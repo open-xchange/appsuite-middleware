@@ -51,7 +51,6 @@ package com.openexchange.mail.json.parser;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -101,7 +100,7 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
             long tmp;
             try {
                 tmp = ServerConfig.getInt(ServerConfig.Property.MAX_UPLOAD_SIZE);
-            } catch (final ConfigurationException e) {
+            } catch (final Exception e) {
                 LOG.warn(e.getMessage() + " Using no upload restrictions as fallback.", e);
                 tmp = 0;
             }

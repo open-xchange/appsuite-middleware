@@ -1,3 +1,15 @@
+* 2013-09-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28885: Null guard for possibly absent confirm status
+ - Fix for bug 28883: Deal with (temporary) absent Hazelcast service
+ - Fix for bug 28882: Improved handling for bad configured "MAX_UPLOAD_SIZE" property in 'server.properties'
+
+* 2013-09-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28857: Orderly signal Snippet identifiers
+ - Fix for bug 28875: Avoid possible 'ArrayIndexOutOfBoundsException' when parsing "From" address
+ - Fix for bug 28865: Increased log level for org.jaudiotagger.*
+
 * 2013-09-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 27882: Remove the "name" parameter from an attachment's "Content-Type" header

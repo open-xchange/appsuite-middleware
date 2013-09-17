@@ -92,7 +92,10 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ConcurrentList<E> implements List<E> {
 
-    private final AtomicReference<List<E>> ref;
+    /**
+     * The reference to current list.
+     */
+    protected final AtomicReference<List<E>> ref;
 
     /**
      * Initializes a new {@link ConcurrentList}.

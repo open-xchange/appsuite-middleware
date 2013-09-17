@@ -58,9 +58,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetRequest;
 
 /**
@@ -83,8 +85,8 @@ public final class ListAction extends SnippetAction {
      *
      * @param services The service look-up
      */
-    public ListAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
-        super(services, actions);
+    public ListAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
+        super(services, snippetServices, actions);
     }
 
     @Override
@@ -93,7 +95,7 @@ public final class ListAction extends SnippetAction {
         final int length = ids.length();
         final List<Snippet> snippets = new ArrayList<Snippet>(length);
 
-        SnippetManagement management = getSnippetService().getManagement(snippetRequest.getSession());
+        SnippetManagement management = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession());
         for (int i = 0; i < length; i++) {
             snippets.add(management.getSnippet(ids.getString(i)));
         }

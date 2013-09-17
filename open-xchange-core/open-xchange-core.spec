@@ -816,6 +816,12 @@ if ! ox_exists_property com.openexchange.ajax.requesthandler.DispatcherServlet.l
     ox_set_property com.openexchange.ajax.requesthandler.DispatcherServlet.level INFO $PFILE
 fi
 
+# SoftwareChange_Request-1635
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.filestore $PFILE; then
+    ox_set_property com.openexchange.capability.filestore true $PFILE
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
@@ -861,6 +867,8 @@ exit 0
 %changelog
 * Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Ninth candidate for 7.4.0 release
+* Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-12
 * Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-12
 * Thu Sep 05 2013 Marcus Klein <marcus.klein@open-xchange.com>

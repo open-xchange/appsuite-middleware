@@ -103,13 +103,13 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      * reason. Following the exception, the Folder is reset to the "closed" state.
      * </p>
      */
-    public final static String FOLDER_CLOSED_MSG = "Folder \"%1$s\" has been closed."+LINE_SEPARATOR+"Probably your request took too long.";
+    public final static String FOLDER_CLOSED_MSG = "Folder \"%1$s\" has been closed. Probably your request took too long.";
 
     /**
      * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
      * Probably your request took too long.
      */
-    public final static String FOLDER_CLOSED_EXT_MSG = "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) ."+LINE_SEPARATOR+"Probably your request took too long.";
+    public final static String FOLDER_CLOSED_EXT_MSG = "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s). Probably your request took too long.";
 
     /**
      * Illegal write attempt: %1$s
@@ -348,8 +348,8 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      */
     public final static String PROCESSING_ERROR_WE_EXT_MSG = "Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error message: %5$s";
 
-    public static final String IN_USE_ERROR_MSG = "That mailbox is already in use by another process. Please try again later." + Strings.getLineSeparator() + "Error message: %1$s";
+    public static final String IN_USE_ERROR_MSG = "That mailbox is already in use by another process. Please try again later. Error message: %1$s";
 
-    public static final String IN_USE_ERROR_EXT_MSG = "That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again later." + Strings.getLineSeparator() + "Error message: %5$s";;
+    public static final String IN_USE_ERROR_EXT_MSG = "That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again later. Error message: %5$s";;
 
 }

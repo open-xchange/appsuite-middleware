@@ -878,8 +878,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      * Enter service stage...
                      */
                     lastWriteAccess = System.currentTimeMillis();
-                    stage = Stage.STAGE_SERVICE;
-                    listenerMonitor.incrementNumProcessing();
                     /*
                      * Form data?
                      */
@@ -948,14 +946,20 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         /*
                          * Call Servlet's service() method
                          */
-                        servlet.service(request, response);
-                        if (!started) {
-                            // Stopped in the meantime
-                            return;
+                        listenerMonitor.incrementNumProcessing();
+                        try {
+                            stage = Stage.STAGE_SERVICE;
+                            servlet.service(request, response);
+                            if (!started) {
+                                // Stopped in the meantime
+                                return;
+                            }
+                            response.flushBuffer();
+                            listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
+                            listenerMonitor.incrementNumRequests();
+                        } finally {
+                            listenerMonitor.decrementNumProcessing();
                         }
-                        response.flushBuffer();
-                        listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
-                        listenerMonitor.incrementNumRequests();
                     }
                 } catch (final UploadServletException e) {
                     /*
@@ -990,7 +994,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 } finally {
                     stage = Stage.STAGE_SERVICE_ENDED;
-                    listenerMonitor.decrementNumProcessing();
                     if (longRunningAccepted) {
                         AjpLongRunningRegistry.getInstance().deregisterLongRunning(request);
                     }

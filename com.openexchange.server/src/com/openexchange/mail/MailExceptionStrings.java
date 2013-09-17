@@ -269,7 +269,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      * This message could not be moved to trash folder as your mailbox is nearly full.<br>
      * Please try to empty your deleted items first, or delete smaller messages first.
      */
-    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "This message could not be moved to trash folder as your mailbox is nearly full."+LINE_SEPARATOR+"Please try to empty your deleted items first, or delete smaller messages first.";
+    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "This message could not be moved to trash folder as your mailbox is nearly full. Please try to empty your deleted items first, or delete smaller messages first.";
 
     /**
      * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s

@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -68,4 +69,11 @@ public interface SnippetService {
      * @throws OXException If management cannot be returned for any reason
      */
     SnippetManagement getManagement(Session session) throws OXException;
+
+    /**
+     * Signals the list of needed capabilities or <code>null</code>/empty list if nothing is needed.
+     * 
+     * @return The list of needed capabilities or <code>null</code>
+     */
+    List<String> neededCapabilities();
 }

@@ -124,7 +124,7 @@ public class StateManagerTest {
         entry4.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 4));
         entry5.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 5));
         
-        stateManager.timeOutStaleStates(120001);
+        stateManager.timeOutStaleStates(1800001);
         
         assertEquals(2, disposed.size());
         assertTrue(disposed.contains(1));

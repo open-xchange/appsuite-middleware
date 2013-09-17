@@ -60,11 +60,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
+import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -90,8 +92,8 @@ public final class NewAction extends SnippetAction {
      *
      * @param services The service look-up
      */
-    public NewAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
-        super(services, actions);
+    public NewAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
+        super(services, snippetServices, actions);
         restMethods = Collections.singletonList(Method.POST);
     }
 
@@ -123,7 +125,7 @@ public final class NewAction extends SnippetAction {
             }
         }
         // Create via management
-        final String id = getSnippetService().getManagement(snippetRequest.getSession()).createSnippet(snippet);
+        final String id = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession()).createSnippet(snippet);
         return new AJAXRequestResult(id, "string");
     }
 

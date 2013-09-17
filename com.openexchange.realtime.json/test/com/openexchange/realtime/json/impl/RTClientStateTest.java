@@ -205,8 +205,8 @@ public class RTClientStateTest {
         state.touch();
         long now = state.getLastSeen();
         
-        assertFalse(state.isTimedOut(now + (30 * 60 * 60 * 1000) - 1));
-        assertTrue(state.isTimedOut(now + (30 * 60 * 60 * 1000) + 1));
+        assertFalse(state.isTimedOut(now + (30 * 60 * 1000) - 1));
+        assertTrue(state.isTimedOut(now + (30 * 60 * 1000) + 1));
         
     }
 

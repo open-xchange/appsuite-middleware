@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -391,7 +392,7 @@ public final class ServerConfig {
     /**
      * @param property wanted property.
      * @return the value of the property.
-     * @throws ConfigurationException If property is missing or its type is not an integer
+     * @throws OXException If property is missing or its type is not an integer
      */
     public static int getInt(final Property property) throws OXException {
         final int value;
@@ -417,12 +418,12 @@ public final class ServerConfig {
         default:
             try {
                 final String prop = getProperty(property.getPropertyName());
-                if (prop == null) {
+                if (Strings.isEmpty(prop)) {
                     throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
                 }
-                value = Integer.parseInt(getProperty(property.getPropertyName()));
+                value = Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
-                throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(property.getPropertyName());
+                throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(e, property.getPropertyName());
             }
         }
         return value;

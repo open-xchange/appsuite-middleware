@@ -63,7 +63,7 @@ import com.openexchange.java.ConcurrentList;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> {
+public final class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implements ServiceListing<S> {
 
     private final List<S> services;
 
@@ -78,11 +78,7 @@ public final class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> {
         services = new ConcurrentList<S>();
     }
 
-    /**
-     * Gets the service list
-     *
-     * @return The service list
-     */
+    @Override
     public List<S> getServiceList() {
         return services;
     }

@@ -52,6 +52,8 @@ package com.openexchange.snippet.json.osgi;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetActionFactory;
 import com.openexchange.snippet.json.converter.SnippetJSONResultConverter;
@@ -81,9 +83,12 @@ public class SnippetJsonActivator extends AJAXModuleActivator {
 
         final SnippetServiceTracker customizer = new SnippetServiceTracker(context);
         track(SnippetService.class, customizer);
+        final RankingAwareNearRegistryServiceTracker<SnippetService> snippetServiceRegistry = new RankingAwareNearRegistryServiceTracker<SnippetService>(context, SnippetService.class);
+        rememberTracker(snippetServiceRegistry);
+        trackService(CapabilityService.class);
         openTrackers();
 
-        registerModule(new SnippetActionFactory(new ForwardingServiceLookup(this, customizer)), "snippet");
+        registerModule(new SnippetActionFactory(new ForwardingServiceLookup(this, customizer), snippetServiceRegistry), "snippet");
         registerService(ResultConverter.class, new SnippetJSONResultConverter());
         log.info("Bundle successfully started: com.openexchange.snippet.json");
     }

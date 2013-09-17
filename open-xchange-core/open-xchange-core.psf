@@ -4,7 +4,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,cern.colt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.hazelcast"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.annotation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching.events"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching.events.ms"/>
@@ -107,6 +106,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.snippet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.snippet.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.snippet.mime"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.snippet.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tasks.json"/>

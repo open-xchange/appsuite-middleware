@@ -119,7 +119,7 @@ public class StateManager {
     }
 
     /**
-     * Times out states that haven't been touched in more than 120 seconds
+     * Times out states that haven't been touched in more than thirty minutes
      * 
      * @param timestamp - The timestamp to compare the lastSeen value to
      */

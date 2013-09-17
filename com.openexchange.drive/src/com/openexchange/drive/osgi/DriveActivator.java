@@ -65,6 +65,8 @@ import com.openexchange.drive.checksum.rdb.DriveCreateTableTask;
 import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
 import com.openexchange.drive.internal.DriveServiceImpl;
 import com.openexchange.drive.internal.DriveServiceLookup;
+import com.openexchange.drive.internal.throttle.BucketInputStream;
+import com.openexchange.drive.internal.throttle.DriveTokenBucket;
 import com.openexchange.drive.internal.throttle.ThrottlingDriveService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -74,6 +76,7 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link DriveActivator}
@@ -94,13 +97,14 @@ public class DriveActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, DatabaseService.class,
-            IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class };
+            IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
         DriveServiceLookup.set(this);
+        BucketInputStream.setTokenBucket(new DriveTokenBucket());
         registerService(DriveService.class, new ThrottlingDriveService(new DriveServiceImpl()));
         registerService(CreateTableService.class, new DriveCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveCreateTableTask()));
@@ -114,6 +118,7 @@ public class DriveActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
         DriveServiceLookup.set(null);
+        BucketInputStream.setTokenBucket(null);
         super.stopBundle();
     }
 
