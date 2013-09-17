@@ -420,9 +420,9 @@ public final class ServerConfig {
                 if (prop == null) {
                     throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
                 }
-                value = Integer.parseInt(getProperty(property.getPropertyName()));
+                value = Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
-                throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(property.getPropertyName());
+                throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(e, property.getPropertyName());
             }
         }
         return value;
