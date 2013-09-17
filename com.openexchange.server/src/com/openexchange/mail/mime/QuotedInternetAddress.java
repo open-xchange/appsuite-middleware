@@ -693,7 +693,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 break; // done with local part
             }
             if (c <= 32 || c >= 127) {
-                throw new AddressException("Local address contains control or whitespace", addr.toString());
+                throw new AddressException("Local address contains control/whitespace or non-ascii character", addr.toString());
             }
             if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
                 throw new AddressException("Local address contains illegal character", addr.toString());
