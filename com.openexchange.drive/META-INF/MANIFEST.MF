@@ -8,8 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.drive.osgi.DriveActivator
 Bundle-ClassPath: .,
  lib/jacksum.jar
-Import-Package: com.google.common.cache,
- com.openexchange.ajax.container,
+Import-Package: com.openexchange.ajax.container,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.database,
