@@ -667,6 +667,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        } finally {
+            clearCache(imapFolder);
         }
     }
 
@@ -1509,6 +1511,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        } finally {
+            clearCache(imapFolder);
         }
     }
 
@@ -1823,6 +1827,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw handleRuntimeException(e);
         } finally {
             closeSafe(sentFolder);
+            clearCache(imapFolder);
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - timeStamp;
                 LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages() for " + fullName + " took " + dur + "msec");
@@ -2182,6 +2187,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        } finally {
+            clearCache(imapFolder);
         }
     }
 
@@ -2236,6 +2243,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        } finally {
+            clearCache(imapFolder);
         }
     }
 
@@ -2960,8 +2969,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
             }
-            final OperationKey opKey = new OperationKey(Type.MSG_FLAGS_UPDATE, accountId, new Object[] { fullName });
-            final boolean marked = setMarker(opKey);
+            // final OperationKey opKey = new OperationKey(Type.MSG_FLAGS_UPDATE, accountId, new Object[] { fullName });
+            // final boolean marked = setMarker(opKey);
             try {
                 /*
                  * Remove non user-alterable system flags
@@ -3069,9 +3078,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     resetIMAPFolder();
                 }
             } finally {
-                if (marked) {
-                    unsetMarker(opKey);
-                }
+                // if (marked) {
+                //    unsetMarker(opKey);
+                // }
             }
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
