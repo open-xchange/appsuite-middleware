@@ -1,3 +1,7 @@
+* 2013-09-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28770: Once again -- Removed &nbsp; entities from html2text converted plain text
+
 * 2013-09-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 28741: Orderly close opened 'Base64OutputStream'

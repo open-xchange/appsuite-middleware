@@ -755,19 +755,17 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final String HTML_BR = "<br>"; // + Strings.getLineSeparator();
-    private static final String HTML_NBSP = "&nbsp;";
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
-    private static final Pattern PATTERN_SPACE = Pattern.compile(" ");
 
     @Override
     public String htmlFormat(final String plainText, final boolean withQuote, final String commentId) {
-        return PATTERN_SPACE.matcher(PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR)).replaceAll(HTML_NBSP);
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
     }
 
     @Override
     public String htmlFormat(final String plainText, final boolean withQuote) {
-        return PATTERN_SPACE.matcher(PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR)).replaceAll(HTML_NBSP);
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
     }
 
     private String escape(final String s, final boolean withQuote, final String commentId) {
