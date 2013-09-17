@@ -1,6 +1,7 @@
 * 2013-09-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 28885: Null guard for possibly absent confirm status
+ - Fix for bug 28883: Deal with (temporary) absent Hazelcast service
 
 * 2013-09-16 - thorben.betten@open-xchange.com
 
