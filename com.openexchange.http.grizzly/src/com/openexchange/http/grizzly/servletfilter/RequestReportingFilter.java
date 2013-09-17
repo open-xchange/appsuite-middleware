@@ -113,32 +113,34 @@ public class RequestReportingFilter implements Filter {
         if (isFilterEnabled) {
             final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
             final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-            if (isLongRunning(httpServletRequest)) { // don't track long running requests
+            if (isLongRunning(httpServletRequest)) { // Do not track long running requests
                 chain.doFilter(request, response);
             } else {
-                final RequestWatcherService requestWatcherService = Services.optService(RequestWatcherService.class);
+                final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
                 // Request watcher is enabled but service is missing, bundle not started etc ..
-                if (requestWatcherService == null) {
-                    LOG.warn("RequestWatcherService is not available. Unable to watch this request.");
+                if (requestWatcher == null) {
+                    if (DEBUG) {
+                        LOG.debug(new StringAllocator(RequestWatcherService.class.getSimpleName()).append(" is not available. Unable to watch this request.").toString());
+                    }
                     chain.doFilter(httpServletRequest, httpServletResponse);
                 } else {
-                    final RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
+                    final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
                     try {
-                        // proceed processing
+                        // Proceed processing
                         chain.doFilter(request, response);
 
-                        // debug duration
+                        // Debug duration
                         if (DEBUG) {
                             LOG.debug(new StringAllocator("Request took ").append(requestRegistryEntry.getAge()).append("ms ").append(" for URL: ").append(
                                 httpServletRequest.getRequestURL()).toString());
                         }
                     } finally {
-                        // remove request from registry after processing finished
-                        requestWatcherService.unregisterRequest(requestRegistryEntry);
+                        // Remove request from watcher after processing finished
+                        requestWatcher.unregisterRequest(requestRegistryEntry);
                     }
                 }
             }
-        } else { // filter isn't enabled
+        } else { // Filter is not enabled
             chain.doFilter(request, response);
         }
     }
@@ -149,17 +151,15 @@ public class RequestReportingFilter implements Filter {
     }
 
     private boolean isLongRunning(final HttpServletRequest httpServletRequest) {
-        return  isDriveRequest(httpServletRequest) || isEASRequest(httpServletRequest);
+        return isDriveRequest(httpServletRequest) || isEASRequest(httpServletRequest);
     }
 
     private final boolean isDriveRequest(final HttpServletRequest httpServletRequest) {
-        final boolean isDriveRequest = DRIVE_URI.equals(httpServletRequest.getRequestURI());
-        return isDriveRequest;
+        return DRIVE_URI.equals(httpServletRequest.getRequestURI());
     }
 
     private final boolean isEASRequest(final HttpServletRequest httpServletRequest) {
-        final boolean isEASRequest = EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(httpServletRequest.getParameter(EAS_CMD));
-        return isEASRequest;
+        return EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(httpServletRequest.getParameter(EAS_CMD));
     }
 
 }
