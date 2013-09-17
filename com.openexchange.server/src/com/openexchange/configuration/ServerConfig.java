@@ -391,7 +391,7 @@ public final class ServerConfig {
     /**
      * @param property wanted property.
      * @return the value of the property.
-     * @throws ConfigurationException If property is missing or its type is not an integer
+     * @throws OXException If property is missing or its type is not an integer
      */
     public static int getInt(final Property property) throws OXException {
         final int value;
