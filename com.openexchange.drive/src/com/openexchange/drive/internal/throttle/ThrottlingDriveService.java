@@ -58,10 +58,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveFileField;
+import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.FileMetadata;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.internal.DriveServiceLookup;
@@ -138,10 +139,10 @@ public class ThrottlingDriveService implements DriveService {
     }
 
     @Override
-    public List<FileMetadata> getFileMetadata(DriveSession session, String path, List<FileVersion> fileVersions) throws OXException {
+    public List<DriveFileMetadata> getFileMetadata(DriveSession session, String path, List<FileVersion> fileVersions, List<DriveFileField> fields) throws OXException {
         try {
             enterSyncOperation();
-            return delegate.getFileMetadata(session, path, fileVersions);
+            return delegate.getFileMetadata(session, path, fileVersions, fields);
         } finally {
             leaveSyncOperation();
         }

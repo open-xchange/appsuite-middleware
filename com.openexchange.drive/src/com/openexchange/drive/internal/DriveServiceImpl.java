@@ -61,10 +61,11 @@ import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveFileField;
+import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.FileMetadata;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.actions.AbstractAction;
@@ -351,19 +352,16 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public List<FileMetadata> getFileMetadata(DriveSession session, String path, List<FileVersion> fileVersions) throws OXException {
-        SyncSession driveSession = new SyncSession(session);
-        List<FileMetadata> fileMetadata = new ArrayList<FileMetadata>();
+    public List<DriveFileMetadata> getFileMetadata(DriveSession session, String path, List<FileVersion> fileVersions, List<DriveFileField> fields) throws OXException {
+        SyncSession syncSession = new SyncSession(session);
         if (null == fileVersions) {
-            List<ServerFileVersion> serverFiles = driveSession.getServerFiles(path);
-            for (ServerFileVersion fileVersion : serverFiles) {
-                fileMetadata.add(new DefaultFileMetadata(driveSession, fileVersion));
-            }
+            return DriveMetadataFactory.getFileMetadata(syncSession, syncSession.getServerFiles(path), fields);
         } else if (1 == fileVersions.size()) {
-            ServerFileVersion fileVersion = ServerFileVersion.valueOf(fileVersions.get(0), path, driveSession);
-            fileMetadata.add(new DefaultFileMetadata(driveSession, fileVersion));
+            ServerFileVersion serverFile = ServerFileVersion.valueOf(fileVersions.get(0), path, syncSession);
+            return Collections.singletonList(DriveMetadataFactory.getFileMetadata(syncSession, serverFile, fields));
         } else {
-            List<ServerFileVersion> serverFiles = driveSession.getServerFiles(path);
+            List<DriveFileMetadata> metadata = new ArrayList<DriveFileMetadata>(fileVersions.size());
+            List<ServerFileVersion> serverFiles = syncSession.getServerFiles(path);
             for (FileVersion requestedVersion : fileVersions) {
                 ServerFileVersion matchingVersion = null;
                 for (ServerFileVersion serverFileVersion : serverFiles) {
@@ -376,10 +374,10 @@ public class DriveServiceImpl implements DriveService {
                 if (null == matchingVersion) {
                     throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(requestedVersion.getName(), requestedVersion.getChecksum(), path);
                 }
-                fileMetadata.add(new DefaultFileMetadata(driveSession, matchingVersion));
+                metadata.add(DriveMetadataFactory.getFileMetadata(syncSession, matchingVersion, fields));
             }
+            return metadata;
         }
-        return fileMetadata;
     }
 
     @Override

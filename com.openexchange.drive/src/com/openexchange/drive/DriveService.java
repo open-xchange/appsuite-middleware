@@ -142,10 +142,11 @@ public interface DriveService {
      * @param path The path to the file's parent folder, relative to the root folder
      * @param fileVersions A list of file versions to get the metadata for, or <code>null</code> to get metadata for all files in the
      *        denoted directory
+     * @param fields The requested metadata fields, or <code>null</code> to get all available fields
      * @return The available file metadata
      * @throws OXException
      */
-    List<FileMetadata> getFileMetadata(DriveSession session, String path, List<FileVersion> fileVersions) throws OXException;
+    List<DriveFileMetadata> getFileMetadata(DriveSession session, String path, List<FileVersion> fileVersions, List<DriveFileField> fields) throws OXException;
 
     /**
      * Gets directory metadata for the supplied directory
