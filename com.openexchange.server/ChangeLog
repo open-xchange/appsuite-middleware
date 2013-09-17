@@ -2,6 +2,7 @@
 
  - Fix for bug 28885: Null guard for possibly absent confirm status
  - Fix for bug 28883: Deal with (temporary) absent Hazelcast service
+ - Fix for bug 28882: Improved handling for bad configured "MAX_UPLOAD_SIZE" property in 'server.properties'
 
 * 2013-09-16 - thorben.betten@open-xchange.com
 
