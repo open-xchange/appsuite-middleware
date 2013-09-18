@@ -87,7 +87,7 @@ KEEP_TMP_VALUES="true false"
 # NOTE: Do not add arbitrary directories here!
 ARCHIVE_DIRS="/opt/open-xchange/etc /var/log/open-xchange"
 
-PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a'
+PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:'
