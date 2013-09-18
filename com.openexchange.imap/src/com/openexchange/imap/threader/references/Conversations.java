@@ -63,7 +63,6 @@ import javax.mail.UIDFolder;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
@@ -108,7 +107,7 @@ public final class Conversations {
         fp = new FetchProfile();
         fp.add("References");
         fp.add(UIDFolder.FetchProfileItem.UID);
-        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
+        fp.add(FetchProfile.Item.ENVELOPE);
         FETCH_PROFILE_CONVERSATION_BY_ENVELOPE = fp;
     }
 
@@ -153,27 +152,25 @@ public final class Conversations {
         if (byEnvelope) {
             boolean found = false;
             final Item envelope = FetchProfile.Item.ENVELOPE;
-            final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
             final Item[] items = fetchProfile.getItems();
             for (int i = 0; !found && i < items.length; i++) {
                 final Item cur = items[i];
-                if (envelope == cur || envelopeOnly == cur) {
+                if (envelope == cur) {
                     found = true;
                 }
             }
             if (!found) {
-                fetchProfile.add(envelopeOnly);
+                fetchProfile.add(envelope);
             }
         } else {
             // Add 'In-Reply-To' to FetchProfile if absent
             {
                 boolean found = false;
                 final Item envelope = FetchProfile.Item.ENVELOPE;
-                final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
                 final Item[] items = fetchProfile.getItems();
                 for (int i = 0; !found && i < items.length; i++) {
                     final Item cur = items[i];
-                    if (envelope == cur || envelopeOnly == cur) {
+                    if (envelope == cur) {
                         found = true;
                     }
                 }
@@ -194,11 +191,10 @@ public final class Conversations {
             {
                 boolean found = false;
                 final Item envelope = FetchProfile.Item.ENVELOPE;
-                final Item envelopeOnly = MailMessageFetchIMAPCommand.ENVELOPE_ONLY;
                 final Item[] items = fetchProfile.getItems();
                 for (int i = 0; !found && i < items.length; i++) {
                     final Item cur = items[i];
-                    if (envelope == cur || envelopeOnly == cur) {
+                    if (envelope == cur) {
                         found = true;
                     }
                 }
@@ -211,7 +207,7 @@ public final class Conversations {
                         }
                     }
                     if (!found) {
-                        fetchProfile.add(envelopeOnly);
+                        fetchProfile.add(envelope);
                     }
                 }
             }
