@@ -158,10 +158,27 @@ public interface UserizedFolder extends ParameterizedFolder {
     /**
      * Sets the dynamic metadata
      */
+    @Override
     void setMeta(Map<String, Object> meta);
-    
+
     /**
      * @return the dynamic properties
      */
+    @Override
     Map<String, Object> getMeta();
+
+    /**
+     * Sets the properties
+     *
+     * @param props The properties
+     */
+    void setProps(Map<String, Object> props);
+
+    /**
+     * Gets the properties
+     *
+     * @return The properties
+     */
+    Map<String, Object> getProps();
+
 }

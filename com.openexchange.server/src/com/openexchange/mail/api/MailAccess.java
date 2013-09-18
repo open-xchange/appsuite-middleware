@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api;
 
+import java.io.Closeable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -91,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable {
+public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, Closeable {
 
     /**
      * Serial version UID
@@ -673,6 +674,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If connection could not be established
      */
     protected abstract void connectInternal() throws OXException;
+
+    @Override
+    public void close() {
+        close(true);
+    }
 
     /**
      * Closes this access.

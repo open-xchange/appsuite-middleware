@@ -368,9 +368,9 @@ public final class OutlookFolder implements FolderExtension {
     }
 
     @Override
-    public int[] getTotalAndUnread() {
+    public int[] getTotalAndUnread(final Map<String, Object> props) {
         if (realFolder instanceof FolderExtension) {
-            return ((FolderExtension) realFolder).getTotalAndUnread();
+            return ((FolderExtension) realFolder).getTotalAndUnread(props);
         }
         return null;
     }

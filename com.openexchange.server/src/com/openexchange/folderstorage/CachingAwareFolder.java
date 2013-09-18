@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,22 +49,15 @@
 
 package com.openexchange.folderstorage;
 
-import java.util.Map;
-
-
 /**
- * {@link FolderExtension} - A {@link Folder folder} extension.
+ * {@link CachingAwareFolder} - Extends {@link Folder} by {@link #prepareForCaching()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface FolderExtension extends Folder {
+public interface CachingAwareFolder extends Folder {
 
     /**
-     * Gets the number of total and unread elements held in this folder.
-     *
-     * @param props The associated properties
-     * @return The total and unread numbers or <code>null</code>
+     * Prepares this folder for being put into cache.
      */
-    int[] getTotalAndUnread(Map<String, Object> props);
-
+    void prepareForCaching();
 }
