@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Configuration Fragment
+Bundle-Name: Configuration fragment
 Bundle-SymbolicName: org.apache.log4j.configuration
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
