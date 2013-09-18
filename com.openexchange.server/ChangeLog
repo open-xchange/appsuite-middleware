@@ -1,3 +1,7 @@
+* 2013-09-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28921: Cope with empty setting for "MAX_UPLOAD_SIZE" property
+
 * 2013-09-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 28885: Null guard for possibly absent confirm status

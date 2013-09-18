@@ -53,10 +53,11 @@ import java.io.File;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -127,7 +128,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 
     public static long getMaxUploadSize(){
     	final String sizeS = getProperty(InfoProperty.MAX_UPLOAD_SIZE.name());
-    	if(null == sizeS) {
+    	if (Strings.isEmpty(sizeS)) {
     		return sysconfMaxUpload();
     	}
 		final long size = Long.parseLong(sizeS);
@@ -139,7 +140,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 
 	private static long sysconfMaxUpload() {
 		final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-		if(null == sizeS) {
+		if (Strings.isEmpty(sizeS)) {
 			return 0;
 		}
 		return Long.parseLong(sizeS);
