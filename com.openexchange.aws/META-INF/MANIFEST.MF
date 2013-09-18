@@ -144,5 +144,8 @@ Import-Package: com.openexchange.config,
  org.apache.http.impl.conn.tsccm,
  org.apache.http.message,
  org.apache.http.params,
- org.osgi.framework
+ org.osgi.framework,
+ org.w3c.dom,
+ org.xml.sax,
+ org.xml.sax.helpers
 Bundle-Activator: com.openexchange.aws.osgi.AWSActivator
