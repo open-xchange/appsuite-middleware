@@ -48,6 +48,9 @@
  */
 
 package com.openexchange.ajax.session;
+
+import com.openexchange.java.Strings;
+
 /**
  * {@link RedeemTest}
  *
@@ -67,15 +70,17 @@ public class RedeemTest extends AbstractLoginTest {
 
         raw("login", "name", credentials[0], "password", credentials[1]);
 
-        String random = rawResponse.getString("random");
-        String session = rawResponse.getString("session");
-
-        createClient();
-
-        raw("redeem", "random", random);
-
-        assertFalse(rawResponse.has("error"));
-        assertEquals(session, rawResponse.get("session"));
+        String random = rawResponse.optString("random");
+        /*
+         * RandomToken is disabled by default via US: 52869957 so only try to login if the randomToken is enabled on the server side
+         */
+        if (!Strings.isEmpty(random)) {
+            String session = rawResponse.getString("session");
+            createClient();
+            raw("redeem", "random", random);
+            assertFalse(rawResponse.has("error"));
+            assertEquals(session, rawResponse.get("session"));
+        }
 
     }
 }

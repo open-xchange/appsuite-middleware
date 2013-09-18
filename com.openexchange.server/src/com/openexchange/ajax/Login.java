@@ -310,10 +310,14 @@ public class Login extends AJAXServlet {
 
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                final LoginConfiguration conf = confReference.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final String randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
+                String randomToken = null;
+                if(conf.isRandomTokenEnabled()) {
+                    randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
+                }
                 if (randomToken == null) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     return;
@@ -325,7 +329,6 @@ public class Login extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
-                final LoginConfiguration conf = confReference.get();
                 final Session session;
                 if (conf.isInsecure()) {
                     if (conf.isRedirectIPChangeAllowed()) {
@@ -471,10 +474,14 @@ public class Login extends AJAXServlet {
 
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+                final LoginConfiguration conf = confReference.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-                final String randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
+                String randomToken = null;
+                if(conf.isRandomTokenEnabled()) {
+                    randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
+                }
                 if (randomToken == null) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     return;
@@ -486,7 +493,6 @@ public class Login extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
-                final LoginConfiguration conf = confReference.get();
                 final Session session;
                 if (conf.isInsecure()) {
                     if (conf.isRedirectIPChangeAllowed()) {
@@ -771,6 +777,7 @@ public class Login extends AJAXServlet {
         }
         final boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
         final boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
+        final boolean isRandomTokenEnabled = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.RANDOM_TOKEN.getPropertyName()));
         LoginConfiguration conf = new LoginConfiguration(
             uiWebPath,
             sessiondAutoLogin,
@@ -787,7 +794,8 @@ public class Login extends AJAXServlet {
             redirectIPChangeAllowed,
             ranges,
             disableTrimLogin,
-            formLoginWithoutAuthId);
+            formLoginWithoutAuthId,
+            isRandomTokenEnabled);
         confReference.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));

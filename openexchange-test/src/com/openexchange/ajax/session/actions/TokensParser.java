@@ -74,7 +74,7 @@ public final class TokensParser extends AbstractAJAXParser<TokensResponse> {
         if (isFailOnError()) {
             assertFalse(response.getErrorMessage(), response.hasError());
             assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
-            assertTrue("Random is missing.", json.has(LoginFields.RANDOM_PARAM));
+            assertFalse("Random should be missing.", json.has(LoginFields.RANDOM_PARAM));
         }
         if (!response.hasError()) {
             retval.setSessionId(json.getString(Login.PARAMETER_SESSION));

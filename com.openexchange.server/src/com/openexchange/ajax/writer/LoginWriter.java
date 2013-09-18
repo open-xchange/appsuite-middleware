@@ -54,14 +54,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.LoginResult;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -73,6 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class LoginWriter {
 
     private static final Locale DEFAULT_LOCALE = Locale.US;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginWriter.class);
 
     /**
      * Initializes a new {@link LoginWriter}.
@@ -148,8 +153,18 @@ public final class LoginWriter {
     private static final String PARAMETER_LOCALE = "locale";
 
     private static void write(final Session session, final JSONObject json, final Collection<OXException> warnings, final Locale locale) throws JSONException {
+        boolean isRandomTokenEnabled = false;
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if(configurationService == null) {
+            LOG.warn("Unable to get ConfigurationService, refusing to write random.");
+        } else {
+            isRandomTokenEnabled = configurationService.getBoolProperty(ConfigurationProperty.RANDOM_TOKEN.getPropertyName(), false);
+        }
+        
         json.put(PARAMETER_SESSION, session.getSessionID());
-        json.put(RANDOM_PARAM, session.getRandomToken());
+        if(isRandomTokenEnabled) {
+            json.put(RANDOM_PARAM, session.getRandomToken());
+        }
         json.put(PARAMETER_USER, session.getLogin());
         json.put(PARAMETER_USER_ID, session.getUserId());
         json.put(PARAMETER_CONTEXT_ID, session.getContextId());
