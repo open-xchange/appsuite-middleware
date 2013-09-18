@@ -118,13 +118,18 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
 
     @Override
     public boolean updateToken(Session session, String serviceID, String oldToken, String newToken) throws OXException {
-        Connection connection = databaseService.getWritable(session.getContextId());
+        return updateToken(session.getContextId(), serviceID, oldToken, newToken);
+    }
+
+    @Override
+    public boolean updateToken(int contextID, String serviceID, String oldToken, String newToken) throws OXException {
+        Connection connection = databaseService.getWritable(contextID);
         try {
-            return 0 < updateToken(connection, session.getContextId(), serviceID, oldToken, newToken);
+            return 0 < updateToken(connection, contextID, serviceID, oldToken, newToken);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(session.getContextId(), connection);
+            databaseService.backWritable(contextID, connection);
         }
     }
 
@@ -175,13 +180,18 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
 
     @Override
     public boolean removeSubscription(Subscription subscription) throws OXException {
-        Connection connection = databaseService.getWritable(subscription.getContextID());
+        return 0 < removeSubscriptions(subscription.getContextID(), subscription.getServiceID(), subscription.getToken());
+    }
+
+    @Override
+    public int removeSubscriptions(int contextID, String serviceID, String token) throws OXException {
+        Connection connection = databaseService.getWritable(contextID);
         try {
-            return 0 < deleteSubscription(connection, subscription.getContextID(), subscription.getServiceID(), subscription.getToken());
+            return deleteSubscription(connection, contextID, serviceID, token);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(subscription.getContextID(), connection);
+            databaseService.backWritable(contextID, connection);
         }
     }
 
