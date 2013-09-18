@@ -173,18 +173,16 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * modified on server, let client download the file
                  */
-                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(
-                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile));
+                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
             }
             break;
         case NEW:
             /*
              * new on server, let client download the file
              */
-            File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-            result.addActionForClient(new DownloadFileAction(
-                comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile));
+            result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
+                ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
             break;
         default:
             break;
@@ -200,16 +198,13 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * delete on server, too, let client remove it's metadata
                  */
                 result.addActionForServer(new RemoveFileAction(comparison.getServerVersion(), comparison, path));
-                result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), null, comparison, path));
+                result.addActionForClient(new AcknowledgeFileAction(session, comparison.getOriginalVersion(), null, comparison, path));
             } else {
                 /*
                  * not allowed, let client re-download the file, indicate as error without quarantine flag
                  */
-                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(
-                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile));
-                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
-                    path, DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), false));
+                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
             }
             break;
         case MODIFIED:
@@ -222,7 +217,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                      */
                     ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
                     result.addActionForServer(new EditFileAction(serverFileVersion, comparison.getClientVersion(), comparison, path));
-                    result.addActionForClient(new AcknowledgeFileAction(
+                    result.addActionForClient(new AcknowledgeFileAction(session,
                         comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile()));
                 } else {
                     /*
@@ -250,8 +245,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 UploadFileAction uploadAction = new UploadFileAction(null, renamedVersion, comparison, path, 0);
                 uploadActions.add(uploadAction);
                 result.addActionForClient(uploadAction);
-                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
+                result.addActionForClient(new DownloadFileAction(session, null,
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
             } else {
                 /*
                  * not allowed, let client first rename it's file and mark as error with quarantine flag...
@@ -263,8 +258,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * ... then download the server version afterwards
                  */
-                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
+                result.addActionForClient(new DownloadFileAction(session, null,
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
             }
             break;
         case NEW:
@@ -312,7 +307,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * both deleted, just let client remove it's metadata
              */
-            result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), null, comparison, path));
+            result.addActionForClient(new AcknowledgeFileAction(session, comparison.getOriginalVersion(), null, comparison, path));
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) &&
             (Change.NEW == comparison.getServerChange() || Change.MODIFIED == comparison.getServerChange())) {
             /*
@@ -323,7 +318,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * same file version, let client update it's metadata
                  */
                 ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
-                result.addActionForClient(new AcknowledgeFileAction(
+                result.addActionForClient(new AcknowledgeFileAction(session,
                     comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile()));
             } else if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
                 comparison.getClientVersion().getName().equalsIgnoreCase(comparison.getServerVersion().getName()) &&
@@ -354,14 +349,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * ... and download the server version aftwerwards
                  */
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
+                result.addActionForClient(new DownloadFileAction(session, null, comparison.getServerVersion(), comparison, path, serverFile));
             }
         } else if (Change.DELETED == comparison.getClientChange() && (Change.MODIFIED == comparison.getServerChange() || Change.NEW == comparison.getServerChange())) {
             /*
              * delete-edit conflict, let client download server version
              */
             File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-            result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
+            result.addActionForClient(new DownloadFileAction(session, null, comparison.getServerVersion(), comparison, path, serverFile));
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) && Change.DELETED == comparison.getServerChange()) {
             /*
              * edit-delete conflict, let client upload it's file

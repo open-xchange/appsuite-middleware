@@ -91,8 +91,9 @@ public class EmptyFileOptimizer extends FileActionOptimizer {
                  */
                 String path = (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH);
                 optimizedActionsForClient.remove(clientAction);
-                optimizedActionsForServer.add(new DownloadFileAction(null, clientAction.getNewVersion(), null, path, -1L, null, null, null));
-                optimizedActionsForClient.add(new AcknowledgeFileAction(null, clientAction.getNewVersion(), null, path));
+                optimizedActionsForServer.add(new DownloadFileAction(
+                    session, null, clientAction.getNewVersion(), null, path, null));
+                optimizedActionsForClient.add(new AcknowledgeFileAction(session, null, clientAction.getNewVersion(), null, path, null));
             }
         }
         /*

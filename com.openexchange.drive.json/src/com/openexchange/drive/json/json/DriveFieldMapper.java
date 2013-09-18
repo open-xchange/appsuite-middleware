@@ -74,6 +74,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
     static final int COLUMN_DIRECT_LINK = 752;
     static final int COLUMN_PREVIEW_LINK = 750;
     static final int COLUMN_DIRECT_LINK_FRAGMENTS = 751;
+    static final int COLUMN_THUMBNAIL_LINK = 753;
 
     private static final DriveFieldMapper INSTANCE = new DriveFieldMapper();
 
@@ -282,6 +283,29 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             @Override
             public void remove(DriveFileMetadata object) {
                 object.setPreviewLink(null);
+            }
+        });
+
+        mappings.put(DriveFileField.THUMBNAIL_LINK, new StringMapping<DriveFileMetadata>("thumbnailLink", COLUMN_THUMBNAIL_LINK) {
+
+            @Override
+            public boolean isSet(DriveFileMetadata object) {
+                return null != object.getThumbnailLink();
+            }
+
+            @Override
+            public void set(DriveFileMetadata object, String value) throws OXException {
+                object.setThumbnailLink(value);
+            }
+
+            @Override
+            public String get(DriveFileMetadata object) {
+                return object.getThumbnailLink();
+            }
+
+            @Override
+            public void remove(DriveFileMetadata object) {
+                object.setThumbnailLink(null);
             }
         });
 

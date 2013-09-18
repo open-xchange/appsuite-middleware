@@ -49,7 +49,9 @@
 
 package com.openexchange.drive.json.internal;
 
+import java.util.List;
 import java.util.Locale;
+import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -65,6 +67,7 @@ public class DefaultDriveSession implements DriveSession {
     private final ServerSession session;
     private String deviceName;
     private Boolean diagnostics;
+    private List<DriveFileField> fields;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
@@ -94,6 +97,15 @@ public class DefaultDriveSession implements DriveSession {
      */
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
+    }
+
+    /**
+     * Sets the fields
+     *
+     * @param fields The fields to set
+     */
+    public void setFields(List<DriveFileField> fields) {
+        this.fields = fields;
     }
 
     @Override
@@ -126,6 +138,11 @@ public class DefaultDriveSession implements DriveSession {
             }
         }
         return null != locale ? locale : Locale.US;
+    }
+
+    @Override
+    public List<DriveFileField> getFields() {
+        return fields;
     }
 
     @Override

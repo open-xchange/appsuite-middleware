@@ -61,6 +61,7 @@ public class DriveFileMetadata {
     private String directLink;
     private String directLinkFragments;
     private String previewLink;
+    private String thumbnailLink;
     private Date modified;
     private Date created;
     private String checksum;
@@ -218,5 +219,22 @@ public class DriveFileMetadata {
         this.previewLink = previewLink;
     }
 
+    /**
+     * Gets the thumbnail link
+     *
+     * @return The thumbnailLink Link
+     */
+    public String getThumbnailLink() {
+        return thumbnailLink;
+    }
+
+    /**
+     * Sets the thumbnailLink
+     *
+     * @param thumbnailLink The thumbnailLink Link to set
+     */
+    public void setThumbnailLink(String thumbnailLink) {
+        this.thumbnailLink = thumbnailLink;
+    }
 
 }

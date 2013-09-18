@@ -62,9 +62,9 @@ import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.drive.sync.RenameTools;
 import com.openexchange.drive.sync.SimpleFileVersion;
-import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
 /**
@@ -128,7 +128,7 @@ Actions for client:
                         optimizedActionsForClient.remove(clientAction);
                         optimizedActionsForClient.remove(matchingClientAction);
                         optimizedActionsForClient.add(
-                            new AcknowledgeFileAction(matchingClientAction.getVersion(), clientAction.getNewVersion(), null, path));
+                            new AcknowledgeFileAction(session, matchingClientAction.getVersion(), clientAction.getNewVersion(), null, path, null));
                         optimizedActionsForServer.remove(matchingServerAction);
                         EditFileAction editAction = new EditFileAction(matchingServerAction.getVersion(), clientAction.getNewVersion(), null, path);
                         if (null != clientAction.getVersion()) {
@@ -181,8 +181,8 @@ Actions for client:
                         /*
                          * acknowledge client renames
                          */
-                        optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(), null, path));
-                        optimizedActionsForClient.add(new AcknowledgeFileAction(matchingAction.getVersion(), matchingAction.getNewVersion(), null, path));
+                        optimizedActionsForClient.add(new AcknowledgeFileAction(session, clientAction.getVersion(), clientAction.getNewVersion(), null, path, null));
+                        optimizedActionsForClient.add(new AcknowledgeFileAction(session, matchingAction.getVersion(), matchingAction.getNewVersion(), null, path, null));
                     }
                 }
             }
