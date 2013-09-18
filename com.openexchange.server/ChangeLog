@@ -1,3 +1,7 @@
+* 2013-09-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 10523: Improved help text for the command line option for aliases when creating users.
+
 * 2013-09-17 - martin.herfurth@open-xchange.com
 
  - Fix for bug 28835: Duplicate invitation mail.

@@ -1872,7 +1872,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setAliasesOption(final AdminParser admp){
-        this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, NeededQuadState.notneeded);
+        this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Comma separated list of the email aliases of the user", true, NeededQuadState.notneeded);
     }
 
     protected final void setImapOnlyOption(final AdminParser admp){
