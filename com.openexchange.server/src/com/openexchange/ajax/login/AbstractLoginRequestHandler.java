@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
@@ -101,7 +101,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      */
     public boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
         Tools.disableCaching(resp);
-        resp.setContentType(Login.CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
 
         // Perform the login
         final Response response = new Response();
@@ -123,7 +123,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             final Future<Object> optModules = getModulesAsync(session, req);
 
             // Add headers and cookies from login result
-            Login.addHeadersAndCookies(result, resp);
+            LoginServlet.addHeadersAndCookies(result, resp);
 
             // Check result code
             {
@@ -217,10 +217,10 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             final Session session = result.getSession();
             // Store associated session
             SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
-            Login.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+            LoginServlet.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
             // Login response is unfortunately not conform to default responses.
-            if (req.getParameter("callback") != null && req.getParameter("action").equals(Login.ACTION_LOGIN)) {
-                APIResponseRenderer.writeResponse(response, Login.ACTION_LOGIN, req, resp);
+            if (req.getParameter("callback") != null && req.getParameter("action").equals(LoginServlet.ACTION_LOGIN)) {
+                APIResponseRenderer.writeResponse(response, LoginServlet.ACTION_LOGIN, req, resp);
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
             }
@@ -230,8 +230,8 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 // throwing a JSON error possibly hides this fact by trying to write to/read from a broken socket connection.
                 throw (IOException) e.getCause();
             }
-            LOG.error(Login.RESPONSE_ERROR, e);
-            Login.sendError(resp);
+            LOG.error(LoginServlet.RESPONSE_ERROR, e);
+            LoginServlet.sendError(resp);
             return false;
         }
         return false;
@@ -261,7 +261,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      */
     public Future<Object> getModulesAsync(final Session session, final HttpServletRequest req) {
         final String modules = "modules";
-        if (!Login.parseBoolean(req.getParameter(modules))) {
+        if (!LoginServlet.parseBoolean(req.getParameter(modules))) {
             return null;
         }
         // Submit task
@@ -296,8 +296,8 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
     public void writePublicSessionCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            final Cookie cookie = new Cookie(Login.PUBLIC_SESSION_NAME, altId);
-            Login.configureCookie(cookie, secure, serverName, conf);
+            final Cookie cookie = new Cookie(LoginServlet.PUBLIC_SESSION_NAME, altId);
+            LoginServlet.configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }
     }

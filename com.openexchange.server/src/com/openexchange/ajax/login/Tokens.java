@@ -60,7 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.Header;
@@ -97,7 +97,7 @@ public final class Tokens implements LoginRequestHandler {
         try {
             doTokens(req, resp);
         } catch (OXException e) {
-            Login.logAndSendException(resp, e);
+            LoginServlet.logAndSendException(resp, e);
         }
     }
 
@@ -150,7 +150,7 @@ public final class Tokens implements LoginRequestHandler {
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        Login.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
+        LoginServlet.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
         try {
             ResponseWriter.write(response, resp.getWriter(), locale);
         } catch (JSONException e) {

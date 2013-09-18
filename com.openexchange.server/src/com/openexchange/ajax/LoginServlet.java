@@ -58,32 +58,22 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthException;
-import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
-import net.oauth.server.OAuthServlet;
 import org.apache.commons.logging.Log;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -91,10 +81,9 @@ import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.AutoLogin;
-import com.openexchange.ajax.login.BasicLogin;
+import com.openexchange.ajax.login.Login;
 import com.openexchange.ajax.login.FormLogin;
 import com.openexchange.ajax.login.HashCalculator;
-import com.openexchange.ajax.login.LoginClosure;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginRequestImpl;
@@ -103,11 +92,9 @@ import com.openexchange.ajax.login.OAuthLogin;
 import com.openexchange.ajax.login.RedeemToken;
 import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
-import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.authentication.ResultCode;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
@@ -121,7 +108,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
-import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
@@ -131,35 +117,29 @@ import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Servlet doing the login and logout stuff.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Login extends AJAXServlet {
+public class LoginServlet extends AJAXServlet {
 
     private static final long serialVersionUID = 7680745138705836499L;
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Login.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServlet.class));
 
     /** The log properties for login-related information. */
     protected static final Set<LogProperties.Name> LOG_PROPERTIES;
@@ -216,7 +196,7 @@ public class Login extends AJAXServlet {
 
     private final Map<String, LoginRequestHandler> handlerMap;
 
-    public Login() {
+    public LoginServlet() {
         super();
         confReference = new AtomicReference<LoginConfiguration>();
         handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16);
@@ -335,7 +315,7 @@ public class Login extends AJAXServlet {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                    } else if (Login.LOG.isInfoEnabled()) {
+                    } else if (LoginServlet.LOG.isInfoEnabled()) {
                         LOG.info("No session could be found for random token: " + randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -393,7 +373,7 @@ public class Login extends AJAXServlet {
                 try {
                     final String sessionId = req.getParameter(PARAMETER_SESSION);
                     if (null == sessionId) {
-                        if (Login.LOG.isInfoEnabled()) {
+                        if (LoginServlet.LOG.isInfoEnabled()) {
                             final StringBuilder sb = new StringBuilder(32);
                             sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found for action ").append(ACTION_CHANGEIP);
                             LOG.info(sb.toString());
@@ -402,7 +382,7 @@ public class Login extends AJAXServlet {
                     }
                     final String newIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
                     if (null == newIP) {
-                        if (Login.LOG.isInfoEnabled()) {
+                        if (LoginServlet.LOG.isInfoEnabled()) {
                             final StringBuilder sb = new StringBuilder(32);
                             sb.append("Parameter \"").append(LoginFields.CLIENT_IP_PARAM).append("\" not found for action ").append(
                                 ACTION_CHANGEIP);
@@ -421,7 +401,7 @@ public class Login extends AJAXServlet {
                             session.getHash(),
                             session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
-                            if (Login.LOG.isInfoEnabled() && null != secret) {
+                            if (LoginServlet.LOG.isInfoEnabled() && null != secret) {
                                 LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
@@ -436,7 +416,7 @@ public class Login extends AJAXServlet {
                         }
                         response.setData("1");
                     } else {
-                        if (Login.LOG.isInfoEnabled()) {
+                        if (LoginServlet.LOG.isInfoEnabled()) {
                             LOG.info("There is no session associated with session identifier: " + sessionId);
                         }
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
@@ -504,7 +484,7 @@ public class Login extends AJAXServlet {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                    } else if (Login.LOG.isInfoEnabled()) {
+                    } else if (LoginServlet.LOG.isInfoEnabled()) {
                         LOG.info("No session could be found for random token: " + randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -629,7 +609,7 @@ public class Login extends AJAXServlet {
         handlerMap.put(ACTION_REDEEM_TOKEN, new RedeemToken(conf));
         handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf));
         handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf));
-        handlerMap.put(ACTION_LOGIN, new BasicLogin(conf));
+        handlerMap.put(ACTION_LOGIN, new Login(conf));
     }
 
     @Override
@@ -881,13 +861,13 @@ public class Login extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeSecretCookie(HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
-        Cookie cookie = new Cookie(Login.SECRET_PREFIX + hash, session.getSecret());
+        Cookie cookie = new Cookie(LoginServlet.SECRET_PREFIX + hash, session.getSecret());
         configureCookie(cookie, secure, serverName, conf);
         resp.addCookie(cookie);
 
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            cookie = new Cookie(Login.PUBLIC_SESSION_NAME, altId);
+            cookie = new Cookie(LoginServlet.PUBLIC_SESSION_NAME, altId);
             configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }

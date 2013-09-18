@@ -59,7 +59,7 @@ import org.apache.http.ParseException;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -95,7 +95,7 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
             HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
             while (iter.hasNext()) {
                 HeaderElement element = iter.nextElement();
-                if (element.getName().startsWith(Login.SECRET_PREFIX)) {
+                if (element.getName().startsWith(LoginServlet.SECRET_PREFIX)) {
                     oxCookieFound = true;
                     continue;
                 }
@@ -130,15 +130,15 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
             response.setData(null);
         } else {
             retval.setJvmRoute(jvmRoute);
-            retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
+            retval.setSessionId(json.getString(LoginServlet.PARAMETER_SESSION));
             retval.setRandom(json.optString(LoginFields.RANDOM_PARAM));
-            if (json.has(Login.PARAMETER_PASSWORD)) {
-                retval.setPassword(json.getString(Login.PARAMETER_PASSWORD));
+            if (json.has(LoginServlet.PARAMETER_PASSWORD)) {
+                retval.setPassword(json.getString(LoginServlet.PARAMETER_PASSWORD));
             }
         }
         if (isFailOnError()) {
             assertFalse(response.getErrorMessage(), response.hasError());
-            assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
+            assertTrue("Session ID is missing.", json.has(LoginServlet.PARAMETER_SESSION));
             assertFalse("Random should be missing.", json.has(LoginFields.RANDOM_PARAM));
         }
         return retval;

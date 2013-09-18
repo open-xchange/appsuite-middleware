@@ -238,7 +238,7 @@ public abstract class SessionServlet extends AJAXServlet {
         findPublicSessionId(req, session, sessiondService);
     }
 
-    private static final String PUBLIC_SESSION_NAME = Login.PUBLIC_SESSION_NAME;
+    private static final String PUBLIC_SESSION_NAME = LoginServlet.PUBLIC_SESSION_NAME;
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
 
     /**
@@ -697,7 +697,7 @@ public abstract class SessionServlet extends AJAXServlet {
         return extractSecret(cookieHash, req, hash, client, null);
     }
 
-    private static final String SECRET_PREFIX = Login.SECRET_PREFIX;
+    private static final String SECRET_PREFIX = LoginServlet.SECRET_PREFIX;
 
     /**
      * Extracts the secret string from specified cookies using given hash string.
@@ -785,7 +785,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (cookies == null) {
             return;
         }
-        final List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, SECRET_PREFIX + hash, Login.PUBLIC_SESSION_NAME);
+        final List<String> cookieNames = Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, LoginServlet.PUBLIC_SESSION_NAME);
         for (final String cookieName : cookieNames) {
             final Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {

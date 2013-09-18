@@ -52,7 +52,7 @@ package com.openexchange.ajax.login;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
@@ -60,11 +60,11 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 
 /**
- * {@link BasicLogin}
+ * {@link Login}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class BasicLogin extends AbstractLoginRequestHandler {
+public class Login extends AbstractLoginRequestHandler {
 
     /**
      * 
@@ -72,11 +72,11 @@ public class BasicLogin extends AbstractLoginRequestHandler {
     private LoginConfiguration conf;
 
     /**
-     * Initializes a new {@link BasicLogin}.
+     * Initializes a new {@link Login}.
      * 
      * @param login
      */
-    public BasicLogin(LoginConfiguration conf) {
+    public Login(LoginConfiguration conf) {
         this.conf = conf;
     }
 
@@ -86,7 +86,7 @@ public class BasicLogin extends AbstractLoginRequestHandler {
         try {
             doLogin(req, resp);
         } catch (final OXException e) {
-            Login.logAndSendException(resp, e);
+            LoginServlet.logAndSendException(resp, e);
         }
     }
 

@@ -50,7 +50,7 @@
 package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 
 /**
@@ -64,7 +64,7 @@ public class ChangeIPRequest extends AbstractRequest<ChangeIPResponse> {
 
     public ChangeIPRequest(final String newIP, final boolean failOnError) {
         super(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, Login.ACTION_CHANGEIP),
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, LoginServlet.ACTION_CHANGEIP),
             new FieldParameter(LoginFields.CLIENT_IP_PARAM, newIP)
         });
         this.failOnError = failOnError;

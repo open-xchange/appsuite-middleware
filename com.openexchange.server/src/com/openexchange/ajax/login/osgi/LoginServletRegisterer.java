@@ -60,7 +60,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
@@ -86,7 +86,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
     private HttpService httpService;
     private DispatcherPrefixService prefixService;
 
-    private Login login;
+    private LoginServlet login;
 
     public LoginServletRegisterer(final BundleContext context) {
         super();
@@ -112,7 +112,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
             needsRegistration = null != configService && null != httpService && login == null && prefixService != null;
             if (needsRegistration) {
-                login = new Login();
+                login = new LoginServlet();
             }
         } finally {
             lock.unlock();
@@ -143,7 +143,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.RANDOM_TOKEN);
             try {
                 LOG.info("Registering login servlet.");
-                httpService.registerServlet(prefixService.getPrefix() + SERVLET_PATH_APPENDIX, new Login(), params, null);
+                httpService.registerServlet(prefixService.getPrefix() + SERVLET_PATH_APPENDIX, new LoginServlet(), params, null);
             } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
             } catch (final NamespaceException e) {

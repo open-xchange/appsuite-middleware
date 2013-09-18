@@ -68,7 +68,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -472,7 +472,7 @@ public class DispatcherServlet extends SessionServlet {
             if (!dispatcher.mayOmitSession(module, action)) {
                 if (dispatcher.mayUseFallbackSession(module, action)) {
                     // "open-xchange-public-session" allowed, but missing for associated action
-                    throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(Login.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_COOKIE.create(Login.PUBLIC_SESSION_NAME);
+                    throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(LoginServlet.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_COOKIE.create(LoginServlet.PUBLIC_SESSION_NAME);
                 }
                 // "open-xchange-public-session" NOT allowed for associated action, therefore complain about missing "session" parameter
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);

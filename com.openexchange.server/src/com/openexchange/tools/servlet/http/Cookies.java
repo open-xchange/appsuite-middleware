@@ -63,7 +63,7 @@ import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import com.google.common.net.InternetDomainName;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -118,7 +118,7 @@ public final class Cookies {
     public static boolean domainEnabled() {
         Boolean tmp = domainEnabled;
         if (null == tmp) {
-            synchronized (Login.class) {
+            synchronized (LoginServlet.class) {
                 tmp = domainEnabled;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -140,7 +140,7 @@ public final class Cookies {
     public static boolean prefixWithDot() {
         Boolean tmp = prefixWithDot;
         if (null == tmp) {
-            synchronized (Login.class) {
+            synchronized (LoginServlet.class) {
                 tmp = prefixWithDot;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -162,7 +162,7 @@ public final class Cookies {
     public static String configuredDomain() {
         String tmp = configuredDomain;
         if (null == tmp) {
-            synchronized (Login.class) {
+            synchronized (LoginServlet.class) {
                 tmp = configuredDomain;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);

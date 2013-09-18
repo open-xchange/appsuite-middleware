@@ -64,7 +64,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.LoginWriter;
@@ -109,7 +109,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
     @Override
     public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Tools.disableCaching(resp);
-        resp.setContentType(Login.CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
         final Response response = new Response();
         Session session = null;
         try {
@@ -134,8 +134,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             }
             String secret = null;
             final String hash = HashCalculator.getInstance().getHash(req);
-            final String sessionCookieName = Login.SESSION_PREFIX + hash;
-            final String secretCookieName = Login.SECRET_PREFIX + hash;
+            final String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
+            final String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
 
             NextCookie: for (final Cookie cookie : cookies) {
                 final String cookieName = cookie.getName();
@@ -250,16 +250,16 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         // The magic spell to disable caching
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(Login.CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
         try {
             if (response.hasError()) {
-                ResponseWriter.write(response, resp.getWriter(), Login.localeFrom(session));
+                ResponseWriter.write(response, resp.getWriter(), LoginServlet.localeFrom(session));
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
             }
         } catch (final JSONException e) {
-            LOG.error(Login.RESPONSE_ERROR, e);
-            Login.sendError(resp);
+            LOG.error(LoginServlet.RESPONSE_ERROR, e);
+            LoginServlet.sendError(resp);
         }
     }
 

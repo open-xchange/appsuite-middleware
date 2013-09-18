@@ -51,7 +51,7 @@ package com.openexchange.ajax.session.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -73,11 +73,11 @@ public final class TokensParser extends AbstractAJAXParser<TokensResponse> {
         final JSONObject json = (JSONObject) response.getData();
         if (isFailOnError()) {
             assertFalse(response.getErrorMessage(), response.hasError());
-            assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
+            assertTrue("Session ID is missing.", json.has(LoginServlet.PARAMETER_SESSION));
             assertFalse("Random should be missing.", json.has(LoginFields.RANDOM_PARAM));
         }
         if (!response.hasError()) {
-            retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
+            retval.setSessionId(json.getString(LoginServlet.PARAMETER_SESSION));
         }
         return retval;
     }

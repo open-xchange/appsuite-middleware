@@ -50,7 +50,7 @@
 package com.openexchange.ajax.session.actions;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ACTION;
-import static com.openexchange.ajax.Login.ACTION_FORMLOGIN;
+import static com.openexchange.ajax.LoginServlet.ACTION_FORMLOGIN;
 import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.AUTOLOGIN_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;

@@ -57,7 +57,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -121,7 +121,7 @@ public class RedeemToken implements LoginRequestHandler {
             String authId = LoginTools.parseAuthId(req, true);
             session = service.redeemToken(token, appSecret, client, authId, hash);
         } catch (OXException e) {
-            Login.logAndSendException(resp, e);
+            LoginServlet.logAndSendException(resp, e);
             return;
         }
         TokenLoginSecret tokenLoginSecret = service.getTokenLoginSecret(appSecret);
@@ -144,7 +144,7 @@ public class RedeemToken implements LoginRequestHandler {
             return;
         }
         // Write cookie accordingly
-        Login.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
+        LoginServlet.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
         // Generate JSON response
         try {
             final JSONObject json = new JSONObject(12);

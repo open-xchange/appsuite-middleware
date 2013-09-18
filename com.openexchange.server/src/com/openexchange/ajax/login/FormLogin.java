@@ -58,7 +58,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -114,7 +114,7 @@ public class FormLogin implements LoginRequestHandler {
         User user = result.getUser();
 
         Tools.disableCaching(resp);
-        Login.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+        LoginServlet.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
         resp.sendRedirect(generateRedirectURL(
             req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
             req.getParameter(LoginFields.AUTOLOGIN_PARAM),

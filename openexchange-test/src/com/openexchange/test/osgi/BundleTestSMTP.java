@@ -64,7 +64,7 @@ import com.meterware.httpunit.WebResponse;
 import com.meterware.httpunit.cookies.CookieJar;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.LoginTest;
 import com.openexchange.tools.URLParameter;
 
@@ -166,7 +166,7 @@ public final class BundleTestSMTP extends AbstractBundleTest {
              * Add cookie
              */
             final CookieJar cookieJar = new CookieJar();
-            cookieJar.putCookie(Login.SESSION_PREFIX + sessionId, sessionId);
+            cookieJar.putCookie(LoginServlet.SESSION_PREFIX + sessionId, sessionId);
         }
 
         final PostMethodWebRequest postReq = new PostMethodWebRequest(PROTOCOL + hostname + MAIL_URL + parameter.getURLParameters(), true);

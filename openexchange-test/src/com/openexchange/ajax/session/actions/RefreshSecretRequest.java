@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.session.actions;
 
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -64,7 +64,7 @@ public class RefreshSecretRequest extends AbstractRequest<RefreshSecretResponse>
 
 	public RefreshSecretRequest(final boolean failOnError) {
 		super(new Parameter[] {
-		    new URLParameter(Login.PARAMETER_ACTION, Login.ACTION_REFRESH_SECRET)
+		    new URLParameter(LoginServlet.PARAMETER_ACTION, LoginServlet.ACTION_REFRESH_SECRET)
 		});
 		this.failOnError = failOnError;
 	}

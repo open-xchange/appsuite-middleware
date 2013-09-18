@@ -80,7 +80,7 @@ public class LoginAddFragmentTest extends TestCase {
         assertFragment("http://www.open-xchange.com/index.html#f=12&i=23?someParam=someValue", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd?someParam=someValue");
     }
 
-    private static final class TestLogin extends Login {
+    private static final class TestLogin extends LoginServlet {
         public String addFragmentParam(String url, String param, String value) {
             return LoginTools.addFragmentParameter(url, param, value);
         }

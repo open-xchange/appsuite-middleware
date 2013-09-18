@@ -59,7 +59,7 @@ import net.oauth.OAuthException;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
@@ -93,7 +93,7 @@ public class OAuthLogin extends AbstractLoginRequestHandler {
         try {
             doOAuthLogin(req, resp);
         } catch (final OXException e) {
-            Login.logAndSendException(resp, e);
+            LoginServlet.logAndSendException(resp, e);
         }
     }
 
