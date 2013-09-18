@@ -77,8 +77,6 @@ public class RequestReportingFilter implements Filter {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RequestReportingFilter.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     // properties of long running eas requests
     private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
 
@@ -119,7 +117,7 @@ public class RequestReportingFilter implements Filter {
                 final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
                 // Request watcher is enabled but service is missing, bundle not started etc ..
                 if (requestWatcher == null) {
-                    if (DEBUG) {
+                    if (LOG.isDebugEnabled()) {
                         LOG.debug(new StringAllocator(RequestWatcherService.class.getSimpleName()).append(" is not available. Unable to watch this request.").toString());
                     }
                     chain.doFilter(httpServletRequest, httpServletResponse);
@@ -130,7 +128,7 @@ public class RequestReportingFilter implements Filter {
                         chain.doFilter(request, response);
 
                         // Debug duration
-                        if (DEBUG) {
+                        if (LOG.isDebugEnabled()) {
                             LOG.debug(new StringAllocator("Request took ").append(requestRegistryEntry.getAge()).append("ms ").append(" for URL: ").append(
                                 httpServletRequest.getRequestURL()).toString());
                         }
