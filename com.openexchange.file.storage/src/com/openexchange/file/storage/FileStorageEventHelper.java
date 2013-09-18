@@ -81,6 +81,10 @@ public class FileStorageEventHelper {
         }
         return new Event(FileStorageEventConstants.DELETE_TOPIC, properties);
     }
+    
+    public static Event buildAccessEvent(Session session, String service, String accountId, String folderId, final String objectId, final String optFileName) {
+        return new Event(FileStorageEventConstants.ACCESS_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName));
+    }
 
     private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName) {
         final Dictionary<String, Object> ht = new Hashtable<String, Object>(8);
