@@ -51,8 +51,12 @@ package com.openexchange.drive.internal;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Set;
 import org.apache.commons.logging.Log;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -69,10 +73,14 @@ public class DirectLinkGenerator {
 
     private final SyncSession session;
     private final ConfigurationService configService;
+
     private String hostName;
+    private Boolean documentPreview;
 
     /**
      * Initializes a new {@link DirectLinkGenerator}.
+     *
+     * @param session The sync session
      */
     public DirectLinkGenerator(SyncSession session) {
         super();
@@ -86,7 +94,7 @@ public class DirectLinkGenerator {
      * @return The quota link
      */
     public String getQuotaLink() {
-        return getTemplate("com.openexchange.drive.directLinkQuota", "https://[hostname]")
+        return getProperty("com.openexchange.drive.directLinkQuota", "https://[hostname]")
             .replaceAll("\\[hostname\\]", getHostName())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[contextid\\]", String.valueOf(session.getServerSession().getContextId()))
@@ -113,7 +121,7 @@ public class DirectLinkGenerator {
      * @return The direct link fragments
      */
     public String getFileLinkFragments(String folderID, String objectID) {
-        return getTemplate("com.openexchange.drive.directLinkFragmentsFile", "m=infostore&f=[folder]&i=[object]")
+        return getProperty("com.openexchange.drive.directLinkFragmentsFile", "m=infostore&f=[folder]&i=[object]")
             .replaceAll("\\[folder\\]", folderID)
             .replaceAll("\\[object\\]", objectID)
         ;
@@ -137,11 +145,58 @@ public class DirectLinkGenerator {
      * @return The direct link
      */
     public String getFileLink(String folderID, String objectID) {
-        return getTemplate("com.openexchange.drive.directLinkFile", "https://[hostname]/[uiwebpath]#[filefragments]")
+        return getProperty("com.openexchange.drive.directLinkFile", "https://[hostname]/[uiwebpath]#[filefragments]")
             .replaceAll("\\[hostname\\]", getHostName())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[filefragments\\]", getFileLinkFragments(folderID, objectID))
         ;
+    }
+
+    /**
+     * Gets a ready-to-use preview link for the supplied file if available.
+     *
+     * @param file The file
+     * @return The direct link, or <code>null</code> if not available
+     */
+    public String getFilePreviewLink(File file) {
+        String mimeType = file.getFileMIMEType();
+        if (false == Strings.isEmpty(mimeType)) {
+            // patterns borrowed from web interface
+            if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$")) {
+                return getProperty("com.openexchange.drive.previewLinkAudioFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
+                    "document&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain&width=128&height=90")
+                    .replaceAll("\\[hostname\\]", getHostName())
+                    .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
+                    .replaceAll("\\[folder\\]", file.getFolderId())
+                    .replaceAll("\\[object\\]", file.getId())
+                    .replaceAll("\\[version\\]", file.getVersion())
+                ;
+            }
+            if (mimeType.matches("(?i)^audio\\/(mpeg|m4a|m4b|mp3|ogg|oga|opus|x-m4a)$")) {
+                return getProperty("com.openexchange.drive.previewLinkAudioFile", "https://[hostname]/[dispatcherPrefix]/image/file/" +
+                    "mp3Cover?folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain&width=128&height=90")
+                    .replaceAll("\\[hostname\\]", getHostName())
+                    .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
+                    .replaceAll("\\[folder\\]", file.getFolderId())
+                    .replaceAll("\\[object\\]", file.getId())
+                    .replaceAll("\\[version\\]", file.getVersion())
+                ;
+            }
+            if (mimeType.matches(
+                "(?i)^application\\/.*(ms-word|ms-excel|ms-powerpoint|msword|msexcel|mspowerpoint|openxmlformats|opendocument|pdf|rtf).*$")
+                && hasDocumentPreview()) {
+                return getProperty("com.openexchange.drive.previewLinkAudioFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
+                    "document&format=preview_image&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
+                    "&width=128&height=90")
+                    .replaceAll("\\[hostname\\]", getHostName())
+                    .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
+                    .replaceAll("\\[folder\\]", file.getFolderId())
+                    .replaceAll("\\[object\\]", file.getId())
+                    .replaceAll("\\[version\\]", file.getVersion())
+                ;
+            }
+        }
+        return null;
     }
 
     /**
@@ -151,7 +206,7 @@ public class DirectLinkGenerator {
      * @return The direct link fragments
      */
     public String getDirectoryLinkFragments(String folderID) {
-        return getTemplate("com.openexchange.drive.directLinkFragmentsDirectory", "m=infostore&f=[folder]")
+        return getProperty("com.openexchange.drive.directLinkFragmentsDirectory", "m=infostore&f=[folder]")
             .replaceAll("\\[folder\\]", folderID)
         ;
     }
@@ -163,15 +218,33 @@ public class DirectLinkGenerator {
      * @return The direct link
      */
     public String getDirectoryLink(String folderID) {
-        return getTemplate("com.openexchange.drive.directLinkDirectory", "https://[hostname]/[uiwebpath]#[directoryfragments]")
+        return getProperty("com.openexchange.drive.directLinkDirectory", "https://[hostname]/[uiwebpath]#[directoryfragments]")
             .replaceAll("\\[hostname\\]", getHostName())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[directoryfragments\\]", getDirectoryLinkFragments(folderID))
         ;
     }
 
-    private String getTemplate(String propertyName, String defaultValue) {
+    private String getProperty(String propertyName, String defaultValue) {
         return null != configService ? configService.getProperty(propertyName, defaultValue) : defaultValue;
+    }
+
+    private boolean hasDocumentPreview() {
+        if (null == documentPreview) {
+            documentPreview = Boolean.FALSE;
+            CapabilityService capabilityService = DriveServiceLookup.getService(CapabilityService.class);
+            if (null != capabilityService) {
+                try {
+                    Set<Capability> capabilities = capabilityService.getCapabilities(session.getServerSession());
+                    if (null != capabilities && capabilities.contains(new Capability("document_preview"))) {
+                        documentPreview = Boolean.TRUE;
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Error determining capabilities", e);
+                }
+            }
+        }
+        return documentPreview.booleanValue();
     }
 
     private String getHostName() {
@@ -215,7 +288,11 @@ public class DirectLinkGenerator {
     }
 
     private String getWebpath() {
-        return getTemplate("com.openexchange.UIWebPath", "/ox6/index.html");
+        return getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+    }
+
+    private String getDispatcherPrefix() {
+        return getProperty("com.openexchange.dispatcher.prefix", "/ajax/");
     }
 
 }

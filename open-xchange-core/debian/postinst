@@ -679,9 +679,9 @@ PFILE=/opt/open-xchange/etc/file-logging.properties
 if ! ox_exists_property org.glassfish.grizzly.level $PFILE; then
     ox_set_property org.glassfish.grizzly.level WARNING $PFILE
 fi
-if ! grep com.openexchange.appsuite.level >/dev/null $pfile; then
-    echo -e "\n# Log access to UI files\n" >> $pfile
-    echo "# com.openexchange.appsuite.level=FINE" >> $pfile
+if ! grep com.openexchange.appsuite.level >/dev/null $PFILE; then
+    echo -e "\n# Log access to UI files\n" >> $PFILE
+    echo "# com.openexchange.appsuite.level=FINE" >> $PFILE
 fi
 if ! ox_exists_property com.openexchange.ajax.requesthandler.DispatcherServlet.level $PFILE; then
     ox_set_property com.openexchange.ajax.requesthandler.DispatcherServlet.level INFO $PFILE
@@ -691,6 +691,13 @@ fi
 PFILE=/opt/open-xchange/etc/permissions.properties
 if ! ox_exists_property com.openexchange.capability.filestore $PFILE; then
     ox_set_property com.openexchange.capability.filestore true $PFILE
+fi
+
+# SoftwareChange_Request-1636
+PFILE=/opt/open-xchange/etc/file-logging.properties
+VALUE=$(ox_read_property org.jaudiotagger.level $PFILE)
+if [ "$VALUE" == "WARNING" -o -z "$VALUE" ]; then
+    ox_set_property org.jaudiotagger.level SEVERE $PFILE
 fi
 
 setConfigFilePermissions() {

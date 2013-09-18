@@ -50,6 +50,7 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.util.concurrent.ExecutorService;
+import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
@@ -70,8 +71,6 @@ import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -83,11 +82,7 @@ import com.openexchange.timer.TimerService;
  */
 public class GrizzlyActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(GrizzlyActivator.class));
-
-    private OXHttpServer grizzly;
-
-    private HttpServiceFactory serviceFactory;
+    private volatile OXHttpServer grizzly;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -96,9 +91,12 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws OXException {
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(GrizzlyActivator.class);
         try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting Grizzly server.");
+            Services.setServiceLookup(this);
+
+            if (log.isInfoEnabled()) {
+                log.info("Starting Grizzly server.");
             }
             context.addFrameworkListener(new FrameworkListener() {
 
@@ -107,15 +105,13 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     if (event.getBundle().getSymbolicName().equalsIgnoreCase("com.openexchange.http.grizzly")) {
                         int eventType = event.getType();
                         if (eventType == FrameworkEvent.ERROR) {
-                            LOG.error(event.toString(), event.getThrowable());
+                            log.error(event.toString(), event.getThrowable());
                         } else {
-                            LOG.info(event.toString(), event.getThrowable());
+                            log.info(event.toString(), event.getThrowable());
                         }
                     }
                 }
             });
-
-            Services.setServiceLookup(this);
 
             GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
             grizzlyConfig.start();
@@ -123,7 +119,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
             /*
              * create, configure and start server
              */
-            grizzly = new OXHttpServer();
+            final OXHttpServer grizzly = new OXHttpServer();
+            this.grizzly = grizzly;
 
             ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
@@ -138,85 +135,87 @@ public class GrizzlyActivator extends HousekeepingActivator {
             networkListener.setMaxBufferedPostSize(maxBodySize);
 
             if (grizzlyConfig.isAJPEnabled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Enabling AJP for Grizzly server.");
-                }
                 networkListener.registerAddOn(new AjpAddOn());
+                if (log.isInfoEnabled()) {
+                    log.info("Enabled AJP for Grizzly server.");
+                }
             }
 
             TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
             networkListener.setTransport(configuredTcpNioTransport);
 
             if (grizzlyConfig.isJMXEnabled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Enabling JMX for Grizzly server.");
-                }
                 grizzly.getServerConfiguration().setJmxEnabled(true);
+                if (log.isInfoEnabled()) {
+                    log.info("Enabled JMX for Grizzly server.");
+                }
             }
 
             if (grizzlyConfig.isWebsocketsEnabled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Enabling WebSockets for Grizzly server.");
-                }
                 networkListener.registerAddOn(new WebSocketAddOn());
+                if (log.isInfoEnabled()) {
+                    log.info("Enabled WebSockets for Grizzly server.");
+                }
             }
 
             if (grizzlyConfig.isCometEnabled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Enabling Comet for Grizzly server.");
-                }
                 networkListener.registerAddOn(new CometAddOn());
                 registerService(CometContextService.class, new CometContextServiceImpl());
+                if (log.isInfoEnabled()) {
+                    log.info("Enabled Comet for Grizzly server.");
+                }
             }
 
-            if (LOG.isInfoEnabled()) {
-                LOG.info(String.format(
-                    "Registering Grizzly HttpNetworkListener on host: %s and port: %s",
-                    grizzlyConfig.getHttpHost(),
-                    grizzlyConfig.getHttpPort()));
-            }
             grizzly.addListener(networkListener);
             grizzly.start();
+            if (log.isInfoEnabled()) {
+                log.info(String.format("Registered Grizzly HttpNetworkListener on host: %s and port: %s", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort())));
+            }
 
             /*
              * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
              * getService() will get its own instance of HttpServiceImpl
              */
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Registering OSGi HttpService for Grizzly server.");
+            registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
+            if (log.isInfoEnabled()) {
+                log.info("Registered OSGi HttpService for Grizzly server.");
             }
-            serviceFactory = new HttpServiceFactory(grizzly, context.getBundle());
-            registerService(HttpService.class.getName(), serviceFactory);
 
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
-
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(GrizzlyActivator.class);
+
         Services.setServiceLookup(null);
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Unregistering services.");
+        if (log.isInfoEnabled()) {
+            log.info("Unregistering services.");
         }
         cleanUp();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Stopping Grizzly.");
+
+        if (log.isInfoEnabled()) {
+            log.info("Stopping Grizzly.");
         }
-        grizzly.stop();
+        final OXHttpServer grizzly = this.grizzly;
+        if (null != grizzly) {
+            grizzly.stop();
+            this.grizzly = null;
+        }
     }
 
     /**
-     * Build a TCPNIOTransport using {c.o].threadpool
+     * Build a TCPNIOTransport using {c.o}.threadpool
      *
      * @return The configure TCPNIOTransport
      * @throws OXException If the Transport can't be build
      */
     private TCPNIOTransport buildTcpNioTransport() throws OXException {
         ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
-        if(threadPoolService == null) {
+        if (threadPoolService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
         }
         TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();

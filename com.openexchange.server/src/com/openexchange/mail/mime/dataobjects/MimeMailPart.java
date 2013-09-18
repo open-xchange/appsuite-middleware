@@ -380,11 +380,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
         try {
             try {
-                return part.getInputStream();
+                // Try to read first byte and push back immediately
+                final PushbackInputStream in = new PushbackInputStream(part.getInputStream());
+                in.unread(in.read());
+                return in;
+            } catch (final com.sun.mail.util.MessageRemovedIOException e) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-                }
                 return getRawInputStream(e);
             } catch (final MessagingException e) {
                 return getRawInputStream(e);

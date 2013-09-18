@@ -50,21 +50,22 @@
 package com.openexchange.drive.json.action;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveFileField;
+import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.FileMetadata;
 import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.json.json.JsonFileMetadata;
+import com.openexchange.drive.json.json.DriveFieldMapper;
 import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
 
 /**
  * {@link FileMetadataAction}
@@ -83,6 +84,20 @@ public class FileMetadataAction extends AbstractDriveAction {
             if (Strings.isEmpty(path)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
             }
+            String columnsValue = requestData.getParameter("columns");
+            if (Strings.isEmpty(columnsValue)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("columns");
+            }
+            String[] splitted = Strings.splitByComma(columnsValue);
+            int[] columnIDs = new int[splitted.length];
+            for (int i = 0; i < splitted.length; i++) {
+                try {
+                    columnIDs[i] = Integer.parseInt(splitted[i]);
+                } catch (NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("columns");
+                }
+            }
+            DriveFileField[] fields = DriveFieldMapper.getInstance().getFields(columnIDs);
             List<FileVersion> fileVersions;
             Object data = requestData.getData();
             if (null != data) {
@@ -116,10 +131,9 @@ public class FileMetadataAction extends AbstractDriveAction {
             /*
              * get & return metadata as json
              */
-            List<FileMetadata> fileMetadata = getDriveService().getFileMetadata(session, path, fileVersions);
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("metadata", JsonFileMetadata.serialize(fileMetadata));
-            return new AJAXRequestResult(jsonObject, "json");
+            List<DriveFileMetadata> fileMetadata = getDriveService().getFileMetadata(session, path, fileVersions, Arrays.asList(fields));
+            JSONArray jsonArray = DriveFieldMapper.getInstance().serialize(fileMetadata, fields, TimeZones.UTC, session.getServerSession());
+            return new AJAXRequestResult(jsonArray, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
