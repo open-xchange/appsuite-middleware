@@ -99,8 +99,14 @@ public class DriveEventsActivator extends HousekeepingActivator {
         final DriveEventServiceImpl service = new DriveEventServiceImpl();
         registerService(DriveEventService.class, service);
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC,
-            new String[] { FileStorageEventConstants.ALL_TOPICS, FileStorageEventConstants.ALL_FOLDER_TOPICS });
+        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] {
+            FileStorageEventConstants.CREATE_TOPIC,
+            FileStorageEventConstants.UPDATE_TOPIC,
+            FileStorageEventConstants.DELETE_TOPIC,
+            FileStorageEventConstants.CREATE_FOLDER_TOPIC,
+            FileStorageEventConstants.UPDATE_FOLDER_TOPIC,
+            FileStorageEventConstants.DELETE_FOLDER_TOPIC
+        });
         registerService(EventHandler.class, service, serviceProperties);
         track(MsService.class, new ServiceTrackerCustomizer<MsService, MsService>() {
 
