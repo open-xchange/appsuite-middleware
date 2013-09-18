@@ -452,7 +452,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     /**
      * Error message if writing the response fails.
      */
-    protected static final String RESPONSE_ERROR = "Error while writing response object.";
+    public static final String RESPONSE_ERROR = "Error while writing response object.";
 
     /**
      * Initializes a new {@link AJAXServlet}.
@@ -486,7 +486,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param session The session
      * @return The locale
      */
-    protected static Locale localeFrom(final Session session) {
+    public static Locale localeFrom(final Session session) {
         if (null == session) {
             return Locale.US;
         }
@@ -946,7 +946,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
-    protected static void sendError(final HttpServletResponse resp) throws IOException {
+    public static void sendError(final HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
