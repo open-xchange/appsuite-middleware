@@ -124,7 +124,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         final List<DocumentMetadataHolder> list = new ArrayList<DocumentMetadataHolder>();
         final InfostoreSession sess = (InfostoreSession) session;
 
-        final SearchIterator<DocumentMetadata> documents = infostore.getDocuments(target.getFolderIdAsInt(), target.getContext(), sess.user, sess.permissionBits).results();
+        final SearchIterator<DocumentMetadata> documents = infostore.getDocuments(target.getFolderIdAsInt(), ServerSessionAdapter.valueOf(sess.user.getId(), target.getContext().getContextId())).results();
         try {
             while (documents.hasNext()) {
                 list.add(new DocumentMetadataHolder(null, documents.next()));

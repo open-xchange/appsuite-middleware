@@ -50,14 +50,12 @@
 package com.openexchange.groupware.infostore;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public interface PathResolver extends TransactionAware {
-	public Resolved resolve(int relativeToFolder, WebdavPath path, Context ctx, User user, UserPermissionBits userPerms) throws OXException;
-	public WebdavPath getPathForFolder(int relativeToFolder, int folderId, Context ctx, User user, UserPermissionBits userPerms) throws OXException;
-	public WebdavPath getPathForDocument(int relativeToFolder, int documentId, Context ctx, User user, UserPermissionBits userPerms) throws OXException;
+	public Resolved resolve(int relativeToFolder, WebdavPath path, ServerSession session) throws OXException;
+	public WebdavPath getPathForFolder(int relativeToFolder, int folderId, ServerSession session) throws OXException;
+	public WebdavPath getPathForDocument(int relativeToFolder, int documentId, ServerSession session) throws OXException;
 }

@@ -54,18 +54,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
 import com.openexchange.groupware.tools.chunk.ListPerformable;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
@@ -79,8 +75,8 @@ import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -119,12 +115,7 @@ public class InfostoreFolderJob implements IndexingJob {
             info.account,
             String.valueOf(info.folder))) {
 
-            ContextService contextService = Services.getService(ContextService.class);
-            UserService userService = Services.getService(UserService.class);
-            UserPermissionService userConfigurationService = Services.getService(UserPermissionService.class);
-            Context context = contextService.getContext(info.contextId);
-            User user = userService.getUser(info.userId, context);
-            UserPermissionBits permissionBits = userConfigurationService.getUserPermissionBits(info.userId, context);
+            ;
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             final IndexAccess<DocumentMetadata> infostoreIndex = indexFacade.acquireIndexAccess(
                 Types.INFOSTORE,
@@ -135,7 +126,7 @@ public class InfostoreFolderJob implements IndexingJob {
                 if (info.deleteFolder) {
                     deleteFromIndex(info, infostoreIndex, attachmentIndex);
                 } else {
-                    indexFolder(info, context, user, permissionBits, infostoreIndex, attachmentIndex);
+                    indexFolder(info, ServerSessionAdapter.valueOf(info.userId, info.contextId), infostoreIndex, attachmentIndex);
                 }
             } finally {
                 closeIndexAccess(infostoreIndex);
@@ -166,9 +157,9 @@ public class InfostoreFolderJob implements IndexingJob {
         attachmentIndex.deleteByQuery(attachmentAllQuery);
     }
 
-    private void indexFolder(InfostoreJobInfo info, Context context, User user, UserPermissionBits permissionBits, final IndexAccess<DocumentMetadata> infostoreIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    private void indexFolder(InfostoreJobInfo info, ServerSession session, final IndexAccess<DocumentMetadata> infostoreIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         InfostoreFacade infostoreFacade = Services.getService(InfostoreFacade.class);
-        TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(info.folder, context, user, permissionBits);
+        TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(info.folder, session);
         final List<IndexDocument<DocumentMetadata>> indexDocuments = new ArrayList<IndexDocument<DocumentMetadata>>();
         final List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
         SearchIterator<DocumentMetadata> it = documents.results();
@@ -181,9 +172,8 @@ public class InfostoreFolderJob implements IndexingJob {
                     InputStream document = infostoreFacade.getDocument(
                         file.getId(),
                         InfostoreFacade.CURRENT_VERSION,
-                        context,
-                        user,
-                        permissionBits);
+                        session
+                    );
 
                     if (document != null) {
                         Attachment attachment = new Attachment();

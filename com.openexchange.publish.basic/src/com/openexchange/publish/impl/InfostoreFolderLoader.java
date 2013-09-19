@@ -52,16 +52,13 @@ package com.openexchange.publish.impl;
 import java.util.Collection;
 import java.util.LinkedList;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -73,24 +70,20 @@ import com.openexchange.userconf.UserPermissionService;
 public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
     private InfostoreFacade infostore = null;
-    private final UserService users;
-    private final UserPermissionService userPermissions;
 
-    public InfostoreFolderLoader(final InfostoreFacade infostore, final UserService users, final UserPermissionService userPermissions) {
+    public InfostoreFolderLoader(final InfostoreFacade infostore) {
         super();
         this.infostore = infostore;
-        this.users = users;
-        this.userPermissions = userPermissions;
     }
-
-
 
     @Override
     public Collection<? extends Object> load(final Publication publication) throws OXException {
         final LinkedList<Object> list = new LinkedList<Object>();
         try {
             final int folderId = Integer.parseInt(publication.getEntityId());
-            final SearchIterator documentsInFolder = infostore.getDocuments(folderId, Metadata.HTTPAPI_VALUES_ARRAY, Metadata.TITLE_LITERAL, InfostoreFacade.ASC, getContext(publication), getUser(publication), getUserConfig(publication)).results();
+            final SearchIterator<DocumentMetadata> documentsInFolder = infostore.getDocuments(
+                folderId, Metadata.HTTPAPI_VALUES_ARRAY, Metadata.TITLE_LITERAL, InfostoreFacade.ASC,
+                ServerSessionAdapter.valueOf(publication.getUserId(), publication.getContext().getContextId())).results();
             while(documentsInFolder.hasNext()) {
                 final Object next = documentsInFolder.next();
                 list.add(next);
@@ -100,24 +93,6 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
             throw e;
         }
         return list;
-    }
-
-
-
-    private UserPermissionBits getUserConfig(final Publication publication) throws OXException, OXException {
-        return userPermissions.getUserPermissionBits(publication.getUserId(), publication.getContext());
-    }
-
-
-
-    private User getUser(final Publication publication) throws OXException, OXException {
-        return users.getUser(publication.getUserId(), publication.getContext());
-    }
-
-
-
-    private Context getContext(final Publication publication) {
-        return publication.getContext();
     }
 
 }

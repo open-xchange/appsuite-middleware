@@ -89,6 +89,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * OXFolderTools
@@ -1533,9 +1534,7 @@ public class OXFolderTools {
                     final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
                     return !db.hasFolderForeignObjects(
                         fo.getObjectID(),
-                        ctx,
-                        UserStorage.getStorageUser(session),
-                        permissionBits);
+                        ServerSessionAdapter.valueOf(session, ctx));
                 default:
                     throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
                         Integer.valueOf(ctx.getContextId()));

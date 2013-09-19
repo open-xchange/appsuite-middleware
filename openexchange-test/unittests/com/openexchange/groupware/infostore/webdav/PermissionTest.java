@@ -256,7 +256,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         // Verify that it has not doubled, but was overwritten (correctly)
         switchUser(user1);
 
-        final TimedResult documents = factory.getDatabase().getDocuments(testFolder.getObjectID(), getContext(), user, permissionBits);
+        final TimedResult documents = factory.getDatabase().getDocuments(testFolder.getObjectID(), factory.getSession());
 
         final Map<String, Integer> counter =  new HashMap<String,Integer>();
         for(final DocumentMetadata metadata : SearchIteratorAdapter.toIterable((SearchIterator<DocumentMetadata>)documents.results())) {

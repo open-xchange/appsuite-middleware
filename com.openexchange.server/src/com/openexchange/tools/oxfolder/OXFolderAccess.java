@@ -88,6 +88,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -550,12 +551,9 @@ public class OXFolderAccess {
             } else if (module == FolderObject.INFOSTORE) {
                 final InfostoreFacade db =
                     new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                final UserPermissionBits userPermissionBits = getUserPermissions(session, ctx, userId, null);
                 return db.hasFolderForeignObjects(
                     folder.getObjectID(),
-                    ctx,
-                    UserStorage.getStorageUser(session.getUserId(), ctx),
-                    userPermissionBits);
+                    ServerSessionAdapter.valueOf(session, ctx));
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
@@ -656,8 +654,7 @@ public class OXFolderAccess {
                 try {
                     final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                     final User user = getUser(session, ctx, userId);
-                    final UserPermissionBits userPermissionBits = getUserPermissions(session, ctx, userId, user);
-                    return db.countDocuments(folder.getObjectID(), ctx, user, userPermissionBits);
+                    return db.countDocuments(folder.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
                 } catch (final OXException e) {
                     if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
                         return 0;

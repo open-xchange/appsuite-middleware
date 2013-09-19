@@ -167,12 +167,12 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             Matcher matcher = EXPLICIT_ID.matcher(name);
             if (matcher.find()) {
                 String id = matcher.group(1);
-                final InputStream is = infostore.getDocument(Integer.parseInt(id), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserPermissionBits());
+                final InputStream is = infostore.getDocument(Integer.parseInt(id), InfostoreFacade.CURRENT_VERSION, session);
                 return asString(is);
             }
         }
 
-        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL}, session.getContext(), session.getUser(), session.getUserPermissionBits()).results();
+        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL}, session).results();
         try {
             final DocumentMetadataMatcher matcher = new DocumentMetadataMatcher(name);
             while(iterator.hasNext() && !matcher.hasPerfectMatch()) {
@@ -184,7 +184,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
                 return null;
             }
 
-            final InputStream is = infostore.getDocument(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserPermissionBits());
+            final InputStream is = infostore.getDocument(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session);
             return asString(is);
 
         } finally {
@@ -232,7 +232,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
     public List<String> getNames(final ServerSession session, final FolderObject folder, final String ... filter) throws OXException {
     	final HashSet<String> sieve = new HashSet<String>(Arrays.asList(filter));
 
-        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.FILENAME_LITERAL, Metadata.CATEGORIES_LITERAL}, session.getContext(), session.getUser(), session.getUserPermissionBits()).results();
+        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.FILENAME_LITERAL, Metadata.CATEGORIES_LITERAL}, session).results();
         final List<String> names = new ArrayList<String>(30);
         while(iterator.hasNext()) {
             final DocumentMetadata doc = iterator.next();

@@ -61,7 +61,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -73,9 +72,8 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.log.LogFactory;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
@@ -106,29 +104,27 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     }
 
     @Override
-    public WebdavPath getPathForDocument(final int relativeToFolder, final int documentId,
-            final Context ctx, final User user, final UserPermissionBits userPerms) throws OXException {
+    public WebdavPath getPathForDocument(final int relativeToFolder, final int documentId, ServerSession session) throws OXException {
         final TIntObjectMap<WebdavPath> cache = docPathCache.get();
         final Map<WebdavPath, Resolved> resCache = resolveCache.get();
         if(cache.containsKey(documentId)) {
-            return relative(relativeToFolder, cache.get(documentId), ctx, user, userPerms);
+            return relative(relativeToFolder, cache.get(documentId), session);
         }
 
-        final DocumentMetadata dm = database.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION, ctx, user, userPerms);
+        final DocumentMetadata dm = database.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION, session);
         if(dm.getFileName() == null || dm.getFileName().equals("")) {
             throw InfostoreExceptionCodes.DOCUMENT_CONTAINS_NO_FILE.create(Integer.valueOf(documentId));
         }
-        final WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userPerms).dup().append(dm.getFileName());
+        final WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),session).dup().append(dm.getFileName());
 
         cache.put(documentId, path);
         resCache.put(path, new ResolvedImpl(path, documentId, true));
-        return relative(relativeToFolder,path, ctx, user, userPerms);
+        return relative(relativeToFolder,path, session);
 
     }
 
     @Override
-    public WebdavPath getPathForFolder(final int relativeToFolder, final int folderId,
-            final Context ctx, final User user, final UserPermissionBits userPerms) throws OXException {
+    public WebdavPath getPathForFolder(final int relativeToFolder, final int folderId, ServerSession session) throws OXException {
         if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new WebdavPath();
         }
@@ -139,17 +135,17 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         final Map<WebdavPath, Resolved> resCache = resolveCache.get();
         final TIntObjectMap<WebdavPath> cache = folderPathCache.get();
         if(cache.containsKey(folderId)) {
-            return relative(relativeToFolder, cache.get(folderId), ctx, user, userPerms);
+            return relative(relativeToFolder, cache.get(folderId), session);
         }
 
         final List<FolderObject> path = new ArrayList<FolderObject>();
-        FolderObject folder = getFolder(folderId, ctx);
+        FolderObject folder = getFolder(folderId, session.getContext());
         path.add(folder);
         while(folder != null) {
             if(folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
                 folder = null;
             } else {
-                folder = getFolder(folder.getParentFolderID(), ctx);
+                folder = getFolder(folder.getParentFolderID(), session.getContext());
                 path.add(folder);
             }
         }
@@ -173,16 +169,15 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         }
 
 
-        return relative(relativeToFolder, thePath, ctx, user, userPerms);
+        return relative(relativeToFolder, thePath, session);
     }
 
     @Override
-    public Resolved resolve(final int relativeToFolder, final WebdavPath path, final Context ctx,
-            final User user, final UserPermissionBits userPerms) throws OXException {
+    public Resolved resolve(final int relativeToFolder, final WebdavPath path, ServerSession session) throws OXException {
 
         final Map<WebdavPath, Resolved> cache = resolveCache.get();
 
-        final WebdavPath absolutePath = absolute(relativeToFolder, path, ctx, user, userPerms);
+        final WebdavPath absolutePath = absolute(relativeToFolder, path, session);
 
         if(cache.containsKey(absolutePath)) {
             return cache.get(absolutePath);
@@ -192,7 +187,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
-        final WebdavPath relpath = getPathForFolder(0, relativeToFolder, ctx, user, userPerms);
+        final WebdavPath relpath = getPathForFolder(0, relativeToFolder, session);
 
         Resolved resolved = new ResolvedImpl(relpath,relativeToFolder, false);
         cache.put(resolved.getPath(), resolved);
@@ -214,10 +209,10 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
                 if(resolved == null) {
                     if(con == null) {
-                        con = getReadConnection(ctx);
+                        con = getReadConnection(session.getContext());
                     }
                     stmt = con.prepareStatement("SELECT folder.fuid, folder.fname FROM oxfolder_tree AS folder JOIN oxfolder_tree AS parent ON (folder.parent = parent.fuid AND folder.cid = parent.cid) WHERE folder.cid = ? and parent.fuid = ? and folder.fname = ?");
-                    stmt.setInt(1, ctx.getContextId());
+                    stmt.setInt(1, session.getContextId());
 
                     stmt.setInt(2, parentId);
                     stmt.setString(3, component);
@@ -229,7 +224,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                         final String fname = rs.getString(2);
                         if(fname.equals(component)) {
                             if( found ) {
-                                final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(ctx.getContextId()));
+                                final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(session.getContextId()));
                                 LOG.warn(e.toString(), e);
                             }
                             folderid = rs.getInt(1);
@@ -242,7 +237,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                             // Maybe infoitem?
                             stmt.close();
                             stmt = con.prepareStatement("SELECT info.id, doc.filename FROM infostore AS info JOIN infostore_document AS doc ON (info.cid = doc.cid AND info.id = doc.infostore_id AND doc.version_number = info.version) WHERE info.cid = ? AND info.folder_id = ? AND doc.filename = ?");
-                            stmt.setInt(1, ctx.getContextId());
+                            stmt.setInt(1, session.getContextId());
                             stmt.setInt(2, parentId);
                             stmt.setString(3, component);
                             rs = stmt.executeQuery();
@@ -252,7 +247,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                                 final String name = rs.getString(2);
                                 if(name.equals(component)) {
                                     if(found) {
-                                        final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(ctx.getContextId()));
+                                        final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(session.getContextId()));
                                         LOG.warn(e.toString(), e);
                                     }
                                     found = true;
@@ -279,7 +274,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, stmt.toString());
         } finally {
             close(stmt,rs);
-            releaseReadConnection(ctx,con);
+            releaseReadConnection(session.getContext(),con);
         }
     }
 

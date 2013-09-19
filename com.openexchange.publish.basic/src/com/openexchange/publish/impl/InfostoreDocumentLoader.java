@@ -53,14 +53,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link InfostoreDocumentLoader}
@@ -71,20 +67,14 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
 
     private final InfostoreFacade infostore;
 
-    private final UserService users;
-
-    private final UserPermissionService userPermissions;
-
     /**
      * Initializes a new {@link InfostoreDocumentLoader}.
      *
      * @param infostoreFacade
      */
-    public InfostoreDocumentLoader(InfostoreFacade infostoreFacade, UserService userService, UserPermissionService userPermissions) {
+    public InfostoreDocumentLoader(InfostoreFacade infostoreFacade) {
         super();
         this.infostore = infostoreFacade;
-        this.users = userService;
-        this.userPermissions = userPermissions;
     }
 
     @Override
@@ -93,19 +83,10 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
         InputStream document = infostore.getDocument(
             Integer.parseInt(publication.getEntityId()),
             InfostoreFacade.CURRENT_VERSION,
-            publication.getContext(),
-            loadUser(publication.getContext(), publication.getUserId()),
-            loadUserPermissionBits(publication.getContext(), publication.getUserId()));
+            ServerSessionAdapter.valueOf(publication.getUserId(), publication.getContext().getContextId())
+            );
         documents.add(document);
         return documents;
-    }
-
-    protected User loadUser(Context ctx, int userId) throws OXException {
-        return users.getUser(userId, ctx);
-    }
-
-    protected UserPermissionBits loadUserPermissionBits(Context ctx, int userId) throws OXException {
-        return userPermissions.getUserPermissionBits(userId, ctx);
     }
 
 }

@@ -70,7 +70,6 @@ import com.openexchange.publish.microformats.OnlinePublicationServlet;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -160,8 +159,6 @@ public class ServletActivator extends HousekeepingActivator {
         ContactPictureServlet.setContactService(contacts);
         MicroformatServlet.setContactService(contacts);
 
-        InfostoreFileServlet.setUserPermissions(userPermissions);
-        InfostoreFileServlet.setUsers(users);
         InfostoreFileServlet.setInfostore(infostore);
 
         final FileResponseRenderer renderer = new FileResponseRenderer();

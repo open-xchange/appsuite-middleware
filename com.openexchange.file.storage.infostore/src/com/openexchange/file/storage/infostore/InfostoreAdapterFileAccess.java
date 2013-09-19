@@ -172,7 +172,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).exists(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userPermissions);
+            return getInfostore(folderId).exists(ID(id), null == version ? -1 : Integer.parseInt(version), sessionObj);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -181,7 +181,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userPermissions);
+            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), sessionObj);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -191,7 +191,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     public InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException {
         try {
             return getInfostore(folderId).getDocument(
-                ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, ctx, user, userPermissions);
+                ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, sessionObj);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -201,7 +201,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         try {
             final DocumentMetadata documentMetadata =
-                getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userPermissions);
+                getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), sessionObj);
             return new InfostoreFile(documentMetadata);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
@@ -354,9 +354,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
                 updateSince,
                 FieldMapping.getMatching(fields),
                 ignoreDeleted,
-                ctx,
-                user,
-                userPermissions);
+                sessionObj);
         return new InfostoreDeltaWrapper(delta);
     }
 
@@ -370,9 +368,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
                 FieldMapping.getMatching(sort),
                 FieldMapping.getSortDirection(order),
                 ignoreDeleted,
-                ctx,
-                user,
-                userPermissions);
+                sessionObj);
         return new InfostoreDeltaWrapper(delta);
     }
 
@@ -395,7 +391,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
          * query infostore for non-virtual ones
          */
         if (0 < foldersToQuery.size()) {
-            Map<Long, Long> infostoreNumbers = infostore.getSequenceNumbers(foldersToQuery, true, ctx, user, userPermissions);
+            Map<Long, Long> infostoreNumbers = infostore.getSequenceNumbers(foldersToQuery, true, sessionObj);
             for (Map.Entry<Long, Long> entry : infostoreNumbers.entrySet()) {
                 sequenceNumbers.put(String.valueOf(entry.getKey().longValue()), entry.getValue());
             }
@@ -405,14 +401,14 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
 
     @Override
     public TimedResult<File> getDocuments(final String folderId) throws OXException {
-        final TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), ctx, user, userPermissions);
+        final TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), sessionObj);
         return new InfostoreTimedResult(documents);
     }
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws OXException {
         final TimedResult<DocumentMetadata> documents =
-            getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), ctx, user, userPermissions);
+            getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), sessionObj);
         return new InfostoreTimedResult(documents);
     }
 
@@ -424,9 +420,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
                 FieldMapping.getMatching(fields),
                 FieldMapping.getMatching(sort),
                 FieldMapping.getSortDirection(order),
-                ctx,
-                user,
-                userPermissions);
+                sessionObj);
         return new InfostoreTimedResult(documents);
     }
 
@@ -435,7 +429,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
         final int[] infostoreIDs = IDS(ids);
         TimedResult<DocumentMetadata> documents;
         try {
-            documents = getInfostore(null).getDocuments(infostoreIDs, FieldMapping.getMatching(fields), ctx, user, userPermissions);
+            documents = getInfostore(null).getDocuments(infostoreIDs, FieldMapping.getMatching(fields), sessionObj);
             return new InfostoreTimedResult(documents);
         } catch (final IllegalAccessException e) {
             throw new OXException(e);
@@ -444,14 +438,14 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), ctx, user, userPermissions);
+        final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), sessionObj);
         return new InfostoreTimedResult(versions);
     }
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
         final TimedResult<DocumentMetadata> versions =
-            getInfostore(folderId).getVersions(ID(id), FieldMapping.getMatching(fields), ctx, user, userPermissions);
+            getInfostore(folderId).getVersions(ID(id), FieldMapping.getMatching(fields), sessionObj);
         return new InfostoreTimedResult(versions);
     }
 
@@ -463,9 +457,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
                 FieldMapping.getMatching(fields),
                 FieldMapping.getMatching(sort),
                 FieldMapping.getSortDirection(order),
-                ctx,
-                user,
-                userPermissions);
+                sessionObj);
         return new InfostoreTimedResult(versions);
     }
 

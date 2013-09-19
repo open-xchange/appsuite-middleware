@@ -485,7 +485,7 @@ public class InfostoreRequest extends CommonRequest {
         SearchIterator<DocumentMetadata> iter = null;
         try {
 
-            result = infostore.getDocuments(ids, cols, ctx, user, userPermissionBits);
+            result = infostore.getDocuments(ids, cols, session);
 
             iter = result.results();
 
@@ -513,7 +513,7 @@ public class InfostoreRequest extends CommonRequest {
         DocumentMetadata dm = null;
         try {
 
-            dm = infostore.getDocumentMetadata(id, version, ctx, user, userPermissionBits);
+            dm = infostore.getDocumentMetadata(id, version, session);
             if (dm == null) {
                 sendErrorAsJS("Cannot find document: %s ", Integer.toString(id));
             }
@@ -539,10 +539,9 @@ public class InfostoreRequest extends CommonRequest {
         try {
             // SearchENgine?
             infostore.startTransaction();
-            infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user,
-                    userPermissionBits).getSequenceNumber();
+            infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session).getSequenceNumber();
             final TimedResult<DocumentMetadata> result = infostore.getVersions(id, new Metadata[] { Metadata.VERSION_LITERAL },
-                    ctx, user, userPermissionBits);
+                session);
             if (timestamp > ts) {
                 throw AjaxExceptionCodes.CONFLICT.create();
             }
@@ -561,8 +560,7 @@ public class InfostoreRequest extends CommonRequest {
                 iter.close();
             }
             infostore.removeVersion(id, versions.toArray(), session);
-            timestamp = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
-                    user, userPermissionBits).getSequenceNumber();
+            timestamp = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session).getSequenceNumber();
             infostore.commit();
             w.object();
             w.key(ResponseFields.DATA).value(new JSONObject()).key(ResponseFields.TIMESTAMP).value(timestamp);
@@ -607,10 +605,9 @@ public class InfostoreRequest extends CommonRequest {
         try {
 
             if (sortedBy == null) {
-                result = infostore.getDocuments(folderId, cols, ctx, user, userPermissionBits);
+                result = infostore.getDocuments(folderId, cols, session);
             } else {
-                result = infostore.getDocuments(folderId, cols, sortedBy, dir, ctx, user,
-                        userPermissionBits);
+                result = infostore.getDocuments(folderId, cols, sortedBy, dir, session);
             }
 
             iter = result.results();
@@ -642,10 +639,9 @@ public class InfostoreRequest extends CommonRequest {
         try {
 
             if (sortedBy == null) {
-                result = infostore.getVersions(id, loadCols, ctx, user, userPermissionBits);
+                result = infostore.getVersions(id, loadCols, session);
             } else {
-                result = infostore.getVersions(id, loadCols, sortedBy, dir, ctx, user,
-                        userPermissionBits);
+                result = infostore.getVersions(id, loadCols, sortedBy, dir, session);
             }
             iter = result.results();
             if (Metadata.CREATED_BY_LITERAL.equals(sortedBy)) {
@@ -762,11 +758,9 @@ public class InfostoreRequest extends CommonRequest {
         try {
 
             if (sortedBy == null) {
-                delta = infostore.getDelta(folderId, timestamp, cols, ignoreDelete, ctx, user,
-                        userPermissionBits);
+                delta = infostore.getDelta(folderId, timestamp, cols, ignoreDelete, session);
             } else {
-                delta = infostore.getDelta(folderId, timestamp, cols, sortedBy, dir, ignoreDelete, ctx,
-                        user, userPermissionBits);
+                delta = infostore.getDelta(folderId, timestamp, cols, sortedBy, dir, ignoreDelete, session);
             }
 
             iter = delta.results();
@@ -878,8 +872,7 @@ public class InfostoreRequest extends CommonRequest {
 
                 notDetached = infostore.removeVersion(objectId, ids, session);
 
-                final DocumentMetadata currentVersion = infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION, ctx,
-                        user, userPermissionBits);
+                final DocumentMetadata currentVersion = infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION, session);
                 searchEngine.index(currentVersion, ctx, user, userPermissionBits);
                 newTimestamp = currentVersion.getLastModified().getTime();
                 infostore.commit();
@@ -1100,8 +1093,7 @@ public class InfostoreRequest extends CommonRequest {
             infostore.startTransaction();
             searchEngine.startTransaction();
 
-            metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION,
-                    ctx, user, userPermissionBits));
+            metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session));
 
             final SetSwitch set = new SetSwitch(metadata);
             final GetSwitch get = new GetSwitch(updated);
@@ -1115,8 +1107,7 @@ public class InfostoreRequest extends CommonRequest {
             metadata.setId(InfostoreFacade.NEW);
 
             if (metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
-                infostore.saveDocument(metadata, infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, ctx,
-                        user, userPermissionBits), metadata.getSequenceNumber(), session);
+                infostore.saveDocument(metadata, infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, session), metadata.getSequenceNumber(), session);
             } else {
                 infostore.saveDocumentMetadata(metadata, timestamp, session);
             }
@@ -1162,8 +1153,7 @@ public class InfostoreRequest extends CommonRequest {
 
             infostore.commit();
 
-            final DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
-                    user, userPermissionBits);
+            final DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
 
             try {
                 w.object();
@@ -1202,8 +1192,7 @@ public class InfostoreRequest extends CommonRequest {
 
             infostore.commit();
 
-            final DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
-                                user, userPermissionBits);
+            final DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
 
             try {
                 w.object().key(ResponseFields.TIMESTAMP).value(currentVersion.getLastModified().getTime()).endObject();

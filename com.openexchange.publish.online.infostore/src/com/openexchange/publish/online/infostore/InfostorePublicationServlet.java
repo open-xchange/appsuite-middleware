@@ -69,8 +69,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -80,8 +78,6 @@ import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -103,18 +99,8 @@ public class InfostorePublicationServlet extends HttpServlet {
     private static volatile PublicationDataLoaderService loader;
     private static volatile InfostoreDocumentPublicationService publisher;
     private static volatile ContextService contexts;
-    private static volatile UserService users;
-    private static volatile UserPermissionService userPermissions;
 
     private static volatile InfostoreFacade infostore;
-
-    public static void setUserService(final UserService service) {
-        users = service;
-    }
-
-    public static void setUserConfigService(final UserPermissionService userPermissions2) {
-        userPermissions = userPermissions2;
-    }
 
     public static void setInfostoreFacade(final InfostoreFacade service) {
         infostore = service;
@@ -238,22 +224,12 @@ public class InfostorePublicationServlet extends HttpServlet {
         try {
             final int id = Integer.parseInt(entityId);
             final int version = InfostoreFacade.CURRENT_VERSION;
-            final Context ctx = publication.getContext();
-            final User user = loadUser(publication);
-            final UserPermissionBits userPerm = loadUserPermissionBits(publication);
+            ServerSession syntheticSession = ServerSessionAdapter.valueOf(publication.getUserId(), publication.getContext().getContextId());
 
-            return infostore.getDocumentMetadata(id, version, ctx, user, userPerm);
+            return infostore.getDocumentMetadata(id, version, syntheticSession);
         } catch (final RuntimeException e) {
             throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create(e, new Object[0]);
         }
-    }
-
-    private static UserPermissionBits loadUserPermissionBits(final Publication publication) throws OXException {
-        return userPermissions.getUserPermissionBits(publication.getUserId(), publication.getContext());
-    }
-
-    private static User loadUser(final Publication publication) throws OXException {
-        return users.getUser(publication.getUserId(), publication.getContext());
     }
 
     private void write(final InputStream is, final HttpServletResponse resp) throws IOException {

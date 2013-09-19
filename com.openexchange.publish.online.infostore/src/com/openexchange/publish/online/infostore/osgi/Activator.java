@@ -50,17 +50,16 @@
 package com.openexchange.publish.online.infostore.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.online.infostore.InfostoreDocumentPublicationService;
 import com.openexchange.publish.online.infostore.InfostorePublicationServlet;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
 public class Activator extends HousekeepingActivator {
@@ -131,24 +130,12 @@ public class Activator extends HousekeepingActivator {
             return;
         }
 
-        final UserService users = getService(UserService.class);
-        if(users == null) {
-            return;
-        }
-
-        final UserPermissionService userConfigs = getService(UserPermissionService.class);
-        if(userConfigs == null) {
-            return;
-        }
-
         final InfostoreFacade infostore = getService(InfostoreFacade.class);
         if(infostore == null) {
             return;
         }
 
         InfostorePublicationServlet.setContextService(contexts);
-        InfostorePublicationServlet.setUserService(users);
-        InfostorePublicationServlet.setUserConfigService(userConfigs);
 
         InfostorePublicationServlet.setInfostoreFacade(infostore);
         InfostorePublicationServlet.setPublicationDataLoaderService(dataLoader);

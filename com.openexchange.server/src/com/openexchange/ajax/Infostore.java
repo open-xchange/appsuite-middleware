@@ -523,7 +523,7 @@ public class Infostore extends PermissionServlet {
             infostore.startTransaction();
             searchEngine.startTransaction();
 
-            metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user, userPerm));
+            metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session));
 
             final SetSwitch set = new SetSwitch(metadata);
             final GetSwitch get = new GetSwitch(updated);
@@ -539,7 +539,7 @@ public class Infostore extends PermissionServlet {
                 if (metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
                     infostore.saveDocument(
                         metadata,
-                        infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, ctx, user, userPerm),
+                        infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, session),
                         metadata.getSequenceNumber(),
                         session);
                 } else {
@@ -588,14 +588,14 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    protected void document(final HttpServletResponse res, final String userAgent, final int id, final int version, final String contentType, final Context ctx, final User user, final UserPermissionBits userPerm, final Session session) throws IOException {
+    protected void document(final HttpServletResponse res, final String userAgent, final int id, final int version, final String contentType, final Context ctx, final User user, final UserPermissionBits userPerm, final ServerSession session) throws IOException {
         final InfostoreFacade infostore = getInfostore();
         OutputStream os = null;
         InputStream documentData = null;
         try {
-            final DocumentMetadata metadata = infostore.getDocumentMetadata(id, version, ctx, user, userPerm);
+            final DocumentMetadata metadata = infostore.getDocumentMetadata(id, version, session);
 
-            documentData = infostore.getDocument(id, version, ctx, user, userPerm);
+            documentData = infostore.getDocument(id, version, session);
             os = res.getOutputStream();
 
             res.setContentLength((int) metadata.getFileSize());

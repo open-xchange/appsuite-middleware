@@ -53,7 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.AbstractInfostoreTest;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -61,9 +60,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.DocumentMetadataResource;
 import com.openexchange.groupware.infostore.webdav.FolderCollection;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -104,10 +101,6 @@ public class LockExpiryTest extends AbstractInfostoreTest {
 
         InfostoreFacade infostoreFacade = factory.getDatabase();
 
-        Context ctx = factory.getSession().getContext();
-        User user = factory.getSession().getUser();
-        UserPermissionBits permissionBits = factory.getSession().getUserPermissionBits();
-
         DocumentMetadataResource resource = createResource();
         final WebdavLock lock = new WebdavLock();
 
@@ -121,7 +114,7 @@ public class LockExpiryTest extends AbstractInfostoreTest {
         resource.lock(lock);
         newRequest();
 
-        Date lastModified = infostoreFacade.getDocumentMetadata(resource.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits).getLastModified();
+        Date lastModified = infostoreFacade.getDocumentMetadata(resource.getId(), InfostoreFacade.CURRENT_VERSION, factory.getSession()).getLastModified();
 
 
         Thread.sleep(2001);
@@ -129,13 +122,14 @@ public class LockExpiryTest extends AbstractInfostoreTest {
         // The lock has expired by now, so an updates request on the testCollection folder must include the resource
         newRequest();
 
-        Delta delta = infostoreFacade.getDelta(folderCollection.getId(), lastModified.getTime()+10, new Metadata[]{Metadata.ID_LITERAL}, true, ctx, user, permissionBits);
+        Delta<DocumentMetadata> delta = infostoreFacade.getDelta(
+            folderCollection.getId(), lastModified.getTime()+10, new Metadata[]{Metadata.ID_LITERAL}, true, factory.getSession());
 
         boolean found = false;
 
-        SearchIterator modified = delta.getModified();
+        SearchIterator<DocumentMetadata> modified = delta.getModified();
         while(modified.hasNext()) {
-            DocumentMetadata document = (DocumentMetadata) modified.next();
+            DocumentMetadata document = modified.next();
             if(document.getId() == resource.getId()) {
                 found = true;
             }

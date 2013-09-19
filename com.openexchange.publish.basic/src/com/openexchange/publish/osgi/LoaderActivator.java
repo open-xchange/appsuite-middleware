@@ -60,7 +60,6 @@ import com.openexchange.publish.impl.ContactFolderLoader;
 import com.openexchange.publish.impl.InfostoreDocumentLoader;
 import com.openexchange.publish.impl.InfostoreFolderLoader;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -75,10 +74,8 @@ public class LoaderActivator extends HousekeepingActivator {
         final CompositeLoaderService compositeLoader = new CompositeLoaderService();
 
         final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        final UserService users = getService(UserService.class);
-        final UserPermissionService userPermissions = getService(UserPermissionService.class);
-        compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userPermissions));
-        compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userPermissions));
+        compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore));
+        compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore));
 
         final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactService.class));
         compositeLoader.registerLoader("contacts", contactLoader);

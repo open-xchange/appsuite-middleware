@@ -52,22 +52,20 @@ package com.openexchange.groupware.infostore.paths.impl;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.PathResolver;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public abstract class AbstractPathResolver extends DBService implements
 		PathResolver {
 
-	protected final WebdavPath absolute(final int relativeToFolder, final WebdavPath path, final Context ctx, final User user, final UserPermissionBits userPermissionBits) throws OXException {
-		final WebdavPath rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userPermissionBits);
+	protected final WebdavPath absolute(final int relativeToFolder, final WebdavPath path, ServerSession session) throws OXException {
+		final WebdavPath rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, session);
 		return rel.dup().append(path);
 	}
 
-	protected final WebdavPath relative(final int relativeToFolder, final WebdavPath absolute, final Context ctx, final User user, final UserPermissionBits userPermissionBits) throws OXException {
-		final WebdavPath rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userPermissionBits);
+	protected final WebdavPath relative(final int relativeToFolder, final WebdavPath absolute, ServerSession session) throws OXException {
+		final WebdavPath rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, session);
 	    return absolute.subpath(rel.size());
 	}
 }

@@ -70,17 +70,14 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -113,18 +110,6 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         infostore = service;
     }
 
-    private static volatile UserService users;
-
-    public static void setUsers(final UserService service) {
-        users = service;
-    }
-
-    private static volatile UserPermissionService userPermissions;
-
-    public static void setUserPermissions(final UserPermissionService service) {
-        userPermissions = service;
-    }
-
     private static volatile FileResponseRenderer fileResponseRenderer;
 
     public static void setFileResponseRenderer(final FileResponseRenderer renderer) {
@@ -153,12 +138,11 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
             final int infoId = Integer.parseInt(args.get(INFOSTORE_ID));
 
-            final User user = getUser(publication);
-            final UserPermissionBits userPerms = getUserPermissionBits(publication);
+            ServerSession syntheticSession = ServerSessionAdapter.valueOf(publication.getUserId(), publication.getContext().getContextId());
 
-            final DocumentMetadata metadata = loadMetadata(publication, infoId, user, userPerms);
+            final DocumentMetadata metadata = loadMetadata(infoId, syntheticSession);
 
-            final InputStream fileData = loadFile(publication, infoId, user, userPerms);
+            final InputStream fileData = loadFile(infoId, syntheticSession);
 
             startedWriting = true;
             writeFile(new PublicationSession(publication), metadata, fileData, req, resp);
@@ -173,18 +157,9 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     }
 
-    private User getUser(final Publication publication) throws OXException {
-        return users.getUser(publication.getUserId(), publication.getContext());
-    }
-
-    private UserPermissionBits getUserPermissionBits(final Publication publication) throws OXException {
-        return userPermissions.getUserPermissionBits(publication.getUserId(), publication.getContext());
-    }
-
-
-    private DocumentMetadata loadMetadata(final Publication publication, final int infoId, final User user, final UserPermissionBits userPermissions) throws OXException {
+    private DocumentMetadata loadMetadata(final int infoId, ServerSession session) throws OXException {
         try {
-            return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userPermissions);
+            return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, session);
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
                 throw PublicationErrorMessage.NotExist.create(e, new Object[0]);
@@ -205,8 +180,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         return null != userAgent && userAgent.contains("MSIE");
     }
 
-    private InputStream loadFile(final Publication publication, final int infoId, final User user, final UserPermissionBits userPermissions) throws OXException {
-        return infostore.getDocument(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userPermissions);
+    private InputStream loadFile(final int infoId, ServerSession session) throws OXException {
+        return infostore.getDocument(infoId, InfostoreFacade.CURRENT_VERSION, session);
     }
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {

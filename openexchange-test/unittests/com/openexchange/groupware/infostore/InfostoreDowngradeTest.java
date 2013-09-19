@@ -48,7 +48,6 @@
  */
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -57,6 +56,7 @@ import junit.framework.TestCase;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -163,7 +163,7 @@ public class InfostoreDowngradeTest extends TestCase {
 
     private void assertNotFound(final int id) {
         try {
-            database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits);
+            database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
             fail("The document still exists!");
         } catch (final OXException e) {
             assertEquals(e.getMessage(), 300, e.getCode());

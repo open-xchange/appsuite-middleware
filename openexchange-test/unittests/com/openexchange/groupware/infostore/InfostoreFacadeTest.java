@@ -68,11 +68,11 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
         infostore.saveDocumentMetadata(dm, System.currentTimeMillis(), session);
         clean.add(dm);
-        assertTrue("Should Exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits));
+        assertTrue("Should Exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, session));
 
         infostore.removeDocument(new int[]{dm.getId()}, System.currentTimeMillis(), session);
         clean.remove(dm);
-        assertFalse("Should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits));
+        assertFalse("Should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, session));
 
     }
 
@@ -85,7 +85,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
         infostore.saveDocumentMetadata(dm, System.currentTimeMillis(), session);
         clean.add(dm);
 
-        assertFalse("No read permission so should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user2, permissionBits2));
+        assertFalse("No read permission so should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, session2));
     }
 
 //     Bug 9555
@@ -164,7 +164,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
         }
 
-        dm = infostore.getDocumentMetadata(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits);
+        dm = infostore.getDocumentMetadata(dm.getId(), InfostoreFacade.CURRENT_VERSION, session);
 
         assertEquals("", dm.getFileMIMEType());
         assertNull(dm.getFileName());
@@ -187,7 +187,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
     }
 
     private DocumentMetadata load(final int id, final ServerSession session) throws OXException {
-        return infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        return infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
     }
 
     private DocumentMetadata createEntry(final int fid) throws OXException {
