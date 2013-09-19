@@ -204,4 +204,19 @@ public class AJAXClient {
     public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) throws OXException, IOException, JSONException {
         return execute(request, -1);
     }
+
+    /**
+     * Executes given request, swallowing all possible exceptions.
+     *
+     * @param request The request to execute
+     * @return The response or <code>null</code> in case an error occurred
+     */
+    public <T extends AbstractAJAXResponse> T executeSafe(final AJAXRequest<T> request) {
+        try {
+            return execute(request, -1);
+        } catch (final Exception e) {
+            // ignore
+            return null;
+        }
+    }
 }
