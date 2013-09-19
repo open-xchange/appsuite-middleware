@@ -49,14 +49,25 @@
 
 package com.openexchange.test.json;
 
-
 /**
- * {@link JSONCondition}
- *
+ * {@link JSONCondition} - A Condition that can be calidated against a JSONObject. If validation fails the complaint can be retrieved.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public interface JSONCondition {
+
+    /**
+     * Validate a JSONObject against this condition.
+     * 
+     * @param o The JSONObject to validate
+     * @return true if the JSONObject conforms to this condition, else false
+     */
     public boolean validate(Object o);
+
+    /**
+     * Get the complaint that caused the validation to fail.
+     * 
+     * @return The complaint that caused the validation to fail.
+     */
     public String getComplaint();
 }

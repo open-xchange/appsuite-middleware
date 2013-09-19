@@ -52,8 +52,11 @@ package com.openexchange.ajax.session;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.httpclient.Cookie;
+import org.apache.commons.httpclient.HttpMethod;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.simple.SimpleResponse;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.test.json.JSONAssertion;
 
@@ -83,8 +86,11 @@ public class LoginTest extends AbstractLoginTest {
         assertResponseContains("session");
     }
 
-    public void testSuccessfulLoginReturnsRandom() throws Exception {
-        assertResponseContains("random");
+    /*
+     * Response now lacks the random unless configured otherwise via login.properties:com.openexchange.ajax.login.randomToken=false
+     */
+    public void testSuccessfulLoginLacksRandom() throws Exception {
+        assertResponseLacks("random");
     }
 
     public void testSuccessfulLoginSetsSecretCookie() throws Exception {
@@ -226,9 +232,51 @@ public class LoginTest extends AbstractLoginTest {
         assertError();
     }
 
+    /**
+     * If a login response lacks the random token the associated login actions (redeem and redirect) have to be unusable, too (even with an
+     * otherwise valid random token).
+     *  
+     * @throws Exception
+     */
+    public void testSessionRandomMissingAndUnusable() throws Exception {
+        rawLogin(USER1);
+        /*
+         * if login.properties:com.openexchange.ajax.login.randomToken=true
+         * the response contains the random. only continue when it's absent.
+         */
+        if(!rawResponse.has("random")) {
+            String sessionID = rawResponse.getString("session");
+            //get the otherwise valid random token
+            callGeneral("logintest", "randomtoken", "session", sessionID);
+            assertNoError();
+            Map<String, Object> details = details();
+            Object randomObject = details.get("random");
+            assertNotNull(randomObject);
+
+            HttpMethod redirectMethod = rawMethod("login",
+                "redirect",
+                "session", sessionID,
+                "random", randomObject
+                );
+            assertEquals("action=redirect shouldn't work when randomToken is disabled", 400, redirectMethod.getStatusCode());
+
+            HttpMethod redeemMethod = rawMethod("login",
+                "redeem",
+                "session", sessionID,
+                "random", randomObject
+                );
+            assertEquals("action=redeem shouldn't work when randomToken is disabled", 400, redeemMethod.getStatusCode());
+        }
+    }
+
     private void assertResponseContains(String key) throws Exception {
         rawLogin(USER1);
         assertRaw(new JSONAssertion().isObject().hasKey(key));
+    }
+    
+    private void assertResponseLacks(String key) throws Exception {
+        rawLogin(USER1);
+        assertRaw(new JSONAssertion().isObject().lacksKey(key));
     }
 
     private void rawLogin(String user) throws Exception{

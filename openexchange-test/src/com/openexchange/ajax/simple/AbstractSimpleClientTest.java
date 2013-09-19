@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import junit.framework.TestCase;
+import org.apache.commons.httpclient.HttpMethod;
 import org.json.JSONObject;
 import com.openexchange.test.json.JSONAssertion;
 
@@ -121,6 +122,10 @@ public class AbstractSimpleClientTest extends TestCase {
 
     public JSONObject rawGeneral(String module, String action, Object...parameters) throws Exception {
         return rawResponse = currentClient.raw(module, action, parameters);
+    }
+
+    public HttpMethod rawMethod(String module, String action, Object...parameters) throws Exception {
+        return currentClient.rawMethod(module, action, parameters);
     }
 
     public SimpleResponse call(String action, Object...parameters) throws Exception {
