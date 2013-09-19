@@ -331,9 +331,20 @@ public class DirectLinkGenerator {
     }
 
     private String getDispatcherPrefix() {
-        return getProperty("com.openexchange.dispatcher.prefix", "/ajax/");
+        return trimSlashes(getProperty("com.openexchange.dispatcher.prefix", "ajax"));
     }
 
+    private static String trimSlashes(String path) {
+        if (null != path && 0 < path.length()) {
+            if ('/' == path.charAt(0)) {
+                path = path.substring(1);
+            }
+            if (0 < path.length() && '/' == path.charAt(path.length() - 1)) {
+                path = path.substring(0, path.length() - 1);
+            }
+        }
+        return path;
+    }
 
 
 }

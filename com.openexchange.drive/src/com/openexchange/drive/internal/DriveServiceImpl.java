@@ -281,8 +281,8 @@ public class DriveServiceImpl implements DriveService {
                     /*
                      * ... then download the server version afterwards
                      */
-                    File serverFile = ServerFileVersion.valueOf(originalVersion, path, driveSession).getFile();
-                    syncResult.addActionForClient(new DownloadFileAction(driveSession, null, originalVersion, null, path, serverFile));
+                    ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(originalVersion, path, driveSession);
+                    syncResult.addActionForClient(new DownloadFileAction(driveSession, null, serverFileVersion, null, path));
                 } else {
                     /*
                      * upload of new file, mark as error with quarantine flag

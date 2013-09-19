@@ -67,14 +67,14 @@ import com.openexchange.groupware.tools.mappings.json.StringMapping;
  */
 public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, DriveFileField> {
 
-    static final int COLUMN_CHECKSUM = 708;
+    static final int COLUMN_CREATED = 4;
+    static final int COLUMN_MODIFIED = 5;
     static final int COLUMN_NAME = 702;
     static final int COLUMN_CONTENT_TYPE = 703;
-    static final int COLUMN_MODIFIED = 5;
-    static final int COLUMN_CREATED = 4;
-    static final int COLUMN_DIRECT_LINK = 752;
+    static final int COLUMN_CHECKSUM = 708;
     static final int COLUMN_PREVIEW_LINK = 750;
     static final int COLUMN_DIRECT_LINK_FRAGMENTS = 751;
+    static final int COLUMN_DIRECT_LINK = 752;
     static final int COLUMN_THUMBNAIL_LINK = 753;
 
     private static final DriveFieldMapper INSTANCE = new DriveFieldMapper();
