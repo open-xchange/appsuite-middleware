@@ -52,6 +52,7 @@ package com.openexchange.publish.online.infostore.osgi;
 import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -72,7 +73,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserPermissionService.class };
+        return new Class<?>[] {IDBasedFileAccessFactory.class, HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserPermissionService.class };
     }
 
     @Override
@@ -129,16 +130,17 @@ public class Activator extends HousekeepingActivator {
         if(contexts == null) {
             return;
         }
-
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        if(infostore == null) {
+        
+        final IDBasedFileAccessFactory fileAccessFactory = getService(IDBasedFileAccessFactory.class);
+        if (fileAccessFactory == null) {
             return;
         }
 
         InfostorePublicationServlet.setContextService(contexts);
 
-        InfostorePublicationServlet.setInfostoreFacade(infostore);
         InfostorePublicationServlet.setPublicationDataLoaderService(dataLoader);
+        
+        InfostorePublicationServlet.setIDBasedFileAccessFactory(fileAccessFactory);
 
         if(servlet == null) {
             try {

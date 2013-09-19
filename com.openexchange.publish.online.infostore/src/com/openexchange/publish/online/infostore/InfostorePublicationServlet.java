@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,14 +65,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.RateLimitedException;
@@ -99,12 +102,7 @@ public class InfostorePublicationServlet extends HttpServlet {
     private static volatile PublicationDataLoaderService loader;
     private static volatile InfostoreDocumentPublicationService publisher;
     private static volatile ContextService contexts;
-
-    private static volatile InfostoreFacade infostore;
-
-    public static void setInfostoreFacade(final InfostoreFacade service) {
-        infostore = service;
-    }
+    private static volatile IDBasedFileAccessFactory fileAccessFactory;
 
     public static void setPublicationDataLoaderService(final PublicationDataLoaderService service) {
         loader = service;
@@ -116,6 +114,10 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     public static void setContextService(final ContextService service) {
         contexts  = service;
+    }
+    
+    public static void setIDBasedFileAccessFactory(final IDBasedFileAccessFactory service) {
+        fileAccessFactory = service;
     }
 
     @Override
@@ -129,25 +131,26 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         handle(req, resp);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         handle(req, resp);
     }
 
     @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         handle(req, resp);
     }
 
     private static final Pattern SPLIT = Pattern.compile("/");
 
-    private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final String[] path = SPLIT.split(req.getRequestURI(), 0);
+            final String requestIp = req.getRemoteAddr();
             final Context ctx = getContext(path);
             final String secret = getSecret(path);
             final Publication publication = getPublication(secret, ctx);
@@ -175,7 +178,8 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     private void destroy(final ServerSession session, final DocumentMetadata document) throws OXException {
-        infostore.removeDocument(new int[]{document.getId()}, Long.MAX_VALUE, session);
+        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        fileAccess.removeDocument(String.valueOf(document.getId()), Long.MAX_VALUE);
     }
 
     private boolean hasMorePublications(final Context ctx, final DocumentMetadata document) throws OXException {
@@ -217,19 +221,10 @@ public class InfostorePublicationServlet extends HttpServlet {
      */
     public static DocumentMetadata loadDocumentMetadata(final Publication publication) throws OXException {
         final String entityId = publication.getEntityId();
-        if (null == entityId) {
-            // Impossible to load without identifier
-            return null;
-        }
-        try {
-            final int id = Integer.parseInt(entityId);
-            final int version = InfostoreFacade.CURRENT_VERSION;
-            ServerSession syntheticSession = ServerSessionAdapter.valueOf(publication.getUserId(), publication.getContext().getContextId());
-
-            return infostore.getDocumentMetadata(id, version, syntheticSession);
-        } catch (final RuntimeException e) {
-            throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create(e, new Object[0]);
-        }
+        Session session = new PublicationSession(publication);
+        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        File file = fileAccess.getFileMetadata(entityId, String.valueOf(1));
+        return FileMetadata.getMetadata(file);
     }
 
     private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
@@ -274,6 +269,7 @@ public class InfostorePublicationServlet extends HttpServlet {
                     cid = Integer.parseInt(path[i+1]);
                     break;
                 } catch (final NumberFormatException x) {
+                    //
                 }
             }
         }
@@ -283,5 +279,5 @@ public class InfostorePublicationServlet extends HttpServlet {
         return contexts.getContext(cid);
     }
 
-
 }
+
