@@ -49,21 +49,16 @@
 
 package com.openexchange.audit.impl;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
-import com.openexchange.audit.logging.AuditFileHandler;
-import com.openexchange.audit.logging.AuditFilter;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -87,7 +82,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AuditEventHandler implements EventHandler {
 
-    private static final Logger LOG = Logger.getLogger(AuditEventHandler.class.getName());
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuditEventHandler.class);
 
     private static final AuditEventHandler instance = new AuditEventHandler();
 
@@ -108,30 +103,26 @@ public class AuditEventHandler implements EventHandler {
              * avoid that the messages will also be written to the master logfile.
              */
             if (AuditConfiguration.getEnabled() == true) {
-                try {
-                    final Logger rootLogger = Logger.getLogger("");
-                    final Handler[] handlers = rootLogger.getHandlers();
-                    for (final Handler handler : handlers) {
-                        handler.setFilter(new AuditFilter());
-                    }
-                    LOG.addHandler(new AuditFileHandler());
-                } catch (final SecurityException e) {
-                    LOG.log(Level.SEVERE, e.getMessage(), e);
-                } catch (final IOException e) {
-                    LOG.log(Level.SEVERE, e.getMessage(), e);
-                }
+//                try {
+//                    String pathToLogfile = AuditConfiguration.getLogfileLocation();
+//                    LOG.addHandler(new AuditFileHandler(pathToLogfile));
+//                } catch (final SecurityException e) {
+//                    LOG.log(Level.SEVERE, e.getMessage(), e);
+//                } catch (final IOException e) {
+//                    LOG.log(Level.SEVERE, e.getMessage(), e);
+//                }
                 LOG.info("Using own Logging instance.");
             } else {
                 LOG.info("Using global Logging instance.");
             }
         } catch (final OXException e) {
-            LOG.log(Level.SEVERE, e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
     @Override
     public void handleEvent(final Event event) {
-        if (!LOG.isLoggable(Level.INFO)) {
+        if (!LOG.isInfoEnabled()) {
             // Not allowed to log
             return;
         }
@@ -139,9 +130,12 @@ public class AuditEventHandler implements EventHandler {
             final StringBuilder log = new StringBuilder(2048);
             final String topic = event.getTopic();
             if (topic.startsWith("com/openexchange/groupware/infostore/")) {
-                if (topic.equals(FileStorageEventConstants.ACCESS_TOPIC) && !AuditConfiguration.getFileAccessLogging()) {
-                    log.append("EVENT TYPE: ACCESS; ");
-                    return;
+                if (topic.equals(FileStorageEventConstants.ACCESS_TOPIC)) {
+                    if (AuditConfiguration.getFileAccessLogging()) {
+                        log.append("EVENT TYPE: ACCESS; ");
+                    } else {
+                        return;
+                    }
                 }
                 if (topic.equals(FileStorageEventConstants.CREATE_TOPIC)) {
                     log.append("EVENT TYPE: INSERT; ");
@@ -321,10 +315,10 @@ public class AuditEventHandler implements EventHandler {
 
             final String infoMsg = log.toString();
             if (!isEmpty(infoMsg)) {
-                LOG.log(Level.INFO, infoMsg);
+                LOG.info(infoMsg);
             }
         } catch (final Exception e) {
-            LOG.log(Level.SEVERE, e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -370,7 +364,7 @@ public class AuditEventHandler implements EventHandler {
         }
         log.append("; ");
     }
-    
+
     private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
@@ -381,47 +375,6 @@ public class AuditEventHandler implements EventHandler {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
-    }
-    
-    private void logFileAccess(Event event, StringBuilder log) {
-        log.append("EVENT TYPE: ACCESS; ");
-        synchronized (logDateFormat) {
-            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
-        }
-        log.append("OBJECT TYPE: FILE; ");
-        final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-        if (session instanceof PublicationSession) {
-            log.append("PUBLISH: ");
-            log.append(session.getLocalIp());
-            log.append("; ");
-        } else {
-            appendUserInformation(session.getUserId(), session.getContextId(), log);
-        }
-        log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
-        log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
-        {
-            final Object fileName = event.getProperty(FileStorageEventConstants.FILE_NAME);
-            if (null != fileName) {
-                log.append("FILE NAME: ").append(fileName).append("; ");
-            }
-        }
-        log.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
-        log.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
-        {
-            final String folderId = (String) event.getProperty(FileStorageEventConstants.FOLDER_ID);
-            if (null != folderId) {
-                try {
-                    final int iFolderId = Integer.parseInt(folderId);
-                    log.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
-                } catch (NumberFormatException e) {
-                    log.append("FOLDER: ").append(folderId).append(';');
-                }
-            }
-        }
-        final String infoMsg = log.toString();
-        if (!isEmpty(infoMsg)) {
-            LOG.log(Level.INFO, infoMsg);
-        }
     }
 
 }
