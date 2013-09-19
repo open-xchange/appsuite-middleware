@@ -159,7 +159,8 @@ public class DirectLinkGenerator {
      * @return The direct link, or <code>null</code> if not available
      */
     public String getFilePreviewLink(File file) {
-        return getFileImageLink(file, 800, 800);
+        int[] dimensions = getDimensions("com.openexchange.drive.previewImageSize", 800, 800);
+        return getFileImageLink(file, dimensions[0], dimensions[1]);
     }
 
     /**
@@ -169,7 +170,8 @@ public class DirectLinkGenerator {
      * @return The direct link, or <code>null</code> if not available
      */
     public String getFileThumbnailLink(File file) {
-        return getFileImageLink(file, 100, 100);
+        int[] dimensions = getDimensions("com.openexchange.drive.thumbnailImageSize", 100, 100);
+        return getFileImageLink(file, dimensions[0], dimensions[1]);
     }
 
     private String getFileImageLink(File file, int width, int height) {
@@ -267,6 +269,23 @@ public class DirectLinkGenerator {
         return documentPreview.booleanValue();
     }
 
+    private int[] getDimensions(String propertyName, int defaultWidth, int defaultHeight) {
+        String value = getProperty(propertyName, null);
+        if (false == Strings.isEmpty(value)) {
+            int idx = value.indexOf('x');
+            if (1 > idx) {
+                LOG.warn("Invalid value for " + propertyName + ", falling back to defaults.");
+            } else {
+                try {
+                    return new int[] { Integer.parseInt(value.substring(0, idx)), Integer.parseInt(value.substring(idx + 1)) };
+                } catch (NumberFormatException e) {
+                    LOG.warn("Invalid value for " + propertyName + ", falling back to defaults.", e);
+                }
+            }
+        }
+        return new int[] { defaultWidth, defaultHeight };
+    }
+
     private String getHostName() {
         if (null == hostName) {
             /*
@@ -314,5 +333,7 @@ public class DirectLinkGenerator {
     private String getDispatcherPrefix() {
         return getProperty("com.openexchange.dispatcher.prefix", "/ajax/");
     }
+
+
 
 }
