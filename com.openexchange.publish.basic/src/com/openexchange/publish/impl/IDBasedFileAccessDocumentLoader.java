@@ -47,49 +47,49 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.impl;
 
-import com.openexchange.caching.CacheService;
-import com.openexchange.contact.ContactService;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.impl.CachingLoader;
-import com.openexchange.publish.impl.CompositeLoaderService;
-import com.openexchange.publish.impl.ContactFolderLoader;
-import com.openexchange.publish.impl.IDBasedFileAccessDocumentLoader;
-import com.openexchange.publish.impl.IDBasedFolderAccessFolderLoader;
+import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link LoaderActivator}
+ * {@link IDBasedFileAccessDocumentLoader}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class LoaderActivator extends HousekeepingActivator {
+public class IDBasedFileAccessDocumentLoader implements PublicationDataLoaderService {
+    
+    private final IDBasedFileAccessFactory fileFactory;
 
-    @Override
-    public void startBundle() throws Exception {
-        final CompositeLoaderService compositeLoader = new CompositeLoaderService();
-        final IDBasedFileAccessFactory fileFactory = getService(IDBasedFileAccessFactory.class);
-        final IDBasedFolderAccessFactory folderFactory = getService(IDBasedFolderAccessFactory.class);
-        compositeLoader.registerLoader("infostore/object", new IDBasedFileAccessDocumentLoader(fileFactory));
-        compositeLoader.registerLoader("infostore", new IDBasedFolderAccessFolderLoader(folderFactory, fileFactory));
 
-        final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactService.class));
-        compositeLoader.registerLoader("contacts", contactLoader);
-
-        registerService(PublicationDataLoaderService.class, new CachingLoader(this, compositeLoader), null);
+    /**
+     * Initializes a new {@link IDBasedFileAccessDocumentLoader}.
+     */
+    public IDBasedFileAccessDocumentLoader(IDBasedFileAccessFactory fileFactory) {
+        super();
+        this.fileFactory = fileFactory;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
+     */
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class, CacheService.class, ContactService.class };
+    public Collection<? extends Object> load(Publication publication) throws OXException {
+        ArrayList<InputStream> documents = new ArrayList<InputStream>();
+        Session session = new PublicationSession(publication);
+        IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
+        InputStream is = fileAccess.getDocument(publication.getEntityId(), String.valueOf(1));
+        documents.add(is);
+        return documents;
     }
 
 }

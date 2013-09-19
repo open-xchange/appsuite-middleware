@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
@@ -95,7 +96,7 @@ public class ServletActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
+        return new Class<?>[] { IDBasedFileAccessFactory.class,
             HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class, ContactService.class,
             UserPermissionService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageTransformationService.class};
     }
@@ -133,12 +134,12 @@ public class ServletActivator extends HousekeepingActivator {
         final ContextService contexts = getService(ContextService.class);
         final TemplateService templates = getService(TemplateService.class);
         final ContactService contacts = getService(ContactService.class);
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
         final UserPermissionService userPermissions = getService(UserPermissionService.class);
         final UserService users = getService(UserService.class);
         final ConfigurationService configService = getService(ConfigurationService.class);
         final HtmlService htmlService = getService(HtmlService.class);
         final ImageTransformationService imageScalingService = getService(ImageTransformationService.class);
+        final IDBasedFileAccessFactory fileFactory = getService(IDBasedFileAccessFactory.class);
 
         if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userPermissions || null == users || configService == null || htmlService == null || imageScalingService == null) {
             return;
@@ -159,7 +160,7 @@ public class ServletActivator extends HousekeepingActivator {
         ContactPictureServlet.setContactService(contacts);
         MicroformatServlet.setContactService(contacts);
 
-        InfostoreFileServlet.setInfostore(infostore);
+        InfostoreFileServlet.setFileFactory(fileFactory);
 
         final FileResponseRenderer renderer = new FileResponseRenderer();
         renderer.setScaler(imageScalingService);
