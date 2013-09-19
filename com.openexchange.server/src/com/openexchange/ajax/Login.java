@@ -1201,7 +1201,7 @@ public class Login extends AJAXServlet {
             SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
             writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), confReference.get());
             // Login response is unfortunately not conform to default responses.
-            if (req.getParameter("callback") != null && req.getParameter("action").equals(ACTION_LOGIN)) {
+            if (req.getParameter("callback") != null && ACTION_LOGIN.equals(req.getParameter("action"))) {
                 APIResponseRenderer.writeResponse(response, ACTION_LOGIN, req, resp);
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
