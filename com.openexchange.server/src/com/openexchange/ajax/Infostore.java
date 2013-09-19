@@ -80,9 +80,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
@@ -130,6 +132,12 @@ public class Infostore extends PermissionServlet {
     static {
         FACADE.setTransactional(true);
         FACADE.setSessionHolder(ThreadLocalSessionHolder.getInstance());
+    }
+
+    public static final EventFiringInfostoreFacade EVENT_FIRING_FACADE = new EventFiringInfostoreFacadeImpl(new DBPoolProvider());
+    static {
+        EVENT_FIRING_FACADE.setTransactional(true);
+        EVENT_FIRING_FACADE.setSessionHolder(ThreadLocalSessionHolder.getInstance());
     }
 
     public static final InfostoreSearchEngine SEARCH_ENGINE = new SearchEngineImpl(new DBPoolProvider());

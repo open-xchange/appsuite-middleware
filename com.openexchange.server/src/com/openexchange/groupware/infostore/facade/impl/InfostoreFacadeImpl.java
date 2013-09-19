@@ -175,7 +175,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     private final DatabaseImpl db = new DatabaseImpl();
 
-    private InfostoreSecurity security = new InfostoreSecurityImpl();
+    protected InfostoreSecurity security = new InfostoreSecurityImpl();
 
     private final EntityLockManager lockManager = new EntityLockManagerImpl("infostore_lock");
 
@@ -834,7 +834,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         saveDocument(document, data, sequenceNumber, modifiedColumns, true, offset, session);
     }
 
-    private void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
+    protected void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
         if (0 < offset && (NEW == document.getId() || false == ignoreVersion)) {
             throw InfostoreExceptionCodes.NO_OFFSET_FOR_NEW_VERSIONS.create();
         }
@@ -1092,7 +1092,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         removeDocuments(allDocuments, allVersions, date, session, null);
     }
 
-    private void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession sessionObj, final List<DocumentMetadata> rejected) throws OXException {
+    protected void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession sessionObj, final List<DocumentMetadata> rejected) throws OXException {
         final List<DocumentMetadata> delDocs = new ArrayList<DocumentMetadata>();
         final List<DocumentMetadata> delVers = new ArrayList<DocumentMetadata>();
         final Set<Integer> rejectedIds = new HashSet<Integer>();
