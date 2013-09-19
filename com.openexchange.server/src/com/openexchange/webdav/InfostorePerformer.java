@@ -56,7 +56,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -66,6 +65,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -74,6 +74,7 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -173,7 +174,7 @@ public final class InfostorePerformer implements SessionHolder {
 
 
         final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
-        final InfostoreFacadeImpl database = new InfostoreFacadeImpl();
+        final InfostoreFacadeImpl database = new EventFiringInfostoreFacadeImpl();
         infoFactory.setDatabase(database);
         infoFactory.setFolderLockManager(new FolderLockManagerImpl());
         infoFactory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));

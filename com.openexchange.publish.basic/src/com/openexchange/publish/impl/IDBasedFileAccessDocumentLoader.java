@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,18 +47,49 @@
  *
  */
 
-package com.openexchange.audit.logging;
+package com.openexchange.publish.impl;
 
-import java.io.IOException;
-import java.util.logging.FileHandler;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.session.Session;
+
 
 /**
- * @author Benjamin Otterbach
+ * {@link IDBasedFileAccessDocumentLoader}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class AuditFileHandler extends FileHandler {
+public class IDBasedFileAccessDocumentLoader implements PublicationDataLoaderService {
+    
+    private final IDBasedFileAccessFactory fileFactory;
 
-	public AuditFileHandler(String path) throws IOException, SecurityException {
-		super(path);
-	}
+
+    /**
+     * Initializes a new {@link IDBasedFileAccessDocumentLoader}.
+     */
+    public IDBasedFileAccessDocumentLoader(IDBasedFileAccessFactory fileFactory) {
+        super();
+        this.fileFactory = fileFactory;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
+     */
+    @Override
+    public Collection<? extends Object> load(Publication publication) throws OXException {
+        ArrayList<InputStream> documents = new ArrayList<InputStream>();
+        Session session = new PublicationSession(publication);
+        IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
+        InputStream is = fileAccess.getDocument(publication.getEntityId(), String.valueOf(1));
+        documents.add(is);
+        return documents;
+    }
 
 }

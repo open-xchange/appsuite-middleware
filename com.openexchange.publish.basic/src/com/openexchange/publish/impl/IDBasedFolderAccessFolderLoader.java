@@ -47,49 +47,61 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.publish.impl;
 
-import com.openexchange.caching.CacheService;
-import com.openexchange.contact.ContactService;
+import java.util.ArrayList;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.file.storage.infostore.FileMetadata;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.impl.CachingLoader;
-import com.openexchange.publish.impl.CompositeLoaderService;
-import com.openexchange.publish.impl.ContactFolderLoader;
-import com.openexchange.publish.impl.IDBasedFileAccessDocumentLoader;
-import com.openexchange.publish.impl.IDBasedFolderAccessFolderLoader;
+import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+
 
 /**
- * {@link LoaderActivator}
+ * {@link IDBasedFolderAccessFolderLoader}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class LoaderActivator extends HousekeepingActivator {
+public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderService {
+    
+    private final IDBasedFolderAccessFactory folderFactory;
+    
+    private final IDBasedFileAccessFactory fileFactory;
 
-    @Override
-    public void startBundle() throws Exception {
-        final CompositeLoaderService compositeLoader = new CompositeLoaderService();
-        final IDBasedFileAccessFactory fileFactory = getService(IDBasedFileAccessFactory.class);
-        final IDBasedFolderAccessFactory folderFactory = getService(IDBasedFolderAccessFactory.class);
-        compositeLoader.registerLoader("infostore/object", new IDBasedFileAccessDocumentLoader(fileFactory));
-        compositeLoader.registerLoader("infostore", new IDBasedFolderAccessFolderLoader(folderFactory, fileFactory));
-
-        final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactService.class));
-        compositeLoader.registerLoader("contacts", contactLoader);
-
-        registerService(PublicationDataLoaderService.class, new CachingLoader(this, compositeLoader), null);
+    /**
+     * Initializes a new {@link IDBasedFolderAccessFolderLoader}.
+     */
+    public IDBasedFolderAccessFolderLoader(IDBasedFolderAccessFactory folderFactory, IDBasedFileAccessFactory fileFactory) {
+        super();
+        this.folderFactory = folderFactory;
+        this.fileFactory = fileFactory;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
+     */
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class, CacheService.class, ContactService.class };
+    public Collection<? extends Object> load(Publication publication) throws OXException {
+        ArrayList<DocumentMetadata> folderItems = new ArrayList<DocumentMetadata>();
+        Session session = new PublicationSession(publication);
+        IDBasedFolderAccess folderAccess = folderFactory.createAccess(session);
+        IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
+        SearchIterator<File> filesInFolder = fileAccess.getDocuments(folderAccess.getFolder(publication.getEntityId()).getId()).results();
+        while (filesInFolder.hasNext()) {
+            final File file = filesInFolder.next();
+            DocumentMetadata metaData = FileMetadata.getMetadata(file);
+            folderItems.add(metaData);
+        }
+        return folderItems;
     }
 
 }

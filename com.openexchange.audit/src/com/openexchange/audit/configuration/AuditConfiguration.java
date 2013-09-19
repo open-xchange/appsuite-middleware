@@ -116,5 +116,13 @@ public class AuditConfiguration {
         }
 		return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.append", "true"));
 	}
+	
+	public static boolean getFileAccessLogging() throws OXException {
+	    final ConfigurationService configservice = Services.optService(ConfigurationService.class);
+        if (null == configservice) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+        }
+        return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "false"));
+	}
 
 }

@@ -319,5 +319,242 @@ public class FileMetadata implements DocumentMetadata {
         }
         return isWhitespace;
     }
+    
+    public static DocumentMetadata getMetadata(final File file) {
+        DocumentMetadata metaData = new DocumentMetadata() {
+            
+            @Override
+            public void setVersionComment(String string) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setVersion(int version) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setURL(String url) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setTitle(String title) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setNumberOfVersions(int numberOfVersions) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setModifiedBy(int lastEditor) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setLockedUntil(Date lockedUntil) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setLastModified(Date now) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setIsCurrentVersion(boolean bool) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setId(int id) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setFolderId(long folderId) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setFilestoreLocation(String string) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setFileSize(long length) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setFileName(String fileName) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setFileMIMEType(String type) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setFileMD5Sum(String sum) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setDescription(String description) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setCreationDate(Date creationDate) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setCreatedBy(int cretor) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setColorLabel(int color) {
+                // nothing to do
+            }
+            
+            @Override
+            public void setCategories(String categories) {
+                // nothing to do
+            }
+            
+            @Override
+            public boolean isCurrentVersion() {
+                return file.isCurrentVersion();
+            }
+            
+            @Override
+            public String getVersionComment() {
+                return file.getVersionComment();
+            }
+            
+            @Override
+            public int getVersion() {
+                return Integer.parseInt(file.getVersion());
+            }
+            
+            @Override
+            public String getURL() {
+                return file.getURL();
+            }
+            
+            @Override
+            public String getTitle() {
+                return file.getTitle();
+            }
+            
+            @Override
+            public long getSequenceNumber() {
+                return file.getSequenceNumber();
+            }
+            
+            @Override
+            public Set<String> getPropertyNames() {
+                return file.getPropertyNames();
+            }
+            
+            @Override
+            public String getProperty(String key) {
+                return file.getProperty(key);
+            }
+            
+            @Override
+            public int getNumberOfVersions() {
+                return file.getNumberOfVersions();
+            }
+            
+            @Override
+            public int getModifiedBy() {
+                return file.getModifiedBy();
+            }
+            
+            @Override
+            public Date getLockedUntil() {
+                return file.getLockedUntil();
+            }
+            
+            @Override
+            public Date getLastModified() {
+                return file.getLastModified();
+            }
+            
+            @Override
+            public int getId() {
+                return Integer.parseInt(file.getId());
+            }
+            
+            @Override
+            public long getFolderId() {
+                return Long.parseLong(file.getFolderId());
+            }
+            
+            @Override
+            public String getFilestoreLocation() {
+                // TODO
+                return null;
+            }
+            
+            @Override
+            public long getFileSize() {
+                return file.getFileSize();
+            }
+            
+            @Override
+            public String getFileName() {
+                return file.getFileName();
+            }
+            
+            @Override
+            public String getFileMIMEType() {
+                return file.getFileMIMEType();
+            }
+            
+            @Override
+            public String getFileMD5Sum() {
+                return file.getFileMD5Sum();
+            }
+            
+            @Override
+            public String getDescription() {
+                return file.getDescription();
+            }
+            
+            @Override
+            public Date getCreationDate() {
+                return file.getCreated();
+            }
+            
+            @Override
+            public int getCreatedBy() {
+                return file.getCreatedBy();
+            }
+            
+            @Override
+            public String getContent() {
+                return file.getContent();
+            }
+            
+            @Override
+            public int getColorLabel() {
+                return file.getColorLabel();
+            }
+            
+            @Override
+            public String getCategories() {
+                return file.getCategories();
+            }
+        };
+        return metaData;
+    }
 
 }

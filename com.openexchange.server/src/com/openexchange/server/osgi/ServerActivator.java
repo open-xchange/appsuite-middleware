@@ -133,6 +133,7 @@ import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
+import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -650,6 +651,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Register Infostore
         registerService(InfostoreFacade.class, Infostore.FACADE);
+        registerService(EventFiringInfostoreFacade.class, Infostore.EVENT_FIRING_FACADE);
         registerService(InfostoreSearchEngine.class, Infostore.SEARCH_ENGINE);
 
         // Register AttachmentBase

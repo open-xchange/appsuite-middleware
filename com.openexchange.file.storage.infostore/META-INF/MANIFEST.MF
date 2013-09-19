@@ -34,3 +34,4 @@ Import-Package: com.openexchange.api2,
  com.openexchange.tx,
  org.osgi.framework
 Bundle-Activator: com.openexchange.file.storage.infostore.osgi.InfostoreFileStorageActivator
+Export-Package: com.openexchange.file.storage.infostore

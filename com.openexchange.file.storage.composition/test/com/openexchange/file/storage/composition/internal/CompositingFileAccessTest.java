@@ -171,6 +171,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     @Test
     public void testGetDocument() throws OXException {
+        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.toUniqueID(), "12");
         fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), "12");
 
         getDocument(fileId.toUniqueID(), "12");

@@ -97,6 +97,8 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -255,17 +257,36 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public InputStream getDocument(final String id, final String version) throws OXException {
+        Props properties = LogProperties.getLogProperties();
+        if (null != properties) {
+            Object serverName = properties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
+            if (null == serverName) {
+                serverName = properties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
+            }
+            if (null != serverName) {
+                session.setLocalIp(serverName.toString());
+            }
+        }
         final FileID fileID = new FileID(id);
         final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        // Post event
+        {
+            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
+            if (null != metaData) {
+                postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), metaData.getFolderId(), fileID.toUniqueID(), metaData.getFileName()));
+            }
+        }
+        // Proceed...
         if (null == registry) {
-            return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+            return fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
         }
         final Collection<FileStreamHandler> handlers = registry.getHandlers();
         if (null == handlers || handlers.isEmpty()) {
-            return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+            return fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
         }
         // Handle stream
-        InputStream inputStream = getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+        InputStream inputStream = fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
         for (final FileStreamHandler streamHandler : handlers) {
             inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
         }

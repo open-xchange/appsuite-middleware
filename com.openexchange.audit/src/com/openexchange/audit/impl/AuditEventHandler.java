@@ -49,21 +49,16 @@
 
 package com.openexchange.audit.impl;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
-import com.openexchange.audit.logging.AuditFileHandler;
-import com.openexchange.audit.logging.AuditFilter;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -78,6 +73,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -86,7 +82,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AuditEventHandler implements EventHandler {
 
-    private static final Logger LOG = Logger.getLogger(AuditEventHandler.class.getName());
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuditEventHandler.class);
 
     private static final AuditEventHandler instance = new AuditEventHandler();
 
@@ -107,30 +103,26 @@ public class AuditEventHandler implements EventHandler {
              * avoid that the messages will also be written to the master logfile.
              */
             if (AuditConfiguration.getEnabled() == true) {
-                try {
-                    final Logger rootLogger = Logger.getLogger("");
-                    final Handler[] handlers = rootLogger.getHandlers();
-                    for (final Handler handler : handlers) {
-                        handler.setFilter(new AuditFilter());
-                    }
-                    LOG.addHandler(new AuditFileHandler());
-                } catch (final SecurityException e) {
-                    LOG.log(Level.SEVERE, e.getMessage(), e);
-                } catch (final IOException e) {
-                    LOG.log(Level.SEVERE, e.getMessage(), e);
-                }
+//                try {
+//                    String pathToLogfile = AuditConfiguration.getLogfileLocation();
+//                    LOG.addHandler(new AuditFileHandler(pathToLogfile));
+//                } catch (final SecurityException e) {
+//                    LOG.log(Level.SEVERE, e.getMessage(), e);
+//                } catch (final IOException e) {
+//                    LOG.log(Level.SEVERE, e.getMessage(), e);
+//                }
                 LOG.info("Using own Logging instance.");
             } else {
                 LOG.info("Using global Logging instance.");
             }
         } catch (final OXException e) {
-            LOG.log(Level.SEVERE, e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
     @Override
     public void handleEvent(final Event event) {
-        if (!LOG.isLoggable(Level.INFO)) {
+        if (!LOG.isInfoEnabled()) {
             // Not allowed to log
             return;
         }
@@ -138,6 +130,13 @@ public class AuditEventHandler implements EventHandler {
             final StringBuilder log = new StringBuilder(2048);
             final String topic = event.getTopic();
             if (topic.startsWith("com/openexchange/groupware/infostore/")) {
+                if (topic.equals(FileStorageEventConstants.ACCESS_TOPIC)) {
+                    if (AuditConfiguration.getFileAccessLogging()) {
+                        log.append("EVENT TYPE: ACCESS; ");
+                    } else {
+                        return;
+                    }
+                }
                 if (topic.equals(FileStorageEventConstants.CREATE_TOPIC)) {
                     log.append("EVENT TYPE: INSERT; ");
                 } else if (topic.equals(FileStorageEventConstants.UPDATE_TOPIC)) {
@@ -145,13 +144,18 @@ public class AuditEventHandler implements EventHandler {
                 } else if (topic.equals(FileStorageEventConstants.DELETE_TOPIC)) {
                     log.append("EVENT TYPE: DELETE; ");
                 }
-
                 synchronized (logDateFormat) {
                     log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
                 }
                 log.append("OBJECT TYPE: FILE; ");
                 final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-                appendUserInformation(session.getUserId(), session.getContextId(), log);
+                if (session instanceof PublicationSession) {
+                    log.append("PUBLISH: ");
+                    log.append(session.getLocalIp());
+                    log.append("; ");
+                } else {
+                    appendUserInformation(session.getUserId(), session.getContextId(), log);
+                }
                 log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
                 log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
                 {
@@ -179,7 +183,7 @@ public class AuditEventHandler implements EventHandler {
                     final int contextId = commonEvent.getContextId();
                     final Context context = ContextStorage.getInstance().getContext(contextId);
 
-                    ModuleSwitch:switch (commonEvent.getModule()) {
+                    ModuleSwitch: switch (commonEvent.getModule()) {
                     default:
                         break ModuleSwitch;
                     case Types.APPOINTMENT:
@@ -219,7 +223,9 @@ public class AuditEventHandler implements EventHandler {
                             contact = (Contact) commonEvent.getActionObj();
                         }
                         if (CommonEvent.DELETE != commonEvent.getAction() && (null == contact || false == contact.containsDisplayName() || false == contact.containsCreatedBy() || false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
-                            contact = Contacts.getContactById(((Contact) commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
+                            contact = Contacts.getContactById(
+                                ((Contact) commonEvent.getActionObj()).getObjectID(),
+                                commonEvent.getSession());
                         }
 
                         if (commonEvent.getAction() == CommonEvent.INSERT) {
@@ -270,8 +276,8 @@ public class AuditEventHandler implements EventHandler {
                         log.append("OBJECT ID: ").append(task.getObjectID()).append("; ");
                         log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(task.getCreatedBy(), context).getDisplayName()).append(
                             "; ");
-                        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName()).append(
-                            "; ");
+                        log.append("MODIFIED BY: ").append(
+                            UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName()).append("; ");
                         log.append("TITLE: ").append(task.getTitle()).append("; ");
                         log.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(';');
 
@@ -294,8 +300,8 @@ public class AuditEventHandler implements EventHandler {
                         appendUserInformation(commonEvent.getUserId(), contextId, log);
                         log.append("CONTEXT ID: ").append(contextId).append("; ");
                         log.append("OBJECT ID: ").append(document.getId()).append("; ");
-                        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(document.getCreatedBy(), context).getDisplayName()).append(
-                            "; ");
+                        log.append("CREATED BY: ").append(
+                            UserStorage.getInstance().getUser(document.getCreatedBy(), context).getDisplayName()).append("; ");
                         log.append("MODIFIED BY: ").append(
                             UserStorage.getInstance().getUser(document.getModifiedBy(), context).getDisplayName()).append("; ");
                         log.append("TITLE: ").append(document.getTitle()).append("; ");
@@ -309,16 +315,16 @@ public class AuditEventHandler implements EventHandler {
 
             final String infoMsg = log.toString();
             if (!isEmpty(infoMsg)) {
-                LOG.log(Level.INFO, infoMsg);
+                LOG.info(infoMsg);
             }
         } catch (final Exception e) {
-            LOG.log(Level.SEVERE, e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
     /**
      * This method will return the full folder path as String.
-     *
+     * 
      * @param folderId
      * @param sessionObj
      * @return String fullFolderPath

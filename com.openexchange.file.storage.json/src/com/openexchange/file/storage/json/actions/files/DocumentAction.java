@@ -107,6 +107,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             public InputStream newStream() throws OXException, IOException {
                 final InputStream inputStream = fileAccess.getDocument(id, version);
                 if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                    //Download file
                     return inputStream;
                 }
                 return new BufferedInputStream(inputStream);

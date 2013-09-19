@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -66,19 +65,19 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
 
 /**
  * {@link InfostoreFileServlet}
@@ -93,7 +92,6 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String CONTEXTID = "contextId";
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
-    private static final String INFOSTORE_VERSION = "infoVersion";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFileServlet.class));
 
@@ -103,11 +101,11 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     public static void setInfostorePublisher(final OXMFPublicationService service) {
         infostorePublisher = service;
     }
-
-    private static volatile InfostoreFacade infostore;
-
-    public static void setInfostore(final InfostoreFacade service) {
-        infostore = service;
+    
+    private static volatile IDBasedFileAccessFactory fileFactory;
+    
+    public static void setFileFactory(final IDBasedFileAccessFactory service) {
+        fileFactory = service;
     }
 
     private static volatile FileResponseRenderer fileResponseRenderer;
@@ -117,7 +115,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     }
 
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Map<String, String> args = getPublicationArguments(req);
         boolean startedWriting = false;
         try {
@@ -138,11 +136,9 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
             final int infoId = Integer.parseInt(args.get(INFOSTORE_ID));
 
-            ServerSession syntheticSession = ServerSessionAdapter.valueOf(publication.getUserId(), publication.getContext().getContextId());
+            final DocumentMetadata metadata = loadMetadata(publication, infoId);
 
-            final DocumentMetadata metadata = loadMetadata(infoId, syntheticSession);
-
-            final InputStream fileData = loadFile(infoId, syntheticSession);
+            final InputStream fileData = loadFile(publication, infoId);
 
             startedWriting = true;
             writeFile(new PublicationSession(publication), metadata, fileData, req, resp);
@@ -157,9 +153,11 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     }
 
-    private DocumentMetadata loadMetadata(final int infoId, ServerSession session) throws OXException {
+    private DocumentMetadata loadMetadata(final Publication publication, final int infoId) throws OXException {
         try {
-            return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, session);
+            Session session = new PublicationSession(publication);
+            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
+            return FileMetadata.getMetadata(fileAccess.getFileMetadata(String.valueOf(infoId), String.valueOf(1)));
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
                 throw PublicationErrorMessage.NotExist.create(e, new Object[0]);
@@ -175,13 +173,10 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     	fileResponseRenderer.write(request, result, req, resp);
     }
 
-    private static final boolean isIE(final HttpServletRequest req) {
-        final String userAgent = req.getHeader("User-Agent");
-        return null != userAgent && userAgent.contains("MSIE");
-    }
-
-    private InputStream loadFile(final int infoId, ServerSession session) throws OXException {
-        return infostore.getDocument(infoId, InfostoreFacade.CURRENT_VERSION, session);
+    private InputStream loadFile(final Publication publication, final int infoId) throws OXException {
+        Session session = new PublicationSession(publication);
+        IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
+        return fileAccess.getDocument(String.valueOf(infoId), String.valueOf(1));
     }
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {

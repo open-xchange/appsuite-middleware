@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,18 +47,15 @@
  *
  */
 
-package com.openexchange.audit.logging;
-
-import java.io.IOException;
-import java.util.logging.FileHandler;
+package com.openexchange.groupware.infostore;
 
 /**
- * @author Benjamin Otterbach
+ * {@link EventFiringInfostoreFacade}
+ *
+ * {@link InfostoreFacade} that fires file storage events.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AuditFileHandler extends FileHandler {
-
-	public AuditFileHandler(String path) throws IOException, SecurityException {
-		super(path);
-	}
+public interface EventFiringInfostoreFacade extends InfostoreFacade {
 
 }
