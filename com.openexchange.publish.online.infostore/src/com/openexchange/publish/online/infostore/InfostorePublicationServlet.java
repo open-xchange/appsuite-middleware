@@ -150,7 +150,6 @@ public class InfostorePublicationServlet extends HttpServlet {
     private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final String[] path = SPLIT.split(req.getRequestURI(), 0);
-            final String requestIp = req.getRemoteAddr();
             final Context ctx = getContext(path);
             final String secret = getSecret(path);
             final Publication publication = getPublication(secret, ctx);
