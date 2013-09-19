@@ -1,6 +1,7 @@
 * 2013-09-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 28932: Deal with possible 'NumberFormatException' gracefully
+ - Fix for bug 28935: Added null guard when checking which sender source to choose
 
 * 2013-09-18 - thorben.betten@open-xchange.com
 

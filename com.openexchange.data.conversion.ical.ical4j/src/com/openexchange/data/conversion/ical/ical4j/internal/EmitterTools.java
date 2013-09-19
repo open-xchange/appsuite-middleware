@@ -203,7 +203,7 @@ public final class EmitterTools {
         }
         return retval;
     }
-    
+
     public static String getFrom(int userId, Context ctx) throws OXException {
         UserSettingMail userSettingMail;
         Connection con = Database.get(ctx, true);
@@ -212,10 +212,8 @@ public final class EmitterTools {
         } finally {
             Database.back(ctx, true, con);
         }
-        
-        String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
-        
-        if (senderSource.equalsIgnoreCase("defaultSenderAddress")) {
+
+        if (null != userSettingMail && "defaultSenderAddress".equalsIgnoreCase(NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail"))) {
             String defaultSendAddress = userSettingMail.getSendAddr();
             if (!Strings.isEmpty(defaultSendAddress)) {
                 return defaultSendAddress;
