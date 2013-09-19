@@ -2,6 +2,7 @@
 
  - Fix for bug 28932: Deal with possible 'NumberFormatException' gracefully
  - Fix for bug 28935: Added null guard when checking which sender source to choose
+ - Fix for bug 28938: Enqueue/synchronize concurrently incoming requests
 
 * 2013-09-18 - thorben.betten@open-xchange.com
 
