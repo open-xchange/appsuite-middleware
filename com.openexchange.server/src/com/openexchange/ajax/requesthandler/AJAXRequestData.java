@@ -1115,7 +1115,7 @@ public class AJAXRequestData {
      * Constructs a URL to this server, injecting the host name and optionally the JVM route.
      *
      * <pre>
-     *  &lt;protocol&gt; + "http://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
+     *  "http(s)://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
      * </pre>
      *
      * @param path The path on the server. If <code>null</code> no path is inserted
