@@ -97,6 +97,8 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -255,6 +257,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public InputStream getDocument(final String id, final String version) throws OXException {
+        Props properties = LogProperties.getLogProperties();
+        if (null != properties) {
+            Object serverName = properties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
+            if (null == serverName) {
+                serverName = properties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
+            }
+            if (null != serverName) {
+                session.setLocalIp(serverName.toString());
+            }
+        }
         final FileID fileID = new FileID(id);
         final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
