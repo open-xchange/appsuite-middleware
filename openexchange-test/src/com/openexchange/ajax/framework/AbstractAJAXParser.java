@@ -84,7 +84,12 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
         this.failOnError = failOnError;
     }
 
-    protected Response getResponse(final String body) throws JSONException {
+    protected Response getResponse(String body) throws JSONException {
+        if (body.startsWith("<!DOCTYPE HTML")) {
+            final int pos1 = body.indexOf('{');
+            final int pos2 = body.indexOf("})</script>");
+            body = body.substring(pos1, pos2 + 1);
+        }
         final Response response = ResponseParser.parse(body);
         if (failOnError && response.hasError()) {
             final OXException exception = response.getException();

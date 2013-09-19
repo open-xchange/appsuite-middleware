@@ -282,7 +282,7 @@ public class DriveServiceImpl implements DriveService {
                      * ... then download the server version afterwards
                      */
                     File serverFile = ServerFileVersion.valueOf(originalVersion, path, driveSession).getFile();
-                    syncResult.addActionForClient(new DownloadFileAction(null, originalVersion, null, path, serverFile));
+                    syncResult.addActionForClient(new DownloadFileAction(driveSession, null, originalVersion, null, path, serverFile));
                 } else {
                     /*
                      * upload of new file, mark as error with quarantine flag
@@ -309,9 +309,9 @@ public class DriveServiceImpl implements DriveService {
             /*
              * check if created file still equals uploaded one
              */
-            FileVersion createdVersion = new ServerFileVersion(createdFile, fileChecksum);
+            ServerFileVersion createdVersion = new ServerFileVersion(createdFile, fileChecksum);
             if (newVersion.getName().equals(createdVersion.getName())) {
-                syncResult.addActionForClient(new AcknowledgeFileAction(originalVersion, createdVersion, null, path, createdFile));
+                syncResult.addActionForClient(new AcknowledgeFileAction(driveSession, originalVersion, createdVersion, null, path));
             } else {
                 syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion, null, path));
             }

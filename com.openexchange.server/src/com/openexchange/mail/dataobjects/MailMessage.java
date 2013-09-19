@@ -1005,6 +1005,7 @@ public abstract class MailMessage extends MailPart {
                 }
             }
         }
+        final Date sentDate = this.sentDate;
         return sentDate == null ? null : new Date(sentDate.getTime());
     }
 
@@ -1040,6 +1041,7 @@ public abstract class MailMessage extends MailPart {
      * @return The received date
      */
     public Date getReceivedDate() {
+        final Date receivedDate = this.receivedDate;
         return receivedDate == null ? null : new Date(receivedDate.getTime());
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,17 @@
  *
  */
 
-package com.openexchange.ajax.mail;
-
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.openexchange.folderstorage;
 
 /**
- * {@link MailTestSuite}
+ * {@link CachingAwareFolder} - Extends {@link Folder} by {@link #prepareForCaching()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailTestSuite extends TestSuite {
+public interface CachingAwareFolder extends Folder {
 
-    private MailTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite();
-        mailSuite.addTestSuite(AllTest.class);
-        mailSuite.addTestSuite(AttachmentTest.class);
-        mailSuite.addTestSuite(ClearTest.class);
-        mailSuite.addTestSuite(CopyMailTest.class);
-        mailSuite.addTestSuite(CountMailTest.class);
-        mailSuite.addTestSuite(ForwardMailTest.class);
-        mailSuite.addTestSuite(GetTest.class);
-        mailSuite.addTestSuite(ListTest.class);
-        mailSuite.addTestSuite(MailSearchTest.class);
-        mailSuite.addTestSuite(MoveMailTest.class);
-        mailSuite.addTestSuite(NewMailTest.class);
-        mailSuite.addTestSuite(MultipleAttachmentTest.class);
-        mailSuite.addTestSuite(ReplyAllTest.class);
-        mailSuite.addTestSuite(ReplyTest.class);
-        mailSuite.addTestSuite(SearchTest.class);
-        mailSuite.addTestSuite(SendTest.class);
-        mailSuite.addTestSuite(ThreadSortTest.class);
-        mailSuite.addTestSuite(UpdateMailTest.class);
-        mailSuite.addTestSuite(ViewTest.class);
-        mailSuite.addTestSuite(AllAliasTest.class);
-        mailSuite.addTestSuite(ListAliasTest.class);
-
-        /*mailSuite.addTestSuite(AlwaysTest.class);*/
-
-        mailSuite.addTestSuite(Bug12409Test.class);
-        mailSuite.addTestSuite(Bug14234Test.class);
-        mailSuite.addTestSuite(Bug15608Test.class);
-        mailSuite.addTestSuite(Bug15777Test.class);
-        mailSuite.addTestSuite(Bug15901Test.class);
-        mailSuite.addTestSuite(Bug16087Test.class);
-        mailSuite.addTestSuite(Bug16141Test.class);
-        mailSuite.addTestSuite(Bug19696Test.class);
-        mailSuite.addTest(new JUnit4TestAdapter(Bug27708Test.class));
-        mailSuite.addTest(new JUnit4TestAdapter(Bug28913Test.class));
-
-        mailSuite.addTestSuite(MaxMailSizeTest.class);
-        mailSuite.addTestSuite(MSISDNAddressTest.class);
-        return mailSuite;
-    }
+    /**
+     * Prepares this folder for being put into cache.
+     */
+    void prepareForCaching();
 }

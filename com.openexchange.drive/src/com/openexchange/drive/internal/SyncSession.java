@@ -57,6 +57,7 @@ import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.ChecksumStore;
@@ -112,6 +113,10 @@ public class SyncSession {
      */
     public ServerSession getServerSession() {
         return session.getServerSession();
+    }
+
+    public List<DriveFileField> getFields() {
+        return session.getFields();
     }
 
     /**

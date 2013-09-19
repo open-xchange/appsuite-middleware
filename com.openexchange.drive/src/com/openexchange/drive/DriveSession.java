@@ -49,6 +49,7 @@
 
 package com.openexchange.drive;
 
+import java.util.List;
 import java.util.Locale;
 import com.openexchange.tools.session.ServerSession;
 
@@ -93,5 +94,13 @@ public interface DriveSession {
      * @return The locale
      */
     Locale getLocale();
+
+    /**
+     * Gets the file metadata fields relevant for the client.
+     *
+     * @return The file metadata fields, or <code>null</code> if not specified
+     */
+    List<DriveFileField> getFields();
+
 }
 

@@ -55,6 +55,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -82,6 +83,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.session.ServerSession;
 
@@ -567,20 +569,22 @@ public final class FolderWriter {
      * @return The JSON array carrying requested fields of given folder
      * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeSingle2Array(final int[] fields, final UserizedFolder folder, final Map<String, Object> parameters) throws OXException {
+    public static JSONArray writeSingle2Array(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final Map<String, Object> parameters) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
+        final List<FolderFieldWriter> ffws = new ArrayList<FolderFieldWriter>(cols.length);
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
-        for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
+        for (int i = 0; i < cols.length; i++) {
+            final int col = cols[i];
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(col);
             if (null == ffw) {
-                ffw = getPropertyByField(cols[i], fieldSet);
+                ffw = getPropertyByField(col, fieldSet);
             }
-            ffws[i] = ffw;
+            ffws.add(ffw);
         }
         try {
-            final JSONArray jsonArray = new JSONArray(ffws.length);
+            final JSONArray jsonArray = new JSONArray(cols.length);
             final JSONValuePutter jsonPutter = new JSONArrayPutter(jsonArray, parameters);
+            jsonPutter.putParameter("__session", serverSession);
             for (final FolderFieldWriter ffw : ffws) {
                 ffw.writeField(jsonPutter, folder);
             }
@@ -602,10 +606,12 @@ public final class FolderWriter {
      */
     public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList, final Map<String, Object> parameters) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
+        final List<FolderFieldWriter> ffws = new ArrayList<FolderFieldWriter>(cols.length);
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
-        for (int i = 0; i < ffws.length; i++) {
+        boolean totalOrUnread = false;
+        for (int i = 0; i < cols.length; i++) {
             final int curCol = cols[i];
+            totalOrUnread |= (FolderField.TOTAL.getColumn() == curCol || FolderField.UNREAD.getColumn() == curCol);
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
             if (null == ffw) {
                 if (additionalFolderFieldList.knows(curCol)) {
@@ -616,14 +622,19 @@ public final class FolderWriter {
                     ffw = getPropertyByField(curCol, fieldSet);
                 }
             }
-            ffws[i] = ffw;
+            ffws.add(ffw);
+        }
+        if (totalOrUnread) {
+            // Load counters
+            loadCounters(folders, serverSession);
         }
         try {
             final JSONArray jsonArray = new JSONArray(folders.length);
             final JSONArrayPutter jsonPutter = new JSONArrayPutter(parameters);
+            jsonPutter.putParameter("__session", serverSession);
             for (final UserizedFolder folder : folders) {
                 try {
-                    final JSONArray folderArray = new JSONArray(ffws.length);
+                    final JSONArray folderArray = new JSONArray(cols.length);
                     jsonPutter.setJSONArray(folderArray);
                     for (final FolderFieldWriter ffw : ffws) {
                         ffw.writeField(jsonPutter, folder);
@@ -648,23 +659,31 @@ public final class FolderWriter {
      * @return The JSON array carrying JSON arrays of given folders
      * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final Collection<UserizedFolder> folders, final Map<String, Object> parameters) throws OXException {
+    public static JSONArray writeMultiple2Array(final int[] fields, final Collection<UserizedFolder> folders, final ServerSession serverSession, final Map<String, Object> parameters) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
+        final List<FolderFieldWriter> ffws = new ArrayList<FolderFieldWriter>(cols.length);
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
-        for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
+        boolean totalOrUnread = false;
+        for (int i = 0; i < cols.length; i++) {
+            final int col = cols[i];
+            totalOrUnread |= (FolderField.TOTAL.getColumn() == col || FolderField.UNREAD.getColumn() == col);
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(col);
             if (null == ffw) {
-                ffw = getPropertyByField(cols[i], fieldSet);
+                ffw = getPropertyByField(col, fieldSet);
             }
-            ffws[i] = ffw;
+            ffws.add(ffw);
+        }
+        if (totalOrUnread) {
+            // Load counters
+            loadCounters(folders, serverSession);
         }
         try {
             final JSONArray jsonArray = new JSONArray(folders.size());
             final JSONArrayPutter jsonPutter = new JSONArrayPutter(parameters);
+            jsonPutter.putParameter("__session", serverSession);
             for (final UserizedFolder folder : folders) {
                 try {
-                    final JSONArray folderArray = new JSONArray(ffws.length);
+                    final JSONArray folderArray = new JSONArray(cols.length);
                     jsonPutter.setJSONArray(folderArray);
                     for (final FolderFieldWriter ffw : ffws) {
                         ffw.writeField(jsonPutter, folder);
@@ -690,9 +709,9 @@ public final class FolderWriter {
      */
     public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList, final Map<String, Object> parameters) throws OXException {
         final int[] cols = null == fields ? getAllFields(additionalFolderFieldList) : fields;
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
+        final List<FolderFieldWriter> ffws = new ArrayList<FolderFieldWriter>(cols.length);
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
-        for (int i = 0; i < ffws.length; i++) {
+        for (int i = 0; i < cols.length; i++) {
             final int curCol = cols[i];
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
             if (null == ffw) {
@@ -703,11 +722,12 @@ public final class FolderWriter {
                     ffw = getPropertyByField(curCol, fieldSet);
                 }
             }
-            ffws[i] = ffw;
+            ffws.add(ffw);
         }
         try {
-            final JSONObject jsonObject = new JSONObject(ffws.length);
+            final JSONObject jsonObject = new JSONObject(cols.length);
             final JSONValuePutter jsonPutter = new JSONObjectPutter(jsonObject, parameters);
+            jsonPutter.putParameter("__session", serverSession);
             for (final FolderFieldWriter ffw : ffws) {
                 ffw.writeField(jsonPutter, folder);
             }
@@ -734,23 +754,30 @@ public final class FolderWriter {
      * @return The JSON array carrying JSON objects of given folders
      * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Object(final int[] fields, final UserizedFolder[] folders, final Map<String, Object> parameters) throws OXException {
+    public static JSONArray writeMultiple2Object(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final Map<String, Object> parameters) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
+        final List<FolderFieldWriter> ffws = new ArrayList<FolderFieldWriter>(cols.length);
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
-        for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
+        boolean totalOrUnread = false;
+        for (int i = 0; i < cols.length; i++) {
+            final int col = cols[i];
+            totalOrUnread |= (FolderField.TOTAL.getColumn() == col || FolderField.UNREAD.getColumn() == col);
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(col);
             if (null == ffw) {
-                ffw = getPropertyByField(cols[i], fieldSet);
+                ffw = getPropertyByField(col, fieldSet);
             }
-            ffws[i] = ffw;
+            ffws.add(ffw);
+        }
+        if (totalOrUnread) {
+            loadCounters(folders, serverSession);
         }
         try {
             final JSONArray jsonArray = new JSONArray(folders.length);
             final JSONObjectPutter jsonPutter = new JSONObjectPutter(parameters);
+            jsonPutter.putParameter("__session", serverSession);
             for (final UserizedFolder folder : folders) {
                 try {
-                    final JSONObject folderObject = new JSONObject(ffws.length);
+                    final JSONObject folderObject = new JSONObject(cols.length);
                     jsonPutter.setJSONObject(folderObject);
                     for (final FolderFieldWriter ffw : ffws) {
                         ffw.writeField(jsonPutter, folder);
@@ -769,6 +796,50 @@ public final class FolderWriter {
     /*
      * Helper methods
      */
+
+    private static void loadCounters(final UserizedFolder[] folders, final ServerSession serverSession) {
+        long st = System.currentTimeMillis();
+
+        final Map<String, Object> props = new HashMap<String, Object>(8);
+        props.put("__session", serverSession);
+        try {
+            for (final UserizedFolder folder : folders) {
+                if (null != folder) {
+                    folder.setProps(props);
+                    folder.getTotal();
+                    folder.getUnread();
+                }
+            }
+        } finally {
+            for (final Object value : props.values()) {
+                if (value instanceof Closeable) {
+                    Streams.close((Closeable) value);
+                }
+            }
+            props.clear();
+        }
+    }
+
+    private static void loadCounters(final Collection<UserizedFolder> folders, final ServerSession serverSession) {
+        final Map<String, Object> props = new HashMap<String, Object>(8);
+        props.put("__session", serverSession);
+        try {
+            for (final UserizedFolder folder : folders) {
+                if (null != folder) {
+                    folder.setProps(props);
+                    folder.getTotal();
+                    folder.getUnread();
+                }
+            }
+        } finally {
+            for (final Object value : props.values()) {
+                if (value instanceof Closeable) {
+                    Streams.close((Closeable) value);
+                }
+            }
+            props.clear();
+        }
+    }
 
     private static final class PropertyFieldWriter implements FolderFieldWriter {
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Map;
+
 
 /**
  * {@link FolderExtension} - A {@link Folder folder} extension.
@@ -60,8 +62,9 @@ public interface FolderExtension extends Folder {
     /**
      * Gets the number of total and unread elements held in this folder.
      *
+     * @param props The associated properties
      * @return The total and unread numbers or <code>null</code>
      */
-    int[] getTotalAndUnread();
+    int[] getTotalAndUnread(Map<String, Object> props);
 
 }

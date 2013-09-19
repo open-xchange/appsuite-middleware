@@ -63,6 +63,7 @@ public enum DriveFileField {
     CREATED,
     DIRECT_LINK,
     PREVIEW_LINK,
+    THUMBNAIL_LINK,
     DIRECT_LINK_FRAGMENTS,
 
 }

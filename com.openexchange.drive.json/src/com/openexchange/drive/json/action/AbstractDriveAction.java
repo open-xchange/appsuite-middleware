@@ -49,16 +49,19 @@
 
 package com.openexchange.drive.json.action;
 
+import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.json.json.DriveFieldMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -115,6 +118,23 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         String diagnostics = requestData.getParameter("diagnostics");
         if (false == Strings.isEmpty(diagnostics)) {
             driveSession.setDiagnostics(Boolean.valueOf(diagnostics));
+        }
+        /*
+         * extract columns parameter to fields if present
+         */
+        String columnsValue = requestData.getParameter("columns");
+        if (false == Strings.isEmpty(columnsValue)) {
+            String[] splitted = Strings.splitByComma(columnsValue);
+            int[] columnIDs = new int[splitted.length];
+            for (int i = 0; i < splitted.length; i++) {
+                try {
+                    columnIDs[i] = Integer.parseInt(splitted[i]);
+                } catch (NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("columns");
+                }
+            }
+            DriveFileField[] fields = DriveFieldMapper.getInstance().getFields(columnIDs);
+            driveSession.setFields(Arrays.asList(DriveFieldMapper.getInstance().getFields(columnIDs)));
         }
         /*
          * perform

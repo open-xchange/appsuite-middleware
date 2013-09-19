@@ -113,11 +113,11 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                         String path = (String)uploadAction.getParameters().get(DriveAction.PARAMETER_PATH);
                         optimizedActionsForClient.remove(uploadAction);
                         DownloadFileAction copyAction = new DownloadFileAction(
-                            uploadAction.getVersion(), uploadAction.getNewVersion(), null, path, -1L, null, null, null);
+                            session, uploadAction.getVersion(), uploadAction.getNewVersion(), null, path, null);
                         copyAction.getParameters().put("sourceVersion", knownFileVersion);
                         optimizedActionsForServer.add(copyAction);
                         optimizedActionsForClient.add(
-                            new AcknowledgeFileAction(uploadAction.getVersion(), uploadAction.getNewVersion(), null, path));
+                            new AcknowledgeFileAction(session, uploadAction.getVersion(), uploadAction.getNewVersion(), null, path, null));
                     }
                 }
             }

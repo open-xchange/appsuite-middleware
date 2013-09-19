@@ -96,6 +96,17 @@ public interface DriveSubscriptionStore {
     boolean updateToken(Session session, String serviceID, String oldToken, String newToken) throws OXException;
 
     /**
+     * Updates the registration ID for a device.
+     *
+     * @param contextID The context ID
+     * @param serviceID The service ID
+     * @param oldToken The old registration token
+     * @param newToken The new registration token
+     * @return <code>true</code> if a subscription was updated, <code>false</code>, otherwise
+     */
+    boolean updateToken(int contextID, String serviceID, String oldToken, String newToken) throws OXException;
+
+    /**
      * Gets the subscriptions of all devices registered to one of the supplied root folder IDs.
      *
      * @param contextID The context ID
@@ -116,6 +127,17 @@ public interface DriveSubscriptionStore {
      * @throws OXException
      */
     int removeSubscriptions(String serviceID, String token, long timestamp) throws OXException;
+
+    /**
+     * Removes all stored subscriptions for the device with the supplied registration token.
+     *
+     * @param contextID The context ID
+     * @param serviceID The service ID
+     * @param token The device token to remove the subscriptions for
+     * @return The number of removed subscriptions
+     * @throws OXException
+     */
+    int removeSubscriptions(int contextID, String serviceID, String token) throws OXException;
 
     /**
      * Removes the supplied subscription from the store.

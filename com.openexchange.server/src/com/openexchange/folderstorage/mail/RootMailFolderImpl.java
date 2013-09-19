@@ -49,14 +49,12 @@
 
 package com.openexchange.folderstorage.mail;
 
-import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.hash.TIntIntHashMap;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
-import com.openexchange.folderstorage.CachingAwareFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExtension;
 import com.openexchange.folderstorage.FolderStorage;
@@ -75,16 +73,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageEnhanced;
-import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -93,19 +81,17 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
 
 /**
- * {@link MailFolderImpl} - A mail folder.
+ * {@link RootMailFolderImpl} - A mail folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderImpl extends AbstractFolder implements FolderExtension, CachingAwareFolder {
+public final class RootMailFolderImpl extends AbstractFolder implements FolderExtension {
 
     private static final long serialVersionUID = 6445442372690458946L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class));
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RootMailFolderImpl.class));
 
     private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
@@ -153,19 +139,14 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private final MailFolderType mailFolderType;
     private final boolean cacheable;
     private final String fullName;
-    private final int accountId;
-    private final int userId;
-    private final int contextId;
     private String localizedName;
-    private volatile int mTotal;
-    private volatile int mUnread;
 
     private static final int BIT_USER_FLAG = (1 << 29);
 
     private static final int BIT_RENAME_FLAG = (1 << 30);
 
     /**
-     * Initializes a new {@link MailFolderImpl} from given mail folder.
+     * Initializes a new {@link RootMailFolderImpl} from given mail folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor.
      *
@@ -178,12 +159,12 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      * @param translate Whether to translate folders according to user's locale
      * @throws OXException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
+    public RootMailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
         this(mailFolder, accountId, mailConfig, params.getUser(), params.getContext(), fullnameProvider);
     }
 
     /**
-     * Initializes a new {@link MailFolderImpl} from given mail folder.
+     * Initializes a new {@link RootMailFolderImpl} from given mail folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor.
      *
@@ -195,13 +176,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      * @param fullnameProvider The (optional) full name provider
      * @throws OXException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
+    public RootMailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
         super();
-        mTotal = -1;
-        mUnread = -1;
-        this.accountId = accountId;
-        userId = user.getId();
-        contextId = context.getContextId();
         fullName = mailFolder.getFullname();
         id = MailFolderUtility.prepareFullname(accountId, fullName);
         final String folderName = mailFolder.getName();
@@ -316,7 +292,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                             localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
                         }
                     } catch (final OXException e) {
-                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class)).error(e.getMessage(), e);
+                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RootMailFolderImpl.class)).error(e.getMessage(), e);
                         mailFolderType = MailFolderType.NONE;
                     }
                 }
@@ -444,173 +420,18 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      */
 
     @Override
-    public void prepareForCaching() {
-        mTotal = -1;
-        mUnread = -1;
-    }
-
-    private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
-
-    @Override
     public int getUnread() {
-        int unread = mUnread;
-        if (unread >= 0) {
-            return unread;
-        }
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = MailAccess.getInstance(userId, contextId, accountId);
-            mailAccess.connect(false);
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                unread = ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(ensureFullName(fullName));
-                mUnread = unread;
-                return unread;
-            }
-            unread = mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
-            mUnread = unread;
-            return unread;
-        } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date unread counter.", e);
-            }
-            return super.getUnread();
-        } catch (final Exception e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date unread counter.", e);
-            }
-            return super.getUnread();
-        } finally {
-            if (null != mailAccess) {
-                mailAccess.close(true);
-            }
-        }
+        return 0;
     }
 
     @Override
     public int getTotal() {
-        int total = mTotal;
-        if (total >= 0) {
-            return total;
-        }
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = MailAccess.getInstance(userId, contextId, accountId);
-            mailAccess.connect(false);
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                total = ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(ensureFullName(fullName));
-                mTotal = total;
-                return total;
-            }
-            total = mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
-            mTotal = total;
-            return total;
-        } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total counter.", e);
-            }
-            return super.getTotal();
-        } catch (final Exception e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total counter.", e);
-            }
-            return super.getTotal();
-        } finally {
-            if (null != mailAccess) {
-                mailAccess.close(true);
-            }
-        }
+        return 0;
     }
 
     @Override
     public int[] getTotalAndUnread(final Map<String, Object> props) {
-        {
-            final int total = mTotal;
-            final int unread = mUnread;
-            if (total >= 0 && unread >= 0) {
-                return new int[] { total, unread };
-            }
-        }
-        try {
-            return loadTotalAndUnread(getMailAccess(props));
-        } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total/unread counter.", e);
-            }
-            return null;
-        } catch (final RuntimeException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total/unread counter.", e);
-            }
-            return null;
-        }
-    }
-
-    /**
-     * Loads the total and unread count using given mail access.
-     *
-     * @param mailAccess The mail access
-     * @return The total and unread count
-     */
-    public int[] loadTotalAndUnread(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
-        try {
-            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-                final int[] totalAndUnread = ((IMailFolderStorageEnhanced2) folderStorage).getTotalAndUnreadCounter(ensureFullName(fullName));
-                mTotal = totalAndUnread[0];
-                mUnread = totalAndUnread[1];
-                return totalAndUnread;
-            }
-            final String ensuredFullName = ensureFullName(fullName);
-            int unread, total;
-            if (folderStorage instanceof IMailFolderStorageEnhanced) {
-                final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
-                unread = storageEnhanced.getUnreadCounter(ensuredFullName);
-                total = storageEnhanced.getTotalCounter(ensuredFullName);
-            } else {
-                unread = mailAccess.getMessageStorage().getUnreadMessages(ensuredFullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
-                total = mailAccess.getMessageStorage().searchMessages(ensuredFullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
-            }
-            mTotal = total;
-            mUnread = unread;
-            return new int[] { total, unread };
-        } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total/unread counter.", e);
-            }
-            return null;
-        } catch (final RuntimeException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total/unread counter.", e);
-            }
-            return null;
-        }
-    }
-
-    private static String ensureFullName(final String fullName) {
-        return prepareMailFolderParam(fullName).getFullname();
-    }
-
-    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final Map<String, Object> props) throws OXException {
-        // Check props
-        if (null == props) {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(userId, contextId, accountId);
-            mailAccess.connect(false);
-            return mailAccess;
-        }
-
-        // Not null
-        final String key = new StringAllocator().append("__ma").append('@').append(accountId).append('@').append(userId).append('@').append(contextId).toString();
-        @SuppressWarnings("unchecked")
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>) props.get(key);
-        if (null != mailAccess) {
-            return mailAccess;
-        }
-        mailAccess = MailAccess.getInstance((Session) props.get("__session"), accountId);
-        mailAccess.connect(false);
-        props.put(key, mailAccess);
-        return mailAccess;
+        return new int[] { 0, 0 };
     }
 
     @Override

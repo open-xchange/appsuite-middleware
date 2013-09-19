@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
+import com.openexchange.folderstorage.CachingAwareFolder;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -499,6 +500,9 @@ public final class FolderMap {
                                 if (loaded.isGlobalID()) {
                                     folderStorage.putFolder(loaded, treeId, params, false);
                                 } else {
+                                    if (loaded instanceof CachingAwareFolder) {
+                                        ((CachingAwareFolder) loaded).prepareForCaching();
+                                    }
                                     folderMap.put(treeId, loaded, session);
                                 }
                             }
@@ -550,6 +554,9 @@ public final class FolderMap {
                         if (loaded.isGlobalID()) {
                             folderStorage.putFolder(loaded, treeId, params, false);
                         } else {
+                            if (loaded instanceof CachingAwareFolder) {
+                                ((CachingAwareFolder) loaded).prepareForCaching();
+                            }
                             folderMap.put(treeId, loaded, session);
                         }
                     }

@@ -78,6 +78,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
+import com.openexchange.folderstorage.CachingAwareFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -579,6 +580,9 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Put to cache
          */
+        if (folder instanceof CachingAwareFolder) {
+            ((CachingAwareFolder) folder).prepareForCaching();
+        }
         if (folder.isGlobalID()) {
             globalCache.putInGroup(newCacheKey(folder.getID(), treeId), Integer.toString(storageParameters.getContextId()), folder, invalidate);
         } else {
@@ -1081,8 +1085,8 @@ public final class CacheFolderStorage implements FolderStorage {
                 /*
                  * Put to cache and return a cloned version
                  */
-                putFolder(folder, treeId, storageParameters, false);
-                return (Folder) folder.clone();
+                putFolder((Folder) folder.clone(), treeId, storageParameters, false);
+                return folder;
             }
             /*
              * Return as-is since not cached
@@ -1199,8 +1203,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     /*
                      * Put to cache and create a cloned version
                      */
-                    putFolder(folder, treeId, storageParameters, false);
-                    folder = (Folder) folder.clone();
+                    putFolder((Folder) folder.clone(), treeId, storageParameters, false);
                 }
                 ret[index] = folder;
             }

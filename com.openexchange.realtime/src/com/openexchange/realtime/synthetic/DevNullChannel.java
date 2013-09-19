@@ -47,62 +47,50 @@
  *
  */
 
-package com.openexchange.ajax.mail;
+package com.openexchange.realtime.synthetic;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
+
 
 /**
- * {@link MailTestSuite}
+ * {@link DevNullChannel}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class MailTestSuite extends TestSuite {
+public class DevNullChannel implements Channel {
 
-    private MailTestSuite() {
-        super();
+    @Override
+    public String getProtocol() {
+        return "devnull";
+    }
+    @Override
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient) throws OXException {
+        return true;
     }
 
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite();
-        mailSuite.addTestSuite(AllTest.class);
-        mailSuite.addTestSuite(AttachmentTest.class);
-        mailSuite.addTestSuite(ClearTest.class);
-        mailSuite.addTestSuite(CopyMailTest.class);
-        mailSuite.addTestSuite(CountMailTest.class);
-        mailSuite.addTestSuite(ForwardMailTest.class);
-        mailSuite.addTestSuite(GetTest.class);
-        mailSuite.addTestSuite(ListTest.class);
-        mailSuite.addTestSuite(MailSearchTest.class);
-        mailSuite.addTestSuite(MoveMailTest.class);
-        mailSuite.addTestSuite(NewMailTest.class);
-        mailSuite.addTestSuite(MultipleAttachmentTest.class);
-        mailSuite.addTestSuite(ReplyAllTest.class);
-        mailSuite.addTestSuite(ReplyTest.class);
-        mailSuite.addTestSuite(SearchTest.class);
-        mailSuite.addTestSuite(SendTest.class);
-        mailSuite.addTestSuite(ThreadSortTest.class);
-        mailSuite.addTestSuite(UpdateMailTest.class);
-        mailSuite.addTestSuite(ViewTest.class);
-        mailSuite.addTestSuite(AllAliasTest.class);
-        mailSuite.addTestSuite(ListAliasTest.class);
-
-        /*mailSuite.addTestSuite(AlwaysTest.class);*/
-
-        mailSuite.addTestSuite(Bug12409Test.class);
-        mailSuite.addTestSuite(Bug14234Test.class);
-        mailSuite.addTestSuite(Bug15608Test.class);
-        mailSuite.addTestSuite(Bug15777Test.class);
-        mailSuite.addTestSuite(Bug15901Test.class);
-        mailSuite.addTestSuite(Bug16087Test.class);
-        mailSuite.addTestSuite(Bug16141Test.class);
-        mailSuite.addTestSuite(Bug19696Test.class);
-        mailSuite.addTest(new JUnit4TestAdapter(Bug27708Test.class));
-        mailSuite.addTest(new JUnit4TestAdapter(Bug28913Test.class));
-
-        mailSuite.addTestSuite(MaxMailSizeTest.class);
-        mailSuite.addTestSuite(MSISDNAddressTest.class);
-        return mailSuite;
+    @Override
+    public int getPriority() {
+        return 0;
     }
+
+    @Override
+    public boolean isConnected(ID id) throws OXException {
+        return true;
+    }
+
+    @Override
+    public boolean conjure(ID id) throws OXException {
+        return true;
+    }
+
+    @Override
+    public void send(Stanza stanza, ID recipient) throws OXException {
+        // Discard
+    }
+
 }

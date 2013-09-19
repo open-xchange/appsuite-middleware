@@ -51,6 +51,7 @@ package com.openexchange.drive.json.json;
 
 import java.util.Date;
 import java.util.EnumMap;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.exception.OXException;
@@ -67,13 +68,14 @@ import com.openexchange.groupware.tools.mappings.json.StringMapping;
 public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, DriveFileField> {
 
     static final int COLUMN_CHECKSUM = 708;
-    static final int COLUMN_FILENAME = 702;
-    static final int COLUMN_MIMETYPE = 703;
+    static final int COLUMN_NAME = 702;
+    static final int COLUMN_CONTENT_TYPE = 703;
     static final int COLUMN_MODIFIED = 5;
     static final int COLUMN_CREATED = 4;
     static final int COLUMN_DIRECT_LINK = 752;
     static final int COLUMN_PREVIEW_LINK = 750;
     static final int COLUMN_DIRECT_LINK_FRAGMENTS = 751;
+    static final int COLUMN_THUMBNAIL_LINK = 753;
 
     private static final DriveFieldMapper INSTANCE = new DriveFieldMapper();
 
@@ -101,7 +103,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
         EnumMap<DriveFileField, JsonMapping<? extends Object, DriveFileMetadata>> mappings = new
             EnumMap<DriveFileField, JsonMapping<? extends Object, DriveFileMetadata>>(DriveFileField.class);
 
-        mappings.put(DriveFileField.CHECKSUM, new StringMapping<DriveFileMetadata>("file_md5sum", COLUMN_CHECKSUM) {
+        mappings.put(DriveFileField.CHECKSUM, new StringMapping<DriveFileMetadata>("checksum", COLUMN_CHECKSUM) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -124,7 +126,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.FILENAME, new StringMapping<DriveFileMetadata>("filename", COLUMN_FILENAME) {
+        mappings.put(DriveFileField.FILENAME, new StringMapping<DriveFileMetadata>("name", COLUMN_NAME) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -147,7 +149,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.MIMETYPE, new StringMapping<DriveFileMetadata>("mimeType", COLUMN_MIMETYPE) {
+        mappings.put(DriveFileField.MIMETYPE, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_CONTENT_TYPE, COLUMN_CONTENT_TYPE) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -170,7 +172,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.MODIFIED, new DateMapping<DriveFileMetadata>("last_modified", COLUMN_MODIFIED) {
+        mappings.put(DriveFileField.MODIFIED, new DateMapping<DriveFileMetadata>(DriveAction.PARAMETER_MODIFIED, COLUMN_MODIFIED) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -193,7 +195,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.CREATED, new DateMapping<DriveFileMetadata>("creation_date", COLUMN_CREATED) {
+        mappings.put(DriveFileField.CREATED, new DateMapping<DriveFileMetadata>(DriveAction.PARAMETER_CREATED, COLUMN_CREATED) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -216,7 +218,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.DIRECT_LINK, new StringMapping<DriveFileMetadata>("directLink", COLUMN_DIRECT_LINK) {
+        mappings.put(DriveFileField.DIRECT_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_DIRECT_LINK, COLUMN_DIRECT_LINK) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -239,7 +241,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.DIRECT_LINK_FRAGMENTS, new StringMapping<DriveFileMetadata>("directLinkFragments", COLUMN_DIRECT_LINK_FRAGMENTS) {
+        mappings.put(DriveFileField.DIRECT_LINK_FRAGMENTS, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_DIRECT_LINK_FRAGMENTS, COLUMN_DIRECT_LINK_FRAGMENTS) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -262,7 +264,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.PREVIEW_LINK, new StringMapping<DriveFileMetadata>("previewLink", COLUMN_PREVIEW_LINK) {
+        mappings.put(DriveFileField.PREVIEW_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_PREVIEW_LINK, COLUMN_PREVIEW_LINK) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -282,6 +284,29 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             @Override
             public void remove(DriveFileMetadata object) {
                 object.setPreviewLink(null);
+            }
+        });
+
+        mappings.put(DriveFileField.THUMBNAIL_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_THUMBNAIL_LINK, COLUMN_THUMBNAIL_LINK) {
+
+            @Override
+            public boolean isSet(DriveFileMetadata object) {
+                return null != object.getThumbnailLink();
+            }
+
+            @Override
+            public void set(DriveFileMetadata object, String value) throws OXException {
+                object.setThumbnailLink(value);
+            }
+
+            @Override
+            public String get(DriveFileMetadata object) {
+                return object.getThumbnailLink();
+            }
+
+            @Override
+            public void remove(DriveFileMetadata object) {
+                object.setThumbnailLink(null);
             }
         });
 

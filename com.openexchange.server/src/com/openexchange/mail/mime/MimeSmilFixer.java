@@ -127,6 +127,12 @@ public final class MimeSmilFixer {
         final MimeMessage processed = process0(mimeMessage, contentType);
         final MailMessage processedMessage = MimeMessageConverter.convertMessage(processed, true);
         processedMessage.setMailId(message.getMailId());
+        if (message.containsReceivedDate()) {
+            processedMessage.setReceivedDate(message.getReceivedDate());
+        }
+        if (!processedMessage.containsSize() && message.containsSize()) {
+            processedMessage.setSize(message.getSize());
+        }
         if (message.containsAccountId()) {
             processedMessage.setAccountId(message.getAccountId());
         }
