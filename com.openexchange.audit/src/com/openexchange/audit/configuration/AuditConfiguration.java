@@ -122,7 +122,7 @@ public class AuditConfiguration {
         if (null == configservice) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
         }
-        return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true"));
+        return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "false"));
 	}
 
 }

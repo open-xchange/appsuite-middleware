@@ -140,6 +140,7 @@ public class AuditEventHandler implements EventHandler {
             final String topic = event.getTopic();
             if (topic.startsWith("com/openexchange/groupware/infostore/")) {
                 if (topic.equals(FileStorageEventConstants.ACCESS_TOPIC) && !AuditConfiguration.getFileAccessLogging()) {
+                    log.append("EVENT TYPE: ACCESS; ");
                     return;
                 }
                 if (topic.equals(FileStorageEventConstants.CREATE_TOPIC)) {
