@@ -179,7 +179,7 @@ public class DirectLinkGenerator {
         if (false == Strings.isEmpty(mimeType)) {
             // patterns borrowed from web interface
             if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$")) {
-                return getProperty("com.openexchange.drive.imageLinkAudioFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
+                return getProperty("com.openexchange.drive.imageLinkImageFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
                     "document&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]")
                     .replaceAll("\\[hostname\\]", getHostName())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
@@ -205,7 +205,7 @@ public class DirectLinkGenerator {
             if (mimeType.matches(
                 "(?i)^application\\/.*(ms-word|ms-excel|ms-powerpoint|msword|msexcel|mspowerpoint|openxmlformats|opendocument|pdf|rtf).*$")
                 && hasDocumentPreview()) {
-                return getProperty("com.openexchange.drive.imageLinkAudioFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
+                return getProperty("com.openexchange.drive.imageLinkDocumentFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
                     "document&format=preview_image&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
                     "&width=[width]&height=[height]")
                     .replaceAll("\\[hostname\\]", getHostName())
