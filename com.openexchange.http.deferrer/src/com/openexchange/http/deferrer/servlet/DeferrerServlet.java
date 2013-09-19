@@ -90,7 +90,7 @@ public class DeferrerServlet extends HttpServlet {
             concat = '&';
         }
 
-        final StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, false, false));
+        final StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, true, false));
         for (final Enumeration<?> parameterNames = req.getParameterNames(); parameterNames.hasMoreElements();) {
             final String name = (String) parameterNames.nextElement();
             if ("redirect".equals(name)) {

@@ -76,12 +76,22 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
             return url;
         }
         deferrerURL = deferrerURL.trim();
-        if (url.startsWith(deferrerURL)) {
+        if (seemsAlreadyDeferred(url, deferrerURL)) {
             // Already deferred
             return url;
         }
         // Return deferred URL
         return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + encodeUrl(url, false, false);
+    }
+
+    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL) {
+        final String str = "://";
+        final int pos1 = url.indexOf(str);
+        final int pos2 = deferrerURL.indexOf(str);
+        if (pos1 > 0 && pos2 > 0) {
+            return url.substring(pos1).startsWith(deferrerURL.substring(pos2));
+        }
+        return url.startsWith(deferrerURL);
     }
 
     /**
