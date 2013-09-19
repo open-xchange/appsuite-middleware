@@ -139,44 +139,46 @@ public class AuditEventHandler implements EventHandler {
             final StringBuilder log = new StringBuilder(2048);
             final String topic = event.getTopic();
             if (topic.startsWith("com/openexchange/groupware/infostore/")) {
-                Session eventSession = (Session) event.getProperty("session");
-                if (eventSession instanceof PublicationSession) {
-                    log.append(eventSession.getLocalIp());
+                if (topic.equals(FileStorageEventConstants.ACCESS_TOPIC) && !AuditConfiguration.getFileAccessLogging()) {
+                    return;
+                }
+                if (topic.equals(FileStorageEventConstants.CREATE_TOPIC)) {
+                    log.append("EVENT TYPE: INSERT; ");
+                } else if (topic.equals(FileStorageEventConstants.UPDATE_TOPIC)) {
+                    log.append("EVENT TYPE: UPDATE; ");
+                } else if (topic.equals(FileStorageEventConstants.DELETE_TOPIC)) {
+                    log.append("EVENT TYPE: DELETE; ");
+                }
+                synchronized (logDateFormat) {
+                    log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
+                }
+                log.append("OBJECT TYPE: FILE; ");
+                final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
+                if (session instanceof PublicationSession) {
+                    log.append("PUBLISH: ");
+                    log.append(session.getLocalIp());
+                    log.append("; ");
                 } else {
-                    if (topic.equals(FileStorageEventConstants.CREATE_TOPIC)) {
-                        log.append("EVENT TYPE: INSERT; ");
-                    } else if (topic.equals(FileStorageEventConstants.UPDATE_TOPIC)) {
-                        log.append("EVENT TYPE: UPDATE; ");
-                    } else if (topic.equals(FileStorageEventConstants.DELETE_TOPIC)) {
-                        log.append("EVENT TYPE: DELETE; ");
-                    } else if (topic.equals(FileStorageEventConstants.ACCESS_TOPIC)) {
-                        log.append("EVENT TYPE: ACCESS; ");
-                    }
-                    synchronized (logDateFormat) {
-                        log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
-                    }
-                    log.append("OBJECT TYPE: FILE; ");
-                    final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
                     appendUserInformation(session.getUserId(), session.getContextId(), log);
-                    log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
-                    log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
-                    {
-                        final Object fileName = event.getProperty(FileStorageEventConstants.FILE_NAME);
-                        if (null != fileName) {
-                            log.append("FILE NAME: ").append(fileName).append("; ");
-                        }
+                }
+                log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
+                log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
+                {
+                    final Object fileName = event.getProperty(FileStorageEventConstants.FILE_NAME);
+                    if (null != fileName) {
+                        log.append("FILE NAME: ").append(fileName).append("; ");
                     }
-                    log.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
-                    log.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
-                    {
-                        final String folderId = (String) event.getProperty(FileStorageEventConstants.FOLDER_ID);
-                        if (null != folderId) {
-                            try {
-                                final int iFolderId = Integer.parseInt(folderId);
-                                log.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
-                            } catch (NumberFormatException e) {
-                                log.append("FOLDER: ").append(folderId).append(';');
-                            }
+                }
+                log.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
+                log.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
+                {
+                    final String folderId = (String) event.getProperty(FileStorageEventConstants.FOLDER_ID);
+                    if (null != folderId) {
+                        try {
+                            final int iFolderId = Integer.parseInt(folderId);
+                            log.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
+                        } catch (NumberFormatException e) {
+                            log.append("FOLDER: ").append(folderId).append(';');
                         }
                     }
                 }
@@ -186,7 +188,7 @@ public class AuditEventHandler implements EventHandler {
                     final int contextId = commonEvent.getContextId();
                     final Context context = ContextStorage.getInstance().getContext(contextId);
 
-                    ModuleSwitch:switch (commonEvent.getModule()) {
+                    ModuleSwitch: switch (commonEvent.getModule()) {
                     default:
                         break ModuleSwitch;
                     case Types.APPOINTMENT:
@@ -226,7 +228,9 @@ public class AuditEventHandler implements EventHandler {
                             contact = (Contact) commonEvent.getActionObj();
                         }
                         if (CommonEvent.DELETE != commonEvent.getAction() && (null == contact || false == contact.containsDisplayName() || false == contact.containsCreatedBy() || false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
-                            contact = Contacts.getContactById(((Contact) commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
+                            contact = Contacts.getContactById(
+                                ((Contact) commonEvent.getActionObj()).getObjectID(),
+                                commonEvent.getSession());
                         }
 
                         if (commonEvent.getAction() == CommonEvent.INSERT) {
@@ -277,8 +281,8 @@ public class AuditEventHandler implements EventHandler {
                         log.append("OBJECT ID: ").append(task.getObjectID()).append("; ");
                         log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(task.getCreatedBy(), context).getDisplayName()).append(
                             "; ");
-                        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName()).append(
-                            "; ");
+                        log.append("MODIFIED BY: ").append(
+                            UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName()).append("; ");
                         log.append("TITLE: ").append(task.getTitle()).append("; ");
                         log.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(';');
 
@@ -301,8 +305,8 @@ public class AuditEventHandler implements EventHandler {
                         appendUserInformation(commonEvent.getUserId(), contextId, log);
                         log.append("CONTEXT ID: ").append(contextId).append("; ");
                         log.append("OBJECT ID: ").append(document.getId()).append("; ");
-                        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(document.getCreatedBy(), context).getDisplayName()).append(
-                            "; ");
+                        log.append("CREATED BY: ").append(
+                            UserStorage.getInstance().getUser(document.getCreatedBy(), context).getDisplayName()).append("; ");
                         log.append("MODIFIED BY: ").append(
                             UserStorage.getInstance().getUser(document.getModifiedBy(), context).getDisplayName()).append("; ");
                         log.append("TITLE: ").append(document.getTitle()).append("; ");
@@ -325,7 +329,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * This method will return the full folder path as String.
-     *
+     * 
      * @param folderId
      * @param sessionObj
      * @return String fullFolderPath
@@ -365,7 +369,7 @@ public class AuditEventHandler implements EventHandler {
         }
         log.append("; ");
     }
-
+    
     private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
@@ -376,6 +380,47 @@ public class AuditEventHandler implements EventHandler {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+    
+    private void logFileAccess(Event event, StringBuilder log) {
+        log.append("EVENT TYPE: ACCESS; ");
+        synchronized (logDateFormat) {
+            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
+        }
+        log.append("OBJECT TYPE: FILE; ");
+        final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
+        if (session instanceof PublicationSession) {
+            log.append("PUBLISH: ");
+            log.append(session.getLocalIp());
+            log.append("; ");
+        } else {
+            appendUserInformation(session.getUserId(), session.getContextId(), log);
+        }
+        log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
+        log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
+        {
+            final Object fileName = event.getProperty(FileStorageEventConstants.FILE_NAME);
+            if (null != fileName) {
+                log.append("FILE NAME: ").append(fileName).append("; ");
+            }
+        }
+        log.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
+        log.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
+        {
+            final String folderId = (String) event.getProperty(FileStorageEventConstants.FOLDER_ID);
+            if (null != folderId) {
+                try {
+                    final int iFolderId = Integer.parseInt(folderId);
+                    log.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
+                } catch (NumberFormatException e) {
+                    log.append("FOLDER: ").append(folderId).append(';');
+                }
+            }
+        }
+        final String infoMsg = log.toString();
+        if (!isEmpty(infoMsg)) {
+            LOG.log(Level.INFO, infoMsg);
+        }
     }
 
 }
