@@ -52,6 +52,7 @@ package com.openexchange.http.deferrer.impl;
 import static com.openexchange.ajax.AJAXServlet.encodeUrl;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.java.Strings;
 
 /**
  * {@link DefaultDeferringURLService}
@@ -70,10 +71,11 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
         if (url == null) {
             return null;
         }
-        final String deferrerURL = getDeferrerURL();
-        if (deferrerURL == null) {
+        String deferrerURL = getDeferrerURL();
+        if (Strings.isEmpty(deferrerURL)) {
             return url;
         }
+        deferrerURL = deferrerURL.trim();
         if (url.startsWith(deferrerURL)) {
             // Already deferred
             return url;
