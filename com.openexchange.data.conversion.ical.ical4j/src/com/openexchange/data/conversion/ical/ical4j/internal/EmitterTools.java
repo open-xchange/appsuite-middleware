@@ -220,7 +220,7 @@ public final class EmitterTools {
             }
         }
 
-        return UserStorage.getStorageUser(userId, ctx.getContextId()).getMail();
+        return UserStorage.getInstance().getUser(userId, ctx).getMail();
     }
 
     public static void setCalendarCollection(final CalendarCollectionService calendarCollection) {
