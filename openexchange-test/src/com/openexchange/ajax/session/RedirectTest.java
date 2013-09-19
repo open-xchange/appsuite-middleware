@@ -66,6 +66,7 @@ import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.groupware.Init;
+import com.openexchange.java.Strings;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -115,6 +116,15 @@ public class RedirectTest extends AbstractAJAXSession {
                 LoginTools.generateAuthId(),
                 RedirectTest.class.getName(),
                 "6.19.0"));
+
+            /*
+             * US 52869957 sets com.openexchange.ajax.login.randomToken=false by default. This test only has to run when the response
+             * contains a random
+             */
+            if (Strings.isEmpty(lResponse.getRandom())) {
+                return;
+            }
+
             // Activate Autologin
             myClient.execute(new StoreRequest(lResponse.getSessionId(), false));
 
