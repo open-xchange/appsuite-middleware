@@ -57,8 +57,8 @@ package com.openexchange.drive;
 public enum DriveFileField {
 
     CHECKSUM,
-    FILENAME,
-    MIMETYPE,
+    NAME,
+    CONTENT_TYPE,
     MODIFIED,
     CREATED,
     DIRECT_LINK,

@@ -126,7 +126,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.FILENAME, new StringMapping<DriveFileMetadata>("name", COLUMN_NAME) {
+        mappings.put(DriveFileField.NAME, new StringMapping<DriveFileMetadata>("name", COLUMN_NAME) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -149,7 +149,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.MIMETYPE, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_CONTENT_TYPE, COLUMN_CONTENT_TYPE) {
+        mappings.put(DriveFileField.CONTENT_TYPE, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_CONTENT_TYPE, COLUMN_CONTENT_TYPE) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {

@@ -49,9 +49,7 @@
 
 package com.openexchange.drive.actions;
 
-import java.util.List;
 import com.openexchange.drive.Action;
-import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
@@ -75,38 +73,6 @@ import com.openexchange.file.storage.File;
  */
 public class AcknowledgeFileAction extends AbstractFileAction {
 
-    /**
-     * Initializes a new {@link AcknowledgeFileAction}.
-     *
-     * @param file The original/previous file
-     * @param newFile The new file
-     * @param path The path to the parent directory
-     */
-//    public AcknowledgeFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
-//        this(file, newFile, comparison, path, null, null, null);
-//    }
-
-//    public AcknowledgeFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, String contentType, Long created, Long modified) {
-//        super(file, newFile, comparison);
-//        parameters.put(PARAMETER_PATH, path);
-//        if (null != contentType) {
-//            parameters.put(PARAMETER_CONTENT_TYPE, contentType);
-//        }
-//        if (null != created) {
-//            parameters.put(PARAMETER_CREATED, created);
-//        }
-//        if (null != modified) {
-//            parameters.put(PARAMETER_MODIFIED, modified);
-//        }
-//    }
-
-//    public AcknowledgeFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
-//        this(file, newFile, comparison, path, serverFile.getFileMIMEType(),
-//            null != serverFile.getCreated() ? serverFile.getCreated().getTime() : null,
-//            null != serverFile.getLastModified() ? serverFile.getLastModified().getTime() : null
-//        );
-//    }
-
     public AcknowledgeFileAction(SyncSession session, FileVersion file, ServerFileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
         this(session, file, newFile, comparison, path, null != newFile ? newFile.getFile() : null);
     }
@@ -114,38 +80,7 @@ public class AcknowledgeFileAction extends AbstractFileAction {
     public AcknowledgeFileAction(SyncSession session, FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
         super(file, newFile, comparison);
         parameters.put(PARAMETER_PATH, path);
-        if (null != serverFile) {
-            /*
-             * add default metadata
-             */
-            if (null != serverFile.getFileMIMEType()) {
-                parameters.put(PARAMETER_CONTENT_TYPE, serverFile.getFileMIMEType());
-            }
-            if (null != serverFile.getCreated()) {
-                parameters.put(PARAMETER_CREATED, Long.valueOf(serverFile.getCreated().getTime()));
-            }
-            if (null != serverFile.getLastModified()) {
-                parameters.put(PARAMETER_MODIFIED, Long.valueOf(serverFile.getLastModified().getTime()));
-            }
-            /*
-             * add additional metadata
-             */
-            List<DriveFileField> fields = session.getFields();
-            if (null != fields) {
-                if (fields.contains(DriveFileField.DIRECT_LINK)) {
-                    parameters.put(PARAMETER_DIRECT_LINK, session.getLinkGenerator().getFileLink(serverFile));
-                }
-                if (fields.contains(DriveFileField.DIRECT_LINK_FRAGMENTS)) {
-                    parameters.put(PARAMETER_DIRECT_LINK_FRAGMENTS, session.getLinkGenerator().getFileLinkFragments(serverFile));
-                }
-                if (fields.contains(DriveFileField.THUMBNAIL_LINK)) {
-                    parameters.put(PARAMETER_THUMBNAIL_LINK, session.getLinkGenerator().getFileThumbnailLink(serverFile));
-                }
-                if (fields.contains(DriveFileField.PREVIEW_LINK)) {
-                    parameters.put(PARAMETER_PREVIEW_LINK, session.getLinkGenerator().getFilePreviewLink(serverFile));
-                }
-            }
-        }
+        applyMetadataParameters(serverFile, session);
     }
 
     @Override
