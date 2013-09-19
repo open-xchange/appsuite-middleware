@@ -270,8 +270,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         final FileID fileID = new FileID(id);
         final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-        File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
-        postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), metaData.getFolderId(), fileID.toUniqueID(), metaData.getFileName()));
+        // Post event
+        {
+            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
+            if (null != metaData) {
+                postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), metaData.getFolderId(), fileID.toUniqueID(), metaData.getFileName()));
+            }
+        }
+        // Proceed...
         if (null == registry) {
             return fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
         }
