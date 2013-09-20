@@ -59,12 +59,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import junit.framework.JUnit4TestAdapter;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.exporters.CSVContactExporter;
 import com.openexchange.importexport.exporters.Exporter;
@@ -109,6 +111,11 @@ public class CSVContactExportTest extends AbstractContactTest {
 		return new JUnit4TestAdapter(CSVContactExportTest.class);
 	}
 
+    @Before
+    public void TearUp() throws OXException {
+        folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
+    }
+	
 	@Test public void canExport() throws OXException, IOException{
 		assertTrue(
 			"Can export?" ,

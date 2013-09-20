@@ -60,12 +60,14 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.TestCSVContactImporter;
 
@@ -93,6 +95,11 @@ public class CSVContactImportTest extends AbstractContactTest {
         super();
         imp = new TestCSVContactImporter();
         defaultFormat = Format.CSV;
+    }
+
+    @Before
+    public void TearUp() throws OXException {
+        folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
 
     @Test public void canImport() throws OXException{

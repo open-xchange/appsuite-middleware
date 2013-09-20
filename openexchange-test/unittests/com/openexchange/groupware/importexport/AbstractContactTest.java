@@ -58,6 +58,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import com.openexchange.api2.ContactSQLInterface;
@@ -340,6 +341,7 @@ public class AbstractContactTest {
     public static ServerSession sessObj;
     public static int userId;
     public static int contextId;
+    protected static Context ctx;
     public static int folderId;
     public String DISPLAY_NAME1 = ContactTestData.DISPLAY_NAME1;
     public String NAME1 = ContactTestData.NAME1;
@@ -389,17 +391,20 @@ public class AbstractContactTest {
     public static void initialize() throws Exception {
         Init.startServer();
         final UserStorage uStorage = UserStorage.getInstance();
-        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(AjaxInit.getAJAXProperty("contextName")));
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(AjaxInit.getAJAXProperty("contextName")));
         String loginname = AjaxInit.getAJAXProperty("login");
         String namePart = loginname.split("@")[0];
         userId = uStorage.getUserId(namePart, ctx);
         sessObj = ServerSessionFactory.createServerSession(userId, ctx, "csv-tests");
-        folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
 
+    @After
+    public void cleanUpAfterTest() throws OXException {
+        deleteTestFolder(folderId);
+    }
+    
     @AfterClass
     public static void debrief() throws Exception {
-        deleteTestFolder(folderId);
         Init.stopServer();
     }
 

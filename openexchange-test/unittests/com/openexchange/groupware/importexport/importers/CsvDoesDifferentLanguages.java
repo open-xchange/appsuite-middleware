@@ -56,10 +56,12 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractContactTest;
 import com.openexchange.groupware.importexport.CSVContactImportTest;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -77,6 +79,11 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
 
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(CsvDoesDifferentLanguages.class);
+    }
+
+    @Before
+    public void TearUp() throws OXException {
+        folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
 
     private final String dutch =

@@ -70,8 +70,6 @@ import com.openexchange.importexport.importers.TestCSVContactImporter;
 
 public class Bug8681forCSV extends AbstractContactTest {
 
-    private static Context ctx;
-
     // workaround for JUnit 3 runner
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(Bug8681forCSV.class);
