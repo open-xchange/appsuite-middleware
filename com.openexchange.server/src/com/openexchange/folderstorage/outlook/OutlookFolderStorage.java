@@ -105,7 +105,6 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
-import com.openexchange.folderstorage.database.DatabaseId;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
@@ -1473,8 +1472,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         if (defaultFileStorageAccess instanceof WarningsAware) {
                             addWarnings(storageParameters, (WarningsAware) defaultFileStorageAccess);
                         }
-                        FolderID folderID = new FolderID(fileStorageService.getId(), defaultAccount.getId(), personalFolder.getId());
-                        return new SortableId[] { new DatabaseId(folderID.toUniqueID(), 0, personalFolder.getName()) };
+                        return new SortableId[] { new OutlookId(new FolderID(fileStorageService.getId(), defaultAccount.getId(), personalFolder.getId()).toUniqueID(), 0, personalFolder.getName()) };
                         // TODO: Shared?
                     } finally {
                         defaultFileStorageAccess.close();
@@ -1501,7 +1499,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         final String accountId = defaultAccount.getId();
                         for (int i = 0; i < publicFolders.length; i++) {
                             final FileStorageFolder folder = publicFolders[i];
-                            ret[i] = new OutlookId(folder.getId(), i, folder.getName());
+                            ret[i] = new OutlookId(new FolderID(serviceId, accountId, folder.getId()).toUniqueID(), i, folder.getName());
                         }
                         if (defaultFileStorageAccess instanceof WarningsAware) {
                             addWarnings(storageParameters, (WarningsAware) defaultFileStorageAccess);
