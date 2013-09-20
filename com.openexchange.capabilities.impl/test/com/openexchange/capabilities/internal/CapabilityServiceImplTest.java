@@ -3,10 +3,13 @@ package com.openexchange.capabilities.internal;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.osgi.CapabilityCheckerRegistry;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
@@ -15,7 +18,6 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
 import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.test.mock.main.test.AbstractMockTest;
 
 /**
  * Unit tests for {@link CapabilityServiceImpl}
@@ -23,8 +25,9 @@ import com.openexchange.test.mock.main.test.AbstractMockTest;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
+@RunWith(PowerMockRunner.class)
 @PrepareForTest({ PermissionAvailabilityServiceRegistry.class })
-public class CapabilityServiceImplTest extends AbstractMockTest {
+public class CapabilityServiceImplTest {
 
     /**
      * Class under test
@@ -54,8 +57,8 @@ public class CapabilityServiceImplTest extends AbstractMockTest {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void setUp() throws Exception {
+    @Before
+    public void setUp() {
         this.serviceLookup = Mockito.mock(ServiceLookup.class);
         this.capabilityCheckerRegistry = Mockito.mock(CapabilityCheckerRegistry.class);
         this.registry = PowerMockito.mock(PermissionAvailabilityServiceRegistry.class);

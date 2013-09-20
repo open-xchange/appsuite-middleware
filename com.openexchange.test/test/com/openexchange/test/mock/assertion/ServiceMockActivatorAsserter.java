@@ -47,17 +47,13 @@
  *
  */
 
-package com.openexchange.test.mock.main;
+package com.openexchange.test.mock.assertion;
 
-import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.test.mock.main.util.InjectionFieldConstants;
-import com.openexchange.test.mock.main.util.MockUtils;
+import org.junit.Assert;
+import com.openexchange.test.mock.InjectionFieldConstants;
+import com.openexchange.test.mock.MockUtils;
 
 /**
  * {@link ServiceMockActivatorAsserter} activates mocking for the provided classes.
@@ -68,22 +64,18 @@ import com.openexchange.test.mock.main.util.MockUtils;
 public class ServiceMockActivatorAsserter {
 
     /**
-     * Logger for this class
-     */
-    protected final static Log LOG = com.openexchange.log.Log.loggerFor(ServiceMockActivatorAsserter.class);
-
-    /**
      * Verifies if all services associated with the bundle are registered
      * 
      * @param activator - the activator the services should be checked for
      * @param expectedNumberOfRegisteredTrackers - int with the number of expected registered services
      */
-    public static void verifyAllServicesRegistered(HousekeepingActivator activator, int expectedNumberOfRegisteredServices) {
-        Map<Object, ServiceRegistration<?>> serviceRegistrations = (Map<Object, ServiceRegistration<?>>) MockUtils.getValueFromField(
+    @SuppressWarnings("unchecked")
+    public static void verifyAllServicesRegistered(Object activator, int expectedNumberOfRegisteredServices) {
+        Map<Object, Object> serviceRegistrations = (Map<Object, Object>) MockUtils.getValueFromField(
             activator,
             InjectionFieldConstants.SERVICE_REGISTRATIONS);
 
-        assertEquals(
+        Assert.assertEquals(
             "Registered services do not match the number of expected ones",
             expectedNumberOfRegisteredServices,
             serviceRegistrations.size());
@@ -94,27 +86,13 @@ public class ServiceMockActivatorAsserter {
      * 
      * @param activator - the activator the services should be checked for
      */
-    public static void verifyAllServicesUnregistered(HousekeepingActivator activator) {
-        Map<Object, ServiceRegistration<?>> serviceRegistrations = (Map<Object, ServiceRegistration<?>>) MockUtils.getValueFromField(
+    @SuppressWarnings("unchecked")
+    public static void verifyAllServicesUnregistered(Object activator) {
+        Map<Object, Object> serviceRegistrations = (Map<Object, Object>) MockUtils.getValueFromField(
             activator,
             InjectionFieldConstants.SERVICE_REGISTRATIONS);
 
-        assertEquals("Not all services deregistered!", 0, serviceRegistrations.size());
-    }
-
-    /**
-     * Verifies if all trackers associated with the bundle are opened
-     * 
-     * @param activator - the activator the trackers should be checked for
-     */
-    public static void verifyAllServiceTrackersOpened(HousekeepingActivator activator) {
-        List<ServiceTracker<?, ?>> serviceTrackers = (List<ServiceTracker<?, ?>>) MockUtils.getValueFromField(
-            activator,
-            InjectionFieldConstants.SERVICE_TRACKERS);
-
-        for (ServiceTracker<?, ?> tracker : serviceTrackers) {
-            assertEquals(0, tracker.getTrackingCount());
-        }
+        Assert.assertEquals("Not all services deregistered!", 0, serviceRegistrations.size());
     }
 
     /**
@@ -123,12 +101,12 @@ public class ServiceMockActivatorAsserter {
      * @param activator - the activator the trackers should be checked for
      * @param expectedNumberOfRegisteredTrackers - int with the number of expected registered trackers
      */
-    public static void verifyAllServiceTrackersRegistered(HousekeepingActivator activator, int expectedNumberOfRegisteredTrackers) {
-        List<ServiceTracker<?, ?>> serviceTrackers = (List<ServiceTracker<?, ?>>) MockUtils.getValueFromField(
+    public static void verifyAllServiceTrackersRegistered(Object activator, int expectedNumberOfRegisteredTrackers) {
+        List<?> serviceTrackers = (List<?>) MockUtils.getValueFromField(
             activator,
             InjectionFieldConstants.SERVICE_TRACKERS);
 
-        assertEquals(
+        Assert.assertEquals(
             "Registered trackers do not match the number of expected ones",
             expectedNumberOfRegisteredTrackers,
             serviceTrackers.size());
@@ -139,11 +117,11 @@ public class ServiceMockActivatorAsserter {
      * 
      * @param activator - the activator the trackers should be checked for
      */
-    public static void verifyAllServiceTrackersClosed(HousekeepingActivator activator) {
-        List<ServiceTracker<?, ?>> serviceTrackers = (List<ServiceTracker<?, ?>>) MockUtils.getValueFromField(
+    public static void verifyAllServiceTrackersClosed(Object activator) {
+        List<?> serviceTrackers = (List<?>) MockUtils.getValueFromField(
             activator,
             InjectionFieldConstants.SERVICE_TRACKERS);
 
-        assertEquals("Not all trackers closed!", 0, serviceTrackers.size());
+        Assert.assertEquals("Not all trackers closed!", 0, serviceTrackers.size());
     }
 }

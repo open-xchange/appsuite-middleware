@@ -58,12 +58,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -71,10 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.test.mock.main.MockFactory;
-import com.openexchange.test.mock.main.test.AbstractMockTest;
-import com.openexchange.test.mock.main.util.MockDefaultValues;
-import com.openexchange.test.mock.main.util.MockUtils;
+import com.openexchange.test.mock.MockUtils;
 import com.openexchange.tokenlogin.DefaultTokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginSecret;
 
@@ -85,8 +86,9 @@ import com.openexchange.tokenlogin.TokenLoginSecret;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
+@RunWith(PowerMockRunner.class)
 @PrepareForTest({ Services.class })
-public class TokenLoginServiceImplTest extends AbstractMockTest {
+public class TokenLoginServiceImplTest {
 
     /**
      * Instance to test
@@ -139,14 +141,20 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
      */
     private final String secretFileContent = "#\n# Listing of known Web Application secrets followed by an optional semicolon-separated parameter list\n# e.g. 1254654698621354; accessPasword=true\n# Dummy entry\n" + SECRET_TOKEN + "; accessPassword=true\n";
 
-    @Override
-    public void setUp() throws Exception {
+    @Before
+    public void setUp() {
         PowerMockito.mockStatic(Services.class);
 
-        this.configService = MockFactory.getMock(ConfigurationService.class);
-        this.session = MockFactory.getMock(Session.class);
-        this.contextService = MockFactory.getMock(ContextService.class);
-        this.sessiondService = MockFactory.getMock(SessiondService.class);
+        // MEMBERS
+        this.configService = PowerMockito.mock(ConfigurationService.class);
+        this.session = PowerMockito.mock(Session.class);
+        this.contextService = PowerMockito.mock(ContextService.class);
+        this.sessiondService = PowerMockito.mock(SessiondService.class);
+
+        // BEHAVIOUR
+        PowerMockito.when(session.getContextId()).thenReturn(424242669);
+        PowerMockito.when(session.getSessionID()).thenReturn("8a07c5a2e4974a75ae70bd9a36198f03");
+
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -269,7 +277,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
 
     @Test
     public void testRedeemToken_EverythingFine_ReturnSession() throws OXException {
-        PowerMockito.when(this.sessiondService.getSession(MockDefaultValues.DEFAULT_SESSION_ID)).thenReturn(this.session);
+        PowerMockito.when(this.sessiondService.getSession(Matchers.anyString())).thenReturn(this.session);
         PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
@@ -413,7 +421,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
             16,
             Integer.MAX_VALUE,
             new IdleExpirationPolicy(this.maxIdleTime));
-        token2sessionId.put(this.token, MockDefaultValues.DEFAULT_SESSION_ID);
+        token2sessionId.put(this.token, "8a07c5a2e4974a75ae70bd9a36198f03");
 
         return token2sessionId;
     }
@@ -430,7 +438,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
             16,
             Integer.MAX_VALUE,
             new IdleExpirationPolicy(this.maxIdleTime));
-        sessionId2Token.put(MockDefaultValues.DEFAULT_SESSION_ID, this.token);
+        sessionId2Token.put("8a07c5a2e4974a75ae70bd9a36198f03", this.token);
 
         return sessionId2Token;
     }

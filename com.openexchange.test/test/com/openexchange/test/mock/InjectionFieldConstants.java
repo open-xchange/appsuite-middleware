@@ -47,65 +47,23 @@
  *
  */
 
-package com.openexchange.test.mock.objects.ajax.requesthandler.osgiservice;
+package com.openexchange.test.mock;
 
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.test.mock.main.MockFactory;
-import com.openexchange.test.mock.objects.AbstractMock;
 
 
 /**
- * Mock for {@link AJAXModuleActivator}
+ * Class that defines member names of {@link HousekeepingActivator} and other available activators for re-usage of injection.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class AJAXModuleActivatorMock<T extends AJAXModuleActivator> extends AbstractMock {
+public class InjectionFieldConstants {
 
-    /**
-     * The mock for {@link AJAXModuleActivator}
-     */
-    private T ajaxModuleActivator;
+    public static final String SERVICES = "services";
 
-    /**
-     * The mock for {@link ConfigurationService}
-     */
-    private ConfigurationService configurationService = null;
+    public static final String CONTEXT = "context";
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T get() {
-        return (T) this.ajaxModuleActivator;
-    }
+    public static final String SERVICE_REGISTRATIONS = "serviceRegistrations";
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void createMocks() throws Exception {
-        this.ajaxModuleActivator = (T) PowerMockito.mock(AJAXModuleActivator.class);
-
-        this.configurationService = MockFactory.getMock(ConfigurationService.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializeMembers() throws Exception {
-        // nothing to do yet
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void defineMockSpecificBehaviour() throws Exception {
-        Mockito.when(this.ajaxModuleActivator.getService(ConfigurationService.class)).thenReturn(this.configurationService);
-    }
+    public static final String SERVICE_TRACKERS = "serviceTrackers";
 }

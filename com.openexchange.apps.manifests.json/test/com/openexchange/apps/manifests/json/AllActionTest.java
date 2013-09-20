@@ -52,13 +52,15 @@ package com.openexchange.apps.manifests.json;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.mock.main.MockFactory;
-import com.openexchange.test.mock.main.test.AbstractMockTest;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -67,7 +69,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class AllActionTest extends AbstractMockTest {
+@RunWith(PowerMockRunner.class)
+public class AllActionTest {
 
     /**
      * Mock for the service lookup
@@ -87,11 +90,12 @@ public class AllActionTest extends AbstractMockTest {
     /**
      * {@inheritDoc}
      */
-    @Override
+    @Before
     public void setUp() throws Exception {
-        this.serviceLookup = MockFactory.getMock(AJAXModuleActivator.class);
-        this.serverSession = MockFactory.getMock(ServerSession.class);
-        this.capabilityService = MockFactory.getMock(CapabilityService.class);
+        // MEMBERS
+        this.serviceLookup = PowerMockito.mock(AJAXModuleActivator.class);
+        this.serverSession = PowerMockito.mock(ServerSession.class);
+        this.capabilityService = PowerMockito.mock(CapabilityService.class);
     }
 
     @Test

@@ -51,23 +51,26 @@ package com.openexchange.apps.manifests.json;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.test.mock.main.ContextAndServicesActivator;
-import com.openexchange.test.mock.main.MockFactory;
-import com.openexchange.test.mock.main.test.AbstractMockTest;
+import com.openexchange.test.mock.InjectionFieldConstants;
+import com.openexchange.test.mock.MockUtils;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -77,7 +80,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class ConfigActionTest extends AbstractMockTest {
+@RunWith(PowerMockRunner.class)
+public class ConfigActionTest {
 
     /**
      * Instance under test
@@ -103,15 +107,32 @@ public class ConfigActionTest extends AbstractMockTest {
 
     private AJAXRequestData ajaxRequestData = null;
 
+    private ConfigurationService configurationService;
+
+    private Properties properties;
+
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void setUp() throws Exception {
-        this.serverConfigServicesLookup = Mockito.mock(ServerConfigServicesLookup.class);
-        this.serviceLookup = MockFactory.getMock(AJAXModuleActivator.class);
-        this.serverSession = MockFactory.getMock(ServerSession.class);
-        this.ajaxRequestData = Mockito.mock(AJAXRequestData.class);
+    @Before
+    public void setUp() {
+        // MEMBERS
+        this.serverConfigServicesLookup = PowerMockito.mock(ServerConfigServicesLookup.class);
+        this.serviceLookup = PowerMockito.mock(AJAXModuleActivator.class);
+        this.serverSession = PowerMockito.mock(ServerSession.class);
+        this.ajaxRequestData = PowerMockito.mock(AJAXRequestData.class);
+        this.configurationService = PowerMockito.mock(ConfigurationService.class);
+        this.properties = PowerMockito.mock(Properties.class);
+
+        // SERVICES
+        Mockito.when(this.serviceLookup.getService(ConfigurationService.class)).thenReturn(this.configurationService);
+        PowerMockito.when(configurationService.getProperty(Matchers.anyString())).thenReturn("theStringPropertyValue");
+        PowerMockito.when(configurationService.getPropertiesInFolder(Matchers.anyString())).thenReturn(this.properties);
+        Map<String, Object> defaultMap = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("key", "value");
+        defaultMap.put("default", map);
+        PowerMockito.when(this.configurationService.getYaml(Matchers.anyString())).thenReturn(defaultMap);
     }
 
 
@@ -144,7 +165,8 @@ public class ConfigActionTest extends AbstractMockTest {
     @Test
     public void testGetFromConfiguration_ConfigurationFound_ReturnJSON() throws JSONException, OXException {
         this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
-        ContextAndServicesActivator.activateServiceLookupMocks(this.configAction);
+
+        MockUtils.injectValueIntoPrivateField(this.configAction, InjectionFieldConstants.SERVICES, serviceLookup);
 
         JSONObject jsonObject = this.configAction.getFromConfiguration(this.ajaxRequestData, this.serverSession);
 
@@ -154,8 +176,9 @@ public class ConfigActionTest extends AbstractMockTest {
     @Test
     public void testGetFromConfiguration_NoConfigurationFound_ReturnEmptyJSON() throws JSONException, OXException {
         this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
-        ServiceLookup lServiceLookup = ContextAndServicesActivator.activateServiceLookupMocks(this.configAction);
-        Mockito.when(lServiceLookup.getService(ConfigurationService.class).getYaml(Matchers.anyString())).thenReturn(null);
+
+        Mockito.when(serviceLookup.getService(ConfigurationService.class).getYaml(Matchers.anyString())).thenReturn(null);
+        MockUtils.injectValueIntoPrivateField(this.configAction, InjectionFieldConstants.SERVICES, serviceLookup);
 
         JSONObject jsonObject = this.configAction.getFromConfiguration(this.ajaxRequestData, this.serverSession);
 

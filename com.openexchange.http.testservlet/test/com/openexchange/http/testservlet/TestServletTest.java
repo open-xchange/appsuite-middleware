@@ -50,13 +50,14 @@
 package com.openexchange.http.testservlet;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.test.mock.main.MockFactory;
-import com.openexchange.test.mock.main.test.AbstractMockTest;
+import org.powermock.api.mockito.PowerMockito;
 
 /**
  * Unit tests for {@link TestServlet}
@@ -64,7 +65,7 @@ import com.openexchange.test.mock.main.test.AbstractMockTest;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class TestServletTest extends AbstractMockTest {
+public class TestServletTest {
 
     /**
      * The class to test
@@ -81,15 +82,31 @@ public class TestServletTest extends AbstractMockTest {
      */
     private HttpServletResponse httpServletResponse = null;
 
+    /**
+     * Header and attribute name parameters
+     */
+    private Enumeration<?> parameters;
 
     /**
      * @throws java.lang.Exception
      */
-    @Override
     @Before
     public void setUp() throws Exception {
-        this.httpServletRequest = MockFactory.getMock(HttpServletRequest.class);
-        this.httpServletResponse = MockFactory.getMock(HttpServletResponse.class);
+        // MEMBERS
+        this.httpServletRequest = PowerMockito.mock(HttpServletRequest.class);
+        this.httpServletResponse = PowerMockito.mock(HttpServletResponse.class);
+        this.parameters = PowerMockito.mock(Enumeration.class);
+
+        // MEMBER BEHAVIOUR
+        PowerMockito.when(this.parameters.hasMoreElements()).thenReturn(false);
+        PowerMockito.when(this.httpServletRequest.getHeaderNames()).thenReturn(this.parameters);
+        try {
+            ServletOutputStream servletOutputStream = PowerMockito.mock(ServletOutputStream.class);
+            PowerMockito.when(this.httpServletResponse.getOutputStream()).thenReturn(servletOutputStream);
+        } catch (IOException ioException) {
+            // will not happen
+        }
+
     }
 
     @Test(timeout = 500)

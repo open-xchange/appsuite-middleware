@@ -63,6 +63,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import com.openexchange.exception.OXException;
@@ -72,7 +73,6 @@ import com.openexchange.realtime.events.RTEventEmitterService;
 import com.openexchange.realtime.events.RTListener;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.MockingServiceLookup;
-import com.openexchange.test.mock.main.test.AbstractMockTest;
 
 
 /**
@@ -80,7 +80,7 @@ import com.openexchange.test.mock.main.test.AbstractMockTest;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RTEventManagerTest extends AbstractMockTest {
+public class RTEventManagerTest {
 
     private MockingServiceLookup services;
     private RTEventManager events = null;
@@ -114,7 +114,7 @@ public class RTEventManagerTest extends AbstractMockTest {
 
     };
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         services = new MockingServiceLookup();
         events = new RTEventManager(services);

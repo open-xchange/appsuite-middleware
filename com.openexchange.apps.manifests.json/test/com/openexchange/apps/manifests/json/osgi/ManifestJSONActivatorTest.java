@@ -19,10 +19,10 @@
  *    Please make sure that third-party modules and libraries are used
  *    according to their respective licenses.
  *
- *    Any modifications to this package must retain all copyright notices
+ *    Matchers.any modifications to this package must retain all copyright notices
  *    of the original copyright holder(s) for the original code used.
  *
- *    After any such modifications, the original and derivative code shall remain
+ *    After Matchers.any such modifications, the original and derivative code shall remain
  *    under the copyright of the copyright holder(s) and/or original author(s)per
  *    the Attribution and Assignment Agreement that can be located at
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
@@ -37,7 +37,7 @@
  *     by the Free Software Foundation.
  *
  *     This program is distributed in the hope that it will be useful, but
- *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     WITHOUT Matchers.any WARRANTY; without even the implied warranty of MERCHANTABILITY
  *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  *     for more details.
  *
@@ -49,10 +49,28 @@
 
 package com.openexchange.apps.manifests.json.osgi;
 
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import com.openexchange.test.mock.main.ContextAndServicesActivator;
-import com.openexchange.test.mock.main.ServiceMockActivatorAsserter;
-import com.openexchange.test.mock.main.test.AbstractMockTest;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.ServiceProvider;
+import com.openexchange.osgi.SimpleServiceProvider;
+import com.openexchange.test.mock.InjectionFieldConstants;
+import com.openexchange.test.mock.MockUtils;
+import com.openexchange.test.mock.assertion.ServiceMockActivatorAsserter;
 
 
 /**
@@ -61,7 +79,13 @@ import com.openexchange.test.mock.main.test.AbstractMockTest;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class ManifestJSONActivatorTest extends AbstractMockTest {
+@RunWith(PowerMockRunner.class)
+public class ManifestJSONActivatorTest {
+
+    /**
+     * Logger for this class
+     */
+    protected final static Log LOG = com.openexchange.log.Log.loggerFor(ManifestJSONActivatorTest.class);
 
     /**
      * Instance to test
@@ -69,15 +93,41 @@ public class ManifestJSONActivatorTest extends AbstractMockTest {
     private ManifestJSONActivator manifestJSONActivator = null;
 
     /**
-     * {@inheritDoc}
+     * A temporary folder that could be used by each mock.
      */
-    @Override
+    @Rule
+    protected TemporaryFolder folder = new TemporaryFolder();
+
+    private BundleContext bundleContext;
+
+    private Bundle bundle;
+
+    private ConfigurationService configurationService;
+
+    private Properties properties;
+
+    @Before
     public void setUp() throws Exception {
         this.manifestJSONActivator = new ManifestJSONActivator();
 
-        ContextAndServicesActivator.activateContextAndServiceMocks(
-            this.manifestJSONActivator,
-            this.manifestJSONActivator.getNeededServices());
+        // MEMBERS
+        this.bundleContext = PowerMockito.mock(BundleContext.class);
+        this.bundle = PowerMockito.mock(Bundle.class);
+        this.configurationService = PowerMockito.mock(ConfigurationService.class);
+        this.properties = PowerMockito.mock(Properties.class);
+
+        // SERVICES
+        PowerMockito.when(configurationService.getProperty(Matchers.anyString())).thenReturn("theStringPropertyValue");
+        PowerMockito.when(configurationService.getPropertiesInFolder(Matchers.anyString())).thenReturn(this.properties);
+
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>();
+        services.putIfAbsent(ConfigurationService.class, new SimpleServiceProvider<Object>(configurationService));
+        MockUtils.injectValueIntoPrivateField(this.manifestJSONActivator, InjectionFieldConstants.SERVICES, services);
+
+        // CONTEXT
+        Mockito.when(this.bundleContext.getBundle()).thenReturn(this.bundle);
+        Mockito.when(this.bundle.getVersion()).thenReturn(new Version(1, 1, 1));
+        MockUtils.injectValueIntoPrivateField(this.manifestJSONActivator, InjectionFieldConstants.CONTEXT, bundleContext);
     }
 
     @Test
@@ -92,12 +142,5 @@ public class ManifestJSONActivatorTest extends AbstractMockTest {
         this.manifestJSONActivator.startBundle();
 
         ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.manifestJSONActivator, 3);
-    }
-
-    @Test
-    public void testStartBundle_EverythingFine_AllTrackersOpened() throws Exception {
-        this.manifestJSONActivator.startBundle();
-
-        ServiceMockActivatorAsserter.verifyAllServiceTrackersOpened(this.manifestJSONActivator);
     }
 }

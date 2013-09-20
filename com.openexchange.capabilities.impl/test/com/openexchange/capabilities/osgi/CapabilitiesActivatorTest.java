@@ -49,12 +49,21 @@
 
 package com.openexchange.capabilities.osgi;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.powermock.api.mockito.PowerMockito;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.test.mock.main.ContextAndServicesActivator;
-import com.openexchange.test.mock.main.ServiceMockActivatorAsserter;
-import com.openexchange.test.mock.main.test.AbstractMockTest;
+import com.openexchange.osgi.ServiceProvider;
+import com.openexchange.osgi.SimpleServiceProvider;
+import com.openexchange.test.mock.InjectionFieldConstants;
+import com.openexchange.test.mock.MockUtils;
+import com.openexchange.test.mock.assertion.ServiceMockActivatorAsserter;
 
 /**
  * Unit tests for {@link CapabilitiesActivator}
@@ -62,22 +71,40 @@ import com.openexchange.test.mock.main.test.AbstractMockTest;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class CapabilitiesActivatorTest extends AbstractMockTest {
+public class CapabilitiesActivatorTest {
 
     /**
      * Instance to test
      */
     private CapabilitiesActivator capabilitiesActivator = null;
 
+    private ConfigurationService configurationService = PowerMockito.mock(ConfigurationService.class);
+
+    private CacheService cacheService = PowerMockito.mock(CacheService.class);
+
+    private BundleContext bundleContext;
+
+    private Bundle bundle;
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void setUp() throws Exception {
+    @Before
+    public void setUp() {
         this.capabilitiesActivator = new CapabilitiesActivator();
 
-        ContextAndServicesActivator.activateContextAndServiceMocks(this.capabilitiesActivator, CacheService.class, ConfigurationService.class);
+        // MEMBERS
+        this.bundleContext = PowerMockito.mock(BundleContext.class);
+        this.bundle = PowerMockito.mock(Bundle.class);
+
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>();
+        services.putIfAbsent(ConfigurationService.class, new SimpleServiceProvider<Object>(configurationService));
+        services.putIfAbsent(CacheService.class, new SimpleServiceProvider<Object>(cacheService));
+        MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.SERVICES, services);
+
+        // CONTEXT
+        Mockito.when(this.bundleContext.getBundle()).thenReturn(this.bundle);
+        MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.CONTEXT, bundleContext);
     }
 
     @Test
@@ -92,13 +119,6 @@ public class CapabilitiesActivatorTest extends AbstractMockTest {
         this.capabilitiesActivator.startBundle();
 
         ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.capabilitiesActivator, 3);
-    }
-
-    @Test
-    public void testStartBundle_EverythingFine_AllTrackersOpened() throws Exception {
-        this.capabilitiesActivator.startBundle();
-
-        ServiceMockActivatorAsserter.verifyAllServiceTrackersOpened(this.capabilitiesActivator);
     }
 
     @Test

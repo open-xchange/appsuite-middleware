@@ -47,63 +47,38 @@
  *
  */
 
-package com.openexchange.test.mock.objects.capabilities;
+package com.openexchange.test.mock;
 
-import java.util.HashSet;
-import java.util.Set;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.test.mock.objects.AbstractMock;
-
+import org.powermock.reflect.Whitebox;
 
 /**
- * Mock for the {@link CapabilityService}
+ * This class offers some nice options to change behavior in the classes to test, for verification or other helpful stuff.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class CapabilityServiceMock<T extends CapabilityService> extends AbstractMock {
+public class MockUtils {
 
     /**
-     * The {@link ConfigurationService} that will be mocked with this class
+     * Inject a value you would like to have for your test case into the field name of the provided object
+     * 
+     * @param objectToModify - the object the value should be changed for
+     * @param fieldNameInClass - the name of the field that should be changed
+     * @param newValue - the new value for the field of the object
      */
-    private T capabilityService;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T get() {
-        return (T) this.capabilityService;
+    public static void injectValueIntoPrivateField(Object objectToModify, String fieldNameInClass, Object newValue) {
+        Whitebox.setInternalState(objectToModify, fieldNameInClass, newValue);
     }
 
     /**
-     * {@inheritDoc}
+     * Get the value of a private field e. g. if it is not visible and does not have a getter.
+     * 
+     * @param objectToGetState - the object you would like to get the value from
+     * @param fieldNameInClass - the name of the field you would like to get the value for
+     * @return Object with the value of the field from the given object
      */
-    @Override
-    protected void createMocks() throws Exception {
-        this.capabilityService = (T) PowerMockito.mock(CapabilityService.class);
+    public static Object getValueFromField(Object objectToGetState, String fieldNameInClass) {
+        return Whitebox.getInternalState(objectToGetState, fieldNameInClass);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializeMembers() throws Exception {
-        // nothing to to yet
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void defineMockSpecificBehaviour() throws Exception {
-        Set<Capability> capabilities = new HashSet<Capability>(64);
-        capabilities.add(new Capability("CapabilityId", true));
-        Mockito.when(this.capabilityService.getCapabilities(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyBoolean())).thenReturn(
-            capabilities);
-    }
 }
