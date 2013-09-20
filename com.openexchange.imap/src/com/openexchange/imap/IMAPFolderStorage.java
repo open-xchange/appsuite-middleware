@@ -336,9 +336,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             } catch (final OXException e) {
                 LOG.warn("Updating IMAP folder cache failed.", e);
                 FolderCache.removeCachedFolder(fullName, session, accountId);
-            } finally {
+            }
+            /*-
+             * No need to close as opened via 'com.sun.mail.imap.IMAPFolder.openFast()'
+             *
+            finally {
                 closeSafe(folder);
             }
+            */
         }
     }
 
@@ -405,9 +410,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
-        } finally {
+        }
+        /*-
+         * No need to close as opened via 'com.sun.mail.imap.IMAPFolder.openFast()'
+         *
+        finally {
             closeSafe(f);
         }
+        */
     }
 
     @Override
@@ -442,9 +452,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
-        } finally {
+        }
+        /*-
+         * No need to close as opened via 'com.sun.mail.imap.IMAPFolder.openFast()'
+         *
+        finally {
             closeSafe(f);
         }
+        */
     }
 
     @Override
@@ -479,9 +494,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
-        } finally {
+        }
+        /*-
+         * No need to close as opened via 'com.sun.mail.imap.IMAPFolder.openFast()'
+         *
+        finally {
             closeSafe(f);
         }
+        */
     }
 
     @Override
@@ -516,9 +536,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
-        } finally {
+        }
+        /*-
+         * No need to close as opened via 'com.sun.mail.imap.IMAPFolder.openFast()'
+         *
+        finally {
             closeSafe(f);
         }
+        */
     }
 
     @Override
