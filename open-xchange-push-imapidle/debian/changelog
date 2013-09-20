@@ -1,3 +1,9 @@
+open-xchange-push-imapidle (7.4.1-0) unstable; urgency=low
+
+  * prepare for 7.4.1 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Sep 2013 11:44:35 +0200
+
 open-xchange-push-imapidle (7.4.0-9) stable; urgency=low
 
   * Ninth candidate for 7.4.0 release

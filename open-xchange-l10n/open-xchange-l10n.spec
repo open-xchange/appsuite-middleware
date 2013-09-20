@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 9
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -704,6 +704,8 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.1 release
 * Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Ninth candidate for 7.4.0 release
 * Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -713,9 +715,9 @@ Build for patch 2013-09-12
 * Thu Sep 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-05
 * Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Eighth candidate for 7.4.0 release
-* Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-26
+* Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Eighth candidate for 7.4.0 release
 * Fri Aug 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-30
 * Wed Aug 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -724,8 +726,6 @@ Build for patch 2013-09-03
 Seventh candidate for 7.4.0 release
 * Fri Aug 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth candidate for 7.4.0 release
-* Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-08-22
 * Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-22
 * Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -742,10 +742,6 @@ Fourth release candidate for 7.4.0
 Third release candidate for 7.4.0
 * Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-09
-* Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-08-09
-* Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-08-09
 * Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.4.0
 * Mon Jul 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -754,10 +750,6 @@ Build for patch 2013-07-22
 First release candidate for 7.4.0
 * Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.0
-* Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Second build for patch  2013-07-18
-* Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-07-18
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second build for patch  2013-07-18
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
