@@ -152,7 +152,7 @@ public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAw
                     ownPermission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
                 }
                 if (!smbFolder.canWrite()) {
-                    ownPermission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
+                    ownPermission.setWritePermission(FileStoragePermission.NO_PERMISSIONS);
                 }
                 /*
                  * Iterate headers
