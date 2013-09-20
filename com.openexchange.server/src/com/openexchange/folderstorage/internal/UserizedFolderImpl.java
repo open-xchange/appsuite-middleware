@@ -122,7 +122,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     @Override
-    public void setProps(Map<String, Object> props) {
+    public void setProps(final Map<String, Object> props) {
         this.props = props;
     }
 

@@ -806,6 +806,7 @@ public final class FolderWriter {
                     folder.setProps(props);
                     folder.getTotal();
                     folder.getUnread();
+                    folder.setProps(null);
                 }
             }
         } finally {
