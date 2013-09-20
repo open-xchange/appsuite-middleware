@@ -798,8 +798,6 @@ public final class FolderWriter {
      */
 
     private static void loadCounters(final UserizedFolder[] folders, final ServerSession serverSession) {
-        long st = System.currentTimeMillis();
-
         final Map<String, Object> props = new HashMap<String, Object>(8);
         props.put("__session", serverSession);
         try {
