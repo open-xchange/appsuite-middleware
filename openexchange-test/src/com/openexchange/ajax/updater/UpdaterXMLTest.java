@@ -84,7 +84,6 @@ import com.openexchange.ajax.updater.actions.UpdateXMLResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 
-
 /**
  * {@link UpdaterXMLTest}
  *
@@ -93,15 +92,22 @@ import com.openexchange.configuration.AJAXConfig.Property;
 public class UpdaterXMLTest extends AbstractAJAXSession {
 
     private AJAXClient client;
+
     private String userName;
+
     private String password;
+
     private String hostname;
+
     private String context;
+
     private String login;
+
     private HttpHost targetHost;
 
     /**
      * Initializes a new {@link UpdaterXMLTest}.
+     *
      * @param name
      */
     public UpdaterXMLTest(String name) {
@@ -118,19 +124,19 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
         password = AJAXConfig.getProperty(user.getPassword());
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);
         targetHost = new HttpHost(hostname, 80);
-        this.client = new AJAXClient(user);        
+        this.client = new AJAXClient(user);
     }
-    
+
     public void testBasicAuth() throws Exception {
         DefaultHttpClient httpClient = new DefaultHttpClient();
-        try {    
-            
+        try {
+
             HttpGet getXML = new HttpGet("/ajax/updater/update.xml");
             HttpResponse response = httpClient.execute(targetHost, getXML);
             HttpEntity entity = response.getEntity();
-            EntityUtils.consume(entity);            
+            EntityUtils.consume(entity);
             assertTrue("Expected 401.", response.getStatusLine().getStatusCode() == 401);
-            
+
             httpClient.getCredentialsProvider().setCredentials(
                 new AuthScope(targetHost.getHostName(), targetHost.getPort()),
                 new UsernamePasswordCredentials(login, password));
@@ -147,7 +153,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
                     break;
                 }
             }
-            
+
             assertTrue("Did not find sessionid cookie.", foundCookie);
             // Clear credentials to force check of sessionid cookie (which must be invalid)
             httpClient.getCredentialsProvider().clear();
@@ -159,7 +165,7 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
             httpClient.getConnectionManager().shutdown();
         }
     }
-    
+
     public void testUpdateXML() throws Exception {
         DefaultHttpClient httpClient = client.getSession().getHttpClient();
         httpClient.getCredentialsProvider().setCredentials(
@@ -167,33 +173,38 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
             new UsernamePasswordCredentials(login, password));
         UpdateXMLRequest request = new UpdateXMLRequest();
         UpdateXMLResponse response = client.execute(request);
-        
+
         SAXBuilder builder = new SAXBuilder();
         String xml = response.getXML();
-        
+
         Document doc = null;
         try {
             doc = builder.build(new StringReader(xml));
             Element products = doc.getRootElement();
             List<Element> children = products.getChildren("Product");
-            
+
             Map<String, String> filesToGet = new HashMap<String, String>();
             for (Element child : children) {
+                if ("{92406A45-8205-4EF4-B7BF-8CA57D56B822}".equals(child.getChildText("UpgradeCode"))) {
+                    // Ignore the artificial product that is used to create a link to appsuite on a susers desktop
+                    continue;
+                }
+
                 filesToGet.put(child.getChildText("URL"), child.getChildText("MD5"));
             }
-            
+
             for (String url : filesToGet.keySet()) {
                 FileRequest fileRequest = new FileRequest(extractFileName(url));
                 FileResponse fileResponse = client.execute(fileRequest);
                 byte[] fileBytes = fileResponse.getFileBytes();
                 String md5 = calculateMD5(new ByteArrayInputStream(fileBytes));
-                
+
                 assertEquals("MD5 Hash was not correct for Download from " + url, md5, filesToGet.get(url));
             }
         } catch (JDOMException e) {
             System.out.println(xml);
             throw e;
-        }        
+        }
     }
 
     public void testAgainWithChangedLocale() throws Exception {
