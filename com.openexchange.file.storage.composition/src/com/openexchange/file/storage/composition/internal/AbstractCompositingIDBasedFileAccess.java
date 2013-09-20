@@ -120,6 +120,22 @@ import com.openexchange.tx.TransactionException;
  */
 public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider {
 
+    /** The empty {@link TimedResult} */
+    private static final TimedResult<File> EMPTY_TIMED_RESULT = new TimedResult<File>() {
+
+        @Override
+        public SearchIterator<File> results() throws OXException {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+
+        @Override
+        public long sequenceNumber() throws OXException {
+            return 0;
+        }
+
+    };
+
+    /** The handler registry */
     private static final AtomicReference<FileStreamHandlerRegistry> HANDLER_REGISTRY = new AtomicReference<FileStreamHandlerRegistry>();
 
     /**
@@ -288,12 +304,19 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> columns, final Field sort, final SortDirection order) throws OXException {
         final FolderID folderID = new FolderID(folderId);
-        final TimedResult<File> result = getFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(
-            folderID.getFolderId(),
-            addIDColumns(columns),
-            sort,
-            order);
-        return fixIDs(result, folderID.getService(), folderID.getAccountId());
+        final String service = folderID.getService();
+        final String accountId = folderID.getAccountId();
+        TimedResult<File> result;
+        try {
+            result = getFileAccess(service, accountId).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
+            return fixIDs(result, service, accountId);
+        } catch (final OXException e) {
+            if (!FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e) || !INFOSTORE_SERVICE_ID.equals(service)) {
+                throw e;
+            }
+            result = EMPTY_TIMED_RESULT;
+        }
+        return fixIDs(result, service, accountId);
     }
 
     @Override
