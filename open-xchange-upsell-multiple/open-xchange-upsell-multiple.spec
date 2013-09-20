@@ -8,7 +8,7 @@ BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define        ox_release 9
+%define        ox_release 10
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -58,6 +58,8 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Fri Sep 20 2013 Carsten Hoeger <choeger@open-xchange.com>
+Tenth candidate for 7.4.0 release
 * Thu Sep 12 2013 Carsten Hoeger <choeger@open-xchange.com>
 Ninth candidate for 7.4.0 release
 * Wed Sep 11 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -67,9 +69,9 @@ Build for patch 2013-09-12
 * Thu Sep 05 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-09-05
 * Mon Sep 02 2013 Carsten Hoeger <choeger@open-xchange.com>
-Eighth candidate for 7.4.0 release
-* Mon Sep 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-09-26
+* Mon Sep 02 2013 Carsten Hoeger <choeger@open-xchange.com>
+Eighth candidate for 7.4.0 release
 * Fri Aug 30 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-08-30
 * Wed Aug 28 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -78,8 +80,6 @@ Build for patch 2013-09-03
 Seventh candidate for 7.4.0 release
 * Fri Aug 23 2013 Carsten Hoeger <choeger@open-xchange.com>
 Sixth candidate for 7.4.0 release
-* Thu Aug 22 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-08-22
 * Thu Aug 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-08-22
 * Thu Aug 22 2013 Carsten Hoeger <choeger@open-xchange.com>
