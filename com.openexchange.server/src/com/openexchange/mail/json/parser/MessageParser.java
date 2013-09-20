@@ -94,6 +94,7 @@ import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -941,7 +942,7 @@ public final class MessageParser {
      */
     public static InternetAddress[] parseAddressKey(final String key, final JSONObject jo, final boolean failOnError) throws JSONException, AddressException {
         String value = null;
-        if (!jo.has(key) || jo.isNull(key) || (value = jo.getString(key)).length() == 0) {
+        if (!jo.has(key) || jo.isNull(key) || Strings.isEmpty( (value = jo.getString(key)) )) {
             return EMPTY_ADDRS;
         }
         if (value.charAt(0) == '[') {
