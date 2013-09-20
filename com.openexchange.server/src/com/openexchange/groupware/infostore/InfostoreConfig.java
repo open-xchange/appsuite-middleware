@@ -50,14 +50,11 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.File;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -69,22 +66,22 @@ import com.openexchange.tools.conf.AbstractConfig;
 
 public class InfostoreConfig extends AbstractConfig implements Initialization {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreConfig.class);
 
+    /**
+     * InfoStore properties.
+     */
     public static enum InfoProperty{
 		MAX_UPLOAD_SIZE;
 	}
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreConfig.class));
-
     private static volatile InfostoreConfig singleton;
 
-    private static final Lock INIT_LOCK = new ReentrantLock();
-
-    private static boolean loaded = false;
-
-
-    private InfostoreConfig() { super(); }
-
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
     public static InfostoreConfig getInstance() {
         InfostoreConfig ret = singleton;
         if (null == ret) {
@@ -97,6 +94,17 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
             }
         }
         return ret;
+    }
+
+    // ------------------------------------------------------------------- //
+
+    private static boolean loaded = false;
+
+    /**
+     * Initializes a new {@link InfostoreConfig}.
+     */
+    private InfostoreConfig() {
+        super();
     }
 
     /**
@@ -126,41 +134,52 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
         return singleton.getPropertyInternal(key);
     }
 
-    public static long getMaxUploadSize(){
-    	final String sizeS = getProperty(InfoProperty.MAX_UPLOAD_SIZE.name());
-    	if (Strings.isEmpty(sizeS)) {
-    		return sysconfMaxUpload();
-    	}
-		final long size = Long.parseLong(sizeS);
-		if(-1 == size) {
-			return sysconfMaxUpload();
-		}
-		return size;
-     }
+    /**
+     * Gets the max. upload size for InfoStore module.
+     *
+     * @return The max. upload size or <code>-1</code> if unlimited
+     */
+    public static long getMaxUploadSize() {
+        final String sizeS = getProperty(InfoProperty.MAX_UPLOAD_SIZE.name());
+        if (Strings.isEmpty(sizeS)) {
+            return sysconfMaxUpload();
+        }
+        long size;
+        try {
+            size = Long.parseLong(sizeS.trim());
+        } catch (final NumberFormatException e) {
+            LOG.warn(InfoProperty.MAX_UPLOAD_SIZE.name() + " is not a number: " + sizeS + ". Fall-back to system upload limitation.");
+            size = -1;
+        }
+        if (size < 0) {
+            return sysconfMaxUpload();
+        }
+        return size;
+    }
 
-	private static long sysconfMaxUpload() {
-		final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-		if (Strings.isEmpty(sizeS)) {
-			return 0;
-		}
-		return Long.parseLong(sizeS);
-	}
+    private static long sysconfMaxUpload() {
+        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+        if (Strings.isEmpty(sizeS)) {
+            return 0;
+        }
+        try {
+            return Long.parseLong(sizeS.trim());
+        } catch (final NumberFormatException e) {
+            LOG.warn(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE.name() + " is not a number: " + sizeS + ". Fall-back to no upload limitation for InfoStore module.");
+            return 0;
+        }
+    }
 
     @Override
-    public void start() throws OXException {
+    public synchronized void start() throws OXException {
         if (!loaded || singleton == null) {
-			INIT_LOCK.lock();
-            try {
-			    getInstance().loadPropertiesInternal();
-                loaded = true;
-            } finally {
-				INIT_LOCK.unlock();
-			}
+			getInstance().loadPropertiesInternal();
+            loaded = true;
 		}
     }
 
     @Override
-    public void stop() throws OXException {
+    public synchronized void stop() throws OXException {
         singleton = null;
         loaded = false;
     }

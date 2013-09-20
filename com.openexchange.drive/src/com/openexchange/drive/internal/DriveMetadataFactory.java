@@ -99,7 +99,7 @@ public class DriveMetadataFactory {
             if (null == fields || fields.contains(DriveFileField.MODIFIED)) {
                 fileMetadata.setModified(file.getCreated());
             }
-            if (null == fields || fields.contains(DriveFileField.MIMETYPE)) {
+            if (null == fields || fields.contains(DriveFileField.CONTENT_TYPE)) {
                 fileMetadata.setMimeType(file.getFileMIMEType());
             }
             if (null == fields || fields.contains(DriveFileField.DIRECT_LINK)) {

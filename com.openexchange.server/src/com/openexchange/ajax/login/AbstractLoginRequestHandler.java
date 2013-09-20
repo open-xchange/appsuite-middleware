@@ -89,7 +89,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractLoginRequestHandler}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class AbstractLoginRequestHandler implements LoginRequestHandler {
@@ -219,7 +219,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
             LoginServlet.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
             // Login response is unfortunately not conform to default responses.
-            if (req.getParameter("callback") != null && req.getParameter("action").equals(LoginServlet.ACTION_LOGIN)) {
+            if (req.getParameter("callback") != null && LoginServlet.ACTION_LOGIN.equals(req.getParameter("action"))) {
                 APIResponseRenderer.writeResponse(response, LoginServlet.ACTION_LOGIN, req, resp);
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
@@ -254,7 +254,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
     /**
      * Asynchronously retrieves modules.
-     * 
+     *
      * @param session The associated session
      * @param req The request
      * @return The resulting object or <code>null</code>
@@ -287,7 +287,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
     /**
      * Writes the (groupware's) public session cookie <code>"open-xchange-public-session"</code> to specified HTTP servlet response.
-     * 
+     *
      * @param resp The HTTP servlet response
      * @param session The session providing the public session cookie identifier
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>

@@ -49,9 +49,13 @@
 
 package com.openexchange.drive.actions;
 
+import java.util.List;
 import com.openexchange.drive.Action;
+import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
+import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.file.storage.File;
 
 /**
  * {@link AbstractFileAction}
@@ -68,6 +72,64 @@ public abstract class AbstractFileAction extends AbstractAction<FileVersion> {
      */
     protected AbstractFileAction(FileVersion version, FileVersion newVersion, ThreeWayComparison<FileVersion> comparison) {
         super(version, newVersion, comparison);
+    }
+
+    /**
+     * Applies file metadata to this action's parameter collection, based on the requested additional file metadata fields found
+     * configured in the session.
+     *
+     * @param file The file generate the metadata for
+     * @param session The session
+     */
+    protected void applyMetadataParameters(File file, SyncSession session) {
+        if (null != file) {
+            /*
+             * add default metadata
+             */
+            parameters.put(PARAMETER_TOTAL_LENGTH, Long.valueOf(file.getFileSize()));
+            if (null != file.getCreated()) {
+                parameters.put(PARAMETER_CREATED, Long.valueOf(file.getCreated().getTime()));
+            }
+            if (null != file.getLastModified()) {
+                parameters.put(PARAMETER_MODIFIED, Long.valueOf(file.getLastModified().getTime()));
+            }
+            /*
+             * add additional metadata
+             */
+            List<DriveFileField> fields = session.getFields();
+            if (null != fields) {
+                if (fields.contains(DriveFileField.CONTENT_TYPE)) {
+                    String contentType = file.getFileMIMEType();
+                    if (null != contentType) {
+                        parameters.put(PARAMETER_CONTENT_TYPE, contentType);
+                    }
+                }
+                if (fields.contains(DriveFileField.DIRECT_LINK)) {
+                    String directLink = session.getLinkGenerator().getFileLink(file);
+                    if (null != directLink) {
+                        parameters.put(PARAMETER_DIRECT_LINK, directLink);
+                    }
+                }
+                if (fields.contains(DriveFileField.DIRECT_LINK_FRAGMENTS)) {
+                    String directLinkFragments = session.getLinkGenerator().getFileLinkFragments(file);
+                    if (null != directLinkFragments) {
+                        parameters.put(PARAMETER_DIRECT_LINK_FRAGMENTS, directLinkFragments);
+                    }
+                }
+                if (fields.contains(DriveFileField.THUMBNAIL_LINK)) {
+                    String thumbnailLink = session.getLinkGenerator().getFileThumbnailLink(file);
+                    if (null != thumbnailLink) {
+                        parameters.put(PARAMETER_THUMBNAIL_LINK, thumbnailLink);
+                    }
+                }
+                if (fields.contains(DriveFileField.PREVIEW_LINK)) {
+                    String previewLink = session.getLinkGenerator().getFilePreviewLink(file);
+                    if (null != previewLink) {
+                        parameters.put(PARAMETER_PREVIEW_LINK, previewLink);
+                    }
+                }
+            }
+        }
     }
 
     @Override

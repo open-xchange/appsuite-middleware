@@ -56,14 +56,49 @@ package com.openexchange.drive;
  */
 public enum DriveFileField {
 
+    /**
+     * A file's checksum (column 708, "checksum")
+     */
     CHECKSUM,
-    FILENAME,
-    MIMETYPE,
+
+    /**
+     * The filename (column 702, "name")
+     */
+    NAME,
+
+    /**
+     * The content type / mime type of the file (column 703, "contentType")
+     */
+    CONTENT_TYPE,
+
+    /**
+     * The last modification timestamp of the file (column 5, "modified")
+     */
     MODIFIED,
+
+    /**
+     * The creation timestamp of the file (column 4, "created")
+     */
     CREATED,
+
+    /**
+     * A direct link to the file in the web interface (column 752, "directLink")
+     */
     DIRECT_LINK,
+
+    /**
+     * A link to a medium-sized preview image for the file (column 750, "previewLink")
+     */
     PREVIEW_LINK,
+
+    /**
+     * A link to a thumbnail image for the file (column 753, "thumbnailLink")
+     */
     THUMBNAIL_LINK,
+
+    /**
+     * The fragments part of the direct link for the file (column 751, "directLinkFragments")
+     */
     DIRECT_LINK_FRAGMENTS,
 
 }

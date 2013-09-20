@@ -443,7 +443,7 @@ public class ContextTest extends AbstractTest {
     }
 
     public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
-        Context ctx = getTestContextObject(context_id);        
+        Context ctx = getTestContextObject(context_id);
         ctx.setMaxQuota(quota_max_in_mb);
         ctx.setUserAttribute("com.openexchange.test", "flavor", "lemon");
         ctx.setUserAttribute("com.openexchange.test", "texture", "squishy");
@@ -452,7 +452,7 @@ public class ContextTest extends AbstractTest {
 
     // Must be public static to override method
     public static Context getTestContextObject(int context_id) {
-        Context ctx = new Context(context_id);        
+        Context ctx = new Context(context_id);
         ctx.setName("Name-"+ctx.getId());
         return ctx;
     }

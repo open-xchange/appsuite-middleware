@@ -557,7 +557,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get store
                  */
-                imapStore = connectIMAPStore(0, imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, null);
+                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass);
                 /*
                  * Add warning if non-secure
                  */
@@ -905,23 +905,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             int retryCount = 0;
             while (retryCount++ < maxRetryCount) {
                 try {
-                    /*
-                     * Establish a new one...
-                     */
-                    IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-                    /*
-                     * ... and connect it
-                     */
-                    try {
-                        imapStore.connect(server, port, login, pw);
-                    } catch (final AuthenticationFailedException e) {
-                        /*
-                         * Retry connect with AUTH=PLAIN disabled
-                         */
-                        imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-                        imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-                        imapStore.connect(server, port, login, pw);
-                    }
+                    IMAPStore imapStore = newConnectedImapStore(imapSession, server, port, login, pw);
                     /*
                      * Done
                      */
@@ -948,6 +932,27 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             }
         }
+    }
+
+    private IMAPStore newConnectedImapStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException {
+        /*
+         * Establish a new one...
+         */
+        IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+        /*
+         * ... and connect it
+         */
+        try {
+            imapStore.connect(server, port, login, pw);
+        } catch (final AuthenticationFailedException e) {
+            /*
+             * Retry connect with AUTH=PLAIN disabled
+             */
+            imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
+            imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+            imapStore.connect(server, port, login, pw);
+        }
+        return imapStore;
     }
 
     private IMAPStore borrowIMAPStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException, OXException {

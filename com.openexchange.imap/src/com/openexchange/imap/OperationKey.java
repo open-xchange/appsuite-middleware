@@ -51,6 +51,12 @@ package com.openexchange.imap;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.session.PutIfAbsent;
+import com.openexchange.session.Session;
 
 /**
  * {@link OperationKey} - An operation key.
@@ -60,11 +66,6 @@ import java.util.Arrays;
 public final class OperationKey implements Serializable {
 
     private static final long serialVersionUID = -3628236985679806438L;
-
-    /**
-     * The default value associated with a key.
-     */
-    public static final Object PRESENT = new Object();
 
     /**
      * Operation type.
@@ -130,6 +131,52 @@ public final class OperationKey implements Serializable {
             return false;
         }
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------------- //
+
+    private static final String IMAP_OPERATIONS = "__imap-operations".intern();
+
+    public static void unsetMarker(final OperationKey key, final Session session) {
+        @SuppressWarnings("unchecked") final ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
+        if (null != map) {
+            final Object removed = map.remove(key);
+            if (null != removed) {
+                synchronized (removed) {
+                    removed.notifyAll();
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static int setMarker(final OperationKey key, final Session session) throws OXException {
+        if (session instanceof PutIfAbsent) {
+            final PutIfAbsent piaSession = (PutIfAbsent) session;
+            ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) piaSession.getParameter(IMAP_OPERATIONS);
+            if (null == map) {
+                final ConcurrentMap<OperationKey, Object> newMap = new ConcurrentHashMap<OperationKey, Object>(16);
+                map = (ConcurrentMap<OperationKey, Object>) piaSession.setParameterIfAbsent(IMAP_OPERATIONS, newMap);
+                if (null == map) {
+                    map = newMap;
+                }
+            }
+            final Object newObject = new Object();
+            int count = 3; // Try three times
+            Object prev = null;
+            while ((count-- > 0) && (prev = map.putIfAbsent(key, newObject)) != null) {
+                synchronized (prev) {
+                    try {
+                        prev.wait();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw MailExceptionCode.INTERRUPT_ERROR.create(e, new Object[0]);
+                    }
+                }
+            }
+            return null == prev ? 1 : -1 /* in-use */;
+        }
+        return 0;
     }
 
 }

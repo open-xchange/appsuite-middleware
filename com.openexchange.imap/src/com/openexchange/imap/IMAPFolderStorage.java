@@ -63,8 +63,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -120,7 +118,6 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
@@ -2483,39 +2480,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * ++++++++++++++++++ Helper methods ++++++++++++++++++
      */
 
-    private static final String IMAP_OPERATIONS = "__imap-operations".intern();
-
     private void unsetMarker(final OperationKey key) {
-        @SuppressWarnings("unchecked") final ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
-        if (null != map) {
-            map.remove(key);
-        }
+        OperationKey.unsetMarker(key, session);
     }
 
-    @SuppressWarnings("unchecked")
     private boolean setMarker(final OperationKey key, final Folder imapFolder) throws OXException {
-        if (session instanceof PutIfAbsent) {
-            final PutIfAbsent session = (PutIfAbsent) this.session;
-            ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
-            if (null == map) {
-                final ConcurrentMap<OperationKey, Object> newMap = new ConcurrentHashMap<OperationKey, Object>(16);
-                map = (ConcurrentMap<OperationKey, Object>) session.setParameterIfAbsent(IMAP_OPERATIONS, newMap);
-                if (null == map) {
-                    map = newMap;
-                }
-            }
-            if (null != map.putIfAbsent(key, OperationKey.PRESENT)) {
-                // In use...
-                throw MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
-                    imapConfig.getServer(),
-                    imapConfig.getLogin(),
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()),
-                    MimeMailException.appendInfo("Mailbox is currently in use.", imapFolder));
-            }
-            return true;
+        final int result = OperationKey.setMarker(key, session);
+        if (result < 0) {
+            throw MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
+                imapConfig.getServer(),
+                imapConfig.getLogin(),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()),
+                MimeMailException.appendInfo("Mailbox is currently in use.", imapFolder));
         }
-        return false;
+        return result > 0;
     }
 
     private static void closeSafe(final Folder folder) {

@@ -113,6 +113,7 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -829,11 +830,23 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             return s;
         }
         try {
+            String prefix = null;
             // Strip possible "\r?\n" and/or "%0A?%0D"
             String retval = PATTERN_CRLF.matcher(s).replaceAll("");
             if (forAnchor) {
                 // Prepare for being used as anchor/link
                 retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, retval.getBytes(Charsets.ISO_8859_1)));
+                final int pos = retval.length() > 6 ? retval.indexOf("://") : -1;
+                if (pos > 0) { // Seems to contain protocol/scheme part; e.g "http://..."
+                    final String tmp = Strings.toLowerCase(retval.substring(0, pos));
+                    if ("https".equals(tmp)) {
+                        prefix = "https://";
+                        retval = retval.substring(pos + 3);
+                    } else if ("http".equals(tmp)) {
+                        prefix = "http://";
+                        retval = retval.substring(pos + 3);
+                    }
+                }
             } else {
                 retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, retval.getBytes(Charsets.ISO_8859_1)));
             }
@@ -861,7 +874,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     matcher = dupSlashes.matcher(retval);
                 }
             }
-            return retval;
+            return null == prefix ? retval : new StringAllocator(prefix).append(retval).toString();
         } catch (final IllegalArgumentException e) {
             throw e;
         } catch (final RuntimeException e) {

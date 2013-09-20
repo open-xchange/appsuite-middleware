@@ -121,7 +121,7 @@ public final class Bug28913Test extends AbstractMailTest {
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(ids, true));
+        client.executeSafe(new DeleteRequest(ids, true));
         super.tearDown();
     }
 

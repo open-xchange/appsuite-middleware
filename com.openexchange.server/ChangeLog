@@ -1,7 +1,14 @@
+* 2013-09-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28932: Deal with possible 'NumberFormatException' gracefully
+ - Fix for bug 28935: Added null guard when checking which sender source to choose
+ - Fix for bug 28938: Enqueue/synchronize concurrently incoming requests
+ - Fix for bug 28949: Keep protocol/scheme part in deferred URL's redirect value
+
 * 2013-09-18 - marcus.klein@open-xchange.com
 
  - Fix for bug 10523: Improved help text for the command line option for aliases when creating users.
-
+ 
 * 2013-09-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 28921: Cope with empty setting for "MAX_UPLOAD_SIZE" property
