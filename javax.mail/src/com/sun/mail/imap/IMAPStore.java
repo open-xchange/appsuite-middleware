@@ -746,23 +746,11 @@ public class IMAPStore extends Store
      */
     protected IMAPProtocol newIMAPProtocol(String host, int port)
 				throws IOException, ProtocolException {
-    return newIMAPProtocol(host, port, session.getProperties());        
-    }
-
-    /**
-     * Create an IMAPProtocol object connected to the host and port.
-     * Subclasses of IMAPStore may override this method to return a
-     * subclass of IMAPProtocol that supports product-specific extensions.
-     *
-     * @since JavaMail 1.4.6
-     */
-    protected IMAPProtocol newIMAPProtocol(String host, int port, Properties props)
-                throws IOException, ProtocolException {
     return new IMAPProtocol(name, host, port, 
-                        props,
-                        isSSL,
-                        logger
-                       );
+            session.getProperties(),
+            isSSL,
+            logger
+           );       
     }
 
     private void checkFailedAuths(String u, String pw) throws ProtocolException {
@@ -988,16 +976,8 @@ public class IMAPStore extends Store
 		    if (forcePasswordRefresh)
 			refreshPassword();
 		            // Going to establish a second connection -- await possible in-use store connections
-		            if (PropUtil.getBooleanProperty(session.getProperties(), "mail.imap.authNoWait", false)) {
-		                final Properties props = new Properties(session.getProperties());
-		                props.put("mail.imap.authNoWait", "false");
-		                props.put("mail.imap.authTimeoutMillis", "90000");
-		                // Use cached host, port and timeout values.
-		                p = newIMAPProtocol(host, port, props);		                
-		            } else {
-	                    // Use cached host, port and timeout values.
-                        p = newIMAPProtocol(host, port); 
-		            }
+                    // Use cached host, port and timeout values.
+                    p = newIMAPProtocol(host, port); 
                     p.setFailOnNOFetch(failOnNOFetch);
                     // Use cached auth info
                     login(p, user, password);
@@ -1100,6 +1080,7 @@ public class IMAPStore extends Store
             if (pool.authenticatedConnections.isEmpty()) {
 		pool.logger.fine("getStoreProtocol() - no connections " +
                         "in the pool, creating a new one");
+		Exception cause = null;
                 try {
 		    if (forcePasswordRefresh)
 			refreshPassword();
@@ -1109,6 +1090,7 @@ public class IMAPStore extends Store
                     // Use cached auth info
                     login(p, user, password);
                 } catch(Exception ex1) {
+                    cause = ex1;
                     if (p != null) {
                         try {
                             logout(p);
@@ -1119,7 +1101,7 @@ public class IMAPStore extends Store
  
                 if (p == null) {
                     throw new ConnectionException(
-				"failed to create new store connection");
+				"failed to create new store connection", cause);
                 }
              
 	        p.addResponseHandler(this);
