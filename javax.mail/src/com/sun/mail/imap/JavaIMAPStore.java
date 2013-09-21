@@ -154,6 +154,10 @@ public class JavaIMAPStore extends IMAPStore {
 
     @Override
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
+        if (p.isAuthenticated()) {
+            super.login(p, u, pw);
+            return;
+        }
         /*
          * Auth stuff
          */
