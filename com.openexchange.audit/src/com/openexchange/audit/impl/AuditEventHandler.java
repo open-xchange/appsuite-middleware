@@ -73,7 +73,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -149,7 +148,7 @@ public class AuditEventHandler implements EventHandler {
                 }
                 log.append("OBJECT TYPE: FILE; ");
                 final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-                if (session instanceof PublicationSession) {
+                if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_PUBLICATION))) {
                     log.append("PUBLISH: ");
                     log.append(session.getLocalIp());
                     log.append("; ");
@@ -324,7 +323,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * This method will return the full folder path as String.
-     * 
+     *
      * @param folderId
      * @param sessionObj
      * @return String fullFolderPath

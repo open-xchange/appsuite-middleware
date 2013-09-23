@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
 public class PublicationSession implements Session {
 
     private final Publication publication;
-    
+
     private String localIp;
 
     /**
@@ -100,11 +100,14 @@ public class PublicationSession implements Session {
 
     @Override
     public boolean containsParameter(final String name) {
-        return false;
+        return PARAM_PUBLICATION.equals(name);
     }
 
     @Override
     public Object getParameter(final String name) {
+        if (PARAM_PUBLICATION.equals(name)) {
+            return Boolean.TRUE;
+        }
         return null;
     }
 

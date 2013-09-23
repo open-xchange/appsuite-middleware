@@ -153,6 +153,13 @@ public interface Session {
     public static final String PARAM_TOKEN = "__session.token".intern();
 
     /**
+     * The parameter to indicate a publication session.
+     *
+     * @type <code>java.lang.Boolean</code>
+     */
+    static final String PARAM_PUBLICATION = "__session.publication".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();
