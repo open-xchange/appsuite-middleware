@@ -607,7 +607,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         if (null != mailAccess) {
             return mailAccess;
         }
-        mailAccess = MailAccess.getInstance((Session) props.get("__session"), accountId);
+        final Session session = (Session) props.get("__session");
+        mailAccess = null == session ? MailAccess.getInstance(userId, contextId, accountId) : MailAccess.getInstance(session, accountId);
         mailAccess.connect(false);
         props.put(key, mailAccess);
         return mailAccess;
