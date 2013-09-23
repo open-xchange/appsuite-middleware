@@ -67,6 +67,7 @@ public class UnitTests {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTest(new JUnit4TestAdapter(com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest.class));
+        tests.addTest(new JUnit4TestAdapter(UpdateFlagTest.class));
         return tests;
     }
 }
