@@ -640,7 +640,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 checkDefaultFolderOnConnect();
             }
         }
-        if (isTrackable()) {
+        if (isTrackable() && false == tracked) {
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
         }
