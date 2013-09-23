@@ -54,7 +54,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FolderID;
 
 /**
@@ -62,7 +64,7 @@ import com.openexchange.file.storage.composition.FolderID;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class IDManglingFolder implements FileStorageFolder {
+public class IDManglingFolder implements TypeAware {
 
     /**
      * Create a new {@link FileStorageFolder} instance delegating all regular calls to the supplied folder, but returning the unique ID
@@ -126,6 +128,14 @@ public class IDManglingFolder implements FileStorageFolder {
         this.delegate = delegate;
         this.id = id;
         this.parentId = parentId;
+    }
+
+    @Override
+    public FileStorageFolderType getType() {
+        if (delegate instanceof TypeAware) {
+            return ((TypeAware) delegate).getType();
+        }
+        return FileStorageFolderType.NONE;
     }
 
     @Override
@@ -212,9 +222,10 @@ public class IDManglingFolder implements FileStorageFolder {
     public Map<String, Object> getProperties() {
         return delegate.getProperties();
     }
-    
-    
 
+
+
+    @Override
     public Map<String, Object> getMeta() {
         return delegate.getMeta();
     }

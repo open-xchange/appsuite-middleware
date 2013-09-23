@@ -254,7 +254,7 @@ public final class IMAPStoreCache {
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final IMAPStoreContainer newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw);
+            final IMAPStoreContainer newContainer = new BoundaryAwareIMAPStoreContainer(server, port, login, pw);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;

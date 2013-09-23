@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-messaging >= @OXVERSION@
 BuildRequires: java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define        ox_release 0
+%define        ox_release 10
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -53,6 +53,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %changelog
 * Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.1 release
+* Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Tenth candidate for 7.4.0 release
 * Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Ninth candidate for 7.4.0 release
 * Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>

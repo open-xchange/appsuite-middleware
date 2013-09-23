@@ -65,6 +65,14 @@ public class ConnectionException extends ProtocolException {
     }
 
     /**
+     * Constructs an ConnectionException with the specified detail message.
+     * @param s     the detail message
+     */
+    public ConnectionException(String s, Throwable cause) {
+    super(s, cause);
+    }
+
+    /**
      * Constructs an ConnectionException with the specified Response.
      * @param r		the Response
      */

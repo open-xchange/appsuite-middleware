@@ -339,7 +339,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
         final boolean hasSubfolders;
         {
             final FileStorageFolder fsFolder = folderAccess.getFolder(folderId);
-            retval = new FileStorageFolderImpl(fsFolder);
+            final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+            retval = new FileStorageFolderImpl(fsFolder, storageParameters.getSession(), altNames);
             hasSubfolders = fsFolder.hasSubfolders();
         }
         retval.setTreeID(treeId);

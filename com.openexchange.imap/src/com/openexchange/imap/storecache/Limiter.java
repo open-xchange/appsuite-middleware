@@ -47,88 +47,68 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.storecache;
 
-import java.io.Serializable;
-import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+import com.sun.mail.imap.JavaIMAPStore;
 
 /**
- * {@link OperationKey} - An operation key.
+ * {@link Limiter} - A simple limiter backed by a {@link AtomicInteger}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OperationKey implements Serializable {
+public final class Limiter {
 
-    private static final long serialVersionUID = -3628236985679806438L;
-
-    /**
-     * The default value associated with a key.
-     */
-    public static final Object PRESENT = new Object();
+    private final int max;
+    private final AtomicInteger cur;
 
     /**
-     * Operation type.
+     * Initializes a new {@link JavaIMAPStore.Limiter}.
      */
-    public static enum Type {
-        /** Message copy operation */
-        MSG_COPY,
-        /** Message delete operation */
-        MSG_DELETE,
-        /** Message label update operation */
-        MSG_LABEL_UPDATE,
-        /** Message flags update operation */
-        MSG_FLAGS_UPDATE,
-        /** Message append operation */
-        MSG_APPEND, ;
-    }
-
-    // --------------------------------------------------------------------------------------- //
-
-    private final Type type;
-    private final int accountId;
-    private final Object[] objects;
-    private final int hash;
-
-    /**
-     * Initializes a new {@link OperationKey}.
-     */
-    public OperationKey(final Type type, final int accountId, final Object... objects) {
+    public Limiter(final int max) {
         super();
-        this.type = type;
-        this.accountId = accountId;
-        this.objects = objects;
-
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + accountId;
-        result = prime * result + Arrays.hashCode(objects);
-        hash = result;
+        this.max = max;
+        cur = new AtomicInteger(max);
     }
 
-    @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof OperationKey)) {
-            return false;
-        }
-        final OperationKey other = (OperationKey) obj;
-        if (type != other.type) {
-            return false;
-        }
-        if (accountId != other.accountId) {
-            return false;
-        }
-        if (!Arrays.equals(objects, other.objects)) {
-            return false;
-        }
+    /**
+     * Acquires a permit.
+     *
+     * @return <code>true</code> if successfully acquired; otherwise <code>false</code>
+     */
+    public boolean acquire() {
+        int i;
+        do {
+            i = cur.get();
+            if (i <= 0) {
+                return false;
+            }
+        } while (!cur.compareAndSet(i, i - 1));
         return true;
     }
+
+    /**
+     * Releases previously obtained permit.
+     */
+    public void release() {
+        int i;
+        do {
+            i = cur.get();
+            if (i >= max) {
+                return;
+            }
+        } while (!cur.compareAndSet(i, i + 1));
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(super.toString());
+        builder.append(" [max=").append(max).append(", ");
+        if (cur != null) {
+            builder.append("cur=").append(cur.get());
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

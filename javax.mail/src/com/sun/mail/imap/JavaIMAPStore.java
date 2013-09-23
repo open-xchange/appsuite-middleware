@@ -144,18 +144,20 @@ public class JavaIMAPStore extends IMAPStore {
         this(session, url, "imap", false);
     }
 
+    /*-
+     * 
     @Override
     protected IMAPProtocol newIMAPProtocol(String host, int port) throws IOException, ProtocolException {
         return new JavaIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger);
     }
-
-    @Override
-    protected IMAPProtocol newIMAPProtocol(String host, int port, Properties props) throws IOException, ProtocolException {
-        return new JavaIMAPProtocol(name, host, port, props, isSSL, logger);
-    }
+    */
 
     @Override
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
+        if (p.isAuthenticated()) {
+            super.login(p, u, pw);
+            return;
+        }
         /*
          * Auth stuff
          */

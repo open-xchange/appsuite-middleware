@@ -54,7 +54,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2013-09-05 15:00+0200\n"
+"PO-Revision-Date: 2013-09-20 14:40+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1951,6 +1951,14 @@ msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
 msgstr ""
 "Die Verzeichnis-Version \"%1$s\" mit der Prüfsumme \"%2$s\" ist ungültig."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:84
+msgid "Push via long polling is not available"
+msgstr "Push via Long polling ist nicht verfügbar."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:85
+msgid "The server is too busy at the moment - please try again later."
+msgstr "Der Server ist derzeit ausgelastet. Bitte später erneut versuchen."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Es trat ein Fehler für folgende Aktion auf: %1$s"
@@ -3159,6 +3167,18 @@ msgid ""
 msgstr ""
 "Anfrage an Server wurde abgelehnt. Die ursprüngliche Client IP-Adresse hat "
 "sich geändert. Bitte erneut versuchen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:101
+msgid "line.separator"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:101
+msgid ""
+"Client login IP changed from %1$s to %2$s and is not covered by IP white-"
+"list or netmask."
+msgstr ""
+"Die Client- Login-IP änderte sich von %1$s zu %2$s und wird nicht durch "
+"die IP-Whitelist oder Netzmaske abgedeckt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:103
 msgid "Your session was invalidated. Please try again."
@@ -5266,18 +5286,12 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full."
+"mailbox is nearly full. In that case, please try to empty your deleted items "
+"first, or delete smaller messages first."
 msgstr ""
 "Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
-"Wahrscheinlich ist Ihre Mailbox fast voll."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
-msgid ""
-"In that case, please try to empty your deleted items first, or delete "
-"smaller messages first."
-msgstr ""
-"Entfernen Sie in diesem Fall zunächst Ihre gelöschten Objekte oder löschen "
-"Sie zunächst kleinere Nachrichten."
+"Wahrscheinlich ist Ihre Mailbox fast voll. Entfernen Sie in diesem Fall "
+"Ihre gelöschten Objekte oder löschen Sie zuerst kleinere Nachrichten."
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -5457,14 +5471,10 @@ msgstr "Verschieben nicht erlaubt"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s)."
+"context=%4$s). Error message from server: %5$s"
 msgstr ""
 "Anmeldeverzögerung verweigert die Verbindung zum Server %1$s mit dem Login "
-"%2$s (Benutzer=%3$s, Kontext=%4$s)."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
-msgid "Error message from server: %5$s"
-msgstr "Fehlermeldung vom Server: %5$s"
+"%2$s (Benutzer=%3$s, Kontext=%4$s). Fehlermeldung vom Server: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -5473,14 +5483,11 @@ msgstr "Fehlermeldung vom Server: %5$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds."
+"context=%4$s). Try again in %5$s seconds. Error message from server: %6$s"
 msgstr ""
 "Anmeldeverzögerung verweigert die Verbindung zum Server %1$s mit dem Login "
-"%2$s (Benutzer=%3$s, Kontext=%4$s). Versuchen Sie es in %5$s Sekunden erneut."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
-msgid "Error message from server: %6$s"
-msgstr "Fehlermeldung vom Server: %6$s"
+"%2$s (Benutzer=%3$s, Kontext=%4$s). Versuchen Sie es in %5$s Sekunden erneut. "
+"Fehlermeldung vom Server: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -5841,91 +5848,6 @@ msgstr ""
 "Quota überschritten. Bitte löschen Sie einige Objekte, um Platz für neue zu "
 "schaffen."
 
-#. * The mandatory session information is missing.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:62
-msgid "The session information didn't match any ServerSession"
-msgstr "Die Sitzungsinformation passt zu keiner ServerSession"
-
-#. * "Obligatory key \"%1$s\" is missing from the Stanza"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
-msgid "Obligatory key \"%1$s\" is missing from the Stanza"
-msgstr "Erforderlicher Key \"%1$s\" nicht im Stanza vorhanden"
-
-#. * Could not find a builder for the specified element: . \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
-msgid "Could not find a builder for the given element: . \"%1$s\""
-msgstr "Kein Builder für das angegebene Element gefunden:  . \"%1$s\""
-
-#. * Error while building Stanza: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:68
-msgid "Error while building Stanza: \"%1$s\""
-msgstr "Fehler beim Bauen von 'Stanza': \"%1$s\""
-
-#. * Could not find a transformer for the PayloadElement: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:70
-msgid "Could not find a transformer for the PayloadElement: \"%1$s\""
-msgstr "Kein Umwandler für das PayloadElement gefunden:  . \"%1$s\""
-
-#. * Could not find an initializer for the specified stanza
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:72
-msgid "Could not find an initializer for the given stanza: . \"%1$s\""
-msgstr "Kein Initialisierer für angegebenes Stanza gefunden:  . \"%1$s\""
-
-#. * Error while transforming a PayloadElement: \"%1$s. %2$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:74
-msgid "Error while transforming a PayloadElement: \"%1$s, %2$s\""
-msgstr "Fehler beim Transformieren eines PayloadElement: \"%1$s, %2$s\""
-
-#. * Error while converting a PayloadElement: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:76
-msgid "Error while converting PayloadElement data: \"%1$s\""
-msgstr "Fehler beim Konvertieren der PayloadElement-Daten: \"%1$s\""
-
-#. * The following obligatory element is missing: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:78
-msgid "The following obligatory element is missing: \"%1$s\""
-msgstr "Folgendes obligatorisches Element fehlt: \"%1$s\""
-
-#. * Malformed Presence Data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:80
-msgid "Malformed Presence Data"
-msgstr "Presence-Daten sind nicht wohlgeformt"
-
-#. * Malformed Message Data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:82
-msgid "Malformed Message Data"
-msgstr "Fehlerhafte Nachrichten-Daten"
-
-#. * Malformed IQ Data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
-msgid "Malformed IQ Data"
-msgstr "Fehlerhafte Iq-Daten"
-
-#. * Malformed Presence Element: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:86
-msgid "Malformed Presence Element: \"%1$s\""
-msgstr "Presence-Element ist nicht wohlgeformt: \"%1$s\""
-
-#. * Malformed Message Element: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:88
-msgid "Malformed Message Element: \"%1$s\""
-msgstr "Fehlerhaftes Nachrichten-Element:  \"%1$s\""
-
-#. * Malformed IQ Element: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:90
-msgid "Malformed IQ Element: \"%1$s\""
-msgstr "Fehlerhaftes IQ-Element: \"%1$s\""
-
-#. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:92
-msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
-msgstr "Ungültiger Wert \"%1$s\" für den Schlüssel \"%1$s\" in: %3$s"
-
-#. * Malformed POST Data"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:94
-msgid "Malformed POST Data"
-msgstr "POST-Daten sind nicht wohlgeformt"
-
 #. Could not find a handler for the specified stanza
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not find a handler for the given stanza: . \"%1$s\""
@@ -5968,6 +5890,91 @@ msgstr "Unerwarteter Fehler: %1$s"
 msgid "Could not send directed Presence to resource: %1$s"
 msgstr ""
 "'Directed Presence' konnte nicht an diese Ressource gesendet werden: %1$s"
+
+#. * The mandatory session information is missing.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:62
+msgid "The session information didn't match any ServerSession"
+msgstr "Die Sitzungsinformation passt zu keiner ServerSession"
+
+#. * "Obligatory key \"%1$s\" is missing from the Stanza"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:64
+msgid "Obligatory key \"%1$s\" is missing from the Stanza"
+msgstr "Erforderlicher Key \"%1$s\" nicht im Stanza vorhanden"
+
+#. * Could not find a builder for the specified element: . \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:66
+msgid "Could not find a builder for the given element: . \"%1$s\""
+msgstr "Kein Builder für das angegebene Element gefunden:  . \"%1$s\""
+
+#. * Error while building Stanza: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:68
+msgid "Error while building Stanza: \"%1$s\""
+msgstr "Fehler beim Bauen von 'Stanza': \"%1$s\""
+
+#. * Could not find a transformer for the PayloadElement: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:70
+msgid "Could not find a transformer for the PayloadElement: \"%1$s\""
+msgstr "Kein Umwandler für das PayloadElement gefunden:  . \"%1$s\""
+
+#. * Could not find an initializer for the specified stanza
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:72
+msgid "Could not find an initializer for the given stanza: . \"%1$s\""
+msgstr "Kein Initialisierer für angegebenes Stanza gefunden:  . \"%1$s\""
+
+#. * Error while transforming a PayloadElement: \"%1$s. %2$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:74
+msgid "Error while transforming a PayloadElement: \"%1$s, %2$s\""
+msgstr "Fehler beim Transformieren eines PayloadElement: \"%1$s, %2$s\""
+
+#. * Error while converting a PayloadElement: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:76
+msgid "Error while converting PayloadElement data: \"%1$s\""
+msgstr "Fehler beim Konvertieren der PayloadElement-Daten: \"%1$s\""
+
+#. * The following obligatory element is missing: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:78
+msgid "The following obligatory element is missing: \"%1$s\""
+msgstr "Folgendes obligatorisches Element fehlt: \"%1$s\""
+
+#. * Malformed Presence Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:80
+msgid "Malformed Presence Data"
+msgstr "Presence-Daten sind nicht wohlgeformt"
+
+#. * Malformed Message Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:82
+msgid "Malformed Message Data"
+msgstr "Fehlerhafte Nachrichten-Daten"
+
+#. * Malformed IQ Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:84
+msgid "Malformed IQ Data"
+msgstr "Fehlerhafte Iq-Daten"
+
+#. * Malformed Presence Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:86
+msgid "Malformed Presence Element: \"%1$s\""
+msgstr "Presence-Element ist nicht wohlgeformt: \"%1$s\""
+
+#. * Malformed Message Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:88
+msgid "Malformed Message Element: \"%1$s\""
+msgstr "Fehlerhaftes Nachrichten-Element:  \"%1$s\""
+
+#. * Malformed IQ Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:90
+msgid "Malformed IQ Element: \"%1$s\""
+msgstr "Fehlerhaftes IQ-Element: \"%1$s\""
+
+#. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:92
+msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
+msgstr "Ungültiger Wert \"%1$s\" für den Schlüssel \"%1$s\" in: %3$s"
+
+#. * Malformed POST Data"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:94
+msgid "Malformed POST Data"
+msgstr "POST-Daten sind nicht wohlgeformt"
 
 #. * Invalid context ID. Couldn't find context for: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.presence.subscribe/src/com/openexchange/realtime/presence/subscribe/PresenceSubscribeExceptionMessages.java:63
@@ -6024,6 +6031,14 @@ msgstr "Ihre Sitzung ist ungültig."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:112
 msgid "The sent sequence is invalid."
 msgstr "Die gesendete Sequenz ist ungültig."
+
+#. * The server has no state associated with this client. Please enrol first.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:115
+msgid ""
+"The server has no state associated with this client. Please enrol first."
+msgstr ""
+"Der Server besitzt keinen mit diesem Client assoziierten Status. "
+"Bitte zuerst registrieren. "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -10274,18 +10289,12 @@ msgstr "Nicht unterstützter MIME-Typ %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:272
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full."
+"full. Please try to empty your deleted items first, or delete smaller "
+"messages first."
 msgstr ""
-"Nachricht konnte nicht in den Papierkorb verschoben werden, da Ihre Mailbox "
-"nahezu voll ist. "
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:272
-msgid ""
-"Please try to empty your deleted items first, or delete smaller messages "
-"first."
-msgstr ""
-"Entfernen Sie zunächst Ihre gelöschten Objekte oder löschen Sie zunächst "
-"kleinere Nachrichten."
+"Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
+"Wahrscheinlich ist Ihre Mailbox fast voll. Entfernen Sie in diesem Fall Ihre "
+"gelöschten Objekte oder löschen Sie zuerst kleinere Nachrichten."
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -10800,13 +10809,10 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:106
-msgid "Folder \"%1$s\" has been closed."
-msgstr "Der Ordner \"%1$s\" wurde geschlossen."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:106
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:112
-msgid "Probably your request took too long."
-msgstr "Wahrscheinlich dauerte Ihre Anfrage zu lang."
+msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
+msgstr ""
+"Ordner \"%1$s\" wurde geschlossen. Wahrscheinlich dauerte Ihre Anfrage zu "
+"lang."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -10815,10 +10821,10 @@ msgstr "Wahrscheinlich dauerte Ihre Anfrage zu lang."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:112
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-"%4$s, context=%5$s) ."
+"%4$s, context=%5$s). Probably your request took too long."
 msgstr ""
-"Der Ordner %1$s wurde auf dem Mailserver %2$s mit dem Login %3$s (Benutzer="
-"%4$s, Kontext=%5$s) geschlossen."
+"Ordner \"%1$s\" wurde auf dem Mailserver %2$s mit dem Login %3$s (Benutzer="
+"%4$s, Kontext=%5$s) geschlossen. Wahrscheinlich dauerte die Anfrage zu lang."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -11182,27 +11188,21 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid ""
-"That mailbox is already in use by another process. Please try again later."
+"That mailbox is already in use by another process. Please try again later. "
+"Error message: %1$s"
 msgstr ""
 "Diese Mailbox wird bereits von einem anderen Prozess verwendet. Bitte erneut "
-"versuchen."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
-msgid "Error message: %1$s"
-msgstr "Fehlermeldung: %1$s"
+"versuchen. Fehlermeldung: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid ""
 "That mailbox is already in use by another process on %1$s mail server for "
-"login %2$s (user=%3$s, context=%4$s). Please try again later."
+"login %2$s (user=%3$s, context=%4$s). Please try again later. Error message: "
+"%5$s"
 msgstr ""
 "Diese Mailbox wird bereits von einem anderen Prozess auf dem %1$s-Mailserver "
 "für das Login %2$s (Benutzer=%3$s, Kontext=%4$s) verwendet. Bitte erneut "
-"versuchen."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
-msgid "Error message: %5$s"
-msgstr "Fehlermeldung: %5$s"
+"versuchen. Fehlermeldung: %5$s"
 
 #. Unexpected error: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -12179,20 +12179,21 @@ msgstr ""
 "Der freigegebene Ordner %1$s darf im Kontext %2$s nicht aktualisiert werden."
 
 #. *
-#. * The attribute %1$s contains too much characters. Current length %3$s is more than allowed length of %2$s characters.
+#. * The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:427
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:428
 msgid ""
-"he attribute %1$s contains too many characters. Current length %3$d is more "
-"than allowed length of %2$d characters."
+"The value for attribute %1$s contains more than the allowed number of %2$d "
+"characters. Current length: %3$d characters."
 msgstr ""
-"Das Attribut %1$s enthält zu viele Zeichen. Aktuelle Anzahl %3$d übersteigt "
+"Der Wert für das Attribut %1$s enthält zu viele Zeichen. Aktuelle Anzahl %3$d "
+"übersteigt "
 "die zulässige Anzahl von %2$d Zeichen."
 
 #. *
 #. * Unable to map OCL permission value %1$s to a JSON permission value
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:431
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:432
 msgid "Unable to map OCL permission value %1$s to a JSON permission value"
 msgstr ""
 "Mapping von OCL-Berechtigungswert %1$s auf JSON-Berechtigungswert nicht "
@@ -12201,7 +12202,7 @@ msgstr ""
 #. *
 #. * Folder existence cannot be checked due to insufficient folder information
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:435
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:436
 msgid ""
 "Folder existence cannot be checked due to insufficient folder information"
 msgstr ""
@@ -12211,21 +12212,21 @@ msgstr ""
 #. *
 #. * A runtime error occurred in context %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:439
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:440
 msgid "A runtime error occurred in context %1$s"
 msgstr "Es trat ein Laufzeit-Fehler im Kontext %1$s auf"
 
 #. *
 #. * This method is not applicable to an IMAP permission.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:443
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:444
 msgid "This method is not applicable to an IMAP permission."
 msgstr "Diese Methode ist nicht auf eine IMAP-Berechtigung anwendbar."
 
 #. *
 #. * No subfolder creation underneath shared folder %1$s in context %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:447
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:448
 msgid "No subfolder creation below shared folder %1$s in context %2$s"
 msgstr ""
 "Unterhalb des freigegebenen Ordners %1$s im Kontext %2$s können keine "
@@ -12234,7 +12235,7 @@ msgstr ""
 #. *
 #. * User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:451
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:452
 msgid ""
 "User %1$s granted invalid permissions on shared folder %2$s in context %3$s. "
 "Only the owner of the parent shared folder %4$s can administrate the folder."
@@ -12246,7 +12247,7 @@ msgstr ""
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:455
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:456
 msgid "Owner %1$s of default folder %2$s must keep the folder admin permission"
 msgstr ""
 "Der Eigentümer %1$s des Standardordners %2$s muss die Adminrechte für den "
@@ -12255,7 +12256,7 @@ msgstr ""
 #. *
 #. * User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:459
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:460
 msgid ""
 "User %1$s is not allowed to share folder %2$s in context %3$s due to user "
 "configuration"
@@ -12267,7 +12268,7 @@ msgstr ""
 #. * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s
 #. * in context %3$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:464
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:465
 msgid ""
 "The permissions for the user %1$s are limited. It is not possible to grant "
 "this user the wanted permissions for the folder %2$s in context %3$s."
@@ -12280,7 +12281,7 @@ msgstr ""
 #. * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently
 #. * cannot delete its parent folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:469
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:470
 msgid ""
 "Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no "
 "delete rights for this subfolder and consequently cannot delete its parent "
@@ -12293,7 +12294,7 @@ msgstr ""
 #. *
 #. * An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s. Please choose another display name.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:473
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:474
 msgid ""
 "An infostore folder named %1$s already exists below folder %2$s (%3$s) in "
 "context %4$s. Please choose another display name."
@@ -12304,7 +12305,7 @@ msgstr ""
 #. *
 #. * Folder contains invalid data: "%1$s"
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:477
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:478
 msgid "Folder contains invalid data: \"%1$s\""
 msgstr "Der Ordner enthält ungültige Daten: \"%1$s\""
 
@@ -12312,7 +12313,7 @@ msgstr "Der Ordner enthält ungültige Daten: \"%1$s\""
 #. * You already share a personal folder named "%1$s" with the same user. You can not share two folders with exactly the same name
 #. * with a user. Please rename the folder before sharing it with this user.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:482
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:483
 msgid ""
 "You already share a personal folder named \"%1$s\" with the same user. You "
 "can not share two folders with exactly the same name with a user. Please "
@@ -12326,7 +12327,7 @@ msgstr ""
 #. *
 #. * Folder module cannot be updated since folder is not empty
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:486
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:487
 msgid "Folder module cannot be updated since folder is not empty"
 msgstr ""
 "Ordner-Modul kann nicht aktualisiert werden, da der Ordner nicht leer ist."
@@ -12334,7 +12335,7 @@ msgstr ""
 #. *
 #. * Duplicate permission defined for user %1$s. Only one permission per user is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:490
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:491
 msgid ""
 "Duplicate permission defined for user %1$s. Only one permission per user is "
 "allowed."
@@ -12345,7 +12346,7 @@ msgstr ""
 #. *
 #. * Duplicate permission defined for group %1$s. Only one permission per group is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:494
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:495
 msgid ""
 "Duplicate permission defined for group %1$s. Only one permission per group "
 "is allowed."
@@ -12356,7 +12357,7 @@ msgstr ""
 #. *
 #. * Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:498
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
 msgid ""
 "Only the folder visibility permission is allowed to be changed for folder "
 "%1$s in context %2$s."
@@ -12367,7 +12368,7 @@ msgstr ""
 #. *
 #. * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:502
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:503
 msgid ""
 "Only individual user permissions, but no group permissions are allowed for "
 "folder %1$s in context %2$s."
@@ -12378,7 +12379,7 @@ msgstr ""
 #. *
 #. * No individual user permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:506
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:507
 msgid ""
 "No individual user permissions are allowed for folder %1$s in context %2$s."
 msgstr ""
@@ -12388,14 +12389,14 @@ msgstr ""
 #. *
 #. * Folder module must not be updated.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:510
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:511
 msgid "Folder module must not be updated."
 msgstr "Das Ordnermodul darf nicht aktualisiert werden."
 
 #. *
 #. * The module of a default folder must not be changed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:514
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:515
 msgid "The module of a default folder must not be changed."
 msgstr "Das Modul eines Standardordners darf nicht geändert werden."
 
@@ -12405,7 +12406,7 @@ msgstr "Das Modul eines Standardordners darf nicht geändert werden."
 #. * No necessary rename access granted for update operation
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:521
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:522
 msgid "User %1$s must not rename folder %2$s in context %3$s"
 msgstr ""
 "Benutzer %1$s hat keine Berechtigung zum Umbenennen des Ordners %2$s im "
@@ -12414,14 +12415,14 @@ msgstr ""
 #. *
 #. * Failed to create folder. Please retry.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:525
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:526
 msgid "Failed to create folder. Please retry."
 msgstr "Der Ordner konnte nicht angelegt werden. Bitte erneut versuchen."
 
 #. *
 #. * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:529
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:530
 msgid ""
 "Delete cannot be performed because of locked documents in folder %1$s in "
 "context %2$s."
@@ -12432,17 +12433,17 @@ msgstr ""
 #. *
 #. * Operation may only be performed for context administrator.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:533
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:534
 msgid "Operation may only be performed for context administrator."
 msgstr "Der Vorgang kann nur für den Kontext-Admin ausgeführt werden."
 
 #. Folder %1$s must not be deleted in context %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:536
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:537
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "Der Ordner %1$s darf im Kontext %2$s nicht gelöscht werden."
 
 #. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:540
 msgid ""
 "Owner %1$s of folder %2$s has been restored to keep the folder admin "
 "permission"
@@ -15746,6 +15747,56 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "This message could not be moved to trash folder, possibly because your "
+#~ "mailbox is nearly full."
+#~ msgstr ""
+#~ "Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
+#~ "Wahrscheinlich ist Ihre Mailbox fast voll."
+
+#~ msgid ""
+#~ "In that case, please try to empty your deleted items first, or delete "
+#~ "smaller messages first."
+#~ msgstr ""
+#~ "Entfernen Sie in diesem Fall zunächst Ihre gelöschten Objekte oder "
+#~ "löschen Sie zunächst kleinere Nachrichten."
+
+#~ msgid "Error message from server: %5$s"
+#~ msgstr "Fehlermeldung vom Server: %5$s"
+
+#~ msgid "Error message from server: %6$s"
+#~ msgstr "Fehlermeldung vom Server: %6$s"
+
+#~ msgid ""
+#~ "This message could not be moved to trash folder as your mailbox is nearly "
+#~ "full."
+#~ msgstr ""
+#~ "Nachricht konnte nicht in den Papierkorb verschoben werden, da Ihre "
+#~ "Mailbox nahezu voll ist. "
+
+#~ msgid ""
+#~ "Please try to empty your deleted items first, or delete smaller messages "
+#~ "first."
+#~ msgstr ""
+#~ "Entfernen Sie zunächst Ihre gelöschten Objekte oder löschen Sie zunächst "
+#~ "kleinere Nachrichten."
+
+#~ msgid "Folder \"%1$s\" has been closed."
+#~ msgstr "Der Ordner \"%1$s\" wurde geschlossen."
+
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) ."
+#~ msgstr ""
+#~ "Der Ordner %1$s wurde auf dem Mailserver %2$s mit dem Login %3$s "
+#~ "(Benutzer=%4$s, Kontext=%5$s) geschlossen."
+
+#~ msgid "Error message: %1$s"
+#~ msgstr "Fehlermeldung: %1$s"
+
+#~ msgid "Error message: %5$s"
+#~ msgstr "Fehlermeldung: %5$s"
+
 #~ msgid "General error: %1$s"
 #~ msgstr "Allgemeiner Fehler: %1$s"
 
@@ -15871,15 +15922,6 @@ msgstr "Zulu"
 
 #~ msgid "The following needed service is missing: %1$s"
 #~ msgstr "Folgender Dienst wird benötigt, fehlt jedoch: %1$s"
-
-#~ msgid ""
-#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s) .\n"
-#~ "Probably your request took too long."
-#~ msgstr ""
-#~ "Ordner \"%1$s\" wurde auf dem Mailserver %2$s mit dem Login %3$s "
-#~ "(Benutzer=%4$s, Kontext=%5$s) geschlossen.\n"
-#~ "Wahrscheinlich dauerte die Anfrage zu lang."
 
 #, fuzzy
 #~ msgid ""
