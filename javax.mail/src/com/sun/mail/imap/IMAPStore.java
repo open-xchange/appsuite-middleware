@@ -2126,4 +2126,23 @@ public class IMAPStore extends Store
 	return debugpassword ? password :
 				(password == null ? "<null>" : "<non-null>");
     }
+
+    /**
+     * Gets the host
+     *
+     * @return The host
+     */
+    public String getHost() {
+        return host;
+    }
+
+    /**
+     * Gets the port
+     *
+     * @return The port
+     */
+    public int getPort() {
+        return port;
+    }
+
 }

@@ -50,7 +50,10 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.canCreateSubfolder;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.mail.MessagingException;
+import javax.mail.Store;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.imap.services.Services;
@@ -59,6 +62,7 @@ import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link RootSubfolderCache}
@@ -66,6 +70,56 @@ import com.sun.mail.imap.IMAPFolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RootSubfolderCache {
+
+    private static final class Key {
+        
+        private final String host;
+        private final int port;
+        private final int hash;
+
+        Key(String host, int port) {
+            super();
+            this.host = host;
+            this.port = port;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((host == null) ? 0 : host.hashCode());
+            result = prime * result + port;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            Key other = (Key) obj;
+            if (port != other.port) {
+                return false;
+            }
+            if (host == null) {
+                if (other.host != null) {
+                    return false;
+                }
+            } else if (!host.equals(other.host)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static final ConcurrentMap<Key, Boolean> CACHE = new ConcurrentHashMap<Key, Boolean>(16);
 
     /**
      * No instance
@@ -85,25 +139,17 @@ public final class RootSubfolderCache {
      * @throws MessagingException If checking subfolder creation fails
      */
     public static Boolean canCreateSubfolders(final DefaultFolder f, final boolean load, final Session session, final int accontId) throws MessagingException {
-        final CreationCacheEntry entry = new CreationCacheEntry();
-        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
-        mailCache.get(entry);
-        if (load && (null == entry.getValue())) {
-            entry.setValue(canCreateSubfolder(f));
-            mailCache.put(entry);
+        final IMAPStore store = (IMAPStore) f.getStore();
+        final Key key = new Key(store.getHost(), store.getPort());
+        Boolean b = CACHE.get(key);
+        if (null == b) {
+            Boolean nb = canCreateSubfolder(f);
+            b = CACHE.putIfAbsent(key, nb);
+            if (null == b) {
+                b = nb;
+            }
         }
-        return entry.getValue();
-    }
-
-    /**
-     * Removes cached <code>boolean</code> value if root folder allows subfolder creation
-     *
-     * @param f The IMAP root folder
-     * @param session The session providing the session-bound cache
-     * @param accontId The account ID
-     */
-    public static void removeCachedRights(final IMAPFolder f, final Session session, final int accountId) {
-        SessionMailCache.getInstance(session, accountId).remove(new CreationCacheEntry());
+        return b;
     }
 
     private static final class CreationCacheEntry implements SessionMailCacheEntry<Boolean> {
