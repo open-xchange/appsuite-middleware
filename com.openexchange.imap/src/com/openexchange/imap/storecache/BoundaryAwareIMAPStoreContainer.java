@@ -51,7 +51,6 @@ package com.openexchange.imap.storecache;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import org.apache.commons.logging.Log;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.util.PropUtil;
 
@@ -62,8 +61,6 @@ import com.sun.mail.util.PropUtil;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreContainer {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(BoundaryAwareIMAPStoreContainer.class);
 
     private volatile Limiter limiter;
 
