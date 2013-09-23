@@ -138,6 +138,8 @@ fi
 prepare for 7.4.1 release
 * Fri Sep 20 2013 Marc Arens <marc.arens@open-xchange.com>
 Tenth candidate for 7.4.0 release
+* Tue Sep 17 2013 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2013-09-26
 * Thu Sep 12 2013 Marc Arens <marc.arens@open-xchange.com>
 Ninth candidate for 7.4.0 release
 * Wed Sep 11 2013 Marc Arens <marc.arens@open-xchange.com>
