@@ -49,16 +49,24 @@
 
 package com.openexchange.ajax.session;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.httpclient.Cookie;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.simple.SimpleResponse;
 import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.java.Charsets;
 import com.openexchange.test.json.JSONAssertion;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * Tests the login. This assumes autologin is allowed and cookie timeout is one week.
@@ -268,6 +276,22 @@ public class LoginTest extends AbstractLoginTest {
             assertEquals("action=redeem shouldn't work when randomToken is disabled", 400, redeemMethod.getStatusCode());
         }
     }
+    
+    @Test
+    public void testCookieHashSalt() throws Exception {
+        rawLogin(USER1);
+        HttpClient client = currentClient.getClient();
+        String agent = (String) client.getParams().getParameter("http.useragent");
+        String salt = "replaceMe1234567890";
+        Cookie[] cookies = client.getState().getCookies();
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().startsWith("open-xchange-secret")) {
+                assertEquals("Bad cookie hash.", "open-xchange-secret-" + getHash(agent, salt), cookie.getName());
+            } else if (cookie.getName().startsWith("open-xchange-session")) {
+                assertEquals("Bad cookie hash.", "open-xchange-session-" + getHash(agent, salt), cookie.getName());
+            }
+        }
+    }
 
     private void assertResponseContains(String key) throws Exception {
         rawLogin(USER1);
@@ -289,6 +313,14 @@ public class LoginTest extends AbstractLoginTest {
                 "password", credentials[1]
                  );
 
+    }
+
+    private String getHash(String agent, String salt) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(agent.getBytes(Charsets.UTF_8));
+        md.update("com.openexchange.ox.gui.dhtml".getBytes(Charsets.UTF_8));
+        md.update(salt.getBytes());
+        return Pattern.compile("\\W").matcher(Base64.encode(md.digest())).replaceAll("");
     }
 
 }
