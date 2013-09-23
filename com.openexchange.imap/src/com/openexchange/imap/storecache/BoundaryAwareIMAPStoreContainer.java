@@ -108,11 +108,12 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
 
         // Await until permit is available
         synchronized (limiter) {
-            while (!limiter.acquire()) {
+            int count = maxRetryCount;
+            while (count-- > 0 && !limiter.acquire()) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): W A I T I N G -- " + limiter);
                 }
-                limiter.wait();
+                limiter.wait(2000);
             }
         }
         if (LOG.isDebugEnabled()) {
