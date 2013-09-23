@@ -73,6 +73,7 @@ public class HashCalculator {
     private static final HashCalculator SINGLETON = new HashCalculator();
 
     private String[] fields = new String[0];
+    private String salt;
 
     private HashCalculator() {
         super();
@@ -85,6 +86,7 @@ public class HashCalculator {
     public void configure(ConfigurationService service) {
         final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
         fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
+        salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890");
     }
 
     /**
@@ -119,6 +121,7 @@ public class HashCalculator {
                     md.update(header.getBytes(Charsets.UTF_8));
                 }
             }
+            md.update(salt.getBytes());
             return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {
             LOG.fatal(e.getMessage(), e);
