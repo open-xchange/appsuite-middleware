@@ -83,8 +83,10 @@ public class JDBC4ConnectionReturner implements Connection {
     private final boolean noTimeout;
     private final boolean write;
     private boolean usedAsRead;
+    private boolean usedForUpdate = false;
 
     protected Connection delegate;
+
 
     public JDBC4ConnectionReturner(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
         super();
@@ -119,7 +121,7 @@ public class JDBC4ConnectionReturner implements Connection {
         }
         final Connection toReturn = delegate;
         delegate = null;
-        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
+        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead, usedForUpdate);
     }
 
     @Override
@@ -405,5 +407,9 @@ public class JDBC4ConnectionReturner implements Connection {
         if (null == delegate) {
             throw new SQLException("Connection was already closed.");
         }
+    }
+
+    public void updatePerformed() {
+        usedForUpdate = true;
     }
 }

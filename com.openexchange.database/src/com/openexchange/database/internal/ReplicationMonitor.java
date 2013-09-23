@@ -59,6 +59,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -202,11 +206,26 @@ public final class ReplicationMonitor {
         return slaveTransaction >= masterTransaction;
     }
 
-    public void backAndIncrementTransaction(Pools pools, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
+    public void backAndIncrementTransaction(Pools pools, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead, boolean usedForUpdate) {
         final int poolId;
         if (write) {
+            boolean checkWriteCons = false;
+            BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
+            if (context != null) {
+                ServiceReference<ConfigurationService> configRef = context.getServiceReference(ConfigurationService.class);
+                if (configRef != null) {
+                    ConfigurationService config = context.getService(configRef);
+                    checkWriteCons = config.getBoolProperty("com.openexchange.database.checkWriteCons", false);
+                }
+            }
+
+            if (!usedAsRead && !usedForUpdate && checkWriteCons) {
+                Exception e = new Exception();
+                LOG.warn("A writable connection was used but no data has been manipulated.", e);
+            }
+
             poolId = assign.getWritePoolId();
-            if (active && poolId != assign.getReadPoolId() && !usedAsRead && Constants.CONFIGDB_WRITE_ID != poolId) {
+            if (active && poolId != assign.getReadPoolId() && (!usedAsRead || usedForUpdate) && Constants.CONFIGDB_WRITE_ID != poolId) {
                 increaseTransactionCounter(assign, con);
             } else if (active && poolId != assign.getReadPoolId() && Constants.CONFIGDB_WRITE_ID != poolId && !assign.isTransactionInitialized()) {
                 try {
