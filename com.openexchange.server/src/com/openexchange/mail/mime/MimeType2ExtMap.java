@@ -67,6 +67,7 @@ import java.util.Locale;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -225,11 +226,12 @@ public final class MimeType2ExtMap {
         if (null == fileName) {
             return MIME_APPL_OCTET;
         }
-        final int pos = fileName.lastIndexOf('.');
+        final String fn = Strings.unquote(fileName);
+        final int pos = fn.lastIndexOf('.');
         if (pos < 0) {
             return MIME_APPL_OCTET;
         }
-        final String s1 = fileName.substring(pos + 1);
+        final String s1 = fn.substring(pos + 1);
         if (s1.length() == 0) {
             return MIME_APPL_OCTET;
         }

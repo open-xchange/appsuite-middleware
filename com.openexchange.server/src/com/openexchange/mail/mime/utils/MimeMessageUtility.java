@@ -1838,6 +1838,50 @@ public final class MimeMessageUtility {
         }
     }
 
+    /**
+     * Gets the denoted (single) header.
+     *
+     * @param name The header name
+     * @param defaultValue The default value to return if absent
+     * @param part The part to look-up
+     * @return The header value or <code>defaultValue</code>
+     * @throws MessagingException If returning header fails
+     */
+    public static String getHeader(final String name, final String defaultValue, final Part part) throws MessagingException {
+        if (null == name || null == part) {
+            return defaultValue;
+        }
+        final String[] header = part.getHeader(name);
+        if (null == header || 0 == header.length) {
+            return defaultValue;
+        }
+        return isEmpty(header[0]) ? defaultValue : header[0];
+    }
+
+    /**
+     * Checks if given part is considered as an inline part, that is if:<br>
+     * <ul>
+     * <li>Part's disposition is equal to <code>&quot;inline&quot;</code> OR </li>
+     * <li>Part has no (file) name</li>
+     * </ul>
+     *
+     * @param part The part to check
+     * @return <code>true</code> if inline; otherwise <code>false</code>
+     * @throws MessagingException If check fails
+     */
+    public static boolean isInline(final Part part) throws MessagingException {
+        if (null == part) {
+            return false;
+        }
+        final String disposition = toLowerCase(getHeader("Content-Disposition", null, part));
+        if (null != disposition) {
+            return disposition.startsWith("inline") || disposition.indexOf("filename=") < 0;
+        }
+        // Check name
+        final String type = toLowerCase(getHeader("Content-Type", "", part));
+        return type.indexOf("name=") < 0;
+    }
+
     private static final String X_ORIGINAL_HEADERS = "x-original-headers";
 
     /**
