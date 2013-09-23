@@ -75,7 +75,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     protected final int port;
     protected final String login;
     protected final String pw;
-    private final int maxRetryCount;
+    protected final int maxRetryCount;
 
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
