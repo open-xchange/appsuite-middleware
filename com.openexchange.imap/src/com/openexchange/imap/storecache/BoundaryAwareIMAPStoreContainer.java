@@ -115,6 +115,14 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
                 }
                 limiter.wait(2000);
             }
+            if (count <= 0) {
+                // Timed out -- So what...?
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): T I M E D   O U T -- " + limiter);
+                }
+                // /final String message = "Max. number of connections exceeded. Try again later.";
+                // /throw new MessagingException(message, new com.sun.mail.iap.ConnectQuotaExceededException(message));
+            }
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- " + limiter);

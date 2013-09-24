@@ -168,7 +168,7 @@ public class DriveStorage {
         copiedFile.setFolderId(getFolderID(targetPath, true));
         copiedFile.setLastModified(new Date());
         copiedFile.setVersion("1");
-        List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID });
+        List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID, Field.LAST_MODIFIED });
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(targetPath, targetFileName));

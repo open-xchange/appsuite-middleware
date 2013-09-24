@@ -72,7 +72,7 @@ import com.openexchange.database.internal.ReplicationMonitor;
 
 /**
  * {@link JDBC4ConnectionReturner}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class JDBC4ConnectionReturner implements Connection {
@@ -91,6 +91,8 @@ public abstract class JDBC4ConnectionReturner implements Connection {
 
 	private final ReplicationMonitor monitor;
 
+	private boolean usedForUpdate = false;
+
     public JDBC4ConnectionReturner(final Pools pools, final ReplicationMonitor monitor, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
         super();
         this.pools = pools;
@@ -101,7 +103,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
         this.monitor = monitor;
         this.usedAsRead = usedAsRead;
     }
-    
+
     public void setUsedAsRead(boolean b) {
     	this.usedAsRead = b;
     }
@@ -123,7 +125,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
         }
         final Connection toReturn = delegate;
         delegate = null;
-        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
+        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead, usedForUpdate);
     }
 
     @Override
@@ -399,6 +401,10 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         checkForAlreadyClosed();
         return delegate.isWrapperFor(iface);
+    }
+
+    public void updatePerformed() {
+        usedForUpdate = true;
     }
 
     @Override

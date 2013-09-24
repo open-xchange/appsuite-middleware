@@ -95,17 +95,11 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Confi
         return configuration;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         if (null != serviceRegistration) {

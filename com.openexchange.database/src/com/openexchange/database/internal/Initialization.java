@@ -49,18 +49,19 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
+import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.internal.Configuration.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 
 /**
- * {@link Initialization}
- * 
+ * Contains the code to startup the complete database connection pooling and replication monitor.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class Initialization {
@@ -102,7 +103,7 @@ public final class Initialization {
         // Setting up database connection pools.
         pools = new Pools(timer);
         // Setting up the replication monitor
-        monitor = new ReplicationMonitor(configuration.getBoolean(Property.REPLICATION_MONITOR, true));
+        monitor = new ReplicationMonitor(configuration.getBoolean(REPLICATION_MONITOR, true), configuration.getBoolean(CHECK_WRITE_CONS, false));
         management.addOverview(new Overview(pools, monitor));
         // Add life cycle for configuration database
         final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);

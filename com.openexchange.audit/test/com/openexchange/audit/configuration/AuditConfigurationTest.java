@@ -47,50 +47,67 @@
  *
  */
 
-package com.openexchange.database.osgi;
+package com.openexchange.audit.configuration;
 
-import java.util.Stack;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-
-import com.openexchange.caching.CacheService;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.audit.services.Services;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.internal.CreateReplicationTable;
-import com.openexchange.management.ManagementService;
-import com.openexchange.timer.TimerService;
+import com.openexchange.exception.OXException;
+
 
 /**
- * Activator for the database bundle.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Unit tests for {@link AuditConfiguration}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.1
  */
-public class Activator implements BundleActivator {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Services.class })
+public class AuditConfigurationTest {
 
-    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+    /**
+     * Mock for the {@link ConfigurationService}
+     */
+    private ConfigurationService configurationService;
 
-    private ServiceRegistration<CreateTableService> createTableRegistration;
-
-    @Override
-    public void start(final BundleContext context) {
-        createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
-        trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new DatabaseServiceRegisterer(context)));
-        trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new CacheServiceCustomizer(context)));
-        for (final ServiceTracker<?, ?> tracker : trackers) {
-            tracker.open();
-        }
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+        configurationService = PowerMockito.mock(ConfigurationService.class);
     }
 
-    @Override
-    public void stop(final BundleContext context) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-        createTableRegistration.unregister();
+    @Test(expected = OXException.class)
+    public void testGetFileAccessLogging_ServicesNotAvailable_ThrowException() throws OXException {
+        AuditConfiguration.getFileAccessLogging();
     }
+
+    @Test
+    public void testGetFileAccessLogging_ServiceAvailableAndConfiguredTrue_ReturnTrue() throws OXException {
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
+        PowerMockito.when(this.configurationService.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true")).thenReturn(
+            "true");
+
+        boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
+        Assert.assertTrue(fileAccessLogging);
+
+    }
+
+    @Test
+    public void testGetFileAccessLogging_ServiceAvailableButNothingConfigured_ReturnFalse() throws OXException {
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
+
+        boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
+        Assert.assertFalse(fileAccessLogging);
+    }
+
 }

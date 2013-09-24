@@ -1,6 +1,13 @@
 * 2013-09-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 29000: Added null guard to check if stack trace has been null'ed in the meantime
+ - Fix for bug 29020: Deal with possibly absent client identifiers in user attribute table
+ - Fix for bug 28973: Pre-initialize request's time stamp
+ - Fix for bug 28933: Orderly pass empty content to message part
+ - Fix for bug 28900: Added null guards to arguments when retrieving a message's inline image
+ - Fix for bug 26000: Completed description sentence
+ - Fix for bug 25923: Avoid possible 'StringIndexOutOfBoundsException' when processing <base> tags
+ - Fix for bug 29031: Handle temporary absent TimerService gracefully
 
 * 2013-09-19 - thorben.betten@open-xchange.com
 

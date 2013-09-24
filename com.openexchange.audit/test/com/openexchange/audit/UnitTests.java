@@ -47,50 +47,27 @@
  *
  */
 
-package com.openexchange.database.osgi;
+package com.openexchange.audit;
 
-import java.util.Stack;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.internal.CreateReplicationTable;
-import com.openexchange.management.ManagementService;
-import com.openexchange.timer.TimerService;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.audit.configuration.AuditConfigurationTest;
+import com.openexchange.audit.impl.AuditEventHandlerTest;
 
 /**
- * Activator for the database bundle.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Unit tests for the bundle com.openexchange.audit
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.1
  */
-public class Activator implements BundleActivator {
+@RunWith(Suite.class)
+@SuiteClasses({
+    AuditConfigurationTest.class,
+    AuditEventHandlerTest.class
+})
+public class UnitTests {
 
-    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
-
-    private ServiceRegistration<CreateTableService> createTableRegistration;
-
-    @Override
-    public void start(final BundleContext context) {
-        createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
-        trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new DatabaseServiceRegisterer(context)));
-        trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<TimerService, TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
-        trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new CacheServiceCustomizer(context)));
-        for (final ServiceTracker<?, ?> tracker : trackers) {
-            tracker.open();
-        }
-    }
-
-    @Override
-    public void stop(final BundleContext context) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-        createTableRegistration.unregister();
+    public UnitTests() {
     }
 }

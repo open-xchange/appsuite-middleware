@@ -271,7 +271,9 @@ public final class Configuration {
         /** Test threads if they use connections correctly. */
         TEST_THREADS("testThreads"),
         /** Allows to disable the replication monitor. */
-        REPLICATION_MONITOR("com.openexchange.database.replicationMonitor");
+        REPLICATION_MONITOR("com.openexchange.database.replicationMonitor"),
+        /** Allows to write a warning into the logs if a connection to the master is only used to read data. */
+        CHECK_WRITE_CONS("com.openexchange.database.checkWriteCons");
 
         private String propertyName;
 
