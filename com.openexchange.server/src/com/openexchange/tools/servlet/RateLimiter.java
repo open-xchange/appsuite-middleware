@@ -65,6 +65,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.logging.Log;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
@@ -83,6 +84,8 @@ import com.openexchange.tools.servlet.http.Cookies;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RateLimiter {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RateLimiter.class);
 
     /**
      * Initializes a new {@link RateLimiter}.
@@ -335,7 +338,9 @@ public final class RateLimiter {
                 tmp = bucketMap;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    if (null == service) {
+                    final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                    if (null == service || null == timerService) {
+                        LOG.info(RateLimiter.class.getSimpleName() + " not yet fully initialized; awaiting " + (null == service ? ConfigurationService.class.getSimpleName() : "") + " " + (null == timerService ? TimerService.class.getSimpleName() : ""));
                         return null;
                     }
                     final int maxCapacity = service.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
@@ -343,7 +348,6 @@ public final class RateLimiter {
                     tmp = tmp2;
                     bucketMap = tmp;
 
-                    final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     final int delay = 300000; // Delay of 5 minutes
                     final Runnable r = new Runnable() {
 
