@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
@@ -329,7 +331,7 @@ public final class RateLimiter {
     private static ConcurrentMap<Key, Rate> bucketMap() {
         ConcurrentMap<Key, Rate> tmp = bucketMap;
         if (null == tmp) {
-            synchronized (CountingHttpServletRequest.class) {
+            synchronized (RateLimiter.class) {
                 tmp = bucketMap;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -374,7 +376,7 @@ public final class RateLimiter {
     private static int maxRate() {
         Integer tmp = maxRate;
         if (null == tmp) {
-            synchronized (CountingHttpServletRequest.class) {
+            synchronized (RateLimiter.class) {
                 tmp = maxRate;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -395,7 +397,7 @@ public final class RateLimiter {
     private static int maxRateTimeWindow() {
         Integer tmp = maxRateTimeWindow;
         if (null == tmp) {
-            synchronized (CountingHttpServletRequest.class) {
+            synchronized (RateLimiter.class) {
                 tmp = maxRateTimeWindow;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -416,7 +418,7 @@ public final class RateLimiter {
     private static boolean omitLocals() {
         Boolean tmp = omitLocals;
         if (null == tmp) {
-            synchronized (CountingHttpServletRequest.class) {
+            synchronized (RateLimiter.class) {
                 tmp = omitLocals;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -467,8 +469,7 @@ public final class RateLimiter {
         if (omitLocals() && LOCALS.contains(servletRequest.getServerName())) {
             return true;
         }
-        final String userAgent = servletRequest.getHeader("User-Agent");
-        if (lenientCheckForUserAgent(userAgent)) {
+        if (lenientCheckForRequest(servletRequest)) {
             return true;
             //maxRatePerMinute <<= 2;
         }
@@ -477,7 +478,7 @@ public final class RateLimiter {
             // Not yet fully initialized
             return true;
         }
-        final Key key = new Key(servletRequest, userAgent);
+        final Key key = new Key(servletRequest, servletRequest.getHeader("User-Agent"));
         while (true) {
             Rate rate = bucketMap.get(key);
             if (null == rate) {
@@ -570,7 +571,7 @@ public final class RateLimiter {
     private static List<UserAgentChecker> userAgentCheckers() {
         List<UserAgentChecker> tmp = userAgentCheckers;
         if (null == tmp) {
-            synchronized (CountingHttpServletRequest.class) {
+            synchronized (RateLimiter.class) {
                 tmp = userAgentCheckers;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -622,6 +623,66 @@ public final class RateLimiter {
                 }
             }
         }
+        return false;
+    }
+
+    private static volatile List<String> modules;
+
+    private static List<String> modules() {
+        List<String> tmp = modules;
+        if (null == tmp) {
+            synchronized (RateLimiter.class) {
+                tmp = modules;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return Arrays.asList("rt", "system");
+                    }
+                    final String sModules;
+                    {
+                        final String defaultValue = "rt, system";
+                        sModules = service.getProperty("com.openexchange.servlet.maxRateLenientModules", defaultValue);
+                    }
+                    if (isEmpty(sModules)) {
+                        tmp = Collections.emptyList();
+                    } else {
+                        final Set<String> set = new LinkedHashSet<String>();
+                        for (final String sModule : Strings.splitByComma(sModules)) {
+                            String s = unquote(sModule);
+                            if (!isEmpty(s)) {
+                                s = toLowerCase(s.trim());
+                                set.add(s);
+                            }
+                        }
+                        tmp = set.isEmpty() ? Collections.<String> emptyList() : (1 == set.size() ? Collections.singletonList(set.iterator().next()) : Collections.unmodifiableList(new ArrayList<String>(set)));
+                    }
+                    modules = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+
+    private static boolean lenientCheckForRequest(final HttpServletRequest servletRequest) {
+        // Servlet path check
+        {
+            final String requestURI = toLowerCase(servletRequest.getRequestURI());
+            final StringBuilder sb = new StringBuilder(toLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix()));
+            final int reslen = sb.length();
+            for (final String module : modules()) {
+                sb.setLength(reslen);
+                if (requestURI.startsWith(sb.append(module).toString())) {
+                    return true;
+                }
+            }
+        }
+
+        // User-Agent check
+        if (lenientCheckForUserAgent(servletRequest.getHeader("User-Agent"))) {
+            return true;
+        }
+
         return false;
     }
 
