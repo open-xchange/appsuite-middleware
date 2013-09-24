@@ -99,6 +99,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
+import com.openexchange.java.Strings;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -968,7 +969,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String prettyPrint(final String htmlContent) {
-        if (null == htmlContent) {
+        if (Strings.isEmpty(htmlContent)) {
             return htmlContent;
         }
         try {
@@ -1003,7 +1004,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed) {
-        if (null == htmlContent) {
+        if (Strings.isEmpty(htmlContent)) {
             return htmlContent;
         }
         /*
@@ -1066,7 +1067,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         href = imgTag.substring(pos+4, epos);
                     }
                     if (!href.startsWith("cid") && !href.startsWith("http")) {
-                        if (href.charAt(0) != '/') {
+                        if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
                         final String replacement = imgTag.substring(0, pos) + "src=\"" + base + href + "\"" + imgTag.substring(epos);
@@ -1102,7 +1103,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         href = hrefTag.substring(pos+11, epos);
                     }
                     if (!href.startsWith("cid") && !href.startsWith("http")) {
-                        if (href.charAt(0) != '/') {
+                        if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
                         final String replacement = hrefTag.substring(0, pos) + "background=\"" + base + href + "\"" + hrefTag.substring(epos);
@@ -1138,7 +1139,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         href = hrefTag.substring(pos+5, epos);
                     }
                     if (!href.startsWith("cid") && !href.startsWith("http")) {
-                        if (href.charAt(0) != '/') {
+                        if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
                         final String replacement = hrefTag.substring(0, pos) + "href=\"" + base + href + "\"" + hrefTag.substring(epos);
