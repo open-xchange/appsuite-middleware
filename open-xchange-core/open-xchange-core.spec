@@ -829,6 +829,12 @@ if [ "$VALUE" == "WARNING" -o -z "$VALUE" ]; then
     ox_set_property org.jaudiotagger.level SEVERE $PFILE
 fi
 
+# SoftwareChange_Request-1648
+PFILE=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.servlet.maxRateLenientModules $PFILE; then
+    ox_set_property com.openexchange.servlet.maxRateLenientModules "rt, system" $PFILE
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
