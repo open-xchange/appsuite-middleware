@@ -121,23 +121,30 @@ public class RealtimeException extends OXException {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof RealtimeException))
+        }
+        if (!(obj instanceof RealtimeException)) {
             return false;
+        }
         RealtimeException other = (RealtimeException) obj;
         if (delegate == null) {
-            if (other.delegate != null)
+            if (other.delegate != null) {
                 return false;
-        } else if (!delegate.equals(other.delegate))
+            }
+        } else if (!delegate.equals(other.delegate)) {
             return false;
+        }
         if (transformer == null) {
-            if (other.transformer != null)
+            if (other.transformer != null) {
                 return false;
-        } else if (!transformer.equals(other.transformer))
+            }
+        } else if (!transformer.equals(other.transformer)) {
             return false;
+        }
         return true;
     }
 

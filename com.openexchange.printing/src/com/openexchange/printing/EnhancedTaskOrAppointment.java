@@ -86,8 +86,9 @@ public class EnhancedTaskOrAppointment {
 		this.services = services;
 		this.taskOrAppointment = taskOrAppointment;
 		this.ctx = ctx;
-		if (taskOrAppointment != null)
-			initialize(taskOrAppointment);
+		if (taskOrAppointment != null) {
+            initialize(taskOrAppointment);
+        }
 
 	}
 

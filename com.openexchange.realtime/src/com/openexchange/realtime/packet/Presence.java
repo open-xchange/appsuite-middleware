@@ -523,15 +523,19 @@ public class Presence extends Stanza {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (!(obj instanceof Presence))
+        }
+        if (!(obj instanceof Presence)) {
             return false;
+        }
         Presence other = (Presence) obj;
-        if (type != other.type)
+        if (type != other.type) {
             return false;
+        }
         return true;
     }
 

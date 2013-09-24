@@ -86,8 +86,9 @@ public class EnhancedContact {
 	@SuppressWarnings("deprecation")
 	public String getFullname(Map<String, Object> contact) {
 		//TODO: Create i18n version - frontend has a nice one in io.ox.contacts/util#getFullName
-		if (contact.containsKey(ContactField.DISPLAY_NAME.getAjaxName()))
-			return (String) contact.get(ContactField.DISPLAY_NAME.getAjaxName());
+		if (contact.containsKey(ContactField.DISPLAY_NAME.getAjaxName())) {
+            return (String) contact.get(ContactField.DISPLAY_NAME.getAjaxName());
+        }
 		
 		if (	!(contact.containsKey(ContactField.GIVEN_NAME.getAjaxName()) || contact.containsKey(ContactField.SUR_NAME.getAjaxName()))
 			&& contact.containsKey(ContactField.COMPANY.getAjaxName())) {
@@ -116,8 +117,9 @@ public class EnhancedContact {
 			bob.append(contact.get(ContactField.SUFFIX.getAjaxName()));
 			bob.append(" ");
 		}
-		if (bob.lastIndexOf(" ") > 0)
-			return bob.substring(0, bob.lastIndexOf(" ")).toString();
+		if (bob.lastIndexOf(" ") > 0) {
+            return bob.substring(0, bob.lastIndexOf(" ")).toString();
+        }
 		return "";
 	}
 	
@@ -138,8 +140,9 @@ public class EnhancedContact {
 		
 		for(ContactField field: desiredFields) {
 			String key = String.valueOf(field.getAjaxName());
-			if(contact.containsKey(key))
-				phones.add((String) contact.get(key));
+			if(contact.containsKey(key)) {
+                phones.add((String) contact.get(key));
+            }
 		}
 		
 		return phones;
@@ -158,8 +161,9 @@ public class EnhancedContact {
 		
 		for(ContactField field: desiredFields) {
 			String key = String.valueOf(field.getAjaxName());
-			if(contact.containsKey(key))
-				phones.add((String) contact.get(key));
+			if(contact.containsKey(key)) {
+                phones.add((String) contact.get(key));
+            }
 		}
 		
 		return phones;
