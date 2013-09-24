@@ -2468,39 +2468,22 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * ++++++++++++++++++ Helper methods ++++++++++++++++++
      */
 
-    private static final String IMAP_OPERATIONS = "__imap-operations".intern();
-
     private void unsetMarker(final OperationKey key) {
-        @SuppressWarnings("unchecked") final ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
-        if (null != map) {
-            map.remove(key);
-        }
+        OperationKey.unsetMarker(key, session);
     }
 
-    @SuppressWarnings("unchecked")
     private boolean setMarker(final OperationKey key, final Folder imapFolder) throws OXException {
-        if (session instanceof PutIfAbsent) {
-            final PutIfAbsent session = (PutIfAbsent) this.session;
-            ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
-            if (null == map) {
-                final ConcurrentMap<OperationKey, Object> newMap = new ConcurrentHashMap<OperationKey, Object>(16);
-                map = (ConcurrentMap<OperationKey, Object>) session.setParameterIfAbsent(IMAP_OPERATIONS, newMap);
-                if (null == map) {
-                    map = newMap;
-                }
-            }
-            if (null != map.putIfAbsent(key, OperationKey.PRESENT)) {
-                // In use...
-                throw MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
-                    imapConfig.getServer(),
-                    imapConfig.getLogin(),
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()),
-                    MimeMailException.appendInfo("Mailbox is currently in use.", imapFolder));
-            }
-            return true;
+        final int result = OperationKey.setMarker(key, session);
+        if (result < 0) {
+            // In use...
+            throw MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
+                imapConfig.getServer(),
+                imapConfig.getLogin(),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()),
+                MimeMailException.appendInfo("Mailbox is currently in use.", imapFolder));
         }
-        return false;
+        return result > 0;
     }
 
     private static void closeSafe(final Folder folder) {

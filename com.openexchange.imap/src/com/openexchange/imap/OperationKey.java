@@ -51,6 +51,12 @@ package com.openexchange.imap;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.imap.services.Services;
+import com.openexchange.session.PutIfAbsent;
+import com.openexchange.session.Session;
 
 /**
  * {@link OperationKey} - An operation key.
@@ -64,7 +70,7 @@ public final class OperationKey implements Serializable {
     /**
      * The default value associated with a key.
      */
-    public static final Object PRESENT = new Object();
+    private static final Object PRESENT = new Object();
 
     /**
      * Operation type.
@@ -130,6 +136,72 @@ public final class OperationKey implements Serializable {
             return false;
         }
         return true;
+    }
+
+    // --------------------------------------------------------------------------------------- //
+
+    private static volatile Boolean synchronizeWriteAccesses;
+    private static boolean synchronizeWriteAccesses() {
+        Boolean tmp = synchronizeWriteAccesses;
+        if (null == tmp) {
+            synchronized (OperationKey.class) {
+                tmp = synchronizeWriteAccesses;
+                if (null == tmp) {
+                    final ConfigurationService configService = Services.optService(ConfigurationService.class);
+                    if (null == configService) {
+                        return false;
+                    }
+                    tmp = Boolean.valueOf(configService.getBoolProperty("com.openexchange.imap.synchronizeWriteAccesses", false));
+                    synchronizeWriteAccesses = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    private static final String IMAP_OPERATIONS = "__imap-operations".intern();
+
+    /**
+     * Unsets the marker for specified operation for given session.
+     *
+     * @param key The operation to unmark
+     * @param session The associated session
+     */
+    public static void unsetMarker(final OperationKey key, final Session session) {
+        @SuppressWarnings("unchecked") final ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
+        if (null != map) {
+            map.remove(key);
+        }
+    }
+
+    /**
+     * Sets the marker for specified operation for given session.
+     *
+     * @param key The operation to mark
+     * @param session The associated session
+     * @return A positive integer if mark was acquired, zero if not (don't care), or a negative integer if there was already a mark and has
+     *         not been releases in time
+     */
+    @SuppressWarnings("unchecked")
+    public static int setMarker(final OperationKey key, final Session session) {
+        if (!synchronizeWriteAccesses()) {
+            return 0; // zero -- do not care
+        }
+
+        // Acquire mark
+        if (session instanceof PutIfAbsent) {
+            final PutIfAbsent psession = (PutIfAbsent) session;
+            ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) psession.getParameter(IMAP_OPERATIONS);
+            if (null == map) {
+                final ConcurrentMap<OperationKey, Object> newMap = new ConcurrentHashMap<OperationKey, Object>(16);
+                map = (ConcurrentMap<OperationKey, Object>) psession.setParameterIfAbsent(IMAP_OPERATIONS, newMap);
+                if (null == map) {
+                    map = newMap;
+                }
+            }
+            return (null == map.putIfAbsent(key, OperationKey.PRESENT)) ? 1 : -1;
+        }
+        return 0;
     }
 
 }
