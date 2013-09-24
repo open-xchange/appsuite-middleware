@@ -2,6 +2,7 @@
 
  - Fix for bug 29000: Added null guard to check if stack trace has been null'ed in the meantime
  - Fix for bug 29020: Deal with possibly absent client identifiers in user attribute table
+ - Fix for bug 28973: Pre-initialize request's time stamp
 
 * 2013-09-19 - thorben.betten@open-xchange.com
 

@@ -962,6 +962,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         }
                     }
                 } catch (final UploadServletException e) {
+                    stage = Stage.STAGE_SERVICE_ENDED;
                     /*
                      * Log ServletException's own root cause separately
                      */
@@ -981,10 +982,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     byteChunk.append(bytes, 0, bytes.length);
                     outputBuffer.doWrite(byteChunk);
                 } catch (final InterruptedIOException e) {
+                    stage = Stage.STAGE_SERVICE_ENDED;
                     error = true;
                 } catch (final IOException e) {
+                    stage = Stage.STAGE_SERVICE_ENDED;
                     // Ignore
                 } catch (final Throwable t) {
+                    stage = Stage.STAGE_SERVICE_ENDED;
                     ExceptionUtils.handleThrowable(t);
                     final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
