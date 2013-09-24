@@ -214,10 +214,19 @@ public final class InlineImageDataSource implements ImageDataSource {
         final MailPart mailPart;
         {
             final String fullnameArgument = dataArguments.get(ARGS[0]);
+            if (null == fullnameArgument) {
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[0]);
+            }
             final FullnameArgument arg = prepareMailFolderParam(fullnameArgument);
             final String fullname = arg.getFullname();
             final String mailId = dataArguments.get(ARGS[1]);
+            if (null == mailId) {
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
+            }
             final String cid = dataArguments.get(ARGS[2]);
+            if (null == cid) {
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[2]);
+            }
             mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session);
             if (null == mailPart) {
                 throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(cid, mailId, fullname);
