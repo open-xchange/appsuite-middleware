@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
@@ -96,7 +95,6 @@ public final class UserizedFolderImpl implements UserizedFolder {
     private Date creationDate;
     private Date lastModified;
     private volatile Map<FolderField, FolderProperty> properties;
-    private volatile Map<String, Object> props;
     private int[] totalAndUnread;
 
     /**
@@ -113,22 +111,11 @@ public final class UserizedFolderImpl implements UserizedFolder {
         if (null == folder) {
             throw new IllegalArgumentException("Folder is null.");
         }
-        props = new ConcurrentHashMap<String, Object>(4);
         this.folder = folder;
         this.session = session;
         this.user = user;
         this.context = context;
 
-    }
-
-    @Override
-    public void setProps(final Map<String, Object> props) {
-        this.props = props;
-    }
-
-    @Override
-    public Map<String, Object> getProps() {
-        return props;
     }
 
     @Override
@@ -390,7 +377,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     public int getTotal() {
         if (null == totalAndUnread) {
             if (folder instanceof FolderExtension) {
-                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread(props);
+                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread();
                 if (null != totalAndUnread) {
                     return totalAndUnread[0];
                 }
@@ -405,7 +392,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     public int getUnread() {
         if (null == totalAndUnread) {
             if (folder instanceof FolderExtension) {
-                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread(props);
+                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread();
                 if (null != totalAndUnread) {
                     return totalAndUnread[1];
                 }

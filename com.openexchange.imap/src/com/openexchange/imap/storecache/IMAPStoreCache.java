@@ -209,6 +209,19 @@ public final class IMAPStoreCache {
     }
 
     /**
+     * Gets the number of currently in-use stores.
+     *
+     * @return The number of currently in-use stores
+     */
+    public int getInUseCount() {
+        int count = 0;
+        for (final IMAPStoreContainer container : map.values()) {
+            count += container.getInUseCount();
+        }
+        return count;
+    }
+
+    /**
      * Drops all associated with specified user.
      *
      * @param userId The user identifier

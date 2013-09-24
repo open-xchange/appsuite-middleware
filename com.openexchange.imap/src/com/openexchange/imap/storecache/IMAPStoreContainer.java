@@ -95,4 +95,11 @@ public interface IMAPStoreContainer {
      * Orderly clears this container.
      */
     void clear();
+
+    /**
+     * Gets the number of stores currently in-use.
+     *
+     * @return The number of stores currently in-use
+     */
+    int getInUseCount();
 }

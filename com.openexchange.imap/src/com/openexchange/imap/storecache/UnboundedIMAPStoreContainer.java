@@ -56,6 +56,7 @@ import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
@@ -76,6 +77,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     protected final String login;
     protected final String pw;
     protected final int maxRetryCount;
+    private final AtomicInteger inUseCount;
 
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
@@ -88,6 +90,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         this.port = port;
         this.pw = pw;
         this.server = server;
+        inUseCount = new AtomicInteger();
     }
 
     /**
@@ -97,6 +100,11 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      */
     protected BlockingQueue<IMAPStoreWrapper> getQueue() {
         return availableQueue;
+    }
+
+    @Override
+    public int getInUseCount() {
+        return inUseCount.get();
     }
 
     @Override
@@ -144,12 +152,14 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                 }
             }
         }
+        inUseCount.incrementAndGet();
         return imapStore;
     }
 
     @Override
     public void backStore(final IMAPStore imapStore) {
         backStoreNoValidityCheck(imapStore);
+        inUseCount.decrementAndGet();
     }
 
     protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
