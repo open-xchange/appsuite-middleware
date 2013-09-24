@@ -76,7 +76,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class OAuthLogin extends AbstractLoginRequestHandler {
 
-    private LoginConfiguration conf;
+    private final LoginConfiguration conf;
 
     /**
      * Initializes a new {@link OAuthLogin}.

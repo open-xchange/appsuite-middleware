@@ -49,7 +49,6 @@
 
 package com.openexchange.printing.contacts;
 
-import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -61,7 +60,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 
 public class EnhancedContact {
 	
-	private Locale locale;
+	private final Locale locale;
 
 	public EnhancedContact(Locale locale) {
 		this.locale = locale;

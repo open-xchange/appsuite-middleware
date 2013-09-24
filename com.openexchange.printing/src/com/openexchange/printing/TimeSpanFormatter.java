@@ -65,7 +65,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class TimeSpanFormatter extends DateFormatter {
 	
-	private Map<String, Object> timespanThingy;
+	private final Map<String, Object> timespanThingy;
 
 	public TimeSpanFormatter(Map<String, Object> timeSpanThingy, Locale locale, TimeZone tz) {
 		super(locale, tz);

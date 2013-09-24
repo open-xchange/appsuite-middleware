@@ -61,7 +61,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -72,7 +71,6 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -85,11 +83,11 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class FSFileAccess implements FileStorageFileAccess {
 
-    private java.io.File directory;
+    private final java.io.File directory;
 
-    private Session session;
+    private final Session session;
 
-    private FileStorageAccountAccess accountAccess;
+    private final FileStorageAccountAccess accountAccess;
 
     /**
      * Initializes a new {@link FSFileAccess}.

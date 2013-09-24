@@ -76,7 +76,7 @@ public class LastLoginRecorder implements LoginHandlerService {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(LastLoginRecorder.class);
 
     private int maxClientCount = -1;
-    private UserService userService;
+    private final UserService userService;
 
     public LastLoginRecorder(ConfigurationService confService, UserService userService) {
         super();

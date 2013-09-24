@@ -49,13 +49,8 @@
 
 package com.openexchange.importexport.exporters;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 

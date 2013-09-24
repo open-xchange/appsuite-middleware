@@ -67,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class RemoveAction extends AbstractSecretRecoveryAction {
 
-    private Set<EncryptedItemCleanUpService> cleanUpServices;
+    private final Set<EncryptedItemCleanUpService> cleanUpServices;
 
     public RemoveAction(ServiceLookup services, Set<EncryptedItemCleanUpService> cleanUpServices) {
         super(services);

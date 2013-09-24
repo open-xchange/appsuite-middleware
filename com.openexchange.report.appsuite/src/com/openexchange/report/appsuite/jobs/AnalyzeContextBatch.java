@@ -78,9 +78,9 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
 
     private static final Log LOG = LogFactory.getLog(AnalyzeContextBatch.class);
     
-    private String uuid;
+    private final String uuid;
     private String reportType;
-    private List<Integer> contextIds;
+    private final List<Integer> contextIds;
 
     /**
      *       

@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class TaskTemplateHelperFactory implements TemplateHelperFactory {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 	
     public TaskTemplateHelperFactory(ServiceLookup services) {
         this.services = services;

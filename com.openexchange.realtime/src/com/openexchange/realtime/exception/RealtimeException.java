@@ -69,7 +69,7 @@ public class RealtimeException extends OXException {
 
     private static final long serialVersionUID = -3650839506266250736L;
 
-    private OXException delegate;
+    private final OXException delegate;
 
     private Transformer transformer;
 
@@ -99,6 +99,7 @@ public class RealtimeException extends OXException {
         return RealtimeExceptionFactory.getInstance().create(transformer.getAtmosphere());
     }
 
+    @Override
     public String getLocalizedMessage() {
         return delegate.getLocalizedMessage();
     }
@@ -140,194 +141,242 @@ public class RealtimeException extends OXException {
         return true;
     }
 
+    @Override
     public Throwable getCause() {
         return delegate.getCause();
     }
 
+    @Override
     public void copyFrom(OXException e) {
         delegate.copyFrom(e);
     }
 
+    @Override
     public Throwable initCause(Throwable cause) {
         return delegate.initCause(cause);
     }
 
+    @Override
     public int getCode() {
         return delegate.getCode();
     }
 
+    @Override
     public Generic getGeneric() {
         return delegate.getGeneric();
     }
 
+    @Override
     public boolean isGeneric(Generic generic) {
         return delegate.isGeneric(generic);
     }
 
+    @Override
     public boolean isNotFound() {
         return delegate.isNotFound();
     }
 
+    @Override
     public boolean isNoPermission() {
         return delegate.isNoPermission();
     }
 
+    @Override
     public boolean isMandatory() {
         return delegate.isMandatory();
     }
 
+    @Override
     public boolean isConflict() {
         return delegate.isConflict();
     }
 
+    @Override
     public OXException setGeneric(Generic generic) {
         return delegate.setGeneric(generic);
     }
 
+    @Override
     public void printStackTrace() {
         delegate.printStackTrace();
     }
 
+    @Override
     public OXException setLogMessage(String logMessage) {
         return delegate.setLogMessage(logMessage);
     }
 
+    @Override
     public OXException setLogMessage(String displayFormat, Object... args) {
         return delegate.setLogMessage(displayFormat, args);
     }
 
+    @Override
     public OXException setDisplayMessage(String displayMessage, Object... displayArgs) {
         return delegate.setDisplayMessage(displayMessage, displayArgs);
     }
 
+    @Override
     public String getPlainLogMessage() {
         return delegate.getPlainLogMessage();
     }
 
+    @Override
     public Object[] getLogArgs() {
         return delegate.getLogArgs();
     }
 
+    @Override
     public Object[] getDisplayArgs() {
         return delegate.getDisplayArgs();
     }
 
+    @Override
     public void log(Log log) {
         delegate.log(log);
     }
 
+    @Override
     public String getLogMessage(LogLevel logLevel) {
         return delegate.getLogMessage(logLevel);
     }
 
+    @Override
     public String getLogMessage(LogLevel logLevel, String defaultLog) {
         return delegate.getLogMessage(logLevel, defaultLog);
     }
 
+    @Override
     public void printStackTrace(PrintStream s) {
         delegate.printStackTrace(s);
     }
 
+    @Override
     public String getLogMessage() {
         return delegate.getLogMessage();
     }
 
+    @Override
     public void printStackTrace(PrintWriter s) {
         delegate.printStackTrace(s);
     }
 
+    @Override
     public String getSoleMessage() {
         return delegate.getSoleMessage();
     }
 
+    @Override
     public boolean isLoggable(LogLevel logLevel) {
         return delegate.isLoggable(logLevel);
     }
 
+    @Override
     public Category getCategory() {
         return delegate.getCategory();
     }
 
+    @Override
     public List<Category> getCategories() {
         return delegate.getCategories();
     }
 
+    @Override
     public StackTraceElement[] getStackTrace() {
         return delegate.getStackTrace();
     }
 
+    @Override
     public void setStackTrace(StackTraceElement[] stackTrace) {
         delegate.setStackTrace(stackTrace);
     }
 
+    @Override
     public OXException setCategory(Category category) {
         return delegate.setCategory(category);
     }
 
+    @Override
     public void removeCategory(Category category) {
         delegate.removeCategory(category);
     }
 
+    @Override
     public String getExceptionId() {
         return delegate.getExceptionId();
     }
 
+    @Override
     public void setExceptionId(String exceptionId) {
         delegate.setExceptionId(exceptionId);
     }
 
+    @Override
     public String getPrefix() {
         return delegate.getPrefix();
     }
 
+    @Override
     public boolean isPrefix(String expected) {
         return delegate.isPrefix(expected);
     }
 
+    @Override
     public OXException setPrefix(String prefix) {
         return delegate.setPrefix(prefix);
     }
 
+    @Override
     public String getDisplayMessage(Locale locale) {
         return delegate.getDisplayMessage(locale);
     }
 
+    @Override
     public String getMessage() {
         return delegate.getMessage();
     }
 
+    @Override
     public String toString() {
         return delegate.toString();
     }
 
+    @Override
     public void addTruncatedId(int truncatedId) {
         delegate.addTruncatedId(truncatedId);
     }
 
+    @Override
     public void addProblematic(ProblematicAttribute problematic) {
         delegate.addProblematic(problematic);
     }
 
+    @Override
     public boolean containsProperty(String name) {
         return delegate.containsProperty(name);
     }
 
+    @Override
     public String getProperty(String name) {
         return delegate.getProperty(name);
     }
 
+    @Override
     public String setProperty(String name, String value) {
         return delegate.setProperty(name, value);
     }
 
+    @Override
     public OXException setSessionProperties(Session session) {
         return delegate.setSessionProperties(session);
     }
 
+    @Override
     public String remove(String name) {
         return delegate.remove(name);
     }
 
+    @Override
     public Set<String> getPropertyNames() {
         return delegate.getPropertyNames();
     }

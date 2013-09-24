@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.json.impl.JSONProtocolHandler;
 import com.openexchange.realtime.json.impl.StateManager;
-import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.server.ServiceLookup;
 
 /**

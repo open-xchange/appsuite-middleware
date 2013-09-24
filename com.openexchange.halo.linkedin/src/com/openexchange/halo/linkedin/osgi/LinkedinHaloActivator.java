@@ -52,7 +52,6 @@ package com.openexchange.halo.linkedin.osgi;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.linkedin.LinkedinInboxDataSource;
 import com.openexchange.halo.linkedin.LinkedinProfileDataSource;

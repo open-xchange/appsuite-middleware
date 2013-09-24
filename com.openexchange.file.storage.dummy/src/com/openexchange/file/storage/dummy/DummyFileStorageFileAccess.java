@@ -60,7 +60,7 @@ import com.openexchange.file.storage.InMemoryFileStorageFileAccess;
  */
 public class DummyFileStorageFileAccess extends InMemoryFileStorageFileAccess {
 
-    private FileStorageAccountAccess accountAccess;
+    private final FileStorageAccountAccess accountAccess;
 
     public DummyFileStorageFileAccess(String serviceId, String accountId, FileStorageAccountAccess accountAccess) {
         super(serviceId, accountId);

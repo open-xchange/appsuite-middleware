@@ -50,7 +50,6 @@
 package com.openexchange.report.appsuite.management;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.report.appsuite.Report;
 import com.openexchange.report.appsuite.jobs.Orchestration;
 
 

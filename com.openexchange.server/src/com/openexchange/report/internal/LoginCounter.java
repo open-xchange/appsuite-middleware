@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
  */
 public class LoginCounter implements LoginCounterMBean {
     
-    private LoginCounterImpl counter;
+    private final LoginCounterImpl counter;
 
     public LoginCounter(LoginCounterImpl counter) {
         this.counter = counter;

@@ -61,8 +61,8 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class MessageDispatch {
     
-    private ComponentHandle handle;
-    private Stanza stanza;
+    private final ComponentHandle handle;
+    private final Stanza stanza;
     
     public MessageDispatch(ComponentHandle handle, Stanza stanza) {
         super();

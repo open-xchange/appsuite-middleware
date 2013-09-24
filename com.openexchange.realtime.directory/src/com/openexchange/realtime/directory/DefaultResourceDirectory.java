@@ -102,6 +102,7 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
         return previousResource;
     }
     
+    @Override
     public Resource setIfAbsent(ID id, Resource resource) throws OXException {
         Resource previousResource = doSet(id, resource, false);
         if (null == previousResource) {

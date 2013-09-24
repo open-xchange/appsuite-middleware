@@ -55,7 +55,6 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.realtime.events.RTEvent;
 import com.openexchange.realtime.events.RTListener;
-import com.openexchange.session.Session;
 
 
 /**
@@ -64,7 +63,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailPushRegistration {
-    private List<RTListener> listeners;
+    private final List<RTListener> listeners;
     
     public MailPushRegistration() {
         super();

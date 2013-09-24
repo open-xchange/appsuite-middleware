@@ -60,7 +60,7 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public class RealtimeExceptionFactory {
 
-    private OXExceptionFactory innerFactory;
+    private final OXExceptionFactory innerFactory;
 
     private static final RealtimeExceptionFactory INSTANCE = new RealtimeExceptionFactory();
 

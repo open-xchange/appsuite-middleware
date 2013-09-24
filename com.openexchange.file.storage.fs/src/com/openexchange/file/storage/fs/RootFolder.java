@@ -60,7 +60,7 @@ import com.openexchange.file.storage.AbstractRootFolder;
  */
 public class RootFolder extends AbstractRootFolder {
 
-    private File directory;
+    private final File directory;
     
     public RootFolder(File directory) {
         this.directory = directory;

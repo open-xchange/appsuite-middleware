@@ -66,12 +66,12 @@ public class Report implements Serializable {
 
     private static final long serialVersionUID = 6998213011280390705L;
 
-    private String uuid;
-    private String type;
+    private final String uuid;
+    private final String type;
     
-    private Map<String, Map<String, Object>> namespaces = new HashMap<String, Map<String, Object>>();
+    private final Map<String, Map<String, Object>> namespaces = new HashMap<String, Map<String, Object>>();
 
-    private long startTime;
+    private final long startTime;
 
     private long stopTime;
 

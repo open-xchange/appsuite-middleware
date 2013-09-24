@@ -64,12 +64,12 @@ import com.openexchange.version.Version;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JMXReport {
-    private String uuid;
-    private int pendingTasks;
-    private int tasks;
-    private long startTime;
-    private long stopTime;
-    private String type;
+    private final String uuid;
+    private final int pendingTasks;
+    private final int tasks;
+    private final long startTime;
+    private final long stopTime;
+    private final String type;
     private String data;
 
     /**

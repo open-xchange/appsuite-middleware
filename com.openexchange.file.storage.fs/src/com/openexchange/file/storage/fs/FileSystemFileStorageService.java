@@ -52,12 +52,8 @@ package com.openexchange.file.storage.fs;
 import java.io.File;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.file.storage.AbstractFileStorageService;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.FileStorageServiceFactory;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 
 /**

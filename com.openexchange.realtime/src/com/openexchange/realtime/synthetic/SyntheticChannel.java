@@ -93,9 +93,9 @@ public class SyntheticChannel implements Channel, Runnable {
     private final ConcurrentHashMap<ID, Long> lastAccess = new ConcurrentHashMap<ID, Long>();
     private final CopyOnWriteArrayList<TimeoutEviction> timeouts = new CopyOnWriteArrayList<TimeoutEviction>();
     
-    private Random loadBalancer = new Random();
+    private final Random loadBalancer = new Random();
     
-    private AtomicBoolean shuttingDown = new AtomicBoolean(false);
+    private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
     
     public SyntheticChannel(ServiceLookup services) {
         for (int i = 0; i < NUMBER_OF_RUNLOOPS; i++) {

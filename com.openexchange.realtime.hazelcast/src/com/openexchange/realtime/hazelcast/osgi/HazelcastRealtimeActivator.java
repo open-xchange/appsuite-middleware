@@ -56,7 +56,6 @@ import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;

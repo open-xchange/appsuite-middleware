@@ -72,7 +72,7 @@ public class MailPushEventEmitter implements RTEventEmitterService, EventHandler
     private static final HashSet<String> EVENTS = new HashSet<String>(Arrays.asList("new"));
     private static final String NAMESPACE = "mail";
     
-    private ConcurrentHashMap<String, MailPushRegistration> registeredIDsPerSession = new ConcurrentHashMap<String, MailPushRegistration>();
+    private final ConcurrentHashMap<String, MailPushRegistration> registeredIDsPerSession = new ConcurrentHashMap<String, MailPushRegistration>();
 
     public MailPushEventEmitter(ServiceLookup services) {
         super();

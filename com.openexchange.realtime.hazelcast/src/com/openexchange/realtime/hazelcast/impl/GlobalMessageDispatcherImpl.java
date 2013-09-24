@@ -221,7 +221,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
     
 
-    private ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
+    private final ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
 
     private void ensureSequence(Stanza stanza, Member receiver) {
         if (stanza.getSequenceNumber() != -1) {

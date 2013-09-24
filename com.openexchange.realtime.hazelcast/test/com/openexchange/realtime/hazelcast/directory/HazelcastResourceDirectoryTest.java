@@ -271,6 +271,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
             final int j = i;
             callables.add(new Callable<Integer>() {
 
+                @Override
                 public Integer call() throws Exception {
                     Thread.sleep(random.nextInt(500));
                     testResource.getPresence().setMessage(String.valueOf(j));
