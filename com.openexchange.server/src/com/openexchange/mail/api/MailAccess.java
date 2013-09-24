@@ -779,38 +779,45 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
         }
         sBuilder.append(toString());
-        sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);
-        /*
-         * Start at index 3
-         */
-        if (Log.appendTraceToMessage()) {
-            for (int i = 3; i < trace.length; i++) {
-                sBuilder.append("    at ").append(trace[i]).append(lineSeparator);
-            }
-        } else {
-            final StackTraceElement[] tmp = new StackTraceElement[trace.length - 3];
-            System.arraycopy(trace, 3, tmp, 0, tmp.length);
-            final Throwable thr = new Throwable();
-            thr.setStackTrace(tmp);
-            log.info(sBuilder.toString(), thr);
-            sBuilder.setLength(0);
-        }
-        if ((null != usingThread) && usingThread.isAlive()) {
-            sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
+        final StackTraceElement[] traze = trace;
+        final int length;
+        if (null != traze && (length = traze.length) > 3) {
+            sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);
             /*
-             * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
-             * MailAccessWatcher.
+             * Start at index 3
              */
-            final StackTraceElement[] trace = usingThread.getStackTrace();
             if (Log.appendTraceToMessage()) {
-                sBuilder.append("    at ").append(trace[0]);
-                for (int i = 1; i < trace.length; i++) {
-                    sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
+                for (int i = 3; i < length; i++) {
+                    sBuilder.append("    at ").append(traze[i]).append(lineSeparator);
                 }
             } else {
+                final StackTraceElement[] tmp = new StackTraceElement[length - 3];
+                System.arraycopy(traze, 3, tmp, 0, tmp.length);
                 final Throwable thr = new Throwable();
-                thr.setStackTrace(trace);
+                thr.setStackTrace(tmp);
                 log.info(sBuilder.toString(), thr);
+                sBuilder.setLength(0);
+            }
+            if ((null != usingThread) && usingThread.isAlive()) {
+                final StackTraceElement[] trace = usingThread.getStackTrace();
+                final int tleng;
+                if (null != trace && (tleng = trace.length) > 0) {
+                    sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
+                    /*
+                     * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
+                     * MailAccessWatcher.
+                     */
+                    if (Log.appendTraceToMessage()) {
+                        sBuilder.append("    at ").append(trace[0]);
+                        for (int i = 1; i < tleng; i++) {
+                            sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
+                        }
+                    } else {
+                        final Throwable thr = new Throwable();
+                        thr.setStackTrace(trace);
+                        log.info(sBuilder.toString(), thr);
+                    }
+                }
             }
         }
     }

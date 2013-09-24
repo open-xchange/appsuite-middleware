@@ -1,3 +1,7 @@
+* 2013-09-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29000: Added null guard to check if stack trace has been null'ed in the meantime
+
 * 2013-09-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 28932: Deal with possible 'NumberFormatException' gracefully
