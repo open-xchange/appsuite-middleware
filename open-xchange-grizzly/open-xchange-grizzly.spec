@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -64,6 +64,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Sep 24 2013 Marc Arens <marc.arens@open-xchange.com>
+Eleventh candidate for 7.4.0 release
 * Fri Sep 20 2013 Marc Arens <marc.arens@open-xchange.com>
 Tenth candidate for 7.4.0 release
 * Thu Sep 12 2013 Marc Arens <marc.arens@open-xchange.com>
