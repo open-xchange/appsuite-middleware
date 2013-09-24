@@ -108,7 +108,10 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
         if (LOG.isDebugEnabled()) {
             LOG.debug(Thread.currentThread() + " executes: " + delegate.toString());
         }
-        return delegate.execute();
+
+        boolean retval = delegate.execute();
+        con.updatePerformed();
+        return retval;
     }
 
     @Override
@@ -124,7 +127,10 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
         if (LOG.isDebugEnabled()) {
             LOG.debug(Thread.currentThread() + " executes: " + delegate.toString());
         }
-        return delegate.executeUpdate();
+
+        int retval = delegate.executeUpdate();
+        con.updatePerformed();
+        return retval;
     }
 
     @Override
