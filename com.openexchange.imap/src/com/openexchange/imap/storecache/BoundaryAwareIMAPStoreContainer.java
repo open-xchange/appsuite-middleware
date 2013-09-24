@@ -134,7 +134,7 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
                     tmp.release();
                     tmp.notifyAll();
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("BoundaryAwareIMAPStoreContainer.backStore(): Released -- " + limiter);
+                        LOG.debug("BoundaryAwareIMAPStoreContainer.backStore(): Released -- " + tmp);
                     }
                 }
             }
