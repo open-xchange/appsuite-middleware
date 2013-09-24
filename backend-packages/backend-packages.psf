@@ -45,6 +45,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-config-cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-l10n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mailfilter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-manage-group-resource"/>
