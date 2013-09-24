@@ -47,72 +47,27 @@
  *
  */
 
-package com.openexchange.audit.osgi;
+package com.openexchange.audit;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.audit.impl.AuditEventHandler;
-import com.openexchange.audit.services.Services;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.file.storage.FileStorageEventConstants;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.audit.configuration.AuditConfigurationTest;
+import com.openexchange.audit.impl.AuditEventHandlerTest;
 
 /**
- * @author Benjamin Otterbach
+ * Unit tests for the bundle com.openexchange.audit
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.1
  */
-public class AuditActivator extends HousekeepingActivator {
+@RunWith(Suite.class)
+@SuiteClasses({
+    AuditConfigurationTest.class,
+    AuditEventHandlerTest.class
+})
+public class UnitTests {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuditActivator.class);
-
-    public AuditActivator() {
-        super();
+    public UnitTests() {
     }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*", FileStorageEventConstants.ALL_TOPICS });
-            registerService(EventHandler.class, new AuditEventHandler(), serviceProperties);
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
-
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            cleanUp();
-            Services.setServiceLookup(null);
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
-    }
-
 }

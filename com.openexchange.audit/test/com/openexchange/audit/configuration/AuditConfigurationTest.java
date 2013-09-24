@@ -47,72 +47,67 @@
  *
  */
 
-package com.openexchange.audit.osgi;
+package com.openexchange.audit.configuration;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.audit.impl.AuditEventHandler;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.audit.services.Services;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.file.storage.FileStorageEventConstants;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+
 
 /**
- * @author Benjamin Otterbach
+ * Unit tests for {@link AuditConfiguration}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.1
  */
-public class AuditActivator extends HousekeepingActivator {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Services.class })
+public class AuditConfigurationTest {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuditActivator.class);
+    /**
+     * Mock for the {@link ConfigurationService}
+     */
+    private ConfigurationService configurationService;
 
-    public AuditActivator() {
-        super();
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+        configurationService = PowerMockito.mock(ConfigurationService.class);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    @Test(expected = OXException.class)
+    public void testGetFileAccessLogging_ServicesNotAvailable_ThrowException() throws OXException {
+        AuditConfiguration.getFileAccessLogging();
     }
 
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
-    }
+    @Test
+    public void testGetFileAccessLogging_ServiceAvailableAndConfiguredTrue_ReturnTrue() throws OXException {
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
+        PowerMockito.when(this.configurationService.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true")).thenReturn(
+            "true");
 
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*", FileStorageEventConstants.ALL_TOPICS });
-            registerService(EventHandler.class, new AuditEventHandler(), serviceProperties);
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
+        boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
+        Assert.assertTrue(fileAccessLogging);
 
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            cleanUp();
-            Services.setServiceLookup(null);
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
+    @Test
+    public void testGetFileAccessLogging_ServiceAvailableButNothingConfigured_ReturnFalse() throws OXException {
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
+
+        boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
+        Assert.assertFalse(fileAccessLogging);
     }
 
 }
