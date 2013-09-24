@@ -1088,7 +1088,6 @@ public class MimeMessageFiller {
                 contentType.setCharsetParameter(charset);
             }
             if (primaryMultipart == null) {
-                final String mailText;
                 if (isPlainText) {
                     /*
                      * Convert HTML content to regular text (preserving links)
@@ -1133,6 +1132,7 @@ public class MimeMessageFiller {
                     /*
                      * Define text content
                      */
+                    final String mailText;
                     if (text == null || text.length() == 0) {
                         mailText = "";
                     } else if (isHtml) {
@@ -1140,10 +1140,15 @@ public class MimeMessageFiller {
                     } else {
                         mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(text, usm.getAutoLinebreak());
                     }
+                    mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 } else {
-                    mailText = htmlService.getConformHTML(content, contentType.getCharsetParameter());
+                    final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
+                    if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
+                    } else {
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
+                    }
                 }
-                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 // mimeMessage.setContent(mailText, contentType.toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
                 mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
