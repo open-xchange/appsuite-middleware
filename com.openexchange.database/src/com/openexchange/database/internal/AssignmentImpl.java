@@ -117,6 +117,10 @@ public class AssignmentImpl implements Serializable, Assignment {
         return schema;
     }
 
+    /**
+     * Returns true if the transaction counter has been initialized
+     * @return
+     */
     boolean isTransactionInitialized() {
         return transactionInitialized;
     }
@@ -125,7 +129,7 @@ public class AssignmentImpl implements Serializable, Assignment {
         return transaction;
     }
 
-    void setTransaction(long transaction) {
+    public void setTransaction(long transaction) {
         this.transaction = transaction;
         transactionInitialized = true;
     }

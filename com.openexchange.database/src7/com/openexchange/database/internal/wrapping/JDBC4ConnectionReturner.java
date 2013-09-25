@@ -57,6 +57,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -72,7 +73,7 @@ import com.openexchange.database.internal.ReplicationMonitor;
 
 /**
  * {@link JDBC4ConnectionReturner}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class JDBC4ConnectionReturner implements Connection {
@@ -89,9 +90,9 @@ public abstract class JDBC4ConnectionReturner implements Connection {
 
     private boolean usedAsRead;
 
-	private final ReplicationMonitor monitor;
+    private final ReplicationMonitor monitor;
 
-	private boolean usedForUpdate = false;
+    private boolean usedForUpdate = false;
 
     public JDBC4ConnectionReturner(final Pools pools, final ReplicationMonitor monitor, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
         super();
@@ -105,8 +106,9 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     }
 
     public void setUsedAsRead(boolean b) {
-    	this.usedAsRead = b;
+        this.usedAsRead = b;
     }
+
     @Override
     public String toString() {
         return delegate.toString();
@@ -131,6 +133,40 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     @Override
     public void commit() throws SQLException {
         checkForAlreadyClosed();
+        if (usedForUpdate) {
+            int contextId = assign.getContextId();
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            Long transactionCounter = null;
+            try {
+                boolean isTransaction = !delegate.getAutoCommit();
+                if (!isTransaction) {
+                    delegate.setAutoCommit(false);
+                }
+                stmt = delegate.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid = ?");
+                stmt.setInt(1, contextId);
+                result = stmt.executeQuery();
+                if (result.next()) {
+                    transactionCounter = result.getLong(1);
+                }
+                if (null == transactionCounter) {
+                    throw new SQLException("Updating transaction for replication monitor failed for context " + contextId + ".");
+                }
+                stmt.close();
+                result.close();
+                stmt = delegate.prepareStatement("UPDATE replicationMonitor SET transaction = ? WHERE cid = ?");
+                stmt.setLong(1, transactionCounter.longValue());
+                stmt.setInt(2, contextId);
+                stmt.execute();
+                stmt.close();
+                assign.setTransaction(transactionCounter.longValue());
+                if (!isTransaction) {
+                    delegate.commit();
+                }
+            } catch (SQLException e) {
+                throw e;
+            }
+        }
         delegate.commit();
     }
 
