@@ -67,11 +67,14 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.commons.logging.Log;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
+import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link JDBC4ConnectionReturner}
@@ -79,6 +82,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class JDBC4ConnectionReturner implements Connection {
+    
+    private final static Log LOG = LogFactory.getLog(JDBC4ConnectionReturner.class);
 
     private final Pools pools;
     private final ReplicationMonitor monitor;
