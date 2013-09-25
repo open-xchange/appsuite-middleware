@@ -1,3 +1,7 @@
+* 2013-09-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29044 : Several null guards to deal with absent messages
+
 * 2013-09-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 29000: Added null guard to check if stack trace has been null'ed in the meantime
