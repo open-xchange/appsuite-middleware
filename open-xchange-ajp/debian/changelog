@@ -4,6 +4,12 @@ open-xchange-ajp (7.4.1-0) unstable; urgency=low
 
  -- Marc Arens <marc.arens@open-xchange.com>  Fri, 20 Sep 2013 11:43:33 +0200
 
+open-xchange-ajp (7.4.0-11) stable; urgency=low
+
+  * Eleventh candidate for 7.4.0 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 24 Sep 2013 09:39:07 +0200
+
 open-xchange-ajp (7.4.0-10) stable; urgency=low
 
   * Tenth candidate for 7.4.0 release
