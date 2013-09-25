@@ -57,6 +57,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -66,16 +67,22 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.commons.logging.Log;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
+import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link JDBC4ConnectionReturner}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class JDBC4ConnectionReturner implements Connection {
+    
+    private final static Log LOG = LogFactory.getLog(JDBC4ConnectionReturner.class);
 
     private final Pools pools;
 
@@ -89,9 +96,9 @@ public abstract class JDBC4ConnectionReturner implements Connection {
 
     private boolean usedAsRead;
 
-	private final ReplicationMonitor monitor;
+    private final ReplicationMonitor monitor;
 
-	private boolean usedForUpdate = false;
+    private boolean usedForUpdate = false;
 
     public JDBC4ConnectionReturner(final Pools pools, final ReplicationMonitor monitor, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
         super();
@@ -105,8 +112,9 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     }
 
     public void setUsedAsRead(boolean b) {
-    	this.usedAsRead = b;
+        this.usedAsRead = b;
     }
+
     @Override
     public String toString() {
         return delegate.toString();
@@ -131,6 +139,51 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     @Override
     public void commit() throws SQLException {
         checkForAlreadyClosed();
+        if (usedForUpdate || !usedAsRead) {
+            int contextId = assign.getContextId();
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            Long transactionCounter = null;
+            try {
+                boolean isTransaction = !delegate.getAutoCommit();
+                if (!isTransaction) {
+                    delegate.setAutoCommit(false);
+                }
+                stmt = delegate.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid = ?");
+                stmt.setInt(1, contextId);
+                result = stmt.executeQuery();
+                if (result.next()) {
+                    transactionCounter = result.getLong(1);
+                }
+                if (null == transactionCounter) {
+                    throw new SQLException("Updating transaction for replication monitor failed for context " + contextId + ".");
+                }
+                stmt.close();
+                result.close();
+                stmt = delegate.prepareStatement("UPDATE replicationMonitor SET transaction = ? WHERE cid = ?");
+                stmt.setLong(1, transactionCounter.longValue() + 1);
+                stmt.setInt(2, contextId);
+                stmt.executeUpdate();
+                stmt.close();
+                assign.setTransaction(transactionCounter.longValue() + 1);
+                if (!isTransaction) {
+                    delegate.commit();
+                    delegate.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                delegate.rollback();
+                if (1146 == e.getErrorCode()) {
+                    if (ReplicationMonitor.getLastLogged() + 300000 < System.currentTimeMillis()) {
+                        ReplicationMonitor.setLastLogged(System.currentTimeMillis());
+                        final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                        LOG.error(e1.getMessage(), e1);
+                    }
+                } else {
+                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    LOG.error(e1.getMessage(), e1);
+                }
+            }
+        }
         delegate.commit();
     }
 
