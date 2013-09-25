@@ -100,8 +100,7 @@ public class RdbContactStorage extends DefaultContactStorage {
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorage.class));
     private static boolean PREFETCH_ATTACHMENT_INFO = true;
-    private static int DELETE_CHUNK_SIZE = 20;
-    private static boolean KEEP_DELETED_IMAGES = false;
+    private static int DELETE_CHUNK_SIZE = 50;
 
     private final Executor executor;
 
@@ -427,13 +426,11 @@ public class RdbContactStorage extends DefaultContactStorage {
                 Contact update = new Contact();
                 update.setLastModified(new Date());
                 update.setModifiedBy(userID);
-                if (0 == executor.insertFromAndUpdate(connection, Table.CONTACTS, Table.DELETED_CONTACTS, contextID, Integer.MIN_VALUE,
+                if (0 == executor.replaceToDeletedContactsAndUpdate(connection, contextID, Integer.MIN_VALUE,
                     new int[] { objectID }, maxLastModified, update, new ContactField[] {
                     ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED })) {
                     throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
                 }
-                executor.insertFrom(connection, Table.IMAGES, Table.DELETED_IMAGES, contextID, objectID, maxLastModified);
-                executor.insertFrom(connection, Table.DISTLIST, Table.DELETED_DISTLIST, contextID, objectID);
             }
             /*
              * update image data if needed
@@ -818,12 +815,8 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * insert copied records to 'deleted' contact- and distlist-tables with updated metadata
              */
-            executor.insertFromAndUpdate(connection, Table.CONTACTS, Table.DELETED_CONTACTS, contextID, folderID, currentObjectIDs,
-                maxLastModified, updatedMetadata, updatedFields);
-            if (KEEP_DELETED_IMAGES) {
-                executor.insertFrom(connection, Table.IMAGES, Table.DELETED_IMAGES, contextID, Integer.MIN_VALUE, objectIDs, maxLastModified);
-            }
-            executor.insertFrom(connection, Table.DISTLIST, Table.DELETED_DISTLIST, contextID, Integer.MIN_VALUE, currentObjectIDs);
+            executor.replaceToDeletedContactsAndUpdate(connection, contextID, folderID, currentObjectIDs, maxLastModified,
+                updatedMetadata, updatedFields);
             /*
              * delete records in original tables
              */

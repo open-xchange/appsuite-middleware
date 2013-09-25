@@ -622,7 +622,7 @@ public final class InternalList {
 
         // Add folder_id to primary key in del_contacts
         list.add(new MakeFolderIdPrimaryForDelContactsTable());
-        
+
         // Remove redundant keys (see bug 26913)
         list.add(new RemoveRedundantKeysForBug26913UpdateTask());
 
@@ -667,6 +667,10 @@ public final class InternalList {
 
         // Adds "archive" and "archive_fullname" columns to mail/transport account table
         list.add(new com.openexchange.groupware.update.tasks.MailAccountAddArchiveTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.4.1 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new com.openexchange.groupware.update.tasks.ContactClearDelTablesTasks());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

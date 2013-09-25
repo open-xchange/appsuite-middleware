@@ -60,12 +60,19 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 public final class Fields {
 
     /**
-     * A set of all contact fields as used by the contacts database table.
+     * A set of all contact fields as used by the 'prg_contacts' database table.
      */
     //TODO: might be better to list the fields explicitly
     public static final EnumSet<ContactField> CONTACT_DATABASE = EnumSet.complementOf(EnumSet.of(ContactField.IMAGE1_URL,
         ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1, ContactField.DISTRIBUTIONLIST,
         ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.LAST_MODIFIED_UTC, ContactField.LINKS, ContactField.SORT_NAME));
+
+    /**
+     * A set of all contact fields as used by the 'del_contacts' database table.
+     */
+    public static final EnumSet<ContactField> DEL_CONTACT_DATABASE = EnumSet.of(ContactField.CONTEXTID, ContactField.FOLDER_ID,
+        ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID, ContactField.FILENAME, ContactField.LAST_MODIFIED,
+        ContactField.CREATION_DATE, ContactField.CREATED_BY, ContactField.MODIFIED_BY, ContactField.PRIVATE_FLAG);
 
     /**
      * An array of all contact fields as used by the contacts database table.
