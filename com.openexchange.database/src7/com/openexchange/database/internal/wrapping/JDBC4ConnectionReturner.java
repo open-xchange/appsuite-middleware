@@ -67,9 +67,13 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.commons.logging.Log;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
+import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link JDBC4ConnectionReturner}
@@ -77,6 +81,8 @@ import com.openexchange.database.internal.ReplicationMonitor;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class JDBC4ConnectionReturner implements Connection {
+    
+    private final static Log LOG = LogFactory.getLog(JDBC4ConnectionReturner.class);
 
     private final Pools pools;
 
@@ -133,7 +139,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     @Override
     public void commit() throws SQLException {
         checkForAlreadyClosed();
-        if (usedForUpdate) {
+        if (usedForUpdate || !usedAsRead) {
             int contextId = assign.getContextId();
             PreparedStatement stmt = null;
             ResultSet result = null;
@@ -155,16 +161,27 @@ public abstract class JDBC4ConnectionReturner implements Connection {
                 stmt.close();
                 result.close();
                 stmt = delegate.prepareStatement("UPDATE replicationMonitor SET transaction = ? WHERE cid = ?");
-                stmt.setLong(1, transactionCounter.longValue());
+                stmt.setLong(1, transactionCounter.longValue() + 1);
                 stmt.setInt(2, contextId);
-                stmt.execute();
+                stmt.executeUpdate();
                 stmt.close();
-                assign.setTransaction(transactionCounter.longValue());
+                assign.setTransaction(transactionCounter.longValue() + 1);
                 if (!isTransaction) {
                     delegate.commit();
+                    delegate.setAutoCommit(true);
                 }
             } catch (SQLException e) {
-                throw e;
+                delegate.rollback();
+                if (1146 == e.getErrorCode()) {
+                    if (ReplicationMonitor.getLastLogged() + 300000 < System.currentTimeMillis()) {
+                        ReplicationMonitor.setLastLogged(System.currentTimeMillis());
+                        final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                        LOG.error(e1.getMessage(), e1);
+                    }
+                } else {
+                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    LOG.error(e1.getMessage(), e1);
+                }
             }
         }
         delegate.commit();

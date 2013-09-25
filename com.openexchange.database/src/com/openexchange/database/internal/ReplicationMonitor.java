@@ -49,9 +49,7 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.DBUtils.autocommit;
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
-import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -233,7 +231,7 @@ public class ReplicationMonitor {
 
             poolId = assign.getWritePoolId();
             if (active && poolId != assign.getReadPoolId() && (!usedAsRead || usedForUpdate) && Constants.CONFIGDB_WRITE_ID != poolId) {
-                checkAndIncreaseTransaction(assign, con);
+//                checkAndIncreaseTransaction(assign, con);
             } else if (active && poolId != assign.getReadPoolId() && Constants.CONFIGDB_WRITE_ID != poolId && !assign.isTransactionInitialized()) {
                 try {
                     assign.setTransaction(readTransaction(con, assign.getContextId()));
@@ -289,8 +287,16 @@ public class ReplicationMonitor {
     }
 
     private static long lastLogged = 0;
+    
+    public static long getLastLogged() {
+        return lastLogged;
+    }
+    
+    public static void setLastLogged(long lastLogged) {
+        ReplicationMonitor.lastLogged = lastLogged;
+    }
 
-    private static void increaseTransactionCounter(AssignmentImpl assign, Connection con) throws SQLException {
+//    private static void increaseTransactionCounter(AssignmentImpl assign, Connection con) throws SQLException {
 //        PreparedStatement stmt = null;
 //        ResultSet result = null;
 //        try {
@@ -309,7 +315,7 @@ public class ReplicationMonitor {
 //        } finally {
 //            closeSQLStuff(result, stmt);
 //        }
-    }
+//    }
 
     private void incrementFetched(final Assignment assign, final boolean write) {
         if (assign.getWritePoolId() == assign.getReadPoolId() || write) {
@@ -335,42 +341,42 @@ public class ReplicationMonitor {
         return masterInsteadOfSlaveFetched.get();
     }
 
-    private void checkAndIncreaseTransaction(AssignmentImpl assign, Connection con) {
-        try {
-            if (con.isClosed()) {
-                return;
-            }
-        } catch (final SQLException e) {
-            final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
-            return;
-        }
-
-        try {
-            boolean isTransaction = !con.getAutoCommit();
-            if (isTransaction) {
-                increaseTransactionCounter(assign, con);
-                con.commit();
-            } else {
-                con.setAutoCommit(false);
-                increaseTransactionCounter(assign, con);
-                con.commit();
-            }
-        } catch (final SQLException e) {
-            rollback(con);
-            if (1146 == e.getErrorCode()) {
-                if (lastLogged + 300000 < System.currentTimeMillis()) {
-                    lastLogged = System.currentTimeMillis();
-                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(e1.getMessage(), e1);
-                }
-            } else {
-                final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                LOG.error(e1.getMessage(), e1);
-            }
-        } finally {
-            autocommit(con);
-        }
-    }
+//    private void checkAndIncreaseTransaction(AssignmentImpl assign, Connection con) {
+//        try {
+//            if (con.isClosed()) {
+//                return;
+//            }
+//        } catch (final SQLException e) {
+//            final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+//            LOG.error(e1.getMessage(), e1);
+//            return;
+//        }
+//
+//        try {
+//            boolean isTransaction = !con.getAutoCommit();
+//            if (isTransaction) {
+//                increaseTransactionCounter(assign, con);
+//                con.commit();
+//            } else {
+//                con.setAutoCommit(false);
+//                increaseTransactionCounter(assign, con);
+//                con.commit();
+//            }
+//        } catch (final SQLException e) {
+//            rollback(con);
+//            if (1146 == e.getErrorCode()) {
+//                if (lastLogged + 300000 < System.currentTimeMillis()) {
+//                    lastLogged = System.currentTimeMillis();
+//                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+//                    LOG.error(e1.getMessage(), e1);
+//                }
+//            } else {
+//                final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+//                LOG.error(e1.getMessage(), e1);
+//            }
+//        } finally {
+//            autocommit(con);
+//        }
+//    }
 
 }
