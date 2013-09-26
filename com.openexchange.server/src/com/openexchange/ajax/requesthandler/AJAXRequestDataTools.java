@@ -309,6 +309,25 @@ public class AJAXRequestDataTools {
         return parseBoolParameter(requestData.getParameter(name));
     }
 
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified request data.
+     * <p>
+     * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
+     * "1".
+     *
+     * @param name The parameter's name
+     * @param requestData The request data to parse from
+     * @param defaultValue The default value to return if parameter is absent
+     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     */
+    public static boolean parseBoolParameter(final String name, final AJAXRequestData requestData, final boolean defaultValue) {
+        final String value = requestData.getParameter(name);
+        if (null == value) {
+            return defaultValue;
+        }
+        return parseBoolParameter(value);
+    }
+
     private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
         "true",
         "1",
