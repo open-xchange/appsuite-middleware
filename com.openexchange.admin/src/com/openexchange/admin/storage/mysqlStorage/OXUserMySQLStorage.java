@@ -2593,131 +2593,41 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement del_st = null;
         ResultSet rs = null;
         try {
-            del_st = write_ox_con.prepareStatement("SELECT imapServer,smtpServer,imapLogin,mail,mailDomain,mailEnabled," + "preferredLanguage,shadowLastChange,timeZone,contactId,userPassword," + "passwordMech,uidNumber,gidNumber,homeDirectory,loginShell FROM user WHERE id = ? AND cid = ?");
+            del_st = write_ox_con.prepareStatement("SELECT contactId,uidNumber,gidNumber FROM user WHERE id = ? AND cid = ?");
             del_st.setInt(1, user_id);
             del_st.setInt(2, ctx.getId());
             rs = del_st.executeQuery();
 
-            String iserver = null;
-            String sserver = null;
-            String ilogin = null;
-            String mail = null;
-            String maildomain = null;
-            int menabled = -1;
-            String preflang = null;
-            int shadowlastschange = -1;
-            String tzone = null;
             int contactid = -1;
-            String passwd = null;
-            String pwmech = null;
             int uidnumber = -1;
             int gidnumber = -1;
-            String homedir = null;
-            String shell = null;
 
             if (rs.next()) {
-                iserver = rs.getString("imapServer");
-                sserver = rs.getString("smtpServer");
-                ilogin = rs.getString("imapLogin");
-                mail = rs.getString("mail");
-                maildomain = rs.getString("maildomain");
-                menabled = rs.getInt("mailEnabled");
-                preflang = rs.getString("preferredLanguage");
-                shadowlastschange = rs.getInt("shadowLastChange");
-                tzone = rs.getString("timeZone");
                 contactid = rs.getInt("contactId");
-                passwd = rs.getString("userPassword");
-                pwmech = rs.getString("passwordMech");
                 uidnumber = rs.getInt("uidNumber");
                 gidnumber = rs.getInt("gidNumber");
-                homedir = rs.getString("homeDirectory");
-                shell = rs.getString("loginShell");
             }
             del_st.close();
             rs.close();
 
-            del_st = write_ox_con.prepareStatement("INSERT into del_user (id,cid,imapServer,smtpServer,imapLogin,mail,maildomain,mailEnabled,preferredLanguage,shadowLastChange,timeZone,contactId,userPassword," + "passwordMech,uidNumber,gidNumber,homeDirectory,loginShell) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            del_st = write_ox_con.prepareStatement("INSERT into del_user (id,cid,contactId,uidNumber,gidNumber) VALUES (?,?,?,?,?)");
             del_st.setInt(1, user_id);
             del_st.setInt(2, ctx.getId());
-            if (iserver != null) {
-                del_st.setString(3, iserver);
-            } else {
-                del_st.setNull(3, Types.VARCHAR);
-            }
-            if (sserver != null) {
-                del_st.setString(4, sserver);
-            } else {
-                del_st.setNull(4, Types.VARCHAR);
-            }
-            if (ilogin != null) {
-                del_st.setString(5, ilogin);
-            } else {
-                del_st.setNull(5, Types.VARCHAR);
-            }
-            if (mail != null) {
-                del_st.setString(6, mail);
-            } else {
-                del_st.setNull(6, Types.VARCHAR);
-            }
-            if (maildomain != null) {
-                del_st.setString(7, maildomain);
-            } else {
-                del_st.setNull(7, Types.VARCHAR);
-            }
-            if (menabled != -1) {
-                del_st.setInt(8, menabled);
-            } else {
-                del_st.setNull(8, Types.INTEGER);
-            }
-            if (preflang != null) {
-                del_st.setString(9, preflang);
-            } else {
-                del_st.setNull(9, Types.VARCHAR);
-            }
-
-            del_st.setInt(10, shadowlastschange);
-
-            if (tzone != null) {
-                del_st.setString(11, tzone);
-            } else {
-                del_st.setNull(11, Types.VARCHAR);
-            }
             if (contactid != -1) {
-                del_st.setInt(12, contactid);
+                del_st.setInt(3, contactid);
             } else {
-                del_st.setNull(12, Types.INTEGER);
-            }
-            if (passwd != null) {
-                del_st.setString(13, passwd);
-            } else {
-                del_st.setNull(13, Types.VARCHAR);
-            }
-            if (pwmech != null) {
-                del_st.setString(14, pwmech);
-            } else {
-                del_st.setNull(14, Types.VARCHAR);
+                del_st.setNull(3, Types.INTEGER);
             }
             if (uidnumber != -1) {
-                del_st.setInt(15, uidnumber);
+                del_st.setInt(4, uidnumber);
             } else {
-                del_st.setNull(15, Types.INTEGER);
+                del_st.setNull(4, Types.INTEGER);
             }
             if (gidnumber != -1) {
-                del_st.setInt(16, gidnumber);
+                del_st.setInt(5, gidnumber);
             } else {
-                del_st.setNull(16, Types.INTEGER);
+                del_st.setNull(5, Types.INTEGER);
             }
-            if (homedir != null) {
-                del_st.setString(17, homedir);
-            } else {
-                del_st.setNull(17, Types.VARCHAR);
-            }
-            if (shell != null) {
-                del_st.setString(18, shell);
-            } else {
-                del_st.setNull(18, Types.VARCHAR);
-            }
-
             del_st.executeUpdate();
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);

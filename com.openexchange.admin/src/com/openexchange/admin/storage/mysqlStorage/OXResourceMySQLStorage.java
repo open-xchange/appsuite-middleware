@@ -602,38 +602,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         // insert into del_resource table
         PreparedStatement del_st = null;
-        ResultSet rs = null;
         final int context_id = ctx.getId();
         try {
-
-            del_st = con.prepareStatement("SELECT identifier,displayName,mail,description,available FROM resource WHERE id = ? AND cid = ?");
-            del_st.setInt(1, resource_id);
-            del_st.setInt(2, context_id);
-            rs = del_st.executeQuery();
-            String ident = null;
-            String disp = null;
-            String mail = null;
-            String desc = null;
-            int available = -1;
-            if (rs.next()) {
-                ident = rs.getString("identifier");
-                disp = rs.getString("displayName");
-                mail = rs.getString("mail");
-                desc = rs.getString("description");
-                available = rs.getInt("available");
-            }
-            del_st.close();
-            rs.close();
-
-            del_st = con.prepareStatement("" + "INSERT " + "into del_resource " + "(id,cid,lastModified,identifier,mail,description,displayName,available) " + "VALUES " + "(?,?,?,?,?,?,?,?)");
+            del_st = con.prepareStatement("" + "INSERT " + "into del_resource " + "(id,cid,lastModified) " + "VALUES " + "(?,?,?)");
             del_st.setInt(1, resource_id);
             del_st.setInt(2, context_id);
             del_st.setLong(3, System.currentTimeMillis());
-            del_st.setString(4, ident);
-            del_st.setString(5, mail);
-            del_st.setString(6, desc);
-            del_st.setString(7, disp);
-            del_st.setInt(8, available);
             del_st.executeUpdate();
         }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);

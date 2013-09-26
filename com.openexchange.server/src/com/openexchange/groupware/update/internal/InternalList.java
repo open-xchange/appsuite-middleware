@@ -98,6 +98,8 @@ import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
+import com.openexchange.groupware.update.tasks.ResourceClearDelTablesTask;
+import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
@@ -678,6 +680,12 @@ public final class InternalList {
 
         // Removes obsolete data from the 'del_dates' table
         list.add(new com.openexchange.groupware.update.tasks.AppointmentClearDelTablesTasks());
+        
+        // Removes obsolete data from the 'del_user' table
+        list.add(new UserClearDelTablesTask());
+        
+        // Removes obsolete data from the 'del_resource' table
+        list.add(new ResourceClearDelTablesTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
