@@ -696,30 +696,49 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * get contact data
              */
-            List<Contact> contacts = executor.select(connection, deleted ? Table.DELETED_CONTACTS : Table.CONTACTS, contextID,
-            		parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions);
-            if (null != contacts && 0 < contacts.size()) {
+            List<Contact> contacts;
+            if (deleted) {
                 /*
-                 * merge image data if needed
+                 * pay attention to limited field availability when querying deleted contacts
                  */
-                if (queryFields.hasImageData()) {
-                    contacts = mergeImageData(connection, deleted ? Table.DELETED_IMAGES : Table.IMAGES, contextID, contacts,
-                    		queryFields.getImageDataFields());
+                ContactField[] requestedFields = queryFields.getContactDataFields();
+                List<ContactField> availableFields = new ArrayList<ContactField>();
+                for (ContactField requestedField : requestedFields) {
+                    if (Fields.DEL_CONTACT_DATABASE.contains(requestedField)) {
+                        availableFields.add(requestedField);
+                    }
                 }
-                /*
-                 * merge distribution list data if needed
-                 */
-                if (queryFields.hasDistListData()) {
-                    contacts = mergeDistListData(connection, deleted ? Table.DELETED_DISTLIST : Table.DISTLIST, contextID, contacts);
-                }
-                /*
-                 * merge attachment information in advance if needed
-                 */
-                //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
-                if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
-                	contacts = mergeAttachmentData(connection, contextID, contacts);
+                contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, objectIDs, minLastModified,
+                    availableFields.toArray(new ContactField[availableFields.size()]), term, sortOptions);
+            } else {
+                contacts = executor.select(connection, deleted ? Table.DELETED_CONTACTS : Table.CONTACTS, contextID,
+                    parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions);
+                if (null != contacts && 0 < contacts.size()) {
+                    /*
+                     * merge image data if needed
+                     */
+                    if (queryFields.hasImageData()) {
+                        contacts = mergeImageData(connection, deleted ? Table.DELETED_IMAGES : Table.IMAGES, contextID, contacts,
+                                queryFields.getImageDataFields());
+                    }
+                    /*
+                     * merge distribution list data if needed
+                     */
+                    if (queryFields.hasDistListData()) {
+                        contacts = mergeDistListData(connection, deleted ? Table.DELETED_DISTLIST : Table.DISTLIST, contextID, contacts);
+                    }
+                    /*
+                     * merge attachment information in advance if needed
+                     */
+                    //TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                    if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
+                        contacts = mergeAttachmentData(connection, contextID, contacts);
+                    }
                 }
             }
+            /*
+             * wrap into search iterator and return result
+             */
             return getSearchIterator(contacts);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
