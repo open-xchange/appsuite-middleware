@@ -662,7 +662,7 @@ class UpdateData {
                 type);
             if (ACTIVE == type && isMove()) {
                 final Task dummy = Tools.createDummyTask(getTaskId(), getUserId(), getOrigTask().getUid());
-                storage.insertTask(ctx, con, dummy, DELETED, true);
+                storage.insertTask(ctx, con, dummy, DELETED, true, TaskStorage.TOMBSTONE_ATTRS);
                 final Folder sourceFolder = FolderStorage.getFolder(getRemovedFolder(), getFolderId());
                 foldStor.insertFolder(ctx, con, getTaskId(), sourceFolder, DELETED);
                 foldStor.deleteFolder(ctx, con, getTaskId(), getDestFolderId(), DELETED, false);

@@ -670,7 +670,11 @@ public final class InternalList {
 
         // +++++++++++++++++++++++++++++++++ Version 7.4.1 starts here. +++++++++++++++++++++++++++++++++
 
+        // Removes obsolete data from the 'del_contacts', 'del_dlist' and 'del_contacts_image' tables
         list.add(new com.openexchange.groupware.update.tasks.ContactClearDelTablesTasks());
+
+        // Removes obsolete data from the 'del_task' table
+        list.add(new com.openexchange.groupware.update.tasks.TaskClearDelTablesTasks());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

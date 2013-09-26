@@ -848,7 +848,7 @@ public final class TaskLogic {
         // Move task to delete to deleted tables.
         task.setLastModified(new Date());
         task.setModifiedBy(userId);
-        storage.insertTask(ctx, con, task, DELETED);
+        storage.insertTask(ctx, con, task, DELETED, TaskStorage.TOMBSTONE_ATTRS);
         final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
         deleteFolder(ctx, con, task.getObjectID(), removed);
         storage.delete(ctx, con, task.getObjectID(), lastModified, ACTIVE);
@@ -856,4 +856,5 @@ public final class TaskLogic {
         // operations.
         foldStor.insertFolder(ctx, con, taskId, movedSourceFolders, DELETED);
     }
+
 }
