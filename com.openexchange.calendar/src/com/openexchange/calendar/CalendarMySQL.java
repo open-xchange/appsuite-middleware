@@ -4704,7 +4704,8 @@ public class CalendarMySQL implements CalendarSqlImp {
         while (rs.next()) {
             final int oid = rs.getInt(1);
             final int owner = rs.getInt(2);
-            deleteSingleAppointment(so.getContextId(), oid, so.getUserId(), owner, fid, readcon, writecon, foldertype, so, ctx, CalendarCollectionService.RECURRING_NO_ACTION, null, null, null);
+            deleteSingleAppointment(so.getContextId(), oid, so.getUserId(), owner, fid, readcon, writecon, foldertype, so, ctx,
+                CalendarCollectionService.RECURRING_NO_ACTION, null, null, null, false);
         }
     }
 
@@ -4716,7 +4717,35 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @param fid folder identifier.
      * @param foldertype any of PRIVATE, PUBLIC or SHARED.
      */
-    private final void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified) throws SQLException, OXException {
+    private void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified) throws SQLException, OXException {
+        deleteSingleAppointment(cid, oid, uid, owner, fid, readcon, writecon, foldertype, so, ctx, recurring_action, cdao, edao, clientLastModified, true);
+    }
+
+    /**
+     * Deletes an appointment from the database.
+     *
+     * @param cid The context ID
+     * @param oid The object ID of the appointment to delete
+     * @param uid The user that is doing the operation
+     * @param owner The user that created the appointment
+     * @param fid The ID of the parent folder
+     * @param readcon A read-only connection to the database
+     * @param writecon A writable connection to the database
+     * @param foldertype The folder type, one of {@link FolderObject#PRIVATE}, {@link FolderObject#PUBLIC} or {@link FolderObject#SHARED}
+     * @param so The session
+     * @param ctx The context
+     * @param recurring_action The previously detected recurring action, or {@link CalendarCollectionService.RECURRING_NO_ACTION} if none
+     * @param cdao The changed appointment, or <code>null</code> if not applicable
+     * @param edao The existing appointment, or <code>null</code> if not applicable
+     * @param clientLastModified The last-modified date known by the client to catch concurrent modifications, or <code>null</code> to
+     *                           bypass the check
+     * @param backup <code>true</code> to insert backup records in the 'del*'-tables, <code>false</code>, otherwise
+     * @throws SQLException
+     * @throws OXException
+     */
+    private void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon,
+        final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action,
+        final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified, boolean backup) throws SQLException, OXException {
         int folderOwner = new OXFolderAccess(ctx).getFolderOwner(fid);
         if ((foldertype == FolderObject.PRIVATE || (foldertype == FolderObject.SHARED && owner != folderOwner)) && uid != owner) {
             if (foldertype == FolderObject.SHARED) {
@@ -4999,9 +5028,9 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         /*
-         * Backup appointment's data and delete from working tables
+         * Backup appointment's data if needed and delete from working tables
          */
-        final long modified = deleteAppointment(writecon, cid, oid, uid);
+        final long modified = deleteAppointment(writecon, cid, oid, uid, backup);
 
         if (edao == null) {
             triggerDeleteEvent(writecon, oid, fid, so, ctx, null);
