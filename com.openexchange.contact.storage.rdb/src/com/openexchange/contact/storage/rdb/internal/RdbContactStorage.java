@@ -309,18 +309,25 @@ public class RdbContactStorage extends DefaultContactStorage {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, contextID, serverSession.getUserId());
             }
             /*
-             * get a list of object IDs to delete
+             * clean-up any obsolete entries in backup table for this folder
+             */
+            executor.delete(connection, Table.DELETED_CONTACTS, contextID, folderID, null);
+            /*
+             * get a list of object IDs to delete from contacts in the folder
              */
             List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE,
                 new ContactField[] { ContactField.OBJECT_ID }, null, null);
             if (null == contacts || 0 == contacts.size()) {
-                return; // nothing to do
+                return; // folder is empty, nothing more to do
             }
             int[] objectIDs = getObjectIDs(contacts);
             /*
-             * delete contacts - per convention, don't check last modification time when clearing a folder
+             * delete all contact data without moving them to the 'del' table
+             * (per convention, don't check last modification time when clearing a folder)
              */
-            deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
+            executor.delete(connection, Table.CONTACTS, contextID, folderID, objectIDs);
+            executor.delete(connection, Table.IMAGES, contextID, Integer.MIN_VALUE, objectIDs);
+            executor.delete(connection, Table.DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
             /*
              * commit
              */
@@ -832,7 +839,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             int[] currentObjectIDs = new int[length];
             System.arraycopy(objectIDs, i, currentObjectIDs, 0, length);
             /*
-             * insert copied records to 'deleted' contact- and distlist-tables with updated metadata
+             * insert copied records to 'deleted' contact-table with updated metadata
              */
             executor.replaceToDeletedContactsAndUpdate(connection, contextID, folderID, currentObjectIDs, maxLastModified,
                 updatedMetadata, updatedFields);
