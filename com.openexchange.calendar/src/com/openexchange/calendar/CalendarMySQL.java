@@ -4538,7 +4538,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                          * shall be written to storage. If storage's reminder
                          * date is greater than or equal to specified reminder,
                          * leave unchanged.
-                         * 
+                         *
                          * Update: I think this is inverted. Change it...
                          */
                         Date storageReminder = rsql.loadReminder(oid, uid, Types.APPOINTMENT, con).getDate();
@@ -5072,15 +5072,17 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SQL_BACKUP_RIGHTS = "INSERT INTO del_date_rights SELECT * FROM prg_date_rights WHERE cid = ? AND object_id = ?";
 
-    private static final String SQL_BACKUP_DATES = "INSERT INTO del_dates SELECT * FROM prg_dates WHERE cid = ? AND intfield01 = ?";
+    private static final String SQL_BACKUP_DATES =
+        "INSERT INTO del_dates (creating_date,created_from,changing_date,changed_from,fid,pflag,cid,intfield01,intfield02,uid,filename) " +
+        "SELECT prg_dates.creating_date,prg_dates.created_from,?,?,prg_dates.fid,prg_dates.pflag,prg_dates.cid,prg_dates.intfield01," +
+        "prg_dates.intfield02,prg_dates.uid,prg_dates.filename FROM prg_dates WHERE cid=? AND intfield01=?;"
+    ;
 
     private static final String SQL_DEL_WORKING_DATES = "DELETE FROM prg_dates WHERE cid = ? AND intfield01 = ?";
 
     private static final String SQL_DEL_WORKING_MEMBERS = "DELETE FROM prg_dates_members WHERE cid = ? AND object_id = ?";
 
     private static final String SQL_DEL_WORKING_RIGHTS = "DELETE FROM prg_date_rights WHERE cid = ? AND object_id = ?";
-
-    private static final String SQL_UPDATE_DEL_DATES = "UPDATE del_dates SET changing_date = ?, changed_from = ? WHERE cid = ? AND intfield01 = ?";
 
     /**
      * Backups appointment data identified through specified <code>oid</code>
@@ -5116,6 +5118,8 @@ public class CalendarMySQL implements CalendarSqlImp {
             final boolean backup) throws SQLException {
         PreparedStatement stmt = null;
         try {
+            final long modified = System.currentTimeMillis();
+
             stmt = writecon.prepareStatement(SQL_DEL_DATES);
             int pos = 1;
             stmt.setInt(pos++, cid);
@@ -5167,6 +5171,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
                 stmt = writecon.prepareStatement(SQL_BACKUP_DATES);
                 pos = 1;
+                stmt.setLong(pos++, modified);
+                stmt.setInt(pos++, uid);
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, oid);
                 stmt.executeUpdate();
@@ -5214,18 +5220,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             stmt.close();
             stmt = null;
 
-            final long modified = System.currentTimeMillis();
-            if (backup) {
-                stmt = writecon.prepareStatement(SQL_UPDATE_DEL_DATES);
-                pos = 1;
-                stmt.setLong(pos++, modified);
-                stmt.setInt(pos++, uid);
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, oid);
-                stmt.executeUpdate();
-                stmt.close();
-                stmt = null;
-            }
             return modified;
         } finally {
             COLLECTION.closePreparedStatement(stmt);
@@ -5246,6 +5240,8 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final long backupAppointment(final Connection writecon, final int cid, final int oid, final int uid) throws SQLException {
         PreparedStatement stmt = null;
         try {
+            final long modified = System.currentTimeMillis();
+
             stmt = writecon.prepareStatement(SQL_DEL_DATES);
             int pos = 1;
             stmt.setInt(pos++, cid);
@@ -5288,15 +5284,6 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             stmt = writecon.prepareStatement(SQL_BACKUP_DATES);
             pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, oid);
-            stmt.executeUpdate();
-            stmt.close();
-            stmt = null;
-
-            final long modified = System.currentTimeMillis();
-            stmt = writecon.prepareStatement(SQL_UPDATE_DEL_DATES);
-            pos = 1;
             stmt.setLong(pos++, modified);
             stmt.setInt(pos++, uid);
             stmt.setInt(pos++, cid);
@@ -5304,6 +5291,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             stmt.executeUpdate();
             stmt.close();
             stmt = null;
+
             return modified;
         } finally {
             COLLECTION.closePreparedStatement(stmt);

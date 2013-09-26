@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport.importers;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,6 +58,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
@@ -149,6 +149,15 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      */
     @Override
     public int[] checkAndAlterCols(int[] cols) {
+        // Nothing to do
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.calendar.CalendarCollectionService#checkAndAlterColsForDeleted(int[])
+     */
+    @Override
+    public int[] checkAndAlterColsForDeleted(int[] cols) {
         // Nothing to do
         return null;
     }
@@ -1033,7 +1042,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
 	public void setRecurrencePositionOrDateInDAO(CalendarDataObject cdao,
 			boolean ignore_exceptions) throws OXException {
 		// Nothing to do
-		
+
 	}
 
 }

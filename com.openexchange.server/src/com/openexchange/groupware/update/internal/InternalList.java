@@ -676,6 +676,9 @@ public final class InternalList {
         // Removes obsolete data from the 'del_task' table
         list.add(new com.openexchange.groupware.update.tasks.TaskClearDelTablesTasks());
 
+        // Removes obsolete data from the 'del_dates' table
+        list.add(new com.openexchange.groupware.update.tasks.AppointmentClearDelTablesTasks());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

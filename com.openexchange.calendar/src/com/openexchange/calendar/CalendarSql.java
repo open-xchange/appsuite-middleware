@@ -316,7 +316,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
         try {
             readcon = DBPool.pickup(ctx);
-            cols = recColl.checkAndAlterCols(cols);
+            cols = recColl.checkAndAlterColsForDeleted(cols);
             final OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
             final EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
             mayRead(oclp);
