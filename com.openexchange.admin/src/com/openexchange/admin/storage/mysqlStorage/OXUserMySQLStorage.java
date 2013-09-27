@@ -2610,23 +2610,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st.close();
             rs.close();
 
-            del_st = write_ox_con.prepareStatement("INSERT into del_user (id,cid,contactId,uidNumber,gidNumber) VALUES (?,?,?,?,?)");
+            del_st = write_ox_con.prepareStatement("INSERT into del_user (id,cid,mailEnabled,contactId,uidNumber,gidNumber) VALUES (?,?,?,?,?,?)");
             del_st.setInt(1, user_id);
             del_st.setInt(2, ctx.getId());
+            del_st.setInt(3, 0);
             if (contactid != -1) {
-                del_st.setInt(3, contactid);
-            } else {
-                del_st.setNull(3, Types.INTEGER);
-            }
-            if (uidnumber != -1) {
-                del_st.setInt(4, uidnumber);
+                del_st.setInt(4, contactid);
             } else {
                 del_st.setNull(4, Types.INTEGER);
             }
-            if (gidnumber != -1) {
-                del_st.setInt(5, gidnumber);
+            if (uidnumber != -1) {
+                del_st.setInt(5, uidnumber);
             } else {
                 del_st.setNull(5, Types.INTEGER);
+            }
+            if (gidnumber != -1) {
+                del_st.setInt(6, gidnumber);
+            } else {
+                del_st.setNull(6, Types.INTEGER);
             }
             del_st.executeUpdate();
         } catch (final DataTruncation dt) {
