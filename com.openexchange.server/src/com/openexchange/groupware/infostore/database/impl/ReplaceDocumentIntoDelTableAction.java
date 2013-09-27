@@ -120,7 +120,7 @@ public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListActio
                 public void fillStatement() throws SQLException {
                     int parameterIndex = 1;
                     for (DocumentMetadata document : slice) {
-                        parameterIndex = fillStmt(parameterIndex, stmt, getQueryCatalog().getWritableDocumentFields(), document, contextID);
+                        parameterIndex = fillStmt(parameterIndex, stmt, getQueryCatalog().getWritableDelDocumentFields(), document, contextID);
                     }
                 }
             });

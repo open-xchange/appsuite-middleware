@@ -124,7 +124,7 @@ public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction
 
                 @Override
                 public void fillStatement() throws SQLException {
-                    fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
+                    fillStmt(stmt,getQueryCatalog().getWritableDelDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
                 }
 
             });

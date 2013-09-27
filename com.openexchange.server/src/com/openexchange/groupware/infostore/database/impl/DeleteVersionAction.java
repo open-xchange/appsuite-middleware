@@ -112,7 +112,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
                 public void fillStatement() throws SQLException {
                     int parameterIndex = 1;
                     for (DocumentMetadata document : slice) {
-                        parameterIndex = fillStmt(parameterIndex, stmt, getQueryCatalog().getWritableVersionFields(), document, contextID);
+                        parameterIndex = fillStmt(parameterIndex, stmt, getQueryCatalog().getWritableDelVersionFields(), document, contextID);
                     }
                 }
             });

@@ -87,6 +87,14 @@ public class InfostoreQueryCatalog {
     public static final Set<Metadata> INFOSTORE_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
         Arrays.asList(INFOSTORE_FIELDS)));
 
+    public static final Metadata[] DEL_INFOSTORE_FIELDS = new Metadata[] {
+        Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.VERSION_LITERAL,
+        Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL, Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL,
+        Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.COLOR_LABEL_LITERAL };
+
+    public static final Set<Metadata> DEL_INFOSTORE_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
+        Arrays.asList(DEL_INFOSTORE_FIELDS)));
+
     public static final Metadata[] INFOSTORE_DOCUMENT_FIELDS = new Metadata[] {
         Metadata.ID_LITERAL, Metadata.VERSION_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL,
         Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL,
@@ -96,6 +104,14 @@ public class InfostoreQueryCatalog {
 
     public static final Set<Metadata> INFOSTORE_DOCUMENT_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
         Arrays.asList(INFOSTORE_DOCUMENT_FIELDS)));
+
+    public static final Metadata[] DEL_INFOSTORE_DOCUMENT_FIELDS = new Metadata[] {
+        Metadata.ID_LITERAL, Metadata.VERSION_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL,
+        Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL
+    };
+
+    public static final Set<Metadata> DEL_INFOSTORE_DOCUMENT_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
+        Arrays.asList(DEL_INFOSTORE_DOCUMENT_FIELDS)));
 
     public static final Set<Metadata> IGNORE_ON_WRITE = Collections.unmodifiableSet(new HashSet<Metadata>(
         Arrays.asList(Metadata.LAST_MODIFIED_UTC_LITERAL)));
@@ -121,8 +137,8 @@ public class InfostoreQueryCatalog {
     public static enum Table {
         INFOSTORE(INFOSTORE_FIELDS, INFOSTORE_FIELDS_SET, "infostore"),
         INFOSTORE_DOCUMENT(INFOSTORE_DOCUMENT_FIELDS, INFOSTORE_DOCUMENT_FIELDS_SET, "infostore_document"),
-        DEL_INFOSTORE(INFOSTORE_FIELDS, INFOSTORE_FIELDS_SET, "del_infostore"),
-        DEL_INFOSTORE_DOCUMENT(INFOSTORE_DOCUMENT_FIELDS, INFOSTORE_DOCUMENT_FIELDS_SET, "del_infostore_document");
+        DEL_INFOSTORE(DEL_INFOSTORE_FIELDS, DEL_INFOSTORE_FIELDS_SET, "del_infostore"),
+        DEL_INFOSTORE_DOCUMENT(DEL_INFOSTORE_DOCUMENT_FIELDS, DEL_INFOSTORE_DOCUMENT_FIELDS_SET, "del_infostore_document");
 
         private final String tablename;
 
@@ -151,11 +167,13 @@ public class InfostoreQueryCatalog {
         public MetadataSwitcher getFieldSwitcher() {
             switch (this) {
             case INFOSTORE:
-            case DEL_INFOSTORE:
                 return new InfostoreColumnsSwitch();
+            case DEL_INFOSTORE:
+                return new DelInfostoreColumnsSwitch();
             case INFOSTORE_DOCUMENT:
-            case DEL_INFOSTORE_DOCUMENT:
                 return new InfostoreDocumentColumnsSwitch();
+            case DEL_INFOSTORE_DOCUMENT:
+                return new DelInfostoreDocumentColumnsSwitch();
             default:
                 throw new IllegalArgumentException("Will not happen");
             }
@@ -198,12 +216,11 @@ public class InfostoreQueryCatalog {
         return buildInsert(t.getTablename(), t.getFields(), t.getFieldSwitcher(), additionalFields);
     }
 
-    private static StringBuilder buildUpdateWithoutWhere(final String tablename, final Metadata[] metadata, final MetadataSwitcher columnNames, final String... additionalFields) {
+    private static StringBuilder buildUpdateWithoutWhere(final Table table, final Metadata[] metadata, final MetadataSwitcher columnNames, final String... additionalFields) {
         final StringBuilder builder = new StringBuilder();
-        builder.append("UPDATE ").append(tablename).append(" SET ");
+        builder.append("UPDATE ").append(table.getTablename()).append(" SET ");
         for (final Metadata m : metadata) {
-            // FIXME
-            if (m == Metadata.VERSION_LITERAL && (tablename.equals("infostore_document") || tablename.equals("del_infostore_document"))) {
+            if (m == Metadata.VERSION_LITERAL && (table == Table.INFOSTORE_DOCUMENT || table == Table.DEL_INFOSTORE_DOCUMENT)) {
                 continue;
             }
             if (IGNORE_ON_WRITE.contains(m)) {
@@ -225,18 +242,11 @@ public class InfostoreQueryCatalog {
         return builder;
     }
 
-    /*
-     * private static StringBuilder buildUpdateWithoutWhere(final Table t, final String...additionalFields) { return
-     * buildUpdateWithoutWhere(t.getTablename(), t.getFields(), t.getFieldSwitcher(), additionalFields); }
-     */
-
     private static final String INSERT_INFOSTORE = buildInsert(Table.INFOSTORE, STR_CID);
 
     private static final String INSERT_INFOSTORE_DOCUMENT = buildInsert(Table.INFOSTORE_DOCUMENT, STR_CID);
 
     private static final String INSERT_DEL_INFOSTORE = buildInsert(Table.DEL_INFOSTORE, STR_CID);
-
-    private static final String INSERT_DEL_INFOSTORE_DOCUMENT = buildInsert(Table.DEL_INFOSTORE_DOCUMENT, STR_CID);
 
     public List<String> getDelete(final Table t, final List<DocumentMetadata> documents) {
         switch (t) {
@@ -316,8 +326,12 @@ public class InfostoreQueryCatalog {
             if (IGNORE_ON_WRITE.contains(fields[i])) {
                 continue;
             }
-            questionMarksAllocator.append("?,");
-            allocator.append(fields[i].doSwitch(switcher)).append(',');
+
+            Object sqlField = fields[i].doSwitch(switcher);
+            if (sqlField != null) {
+                questionMarksAllocator.append("?,");
+                allocator.append(sqlField).append(',');
+            }
         }
         String questionMarks = questionMarksAllocator.append("?)").toString();
         allocator.append("cid) VALUES ").append(questionMarks);
@@ -337,7 +351,7 @@ public class InfostoreQueryCatalog {
     }
 
     public String getDocumentUpdate(final Metadata[] fields) {
-        return buildUpdateWithoutWhere(Table.INFOSTORE.getTablename(), fields, Table.INFOSTORE.getFieldSwitcher()).append(
+        return buildUpdateWithoutWhere(Table.INFOSTORE, fields, Table.INFOSTORE.getFieldSwitcher()).append(
             " WHERE cid = ? and id = ? and last_modified <= ?").toString();
     }
 
@@ -354,9 +368,17 @@ public class InfostoreQueryCatalog {
         return Table.INFOSTORE.getFields();
     }
 
+    public Metadata[] getDelDocumentFields() {
+        return Table.DEL_INFOSTORE.getFields();
+    }
+
     public Metadata[] getWritableDocumentFields() {
         final Metadata[] fields = getDocumentFields();
+        return filterWritable(fields);
+    }
 
+    public Metadata[] getWritableDelDocumentFields() {
+        final Metadata[] fields = getDelDocumentFields();
         return filterWritable(fields);
     }
 
@@ -385,12 +407,8 @@ public class InfostoreQueryCatalog {
         return INSERT_INFOSTORE_DOCUMENT;
     }
 
-    public String getDelVersionInsert() {
-        return INSERT_DEL_INFOSTORE_DOCUMENT;
-    }
-
     public String getVersionUpdate(final Metadata[] fields) {
-        return buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT.getTablename(), fields, Table.INFOSTORE_DOCUMENT.getFieldSwitcher()).append(
+        return buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT, fields, Table.INFOSTORE_DOCUMENT.getFieldSwitcher()).append(
             " WHERE cid = ? and infostore_id = ? and version_number = ? and last_modified <= ?").toString();
     }
 
@@ -398,8 +416,17 @@ public class InfostoreQueryCatalog {
         return Table.INFOSTORE_DOCUMENT.getFields();
     }
 
+    public Metadata[] getDelVersionFields() {
+        return Table.DEL_INFOSTORE_DOCUMENT.getFields();
+    }
+
     public Metadata[] getWritableVersionFields() {
         final Metadata[] fields = getVersionFields();
+        return filterWritable(fields);
+    }
+
+    public Metadata[] getWritableDelVersionFields() {
+        final Metadata[] fields = getDelVersionFields();
         return filterWritable(fields);
     }
 
@@ -799,6 +826,129 @@ public class InfostoreQueryCatalog {
 
     }
 
+    public static final class DelInfostoreColumnsSwitch implements MetadataSwitcher {
+        @Override
+        public Object categories() {
+            return null;
+        }
+
+        @Override
+        public Object colorLabel() {
+            return "color_label";
+        }
+
+        @Override
+        public Object content() {
+            return null;
+        }
+
+        @Override
+        public Object createdBy() {
+            return "created_by";
+        }
+
+        @Override
+        public Object creationDate() {
+            return "creating_date";
+        }
+
+        @Override
+        public Object currentVersion() {
+            return null;
+        }
+
+        @Override
+        public Object description() {
+            return null;
+        }
+
+        @Override
+        public Object fileMD5Sum() {
+            return null;
+        }
+
+        @Override
+        public Object fileMIMEType() {
+            return null;
+        }
+
+        @Override
+        public Object fileName() {
+            return null;
+        }
+
+        @Override
+        public Object fileSize() {
+            return null;
+        }
+
+        @Override
+        public Object folderId() {
+            return "folder_id";
+        }
+
+        @Override
+        public Object id() {
+            return "id";
+        }
+
+        @Override
+        public Object lastModified() {
+            return "last_modified";
+        }
+
+        @Override
+        public Object lockedUntil() {
+            return null;
+        }
+
+        @Override
+        public Object modifiedBy() {
+            return "changed_by";
+        }
+
+        @Override
+        public Object sequenceNumber() {
+            return null;
+        }
+
+        @Override
+        public Object title() {
+            return null;
+        }
+
+        @Override
+        public Object url() {
+            return null;
+        }
+
+        @Override
+        public Object version() {
+            return "version";
+        }
+
+        @Override
+        public Object versionComment() {
+            return null;
+        }
+
+        @Override
+        public Object filestoreLocation() {
+            // Nothing to do
+            return null;
+        }
+
+        @Override
+        public Object lastModifiedUTC() {
+            return lastModified();
+        }
+
+        @Override
+        public Object numberOfVersions() {
+            return null;
+        }
+    }
+
     public static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher {
 
         @Override
@@ -922,8 +1072,130 @@ public class InfostoreQueryCatalog {
         }
     }
 
-    public static interface FieldChooser {
+    public static final class DelInfostoreDocumentColumnsSwitch implements MetadataSwitcher {
 
+        @Override
+        public Object categories() {
+            return null;
+        }
+
+        @Override
+        public Object colorLabel() {
+            return null;
+        }
+
+        @Override
+        public Object content() {
+            return null;
+        }
+
+        @Override
+        public Object createdBy() {
+            return "created_by";
+        }
+
+        @Override
+        public Object creationDate() {
+            return "creating_date";
+        }
+
+        @Override
+        public Object currentVersion() {
+            return null;
+        }
+
+        @Override
+        public Object description() {
+            return null;
+        }
+
+        @Override
+        public Object fileMD5Sum() {
+            return null;
+        }
+
+        @Override
+        public Object fileMIMEType() {
+            return null;
+        }
+
+        @Override
+        public Object fileName() {
+            return null;
+        }
+
+        @Override
+        public Object fileSize() {
+            return null;
+        }
+
+        @Override
+        public Object folderId() {
+            return null;
+        }
+
+        @Override
+        public Object id() {
+            return "infostore_id";
+        }
+
+        @Override
+        public Object lastModified() {
+            return "last_modified";
+        }
+
+        @Override
+        public Object lockedUntil() {
+            return null;
+        }
+
+        @Override
+        public Object modifiedBy() {
+            return "changed_by";
+        }
+
+        @Override
+        public Object sequenceNumber() {
+            return null;
+        }
+
+        @Override
+        public Object title() {
+            return null;
+        }
+
+        @Override
+        public Object url() {
+            return null;
+        }
+
+        @Override
+        public Object version() {
+            return "version_number";
+        }
+
+        @Override
+        public Object versionComment() {
+            return null;
+        }
+
+        @Override
+        public Object filestoreLocation() {
+            return null;
+        }
+
+        @Override
+        public Object lastModifiedUTC() {
+            return lastModified();
+        }
+
+        @Override
+        public Object numberOfVersions() {
+            return null;
+        }
+    }
+
+    public static interface FieldChooser {
         public Table choose(Metadata m);
     }
 

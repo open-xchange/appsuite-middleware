@@ -95,12 +95,6 @@ import com.openexchange.tools.session.ServerSession;
 
 public class DatabaseImpl extends DBService {
 
-    private static final String TABLE_DEL_INFOSTORE_DOCUMENT = "del_infostore_document";
-
-    private static final String TABLE_DEL_INFOSTORE = "del_infostore";
-
-    private static final String[] DEL_TABLES = new String[] { TABLE_DEL_INFOSTORE, TABLE_DEL_INFOSTORE_DOCUMENT };
-
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseImpl.class));
 
     private final static int DOCUMENT_VERSION_NUMBER_WITHOUT_FILE = 0;
@@ -255,7 +249,7 @@ public class DatabaseImpl extends DBService {
         try {
             final int[] columns = switchMetadata2DBColumns(Metadata.VALUES_ARRAY, false);
             con = getReadConnection(ctx);
-            stmt = con.prepareStatement(getSQLSelectForInfostoreColumns(columns, false).toString() + " FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore.id=? AND infostore_document.infostore_id=infostore.id AND infostore_document.cid=? AND infostore_document.version_number = " + versionString);
+            stmt = con.prepareStatement(getSQLSelectForInfostoreColumns(columns).toString() + " FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore.id=? AND infostore_document.infostore_id=infostore.id AND infostore_document.cid=? AND infostore_document.version_number = " + versionString);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, id);
             stmt.setInt(3, ctx.getContextId());
@@ -290,7 +284,7 @@ public class DatabaseImpl extends DBService {
         ResultSet rs = null;
         try {
             con = getReadConnection(ctx);
-            stmt = con.prepareStatement(getSQLSelectForInfostoreColumns(switchMetadata2DBColumns(columns, true), false).toString() + " FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.infostore_id=infostore.id AND infostore_document.cid=? WHERE " + where);
+            stmt = con.prepareStatement(getSQLSelectForInfostoreColumns(switchMetadata2DBColumns(columns, true)).toString() + " FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.infostore_id=infostore.id AND infostore_document.cid=? WHERE " + where);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             rs = stmt.executeQuery();
@@ -317,7 +311,7 @@ public class DatabaseImpl extends DBService {
         ResultSet rs = null;
         try {
             con = getReadConnection(ctx);
-            stmt = con.prepareStatement(getSQLSelectForInfostoreColumns(switchMetadata2DBColumns(columns, false), false).toString() + " FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.infostore_id=infostore.id AND infostore_document.cid=? AND infostore_document.version_number = infostore.version WHERE " + where);
+            stmt = con.prepareStatement(getSQLSelectForInfostoreColumns(switchMetadata2DBColumns(columns, false)).toString() + " FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.infostore_id=infostore.id AND infostore_document.cid=? AND infostore_document.version_number = infostore.version WHERE " + where);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             rs = stmt.executeQuery();
@@ -379,14 +373,10 @@ public class DatabaseImpl extends DBService {
         return removeDocumentFromTable(identifier, ctx, "infostore");
     }
 
-    public int[] removeDelDocument(final String identifier, final Context ctx) throws OXException {
-        return removeDocumentFromTable(identifier, ctx, TABLE_DEL_INFOSTORE);
-    }
-
     /**
      * @param identifier The file identifier
      * @param ctx The Context from which it should be deleted
-     * @param basetablename The basename of the table e.g. del_infostore the fitting database names (del_infostore_documents etc. are
+     * @param basetablename The basename of the table e.g. infostore the fitting database names (infostore_documents etc. are
      *            self-build
      * @return The number of changed entries in the basetable in int[0] and the number of deleted entries in int[1]
      * @throws OXException
@@ -474,10 +464,6 @@ public class DatabaseImpl extends DBService {
 
     public int modifyDocument(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx) throws OXException {
         return modifyDocumentInTable(oldidentifier, newidentifier, description, mimetype, ctx, "infostore");
-    }
-
-    public int modifyDelDocument(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx) throws OXException {
-        return modifyDocumentInTable(oldidentifier, newidentifier, description, mimetype, ctx, TABLE_DEL_INFOSTORE);
     }
 
     private int modifyDocumentInTable(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx, final String basetablename) throws OXException {
@@ -635,7 +621,7 @@ public class DatabaseImpl extends DBService {
 
             final int[] dbColumns = switchMetadata2DBColumns(columns, false);
 
-            final StringBuilder sql = new StringBuilder(getSQLSelectForInfostoreColumns(dbColumns, false));
+            final StringBuilder sql = new StringBuilder(getSQLSelectForInfostoreColumns(dbColumns));
             sql.append(" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore.id=infostore_document.infostore_id AND infostore_document.version_number=infostore.version AND infostore.folder_id=?");
             sql.append(onlyOwn);
 
@@ -695,34 +681,6 @@ public class DatabaseImpl extends DBService {
         return _strReturnArray;
     }
 
-    public SortedSet<String> getDelDocumentFileStoreLocationsperContext(final Context ctx) throws OXException {
-        final SortedSet<String> _strReturnArray = new TreeSet<String>();
-        Connection con = getReadConnection(ctx);
-
-        final StringBuilder SQL = new StringBuilder(
-            "SELECT file_store_location from del_infostore_document where del_infostore_document.cid=? AND file_store_location is not null");
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(SQL.toString());
-            stmt.setInt(1, ctx.getContextId());
-            result = stmt.executeQuery();
-            while (result.next()) {
-                _strReturnArray.add(result.getString(1));
-            }
-            result.close();
-            stmt.close();
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e);
-        } finally {
-            close(stmt, result);
-            releaseReadConnection(ctx, con);
-        }
-
-        return _strReturnArray;
-    }
-
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, final Context ctx) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -730,7 +688,7 @@ public class DatabaseImpl extends DBService {
         try {
             final int[] dbColumns = switchMetadata2DBColumns(columns, true);
 
-            final StringBuilder sql = new StringBuilder(getSQLSelectForInfostoreColumns(dbColumns, false).toString());
+            final StringBuilder sql = new StringBuilder(getSQLSelectForInfostoreColumns(dbColumns).toString());
             sql.append(" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore.id=? AND infostore_document.infostore_id=? AND infostore_document.cid=?");
 
             if (sort != null) {
@@ -769,7 +727,7 @@ public class DatabaseImpl extends DBService {
         try {
             con = getReadConnection(ctx);
             final int[] dbColumns = switchMetadata2DBColumns(columns, false);
-            final StringBuilder SQL_JOIN = new StringBuilder(getSQLSelectForInfostoreColumns(dbColumns, false));
+            final StringBuilder SQL_JOIN = new StringBuilder(getSQLSelectForInfostoreColumns(dbColumns));
             SQL_JOIN.append(" FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore.id=infostore_document.infostore_id AND infostore_document.version_number=infostore.version AND (");
             for (int i = 0; i < ids.length; i++) {
                 SQL_JOIN.append("infostore.id=?");
@@ -829,7 +787,7 @@ public class DatabaseImpl extends DBService {
             }
 
             final int[] dbColumns = switchMetadata2DBColumns(columns, false);
-            final StringBuilder SELECT = new StringBuilder(getSQLSelectForInfostoreColumns(dbColumns, false));
+            final StringBuilder SELECT = new StringBuilder(getSQLSelectForInfostoreColumns(dbColumns));
             final StringBuilder JOIN_NEW = new StringBuilder(
                 " FROM infostore JOIN infostore_document ON infostore.cid=? AND infostore_document.cid=? AND infostore_document.infostore_id=infostore.id AND infostore_document.version_number = infostore.version AND infostore.folder_id=? AND infostore.creating_date>?").append(onlyOwn);
             final StringBuilder JOIN_MODIFIED = new StringBuilder(
@@ -1008,9 +966,9 @@ public class DatabaseImpl extends DBService {
             assignToAdmin(id, ctx);
         } else {
             removeAll(ctx, session);
-            removeFromDel(id, ctx);
         }
 
+        removeFromDel(id, ctx);
         locks.transferLocks(ctx, id, ctx.getMailadmin());
     }
 
@@ -1021,7 +979,7 @@ public class DatabaseImpl extends DBService {
         try {
             writeCon = getWriteConnection(ctx);
             stmt = writeCon.createStatement();
-            for (final String table : DEL_TABLES) {
+            for (final String table : new String[] { "del_infostore", "del_infostore_document" }) {
                 query = new StringBuilder("DELETE FROM ").append(table).append(" WHERE cid = ").append(ctx.getContextId()).append(
                     " AND created_by = ").append(id);
                 stmt.executeUpdate(query.toString());
@@ -1247,11 +1205,8 @@ public class DatabaseImpl extends DBService {
         }
     }
 
-    private StringBuffer getSQLSelectForInfostoreColumns(final int[] columns, final boolean deleteTable) {
+    private StringBuffer getSQLSelectForInfostoreColumns(final int[] columns) {
         String delete = "";
-        if (deleteTable) {
-            delete = "del_";
-        }
         final StringBuffer select = new StringBuffer("SELECT ");
         for (int i = 0; i < columns.length; i++) {
             select.append(delete);

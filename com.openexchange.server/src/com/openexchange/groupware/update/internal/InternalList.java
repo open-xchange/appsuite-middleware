@@ -82,6 +82,7 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryK
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.InfostoreClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.InfostoreDocumentCreateForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.InfostoreDocumentDropForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask;
@@ -680,12 +681,15 @@ public final class InternalList {
 
         // Removes obsolete data from the 'del_dates' table
         list.add(new com.openexchange.groupware.update.tasks.AppointmentClearDelTablesTasks());
-        
+
         // Removes obsolete data from the 'del_user' table
         list.add(new UserClearDelTablesTask());
-        
+
         // Removes obsolete data from the 'del_resource' table
         list.add(new ResourceClearDelTablesTask());
+
+        // Removes obsolete data from the 'del_infostore_document' table
+        list.add(new InfostoreClearDelTablesTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
