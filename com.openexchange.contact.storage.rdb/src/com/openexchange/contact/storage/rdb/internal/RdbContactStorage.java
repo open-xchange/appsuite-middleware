@@ -309,25 +309,18 @@ public class RdbContactStorage extends DefaultContactStorage {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, contextID, serverSession.getUserId());
             }
             /*
-             * clean-up any obsolete entries in backup table for this folder
-             */
-            executor.delete(connection, Table.DELETED_CONTACTS, contextID, folderID, null);
-            /*
-             * get a list of object IDs to delete from contacts in the folder
+             * get a list of object IDs to delete
              */
             List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE,
                 new ContactField[] { ContactField.OBJECT_ID }, null, null);
             if (null == contacts || 0 == contacts.size()) {
-                return; // folder is empty, nothing more to do
+                return; // nothing to do
             }
             int[] objectIDs = getObjectIDs(contacts);
             /*
-             * delete all contact data without moving them to the 'del' table
-             * (per convention, don't check last modification time when clearing a folder)
+             * delete contacts - per convention, don't check last modification time when clearing a folder
              */
-            executor.delete(connection, Table.CONTACTS, contextID, folderID, objectIDs);
-            executor.delete(connection, Table.IMAGES, contextID, Integer.MIN_VALUE, objectIDs);
-            executor.delete(connection, Table.DISTLIST, contextID, Integer.MIN_VALUE, objectIDs);
+            deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
             /*
              * commit
              */
