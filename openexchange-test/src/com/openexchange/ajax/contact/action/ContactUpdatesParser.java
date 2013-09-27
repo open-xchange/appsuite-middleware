@@ -84,6 +84,10 @@ public class ContactUpdatesParser extends AbstractColumnsParser<ContactUpdatesRe
         }
         List<Contact> contacts = new ArrayList<Contact>();
         for (int i = 0, size = rows.length(); i < size; i++) {
+            Object arrayOrId = rows.get(i);
+            if(!JSONArray.class.isInstance(arrayOrId)) {
+                continue;
+            }
             JSONArray row = rows.getJSONArray(i);
             Contact contact = new Contact();
             for (int colIndex = 0; colIndex < getColumns().length; colIndex++) {
