@@ -47,39 +47,90 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.ajax.framework.AbstractUpdatesResponse;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.container.DataObject;
+
 
 /**
- * {@link TaskUpdatesResponse}
+ * {@link AbstractUpdatesResponse} - 
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class TaskUpdatesResponse extends AbstractUpdatesResponse {
+public class AbstractUpdatesResponse extends AbstractColumnsResponse {
 
-    private List<Task> tasks = new ArrayList<Task>();
+    private Set<Integer> newOrModifiedIds;
+    private Set<Integer> deletedIds;
 
-    public TaskUpdatesResponse(Response response) {
+    /**
+     * Initializes a new {@link AbstractUpdatesResponse}.
+     * @param response
+     */
+    protected AbstractUpdatesResponse(Response response) {
         super(response);
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    @Override
+    void setArray(final Object[][] array) {
+        super.setArray(array);
+        initUpdatedIds(array);
+    }
+    
+    /**
+     * Get a collection of object ids that were modified(new or updated) during the request. 
+     * @return a collection of object ids that were modified during the request.
+     */
+    public Set<Integer> getNewOrModifiedIds() {
+        return newOrModifiedIds;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    /**
+     * Get a collection of object ids that were deleted during the request. 
+     * @return a collection of object ids that were deleted during the request.
+     */
+    public Set<Integer> getDeletedIds() {
+        return deletedIds;
+    }
+
+    /*
+     * Deleted Objects are represented as String ids on the toplevel of the response array
+     * 
+     * New or modified Objects are represented as array on the toplevel of the response array
+     * [
+     *  31279,
+     *  35,
+     *  "UpdatedTask 4",
+     *  null,
+     *  null,
+     *  null,
+     *  null,
+     *  [
+     *    {
+     *      "type": 1,
+     *      "confirmation": 0,
+     *      "id": 5
+     *    }
+     *  ]
+     * ]
+     */
+    private void initUpdatedIds(Object[][] responseData) {
+        newOrModifiedIds = new HashSet<Integer>(responseData.length);
+        deletedIds = new HashSet<Integer>(responseData.length);
+
+        int idPosition = getColumnPos(DataObject.OBJECT_ID);
+
+        for(Object[] objectArray : responseData) {
+            if(objectArray.length == 1) {
+                Integer objectId = (Integer)objectArray[0];
+                deletedIds.add(objectId);
+            } else {
+                Integer objectId = (Integer) objectArray[idPosition];
+                newOrModifiedIds.add(objectId);
+            }
+        }
     }
 
 }
