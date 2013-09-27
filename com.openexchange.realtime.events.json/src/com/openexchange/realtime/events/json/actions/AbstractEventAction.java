@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractEventAction implements AJAXActionService {
     
-    private ServiceLookup services;
+    private final ServiceLookup services;
     
     public AbstractEventAction(ServiceLookup services) {
         this.services = services;

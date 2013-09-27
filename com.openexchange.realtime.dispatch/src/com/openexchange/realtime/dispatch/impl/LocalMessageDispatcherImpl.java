@@ -77,7 +77,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
 
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
-    private StanzaSequenceGate gate = new StanzaSequenceGate("LocalMessageDispatcher") {
+    private final StanzaSequenceGate gate = new StanzaSequenceGate("LocalMessageDispatcher") {
 
         @Override
         public void handleInternal(Stanza stanza, ID recipient) throws OXException {

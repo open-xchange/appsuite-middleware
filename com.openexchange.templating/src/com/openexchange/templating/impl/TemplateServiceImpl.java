@@ -88,8 +88,6 @@ import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplatingHelper;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import freemarker.cache.FileTemplateLoader;
-import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;

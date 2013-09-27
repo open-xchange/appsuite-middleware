@@ -57,8 +57,8 @@ package com.openexchange.realtime.events;
  */
 public class RTEvent {
 
-    private Object payload;
-    private String format;
+    private final Object payload;
+    private final String format;
 
     public RTEvent(Object payload, String format) {
         super();

@@ -182,6 +182,14 @@ public interface CalendarCollectionService {
     public int[] checkAndAlterCols(int cols[]);
 
     /**
+     * Checks if given columns contain fields that are not present in the backup table - if so, they're removed.
+     *
+     * @param cols The columns to check
+     * @return The possibly reduced columns
+     */
+    int[] checkAndAlterColsForDeleted(int cols[]);
+
+    /**
      * Creates a newly allocated array containing first given array enhanced by
      * specified number of elements from second array.
      *

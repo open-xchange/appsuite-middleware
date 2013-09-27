@@ -62,11 +62,11 @@ public class UserReport extends Report {
 
     private static final long serialVersionUID = -8802071039164053141L;
 
-    private Context ctx;
+    private final Context ctx;
 
-    private User user;
+    private final User user;
 
-    private ContextReport contextReport;
+    private final ContextReport contextReport;
 
     /**
      * 

@@ -73,11 +73,11 @@ import com.openexchange.session.Session;
  */
 public class RTEventManager implements RTEventManagerService {
     
-    private ConcurrentHashMap<String, RTEventEmitterService> emitterFactories = new ConcurrentHashMap<String, RTEventEmitterService>(); 
+    private final ConcurrentHashMap<String, RTEventEmitterService> emitterFactories = new ConcurrentHashMap<String, RTEventEmitterService>(); 
 
-    private ConcurrentHashMap<ID, List<RTEventSubscription>> subscriptions = new ConcurrentHashMap<ID, List<RTEventSubscription>>();
+    private final ConcurrentHashMap<ID, List<RTEventSubscription>> subscriptions = new ConcurrentHashMap<ID, List<RTEventSubscription>>();
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
     
     /**
      * Initializes a new {@link RTEventManager}.

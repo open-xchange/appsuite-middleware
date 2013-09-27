@@ -60,6 +60,7 @@ import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.conversion.DataProperties;
@@ -122,7 +123,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !isEmpty(eTag);
-            if (null != previewCache && isValidEtag) {
+            if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final String cacheKey = generatePreviewCacheKey(eTag, requestData);
                 final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {

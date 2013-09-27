@@ -53,15 +53,12 @@ import static com.openexchange.imap.IMAPCommandsCollection.canCreateSubfolder;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.MessagingException;
-import javax.mail.Store;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.imap.services.Services;
-import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.DefaultFolder;
-import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 /**

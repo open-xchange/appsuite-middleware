@@ -83,7 +83,7 @@ public class Total implements ContextReportCumulator{
             HashMap<String, Long> counts = (HashMap) entry.getValue();
             
             if (counts != null && counts.containsKey("total")) {
-                users += (Long) counts.get("total");
+                users += counts.get("total");
             }
         }
         

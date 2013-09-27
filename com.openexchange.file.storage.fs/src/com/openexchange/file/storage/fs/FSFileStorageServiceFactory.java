@@ -71,8 +71,8 @@ import com.openexchange.session.Session;
  */
 public class FSFileStorageServiceFactory implements FileStorageServiceFactory {
     
-    private File file;
-    private ServiceLookup services;
+    private final File file;
+    private final ServiceLookup services;
 
     public FSFileStorageServiceFactory(ServiceLookup serviceLookup, File file) {
         super();

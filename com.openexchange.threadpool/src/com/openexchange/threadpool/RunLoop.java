@@ -65,9 +65,9 @@ public abstract class RunLoop<E> implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(RunLoop.class);
     
-    private BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
+    private final BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
 
-    private String name;
+    private final String name;
     
     public RunLoop(String name) {
         this.name = name;

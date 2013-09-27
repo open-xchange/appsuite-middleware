@@ -69,8 +69,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class JSONProtocolHandler {
     
-    private RTProtocol protocol;
-    private StanzaSequenceGate gate;
+    private final RTProtocol protocol;
+    private final StanzaSequenceGate gate;
 
     public JSONProtocolHandler(RTProtocol protocol, StanzaSequenceGate gate) {
         this.protocol = protocol;

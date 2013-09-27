@@ -49,13 +49,9 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.DateProperty;
-import net.fortuna.ical4j.model.property.DtStart;
 import net.fortuna.ical4j.model.property.XProperty;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;

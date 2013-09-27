@@ -50,7 +50,6 @@
 package com.openexchange.realtime.example.chineseRoom;
 
 import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.ComponentHandle;

@@ -71,7 +71,7 @@ import com.sun.mail.util.PropUtil;
  */
 public class JavaIMAPProtocol extends IMAPProtocol {
 
-    /** Mapping for the authenticate semaphores */
+    /** Mapping for the login-permitting semaphores */
     private static final ConcurrentMap<URLName, Semaphore> semaphores = new ConcurrentHashMap<URLName, Semaphore>(16);
 
     private static Semaphore initAuthSemaphore(final URLName url, final int permits, final MailLogger logger) {
@@ -163,28 +163,38 @@ public class JavaIMAPProtocol extends IMAPProtocol {
 
     }
 
+    /**
+     * Acquires a login permit.
+     *
+     * @param u The user
+     * @param p The password
+     * @param maxNumAuthenticated The max. number of allowed concurrent logins
+     * @throws ConnectQuotaExceededException If <code>maxNumAuthenticated</code> is exceeded and permit could not be acquired in time
+     * @throws ProtocolException If a protocol error occurs
+     */
     protected void acquirePermit(final String u, final String p, final int maxNumAuthenticated) throws ConnectQuotaExceededException, ProtocolException {
         final boolean debug = (logger.isLoggable(Level.FINE));
 
         Semaphore semaphore = this.semaphore;
         if (null == semaphore) {
-            semaphore = initAuthSemaphore(new URLName("imap", host, port, /*Integer.toString(accountId)*/null, u, p), maxNumAuthenticated, logger);
+            semaphore = initAuthSemaphore(new URLName("imap", host, port, /* Integer.toString(accountId) */null, u, p), maxNumAuthenticated, logger);
             this.semaphore = semaphore;
         } else {
             if (debug) {
-                logger.fine("JavaIMAPProtocol.authenticated: semaphore already applied. -- protocol's permit count " + permitCount.get());
+                logger.fine("JavaIMAPProtocol.acquirePermit: semaphore already applied. -- protocol's permit count " + permitCount.get());
             }
         }
 
         if (null != semaphore) {
             try {
-
+                // For debugging purpose
                 final long start = debug ? System.currentTimeMillis() : 0L;
 
+                // Acquire login permit
                 final long timeoutMillis = this.authTimeoutMillis;
                 if (0 == timeoutMillis) {
                     if (debug) {
-                        logger.fine("JavaIMAPProtocol.authenticated: performing limited login. no wait -- " + semaphore);
+                        logger.fine("JavaIMAPProtocol.acquirePermit: Trying to acquire login permit. No wait -- " + semaphore);
                     }
                     if (!semaphore.tryAcquire()) {
                         // No permit available at the moment
@@ -193,7 +203,7 @@ public class JavaIMAPProtocol extends IMAPProtocol {
                 } else if (timeoutMillis > 0) {
                     // Await released permit only for specified amount of milliseconds
                     if (debug) {
-                        logger.fine("JavaIMAPProtocol.authenticated: performing limited login. max wait time: " + timeoutMillis + " -- " + semaphore);
+                        logger.fine("JavaIMAPProtocol.acquirePermit: Trying to acquire login permit. Max wait time: " + timeoutMillis + " -- " + semaphore);
                     }
                     if (!semaphore.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS)) {
                         // No permit acquired in time
@@ -202,15 +212,15 @@ public class JavaIMAPProtocol extends IMAPProtocol {
                 } else {
                     // Await until released permit available
                     if (debug) {
-                        logger.fine("JavaIMAPProtocol.authenticated: performing limited login. awaiting until a used connection gets closed -- " + semaphore);
+                        logger.fine("JavaIMAPProtocol.acquirePermit: Trying to acquire login permit. Awaiting until a used connection gets closed -- " + semaphore);
                     }
                     semaphore.acquire();
                 }
                 // Permit obtained
-                /*final int acquired = */permitCount.incrementAndGet();
+                /* final int acquired = */permitCount.incrementAndGet();
                 if (debug) {
                     final long dur = System.currentTimeMillis() - start;
-                    logger.fine("JavaIMAPProtocol.authenticated: login permitted ("+dur+"msec) -- " + semaphore + " -- protocol's permit count " + permitCount.get());
+                    logger.fine("JavaIMAPProtocol.acquirePermit: Login permitted after " + dur + "msec -- " + semaphore + " -- protocol's permit count " + permitCount.get());
                 }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -219,6 +229,9 @@ public class JavaIMAPProtocol extends IMAPProtocol {
         }
     }
 
+    /**
+     * Releases a previously acquired login permit.
+     */
     protected void releasePermits() {
         final Semaphore semaphore = this.semaphore;
         if (null != semaphore) {
@@ -226,7 +239,7 @@ public class JavaIMAPProtocol extends IMAPProtocol {
             if (permits > 0) {
                 semaphore.release(permits);
                 if (logger.isLoggable(Level.FINE)) {
-                    logger.fine("JavaIMAPProtocol.logout: released login semaphore -- " + semaphore);
+                    logger.fine("JavaIMAPProtocol.releasePermits: Released login permit -- " + semaphore);
                 }
             }
             this.semaphore = null;

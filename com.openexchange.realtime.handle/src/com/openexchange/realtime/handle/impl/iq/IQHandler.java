@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.handle.impl.AbstractStrategyHandler;
 import com.openexchange.realtime.handle.impl.HandlerStrategy;
 import com.openexchange.realtime.handle.impl.HandlerUtils;
-import com.openexchange.realtime.handle.impl.message.MessageHandler;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.IQ.Type;

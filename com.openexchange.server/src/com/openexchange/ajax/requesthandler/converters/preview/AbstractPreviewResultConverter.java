@@ -73,6 +73,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -218,7 +219,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             final PreviewCache previewCache = getPreviewCache();
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !isEmpty(eTag);
-            if (null != previewCache && isValidEtag) {
+            if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final String cacheKey = generatePreviewCacheKey(eTag, requestData);
                 final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {

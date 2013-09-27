@@ -66,9 +66,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class EventsRequest {
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
+    private final AJAXRequestData req;
+    private final ServerSession session;
+    private final RTEventManagerService manager;
 
     public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
         super();

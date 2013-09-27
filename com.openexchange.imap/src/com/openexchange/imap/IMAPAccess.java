@@ -880,8 +880,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (maxCount > 0) {
                     final Properties properties = imapSession.getProperties();
                     properties.put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
-                    properties.put("mail.imap.authNoWait", "true");
-                    // properties.put("mail.imap.authTimeoutMillis", "90000");
+                    properties.put("mail.imap.authAwait", "true");
                     properties.put("mail.imap.accountId", Integer.toString(accountId));
                 }
                 final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw);
@@ -895,7 +894,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             if (maxCount > 0) {
                 imapSession.getProperties().put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
-                imapSession.getProperties().put("mail.imap.authNoWait", "true");
+                imapSession.getProperties().put("mail.imap.authAwait", "true");
                 imapSession.getProperties().put("mail.imap.accountId", Integer.toString(accountId));
             }
             /*

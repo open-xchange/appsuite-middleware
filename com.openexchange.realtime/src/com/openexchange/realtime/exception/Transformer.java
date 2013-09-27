@@ -60,9 +60,9 @@ import java.io.Serializable;
  */
 public class Transformer implements Serializable {
 
-    private RealtimeExceptionCodes origin;
-    private RealtimeExceptionCodes atmosphere;
-    private RealtimeExceptionCodes xmpp;
+    private final RealtimeExceptionCodes origin;
+    private final RealtimeExceptionCodes atmosphere;
+    private final RealtimeExceptionCodes xmpp;
 
     /**
      * Initializes a new {@link Transformer}.

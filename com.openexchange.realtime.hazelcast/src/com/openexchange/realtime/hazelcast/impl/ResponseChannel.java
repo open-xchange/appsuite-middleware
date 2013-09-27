@@ -74,11 +74,11 @@ import com.openexchange.realtime.util.ElementPath;
  */
 public class ResponseChannel implements Channel{
 
-    private ConcurrentHashMap<ID, Stanza> responses = new ConcurrentHashMap<ID, Stanza>();
-    private ConcurrentHashMap<ID, Condition> condition = new ConcurrentHashMap<ID, Condition>();
-    private ConcurrentHashMap<ID, Lock> locks = new ConcurrentHashMap<ID, Lock>();
+    private final ConcurrentHashMap<ID, Stanza> responses = new ConcurrentHashMap<ID, Stanza>();
+    private final ConcurrentHashMap<ID, Condition> condition = new ConcurrentHashMap<ID, Condition>();
+    private final ConcurrentHashMap<ID, Lock> locks = new ConcurrentHashMap<ID, Lock>();
 
-    private ResourceDirectory directory;
+    private final ResourceDirectory directory;
 
     public ResponseChannel(ResourceDirectory directory) {
         this.directory = directory;

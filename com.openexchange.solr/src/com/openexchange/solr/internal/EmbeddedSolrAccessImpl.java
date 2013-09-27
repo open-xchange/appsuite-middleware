@@ -70,7 +70,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SchemaAndConfigStore;
 import com.openexchange.solr.SolrAccessService;

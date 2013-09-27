@@ -96,7 +96,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AutoLogin.class));
 
-    private LoginConfiguration conf;
+    private final LoginConfiguration conf;
 
     /**
      * Initializes a new {@link AutoLogin}.

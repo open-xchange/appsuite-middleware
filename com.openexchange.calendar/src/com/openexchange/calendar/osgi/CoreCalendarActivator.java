@@ -56,7 +56,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarReminderDelete;
-import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.cache.CalendarVolatileCache;

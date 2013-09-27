@@ -668,31 +668,31 @@ public class Executor {
      * @throws SQLException
      * @throws OXException
      */
-    public int insertFromAndUpdate(Connection connection, Table from, Table to, int contextID, int folderID, int[] objectIDs,
-        long maxLastModified, Contact update, ContactField[] updatedFields) throws SQLException, OXException {
-        if (false == from.isContactTable()) {
-            throw new UnsupportedOperationException("only contact tables");
-        } else if (null == updatedFields || 0 == updatedFields.length) {
+    public int replaceToDeletedContactsAndUpdate(Connection connection,int contextID, int folderID, int[] objectIDs, long maxLastModified,
+        Contact update, ContactField[] updatedFields) throws SQLException, OXException {
+        if (null == updatedFields || 0 == updatedFields.length) {
             throw new IllegalArgumentException("need some updated fields");
-        } else if (Integer.MIN_VALUE == folderID && (null == objectIDs || 0 == objectIDs.length)) {
+        }
+        if (Integer.MIN_VALUE == folderID && (null == objectIDs || 0 == objectIDs.length)) {
             throw new UnsupportedOperationException("need either a folder id or object ids");
         }
         /*
          * determine which fields to copy over
          */
-        EnumSet<ContactField> copiedFieldsSet = EnumSet.copyOf(Fields.CONTACT_DATABASE);
+        EnumSet<ContactField> copiedFieldsSet = EnumSet.copyOf(Fields.DEL_CONTACT_DATABASE);
         copiedFieldsSet.removeAll(Arrays.asList(updatedFields));
         ContactField[] copiedFields = copiedFieldsSet.toArray(new ContactField[copiedFieldsSet.size()]);
         /*
          * build statement
          */
         StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("REPLACE INTO ").append(to).append(" (").append(Mappers.CONTACT.getColumns(copiedFields)).append(',')
+        stringAllocator.append("REPLACE INTO ").append(Table.DELETED_CONTACTS).append(" (")
+            .append(Mappers.CONTACT.getColumns(copiedFields)).append(',')
             .append(Mappers.CONTACT.getColumns(updatedFields)).append(") SELECT ");
         for (ContactField copiedField : copiedFields) {
-            stringAllocator.append(from).append('.').append(Mappers.CONTACT.get(copiedField).getColumnLabel()).append(',');
+            stringAllocator.append(Table.CONTACTS).append('.').append(Mappers.CONTACT.get(copiedField).getColumnLabel()).append(',');
         }
-        stringAllocator.append(Tools.getParameters(updatedFields.length)).append(" FROM ").append(from).append(" WHERE ");
+        stringAllocator.append(Tools.getParameters(updatedFields.length)).append(" FROM ").append(Table.CONTACTS).append(" WHERE ");
         stringAllocator.append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
             stringAllocator.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");

@@ -50,7 +50,6 @@
 package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.server.ajax.ping.PingAJAXActionFactory;
 

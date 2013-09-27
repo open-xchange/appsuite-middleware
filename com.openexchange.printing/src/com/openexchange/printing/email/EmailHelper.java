@@ -56,7 +56,6 @@ import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.printing.DateFormatter;
-import com.openexchange.printing.EnhancedTaskOrAppointment;
 import com.openexchange.printing.TemplateLabels;
 import com.openexchange.server.ServiceLookup;
 

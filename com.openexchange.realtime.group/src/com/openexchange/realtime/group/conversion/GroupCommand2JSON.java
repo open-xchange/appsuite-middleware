@@ -49,15 +49,12 @@
 
 package com.openexchange.realtime.group.conversion;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.commands.JoinCommand;
 import com.openexchange.realtime.group.commands.LeaveCommand;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 

@@ -56,7 +56,6 @@ import com.openexchange.realtime.events.RTEvent;
 import com.openexchange.realtime.events.RTListener;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Message.Type;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.server.ServiceLookup;
@@ -71,13 +70,13 @@ import com.openexchange.session.Session;
  */
 public class RTEventSubscription implements RTListener {
 
-    private ServiceLookup services;
-    private ID id;
-    private String selector;
-    private String eventName;
-    private String namespace;
-    private Session session;
-    private Map<String, String> parameters;
+    private final ServiceLookup services;
+    private final ID id;
+    private final String selector;
+    private final String eventName;
+    private final String namespace;
+    private final Session session;
+    private final Map<String, String> parameters;
 
     public RTEventSubscription(String namespace, String eventName, String selector, ID id, Session session, Map<String, String> parameters, ServiceLookup services) {
         super();
@@ -100,6 +99,7 @@ public class RTEventSubscription implements RTListener {
         return session;
     }
     
+    @Override
     public Map<String, String> getParameters() {
         return parameters;
     }

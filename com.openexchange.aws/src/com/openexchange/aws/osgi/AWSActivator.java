@@ -66,6 +66,7 @@ import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingCli
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3EncryptionClient;
+import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.openexchange.aws.exceptions.OXAWSExceptionCodes;
 import com.openexchange.config.ConfigurationService;
@@ -129,7 +130,7 @@ public class AWSActivator extends HousekeepingActivator {
             amazonAutoScaling.setEndpoint(autoscalingRegion);
             final AmazonCloudWatch amazonCloudWatch = new AmazonCloudWatchClient(credentials);
             amazonCloudWatch.setEndpoint(cloudwatchRegion);
-            AmazonS3 amazonS3 = null;
+            AmazonS3Client amazonS3 = null;
             if (s3encryption) {
                 SecretKey sKey = null;
                 try {
@@ -149,6 +150,10 @@ public class AWSActivator extends HousekeepingActivator {
                 amazonS3 = new AmazonS3Client(credentials);
             }
             amazonS3.setEndpoint(amazonS3Region);
+            if (configService.getBoolProperty("com.openexchange.aws.s3.pathStyleAccess", true)) {
+                amazonS3.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
+            }
+
             registerService(AmazonEC2.class, amazonEC2);
             registerService(AmazonElasticLoadBalancing.class, amazonLoadBalancing);
             registerService(AmazonAutoScaling.class, amazonAutoScaling);

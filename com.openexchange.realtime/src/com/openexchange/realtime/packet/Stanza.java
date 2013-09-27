@@ -107,7 +107,7 @@ public abstract class Stanza implements Serializable {
 
     private String tracer;
 
-    private List<String> logEntries = new LinkedList<String>();
+    private final List<String> logEntries = new LinkedList<String>();
 
     // Payloads carried by this Stanza as n-ary trees
     protected volatile Map<ElementPath, List<PayloadTree>> payloads;

@@ -65,7 +65,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;

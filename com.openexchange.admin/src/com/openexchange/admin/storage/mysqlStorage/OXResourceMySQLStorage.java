@@ -56,17 +56,18 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXResourceSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.log.LogFactory;
 
 /**
  * @author d7
@@ -86,10 +87,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         PreparedStatement editres = null;
         final int context_id = ctx.getId().intValue();
         final int resource_id = res.getId().intValue();
+        boolean rollback = false;
         try {
 
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
+            rollback = true;
 
             int edited_the_resource = 0;
 
@@ -135,7 +138,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 edited_the_resource++;
             }
 
-            // update displayName of resource
+            // Update displayName of resource
             final String displayname = res.getDisplayname();
             if (null != displayname) {
                 editres = con.prepareStatement("UPDATE resource SET displayName = ? WHERE cid = ? AND id = ?");
@@ -147,11 +150,27 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 edited_the_resource++;
             }
 
-            // update name of resource
-            final String rid = res.getName();
-            if (null != rid) {
+            // Check for possibly updating the name of resource
+            String resourceName = res.getName();
+            if (null == resourceName) {
+                // Load the name of the resource for logging purpose
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = con.prepareStatement("SELECT identifier FROM resource WHERE cid = ? AND id = ?");
+                    stmt.setInt(1, context_id);
+                    stmt.setInt(2, resource_id);
+                    rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        resourceName = rs.getString(1);
+                    }
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                }
+            } else {
+                // Change the name of the resource
                 editres = con.prepareStatement("UPDATE resource SET identifier = ? WHERE cid = ? AND id = ?");
-                editres.setString(1, rid);
+                editres.setString(1, resourceName);
                 editres.setInt(2, context_id);
                 editres.setInt(3, resource_id);
                 editres.executeUpdate();
@@ -159,32 +178,33 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 edited_the_resource++;
             }
 
+            // Update last-modified time stamp if any modification performed
             if (edited_the_resource > 0) {
-                // update modifed
                 changeLastModified(resource_id, ctx, con);
             }
+
             con.commit();
-            log.info("Resource " + rid + " changed!");
+            rollback = false;
+
+            if (null == resourceName) {
+                log.info("Resource changed!");
+            } else {
+                log.info("Resource " + resourceName + " changed!");
+            }
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            dorollback(con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            dorollback(con);
             throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            dorollback(con);
             throw new StorageException(e);
         } finally {
-            try {
-                if (editres != null) {
-                    editres.close();
-                }
-            } catch (final SQLException ex) {
-                log.error("Error closing PreparedStatement", ex);
+            if (rollback) {
+                dorollback(con);
             }
+            Databases.closeSQLStuff(editres);
             try {
                 cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
@@ -582,38 +602,16 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         // insert into del_resource table
         PreparedStatement del_st = null;
-        ResultSet rs = null;
         final int context_id = ctx.getId();
         try {
-
-            del_st = con.prepareStatement("SELECT identifier,displayName,mail,description,available FROM resource WHERE id = ? AND cid = ?");
+            del_st = con.prepareStatement("" + "INSERT " + "into del_resource " + "(id,cid,identifier,displayName,mail,description,lastModified) " + "VALUES " + "(?,?,?,?,?,?,?)");
             del_st.setInt(1, resource_id);
             del_st.setInt(2, context_id);
-            rs = del_st.executeQuery();
-            String ident = null;
-            String disp = null;
-            String mail = null;
-            String desc = null;
-            int available = -1;
-            if (rs.next()) {
-                ident = rs.getString("identifier");
-                disp = rs.getString("displayName");
-                mail = rs.getString("mail");
-                desc = rs.getString("description");
-                available = rs.getInt("available");
-            }
-            del_st.close();
-            rs.close();
-
-            del_st = con.prepareStatement("" + "INSERT " + "into del_resource " + "(id,cid,lastModified,identifier,mail,description,displayName,available) " + "VALUES " + "(?,?,?,?,?,?,?,?)");
-            del_st.setInt(1, resource_id);
-            del_st.setInt(2, context_id);
-            del_st.setLong(3, System.currentTimeMillis());
-            del_st.setString(4, ident);
-            del_st.setString(5, mail);
-            del_st.setString(6, desc);
-            del_st.setString(7, disp);
-            del_st.setInt(8, available);
+            del_st.setString(3, "");
+            del_st.setString(4, "");
+            del_st.setNull(5, Types.VARCHAR);
+            del_st.setString(6, "");
+            del_st.setLong(7, System.currentTimeMillis());
             del_st.executeUpdate();
         }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);

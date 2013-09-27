@@ -98,6 +98,8 @@ import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
+import com.openexchange.groupware.update.tasks.ResourceClearDelTablesTask;
+import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
@@ -622,7 +624,7 @@ public final class InternalList {
 
         // Add folder_id to primary key in del_contacts
         list.add(new MakeFolderIdPrimaryForDelContactsTable());
-        
+
         // Remove redundant keys (see bug 26913)
         list.add(new RemoveRedundantKeysForBug26913UpdateTask());
 
@@ -667,6 +669,23 @@ public final class InternalList {
 
         // Adds "archive" and "archive_fullname" columns to mail/transport account table
         list.add(new com.openexchange.groupware.update.tasks.MailAccountAddArchiveTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.4.1 starts here. +++++++++++++++++++++++++++++++++
+
+        // Removes obsolete data from the 'del_contacts', 'del_dlist' and 'del_contacts_image' tables
+        list.add(new com.openexchange.groupware.update.tasks.ContactClearDelTablesTasks());
+
+        // Removes obsolete data from the 'del_task' table
+        list.add(new com.openexchange.groupware.update.tasks.TaskClearDelTablesTasks());
+
+        // Removes obsolete data from the 'del_dates' table
+        list.add(new com.openexchange.groupware.update.tasks.AppointmentClearDelTablesTasks());
+        
+        // Removes obsolete data from the 'del_user' table
+        list.add(new UserClearDelTablesTask());
+        
+        // Removes obsolete data from the 'del_resource' table
+        list.add(new ResourceClearDelTablesTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

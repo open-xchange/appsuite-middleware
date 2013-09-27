@@ -64,9 +64,9 @@ import com.openexchange.realtime.packet.IDEventHandler;
  */
 public class StateManager {
 
-    private ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
+    private final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
 
-    private ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
+    private final ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
 
     /**
      * Retrieves stored {@link RTClientState} or creates a new entry for the given id.

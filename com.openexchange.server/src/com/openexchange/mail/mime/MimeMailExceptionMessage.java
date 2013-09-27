@@ -49,9 +49,7 @@
 
 package com.openexchange.mail.mime;
 
-import static com.openexchange.i18n.TextPattern.LINE_SEPARATOR;
 import com.openexchange.i18n.LocalizableStrings;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
