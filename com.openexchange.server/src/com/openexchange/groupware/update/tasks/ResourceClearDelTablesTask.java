@@ -120,7 +120,6 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
                     stmt.executeUpdate();
                     stmt.close();
                 }
-                
             }
             con.commit();
         } catch (SQLException e) {
