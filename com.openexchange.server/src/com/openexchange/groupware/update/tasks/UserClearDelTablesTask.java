@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -57,7 +58,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -96,27 +99,30 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
         try {
             con.setAutoCommit(false);
             for (String column : OBSOLETE_COLUMNS) {
-                String type = Tools.getColumnTypeName(con, TABLE, column);
-                String length = null;
-                if ("VARCHAR".equals(type)) {
-                    if ("mail".equals(column)) {
-                        length = "255";
-                    } else if ("passwordMech".equals(column)) {
-                        length = "32";
-                    } else if ("preferredLanguage".equals(column)) {
-                        length = "10";
-                    } else {
-                        length = "128";
+                if (Tools.isNullable(con, TABLE, column)) {
+                    stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = NULL");
+                    stmt.executeUpdate();
+                    stmt.close();
+                } else {
+                    int type = Tools.getColumnType(con, TABLE, column);
+                    stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = ?");
+                    switch (type) {
+                    case java.sql.Types.CHAR:
+                    case java.sql.Types.VARCHAR:
+                        stmt.setString(1, "");
+                        break;
+                    case java.sql.Types.DATE:
+                    case java.sql.Types.TIMESTAMP:
+                        stmt.setDate(1, new java.sql.Date(0));
+                        break;
+                    default:
+                        stmt.setInt(1, 0);
+                        break;
                     }
-                }
-                if (!Tools.isNullable(con, TABLE, column)) {
-                    stmt = con.prepareStatement("ALTER TABLE " + TABLE + " MODIFY " + column + " " + type + (null != length ? "(" + length + ")" : "") + " DEFAULT NULL");
-                    stmt.execute();
+                    stmt.executeUpdate();
                     stmt.close();
                 }
-                stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = NULL");
-                stmt.execute();
-                stmt.close();
+                
             }
             con.commit();
         } catch (SQLException e) {
@@ -138,6 +144,11 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[0];
+    }
+    
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(BACKGROUND);
     }
 
 }
