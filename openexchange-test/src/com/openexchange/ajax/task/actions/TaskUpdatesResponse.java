@@ -50,7 +50,12 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.groupware.tasks.Task;
@@ -63,6 +68,9 @@ import com.openexchange.groupware.tasks.Task;
 public class TaskUpdatesResponse extends AbstractColumnsResponse {
 
     private List<Task> tasks = new ArrayList<Task>();
+    private Set<Integer> newOrModifiedIds;
+    private Set<Integer> deletedIds;
+    
 
     public TaskUpdatesResponse(Response response) {
         super(response);
@@ -75,4 +83,67 @@ public class TaskUpdatesResponse extends AbstractColumnsResponse {
     public void setTasks(List<Task> tasks) {
         this.tasks = tasks;
     }
+
+    /**
+     * Get a collection of task ids that were modified(new or updated) during the request. 
+     * @return a collection of task ids that were modified during the request.
+     * @throws Exception
+     */
+    public Set<Integer> getNewOrModifiedIds() throws Exception {
+        if(newOrModifiedIds == null) {
+            initUpdatedIds(getArray());
+        }
+        return newOrModifiedIds;
+    }
+
+    /**
+     * Get a collection of task ids that were deleted during the request. 
+     * @return a collection of task ids that were deleted during the request.
+     * @throws Exception
+     */
+    public Set<Integer> getDeletedIds() throws Exception {
+        if(deletedIds == null) {
+            initUpdatedIds(getArray());
+        }
+        return deletedIds;
+    }
+
+    /*
+     * Deleted Tasks are represented as String ids on the toplevel of the response array
+     * 
+     * New or modified Tasks are represented as array on the toplevel of the response array
+     * [
+     *  31279,
+     *  35,
+     *  "UpdatedTask 4",
+     *  null,
+     *  null,
+     *  null,
+     *  null,
+     *  [
+     *    {
+     *      "type": 1,
+     *      "confirmation": 0,
+     *      "id": 5
+     *    }
+     *  ]
+     * ]
+     */
+    private void initUpdatedIds(Object[][] responseData) throws Exception {
+        newOrModifiedIds = new HashSet<Integer>(responseData.length);
+        deletedIds = new HashSet<Integer>(responseData.length);
+
+        int idPosition = getColumnPos(Task.OBJECT_ID);
+
+        for(Object[] taskArray : responseData) {
+            if(taskArray.length == 1) {
+                Integer objectId = (Integer)taskArray[0];
+                deletedIds.add(objectId);
+            } else {
+                Integer objectId = (Integer) taskArray[idPosition];
+                newOrModifiedIds.add(objectId);
+            }
+        }
+    }
+
 }
