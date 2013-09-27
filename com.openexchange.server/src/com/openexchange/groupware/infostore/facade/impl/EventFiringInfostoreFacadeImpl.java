@@ -115,7 +115,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
         } else {
             document = fs.getFile(dm.getFilestoreLocation(), offset, length);
         }
-        System.out.println("########## ACCESS : " + dm.getFileName());
+
         fireEvent(FileStorageEventHelper.buildAccessEvent(
             session, SERVICE_ID, ACCOUNT_ID, getFolderID(dm), getFileID(dm), dm.getFileName()));
         return document;

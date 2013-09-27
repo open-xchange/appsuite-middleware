@@ -158,11 +158,6 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    public int[] removeDelDocument(final String identifier, final Context ctx) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public int modifyDocument(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx) {
         for(final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
             for(final DocumentMetadata metadata : versions) {
@@ -177,11 +172,6 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
             }
         }
         return -1;
-    }
-
-    @Override
-    public int modifyDelDocument(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -203,11 +193,6 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
             }
         }
         return locations;
-    }
-
-    @Override
-    public SortedSet<String> getDelDocumentFileStoreLocationsperContext(final Context ctx) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

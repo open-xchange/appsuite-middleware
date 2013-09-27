@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,14 +47,18 @@
  *
  */
 
-package com.openexchange.test;
+package com.openexchange.groupware.infostore;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 
-
-public class UnitTests {
+/**
+ * {@link InfostoreTestSuite}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class InfostoreTestSuite {
 
     public static Test suite() {
         final TestSuite tests = new TestSuite();
@@ -71,19 +75,8 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.protocol.util.UtilsTest.class);
         tests.addTestSuite(com.openexchange.groupware.results.AbstractTimedResultTest.class);
 
-        tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
-        tests.addTestSuite(com.openexchange.groupware.CalendarRecurringTests.class);
-        tests.addTestSuite(com.openexchange.groupware.AppointmentBugTests.class);
-
-        tests.addTest(com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.suite());
-        tests.addTestSuite(com.openexchange.groupware.calendar.ConflictHandlerTest.class);
-        tests.addTestSuite(com.openexchange.groupware.calendar.CalendarDowngradeUserTest.class);
-        tests.addTestSuite(com.openexchange.groupware.calendar.RecurringCalculationTest.class);
-
         tests.addTestSuite(com.openexchange.tools.file.SaveFileActionTest.class);
         tests.addTestSuite(com.openexchange.tools.update.IndexTest.class);
-
-        tests.addTestSuite(com.openexchange.tools.io.SizeAwareInputStreamTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.attach.actions.CreateAttachmentsActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.attach.actions.UpdateAttachmentsActionTest.class);
@@ -96,8 +89,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.infostore.PropertyStoreTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.EntityLockManagerTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreFacadeTest.class);
-        tests.addTestSuite(com.openexchange.groupware.folder.FolderTreeUtilTest.class);
-        tests.addTestSuite(com.openexchange.groupware.folder.FolderLockManagerTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.infostore.AbstractDocumentListActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.CreateDocumentActionTest.class);
@@ -115,68 +106,21 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.infostore.InfostoreDowngradeTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.SearchEngineTest.class);
 
-        tests.addTestSuite(com.openexchange.groupware.tasks.DowngradeTest.class);
-
         tests.addTestSuite(com.openexchange.groupware.infostore.WebdavFolderAliasesTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.webdav.PermissionTest.class);
 
-        tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
-        tests.addTestSuite(com.openexchange.i18n.GettextParserTest.class);
-        tests.addTestSuite(com.openexchange.i18n.impl.FileDiscovererTest.class);
-
         tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 
-        tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserBasicTests.class);
-        tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserBugTests.class);
-        tests.addTestSuite(com.openexchange.data.conversion.ical.ICalEmitterTest.class);
-        tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
-        tests.addTestSuite(com.openexchange.groupware.importexport.importers.Bug12380RecoveryParserTest.class);
-
-        tests.addTestSuite(com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistryTest.class);
-        tests.addTestSuite(com.openexchange.webdav.action.behaviour.UserAgentBehaviourTest.class);
-
-        tests.addTestSuite(com.openexchange.webdav.action.ApacheURLDecoderTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.attach.CopyAttachmentsForChangeExceptionsTest.class);
-        tests.addTestSuite(com.openexchange.groupware.links.CopyLinksForChangeExceptionsTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.container.DataObjectTest.class);
-        tests.addTestSuite(com.openexchange.groupware.container.FolderChildObjectTest.class);
-        tests.addTestSuite(com.openexchange.groupware.container.FolderObjectTest.class);
-        tests.addTestSuite(com.openexchange.groupware.container.CommonObjectTest.class);
-        tests.addTestSuite(com.openexchange.groupware.container.TaskTest.class);
-        tests.addTestSuite(com.openexchange.groupware.container.CalendarObjectTest.class);
-        tests.addTestSuite(com.openexchange.groupware.container.AppointmentObjectTest.class);
-        tests.addTestSuite(com.openexchange.groupware.container.ContactObjectTest.class);
-
-        tests.addTestSuite(com.openexchange.groupware.contact.ContactMergeratorTest.class);
-        tests.addTestSuite(com.openexchange.groupware.contact.UseCountGlobalFirstComparatorTest.class);
-        tests.addTestSuite(com.openexchange.groupware.contact.DefaultContactComparatorTest.class);
-
-        tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
 
-        tests.addTestSuite(com.openexchange.l10n.SuperCollatorTest.class);
-        tests.addTest(com.openexchange.pubsub.TemplateTestSuite.suite());
-
-        // Slow Tests
-        tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
-        tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
-        tests.addTestSuite(com.openexchange.groupware.calendar.SlowCalendarTests.class);
         tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
-        // Pretty outdated since v6.18.0
-        // tests.addTestSuite(com.openexchange.tools.file.FileStorageThreadTest.class);
         tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
-        tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
-//        tests.addTest(com.openexchange.test.LostAndFoundUnitTests.suite());
-
-        // Mail
-        tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());
 
         return tests;
     }
+
 }
