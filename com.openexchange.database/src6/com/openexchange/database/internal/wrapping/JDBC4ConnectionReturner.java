@@ -134,51 +134,58 @@ public class JDBC4ConnectionReturner implements Connection {
     @Override
     public void commit() throws SQLException {
         checkForAlreadyClosed();
-        if (usedForUpdate || !usedAsRead) {
-            int contextId = assign.getContextId();
-            PreparedStatement stmt = null;
-            ResultSet result = null;
-            Long transactionCounter = null;
-            try {
-                boolean isTransaction = !delegate.getAutoCommit();
-                if (!isTransaction) {
-                    delegate.setAutoCommit(false);
-                }
-                stmt = delegate.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid = ?");
-                stmt.setInt(1, contextId);
-                result = stmt.executeQuery();
-                if (result.next()) {
-                    transactionCounter = result.getLong(1);
-                }
-                if (null == transactionCounter) {
-                    throw new SQLException("Updating transaction for replication monitor failed for context " + contextId + ".");
-                }
-                stmt.close();
-                result.close();
-                stmt = delegate.prepareStatement("UPDATE replicationMonitor SET transaction = ? WHERE cid = ?");
-                stmt.setLong(1, transactionCounter.longValue() + 1);
-                stmt.setInt(2, contextId);
-                stmt.executeUpdate();
-                stmt.close();
-                assign.setTransaction(transactionCounter.longValue() + 1);
-                if (!isTransaction) {
-                    delegate.commit();
-                    delegate.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                delegate.rollback();
-                if (1146 == e.getErrorCode()) {
-                    if (ReplicationMonitor.getLastLogged() + 300000 < System.currentTimeMillis()) {
-                        ReplicationMonitor.setLastLogged(System.currentTimeMillis());
-                        final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                        LOG.error(e1.getMessage(), e1);
-                    }
-                } else {
-                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(e1.getMessage(), e1);
-                }
-            }
-        }
+//        DatabaseMetaData metadata = delegate.getMetaData();
+//        ResultSet rs = metadata.getSchemas();
+//        String schema = null;
+//        while (rs.next()) {
+//            schema = rs.getString(1);
+//        }
+//        rs.close();
+//        if (null != schema && !"configdb".equals(schema) && (usedForUpdate || !usedAsRead)) {
+//            int contextId = assign.getContextId();
+//            PreparedStatement stmt = null;
+//            ResultSet result = null;
+//            Long transactionCounter = null;
+//            try {
+//                boolean isTransaction = !delegate.getAutoCommit();
+//                if (!isTransaction) {
+//                    delegate.setAutoCommit(false);
+//                }
+//                stmt = delegate.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid = ?");
+//                stmt.setInt(1, contextId);
+//                result = stmt.executeQuery();
+//                if (result.next()) {
+//                    transactionCounter = result.getLong(1);
+//                }
+//                if (null == transactionCounter) {
+//                    throw new SQLException("Updating transaction for replication monitor failed for context " + contextId + ".");
+//                }
+//                stmt.close();
+//                result.close();
+//                stmt = delegate.prepareStatement("UPDATE replicationMonitor SET transaction = ? WHERE cid = ?");
+//                stmt.setLong(1, transactionCounter.longValue() + 1);
+//                stmt.setInt(2, contextId);
+//                stmt.executeUpdate();
+//                stmt.close();
+//                assign.setTransaction(transactionCounter.longValue() + 1);
+//                if (!isTransaction) {
+//                    delegate.commit();
+//                    delegate.setAutoCommit(true);
+//                }
+//            } catch (SQLException e) {
+//                delegate.rollback();
+//                if (1146 == e.getErrorCode()) {
+//                    if (ReplicationMonitor.getLastLogged() + 300000 < System.currentTimeMillis()) {
+//                        ReplicationMonitor.setLastLogged(System.currentTimeMillis());
+//                        final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+//                        LOG.error(e1.getMessage(), e1);
+//                    }
+//                } else {
+//                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+//                    LOG.error(e1.getMessage(), e1);
+//                }
+//            }
+//        }
         delegate.commit();
     }
 
