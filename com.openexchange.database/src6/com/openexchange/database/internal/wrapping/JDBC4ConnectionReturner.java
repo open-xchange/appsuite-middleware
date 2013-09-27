@@ -134,7 +134,7 @@ public class JDBC4ConnectionReturner implements Connection {
     @Override
     public void commit() throws SQLException {
         checkForAlreadyClosed();
-        if (!"configdb".equals(delegate.getSchema()) && (usedForUpdate || !usedAsRead)) {
+        if (usedForUpdate || !usedAsRead) {
             int contextId = assign.getContextId();
             PreparedStatement stmt = null;
             ResultSet result = null;
