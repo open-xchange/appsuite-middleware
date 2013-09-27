@@ -286,24 +286,24 @@ public class ReplicationMonitor {
     }
 
     private static void increaseTransactionCounter(AssignmentImpl assign, Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
-            stmt.setInt(1, assign.getContextId());
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
-            stmt.setInt(1, assign.getContextId());
-            result = stmt.executeQuery();
-            if (result.next()) {
-                assign.setTransaction(result.getLong(1));
-            } else {
-                LOG.error("Updating transaction for replication monitor failed for context " + assign.getContextId() + ".");
-            }
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
+//        PreparedStatement stmt = null;
+//        ResultSet result = null;
+//        try {
+//            stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
+//            stmt.setInt(1, assign.getContextId());
+//            stmt.execute();
+//            stmt.close();
+//            stmt = con.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
+//            stmt.setInt(1, assign.getContextId());
+//            result = stmt.executeQuery();
+//            if (result.next()) {
+//                assign.setTransaction(result.getLong(1));
+//            } else {
+//                LOG.error("Updating transaction for replication monitor failed for context " + assign.getContextId() + ".");
+//            }
+//        } finally {
+//            closeSQLStuff(result, stmt);
+//        }
     }
 
     private void incrementFetched(final Assignment assign, final boolean write) {
