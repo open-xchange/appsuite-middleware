@@ -179,8 +179,9 @@ public class DirectLinkGenerator {
         if (false == Strings.isEmpty(mimeType)) {
             // patterns borrowed from web interface
             if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$")) {
-                return getProperty("com.openexchange.drive.imageLinkImageFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
-                    "document&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]")
+                return getProperty("com.openexchange.drive.imageLinkImageFile", "https://[hostname]/[dispatcherPrefix]/files" +
+                    "?action=document&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
+                    "&width=[width]&height=[height]&rotate=true")
                     .replaceAll("\\[hostname\\]", getHostName())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
                     .replaceAll("\\[folder\\]", file.getFolderId())
