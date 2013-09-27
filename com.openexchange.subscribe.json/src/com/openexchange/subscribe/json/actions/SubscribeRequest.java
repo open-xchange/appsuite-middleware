@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.json.actions;
 
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.tools.session.ServerSession;
 
@@ -87,5 +88,8 @@ public class SubscribeRequest {
 	public String getModule() {
 		return requestData.getModule();
 	}
+    public TimeZone getTimeZone() {
+        return requestData.isSet("timezone") ? TimeZone.getTimeZone(requestData.getParameter("timezone")) : TimeZone.getTimeZone(serverSession.getUser().getTimeZone());
+    }
 
 }

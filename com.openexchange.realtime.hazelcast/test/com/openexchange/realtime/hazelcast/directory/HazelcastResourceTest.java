@@ -56,8 +56,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -129,6 +131,7 @@ public class HazelcastResourceTest {
     public void setUp() throws Exception {
         marensID = new ID("ox", "marens", "premium", "desktop");
         onlinePresence = Presence.builder().from(marensID).state(PresenceState.ONLINE).message("Hello World.").build();
+        currentDate = new Date();
         epoch = new Date(0);
         afterEpoch = new Date(1);
         differingHazelcastResource1 = new HazelcastResource(onlinePresence, epoch);
@@ -264,6 +267,58 @@ public class HazelcastResourceTest {
     public void testHashCode() throws OXException {
         assertFalse(differingHazelcastResource1.hashCode() == (differingHazelcastResource2.hashCode()));
         assertTrue(matchingHazelcastResource1.hashCode() == matchingHazelcastResource2.hashCode());
+    }
+
+    /**
+     * Test wrapping a POJO into a Serializable Map 
+     * @throws OXException
+     */
+    @Test
+    public void testWrapWithPresence() throws OXException {
+        HazelcastResource hazelcastResource = new HazelcastResource(onlinePresence, currentDate);
+        Map<String, Serializable> wrappedResource = HazelcastResourceWrapper.wrap(hazelcastResource);
+        HazelcastResource unwrappedResource = HazelcastResourceWrapper.unwrap(wrappedResource);
+        
+        assertNotNull(unwrappedResource.getPresence());
+        assertEquals(hazelcastResource.getPresence().getFrom(), unwrappedResource.getPresence().getFrom());
+        assertEquals(hazelcastResource.getPresence().getMessage(), unwrappedResource.getPresence().getMessage());
+        assertEquals(hazelcastResource.getPresence().getPriority(), unwrappedResource.getPresence().getPriority());
+        assertEquals(hazelcastResource.getPresence().getState(), unwrappedResource.getPresence().getState());
+        assertEquals(hazelcastResource.getPresence().getType(), unwrappedResource.getPresence().getType());
+        
+        assertNotNull(unwrappedResource.getRoutingInfo());
+        assertEquals(hazelcastResource.getRoutingInfo().getInetSocketAddress(), unwrappedResource.getRoutingInfo().getInetSocketAddress());
+        assertEquals(hazelcastResource.getRoutingInfo().getUuid(), unwrappedResource.getRoutingInfo().getUuid());
+        assertEquals(hazelcastResource.getRoutingInfo().isLiteMember(), unwrappedResource.getRoutingInfo().isLiteMember());
+        assertEquals(hazelcastResource.getRoutingInfo().localMember(), unwrappedResource.getRoutingInfo().localMember());
+        assertEquals(hazelcastResource.getTimestamp(), unwrappedResource.getTimestamp());
+        
+        assertNotNull(unwrappedResource.getTimestamp());
+        assertEquals(hazelcastResource.getTimestamp(), unwrappedResource.getTimestamp());
+    }
+    
+    /**
+     * Test wrapping a POJO into a Serializable Map 
+     * @throws OXException
+     */
+    @Test
+    public void testWrapWithoutPresence() throws OXException {
+        HazelcastResource hazelcastResource = new HazelcastResource();
+        Map<String, Serializable> wrappedResource = HazelcastResourceWrapper.wrap(hazelcastResource);
+        HazelcastResource unwrappedResource = HazelcastResourceWrapper.unwrap(wrappedResource);
+        
+        assertNull(unwrappedResource.getPresence());
+        
+        assertNotNull(unwrappedResource.getRoutingInfo());
+        assertEquals(hazelcastResource.getRoutingInfo().getInetSocketAddress(), unwrappedResource.getRoutingInfo().getInetSocketAddress());
+        assertEquals(hazelcastResource.getRoutingInfo().getUuid(), unwrappedResource.getRoutingInfo().getUuid());
+        assertEquals(hazelcastResource.getRoutingInfo().isLiteMember(), unwrappedResource.getRoutingInfo().isLiteMember());
+        assertEquals(hazelcastResource.getRoutingInfo().localMember(), unwrappedResource.getRoutingInfo().localMember());
+        assertEquals(hazelcastResource.getTimestamp(), unwrappedResource.getTimestamp());
+        
+        assertNotNull(unwrappedResource.getTimestamp());
+        assertEquals(hazelcastResource.getTimestamp(), unwrappedResource.getTimestamp());
+
     }
 
 }

@@ -54,10 +54,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.http.Tools;
@@ -193,16 +193,6 @@ public class Infostore extends OXServlet {
 
     private boolean mustLogOut(final HttpServletRequest req) {
         return !WebdavWhiteList.getInstance().acceptClient(req);
-    }
-
-    @Override
-    protected void decrementRequests() {
-        // Nothing to do
-    }
-
-    @Override
-    protected void incrementRequests() {
-        // Nothing to do
     }
 
 }

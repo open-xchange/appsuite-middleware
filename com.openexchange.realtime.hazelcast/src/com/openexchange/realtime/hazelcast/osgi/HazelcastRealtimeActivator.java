@@ -56,6 +56,8 @@ import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -106,7 +108,15 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                 HazelcastAccess.setHazelcastInstance(null);
             }
         });
-        final HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
+        
+        Config config = hazelcastInstance.getConfig();
+        String id_map = discoverMapName(config, "rtIDMapping-");
+        String resource_map = discoverMapName(config, "rtResourceDirectory-");
+        if(Strings.isEmpty(id_map) || Strings.isEmpty(resource_map)) {
+            String msg = "Distributed directory maps couldn't be found in hazelcast configuration";
+            throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
+        }
+        final HazelcastResourceDirectory directory = new HazelcastResourceDirectory(id_map, resource_map);
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
         
         track(Channel.class, new SimpleRegistryListener<Channel>() {
@@ -139,25 +149,21 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     }
 
     /**
-     * Discovers the rtResourceDirectory map name from the supplied hazelcast configuration.
+     * Discovers map names in the supplied hazelcast configuration based on the map prefix.
      * 
      * @param config The config object
-     * @return The resourceDirectory map name
-     * @throws IllegalStateException
+     * @return The prefix of the map name
      */
-    private static String discoverResourceDirectoryName(Config config) throws IllegalStateException {
-        // TODO: Probably reactivate for new resource directory collections
+    private String discoverMapName(Config config, String mapPrefix){
         Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && 0 < mapConfigs.size()) {
             for (String mapName : mapConfigs.keySet()) {
-                if (mapName.startsWith("rtResourceDirectory-")) {
-                    LOG.info("Using distributed map '" + mapName + "'.");
+                if (mapName.startsWith(mapPrefix)) {
                     return mapName;
                 }
             }
         }
-        String msg = "No distributed rtResourceDirectory map found in hazelcast configuration";
-        throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
+        return null;
     }
 
 }

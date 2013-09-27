@@ -88,7 +88,7 @@ public final class ReceiptAckAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final JSONObject bodyObj = (JSONObject) req.getRequest().getData();
+            final JSONObject bodyObj = (JSONObject) req.getRequest().requireData();
             final String folderPath = bodyObj.has(AJAXServlet.PARAMETER_FOLDERID) ? bodyObj.getString(AJAXServlet.PARAMETER_FOLDERID) : null;
             if (null == folderPath) {
                 throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_FOLDERID);

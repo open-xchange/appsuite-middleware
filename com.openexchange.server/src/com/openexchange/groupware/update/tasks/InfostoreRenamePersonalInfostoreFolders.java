@@ -57,13 +57,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.log.LogFactory;
 
 public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 
@@ -286,7 +286,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                 }
 
                 if(null != writeCon) {
-                    Database.back(contextId, true, writeCon);
+                    Database.backAfterReading(contextId, writeCon);
                 }
             }
         }

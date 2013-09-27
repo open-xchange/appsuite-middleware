@@ -59,6 +59,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -165,7 +166,12 @@ public final class CacheEventServiceImpl implements CacheEventService {
 
             @Override
             public void run() {
-                listener.onEvent(sender, event);
+                try {
+                    listener.onEvent(sender, event);
+                } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
+                    LOG.error("Error while excuting event listener: " + t.getMessage(), t);
+                }
             }
         };
     }

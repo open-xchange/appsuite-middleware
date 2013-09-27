@@ -63,10 +63,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
@@ -280,6 +280,14 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     @Override
     public String saveNewFile(final InputStream is) throws OXException {
+        return saveNewFile(is, -1);
+    }
+
+    @Override
+    public String saveNewFile(final InputStream is, long sizeHint) throws OXException {
+        if (0 < sizeHint) {
+            checkAvailable(sizeHint);
+        }
         String file = null;
         String retval = null;
         final boolean full;
@@ -383,4 +391,52 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     public boolean stateFileIsCorrect() throws OXException {
         return fileStorage.stateFileIsCorrect();
     }
+
+    @Override
+    public long appendToFile(InputStream is, String name, long offset) throws OXException {
+        return appendToFile(is, name, offset, -1);
+    }
+
+    @Override
+    public long appendToFile(InputStream is, String name, long offset, long sizeHint) throws OXException {
+        if (0 < sizeHint) {
+            checkAvailable(sizeHint);
+        }
+        long newSize = -1;
+        try {
+            newSize = fileStorage.appendToFile(is, name, offset);
+            if (incUsage(newSize - offset)) {
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+            }
+        } finally {
+            if (-1 == newSize) {
+                try {
+                    fileStorage.setFileLength(offset, name);
+                } catch (OXException e) {
+                    LOG.warn("Error rolling back 'append' operation", e);
+                }
+            }
+        }
+        return newSize;
+    }
+
+    @Override
+    public void setFileLength(long length, String name) throws OXException {
+        fileStorage.setFileLength(length, name);
+    }
+
+    @Override
+    public InputStream getFile(String name, long offset, long length) throws OXException {
+        return fileStorage.getFile(name, offset, length);
+    }
+
+    private void checkAvailable(long required) throws OXException {
+        if (0 < required) {
+            long quota = getQuota();
+            if (0 < quota && quota < getUsage() + required) {
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+            }
+        }
+    }
+
 }

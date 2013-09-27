@@ -53,11 +53,11 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -123,9 +123,17 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
      * @param parser
      */
     private void setOptions(AdminParser parser) {
+        parser.setExtendedOptions();
         setDefaultCommandLineOptionsWithoutContextID(parser);
         filterOption = setShortLongOpt(parser, FILTER_SHORT, FILTER_LONG, FILTER_DESCRIPTION, true, NeededQuadState.notneeded);
+        accessRightsCombinationName = setShortLongOpt(parser,'a', OPT_ACCESSRIGHTS_COMBINATION_NAME, "The optional access combination name as replacement for specifying single permissions to enable/disable.", true, NeededQuadState.notneeded);
         setModuleAccessOptions(parser, false, false);
+    }
+
+    @Override
+    protected void setDefaultCommandLineOptionsWithoutContextID(AdminParser admp) {
+        setAdminUserOption(admp, "adminmaster", "The name of the admin master");
+        setAdminPassOption(admp, "adminmasterpass", "The password of the admin master");
     }
 
     private void prepare(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException {
@@ -136,12 +144,33 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         oxusr.changeModuleAccessGlobal(filterString, addAccess, removeAccess, auth);
     }
 
-    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException {
+    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException, RemoteException {
         parser.ownparse(args);
         auth = credentialsparsing(parser);
+
+        final String accessCombinationName = parseAndSetAccessCombinationName(parser);
+        if (null != accessCombinationName) {
+            final UserModuleAccess moduleAccess = oxusr.moduleAccessForName(accessCombinationName.trim());
+
+            if (null == moduleAccess) {
+                throw new InvalidDataException("No such access combination name \""+accessCombinationName.trim()+"\"");
+            }
+
+            if (moduleAccess.isGlobalAddressBookDisabled()) {
+                throw new InvalidDataException("Unable to set Global Address Book Permission.");
+            }
+
+            moduleAccess.transferTo(addAccess, removeAccess);
+            addAccess.setGlobalAddressBookDisabled(false);
+            removeAccess.setGlobalAddressBookDisabled(false);
+
+
+        }
+
         if (parser.getOptionValue(accessGAB) != null) {
             throw new InvalidDataException("Unable to set Global Address Book Permission.");
         }
+
         if (parser.getOptionValue(accessCalendarOption) != null) {
             if (accessOption2Boolean(parser, accessCalendarOption)) {
                 addAccess.setCalendar(true);

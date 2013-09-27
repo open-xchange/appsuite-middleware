@@ -224,7 +224,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
                 out.flush();
             } else {
                 // Threshold already exceeded. Stream to file.
-                out = new FileOutputStream(tempFile);
+                out = new FileOutputStream(tempFile, true);
                 final int buflen = 0xFFFF; // 64KB
                 final byte[] buffer = new byte[buflen];
                 for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
+import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 
@@ -65,6 +66,9 @@ public class DistListMember extends DistributionListEntryObject {
 
 	private int contextID;
 	private boolean b_contextID;
+	
+	private UUID uuid;
+	private boolean b_uuid;
 
 	/**
 	 * Creates an array of distribution list members using the supplied data.
@@ -168,6 +172,24 @@ public class DistListMember extends DistributionListEntryObject {
 	 */
 	public boolean containsParentContactID() {
 		return b_parentContactID;
+	}
+	
+	public void setUuid(UUID uuid) {
+	    this.b_uuid = true;
+	    this.uuid = uuid;
+	}
+	
+	public void removeUuid() {
+	    this.uuid = null;
+	    this.b_uuid = false;
+	}
+	
+	public boolean containsUuid() {
+	    return b_uuid;
+	}
+	
+	public UUID getUuid() {
+	    return uuid;
 	}
 
 }

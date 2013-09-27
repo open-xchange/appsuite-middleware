@@ -69,7 +69,7 @@ public class PublicationExceptionMessages implements LocalizableStrings {
 
     public static final String PUBLICATION_NOT_FOUND_MSG = "Cannot find the publication site.";
 
-    public static final String UNIQUENESS_CONSTRAINT_VIOLATION = "%s has already been taken (field: %s)";
+    public static final String UNIQUENESS_CONSTRAINT_VIOLATION = "%1$s has already been taken (field: %2$s)";
 
     public static final String ACCESS_DENIED_MSG = "You do not have the permissions to perform the chosen action (%s)";
 

@@ -733,7 +733,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                 }
                 /*-
                  * TODO:
-                 * 1. Check for messaging permission; e.g. session.getUserConfiguration().isMultipleMailAccounts()
+                 * 1. Check for messaging permission; e.g. session.getUserPermissionBits().isMultipleMailAccounts()
                  *    Add primary only if not enabled
                  * 2. Strip Unified-Messaging account from obtained list
                  */

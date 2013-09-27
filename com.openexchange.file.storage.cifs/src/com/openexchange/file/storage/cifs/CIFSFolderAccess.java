@@ -493,7 +493,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Create folder
              */
-            final String fid = pid + '/' + toCreate.getName() + '/';
+            final String fid = pid + toCreate.getName() + '/';
             final SmbFile newDir = getSmbFile(fid);
             newDir.mkdir();
             /*
@@ -625,13 +625,9 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             }
             final SmbFile dest = getSmbFile(newUri);
             /*
-             * Perform COPY
+             * Perform rename
              */
-            renameMe.copyTo(dest);
-            /*
-             * Now delete
-             */
-            renameMe.delete();
+            renameMe.renameTo(dest);
             /*
              * Invalidate
              */

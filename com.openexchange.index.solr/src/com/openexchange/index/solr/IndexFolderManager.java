@@ -156,7 +156,7 @@ public class IndexFolderManager {
             return isLocked(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
-                dbService.backWritable(contextId, con);
+                dbService.backWritableAfterReading(contextId, con);
             }
         }
 
@@ -373,7 +373,7 @@ public class IndexFolderManager {
             return getTimestamp(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
-                dbService.backWritable(contextId, con);
+                dbService.backWritableAfterReading(contextId, con);
             }
         }
     }

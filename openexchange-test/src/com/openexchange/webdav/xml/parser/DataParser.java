@@ -45,6 +45,7 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import org.jdom2.Element;
 import com.openexchange.groupware.container.DataObject;
@@ -91,19 +92,16 @@ public abstract class DataParser {
 		}
 	}
 
-	public static float getValueAsFloat(final Element e) {
-		if (e == null) {
-			return 0;
-		}
-
-		String s = null;
-
-		if ((s = e.getValue()) != null && s.length() > 0) {
-			return Float.parseFloat(s);
-		} else {
-			return 0;
-		}
-	}
+    public static BigDecimal getValueAsBigDecimal(final Element e) {
+        if (e == null) {
+            return new BigDecimal(0);
+        }
+        String s = null;
+        if ((s = e.getValue()) != null && s.length() > 0) {
+            return new BigDecimal(s);
+        }
+        return new BigDecimal(0);
+    }
 
 	public static long getValueAsLong(final Element e) {
 		if (e == null) {

@@ -104,6 +104,11 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUser(final int userId, final int contextId) throws OXException {
+        return UserStorage.getInstance().getUser(userId, ContextStorage.getInstance().getContext(contextId));
+    }
+
+    @Override
     public User getUser(final Connection con, final int uid, final Context context) throws OXException {
         return UserStorage.getInstance().getUser(context, uid, con);
     }

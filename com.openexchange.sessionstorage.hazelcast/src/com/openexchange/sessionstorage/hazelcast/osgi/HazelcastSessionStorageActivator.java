@@ -63,6 +63,7 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
+import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
@@ -129,6 +130,8 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                                     try {
                                         sessionStorageService.touch(touchedSession.getSessionID());
                                     } catch (OXException e) {
+                                        LOG.warn("error handling OSGi event", e);
+                                    } catch (HazelcastException e) {
                                         LOG.warn("error handling OSGi event", e);
                                     }
                                 }

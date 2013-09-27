@@ -122,8 +122,8 @@ public class TaskExceptionMessage implements LocalizableStrings {
     // Date range in search must contain 2 and not %d values.
     public static final String WRONG_DATE_RANGE_MSG = "Date range in search must contain 2 and not %d values.";
 
-    // Cannot decrease number of attachments below zero.
-    public static final String WRONG_ATTACHMENT_COUNT_MSG = "Cannot decrease number of attachments below zero.";
+    // Cannot detach more attachments than actually available.
+    public static final String WRONG_ATTACHMENT_COUNT_MSG = "Cannot detach more attachments than actually available.";
 
     // You are not allowed to read the contents of folder %1$s (%2$d).
     public static final String NO_READ_PERMISSION_MSG = "You are not allowed to read the contents of folder %1$s (%2$d).";
@@ -203,9 +203,6 @@ public class TaskExceptionMessage implements LocalizableStrings {
 
     // Unknown participant type %1$d.
     public static final String UNKNOWN_PARTICIPANT_MSG = "Unknown participant type %1$d.";
-
-    // The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.
-    public static final String COSTS_OFF_LIMIT_MSG = "The value entered for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.";
 
     // In order to accomplish the search, %1$d or more characters are required.
     public static final String PATTERN_TOO_SHORT_MSG = "In order to accomplish the search, %1$d or more characters are required.";

@@ -49,17 +49,21 @@
 
 package com.openexchange.soap.cxf.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.common.logging.LogUtils;
+import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
 import com.openexchange.soap.cxf.logger.CommonsLoggingLogger;
@@ -74,7 +78,7 @@ public class CXFActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class };
+        return new Class[] { HttpService.class, ConfigurationService.class };
     }
 
     @Override
@@ -129,15 +133,37 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean collectorOpened = false;
                         try {
                             System.setProperty("org.apache.cxf.Logger", "com.openexchange.soap.cxf.logger.CommonsLoggingLogger");
+                            System.setProperty(StaxUtils.ALLOW_INSECURE_PARSER, "true");
+                            // System.setProperty("org.apache.cxf.servlet.base-address", "http://localhost/foo/");
                             final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
                             /*
                              * Register CXF Servlet
                              */
-                            httpService.registerServlet(alias, cxfServlet, null, null);
-                            log.info("Registered CXF Servlet under: " + alias);
-                            httpService.registerServlet(alias2, cxfServlet, null, null);
-                            log.info("Registered CXF Servlet under: " + alias2);
-                            servletRegistered = true;
+                            {
+                                // Servlet config; see org.apache.cxf.transport.servlet.ServletController.init()
+                                final ConfigurationService configService = getService(ConfigurationService.class);
+                                Dictionary<String, Object> config = null;
+                                if (null != configService) {
+                                    final String baseAddress = configService.getProperty("com.openexchange.soap.cxf.baseAddress");
+                                    if (null != baseAddress) {
+                                        config = new Hashtable<String, Object>(2);
+                                        config.put("base-address", baseAddress);
+                                    }
+                                    final String hideServiceListPage = configService.getProperty("com.openexchange.soap.cxf.hideServiceListPage");
+                                    if (null != baseAddress) {
+                                        if (null == config) {
+                                            config = new Hashtable<String, Object>(2);
+                                        }
+                                        config.put("hide-service-list-page", hideServiceListPage.trim());
+                                    }
+                                }
+                                // Registration
+                                httpService.registerServlet(alias, cxfServlet, config, null);
+                                log.info("Registered CXF Servlet under: " + alias);
+                                httpService.registerServlet(alias2, cxfServlet, config, null);
+                                log.info("Registered CXF Servlet under: " + alias2);
+                                servletRegistered = true;
+                            }
                             /*
                              * Get CXF bus
                              */

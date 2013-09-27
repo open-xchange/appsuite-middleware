@@ -71,12 +71,14 @@ import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
@@ -2717,10 +2719,22 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
                 if (0 < from.getNumberOfImages() || from.containsImage1() && null != from.getImage1()) {
                     String timestamp = null != from.getLastModified() ? String.valueOf(from.getLastModified().getTime()) : null;
-                    ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(from.getParentFolderID())).id(
-                        String.valueOf(from.getObjectID())).timestamp(timestamp).build();
                     try {
-                        return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
+                        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == from.getParentFolderID() && from.containsInternalUserId()) {
+                            /*
+                             * prefer user contact image url
+                             */
+                            ImageLocation imageLocation = new ImageLocation.Builder().id(
+                                String.valueOf(from.getInternalUserId())).timestamp(timestamp).build();
+                            return UserImageDataSource.getInstance().generateUrl(imageLocation, session);
+                        } else {
+                            /*
+                             * use default contact image data source
+                             */
+                            ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(from.getParentFolderID())).id(
+                                String.valueOf(from.getObjectID())).timestamp(timestamp).build();
+                            return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
+                        }
                     } catch (OXException e) {
                         throw new JSONException(e);
                     }

@@ -2,13 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: IBM Xerces compatibility plugin
 Bundle-SymbolicName: com.openexchange.xerces.ibm
-Bundle-Version: 7.2.2
+Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Fragment-Host: system.bundle
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Export-Package: org.apache.xerces.impl,
+Export-Package: org.apache.xerces.dom,
+ org.apache.xerces.impl,
+ org.apache.xerces.impl.dv,
+ org.apache.xerces.impl.dv.util, 
+ org.apache.xerces.impl.validation, 
  org.apache.xerces.jaxp,
- org.apache.xerces.jaxp.datatype,
+ org.apache.xerces.jaxp.datatype, 
  org.apache.xerces.jaxp.validation,
  org.apache.xerces.parsers,
  org.apache.xerces.util,

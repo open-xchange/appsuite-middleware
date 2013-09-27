@@ -53,7 +53,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
@@ -63,6 +66,7 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 
 /**
@@ -70,12 +74,11 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
+public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, TtlAware {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileImpl.class));
 
-    private static final ManagedFileImageDataSource IMAGE_DATA_SOURCE = new ManagedFileImageDataSource();
-
+    private final ManagedFileManagementImpl management;
     private final String id;
 
     private final File file;
@@ -92,14 +95,31 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
     private String contentDisposition;
 
+    private int optTtl;
+
+
+    
+    /**
+     * Initializes a new {@link ManagedFileImpl}.
+     * 
+     * @param id The unique ID
+     * @param file The kept file
+     */
+    public ManagedFileImpl(ManagedFileManagementImpl management, final String id, final File file) {
+        this(management, id, file, -1);
+    }
+
     /**
      * Initializes a new {@link ManagedFileImpl}.
      *
      * @param id The unique ID
      * @param file The kept file
+     * @param optTtl The optional TTL
      */
-    public ManagedFileImpl(final String id, final File file) {
+    public ManagedFileImpl(ManagedFileManagementImpl management, final String id, final File file, int optTtl) {
         super();
+        this.management = management;
+        this.optTtl = optTtl;
         this.id = id;
         this.file = file;
         lastAccessed = System.currentTimeMillis();
@@ -107,9 +127,14 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
     }
 
     @Override
+    public int optTimeToLive() {
+        return optTtl;
+    }
+
+    @Override
     public String constructURL(final Session session) throws OXException {
         if (null != contentType && contentType.regionMatches(true, 0, "image/", 0, 6)) {
-            return IMAGE_DATA_SOURCE.generateUrl(new ImageLocation.Builder(id).build(), session);
+            return new ManagedFileImageDataSource(management).generateUrl(new ImageLocation.Builder(id).build(), session);
         }
         final StringBuilder sb = new StringBuilder(64);
         final String prefix;
@@ -163,7 +188,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
                 LOG.warn("Temporary file could not be deleted: " + file.getPath());
             }
         }
-        ManagedFileManagementImpl.getInstance().removeFromFiles(id);
+        management.removeFromFiles(id);
     }
 
     @Override
@@ -208,6 +233,54 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         } catch (final FileNotFoundException e) {
             throw ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.create(e, file.getPath());
         }
+    }
+
+    @Override
+    public int writeTo(OutputStream out, int off, int len) throws OXException {
+        if (null == out) {
+            return 0;
+        }
+        if (!file.exists()) {
+            return -1;
+        }
+        touch();
+        RandomAccessFile raf = null;
+        try {
+            final File tmpFile = file;
+            raf = new RandomAccessFile(tmpFile, "r");
+            final long total = raf.length();
+            if (off >= total) {
+                return 0;
+            }
+            // Check available bytes
+            {
+                final long actualLen = total - off;
+                if (actualLen < len) {
+                    len = (int) actualLen;
+                }
+            }
+            // Set file pointer & start reading
+            raf.seek(off);
+            final int buflen = 2048;
+            final byte[] bytes = new byte[buflen];
+            int n = 0;
+            while (n < len) {
+                final int available = len - n;
+                final int read = raf.read(bytes, 0, buflen > available ? available : buflen);
+                if (read > 0) {
+                    out.write(bytes, 0, read);
+                    n += read;
+                } else {
+                    break;
+                }
+            }
+            return n;
+        } catch (final IOException e) {
+            throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(raf);
+        }
+
     }
 
     @Override

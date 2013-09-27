@@ -851,7 +851,23 @@ public class AJAXRequestData {
     /**
      * Gets the data object.
      *
+     * @return The data object
+     * @throws OXException If data object is <code>null</code>
+     * @see #getData()
+     */
+    public Object requireData() throws OXException {
+        final Object data = this.data;
+        if (null == data) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+        return data;
+    }
+
+    /**
+     * Gets the data object.
+     *
      * @return The data object or <code>null</code> if not available
+     * @see #requireData()
      */
     public Object getData() {
         return data;
@@ -1099,7 +1115,7 @@ public class AJAXRequestData {
      * Constructs a URL to this server, injecting the host name and optionally the JVM route.
      *
      * <pre>
-     *  &lt;protocol&gt; + "http://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
+     *  "http(s)://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
      * </pre>
      *
      * @param path The path on the server. If <code>null</code> no path is inserted

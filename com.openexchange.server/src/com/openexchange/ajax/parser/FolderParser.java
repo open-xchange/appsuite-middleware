@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.parser;
 
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,10 +59,12 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
@@ -74,7 +77,7 @@ public class FolderParser {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderParser.class));
 
-    private final UserConfiguration userConfig;
+    private final UserPermissionBits userPermissionBits;
 
     private static final int[] mapping = { 0, 2, 4, -1, 8 };
 
@@ -82,11 +85,16 @@ public class FolderParser {
 
     public FolderParser(final UserConfiguration userConfig) {
         super();
-        this.userConfig = userConfig;
+        this.userPermissionBits = userConfig.getUserPermissionBits();
+    }
+
+    public FolderParser(final UserPermissionBits userPermissionBits) {
+        super();
+        this.userPermissionBits = userPermissionBits;
     }
 
     public FolderParser() {
-        this(null);
+        this((UserPermissionBits) null);
     }
 
     public void parse(final FolderObject fo, final JSONObject jsonObj) throws OXException {
@@ -161,6 +169,9 @@ public class FolderParser {
             final OCLPermission[] perms = parseOCLPermission(jsonArr, fo.containsObjectID() ? Integer.valueOf(fo.getObjectID()) : null);
             fo.setPermissionsAsArray(perms);
         }
+        if (jsonObj.has(FolderFields.META) && !jsonObj.isNull(FolderFields.META)) {
+            fo.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(jsonObj.getJSONObject("meta")));
+        }
     }
 
     public OCLPermission[] parseOCLPermission(final JSONArray permissionsAsJSON, final Integer objectID) throws JSONException, OXException {
@@ -175,11 +186,11 @@ public class FolderParser {
             try {
                 entity = elem.getInt(FolderFields.ENTITY);
             } catch (final JSONException e) {
-                if (null == userConfig) {
+                if (null == userPermissionBits) {
                     throw e;
                 }
                 final String entityStr = elem.getString(FolderFields.ENTITY);
-                entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
+                entity = UserStorage.getInstance().getUserId(entityStr, userPermissionBits.getContext());
             }
             final OCLPermission oclPerm = new OCLPermission();
             oclPerm.setEntity(entity);

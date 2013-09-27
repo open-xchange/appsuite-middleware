@@ -59,6 +59,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
+import com.openexchange.java.StringAllocator;
 
 public class InfostoreQueryCatalog {
 
@@ -237,7 +238,7 @@ public class InfostoreQueryCatalog {
 
     private static final String INSERT_DEL_INFOSTORE_DOCUMENT = buildInsert(Table.DEL_INFOSTORE_DOCUMENT, STR_CID);
 
-    public String getDelete(final Table t, final List<DocumentMetadata> documents) {
+    public List<String> getDelete(final Table t, final List<DocumentMetadata> documents) {
         switch (t) {
         default:
             break;
@@ -245,17 +246,33 @@ public class InfostoreQueryCatalog {
         case DEL_INFOSTORE_DOCUMENT:
             throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
         }
-        final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
-            Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" IN (");
-        for (final DocumentMetadata doc : documents) {
-            delete.append(doc.getId()).append(',');
+        final int size = documents.size();
+        final List<String> l = new ArrayList<String>(2);
+        // Versions
+        {
+            final Table versionTable = Table.INFOSTORE.equals(t) ? Table.INFOSTORE_DOCUMENT : Table.DEL_INFOSTORE_DOCUMENT;
+            final StringAllocator delete = new StringAllocator("DELETE FROM ").append(versionTable.getTablename()).append(" WHERE ").append(
+                Metadata.ID_LITERAL.doSwitch(versionTable.getFieldSwitcher())).append(" IN (");
+            delete.append(documents.get(0).getId());
+            for (int i = 1; i < size; i++) {
+                delete.append(',').append(documents.get(i).getId());
+            }
+            delete.append(") AND cid = ?");
+            l.add(delete.toString());
         }
-        delete.setLength(delete.length() - 1);
+        // Documents
+        final StringAllocator delete = new StringAllocator("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
+            Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" IN (");
+        delete.append(documents.get(0).getId());
+        for (int i = 1; i < size; i++) {
+            delete.append(',').append(documents.get(i).getId());
+        }
         delete.append(") AND cid = ?");
-        return delete.toString();
+        l.add(delete.toString());
+        return l;
     }
 
-    public String getSingleDelete(final Table t) {
+    public List<String> getSingleDelete(final Table t) {
         switch (t) {
         default:
             break;
@@ -263,9 +280,52 @@ public class InfostoreQueryCatalog {
         case DEL_INFOSTORE_DOCUMENT:
             throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
         }
-        final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
+        final List<String> l = new ArrayList<String>(2);
+        // Versions
+        {
+            final Table versionTable = Table.INFOSTORE.equals(t) ? Table.INFOSTORE_DOCUMENT : Table.DEL_INFOSTORE_DOCUMENT;
+            final StringAllocator delete = new StringAllocator("DELETE FROM ").append(versionTable.getTablename()).append(" WHERE ").append(
+                Metadata.ID_LITERAL.doSwitch(versionTable.getFieldSwitcher())).append("  = ? AND cid = ?");
+            l.add(delete.toString());
+        }
+        // Document
+        final StringAllocator delete = new StringAllocator("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
             Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append("  = ? AND cid = ?");
-        return delete.toString();
+        l.add(delete.toString());
+        return l;
+    }
+
+    /**
+     * Constructs an REPLACE INTO statement useful to insert multiple entries into the del_* tables at once, overwriting already
+     * existing entries if needed automatically.
+     *
+     * @param table The table to replace into
+     * @param count The number of rows to prepare parameter placeholders for. For each row, the number of writable fields are prepared,
+     *        additionally a paramter for the context ID is for each row.
+     * @return The statement string
+     */
+    public String getReplace(Table table, int count) {
+        if (1 > count) {
+            throw new IllegalArgumentException("need at least one item to create statement");
+        }
+        Metadata[] fields = table.getFields();
+        MetadataSwitcher switcher = table.getFieldSwitcher();
+        StringAllocator questionMarksAllocator = new StringAllocator("(");
+        StringAllocator allocator = new StringAllocator("REPLACE INTO ").append(table.getTablename()).append(" (");
+        for (int i = 0; i < fields.length; i++) {
+            if (IGNORE_ON_WRITE.contains(fields[i])) {
+                continue;
+            }
+            questionMarksAllocator.append("?,");
+            allocator.append(fields[i].doSwitch(switcher)).append(',');
+        }
+        String questionMarks = questionMarksAllocator.append("?)").toString();
+        allocator.append("cid) VALUES ").append(questionMarks);
+        for (int i = 1; i < count; i++) {
+            allocator.append(',').append(questionMarks);
+        }
+        allocator.append(';');
+        return allocator.toString();
     }
 
     public String getDocumentInsert() {
@@ -552,6 +612,27 @@ public class InfostoreQueryCatalog {
             " AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE ").append(
             where);
         return builder.toString();
+    }
+
+    public String getFolderSequenceNumbersQuery(List<Long> folderIds, boolean versionsOnly, boolean deleted, int contextId) {
+        StringAllocator allocator = new StringAllocator(STR_SELECT).append(Metadata.FOLDER_ID_LITERAL.getName()).append(",MAX(")
+            .append(Metadata.LAST_MODIFIED_LITERAL.getName())
+            .append(") FROM ").append(deleted ? Table.DEL_INFOSTORE.getTablename() : Table.INFOSTORE.getTablename())
+            .append(" WHERE ").append(STR_CID).append('=').append(contextId);
+        if (versionsOnly) {
+            allocator.append(" AND ").append(Metadata.VERSION_LITERAL.getName()).append(">0");
+        }
+        if (1 == folderIds.size()) {
+            allocator.append(" AND ").append(Metadata.FOLDER_ID_LITERAL.getName()).append('=').append(folderIds.get(0));
+        } else if (1 < folderIds.size()) {
+            allocator.append(" AND ").append(Metadata.FOLDER_ID_LITERAL.getName()).append(" IN (").append(folderIds.get(0));
+            for (int i = 1; i < folderIds.size(); i++) {
+                allocator.append(',').append(folderIds.get(i));
+            }
+            allocator.append(')');
+        }
+        allocator.append(" GROUP BY ").append(Metadata.FOLDER_ID_LITERAL.getName()).append(';');
+        return allocator.toString();
     }
 
     private String order(final int order) {

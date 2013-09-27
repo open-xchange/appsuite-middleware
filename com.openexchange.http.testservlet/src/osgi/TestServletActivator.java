@@ -2,19 +2,17 @@
 package osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.http.testservlet.PingServlet;
 import com.openexchange.http.testservlet.TestServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
- * {@link TestServletActivator} - Registers an instance of TestServlet at /servlet/TestServlet.
+ * {@link TestServletActivator} - Registers <code>TestServlet</code> and <code>PingServlet</code>.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TestServletActivator extends HousekeepingActivator {
-
-    // The alias for registering the test servlet in the url namespace
-    private final String ALIAS = "/servlet/TestServlet";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -23,14 +21,12 @@ public class TestServletActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(HttpService.class);
-        openTrackers();
-
         HttpService service = getService(HttpService.class);
         if (service == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HttpService.class.getName());
         }
-        service.registerServlet(ALIAS, new TestServlet(), null, null);
+        service.registerServlet("/servlet/TestServlet", new TestServlet(), null, null);
+        service.registerServlet("/servlet/Ping", new PingServlet(), null, null);
     }
 
 }

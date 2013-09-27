@@ -51,7 +51,6 @@ package com.openexchange.ajax.request;
 
 import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -59,6 +58,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -110,7 +110,7 @@ public class QuotaRequest {
         } else if ("mail".equals(action)) {
             return mail();
         }
-        throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+        throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
     private JSONObject filestore() throws OXException, JSONException {
@@ -158,12 +158,12 @@ public class QuotaRequest {
              */
             return data;
         } finally {
-            try {
-                if (mi != null) {
+            if (mi != null) {
+                try {
                     mi.close(false);
+                } catch (final OXException e) {
+                    // Ignore
                 }
-            } catch (final OXException e) {
-                LOG.error(e);
             }
         }
     }

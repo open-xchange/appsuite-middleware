@@ -54,10 +54,12 @@ import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.groupware.tools.mappings.database.BinaryMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link DistListMapper} - Maps distribution list related fields to a corresponding {@link Mapping} implementation.
@@ -291,6 +293,30 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeContextID();
 			}
         });
+		
+		mappings.put(DistListMemberField.UUID, new BinaryMapping<DistListMember>("uuid", "UUID") {
+
+            @Override
+            public boolean isSet(DistListMember member) {
+                return member.containsUuid();
+            }
+
+            @Override
+            public void set(DistListMember member, byte[] value) throws OXException {
+                member.setUuid(UUIDs.toUUID(value));
+            }
+
+            @Override
+            public byte[] get(DistListMember member) {
+                return UUIDs.toByteArray(member.getUuid());
+            }
+
+            @Override
+            public void remove(DistListMember member) {
+                member.removeUuid();
+            }
+		    
+		});
 
 		return mappings;
 	}

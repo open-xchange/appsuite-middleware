@@ -63,6 +63,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
@@ -89,7 +90,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
     private final static Log LOG = LogFactory.getLog(OXContextRestoreMySQLStorage.class);
 
     @Override
-    public String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema) throws SQLException, FileNotFoundException, IOException, OXContextRestoreException, StorageException {
+    public String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema, String configdbname) throws SQLException, IOException, OXContextRestoreException, StorageException {
         Connection connection = null;
         Connection connection2 = null;
         PreparedStatement prepareStatement = null;
@@ -97,33 +98,53 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
         PreparedStatement prepareStatement3 = null;
         final int poolId = poolidandschema.getPoolId();
         boolean doRollback = false;
+        final Map<String, File> tempfilemap = poolidandschema.getTempfilemap();
         try {
-            File file = new File("/tmp/" + poolidandschema.getSchema() + ".txt");
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            File file = tempfilemap.get(poolidandschema.getSchema());
+            BufferedReader reader;
+            try {
+                reader = new BufferedReader(new FileReader(file));
+            } catch (final FileNotFoundException e1) {
+                throw new OXContextRestoreException(Code.CONFIGDB_FILE_NOT_FOUND);
+            }
             try {
                 connection = Database.get(poolId, poolidandschema.getSchema());
                 connection.setAutoCommit(false);
                 doRollback = true;
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    prepareStatement = connection.prepareStatement(line);
-                    prepareStatement.execute();
-                    prepareStatement.close();
+                    try {
+                        prepareStatement = connection.prepareStatement(line);
+                        prepareStatement.execute();
+                        prepareStatement.close();
+                    } catch (SQLException e) {
+                        LOG.error("Executing the following SQL statement failed: " + line, e);
+                        throw e;
+                    }
                 }
             } finally {
                 close(reader);
             }
-            file = new File("/tmp/configdb.txt");
-            reader = new BufferedReader(new FileReader(file));
+            file = tempfilemap.get(configdbname);
+            try {
+                reader = new BufferedReader(new FileReader(file));
+            } catch (final FileNotFoundException e1) {
+                throw new OXContextRestoreException(Code.USERDB_FILE_NOT_FOUND);
+            }
             try {
                 connection2 = Database.get(true);
                 connection2.setAutoCommit(false);
                 doRollback = true;
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    prepareStatement2 = connection2.prepareStatement(line);
-                    prepareStatement2.execute();
-                    prepareStatement2.close();
+                    try {
+                        prepareStatement2 = connection2.prepareStatement(line);
+                        prepareStatement2.execute();
+                        prepareStatement2.close();
+                    } catch (SQLException e) {
+                        LOG.error("Executing the following SQL statement failed: " + line, e);
+                        throw e;
+                    }
                 }
             } finally {
                 close(reader);
@@ -156,6 +177,9 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             if (null != connection2) {
                 autocommit(connection2);
                 Database.back(true, connection2);
+            }
+            for (final File file : tempfilemap.values()) {
+                file.delete();
             }
         }
     }

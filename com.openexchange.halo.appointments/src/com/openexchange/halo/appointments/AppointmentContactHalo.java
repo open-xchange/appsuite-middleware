@@ -135,7 +135,7 @@ public class AppointmentContactHalo extends AbstractContactHalo implements HaloC
 
     @Override
     public boolean isAvailable(ServerSession session) {
-        return session.getUserConfiguration().hasCalendar();
+        return session.getUserPermissionBits().hasCalendar();
     }
 
 }

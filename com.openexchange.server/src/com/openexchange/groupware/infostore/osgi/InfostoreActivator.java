@@ -64,6 +64,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -76,8 +78,11 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.jslob.shared.SharedJSlobService;
+import com.openexchange.server.services.SharedInfostoreJSlob;
 
 /**
  * {@link InfostoreActivator}
@@ -96,10 +101,14 @@ public class InfostoreActivator implements BundleActivator {
     private volatile Queue<ServiceRegistration<?>> registrations;
     private volatile ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
 
+    private ServiceTracker<FullPrimaryKeySupportService, FullPrimaryKeySupportService> primaryKeyTracker;
+
+    private ServiceTracker<ConfigurationService, ConfigurationService> configTracker;
+
     @Override
     public void start(final BundleContext context) throws Exception {
         try {
-            final InfostoreFilenameReservationsCreateTableTask task = new InfostoreFilenameReservationsCreateTableTask();
+            
             final LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
             final PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
@@ -108,13 +117,8 @@ public class InfostoreActivator implements BundleActivator {
              * Service registrations
              */
             final Queue<ServiceRegistration<?>> registrations = new LinkedList<ServiceRegistration<?>>();
-            registrations.offer(context.registerService(CreateTableService.class.getName(), task, null));
-            registrations.offer(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-                @Override
-                public Collection<UpdateTaskV2> getUpdateTasks() {
-                    return Arrays.asList(((UpdateTaskV2) task));
-                }
-            }, null));
+//            registrations.offer(context.registerService(CreateTableService.class.getName(), task, null));
+//            registrations.offer(
             registrations.offer(context.registerService(EventHandler.class, lockCleaner, serviceProperties));
             registrations.offer(context.registerService(EventHandler.class, propertyCleaner, serviceProperties));
             this.registrations = registrations;
@@ -149,6 +153,63 @@ public class InfostoreActivator implements BundleActivator {
             final AvailableTracker tracker = new AvailableTracker(context);
             tracker.open();
             this.tracker = tracker;
+            primaryKeyTracker = new ServiceTracker<FullPrimaryKeySupportService, FullPrimaryKeySupportService>(context, FullPrimaryKeySupportService.class, new ServiceTrackerCustomizer<FullPrimaryKeySupportService, FullPrimaryKeySupportService>() {
+
+                @Override
+                public FullPrimaryKeySupportService addingService(ServiceReference<FullPrimaryKeySupportService> arg0) {
+                    FullPrimaryKeySupportService service = context.getService(arg0);
+                    final InfostoreFilenameReservationsCreateTableTask task = new InfostoreFilenameReservationsCreateTableTask(service);
+                    context.registerService(CreateTableService.class, task, null);
+                    context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+                        @Override
+                        public Collection<UpdateTaskV2> getUpdateTasks() {
+                            return Arrays.asList(((UpdateTaskV2) task));
+                        }
+                    }, null);
+                    return service;
+                }
+
+                @Override
+                public void modifiedService(ServiceReference<FullPrimaryKeySupportService> arg0, FullPrimaryKeySupportService arg1) {
+                    // nothing to do
+                }
+
+                @Override
+                public void removedService(ServiceReference<FullPrimaryKeySupportService> arg0, FullPrimaryKeySupportService arg1) {
+                    context.ungetService(arg0);
+                }
+            });
+            primaryKeyTracker.open();
+            
+            configTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
+                
+                /* 
+                 * Register quotas as SharedJSLob
+                 */                
+                ServiceRegistration<SharedJSlobService> registration;
+
+                @Override
+                public ConfigurationService addingService(ServiceReference<ConfigurationService> arg0) {
+                    
+                    ConfigurationService configService = context.getService(arg0);
+                    SharedJSlobService infostoreJSlob = new SharedInfostoreJSlob();
+                    registration = context.registerService(SharedJSlobService.class, infostoreJSlob, null);
+                    return configService;
+                }
+
+                @Override
+                public void modifiedService(ServiceReference<ConfigurationService> arg0, ConfigurationService arg1) {
+                    //nothing to do
+                }
+
+                @Override
+                public void removedService(ServiceReference<ConfigurationService> arg0, ConfigurationService arg1) {
+                    registration.unregister();
+                    context.ungetService(arg0);
+                }
+            });
+            configTracker.open();
+            
         } catch (final Exception e) {
             final Log logger = com.openexchange.log.Log.loggerFor(InfostoreActivator.class);
             logger.error("Starting InfostoreActivator failed.", e);
@@ -164,6 +225,8 @@ public class InfostoreActivator implements BundleActivator {
                 tracker.close();
                 this.tracker = null;
             }
+            primaryKeyTracker.close();
+            configTracker.close();
             final Queue<ServiceRegistration<?>> registrations = this.registrations;
             if (null != registrations) {
                 ServiceRegistration<?> polled;

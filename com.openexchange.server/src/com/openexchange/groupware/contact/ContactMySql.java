@@ -80,6 +80,8 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -723,7 +725,7 @@ public class ContactMySql implements ContactSql {
 
     @Override
     public String iFwriteDistributionListArrayInsert() {
-        return "INSERT INTO prg_dlist (intfield01, intfield02, intfield03, field01, field02, field03, field04, cid, intfield04) VALUES (?,?,?,?,?,?,?,?,?)";
+        return "INSERT INTO prg_dlist (intfield01, intfield02, intfield03, field01, field02, field03, field04, cid, intfield04, uuid) VALUES (?,?,?,?,?,?,?,?,?,?)";
     }
 
     @Override
@@ -744,7 +746,7 @@ public class ContactMySql implements ContactSql {
 
     @Override
     public String iFwriteContactLinkArrayInsert() {
-        return "INSERT INTO prg_contacts_linkage (intfield01, intfield02, field01, field02, cid) VALUES (?,?,?,?,?)";
+        return "INSERT INTO prg_contacts_linkage (intfield01, intfield02, field01, field02, cid, uuid) VALUES (?,?,?,?,?,?)";
     }
 
     @Override

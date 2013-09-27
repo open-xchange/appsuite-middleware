@@ -61,6 +61,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.notify.NotificationConfig;
+import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -123,11 +126,17 @@ public class ContactReader {
 
     private Contact patch(Contact contact) throws OXException {
         if (null != contact && 0 < contact.getInternalUserId() && contact.containsEmail1()) {
-            UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(
-                contact.getInternalUserId(), getContext(), connection);
-            String defaultSendAddress = userSettingMail.getSendAddr();
-            if (false == Strings.isEmpty(defaultSendAddress)) {
-                contact.setEmail1(defaultSendAddress);
+            String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+            
+            if (senderSource.equalsIgnoreCase("defaultSenderAddress")) {
+                UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
+                String defaultSendAddress = userSettingMail.getSendAddr();
+                if (false == Strings.isEmpty(defaultSendAddress)) {
+                    contact.setEmail1(defaultSendAddress);
+                }
+            } else {
+                String primaryMail = UserStorage.getStorageUser(contact.getInternalUserId(), contextID).getMail();
+                contact.setEmail1(primaryMail);
             }
         }
         return contact;

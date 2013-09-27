@@ -83,7 +83,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
             @Override
             public Object getObject(final Task candidate) {
-                return Float.valueOf(candidate.getActualCosts());
+                return candidate.getActualCosts();
             }
         });
 
@@ -91,7 +91,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
             @Override
             public Object getObject(final Task candidate) {
-                return Long.valueOf(candidate.getActualDuration());
+                return candidate.getActualDuration();
             }
         });
 
@@ -171,7 +171,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
             @Override
             public Object getObject(final Task candidate) {
-                return Float.valueOf(candidate.getTargetCosts());
+                return candidate.getTargetCosts();
             }
         });
 
@@ -179,7 +179,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
             @Override
             public Object getObject(final Task candidate) {
-                return Long.valueOf(candidate.getTargetDuration());
+                return candidate.getTargetDuration();
             }
         });
 
@@ -486,7 +486,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
     }
 
     /**
-     * Initializes a new {@link TaskAttributeFetcher}.
+     * Prevent instantiation.
      */
     private TaskAttributeFetcher() {
         super();

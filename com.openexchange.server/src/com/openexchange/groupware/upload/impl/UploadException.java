@@ -121,6 +121,10 @@ public class UploadException extends OXException {
          * An error occurred: %1$s
          */
         UNEXPECTED_ERROR(UploadExceptionMessage.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 12),
+        /**
+         * Connection has been closed unexpectedly. Please try again.
+         */
+        UNEXPECTED_EOF(UploadExceptionMessage.UNEXPECTED_EOF_MSG, CATEGORY_TRY_AGAIN, 13),
 
         ;
 

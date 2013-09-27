@@ -53,6 +53,7 @@ import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -100,7 +101,7 @@ public class PublicationWriterTest extends TestCase {
 
     public void testWriteObject() throws JSONException, OXException {
         PublicationWriter writer = new PublicationWriter();
-        JSONObject object = writer.write(publication, null);
+        JSONObject object = writer.write(publication, null, TimeZone.getTimeZone("utc"));
 
         JSONAssertion assertion = new JSONAssertion()
                 .hasKey("id").withValue(23)
@@ -130,7 +131,7 @@ public class PublicationWriterTest extends TestCase {
             publication,
             basicCols,
             specialCols,
-            Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription());
+            Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription(), TimeZone.getTimeZone("utc"));
 
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(23, "com.openexchange.publish.test", "myName", true, "publication");
 
@@ -140,7 +141,7 @@ public class PublicationWriterTest extends TestCase {
 
     public void testThrowsExceptionOnUnknownColumn() {
         try {
-            new PublicationWriter().writeArray(publication, new String[]{"id", "unknownColumn"}, new HashMap<String, String[]>(), Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription());
+            new PublicationWriter().writeArray(publication, new String[]{"id", "unknownColumn"}, new HashMap<String, String[]>(), Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription(), TimeZone.getTimeZone("utc"));
             fail("Should have failed");
         } catch (OXException e) {
 

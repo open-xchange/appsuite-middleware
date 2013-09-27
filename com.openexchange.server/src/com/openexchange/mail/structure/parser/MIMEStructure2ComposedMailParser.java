@@ -251,7 +251,7 @@ public final class MIMEStructure2ComposedMailParser {
                  * A multipart
                  */
                 parseMultipartBody(jsonPart.getJSONArray("body"), contentType.getSubType());
-            } else if (contentType.startsWith("message/rfc822")) {
+            } else if (contentType.startsWith("message/rfc822") || (contentType.getNameParameter() != null && contentType.getNameParameter().endsWith(".eml"))) {
                 /*
                  * A nested message
                  */

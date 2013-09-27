@@ -73,6 +73,34 @@ public final class ServerServiceRegistry {
         return REGISTRY;
     }
 
+    /**
+     * Gets the service defined by given class
+     *
+     * @param <S> The type of service's class
+     * @param clazz The service's class
+     * @return The service if found; otherwise <code>null</code>
+     */
+    public static <S extends Object> S getServize(final Class<? extends S> clazz) {
+        return getInstance().getService(clazz);
+    }
+
+    /**
+     * Gets the service defined by given class
+     *
+     * @param <S> The type of service's class
+     * @param clazz The service's class
+     * @param failOnError <code>true</code> to throw an appropriate {@link OXException} if service is missing; otherwise
+     *            <code>false</code>
+     * @return The service if found; otherwise <code>null</code> or an appropriate {@link OXException} is thrown dependent on
+     *         <code>failOnError</code> parameter.
+     * @throws OXException If <code>failOnError</code> parameter is set to <code>true</code> and service is missing
+     */
+    public static <S extends Object> S getServize(final Class<? extends S> clazz, final boolean failOnError) throws OXException {
+        return getInstance().getService(clazz, failOnError);
+    }
+
+    // ------------------------------------------------------------------------------------------------ //
+
     private final Map<Class<?>, Object> services;
 
     /**

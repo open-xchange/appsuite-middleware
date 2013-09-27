@@ -223,7 +223,6 @@ public class RequestTools {
      * @throws OXException If applying image data to contact fails
      */
     public static void setImageData(final Contact contact, final byte[] bytes, final String mimeType) throws OXException {
-        FileInputStream fis = null;
         try {
             // First check MIME type
             String contentType = null == mimeType ? "image/jpeg" : toLowerCase(mimeType);
@@ -244,8 +243,6 @@ public class RequestTools {
             contact.setImageContentType(contentType);
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Error while applying contact image.");
-        } finally {
-            Streams.close(fis);
         }
     }
 

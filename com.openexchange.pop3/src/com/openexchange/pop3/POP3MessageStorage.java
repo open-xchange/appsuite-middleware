@@ -226,12 +226,13 @@ public final class POP3MessageStorage extends MailMessageStorage {
 
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        final MailMessage[] mails = pop3MessageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+        final MailMessage[] mails = pop3MessageStorage.searchMessages(folder, indexRange, effectiveSortField, order, searchTerm, fields);
         /*
          * Check for account name in used fields
          */
         final Set<MailField> set = EnumSet.copyOf(Arrays.asList(fields));
-        final MailField sort = MailField.toField(sortField.getListField());
+        final MailField sort = MailField.toField(effectiveSortField.getListField());
         if (null != sort) {
             set.add(sort);
         }

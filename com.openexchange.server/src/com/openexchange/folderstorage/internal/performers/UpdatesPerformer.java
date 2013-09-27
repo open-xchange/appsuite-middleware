@@ -78,8 +78,8 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -158,14 +158,14 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
         }
         final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         try {
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
                     userConfiguration =
-                        UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), storageParameters.getContext());
+                        UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), storageParameters.getContext());
                 }
             }
             final boolean isReal = FolderStorage.REAL_TREE_ID.equals(treeId);

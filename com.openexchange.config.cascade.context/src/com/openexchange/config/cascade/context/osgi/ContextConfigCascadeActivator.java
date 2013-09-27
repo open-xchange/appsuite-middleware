@@ -58,19 +58,20 @@ import com.openexchange.config.cascade.context.ContextSetConfigProvider;
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ ContextService.class, ConfigurationService.class, UserConfigurationService.class, ConfigViewFactory.class};
+        return new Class[]{ ContextService.class, ConfigurationService.class, UserPermissionService.class, ConfigViewFactory.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
         ContextService contexts = getService(ContextService.class);
         ConfigurationService configuration = getService(ConfigurationService.class);
-        UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        UserPermissionService userConfigs = getService(UserPermissionService.class);
 
         {
             ContextConfigProvider provider = new ContextConfigProvider(contexts);

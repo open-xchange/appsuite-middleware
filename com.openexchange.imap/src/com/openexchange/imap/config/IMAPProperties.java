@@ -132,6 +132,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private Set<String> propagateHostNames;
 
+    private boolean allowFolderCaches;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
@@ -171,6 +173,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         {
             final String tmp = configuration.getProperty("com.openexchange.imap.notifyFullNames", "INBOX").trim();
             notifyFullNames = tmp;
+        }
+
+        {
+            final String allowFolderCachesStr = configuration.getProperty("com.openexchange.imap.allowFolderCaches", "true").trim();
+            allowFolderCaches = "true".equalsIgnoreCase(allowFolderCachesStr);
+            logBuilder.append("\tIMAP allow folder caches: ").append(allowFolderCaches).append('\n');
         }
 
         {
@@ -560,4 +568,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return mailProperties.isWatcherShallClose();
     }
 
+    @Override
+    public boolean allowFolderCaches() {
+        return allowFolderCaches;
+    }
 }

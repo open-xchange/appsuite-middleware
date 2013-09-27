@@ -13,11 +13,9 @@
 	
     <property name="bundlesdir"   value="${prefix}/bundles"/>
     <property name="commonBundle" value="com.openexchange.common"/>
-    <property name="axis2Bundle"  value="com.openexchange.axis2"/>
     <property name="libdir"       value="${prefix}/lib"/>
     <property name="configdir"    value="${prefix}/etc/admindaemon/plugin"/>
     <property name="configfile"   value="open-xchange-admin-soap.properties"/>
-	<property name="axis2dir"     value="${bundlesdir}/${axis2Bundle}"/>
 
     <!-- required osgi bundles -->
 	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
@@ -131,9 +129,7 @@
     </target>
 
     <target name="install" depends="jar">
-        <mkdir dir="${destdir}/${axis2dir}/services"/>
         <mkdir dir="${destdir}/${configdir}"/>
-    	<copy todir="${destdir}/${axis2dir}/services" overwrite="true">
             <fileset file="jar/${service.name}.aar"/>
         </copy>
     	<copy todir="${destdir}${libdir}" overwrite="true">

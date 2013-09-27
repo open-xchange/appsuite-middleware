@@ -57,7 +57,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacades;
@@ -134,10 +134,8 @@ public class Infostore implements PreferencesItemService {
                         accountAccess.connect();
                         try {
                             final FileStorageFolder personalFolder = accountAccess.getFolderAccess().getPersonalFolder();
-                            setting.setSingleValue(new FileStorageFolderIdentifier(
-                                fileStorageService.getId(),
-                                defaultAccount.getId(),
-                                personalFolder.getId()).toString());
+                            setting.setSingleValue(new FolderID(
+                                fileStorageService.getId(), defaultAccount.getId(), personalFolder.getId()).toUniqueID());
                             return;
                         } finally {
                             accountAccess.close();

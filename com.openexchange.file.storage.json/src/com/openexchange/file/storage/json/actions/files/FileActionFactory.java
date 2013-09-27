@@ -59,7 +59,6 @@ import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
-
 /**
  * {@link FileActionFactory}
  *
@@ -80,7 +79,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
      */
     protected FileActionFactory() {
         super();
-        final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(20);
+        final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(24);
         actions.put("new", new NewAction());
         actions.put("update", new UpdateAction());
         actions.put("delete", new DeleteAction());
@@ -100,6 +99,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("saveAs", new SaveAsAction());
 
         actions.put("document", new DocumentAction());
+        actions.put("zipdocuments", new ZipDocumentsAction());
 
         actions.put("documentdelta", new DocumentDeltaAction());
         actions.put("documentsig", new DocumentSigAction());
@@ -115,8 +115,8 @@ public class FileActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         final AJAXActionService handler = actions.get(action);
-        if(handler == null) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+        if (handler == null) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
         }
         return handler;
     }

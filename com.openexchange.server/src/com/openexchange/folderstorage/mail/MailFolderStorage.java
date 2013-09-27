@@ -120,6 +120,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -241,7 +242,7 @@ public final class MailFolderStorage implements FolderStorage {
             } else {
                 final List<MailAccount> accountList;
                 final Object property = decorator.getProperty("mailRootFolders");
-                if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserConfiguration().isMultipleMailAccounts()) {
+                if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
                     final MailAccountStorageService mass = MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                     final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
                     accountList = new ArrayList<MailAccount>(accounts.length);
@@ -415,7 +416,7 @@ public final class MailFolderStorage implements FolderStorage {
             final String fullname = mailAccess.getFolderStorage().createFolder(mfd);
             addWarnings(mailAccess, storageParameters);
             folder.setID(prepareFullname(accountId, fullname));
-            postEvent(accountId, mfd.getParentFullname(), false, storageParameters);
+            postEvent(accountId, mfd.getParentFullname(), false, true, storageParameters);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -436,7 +437,7 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             final String fullname = arg.getFullname();
             /*
-             * Only backup if fullname does not denote trash (sub)folder
+             * Only backup if full name does not denote trash (sub)folder
              */
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
             final boolean hardDelete = fullname.startsWith(trashFullname);
@@ -464,9 +465,9 @@ public final class MailFolderStorage implements FolderStorage {
                 for (int i = 0; i < subf.length; i++) {
                     final String subFullname = subf[i].getFullname();
                     mailAccess.getFolderStorage().deleteFolder(subFullname, true);
-                    postEvent(accountId, subFullname, false, storageParameters);
+                    postEvent(accountId, subFullname, false, true, storageParameters);
                 }
-                postEvent(accountId, trashFullname, false, storageParameters);
+                postEvent(accountId, trashFullname, false, true, storageParameters);
             }
         } finally {
             closeMailAccess(mailAccess);
@@ -798,17 +799,30 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     private static MailFolder getMailFolder(final String treeId, final int accountId, final String fullname, final boolean createIfAbsent, final Session session, final MailAccess<?, ?> mailAccess) throws OXException {
-        try {
-            return mailAccess.getFolderStorage().getFolder(fullname);
-        } catch (final OXException e) {
-            if (!createIfAbsent) {
-                throw e;
+        OXException exc = null;
+        final int max = 2;
+        int count = 0;
+
+        while (count++ < max) {
+            try {
+                return mailAccess.getFolderStorage().getFolder(fullname);
+            } catch (final OXException e) {
+                if (count < max && MimeMailExceptionCode.STORE_CLOSED.equals(e)) {
+                    MailAccess.reconnect(mailAccess);
+                    exc = e;
+                } else {
+                    if (!createIfAbsent) {
+                        throw e;
+                    }
+                    if ((!e.isPrefix("MSG") || MailExceptionCode.FOLDER_NOT_FOUND.getNumber() != e.getCode()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                        throw e;
+                    }
+                    return recreateMailFolder(accountId, fullname, session, mailAccess);
+                }
             }
-            if ((!e.isPrefix("MSG") || MailExceptionCode.FOLDER_NOT_FOUND.getNumber() != e.getCode()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                throw e;
-            }
-            return recreateMailFolder(accountId, fullname, session, mailAccess);
         }
+
+        throw null == exc ? MailExceptionCode.UNEXPECTED_ERROR.create("Connection closed.") : exc;
     }
 
     private static MailFolder recreateMailFolder(final int accountId, final String fullname, final Session session, final MailAccess<?, ?> mailAccess) throws OXException {
@@ -894,7 +908,7 @@ public final class MailFolderStorage implements FolderStorage {
                  */
                 final List<MailAccount> accounts;
                 final ServiceRegistry serviceRegistry = MailServiceRegistry.getServiceRegistry();
-                if (session.getUserConfiguration().isMultipleMailAccounts()) {
+                if (session.getUserPermissionBits().isMultipleMailAccounts()) {
                     final MailAccountStorageService storageService = serviceRegistry.getService(MailAccountStorageService.class, true);
                     final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                     final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);

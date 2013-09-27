@@ -53,8 +53,8 @@ package com.openexchange.groupware.links;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.LinkObject;
+import com.openexchange.log.LogFactory;
 
 
 /**
@@ -88,7 +88,7 @@ public class LinksMySql implements LinksSql {
 		return new StringBuilder("SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid FROM prg_links WHERE ((firstid = ").append(l.getFirstId()).append(SQL_AND_FIRSTMODULE).append(l.getFirstType()).append(SQL_AND_SECONDID).append(l.getSecondId()).append(SQL_AND_SECONDMODULE).append(l.getSecondType()).append(") OR (firstid = ").append(l.getSecondId()).append(SQL_AND_FIRSTMODULE).append(l.getSecondType()).append(SQL_AND_SECONDID).append(l.getFirstId()).append(SQL_AND_SECONDMODULE).append(l.getFirstType()).append(")) AND cid = ").append(cid).toString();
 	}
 
-	private static final String SQL_INSERT = "INSERT INTO prg_links (firstid, firstmodule, firstfolder,secondid,secondmodule,secondfolder,cid) VALUES (?,?,?,?,?,?,?)";
+	private static final String SQL_INSERT = "INSERT INTO prg_links (firstid, firstmodule, firstfolder,secondid,secondmodule,secondfolder,cid,uuid) VALUES (?,?,?,?,?,?,?,?)";
 
 	@Override
     public String iFperformLinkStorageInsertString(){

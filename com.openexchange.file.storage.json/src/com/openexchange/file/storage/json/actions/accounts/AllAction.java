@@ -96,10 +96,11 @@ public class AllAction extends AbstractFileStorageAccountAction {
         final JSONArray result = new JSONArray();
 
         for (final FileStorageService fsService : services) {
-            final List<FileStorageAccount> userAccounts;
+            List<FileStorageAccount> userAccounts = null;
             if (fsService instanceof AccountAware) {
                 userAccounts = ((AccountAware) fsService).getAccounts(session);
-            } else {
+            }
+            if (null == userAccounts) {
                 userAccounts = fsService.getAccountManager().getAccounts(session);
             }
             for (final FileStorageAccount account : userAccounts) {

@@ -99,51 +99,47 @@ public class IntegrationTest implements OSGiTest {
         approval.setFrom(martin);
         approval.setMessage("Sicher doch.");
         approval.setType(Type.SUBSCRIBED);
-        try {
-            // marcus wants to subscribe to martin
-            subscriptionService.subscribe(subscription, "bitte bitte");
+        // marcus wants to subscribe to martin
+        subscriptionService.subscribe(subscription, "bitte bitte");
 
-            // martin should have on pending subscription but no subscriber, yet
-            List<Presence> pendingRequests = subscriptionService.getPendingRequests(martin);
-            assertEquals("Wrong amount of pending requests.", 1, pendingRequests.size());
-            assertEquals("Wrong or missing message.", "bitte bitte", pendingRequests.get(0).getMessage());
-            List<ID> subscribers = subscriptionService.getSubscribers(martin);
-            assertEquals("No subscribers expected.", 0, subscribers.size());
+        // martin should have on pending subscription but no subscriber, yet
+        List<Presence> pendingRequests = subscriptionService.getPendingRequests(martin);
+        assertEquals("Wrong amount of pending requests.", 1, pendingRequests.size());
+        assertEquals("Wrong or missing message.", "bitte bitte", pendingRequests.get(0).getMessage());
+        List<ID> subscribers = subscriptionService.getSubscribers(martin);
+        assertEquals("No subscribers expected.", 0, subscribers.size());
 
-            // marcus shouldn't have any subscriptions either
-            List<ID> subscriptions = subscriptionService.getSubscriptions(marcus);
-            assertEquals("No subscriptions expected.", 0, subscriptions.size());
+        // marcus shouldn't have any subscriptions either
+        List<ID> subscriptions = subscriptionService.getSubscriptions(marcus);
+        assertEquals("No subscriptions expected.", 0, subscriptions.size());
 
-            // martin approves marcus' subscription request
-            subscriptionService.approve(approval);
+        // martin approves marcus' subscription request
+        subscriptionService.approve(approval);
 
-            // this should result in marcus being the only one subscribed to martin
-            subscribers = subscriptionService.getSubscribers(martin);
-            assertEquals("One subscriber expected.", 1, subscribers.size());
-            ID id = subscribers.get(0);
-            assertEquals(marcus.getUser(), id.getUser());
-            assertEquals(marcus.getContext(), id.getContext());
+        // this should result in marcus being the only one subscribed to martin
+        subscribers = subscriptionService.getSubscribers(martin);
+        assertEquals("One subscriber expected.", 1, subscribers.size());
+        ID id = subscribers.get(0);
+        assertEquals(marcus.getUser(), id.getUser());
+        assertEquals(marcus.getContext(), id.getContext());
 
-            // and marcus having only one subscription, the one to martin
-            subscriptions = subscriptionService.getSubscriptions(marcus);
-            assertEquals("One subscription expected.", 1, subscriptions.size());
-            id = subscriptions.get(0);
-            assertEquals("Subscribed user doesn't match initial subscription", martin.getUser(), id.getUser());
-            assertEquals(martin.getContext(), id.getContext());
+        // and marcus having only one subscription, the one to martin
+        subscriptions = subscriptionService.getSubscriptions(marcus);
+        assertEquals("One subscription expected.", 1, subscriptions.size());
+        id = subscriptions.get(0);
+        assertEquals("Subscribed user doesn't match initial subscription", martin.getUser(), id.getUser());
+        assertEquals(martin.getContext(), id.getContext());
 
-            // revoke subscription again
-            approval.setMessage("Hau ab!");
-            approval.setType(Type.UNSUBSCRIBED);
-            subscriptionService.approve(approval);
+        // revoke subscription again
+        approval.setMessage("Hau ab!");
+        approval.setType(Type.UNSUBSCRIBED);
+        subscriptionService.approve(approval);
 
-            // this should result in zero people currently being subscribed to martin
-            subscribers = subscriptionService.getSubscribers(martin);
-            assertEquals("No subscribers expected.", 0, subscribers.size());
-            pendingRequests = subscriptionService.getPendingRequests(martin);
-            assertEquals("Wrong amount of pending requests.", 0, pendingRequests.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // this should result in zero people currently being subscribed to martin
+        subscribers = subscriptionService.getSubscribers(martin);
+        assertEquals("No subscribers expected.", 0, subscribers.size());
+        pendingRequests = subscriptionService.getPendingRequests(martin);
+        assertEquals("Wrong amount of pending requests.", 0, pendingRequests.size());
     }
 
     /*

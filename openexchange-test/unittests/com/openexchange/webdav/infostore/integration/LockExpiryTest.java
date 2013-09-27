@@ -63,7 +63,7 @@ import com.openexchange.groupware.infostore.webdav.FolderCollection;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -106,7 +106,7 @@ public class LockExpiryTest extends AbstractInfostoreTest {
 
         Context ctx = factory.getSession().getContext();
         User user = factory.getSession().getUser();
-        UserConfiguration userConfig = factory.getSession().getUserConfiguration();
+        UserPermissionBits userConfig = factory.getSession().getUserPermissionBits();
 
         DocumentMetadataResource resource = createResource();
         final WebdavLock lock = new WebdavLock();

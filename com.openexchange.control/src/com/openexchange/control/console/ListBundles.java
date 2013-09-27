@@ -84,6 +84,7 @@ public final class ListBundles extends AbstractConsoleHandler {
             } else {
                 exc.printStackTrace();
             }
+            exit();
         } finally {
             try {
                 close();

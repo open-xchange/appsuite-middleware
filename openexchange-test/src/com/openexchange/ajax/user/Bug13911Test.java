@@ -116,8 +116,8 @@ public class Bug13911Test extends AbstractAJAXSession {
             final SearchResponse response = client.execute(new MultipleRequest<SearchResponse>(searches)).getResponse(0);
             boolean found = false;
             for (final Object[] test : response) {
-                final int id = ((Integer) test[response.getColumnPos(Contact.OBJECT_ID)]).intValue();
-                if (id == contact.getObjectID()) {
+                final int id = ((Integer) test[response.getColumnPos(Contact.INTERNAL_USERID)]).intValue();
+                if (id == contact.getInternalUserId()) {
                     found = true;
                     break;
                 }
@@ -143,13 +143,13 @@ public class Bug13911Test extends AbstractAJAXSession {
             final SearchResponse response = client.execute(request);
             boolean found = false;
             for (final Object[] test : response) {
-                final int id = ((Integer) test[response.getColumnPos(Contact.OBJECT_ID)]).intValue();
-                if (id == contact.getObjectID()) {
+                final int id = ((Integer) test[response.getColumnPos(Contact.INTERNAL_USERID)]).intValue();
+                if (id == contact.getInternalUserId()) {
                     found = true;
                     break;
                 }
             }
-            assertTrue("Searched user contact not found.", found);
+            assertTrue("Searched user contact not found using pattern: " + pattern, found);
         }
     }
 

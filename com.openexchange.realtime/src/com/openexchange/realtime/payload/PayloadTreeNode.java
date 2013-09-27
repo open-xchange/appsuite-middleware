@@ -473,7 +473,7 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
             node.setPayloadElement(payloadElement);
             return this;
         }
-
+  
         /**
          * Create a new PayloadTreeNode and add it as child to the PayloadTreeNode we are currently building.
          *

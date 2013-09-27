@@ -533,8 +533,9 @@ public final class MailFolderTest extends AbstractMailTest {
 					mailAccess.getFolderStorage().createFolder(mfd);
 				}
 
-				String newFullname = parentIsDefault ? "TemporaryFolderMoved" : new StringBuilder(parentFullname)
-						.append(separator).append("TemporaryFolderMoved").toString();
+				String stamp = Long.toString(System.currentTimeMillis());
+                String newFullname = parentIsDefault ? ("TemporaryFolderMoved" + stamp) : new StringBuilder(parentFullname)
+						.append(separator).append("TemporaryFolderMoved").append(stamp).toString();
 				// MOVE FOLDER
 				mailAccess.getFolderStorage().moveFolder(fullname, newFullname);
 				// ENSURE OLD ONE DOES NO MORE EXIST
@@ -549,7 +550,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				fullname = newFullname;
 				MailFolder mf = mailAccess.getFolderStorage().getFolder(fullname);
 
-				assertEquals("Unexpected name: " + mf.getName(), "TemporaryFolderMoved", mf.getName());
+				assertEquals("Unexpected name: " + mf.getName(), ("TemporaryFolderMoved" + stamp), mf.getName());
 				assertEquals("Unexpected parent: " + mf.getParentFullname(), parentFullname, mf.getParentFullname());
 
 				/*
@@ -559,7 +560,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				final OCLPermission[] rootPerms = root.getPermissions();
 
 				if (canCreateSubfolders(rootPerms)) {
-					newFullname = "TemporaryFolderMovedAgain";
+					newFullname = "TemporaryFolderMovedAgain" + stamp;
 					exc = null;
 					try {
 						mailAccess.getFolderStorage().moveFolder(fullname, newFullname);
@@ -577,7 +578,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					fullname = newFullname;
 					mf = mailAccess.getFolderStorage().getFolder(fullname);
 
-					assertTrue("Unexpected name: " + mf.getName(), "TemporaryFolderMovedAgain".equals(mf.getName()));
+					assertTrue("Unexpected name: " + mf.getName(), ("TemporaryFolderMovedAgain" + stamp).equals(mf.getName()));
 					assertTrue("Unexpected parent: " + mf.getParentFullname(), MailFolder.DEFAULT_FOLDER_ID.equals(mf.getParentFullname()));
 				} else {
 				    fullname = null;
@@ -830,7 +831,7 @@ public final class MailFolderTest extends AbstractMailTest {
     					mfd.setSeparator(inbox.getSeparator());
     					mfd.setSubscribed(false);
     					mfd.setName(name);
-    
+
     					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
     							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
     					p.setEntity(getUser());

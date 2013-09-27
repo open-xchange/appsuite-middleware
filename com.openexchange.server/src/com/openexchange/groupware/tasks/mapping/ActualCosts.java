@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.tasks.mapping;
 
-import static com.openexchange.java.Autoboxing.F;
-import static com.openexchange.java.Autoboxing.f;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +58,12 @@ import com.openexchange.groupware.tasks.AttributeNames;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
 
-public final class ActualCosts implements Mapper<Float> {
+/**
+ * Implementation to map task attribute actualCosts to database actual_costs and back.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class ActualCosts implements Mapper<BigDecimal> {
 
     public static final ActualCosts SINGLETON = new ActualCosts();
 
@@ -90,17 +94,17 @@ public final class ActualCosts implements Mapper<Float> {
     @Override
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
         if (null == task.getActualCosts()) {
-            stmt.setNull(pos, Types.FLOAT);
+            stmt.setNull(pos, Types.NUMERIC);
         } else {
-            stmt.setDouble(pos, f(task.getActualCosts()));
+            stmt.setBigDecimal(pos, task.getActualCosts());
         }
     }
 
     @Override
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        float actualCosts = result.getFloat(pos);
+        BigDecimal actualCosts = result.getBigDecimal(pos);
         if (!result.wasNull()) {
-            task.setActualCosts(F(actualCosts));
+            task.setActualCosts(actualCosts);
         }
     }
 
@@ -117,12 +121,12 @@ public final class ActualCosts implements Mapper<Float> {
     }
 
     @Override
-    public Float get(Task task) {
+    public BigDecimal get(Task task) {
         return task.getActualCosts();
     }
 
     @Override
-    public void set(Task task, Float value) {
+    public void set(Task task, BigDecimal value) {
         task.setActualCosts(value);
     }
 }

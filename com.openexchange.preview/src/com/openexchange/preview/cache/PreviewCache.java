@@ -151,6 +151,14 @@ public interface PreviewCache {
     void removeAlikes(String id, int userId, int contextId) throws OXException;
 
     /**
+     * Clears all cache entries belonging to given context.
+     *
+     * @param contextId The context identifier
+     * @throws OXException If clear operation fails
+     */
+    void clearFor(int contextId) throws OXException;
+
+    /**
      * Tests for existence of denoted preview document.
      *
      * @param id The identifier (cache key) for the cached document

@@ -78,15 +78,25 @@ public final class JSONPathElement {
         try {
             final String[] fields = SPLIT.split(path, 0);
             final List<JSONPathElement> list = new ArrayList<JSONPathElement>(fields.length);
+            StringBuilder composite = null;
             for (int i = 0; i < fields.length; i++) {
-                final String field = fields[i];
-                final int pos = field.indexOf('[');
-                if (pos >= 0) {
-                    final int index = getUnsignedInteger(field.substring(pos + 1, field.indexOf(']', pos + 1)));
-                    final String name = field.substring(0, pos);
-                    list.add(new JSONPathElement(0 == name.length() ? null : name, index));
+                String field = fields[i];
+                if (field.endsWith("\\")) {
+                    if (composite == null) {
+                        composite = new StringBuilder();
+                    }
+                    composite.append(field.substring(0, field.length() - 1)).append('/');
                 } else {
-                    list.add(new JSONPathElement(field));
+                    field = (composite != null) ? composite.toString() + field : field;
+                    composite = null;
+                    final int pos = field.indexOf('[');
+                    if (pos >= 0) {
+                        final int index = getUnsignedInteger(field.substring(pos + 1, field.indexOf(']', pos + 1)));
+                        final String name = field.substring(0, pos);
+                        list.add(new JSONPathElement(0 == name.length() ? null : name, index));
+                    } else {
+                        list.add(new JSONPathElement(field));
+                    }
                 }
             }
             return list;

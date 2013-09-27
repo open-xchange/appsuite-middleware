@@ -50,12 +50,20 @@
 package com.openexchange.groupware.tasks.osgi;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import com.openexchange.groupware.tasks.database.CreateTaskTables;
+import com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.osgi.UpdateTaskRegisterer;
 import com.openexchange.quota.QuotaService;
 
 /**
@@ -76,9 +84,19 @@ public class TaskActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() {
+        registerService(CreateTableService.class, new CreateTaskTables());
+
+        track(DatabaseService.class, new UpdateTaskRegisterer(context) {
+            @Override
+            protected Collection<? extends UpdateTaskV2> createTasks(DatabaseService service) {
+                return Arrays.asList(new TasksModifyCostColumnTask(service));
+            }
+        });
+
         final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
         registerService(TargetService.class, new ModifyThroughDependant(), props);
+
         track(QuotaService.class, new QuotaServiceCustomizer(context));
     }
 }

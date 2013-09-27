@@ -127,6 +127,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.pop3.POP3Folder;
+import com.sun.mail.util.MessageRemovedIOException;
 
 /**
  * {@link MimeMessageConverter} - Provides several methods to convert instances of {@link MimeMessage} to {@link MailMessage} in vice versa.
@@ -1541,14 +1542,14 @@ public final class MimeMessageConverter {
                             ct.getSubType())));
                     } catch (final ClassCastException e) {
                         // Cast to javax.mail.Multipart failed
-                        LOG1.warn(new com.openexchange.java.StringAllocator(256).append(
+                        LOG1.debug(new com.openexchange.java.StringAllocator(256).append(
                             "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                             e.getMessage()).append(
                             ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                         mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final MessagingException e) {
                         // A messaging error occurred
-                        LOG1.warn(new com.openexchange.java.StringAllocator(256).append(
+                        LOG1.debug(new com.openexchange.java.StringAllocator(256).append(
                             "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                             e.getMessage()).append(
                             ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
@@ -1774,6 +1775,21 @@ public final class MimeMessageConverter {
     /**
      * Creates a message data object from given message bytes conform to RFC822.
      *
+     * @param in The message input stream conform to RFC822
+     * @return An instance of <code>{@link MailMessage}</code>
+     * @throws OXException If conversion fails
+     */
+    public static MailMessage convertMessage(final InputStream in) throws OXException {
+        try {
+            return convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), in));
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Creates a message data object from given message bytes conform to RFC822.
+     *
      * @param asciiBytes The message bytes conform to RFC822
      * @return An instance of <code>{@link MailMessage}</code>
      * @throws OXException If conversion fails
@@ -1904,21 +1920,21 @@ public final class MimeMessageConverter {
                                     throw e;
                                 }
                                 // A messaging error occurred
-                                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
                                     "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                                     e.getMessage()).append(
                                     ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(), e);
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final ClassCastException e) {
                                 // Cast to javax.mail.Multipart failed
-                                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
                                     "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                                     content.getClass().getName()).append(
                                     ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final MessagingException e) {
                                 // A messaging error occurred
-                                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
                                     "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                                     e.getMessage()).append(
                                     ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
@@ -2441,9 +2457,13 @@ public final class MimeMessageConverter {
             try {
                 part.writeTo(out);
                 headers = loadHeaders(new String(out.toByteArray(), Charsets.ISO_8859_1));
+            } catch (final MessageRemovedIOException e2) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e2, new Object[0]);
             } catch (final IOException e2) {
                 LOG.warn("Unable to parse headers. Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
+            } catch (final MessageRemovedException e2) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e2, new Object[0]);
             } catch (final MessagingException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
@@ -2459,9 +2479,13 @@ public final class MimeMessageConverter {
             try {
                 part.writeTo(out);
                 headers = loadHeaders(new String(out.toByteArray(), Charsets.ISO_8859_1));
+            } catch (final MessageRemovedIOException e2) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e2, new Object[0]);
             } catch (final IOException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
+            } catch (final MessageRemovedException e2) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e2, new Object[0]);
             } catch (final MessagingException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
@@ -2574,8 +2598,11 @@ public final class MimeMessageConverter {
      * @throws MessagingException If a messaging error occurs
      */
     public static String getSubject(final Message message) throws MessagingException {
-        final String subject = getStringHeader(MessageHeaders.HDR_SUBJECT, message, '\0');
-        return null == subject ? "" : subject;
+        final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
+        if (null == valueArr || valueArr.length == 0) {
+            return null;
+        }
+        return MimeMessageUtility.decodeEnvelopeSubject(valueArr[0]);
     }
 
     /**
@@ -2590,8 +2617,11 @@ public final class MimeMessageConverter {
      * @return The decoded header
      */
     public static String getSubject(final MailMessage message) {
-        final String subject = getStringHeader(MessageHeaders.HDR_SUBJECT, message, '\0');
-        return null == subject ? "" : subject;
+        final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
+        if (null == valueArr || valueArr.length == 0) {
+            return null;
+        }
+        return MimeMessageUtility.decodeEnvelopeSubject(valueArr[0]);
     }
 
     /**

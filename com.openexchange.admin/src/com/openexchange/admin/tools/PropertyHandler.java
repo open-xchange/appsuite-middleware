@@ -495,43 +495,5 @@ public class PropertyHandler {
         return retval;
     }
 
-    /**
-     *
-     * @param key
-     * @param fallBack
-     * @return
-     */
-    public String getSqlProp(final String key, final String fallBack) {
-        String retString = fallBack;
-
-        synchronized (this) {
-            if ( this.sqlPropValues == null ) {
-                ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (null == service) {
-                    service = AdminCache.getConfigurationService();
-                }
-                if (null == service) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
-                    }
-                } else {
-                    final Properties properties = service.getFile("Sql.properties");
-                    final Hashtable<String, String> ht = this.sqlPropValues = new Hashtable<String, String>(properties.size());
-                    for (final Entry<Object, Object> entry : properties.entrySet()) {
-                        ht.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                }
-            }
-        }
-
-        if (this.sqlPropValues != null && this.sqlPropValues.containsKey(key)) {
-            retString = this.sqlPropValues.get(key).toString();
-        } else {
-            log.error("Property '" + key + "' not found in file 'Sql.properties'! Using fallback :" + fallBack);
-        }
-
-        return retString;
-    }
-
 
 }

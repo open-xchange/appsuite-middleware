@@ -381,15 +381,13 @@ public class FolderTest extends AbstractAJAXTest {
 
     public static boolean renameFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int folderId, final String folderName, final String moduleStr, final int type, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
         final JSONObject jsonFolder = new JSONObject();
-        jsonFolder.put("id", folderId);
         jsonFolder.put("title", folderName);
-        jsonFolder.put("module", moduleStr);
-        jsonFolder.put("type", type);
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, Integer.toString(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
+        urlParam.setParameter(FolderFields.TREE, Integer.toString(1)); //TODO need to get this out of the rensponse
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
@@ -397,11 +395,17 @@ public class FolderTest extends AbstractAJAXTest {
             bais,
             "text/javascript; charset=UTF-8");
         final WebResponse resp = conversation.getResponse(req);
-        final JSONObject respObj = new JSONObject(resp.getText());
-        if (respObj.has("error")) {
-            return false;
+        final String text = resp.getText();
+        try {
+            final JSONObject respObj = new JSONObject(text);
+            if (respObj.has("error")) {
+                return false;
+            }
+            return true;
+        } catch (JSONException e) {
+            // Response is no valid JSON
+            throw new JSONException("HTTP response cannot be parsed to JSON object:\n" + text, e);
         }
-        return true;
     }
 
     public static boolean updateFolder(final WebConversation conversation, final String hostname, final String sessionId, final String entityArg, final String secondEntityArg, final int folderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
@@ -1191,8 +1195,8 @@ public class FolderTest extends AbstractAJAXTest {
         for (int i = 0; i < size; i++) {
             final JSONArray row = arr.optJSONArray(i);
             assertNotNull(row);
-            assertTrue(row.length() == 1);
-            assertNotNull(row.get(0));
+            assertTrue(row.length() == 2);
+            assertNotNull(row.get(1));
         }
     }
 

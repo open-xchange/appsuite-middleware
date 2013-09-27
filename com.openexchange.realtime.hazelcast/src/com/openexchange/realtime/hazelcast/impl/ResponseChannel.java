@@ -60,28 +60,36 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
 
-
 /**
- * {@link ResponseChannel}
+ * {@link ResponseChannel} - Used to "transport" messages addressed to call:// IDs used during sychronous Stanza sending. Received messages
+ * are collected in a response map and the appropriate condition is signaled. As a result clients that are "synchronously" waiting for this
+ * response in {@link ResponseChannel#waitFor(String, long, TimeUnit)} will receive the Stanza.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ResponseChannel implements Channel{
-    
+
     private ConcurrentHashMap<ID, Stanza> responses = new ConcurrentHashMap<ID, Stanza>();
     private ConcurrentHashMap<ID, Condition> condition = new ConcurrentHashMap<ID, Condition>();
     private ConcurrentHashMap<ID, Lock> locks = new ConcurrentHashMap<ID, Lock>();
-    
+
     private ResourceDirectory directory;
-    
+
     public ResponseChannel(ResourceDirectory directory) {
         this.directory = directory;
     }
-    
+
+    /**
+     * Set up/prepare the channel for sending a Stanza. This includes replacing the from ID with a channel specific internal ID
+     * @param uuid the unique id to use for sending this Stanza
+     * @param stanza the Stanza to send
+     * @throws OXException
+     */
     public void setUp(String uuid, Stanza stanza) throws OXException {
         ID id = getId(uuid);
         ReentrantLock lock = new ReentrantLock();
@@ -91,7 +99,15 @@ public class ResponseChannel implements Channel{
         directory.set(id, res);
         stanza.setFrom(id);
     }
-    
+
+    /**
+     * Wait "synchronously" for the arrival of a response Stanza addressed for a given unique id.
+     * @param uuid the unique id used during {@link ResponseChannel#setUp(String, Stanza)}
+     * @param timeout duration to wait for the arrival or the expected response 
+     * @param unit timout unit
+     * @return the Stanza representing the response that we are waiting for
+     * @throws OXException if no Stanza was received within the given timout
+     */
     public Stanza waitFor(String uuid, long timeout, TimeUnit unit) throws OXException {
         ID id = getId(uuid);
         try {
@@ -103,23 +119,26 @@ public class ResponseChannel implements Channel{
             condition.get(id).await(timeout, unit);
             stanza = responses.get(id);
             if (stanza == null) {
-                throw new OXException();
+                throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Timeout while waiting for response to " + id);
             }
-            
+
             return stanza;
         } catch (InterruptedException e) {
-            throw new OXException();
+            throw new OXException(e);
         } finally {
             directory.remove(id);
             condition.remove(id);
-            responses.remove(id);        
+            responses.remove(id);
             locks.remove(id).unlock();
         }
-        
+
     }
 
-
-
+    /**
+     * Generate a channel specific internal ID. Example: call://894ae710b4f447d494818b56f663d0ca@internal
+     * @param uuid the uuid to use for ID creation
+     * @return an channel specific internal ID
+     */
     private ID getId(String uuid) {
         ID id = new ID(getProtocol(), uuid, "internal", "");
         return id;
@@ -145,20 +164,32 @@ public class ResponseChannel implements Channel{
         return condition.containsKey(id);
     }
 
+    /*
+     * Recipients are one-time UUIDs that are created before sending a message on behalf of some client and removed either after Stanza
+     * retrieval or the given timeout. Recipients can't be conjured for this channel.
+     */
     @Override
     public boolean conjure(ID id) throws OXException {
-        return id.getProtocol().equals(getProtocol());
+        return false;
     }
 
+    /**
+     * 
+     */
     @Override
     public void send(Stanza stanza, ID recipient) throws OXException {
         stanza.trace("Delivering synchronously. ResponseChannel.");
         Lock lock = locks.get(recipient);
+        if(lock == null) {
+            throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Missing lock for recipient: " + recipient);
+        }
         try {
             lock.lock();
             if (condition.get(recipient) != null) {
                 responses.put(recipient, stanza);
                 condition.get(recipient).signal();
+            } else {
+                throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Missing condition for recipient: " + recipient);
             }
         } finally {
             lock.unlock();

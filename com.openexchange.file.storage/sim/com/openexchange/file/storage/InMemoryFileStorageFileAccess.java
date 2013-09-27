@@ -51,6 +51,8 @@ package com.openexchange.file.storage;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,10 +62,11 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
-
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link InMemoryFileStorageFileAccess}
@@ -77,7 +80,6 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     private final String accountId;
 
     private final String serviceId;
-
 
     public InMemoryFileStorageFileAccess(String serviceId, String accountId) {
         super();
@@ -97,15 +99,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
 
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
-        Map<String, VersionContainer> map = storage.get(folderId);
-        if (map == null) {
-            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
-        }
-
-        VersionContainer versionContainer = map.get(id);
-        if (versionContainer == null) {
-            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
-        }
+        VersionContainer versionContainer = getVersionContainer(folderId, id);
 
         if (version == FileStorageFileAccess.CURRENT_VERSION) {
             version = Integer.toString(versionContainer.getCurrentVersionNumber());
@@ -115,6 +109,19 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
         }
 
         throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+    }
+
+    private VersionContainer getVersionContainer(String folderId, String id) throws OXException {
+        Map<String, VersionContainer> map = storage.get(folderId);
+        if (map == null) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+        }
+
+        VersionContainer versionContainer = map.get(id);
+        if (versionContainer == null) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+        }
+        return versionContainer;
     }
 
     @Override
@@ -160,6 +167,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             file.setVersion(Integer.toString(version));
             map.put(id, versionContainer);
         } else {
+            
             VersionContainer versionContainer = map.get(id);
             if (versionContainer == null) {
                 throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
@@ -173,7 +181,17 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             }
             int version = versionContainer.addVersion(holder);
             file.setVersion(Integer.toString(version));
+            
+            // Swap IDs
+            String oldId = id;
+            id = UUID.randomUUID().toString();
+            file.setId(id);
+            map.put(id, map.remove(oldId));
+            for(FileHolder fh: versionContainer.getAllVersions()) {
+                fh.getInternalFile().setId(id);
+            }
         }
+        
     }
 
     @Override
@@ -240,15 +258,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
 
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
-        Map<String, VersionContainer> map = storage.get(folderId);
-        if (map == null) {
-            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
-        }
-
-        VersionContainer versionContainer = map.get(id);
-        if (versionContainer == null) {
-            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
-        }
+        VersionContainer versionContainer = getVersionContainer(folderId, id);
 
         FileHolder holder;
         if (version == FileStorageFileAccess.CURRENT_VERSION) {
@@ -267,21 +277,32 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     @Override
     public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
         final File orig = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
-        if(newFile == null && orig.getFileName() != null) {
+        if (newFile == null && orig.getFileName() != null) {
             newFile = getDocument(source.getFolder(), source.getId(), CURRENT_VERSION);
         }
-        if(update != null) {
+        if (update != null) {
             orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));
         }
         orig.setId(NEW);
         orig.setFolderId(destFolder);
 
-        if(newFile == null) {
+        if (newFile == null) {
             saveFileMetadata(orig, UNDEFINED_SEQUENCE_NUMBER);
         } else {
             saveDocument(orig, newFile, UNDEFINED_SEQUENCE_NUMBER);
         }
 
+        return new IDTuple(destFolder, orig.getId());
+    }
+
+    @Override
+    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
+        final File orig = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
+        if (update != null) {
+            orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));
+        }
+        orig.setFolderId(destFolder);
+        saveFileMetadata(orig, sequenceNumber, modifiedFields);
         return new IDTuple(destFolder, orig.getId());
     }
 
@@ -305,62 +326,77 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
 
     @Override
     public TimedResult<File> getDocuments(String folderId) throws OXException {
-        // Nothing to do
-        return null;
+        Map<String, VersionContainer> files = storage.get(folderId);
+
+        return new InMemoryTimedResult(files);
     }
 
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields) throws OXException {
-        // Nothing to do
-        return null;
+        return getDocuments(folderId);
     }
 
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        // Nothing to do
-        return null;
+        return new InMemoryTimedResult(storage.get(folderId), sort, order);
     }
 
     @Override
     public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        // Nothing to do
-        return null;
+        VersionContainer versionContainer = getVersionContainer(folderId, id);
+
+        return new AllVersionsTimedResult(versionContainer);
     }
 
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        // Nothing to do
-        return null;
+        VersionContainer versionContainer = getVersionContainer(folderId, id);
+
+        return new AllVersionsTimedResult(versionContainer);
     }
 
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        // Nothing to do
-        return null;
+        VersionContainer versionContainer = getVersionContainer(folderId, id);
+
+        return new AllVersionsTimedResult(versionContainer, sort, order);
     }
 
     @Override
-    public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        // Nothing to do
-        return null;
+    public TimedResult<File> getDocuments(final List<IDTuple> ids, List<Field> fields) throws OXException {
+
+        return new TimedResult<File>() {
+
+            @Override
+            public SearchIterator<File> results() throws OXException {
+                List<File> files = new ArrayList<File>(ids.size());
+                for (IDTuple idTuple : ids) {
+                    files.add(getVersionContainer(idTuple.getFolder(), idTuple.getId()).getCurrentVersion().getFile());
+                }
+
+                return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+            }
+
+            @Override
+            public long sequenceNumber() throws OXException {
+                return System.currentTimeMillis();
+            }
+        };
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
-        // Nothing to do
-        return null;
+        return new DeltaImpl<File>(getDocuments(folderId).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        // Nothing to do
-        return null;
+        return new DeltaImpl<File>(getDocuments(folderId, fields, sort, order).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
     }
 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
-        // Nothing to do
-        return null;
+        return SearchIteratorAdapter. <File> emptyIterator();
     }
 
     @Override
@@ -485,6 +521,101 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
 
     @Override
     public void setCommitsTransaction(boolean commits) {
+
+    }
+
+    private final class InMemoryTimedResult implements TimedResult<File> {
+
+        private final Map<String, VersionContainer> files;
+
+        private final long sequenceNumber;
+
+        private Field sort;
+
+        private SortDirection order;
+
+        public InMemoryTimedResult(Map<String, VersionContainer> files) {
+            this.files = files == null ? new HashMap<String, VersionContainer>() : files;
+            this.sequenceNumber = System.currentTimeMillis();
+        }
+
+        public InMemoryTimedResult(Map<String, VersionContainer> files, Field sort, SortDirection order) {
+            this(files);
+            this.sort = sort;
+            this.order = order;
+        }
+
+        @Override
+        public SearchIterator<File> results() throws OXException {
+            List<File> fileList = new ArrayList<File>(files.size());
+            for (VersionContainer container : files.values()) {
+                File file = container.getCurrentVersion().getFile();
+                fileList.add(file);
+            }
+            if (sort != null && order != null) {
+                Collections.sort(fileList, order.comparatorBy(sort));
+            }
+
+            return new SearchIteratorAdapter<File>(fileList.iterator(), fileList.size());
+        }
+
+        @Override
+        public long sequenceNumber() throws OXException {
+            return sequenceNumber;
+        }
+
+    }
+
+    /**
+     * {@link AllVersionsTimedResult}
+     *
+     * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+     */
+    public class AllVersionsTimedResult implements TimedResult<File> {
+
+        private final VersionContainer versionContainer;
+
+        private Field sort;
+
+        private SortDirection order;
+
+        private final long sequenceNumber = System.currentTimeMillis();
+
+        public AllVersionsTimedResult(VersionContainer versionContainer) {
+            super();
+            this.versionContainer = versionContainer;
+        }
+
+        public AllVersionsTimedResult(VersionContainer versionContainer, Field sort, SortDirection order) {
+            super();
+            this.versionContainer = versionContainer;
+            this.sort = sort;
+            this.order = order;
+        }
+
+        @Override
+        public SearchIterator<File> results() throws OXException {
+            if (versionContainer == null) {
+                return SearchIteratorAdapter.<File> emptyIterator();
+            }
+            Collection<FileHolder> allVersions = versionContainer.getAllVersions();
+            List<File> versions = new ArrayList<File>(allVersions.size());
+
+            for (FileHolder fileHolder : allVersions) {
+                versions.add(fileHolder.getFile());
+            }
+
+            if (sort != null && order != null) {
+                Collections.sort(versions, order.comparatorBy(sort));
+            }
+
+            return new SearchIteratorAdapter<File>(versions.iterator(), versions.size());
+        }
+
+        @Override
+        public long sequenceNumber() throws OXException {
+            return sequenceNumber;
+        }
 
     }
 

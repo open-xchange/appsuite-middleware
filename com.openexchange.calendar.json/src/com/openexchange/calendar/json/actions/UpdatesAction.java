@@ -61,6 +61,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -143,7 +145,11 @@ public final class UpdatesAction extends AppointmentAction {
         }
 
         final ServerSession session = req.getSession();
-        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
+        final AppointmentSqlFactoryService sqlFactoryService = getService();
+        if (null == sqlFactoryService) {
+            throw ServiceExceptionCode.serviceUnavailable(AppointmentSqlFactoryService.class);
+        }
+        final AppointmentSQLInterface appointmentsql = sqlFactoryService.createAppointmentSql(session);
         final CalendarCollectionService recColl = getService(CalendarCollectionService.class);
         SearchIterator<Appointment> it = null;
         Date lastModified = null;

@@ -51,14 +51,10 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
@@ -175,6 +171,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 // No thumbnail available
                 throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
             }
+
+            if(previewDocument.getClass().getName().equals("com.openexchange.documentpreview.OfficePreviewDocument")) {
+                requestData.putParameter("transformationNeeded", "false");
+            }
+
             // (Asynchronously) Put to cache if ETag is available
             final String fileName = previewDocument.getMetaData().get("resourcename");
             int size = -1;
@@ -235,6 +236,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         "application/vnd",
         "application/vnd.ms-word.document.12n",
         "application/vnd.ms-word.document.12",
+        "application/vnd.ms-word",
         "application/odt",
         "application/x-pdf")));
 

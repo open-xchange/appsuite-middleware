@@ -50,6 +50,7 @@
 package com.openexchange.jslob.storage;
 
 import java.util.Collection;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
@@ -102,6 +103,15 @@ public interface JSlobStorage {
      * @throws OXException If loading fails
      */
     JSlob opt(JSlobId id) throws OXException;
+
+    /**
+     * Reads the elements associated with the given identifiers.
+     *
+     * @param ids The identifiers
+     * @return The elements
+     * @throws OXException If loading fails
+     */
+    List<JSlob> list(List<JSlobId> ids) throws OXException;
 
     /**
      * Reads the elements associated with the given identifier.

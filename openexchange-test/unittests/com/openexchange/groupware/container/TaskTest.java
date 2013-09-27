@@ -1,9 +1,10 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.groupware.tasks.Task.*;
+import java.math.BigDecimal;
 import java.util.Date;
 import com.openexchange.groupware.tasks.Task;
-import static com.openexchange.groupware.tasks.Task.*;
 
 
 public class TaskTest extends CalendarObjectTest {
@@ -13,7 +14,7 @@ public class TaskTest extends CalendarObjectTest {
         Task dataObject = getTask();
         Task otherDataObject = getTask();
 
-        otherDataObject.setActualCosts(1.2f);
+        otherDataObject.setActualCosts(new BigDecimal("1.2"));
         assertDifferences(dataObject, otherDataObject, Task.ACTUAL_COSTS);
 
         otherDataObject.setActualDuration(12L);
@@ -123,7 +124,7 @@ public class TaskTest extends CalendarObjectTest {
             Task.PROJECT_ID,
             Task.STATUS);
 
-        otherDataObject.setTargetCosts(1.2f);
+        otherDataObject.setTargetCosts(new BigDecimal("1.2"));
         assertDifferences(
             dataObject,
             otherDataObject,
@@ -241,13 +242,13 @@ public class TaskTest extends CalendarObjectTest {
         assertFalse(object.contains(TARGET_COSTS));
         assertFalse(object.containsTargetCosts());
 
-        object.setTargetCosts(-1.2f);
+        object.setTargetCosts(new BigDecimal("-1.2"));
         assertTrue(object.contains(TARGET_COSTS));
         assertTrue(object.containsTargetCosts());
-        assertEquals(-1.2f, object.get(TARGET_COSTS));
+        assertEquals(new BigDecimal("-1.2"), object.get(TARGET_COSTS));
 
-        object.set(TARGET_COSTS,1.2f);
-        assertEquals(1.2f, object.getTargetCosts());
+        object.set(TARGET_COSTS, new BigDecimal("1.2"));
+        assertEquals(new BigDecimal("1.2"), object.getTargetCosts());
 
         object.remove(TARGET_COSTS);
         assertFalse(object.contains(TARGET_COSTS));
@@ -367,13 +368,13 @@ public class TaskTest extends CalendarObjectTest {
         assertFalse(object.contains(ACTUAL_COSTS));
         assertFalse(object.containsActualCosts());
 
-        object.setActualCosts(-1.2f);
+        object.setActualCosts(new BigDecimal("-1.2"));
         assertTrue(object.contains(ACTUAL_COSTS));
         assertTrue(object.containsActualCosts());
-        assertEquals(-1.2f, object.get(ACTUAL_COSTS));
+        assertEquals(new BigDecimal("-1.2"), object.get(ACTUAL_COSTS));
 
-        object.set(ACTUAL_COSTS,1.2f);
-        assertEquals(1.2f, object.getActualCosts());
+        object.set(ACTUAL_COSTS, new BigDecimal("1.2"));
+        assertEquals(new BigDecimal("1.2"), object.getActualCosts());
 
         object.remove(ACTUAL_COSTS);
         assertFalse(object.contains(ACTUAL_COSTS));
@@ -447,7 +448,7 @@ public class TaskTest extends CalendarObjectTest {
     public void fillTask(Task object) {
         super.fillCalendarObject(object);
 
-        object.setActualCosts(-1.2f);
+        object.setActualCosts(new BigDecimal("-1.2"));
 
         object.setActualDuration(-12L);
 
@@ -471,7 +472,7 @@ public class TaskTest extends CalendarObjectTest {
 
         object.setStatus(-12);
 
-        object.setTargetCosts(-1.2f);
+        object.setTargetCosts(new BigDecimal("-1.2"));
 
         object.setTargetDuration(-12L);
 

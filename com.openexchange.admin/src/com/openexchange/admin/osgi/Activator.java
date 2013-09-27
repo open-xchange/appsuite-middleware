@@ -59,6 +59,17 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.mysql.CreateAttachmentTables;
+import com.openexchange.admin.mysql.CreateCalendarTables;
+import com.openexchange.admin.mysql.CreateContactsTables;
+import com.openexchange.admin.mysql.CreateIcalVcardTables;
+import com.openexchange.admin.mysql.CreateInfostoreTables;
+import com.openexchange.admin.mysql.CreateLdap2SqlTables;
+import com.openexchange.admin.mysql.CreateMiscTables;
+import com.openexchange.admin.mysql.CreateOXFolderTables;
+import com.openexchange.admin.mysql.CreateSequencesTables;
+import com.openexchange.admin.mysql.CreateSettingsTables;
+import com.openexchange.admin.mysql.CreateVirtualFolderTables;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
@@ -66,6 +77,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -90,8 +102,10 @@ public class Activator extends HousekeepingActivator {
         track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
         AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
+        final FullPrimaryKeySupportService fullPrimaryKeySupportService = getService(FullPrimaryKeySupportService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
+        AdminServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, fullPrimaryKeySupportService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
         openTrackers();
 
@@ -145,6 +159,19 @@ public class Activator extends HousekeepingActivator {
         } catch (final InvalidSyntaxException e) {
             e.printStackTrace();
         }
+
+        //Register CreateTableServices
+        registerService(CreateTableService.class, new CreateSequencesTables());
+        registerService(CreateTableService.class, new CreateLdap2SqlTables());
+        registerService(CreateTableService.class, new CreateOXFolderTables());
+        registerService(CreateTableService.class, new CreateVirtualFolderTables());
+        registerService(CreateTableService.class, new CreateSettingsTables());
+        registerService(CreateTableService.class, new CreateCalendarTables());
+        registerService(CreateTableService.class, new CreateContactsTables());
+        registerService(CreateTableService.class, new CreateInfostoreTables());
+        registerService(CreateTableService.class, new CreateAttachmentTables());
+        registerService(CreateTableService.class, new CreateMiscTables());
+        registerService(CreateTableService.class, new CreateIcalVcardTables());
     }
 
     /**
@@ -167,6 +194,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, FullPrimaryKeySupportService.class };
     }
 }

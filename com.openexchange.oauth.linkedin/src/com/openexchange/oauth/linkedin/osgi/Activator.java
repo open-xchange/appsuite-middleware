@@ -54,8 +54,6 @@ import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -72,25 +70,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
-
-    private OAuthService oauthService;
-
-    private ConfigurationService configurationService;
+    private OAuthService oauthService = null;
 
     public Activator() {
         super();
-    }
-
-    public void registerServices() {
-        if (null != oauthService && null != configurationService) {
-            final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
-            registerService(OAuthServiceMetaData.class, linkedInMetaDataService, null);
-            LOG.info("OAuthServiceMetaData for LinkedIn was started");
-
-            final LinkedInService linkedInService = new LinkedInServiceImpl(this);
-            registerService(LinkedInService.class, linkedInService, null);
-            LOG.info("LinkedInService was started.");
-        }
     }
 
     @Override
@@ -99,40 +82,30 @@ public class Activator extends HousekeepingActivator {
     }
 
     public OAuthService getOauthService() {
-        return oauthService;
-    }
-
-    public void setOauthService(final OAuthService oauthService) {
-        this.oauthService = oauthService;
-    }
-
-    /**
-     * @param configurationService
-     */
-    public void setConfigurationService(final ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-
-    public ConfigurationService getConfigurationService() {
-        return configurationService;
+        if (oauthService != null) {
+            return oauthService;
+        }
+        return getService(OAuthService.class);
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{CapabilityService.class, ConfigViewFactory.class };
+        return new Class<?>[]{ OAuthService.class, ConfigViewFactory.class, CapabilityService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        track(ConfigurationService.class, new ConfigurationServiceRegisterer(context, this));
-        track(OAuthService.class, new OAuthServiceRegisterer(context, this));
-        openTrackers();
+        final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
+        registerService(OAuthServiceMetaData.class, linkedInMetaDataService, null);
+        LOG.info("OAuthServiceMetaData for LinkedIn was started");
+
+        final LinkedInService linkedInService = new LinkedInServiceImpl(this);
+        registerService(LinkedInService.class, linkedInService, null);
+        LOG.info("LinkedInService was started.");
 
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "linkedin");
         registerService(CapabilityChecker.class, new CapabilityChecker() {
-
             @Override
             public boolean isEnabled(String capability, Session ses) throws OXException {
                 if ("linkedin".equals(capability)) {
@@ -140,12 +113,11 @@ public class Activator extends HousekeepingActivator {
                     if (session.isAnonymous()) {
                         return false;
                     }
-                    final ConfigViewFactory factory = getService(ConfigViewFactory.class);
-                    final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                    return view.opt("com.openexchange.oauth.linkedin", boolean.class, Boolean.TRUE).booleanValue();
-                }
-                return true;
 
+                    return linkedInMetaDataService.isEnabled(session.getUserId(), session.getContextId());
+                }
+
+                return true;
             }
         }, properties);
         getService(CapabilityService.class).declareCapability("linkedin");
@@ -155,6 +127,10 @@ public class Activator extends HousekeepingActivator {
     protected void stopBundle() {
         closeTrackers();
         cleanUp();
+    }
+
+    public void setOauthService(OAuthService service) {
+        this.oauthService = service;
     }
 
 

@@ -57,9 +57,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.search.RecipientStringTerm;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -82,7 +81,7 @@ public final class BccTerm extends SearchTerm<String> {
     public BccTerm(final String pattern) {
         super();
         try {
-            addr = new QuotedInternetAddress(pattern, true).getUnicodeAddress();
+            addr = new QuotedInternetAddress(pattern, false).getUnicodeAddress();
         } catch (final AddressException e) {
             addr = pattern;
         }

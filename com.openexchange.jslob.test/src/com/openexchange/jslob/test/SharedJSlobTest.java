@@ -57,6 +57,8 @@ import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
+import com.openexchange.session.Session;
+import com.openexchange.session.SimSession;
 import com.openexchange.test.osgi.OSGiTest;
 
 /**
@@ -70,8 +72,9 @@ public class SharedJSlobTest implements OSGiTest {
 
     @Test
     public void testSharedJSlob() throws OXException, JSONException {
+        Session session = new SimSession();
         assertNotNull("JSlob service was null", jslobService);
-        JSlob jslob = jslobService.getShared("sharedjslob");
+        JSlob jslob = jslobService.getShared("sharedjslob", session);
         assertNotNull("jslob was null", jslob);
         assertEquals("JSONObect's length was not 2", 2, jslob.getJsonObject().length());
         assertTrue("JSONObject has not key test1", jslob.getJsonObject().has("test1"));

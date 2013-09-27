@@ -118,7 +118,7 @@ public class YahooServiceImpl implements YahooService {
             try {
                 account = oAuthService.getAccount(accountId, session, user, contextId);
             } catch (final OXException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
                 return Collections.emptyList();
             }
             final Token accessToken = new Token(account.getToken(), account.getSecret());
@@ -356,7 +356,7 @@ public class YahooServiceImpl implements YahooService {
                 }
             }
         } catch (final JSONException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
         return oxContact;
     }
@@ -369,7 +369,7 @@ public class YahooServiceImpl implements YahooService {
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
         return displayName;
     }

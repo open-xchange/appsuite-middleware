@@ -51,6 +51,8 @@ package com.openexchange.unifiedinbox;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry.getServiceRegistry;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,6 +64,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -85,6 +88,7 @@ import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -204,27 +208,27 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final MailMessage[] messages = new MailMessage[mailIds.length];
             // Parse mail IDs
-            final Map<Integer, Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
+            final TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
             // Create completion service for simultaneous access
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
-            final TrackingCompletionService<GetMessagesResult> completionService =
-                new UnifiedInboxCompletionService<GetMessagesResult>(executor);
+            final TrackingCompletionService<GetMessagesResult> completionService = new UnifiedInboxCompletionService<GetMessagesResult>(executor);
             // Iterate parsed map and submit a task for each iteration
             int numTasks = 0;
-            for (final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator(); iter.hasNext();) {
-                final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
+            final TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
+            for (int i = parsed.size(); i-- > 0;) {
+                iter.advance();
+                final int accountId = iter.key();
+                final Map<String, List<String>> folderUIDMap = iter.value();
                 numTasks++;
                 completionService.submit(new LoggingCallable<GetMessagesResult>(session) {
 
                     @Override
                     public GetMessagesResult call() throws OXException {
-                        final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
                         MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             for (final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator(); inneriter.hasNext();) {
                                 final Map.Entry<String, List<String>> e = inneriter.next();
                                 final String folder = e.getKey();
@@ -349,17 +353,42 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
             MailAccess<?, ?> mailAccess = null;
             try {
+                // Get the message
                 mailAccess = MailAccess.getInstance(session, uid.getAccountId());
                 mailAccess.connect();
                 MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullName(), uid.getId(), markSeen);
                 if (null == mail) {
                     return null;
                 }
+                // Determine unread count
+                final boolean wasUnseen = markSeen && mail.containsPrevSeen() && !mail.isPrevSeen();
+                Future<Integer> future = null;
+                if (wasUnseen) {
+                    final UnifiedInboxAccess access = this.access;
+                    future = ThreadPools.getThreadPool().submit(new AbstractTask<Integer>() {
+
+                        @Override
+                        public Integer call() throws OXException {
+                            return Integer.valueOf(access.getFolderStorage().getUnreadCounter(fullName));
+                        }
+                    });
+                }
+                // Convert to Unified Mail message
                 mail = new UnifiedMailMessage(mail, access.getAccountId());
                 mail.loadContent();
                 mail.setMailId(mailId);
                 mail.setFolder(fullName);
                 mail.setAccountId(uid.getAccountId());
+                if (null != future) {
+                    try {
+                        mail.setUnreadMessages(future.get().intValue());
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+                    } catch (ExecutionException e) {
+                        throw ThreadPools.launderThrowable(e, OXException.class);
+                    }
+                }
                 return mail;
             } finally {
                 closeSafe(mailAccess);
@@ -1057,24 +1086,24 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             // Parse mail IDs
-            final Map<Integer, Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
+            final TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
-            final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
+            final TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
             // Collection of Callables
             final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
-            for (int i = 0; i < size; i++) {
-                final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
+            for (int i = size; i-- > 0;) {
+                iter.advance();
+                final int accountId = iter.key();
+                final Map<String, List<String>> folderUIDMap = iter.value();
                 collection.add(new LoggingCallable<Object>(session) {
 
                     @Override
                     public Object call() throws Exception {
-                        final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
                         MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
                             for (int j = 0; j < innersize; j++) {
@@ -1158,24 +1187,24 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             // Parse mail IDs
-            final Map<Integer, Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
+            final TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
-            final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
+            final TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
             // Collection of Callables
             final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
-            for (int i = 0; i < size; i++) {
-                final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
+            for (int i = size; i-- > 0;) {
+                iter.advance();
+                final int accountId = iter.key();
+                final Map<String, List<String>> folderUIDMap = iter.value();
                 collection.add(new LoggingCallable<Object>(session) {
 
                     @Override
                     public Object call() throws Exception {
-                        final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
                         MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
                             for (int j = 0; j < innersize; j++) {
@@ -1231,24 +1260,24 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             // Parse mail IDs
-            final Map<Integer, Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
+            final TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
-            final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
+            final TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
             // Collection of Callables
             final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
-            for (int i = 0; i < size; i++) {
-                final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
+            for (int i = size; i-- > 0;) {
+                iter.advance();
+                final int accountId = iter.key();
+                final Map<String, List<String>> folderUIDMap = iter.value();
                 collection.add(new LoggingCallable<Object>(session) {
 
                     @Override
                     public Object call() throws Exception {
-                        final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
                         MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
                             for (int j = 0; j < innersize; j++) {

@@ -70,13 +70,9 @@ public final class TimeoutConcurrentMap<K, V> {
      */
 
     private final ConcurrentMap<K, ValueWrapper<V>> map;
-
     private final ScheduledTimerTask timeoutTask;
-
     private final boolean forceTimeout;
-
-    private TimeoutListener<V> defaultTimeoutListener;
-
+    private volatile TimeoutListener<V> defaultTimeoutListener;
     private volatile boolean disposed;
 
     /**
@@ -102,7 +98,8 @@ public final class TimeoutConcurrentMap<K, V> {
         this.forceTimeout = forceTimeout;
         map = new ConcurrentHashMap<K, ValueWrapper<V>>();
         final TimerService timer = getInstance().getService(TimerService.class, true);
-        timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), 1000, shrinkerIntervalSeconds * 1000);
+        final int delay = shrinkerIntervalSeconds * 1000;
+        timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), delay, delay);
     }
 
     /**
@@ -325,13 +322,9 @@ public final class TimeoutConcurrentMap<K, V> {
     private static final class ValueWrapper<V> {
 
         public final V value;
-
         public final long ttl;
-
         public final TimeoutListener<V> timeoutListener;
-
         public final boolean forceTimeout;
-
         public volatile long lastAccessed;
 
         public ValueWrapper(final V value, final long ttl, final boolean forceTimeout, final TimeoutListener<V> timeoutListener) {
@@ -370,8 +363,9 @@ public final class TimeoutConcurrentMap<K, V> {
                 final ValueWrapper<V> vw = it.next();
                 if ((now - vw.lastAccessed) > vw.ttl) {
                     it.remove();
-                    if (vw.timeoutListener != null) {
-                        vw.timeoutListener.onTimeout(vw.value);
+                    final TimeoutListener<V> timeoutListener = vw.timeoutListener;
+                    if (timeoutListener != null) {
+                        timeoutListener.onTimeout(vw.value);
                     }
                 }
             }

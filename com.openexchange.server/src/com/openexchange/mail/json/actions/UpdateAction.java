@@ -100,7 +100,7 @@ public final class UpdateAction extends AbstractMailAction {
              * Read in parameters
              */
             final String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final JSONObject bodyObj = (JSONObject) req.getRequest().getData();
+            final JSONObject bodyObj = (JSONObject) req.getRequest().requireData();
             final String destFolder = bodyObj.hasAndNotNull(FolderChildFields.FOLDER_ID) ? bodyObj.getString(FolderChildFields.FOLDER_ID) : null;
             final Integer colorLabel =
                 bodyObj.hasAndNotNull(CommonFields.COLORLABEL) ? Integer.valueOf(bodyObj.getInt(CommonFields.COLORLABEL)) : null;

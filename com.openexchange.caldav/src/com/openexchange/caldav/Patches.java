@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -312,6 +313,29 @@ public class Patches {
                  */
                 updatedTask.setPercentComplete(originalTask.getPercentComplete());
                 updatedTask.setStatus(originalTask.getStatus());
+            }
+        }
+
+        /**
+         * Removes the appointment's participants other than the user with the given user ID in case the supplied folder is a 'public' one.
+         *
+         * @param userID The user ID
+         * @param folder The folder where the appointment is going to be saved
+         * @param appointment The appointment to patch
+         */
+        public static void removeParticipantsForPrivateAppointmentInPublicfolder(int userID, UserizedFolder folder, Appointment appointment) {
+            if (appointment.getPrivateFlag() && PublicType.getInstance().equals(folder.getType())) {
+                Participant[] participants = appointment.getParticipants();
+                if (null != participants && 0 < participants.length) {
+                    List<Participant> filteredParticipants = new ArrayList<Participant>(1);
+                    for (Participant participant : participants) {
+                        if (participant.getIdentifier() == userID) {
+                            filteredParticipants.add(participant);
+                            break;
+                        }
+                    }
+                    appointment.setParticipants(filteredParticipants);
+                }
             }
         }
 

@@ -10,6 +10,5 @@ Package: open-xchange-aws
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Conflicts: open-xchange-mdns
 Description: The Open-Xchange AWS cluster package
  This package installs the OSGi bundles needed for the AWS cluster.

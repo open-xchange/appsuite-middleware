@@ -149,6 +149,7 @@ public class DatabaseFolder extends AbstractFolder {
         subscribed = true;
         deefault = folderObject.isDefaultFolder();
         defaultType = deefault ? contentType.getModule() : 0;
+        meta = folderObject.getMeta();
     }
 
     @Override

@@ -205,6 +205,9 @@ public class Bug15776Test extends AbstractAJAXSession {
 
         appointment.setTitle("testBug15776");
         appointment.setStartDate(cal.getTime());
+        appointment.setRecurrenceType(Appointment.YEARLY);
+        appointment.setMonth(cal.get(Calendar.MONTH));
+        appointment.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
         cal.add(Calendar.HOUR, 1);
         appointment.setEndDate(cal.getTime());
 
@@ -215,9 +218,6 @@ public class Bug15776Test extends AbstractAJAXSession {
         appointment.setNotification(true);
         appointment.setPrivateFlag(false);
         appointment.setFullTime(false);
-        appointment.setRecurrenceType(Appointment.YEARLY);
-        appointment.setMonth(cal.get(Calendar.MONTH));
-        appointment.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
 
         appointment.setInterval(1);
         appointment.setOccurrence(25);

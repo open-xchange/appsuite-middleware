@@ -71,7 +71,7 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 -Dopenexchange.propdir=$PROPERTIESDIR \
 -Djava.util.logging.config.file=$LOGGINGPROPERTIES"
 
-CLASSPATH="-classpath $OXBUNDLES/com.openexchange.global/com.openexchange.global.jar:$OXBUNDLES/com.openexchange.java/com.openexchange.java.jar:$OXBUNDLES/com.openexchange.server/com.openexchange.server.jar:$OXBUNDLES/org.apache.commons.cli_1.2.0.v201105210650.jar:$OXBUNDLES/org.apache.commons.logging_1.1.1.v201101211721.jar:$OXBUNDLES/org.apache.log4j_1.2.15.v201012070815.jar:$OXBUNDLES/com.openexchange.common/lib/backport-util-concurrent-3.1.jar"
+CLASSPATH="-classpath $OXBUNDLES/com.openexchange.java/com.openexchange.java.jar:$OXBUNDLES/com.openexchange.global/com.openexchange.global.jar:$OXBUNDLES/com.openexchange.java/com.openexchange.java.jar:$OXBUNDLES/com.openexchange.server/com.openexchange.server.jar:$OXBUNDLES/org.apache.commons.cli_1.2.0.v201105210650.jar:$OXBUNDLES/org.apache.commons.logging_1.1.1.v201101211721.jar:$OXBUNDLES/org.apache.log4j_1.2.15.v201012070815.jar:$OXBUNDLES/com.openexchange.common/lib/backport-util-concurrent-3.1.jar"
 
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.report.console.LastLoginTimeStampTool $@

@@ -49,7 +49,6 @@
 
 package com.openexchange.carddav.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
@@ -63,14 +62,11 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
 public class CarddavActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavActivator.class);
-    private static final Class<?>[] NEEDED = new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
-
     private volatile OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
     }
 
     @Override
@@ -90,7 +86,7 @@ public class CarddavActivator extends HousekeepingActivator {
 
             openTrackers();
         } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+            com.openexchange.log.Log.loggerFor(CarddavActivator.class).error(t.getMessage(), t);
         }
     }
 

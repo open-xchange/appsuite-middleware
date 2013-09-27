@@ -65,6 +65,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -173,9 +174,17 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
-        final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
+        final List<String> dynamicColumnOrder = getDynamicColumnOrder(request); 
+        
+        TimeZone tz = null;
+        String sTimeZone = request.optString("timezone");
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
 
-        return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder);
+        return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
     private Object loadAllPublications(final JSONObject request, final ServerSession session) throws OXException, JSONException, OXException {
@@ -212,8 +221,16 @@ public class PublicationMultipleHandler implements MultipleHandler {
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
-
-        return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder);
+        
+        TimeZone tz = null;
+        String sTimeZone = request.optString("timezone");
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        
+        return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
     private static final Set<String> KNOWN_PARAMS = new HashSet<String>() {
@@ -307,7 +324,16 @@ public class PublicationMultipleHandler implements MultipleHandler {
         final String target = request.optString("target");
         final Context context = session.getContext();
         final Publication publication = loadPublication(id, context, target);
-        return createResponse(publication, getURLPrefix(request, publication));
+        
+        String sTimeZone = request.optString("timezone");
+        TimeZone tz = null;
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        
+        return createResponse(publication, getURLPrefix(request, publication), tz);
     }
 
     private String getURLPrefix(final JSONObject request, final Publication publication) {
@@ -398,7 +424,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return L(publication.getId());
     }
 
-    private Object createList(final List<Publication> publications, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder) throws OXException, JSONException {
+    private Object createList(final List<Publication> publications, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder, TimeZone tz) throws OXException, JSONException {
         final JSONArray rows = new JSONArray();
         final PublicationWriter writer = new PublicationWriter();
         for (final Publication publication : publications) {
@@ -407,14 +433,14 @@ public class PublicationMultipleHandler implements MultipleHandler {
                 basicColumns,
                 dynamicColumns,
                 dynamicColumnOrder,
-                publication.getTarget().getFormDescription());
+                publication.getTarget().getFormDescription(), tz);
             rows.put(row);
         }
         return rows;
     }
 
-    private Object createResponse(final Publication publication, final String urlPrefix) throws JSONException, OXException {
-        final JSONObject asJson = new PublicationWriter().write(publication, urlPrefix);
+    private Object createResponse(final Publication publication, final String urlPrefix, TimeZone tz) throws JSONException, OXException {
+        final JSONObject asJson = new PublicationWriter().write(publication, urlPrefix, tz);
         return asJson;
     }
 

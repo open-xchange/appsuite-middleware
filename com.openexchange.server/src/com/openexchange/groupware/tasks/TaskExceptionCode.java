@@ -127,7 +127,7 @@ public enum TaskExceptionCode implements OXExceptionCode {
     /** Date range in search must contain 2 and not %d values. */
     WRONG_DATE_RANGE(WRONG_DATE_RANGE_MSG, Category.CATEGORY_ERROR, 21),
 
-    /** Cannot decrease number of attachments below zero. */
+    /** Cannot detach more attachments than actually available. */
     WRONG_ATTACHMENT_COUNT(WRONG_ATTACHMENT_COUNT_MSG, Category.CATEGORY_ERROR, 22),
 
     /** You are not allowed to read the contents of folder %1$s (%2$d). */
@@ -212,12 +212,6 @@ public enum TaskExceptionCode implements OXExceptionCode {
 
     /** Unknown participant type %1$d. */
     UNKNOWN_PARTICIPANT(UNKNOWN_PARTICIPANT_MSG, Category.CATEGORY_ERROR, 49),
-
-    /**
-     * The entered value for costs is not within the allowed range. Please use a
-     * value from -130000.00 to 130000.00.
-     */
-    COSTS_OFF_LIMIT(COSTS_OFF_LIMIT_MSG, Category.CATEGORY_USER_INPUT, 50),
 
     /** In order to accomplish the search, %1$d or more characters are required. */
     PATTERN_TOO_SHORT(PATTERN_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 51),

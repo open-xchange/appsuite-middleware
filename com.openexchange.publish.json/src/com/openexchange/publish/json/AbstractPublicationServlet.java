@@ -77,7 +77,7 @@ public abstract class AbstractPublicationServlet extends PermissionServlet {
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return session.getUserConfiguration().isPublication();
+        return session.getUserPermissionBits().isPublication();
     }
 
     protected void writeOXException(final OXException x, final HttpServletRequest req, final HttpServletResponse resp) {

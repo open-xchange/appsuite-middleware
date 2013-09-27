@@ -1,5 +1,7 @@
 package com.openexchange.ajax.task;
 
+import static com.openexchange.java.Autoboxing.L;
+import java.math.BigDecimal;
 import java.util.TimeZone;
 import junit.framework.AssertionFailedError;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -15,6 +17,7 @@ import com.openexchange.groupware.tasks.Task;
 
 public class Bug20008Test extends AbstractAJAXSession {
 
+    @SuppressWarnings("hiding")
     private AJAXClient client;
     private Task task;
     private TimeZone tz;
@@ -31,10 +34,10 @@ public class Bug20008Test extends AbstractAJAXSession {
         task = new Task();
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         task.setTitle("Test for bug 20008");
-        task.setActualDuration(2L);
-        task.setActualCosts(2.0f);
-        task.setTargetDuration(10L);
-        task.setTargetCosts(10.0f);
+        task.setActualDuration(L(2));
+        task.setActualCosts(new BigDecimal("2.0"));
+        task.setTargetDuration(L(10));
+        task.setTargetCosts(new BigDecimal("10.0"));
         InsertRequest request = new InsertRequest(task, tz);
         InsertResponse response = client.execute(request);
         response.fillTask(task);
@@ -68,5 +71,4 @@ public class Bug20008Test extends AbstractAJAXSession {
         assertNull("Actual costs should not be set.", test.getActualCosts());
         assertNull("Target costs should not be set.", test.getTargetCosts());
     }
-
 }

@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
@@ -567,6 +568,7 @@ public class Executor {
 
     public int insert(final Connection connection, final Table table, final DistListMember member, final DistListMemberField[] fields)
     		throws SQLException, OXException {
+        member.setUuid(UUID.randomUUID());
         final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
         stringBuilder.append("INSERT INTO ").append(table).append(" (").append(Mappers.DISTLIST.getColumns(fields))
             .append(") VALUES (").append(Tools.getParameters(fields.length)).append(");");

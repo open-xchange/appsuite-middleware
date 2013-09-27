@@ -62,6 +62,7 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -193,6 +194,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     public void beforeUpdate(final Publication publication) throws OXException {
         super.beforeUpdate(publication);
         final Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
+        publication.getConfiguration().remove(URL);
         addSecretIfNeeded(publication, oldPublication);
         removeSecretIfNeeded(publication);
     }
@@ -201,20 +203,31 @@ public class OXMFPublicationService extends AbstractPublicationService {
     public void modifyOutgoing(final Publication publication) throws OXException {
         super.modifyOutgoing(publication);
 
+        updateUrl(publication);
+
+        publication.getConfiguration().remove(SECRET);
+
+        publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
+    }
+
+    private void updateUrl(final Publication publication) {
         final Map<String, Object> configuration = publication.getConfiguration();
 
         final StringBuilder urlBuilder = new StringBuilder(rootURL);
-        urlBuilder.append('/').append(publication.getContext().getContextId()).append('/').append(configuration.get(SITE));
+        urlBuilder.append('/').append(publication.getContext().getContextId()).append('/').append(saneSiteName((String) configuration.get(SITE)));
 
         if (configuration.containsKey(SECRET)) {
             urlBuilder.append("?secret=").append(configuration.get(SECRET));
         }
 
         publication.getConfiguration().put(URL, urlBuilder.toString());
+    }
 
-        publication.getConfiguration().remove(SECRET);
-
-        publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
+    private String saneSiteName(final String site) {
+        if (isEmpty(site)) {
+            return site;
+        }
+        return AJAXServlet.encodeUrl(site, true, true);
     }
 
     protected String normalizeSiteName(final String siteName) {
@@ -330,18 +343,18 @@ public class OXMFPublicationService extends AbstractPublicationService {
         String re4="(\\d+)";    // Integer Number 1
         String re5="(\\/)"; // Any Single Character 3
         String re6="((?:[a-z][a-z]+))"; // Word 3
-        
+
         Pattern p = Pattern.compile(re1+re2+re3+re4+re5+re6,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher m = p.matcher(URL);
         if (m.find())
         {
             String contextId=m.group(3);
             String site=m.group(5);
-            
+
             final Context ctx = service.getContext(Integer.parseInt(contextId));
             return getPublication(ctx, site);
         }
-       
+
         return null;
     }
 
@@ -354,4 +367,16 @@ public class OXMFPublicationService extends AbstractPublicationService {
         return sb.toString();
     }
 
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 }

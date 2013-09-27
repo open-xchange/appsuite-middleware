@@ -92,7 +92,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
     USERSOURCE_WRONG(SpamhandlerSpamassassinExceptionMessage.USERSOURCE_WRONG_MSG, CATEGORY_CONFIGURATION, 6),
 
     /**
-     * The parameter "%s" must be an long value but is "%s"
+     * The parameter "%s" must be numeric, but is "%s"
      */
     PARAMETER_NO_LONG(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NO_LONG_MSG, CATEGORY_CONFIGURATION, 7);
 

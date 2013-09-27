@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.Date;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -154,9 +155,9 @@ public class DataWriter {
         return e;
     }
 
-    public static Element addElement(final String name, final float value, final Element parent) throws Exception {
-        final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-        e.addContent(Float.toString(value));
+    public static Element addElement(String name, BigDecimal value, Element parent) {
+        Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+        e.addContent(value.toPlainString());
         parent.addContent(e);
         return e;
     }

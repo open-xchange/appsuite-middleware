@@ -70,6 +70,7 @@ import com.openexchange.caldav.Tools;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
@@ -189,6 +190,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 Patches.Incoming.patchResources(originalAppointment, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingAliases(factory, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingDoubleUsers(appointmentToSave);
+                Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
+                    factory.getSession().getUserId(), parent.getFolder(), appointmentToSave);
                 if (PublicType.getInstance().equals(parent.getFolder().getType()) ||
                     PrivateType.getInstance().equals(parent.getFolder().getType())) {
                     Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
@@ -222,6 +225,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (false == Patches.Incoming.tryRestoreParticipants(originalException, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
+                        Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
+                            factory.getSession().getUserId(), parent.getFolder(), exceptionToSave);
                         if (PublicType.getInstance().equals(parent.getFolder().getType()) ||
                             PrivateType.getInstance().equals(parent.getFolder().getType())) {
                             Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), exceptionToSave);
@@ -235,6 +240,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (false == Patches.Incoming.tryRestoreParticipants(originalAppointment, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
+                        Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
+                            factory.getSession().getUserId(), parent.getFolder(), exceptionToSave);
                         if (PublicType.getInstance().equals(parent.getFolder().getType()) ||
                             PrivateType.getInstance().equals(parent.getFolder().getType())) {
                             Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), exceptionToSave);
@@ -290,6 +297,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             appointmentToSave.removeObjectID(); // in case it's already assigned due to retry operations
             appointmentToSave.setParentFolderID(null != object ? object.getParentFolderID() : parentFolderID);
             if (PublicType.getInstance().equals(parent.getFolder().getType())) {
+                Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
+                    factory.getSession().getUserId(), parent.getFolder(), appointmentToSave);
                 Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
             }
             getAppointmentInterface().insertAppointmentObject(this.appointmentToSave);
@@ -300,6 +309,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             for (final CalendarDataObject exception : exceptionsToSave) {
                 exception.removeObjectID(); // in case it's already assigned due to retry operations
                 exception.setObjectID(appointmentToSave.getObjectID());
+                Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
+                    factory.getSession().getUserId(), parent.getFolder(), exception);
                 getAppointmentInterface().updateAppointmentObject(exception, parentFolderID, clientLastModified);
                 clientLastModified = exception.getLastModified();
             }
@@ -317,11 +328,13 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     @Override
-    protected void move(final String targetFolderID) throws OXException {
+    protected void move(CalDAVFolderCollection<Appointment> target) throws OXException {
         this.appointmentToSave = new CalendarDataObject();
         appointmentToSave.setObjectID(object.getObjectID());
-        appointmentToSave.setParentFolderID(Tools.parse(targetFolderID));
+        appointmentToSave.setParentFolderID(Tools.parse(target.getFolder().getID()));
         appointmentToSave.setContext(factory.getContext());
+        Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
+            factory.getSession().getUserId(), target.getFolder(), appointmentToSave);
         getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, object.getLastModified());
     }
 
@@ -401,6 +414,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             if (null != resourceName && false == resourceName.equals(appointmentToSave.getUid())) {
                 appointmentToSave.setFilename(resourceName);
             }
+        } else {
+            throw new ConversionError(0, Code.INSUFFICIENT_INFORMATION);
         }
     }
 
@@ -519,6 +534,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (CalendarObject.UNTIL == field) {
                         // getUntil returns 'max until date' if not set
                         updatedAppointment.set(field, null);
+                    } else if (CalendarObject.DAYS == field) {
+                        // days must not be 'set' here, even not to '0'
+                        updatedAppointment.removeDays();
                     } else {
                         updatedAppointment.set(field, updatedAppointment.get(field));
                     }

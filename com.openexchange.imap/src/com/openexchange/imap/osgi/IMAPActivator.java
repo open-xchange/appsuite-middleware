@@ -63,14 +63,13 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.imap.IMAPStoreCache;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.threader.ThreadableCache;
 import com.openexchange.imap.threader.ThreadableLoginHandler;
 import com.openexchange.login.LoginHandlerService;
@@ -207,7 +206,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                                 ListLsubCache.dropFor(session);
                                 IMAPStoreCache.getInstance().dropFor(session.getUserId(), session.getContextId());
                                 ThreadableCache.dropFor(session);
-                                IMAPAccess.dropValidity(session.getUserId(), session.getContextId());
                             }
                         } catch (final Exception e) {
                             // Failed handling session
@@ -217,6 +215,23 @@ public final class IMAPActivator extends HousekeepingActivator {
 
                 },
                     serviceProperties);
+            }
+            {
+                final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
+                registerService(EventHandler.class, new EventHandler() {
+
+                    @Override
+                    public void handleEvent(Event event) {
+                        final int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
+                        final int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
+                        final Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+                        ListLsubCache.dropFor(session);
+                        IMAPStoreCache.getInstance().dropFor(userId, contextId);
+                        ThreadableCache.dropFor(session);
+                    }
+
+                }, serviceProperties);
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 19
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -447,15 +447,16 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package sv-sv
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for sv_SV
+%package sv-se
+Group:          Applications/Productivity
+Summary:        Package containing Open-Xchange backend localization for sv_SE
 Provides:       open-xchange-lang-community-sv-sv = %{version}
 Obsoletes:      open-xchange-lang-community-sv-sv <= %{version}
+Provides:       open-xchange-l10n-sv-sv = %{version}
+Obsoletes:      open-xchange-l10n-sv-sv <= %{version}
 
-%description sv-sv
-Package containing Open-Xchange backend localization for sv_SV
-This localization package are driven by the community.
+%description sv-se
+Package containing Open-Xchange backend localization for sv_SE
 
 Authors:
 --------
@@ -546,7 +547,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SV tr_TR zh_CN zh_TW en_GB; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -677,10 +678,10 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*sk_SK*
 
-%files sv-sv
+%files sv-se
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
-/opt/open-xchange/i18n/*sv_SV*
+/opt/open-xchange/i18n/*sv_SE*
 
 %files tr-tr
 %defattr(-,root,root)
@@ -703,16 +704,32 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Tue Sep 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Eleventh candidate for 7.4.0 release
+* Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Tenth candidate for 7.4.0 release
 * Tue Sep 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-26
+* Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Ninth candidate for 7.4.0 release
+* Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-12
 * Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-12
 * Thu Sep 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-05
 * Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-26
+* Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Eighth candidate for 7.4.0 release
 * Fri Aug 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-30
+* Wed Aug 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-03
+* Tue Aug 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.4.0 release
+* Fri Aug 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.4.0 release
 * Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-22
 * Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -721,18 +738,34 @@ Build for patch 2013-08-22
 Build for patch 2013-08-19
 * Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-21
+* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.4.0
+* Tue Aug 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.4.0
+* Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.0
 * Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-09
+* Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.4.0
 * Mon Jul 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-22
+* Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.4.0
+* Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.0
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second build for patch  2013-07-18
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
+* Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-18
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-10
+* Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-27
 * Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.2 release
 * Fri Jun 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -785,6 +818,8 @@ Build for patch 2013-04-23
 Build for patch 2013-04-17
 * Mon Apr 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.2.1 release
+* Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.0
 * Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.2.1
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>

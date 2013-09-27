@@ -63,9 +63,9 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
@@ -101,7 +101,7 @@ public class CrawlerUpdateTask implements Runnable {
                 long now = Calendar.getInstance().getTimeInMillis();
                 URL url = new URL(lastUpdatedFilePath);
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setIfModifiedSince(activator.getLAST_TIME_CHECKED());
+                con.setIfModifiedSince(activator.getLastTimeChecked());
                 con.connect();
                 ArrayList<String> ymlFilenames = new ArrayList<String>();
                 // Only if the indicator-page has been modified is any further action taken. This keeps traffic to a minimum
@@ -125,15 +125,15 @@ public class CrawlerUpdateTask implements Runnable {
                     }
                     downloadAndCheckTheFiles(configurationService, updateDirectoryPath, ymlFilenames);
                     // Set the date so that we remember that we looked for changes for today and before
-                    activator.setLAST_TIME_CHECKED(now);
+                    activator.setLastTimeChecked(now);
                 } else {
                     LOG.info("No updated crawlers are available.");
                 }
 
             } catch (MalformedURLException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             } catch (IOException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

@@ -57,9 +57,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.realtime.packet.IDComponentsParser.IDComponents;
 import com.openexchange.realtime.util.IdLookup;
 import com.openexchange.realtime.util.IdLookup.UserAndContext;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -68,10 +68,28 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * An ID describes a valid sender or recipient of a {@link Stanza}. It consists of an optional channel, a mandatory user name and mandatory
- * context name and an optional resource. Resources are arbitrary Strings that allow the user to specify how he is currently connected to
- * the service (e.g. one resource per client) and by that enable multiple logins from different machines and locations.
+ * An ID describes a valid sender or recipient of a {@link Stanza}. 
  * 
+ * An ID has the following form: [protocol].[component]://[user]@[context]/[resource]:
+ * <ol>
+ *   <li><b>protocol</b>: specifies the protocol that the entity behind this ID uses to connect to the OX.</li>
+ *   <li><b>component</b> (optional): corresponds to a specific backend service that registered itself for this component name</li>
+ *   <li><b>user</b>: specifies the name of the entity we want to address</li>
+ *   <li><b>context</b>: specifies the context of the entity we want to address</li>
+ *   <li><b>resource</b>: is an unique identifier used to distinguish between multiple instances/connections of the same entitiy</li>
+ * </ol>
+ * 
+ * <h4>Examples:</h4>
+ * <ol>
+ *   <li><b>ox://francisco.laguna@premium/20d39asd9da93249f009d</b>: we want to address the user francisco.laguna in the context premium.
+ *       The user is connected via the ox channel that is used between the browser and the backend and has the identifier
+ *       20d39asd9da93249f009d (tab/window/browser)</li>
+ *   <li><b>synthetic.office://operations@premium/66499.62446</b>: The "synthetic" protocol declares that the entity is synthetic and has no
+ *       counterpart in the real world (a bot, a room, general programm construct) instead of a user. The backendservice addressed with this
+ *       ID is office. The entity addressed is operations@premium and the resource identifies document via folder.document notation</li>
+ *   <li><b>call://356c4ad6a4af46948f9703217a1f5a2d@internal</b>:</li>
+ * </ol>
+
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -80,35 +98,30 @@ public class ID implements Serializable {
 
     private static final long serialVersionUID = -5237507998711320109L;
 
-    private static ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> listeners = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
+    private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> LISTENERS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
 
-    private static ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> locks = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
+    private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> LOCKS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
 
     private String protocol;
-
+    private String component;
     private String user;
-
     private String context;
-
     private String resource;
 
-    private String component;
-
     /**
-     * Pattern to match IDs consisting of protocol, user, context and resource e.g. xmpp://user@context/notebook
+     * Initializes a new {@link ID}.
+     * 
+     * @param id the given String representation of an ID
+     * @param defaultContext the default context to use if the string representation doesn't contain one
+     * @throws IllegalArgumentException if no ID could be created from the given String 
      */
-    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(\\.\\w+)?://)?([^@/]+)@?([^/]+)?/?(.*)");
-
     public ID(final String id, String defaultContext) {
-        final Matcher matcher = PATTERN.matcher(id);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
-        }
-        protocol = matcher.group(1);
-        component = matcher.group(2);
-        user = matcher.group(3);
-        context = matcher.group(4);
-        resource = matcher.group(5);
+        IDComponents idComponents = IDComponentsParser.parse(id);
+        protocol = idComponents.protocol;
+        component = idComponents.component;
+        user = idComponents.user;
+        context = idComponents.context;
+        resource = idComponents.resource;
 
         if (context == null) {
             context = defaultContext;
@@ -120,21 +133,18 @@ public class ID implements Serializable {
     }
 
     /**
-     * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
+     * Initializes a new {@link ID}.
      * 
-     * @param id String with the syntax "xmpp://user@context/resource".
-     * @throws IllegalArgumentException if the id doesn't follow the syntax convention.
+     * @param id the given String representation of an ID
+     * @throws IllegalArgumentException if no ID could be created from the given String
      */
     public ID(final String id) {
-        final Matcher matcher = PATTERN.matcher(id);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
-        }
-        protocol = matcher.group(1);
-        component = matcher.group(2);
-        user = matcher.group(3);
-        context = matcher.group(4);
-        resource = matcher.group(5);
+        IDComponents idComponents = IDComponentsParser.parse(id);
+        protocol = idComponents.protocol;
+        component = idComponents.component;
+        user = idComponents.user;
+        context = idComponents.context;
+        resource = idComponents.resource;
 
         sanitize();
         validate();
@@ -142,7 +152,7 @@ public class ID implements Serializable {
 
     /**
      * Initializes a new {@link ID} without a component.
-     * 
+     *
      * @param protocol The protocol of the ID, ox, xmpp ...
      * @param user The user represented by this ID
      * @param context The context of the user represented by this ID
@@ -155,7 +165,7 @@ public class ID implements Serializable {
 
     /**
      * Initializes a new {@link ID}.
-     * 
+     *
      * @param protocol The protocol of the ID, ox, xmpp ...
      * @param component The component of the id (to address Files and so on)
      * @param user The user represented by this ID
@@ -174,40 +184,22 @@ public class ID implements Serializable {
         validate();
     }
 
-    /*
+    /**
      * Check optional id components for emtpy strings and sanitize by setting to null or default values.
      */
     private void sanitize() {
-        if (protocol != null && isEmpty(protocol)) {
+        if (Strings.isEmpty(protocol)) {
             protocol = null;
         }
 
-        if (resource != null && isEmpty(resource)) {
+        if (Strings.isEmpty(resource)) {
             resource = null;
         }
 
-        if (component != null) {
-            if (isEmpty(component)) {
+        if (Strings.isEmpty(component)) {
                 component = null;
-            } else {
-                if (component.startsWith(".")) {
-                    component = component.substring(1);
-                }
-            }
         }
 
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /*
@@ -336,7 +328,10 @@ public class ID implements Serializable {
             needSep = true;
         }
         if (component != null) {
-            b.append(".").append(component);
+            if(protocol != null) {
+                b.append(".");
+            }
+            b.append(component);
             needSep = true;
         }
         if (needSep) {
@@ -351,7 +346,7 @@ public class ID implements Serializable {
 
     /**
      * Strip protocol and resource from this id so that it only contains user@context information.
-     * 
+     *
      * @return
      */
     public ID toGeneralForm() {
@@ -361,7 +356,7 @@ public class ID implements Serializable {
     /**
      * Gets a value indicating whether this ID is in general form or not, i.e. if it only contains the mandatory parts and no protocol or
      * concrete resource name.
-     * 
+     *
      * @return <code>true</code> if the ID is in general form, <code>false</code>, otherwise
      */
     public boolean isGeneralForm() {
@@ -389,7 +384,7 @@ public class ID implements Serializable {
 
     /**
      * Execute the event handler when the event happens, but only once
-     * 
+     *
      * @param event
      * @param handler
      */
@@ -408,7 +403,7 @@ public class ID implements Serializable {
      * Remove all event handlers for this ID
      */
     public void clearListeners() {
-        listeners.remove(this);
+        LISTENERS.remove(this);
     }
 
     /**
@@ -431,12 +426,12 @@ public class ID implements Serializable {
         trigger(event, source, new HashMap<String, Object>());
     }
 
-    
+
     private List<IDEventHandler> handlerList(String event) {
-        ConcurrentHashMap<String, List<IDEventHandler>> events = listeners.get(this);
+        ConcurrentHashMap<String, List<IDEventHandler>> events = LISTENERS.get(this);
         if (events == null) {
             events = new ConcurrentHashMap<String, List<IDEventHandler>>();
-            listeners.put(this, events);
+            LISTENERS.put(this, events);
         }
 
         List<IDEventHandler> list = events.get(event);
@@ -449,7 +444,7 @@ public class ID implements Serializable {
         return list;
 
     }
-    
+
     private class OneOf implements IDEventHandler {
 
         IDEventHandler delegate;
@@ -465,40 +460,40 @@ public class ID implements Serializable {
             id.off(event, this);
         }
     }
-    
+
     public void clearLocks() {
-        locks.remove(this);
+        LOCKS.remove(this);
     }
-    
+
     public void lock(String scope) {
         getLock(scope).lock();
     }
-    
+
     public void unlock(String scope) {
         getLock(scope).unlock();
     }
-    
+
     public Lock getLock(String scope) {
-        ConcurrentHashMap<String, Lock> locksPerId = locks.get(this);
+        ConcurrentHashMap<String, Lock> locksPerId = LOCKS.get(this);
         if (locksPerId == null) {
             locksPerId = new ConcurrentHashMap<String, Lock>();
-            ConcurrentHashMap<String, Lock> meantime = locks.putIfAbsent(this, locksPerId);
+            ConcurrentHashMap<String, Lock> meantime = LOCKS.putIfAbsent(this, locksPerId);
             locksPerId = (meantime != null) ?  meantime : locksPerId;
         }
-        
+
         Lock lock = locksPerId.get(scope);
         if (lock == null) {
             lock = new ReentrantLock();
             Lock l = locksPerId.putIfAbsent(scope, lock);
             lock = (l != null) ? l : lock;
         }
-        
+
         return lock;
     }
-    
+
     /**
-     * 
-     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and {@link ID#on(String, IDEventHandler)} 
+     *
+     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and {@link ID#on(String, IDEventHandler)}
      *
      * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
      */

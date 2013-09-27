@@ -54,7 +54,7 @@ import junit.framework.TestSuite;
 
 /**
  * {@link CardDAVBugSuite}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class CardDAVBugSuite {
@@ -70,6 +70,7 @@ public final class CardDAVBugSuite {
         suite.addTestSuite(Bug21374Test.class);
         suite.addTestSuite(Bug23046Test.class);
         suite.addTestSuite(Bug23078Test.class);
+        suite.addTestSuite(Bug28672Test.class);
         return suite;
     }
 }

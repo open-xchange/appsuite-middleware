@@ -78,13 +78,22 @@ public interface OAuthServiceMetaData {
     String getDisplayName();
 
     /**
+     * Checks if the given user may use this service.
+     *
+     * @param contextId The users context
+     * @param userId The users id
+     * @return Whether this service is enabled for the user or not
+     */
+    boolean isEnabled(int userId, int contextId) throws OXException;
+
+    /**
      * Gets the API key.
      *
      * @depcrecated: Please use {@link #getAPIKey(Session)} and also please implement {@link #getAPIKey(Session)}
      * @return The API key
      */
     String getAPIKey();
-    
+
     /**
      * Gets the API key that belongs to a given session
      * @param session
@@ -100,7 +109,7 @@ public interface OAuthServiceMetaData {
      * @return The API secret
      */
     String getAPISecret();
-    
+
     /**
      * Gets the API secret that belongs to a given session
      * @param session
@@ -172,7 +181,7 @@ public interface OAuthServiceMetaData {
     /**
      * Gives the strategy the opportunity to modify a callback URL.
      * @param callbackUrl
-     * @param session 
+     * @param session
      * @return the modified callback URL
      */
     String modifyCallbackURL(String callbackUrl, Session session);

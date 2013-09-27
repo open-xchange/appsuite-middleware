@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -62,7 +61,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -81,7 +81,7 @@ public class Search {
 
     private final User user;
 
-    private final UserConfiguration config;
+    private final UserPermissionBits config;
 
     private final TaskSearchObject search;
 
@@ -93,7 +93,7 @@ public class Search {
 
     private final List<Integer> all = new ArrayList<Integer>(), own = new ArrayList<Integer>(), shared = new ArrayList<Integer>();
 
-    public Search(final Context ctx, final User user, final UserConfiguration config, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns) {
+    public Search(final Context ctx, final User user, final UserPermissionBits config, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns) {
         super();
         this.config = config;
         this.ctx = ctx;

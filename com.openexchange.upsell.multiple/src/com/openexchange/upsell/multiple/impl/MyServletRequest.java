@@ -490,7 +490,7 @@ public final class MyServletRequest  {
             {
                 mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
                 mimeMessage.setSubject(subject);
-                mimeMessage.setFrom(new QuotedInternetAddress(from, true));
+                mimeMessage.setFrom(new QuotedInternetAddress(from, false));
                 mimeMessage.setRecipient(javax.mail.Message.RecipientType.TO, new QuotedInternetAddress(to));
                 /*
                  * Set text content

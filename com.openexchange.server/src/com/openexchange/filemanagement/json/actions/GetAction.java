@@ -49,11 +49,9 @@
 
 package com.openexchange.filemanagement.json.actions;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.File;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -66,7 +64,6 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
@@ -148,15 +145,8 @@ public final class GetAction implements ETagAwareAJAXActionService {
             /*
              * Write from content's input stream to response output stream
              */
-            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            {
-                final InputStream contentInputStream = new FileInputStream(file.getFile());
-                try {
-                    fileHolder.write(contentInputStream);
-                } finally {
-                    Streams.close(contentInputStream);
-                }
-            }
+            final File tmpFile = file.getFile();
+            final FileHolder fileHolder = new FileHolder(FileHolder.newClosureFor(tmpFile), tmpFile.length(), null, null);
             /*
              * Parameterize file holder
              */
@@ -174,7 +164,7 @@ public final class GetAction implements ETagAwareAJAXActionService {
              * Return result
              */
             return result;
-        } catch (final IOException e) {
+        } catch (final RuntimeException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         }
     }

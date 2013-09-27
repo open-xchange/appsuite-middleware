@@ -152,11 +152,12 @@ public final class ListAction extends AbstractUserAction {
         Date lastModified = null;
         final List<OXException> warnings = new LinkedList<OXException>();
         final User[] users = getUsers(session, userIDs, warnings);
+        censor(session, users);
         final List<UserContact> userContacts = new ArrayList<UserContact>(users.length);
         for (final User user : users) {
             final Contact contact = contacts.get(user.getId());
             if (null != contact) {
-                userContacts.add(new UserContact(contact, censor(session, user)));
+                userContacts.add(new UserContact(contact, user));
                 final Date contactLastModified = contact.getLastModified();
                 if (null != contactLastModified && ((null == lastModified) || (contactLastModified.after(lastModified)))) {
                     lastModified = contactLastModified;

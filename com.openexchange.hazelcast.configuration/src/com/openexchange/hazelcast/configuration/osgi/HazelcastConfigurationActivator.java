@@ -51,8 +51,10 @@
 package com.openexchange.hazelcast.configuration.osgi;
 
 import org.apache.commons.logging.Log;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
 import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
 import com.openexchange.hazelcast.configuration.internal.Services;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -82,7 +84,9 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.set(this);
-        registerService(HazelcastConfigurationService.class, new HazelcastConfigurationServiceImpl(context));
+        HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl(context);
+        registerService(HazelcastConfigurationService.class, configService);
+        registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
     }
 
     @Override

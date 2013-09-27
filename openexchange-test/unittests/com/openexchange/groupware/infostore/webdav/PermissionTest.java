@@ -23,8 +23,8 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -54,9 +54,9 @@ public class PermissionTest extends TestCase implements SessionHolder {
     private User user1;
     private User user2;
 
-    private UserConfiguration userConfig;
-    private UserConfiguration userConfig1;
-    private UserConfiguration userConfig2;
+    private UserPermissionBits userConfig;
+    private UserPermissionBits userConfig1;
+    private UserPermissionBits userConfig2;
 
     private User cleanupUser;
 
@@ -85,15 +85,15 @@ public class PermissionTest extends TestCase implements SessionHolder {
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 
         final UserStorage userStorage = UserStorage.getInstance();
-        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+        final UserPermissionBitsStorage userConfigStorage = UserPermissionBitsStorage.getInstance();
 
         session1 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN)), ctx), ctx, getClass().getName());
 		user1 = userStorage.getUser(session1.getUserId(), ctx);
-        userConfig1 = userConfigStorage.getUserConfiguration(user1.getId(),ctx);
+        userConfig1 = userConfigStorage.getUserPermissionBits(user1.getId(),ctx);
 
         session2 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER)), ctx), ctx, getClass().getName());
 		user2 = userStorage.getUser(session2.getUserId(), ctx);
-        userConfig2 = userConfigStorage.getUserConfiguration(user2.getId(), ctx);
+        userConfig2 = userConfigStorage.getUserPermissionBits(user2.getId(), ctx);
 
         final OXFolderAccess oxfa = new OXFolderAccess(ctx);
 		root = oxfa.getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);

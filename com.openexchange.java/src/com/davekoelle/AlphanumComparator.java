@@ -25,8 +25,16 @@
 package com.davekoelle;
 
 import java.text.Collator;
+import java.text.ParseException;
+import java.text.RuleBasedCollator;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.java.StringAllocator;
 
 /**
  * This is an updated version with enhancements made by Daniel Migowski,
@@ -48,6 +56,10 @@ import java.util.Locale;
  */
 public class AlphanumComparator implements Comparator<String> {
 
+    private static final Log LOG = LogFactory.getLog(AlphanumComparator.class);
+
+    private static final Map<Locale, Collator> COLLATOR_OVERRIDES;
+
     private static final Locale DEFAULT_LOCALE = Locale.US;
 
     private static final Collator DEFAULT_COLLATOR;
@@ -56,9 +68,10 @@ public class AlphanumComparator implements Comparator<String> {
         final Collator collator = Collator.getInstance(DEFAULT_LOCALE);
         collator.setStrength(Collator.SECONDARY);
         DEFAULT_COLLATOR = collator;
+        COLLATOR_OVERRIDES = Collections.unmodifiableMap(initCollatorOverrides());
     }
 
-    private final Collator collator;
+    private Collator collator;
 
     private final Locale locale;
 
@@ -79,6 +92,9 @@ public class AlphanumComparator implements Comparator<String> {
         if (null == locale) {
             collator = DEFAULT_COLLATOR;
             this.locale = DEFAULT_LOCALE;
+        } else if (COLLATOR_OVERRIDES.containsKey(locale)) {
+            this.locale = locale;
+            this.collator = COLLATOR_OVERRIDES.get(locale);
         } else {
             this.locale = locale;
             collator = Collator.getInstance(locale);
@@ -135,4 +151,44 @@ public class AlphanumComparator implements Comparator<String> {
         }
         return s1Length - s2Length;
     }
+
+    private static Map<Locale, Collator> initCollatorOverrides() {
+        Map<Locale, Collator> overrides = new HashMap<Locale, Collator>();
+        Collator defaultJapaneseCollator = Collator.getInstance(Locale.JAPANESE);
+        if (null != defaultJapaneseCollator && RuleBasedCollator.class.isInstance(defaultJapaneseCollator)) {
+            StringAllocator customRules = new StringAllocator(((RuleBasedCollator)defaultJapaneseCollator).getRules());
+            /*
+             * insert custom rules after the 0 character to sort those characters before any others
+             */
+            customRules.append("& \u0000");
+            /*
+             * Hiragana and Katakana characters first...
+             */
+            for (int c = 0x3040; c <= 0x30ff; c++) {
+                customRules.append('<').append((char)c);
+            }
+            /*
+             * ... and then Kanji
+             */
+            for (int c = 0x4e00; c <= 0x9fbf; c++) {
+                customRules.append('<').append((char)c);
+            }
+            /*
+             * Initialize collator and add to overrides
+             */
+            RuleBasedCollator customJapaneseCollator = null;
+            try {
+                customJapaneseCollator = new RuleBasedCollator(customRules.toString());
+            } catch (ParseException e) {
+                LOG.warn("Error initializing custom collator", e);
+            }
+            if (null != customJapaneseCollator) {
+                customJapaneseCollator.setStrength(Collator.SECONDARY);
+                overrides.put(Locale.JAPAN, customJapaneseCollator);
+                overrides.put(Locale.JAPANESE, customJapaneseCollator);
+            }
+        }
+        return overrides;
+    }
+
 }

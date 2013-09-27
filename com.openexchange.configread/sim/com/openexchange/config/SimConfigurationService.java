@@ -87,8 +87,11 @@ public class SimConfigurationService implements ConfigurationService {
 
     @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
-        // Nothing to do
-        return false;
+        final String prop = stringProperties.get(name);
+        if (null != prop) {
+            return Boolean.parseBoolean(prop.trim());
+        }
+        return defaultValue;
     }
 
     @Override
@@ -99,8 +102,15 @@ public class SimConfigurationService implements ConfigurationService {
 
     @Override
     public int getIntProperty(final String name, final int defaultValue) {
-        // Nothing to do
-        return 0;
+        final String prop = stringProperties.get(name);
+        if (prop != null) {
+            try {
+                return Integer.parseInt(prop.trim());
+            } catch (final NumberFormatException e) {
+                // Ignore
+            }
+        }
+        return defaultValue;
     }
 
     @Override
@@ -121,20 +131,17 @@ public class SimConfigurationService implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final PropertyListener listener) {
-        // Nothing to do
-        return null;
+        return stringProperties.get(name);
     }
 
     @Override
     public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-        // Nothing to do
-        return null;
+        return stringProperties.containsKey(name) ? stringProperties.get(name) : defaultValue;
     }
 
     @Override
     public Iterator<String> propertyNames() {
-        // Nothing to do
-        return null;
+        return stringProperties.keySet().iterator();
     }
 
     @Override

@@ -416,4 +416,19 @@ public class AWSS3FileStorage implements FileStorage {
         return null;
     }
 
+    @Override
+    public long appendToFile(InputStream file, String name, long offset) throws OXException {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public void setFileLength(long length, String name) throws OXException {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public InputStream getFile(String name, long offset, long length) throws OXException {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
 }

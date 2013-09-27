@@ -61,9 +61,10 @@ import com.openexchange.tools.session.ServerSession;
  * {@link SubscriptionServlet}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SubscriptionServlet extends MultipleAdapterServlet {
+
+    private static final long serialVersionUID = -1033538285268622324L;
 
     private static SubscriptionMultipleFactory multipleFactory = null;
 
@@ -82,7 +83,7 @@ public class SubscriptionServlet extends MultipleAdapterServlet {
     }
     @Override
     protected boolean hasModulePermission(ServerSession session) {
-        return session.getUserConfiguration().isSubscription();
+        return session.getUserPermissionBits().isSubscription();
     }
 
 

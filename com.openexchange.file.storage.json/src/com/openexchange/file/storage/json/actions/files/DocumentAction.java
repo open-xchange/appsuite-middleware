@@ -85,6 +85,13 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService {
 
+    /**
+     * Initializes a new {@link DocumentAction}.
+     */
+    public DocumentAction() {
+        super();
+    }
+
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);

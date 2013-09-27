@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,6 +86,7 @@ public class VersionContainer {
     public int addVersion(FileHolder fileHolder) {
         int version = ++currentVersion;
         versions.put(version, fileHolder);
+        fileHolder.getInternalFile().setVersion("" + version);
 
         return version;
     }
@@ -111,5 +113,9 @@ public class VersionContainer {
 
     public int getCurrentVersionNumber() {
         return currentVersion;
+    }
+    
+    public Collection<FileHolder> getAllVersions() {
+        return versions.values();
     }
 }

@@ -58,19 +58,28 @@ import com.openexchange.importexport.actions.importer.FacebookFriendsImportActio
 import com.openexchange.importexport.actions.importer.ICalImportAction;
 import com.openexchange.importexport.actions.importer.VCardImportAction;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.server.ServiceLookup;
 
 public class ImportActionFactory extends AbstractIEActionFactory{
+ 
+   /**
+     * Initializes a new {@link ImportActionFactory}.
+     * @param services
+     */
+    public ImportActionFactory(ServiceLookup services) {
+        super(services);
+    }
 
     @Override
     protected Map<Format, AJAXActionService> getActions(){
     	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CSVImportAction());
-    		put(Format.OUTLOOK_CSV, new CSVImportAction());
-    		put(Format.VCARD, new VCardImportAction());
-    		put(Format.ICAL, new ICalImportAction());
+    		put(Format.CSV, new CSVImportAction(services));
+    		put(Format.OUTLOOK_CSV, new CSVImportAction(services));
+    		put(Format.VCARD, new VCardImportAction(services));
+    		put(Format.ICAL, new ICalImportAction(services));
 
-    		put(Format.FacebookArchive, new FacebookArchiveImportAction());
-    		put(Format.FacebookFriends, new FacebookFriendsImportAction());
+    		put(Format.FacebookArchive, new FacebookArchiveImportAction(services));
+    		put(Format.FacebookFriends, new FacebookFriendsImportAction(services));
     	}};
     }
 

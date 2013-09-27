@@ -108,7 +108,7 @@ public abstract class TaskAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        if (!session.getUserConfiguration().hasTask()) {
+        if (!session.getUserPermissionBits().hasTask()) {
             throw OXException.noPermissionForModule("task");
         }
         try {

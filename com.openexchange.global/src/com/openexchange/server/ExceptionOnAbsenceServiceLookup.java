@@ -49,14 +49,29 @@
 
 package com.openexchange.server;
 
-
-
 /**
- * {@link ExceptionOnAbsenceServiceLookup}
+ * {@link ExceptionOnAbsenceServiceLookup} - Throws an {@link IllegalStateException} if required service is missing on
+ * {@link #getService(Class)} invocation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ExceptionOnAbsenceServiceLookup implements ServiceLookup {
+
+    /**
+     * Gets an appropriate service look-up that throws an {@link IllegalStateException} if required service is missing on
+     * {@link #getService(Class)} invocation.
+     *
+     * @param serviceLookup The service look-up
+     * @return The error-throwing service look-up on service absence
+     */
+    public static ExceptionOnAbsenceServiceLookup valueOf(final ServiceLookup serviceLookup) {
+        if (serviceLookup instanceof ExceptionOnAbsenceServiceLookup) {
+            return (ExceptionOnAbsenceServiceLookup) serviceLookup;
+        }
+        return null == serviceLookup ? null : new ExceptionOnAbsenceServiceLookup(serviceLookup);
+    }
+
+    // ----------------------------------------------------------------------- //
 
     private final ServiceLookup serviceLookup;
 
@@ -81,7 +96,7 @@ public final class ExceptionOnAbsenceServiceLookup implements ServiceLookup {
 
     @Override
     public <S> S getOptionalService(Class<? extends S> clazz) {
-    	return serviceLookup.getOptionalService(clazz);
+        return serviceLookup.getOptionalService(clazz);
     }
 
 }

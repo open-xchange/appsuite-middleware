@@ -229,7 +229,7 @@ public interface OXUserInterface extends Remote {
 
     /**
      * Changes specified context's capabilities.
-     * 
+     *
      * @param ctx The context
      * @param user The user
      * @param capsToAdd The capabilities to add
@@ -319,6 +319,19 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchUserException
      */
     public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Retrieve the ModuleAccess for an user.
+     *
+     * @param accessCombinationName
+     *            The access combination name
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @return UserModuleAccess containing the module access rights.
+     *
+     * @throws RemoteException General RMI Exception
+     */
+    public UserModuleAccess moduleAccessForName(final String accessCombinationName) throws RemoteException;
 
     /**
      * Retrieve the ModuleAccess for an user.
@@ -567,4 +580,5 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchContextException
      */
     public boolean exists(final Context ctx, final User user, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException;
+
 }

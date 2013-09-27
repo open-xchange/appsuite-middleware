@@ -82,10 +82,10 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.index.FakeSession;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.internal.Services;
 
 
 /**
@@ -117,7 +117,7 @@ public class MailFolderJob extends AbstractMailJob {
                 MailField.ID,
                 MailField.FLAGS,
                 MailField.COLOR_LABEL };
-            IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
+            IndexFacadeService indexFacade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
             IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
             IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
             FakeSession fakeSession = new FakeSession(info.primaryPassword, info.userId, info.contextId);
@@ -204,7 +204,7 @@ public class MailFolderJob extends AbstractMailJob {
                 if (e.getCategory().equals(Category.CATEGORY_TRY_AGAIN)
                     && e.getCode() == 2058) {
                     LOG.warn("Could not connect mail access for job " + info + ". Rescheduling job to run again in 60 seconds.");
-                    IndexingService indexingService = Services.getService(IndexingService.class);
+                    IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
                     indexingService.scheduleJob(false, info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
                     return;
                 }

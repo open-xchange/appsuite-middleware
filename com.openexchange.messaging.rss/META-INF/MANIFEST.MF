@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Messaging RSS Bundle
 Bundle-SymbolicName: com.openexchange.messaging.rss
-Bundle-Version: 7.2.2
+Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.messaging.rss.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -21,7 +21,28 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.proxy,
  com.openexchange.server,
  com.openexchange.session,
+ javax.crypto,
+ javax.crypto.interfaces,
+ javax.crypto.spec,
+ javax.imageio,
+ javax.imageio.stream,
+ javax.mail.internet,
+ javax.net.ssl,
+ javax.servlet,
+ javax.servlet.http,
  javax.swing.text,
+ javax.xml,
+ javax.xml.datatype,
+ javax.xml.namespace,
+ javax.xml.parsers,
+ javax.xml.stream,
+ javax.xml.stream.events,
+ javax.xml.stream.util,
+ javax.xml.transform,
+ javax.xml.transform.dom,
+ javax.xml.transform.sax,
+ javax.xml.transform.stream,
+ javax.xml.xpath,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.methods,
  org.apache.commons.httpclient.params,

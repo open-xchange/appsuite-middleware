@@ -186,6 +186,13 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         return parameterList.getParameterNames();
     }
 
+    /**
+     * Clears all parameters contained in this parameterized header.
+     */
+    public void clearParameters() {
+        parameterList.clearParameters();
+    }
+
     //private static final Pattern PATTERN_CORRECT = Pattern.compile("\\s*=\\s*");
 
     /**

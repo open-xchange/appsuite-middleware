@@ -122,4 +122,42 @@ public class FileStorage {
     public void close() {
         fs = null;
     }
+
+    /**
+     * Appends specified stream to the supplied file.
+     *
+     * @param file The stream to append to the file
+     * @param name The existing file's path in associated file storage
+     * @param offset The offset in bytes where to append the data, must be equal to the file's current length
+     * @return The updated length of the file
+     * @throws OXException If appending file fails
+     */
+    public long appendToFile(InputStream file, String name, long offset) throws OXException {
+        return fs.appendToFile(file, name, offset);
+    }
+
+    /**
+     * Shortens an existing file to the supplied length.
+     *
+     * @param length The target file length in bytes
+     * @param name The existing file's path in associated file storage
+     * @throws OXException
+     */
+    public void setFileLength(long length, String name) throws OXException {
+        fs.setFileLength(length, name);
+    }
+
+    /**
+     * Gets (part of) a file's input stream.
+     *
+     * @param name The existing file's path in associated file storage
+     * @param offset The requested start offset of the file stream in bytes
+     * @param length The requested length in bytes, starting from the offset
+     * @return The file stream
+     * @throws OXException
+     */
+    public InputStream getFile(String name, long offset, long length) throws OXException {
+        return fs.getFile(name, offset, length);
+    }
+
 }

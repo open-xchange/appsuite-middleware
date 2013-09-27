@@ -75,6 +75,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -98,7 +99,12 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
     private static final boolean DEBUG = LOG.isDebugEnabled();
-
+    
+    
+    public VCardImporter(ServiceLookup services) {
+        super(services);
+    }
+    
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -189,6 +195,8 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             if (chunks.isEmpty()) {
                 throw ImportExportExceptionCodes.NO_VCARD_FOUND.create();
             }
+            int count = 0;
+            int limit = getLimit(session);
             for (final VCardFileToken chunk : chunks) {
                 final VersitDefinition def = chunk.getVersitDefinition();
                 final ImportResult importResult = new ImportResult();
@@ -202,25 +210,31 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(chunk.getContent()), "UTF-8");
                     try {
                         final VersitObject versitObject = def.parse(versitReader);
+                        
+                        if (limit <= 0 || count <= limit) {
+                            
+                            importResult.setFolder(String.valueOf(contactFolderId));
 
-                        importResult.setFolder(String.valueOf(contactFolderId));
-
-                        final Contact contactObj = oxContainerConverter.convertContact(versitObject);
-                        contactObj.setParentFolderID(contactFolderId);
-                        importResult.setDate(new Date());
-                        try {
-                            super.createContact(session, contactObj, Integer.toString(contactFolderId));
-                        } catch (final OXException oxEx) {
-                            if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
-                                LOG.debug(oxEx.getMessage(), oxEx);
-                            } else {
-                                LOG.error(oxEx.getMessage(), oxEx);
+                            final Contact contactObj = oxContainerConverter.convertContact(versitObject);
+                            contactObj.setParentFolderID(contactFolderId);
+                            importResult.setDate(new Date());
+                            try {
+                                super.createContact(session, contactObj, Integer.toString(contactFolderId));
+                                count++;
+                            } catch (final OXException oxEx) {
+                                if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
+                                    LOG.debug(oxEx.getMessage(), oxEx);
+                                } else {
+                                    LOG.error(oxEx.getMessage(), oxEx);
+                                }
+                                importResult.setException(oxEx);
+                                LOG.debug("cannot import contact object", oxEx);
                             }
-                            importResult.setException(oxEx);
-                            LOG.debug("cannot import contact object", oxEx);
+                            importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
+                            importResult.setDate(contactObj.getLastModified());
+                        } else {
+                            throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
                         }
-                        importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
-                        importResult.setDate(contactObj.getLastModified());
                     } catch (final VersitException e) {
                         LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage()));

@@ -52,6 +52,7 @@ package com.openexchange.calendar.itip.analyzers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -126,7 +127,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         boolean differ = true;
 
         if (original != null) {
-            if (original.containsSequence() && update.containsSequence() && original.getSequence() > update.getSequence()) {
+            if (isOutdated(update, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
                 return analysis;
@@ -203,6 +204,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             	analysis.addAnnotation(annotation);
             	break;
             } else if (differ) {
+                if (original != null) {
+                    exception.setParentFolderID(original.getParentFolderID());
+                }
                 change.setNewAppointment(exception);
                 change.setConflicts(util.getConflicts(exception, session));
 
@@ -265,6 +269,29 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
         }
         return analysis;
+    }
+
+    private boolean isOutdated(CalendarDataObject update, CalendarDataObject original) {
+        if (original.containsSequence() && update.containsSequence() && original.getSequence() > update.getSequence()) {
+            return true;
+        }
+        Date originalLastTouched = null;
+        if (original.containsLastModified()) {
+            originalLastTouched = original.getLastModified();
+        } else if (original.containsCreationDate()) {
+            originalLastTouched = original.getCreationDate();
+        }
+        Date updateLastTouched = null;
+        if (update.containsLastModified()) {
+            updateLastTouched = update.getLastModified();
+        } else if (original.containsCreationDate()) {
+            updateLastTouched = update.getCreationDate();
+        }
+        
+        if (originalLastTouched != null && updateLastTouched != null && originalLastTouched.compareTo(updateLastTouched) > 0) {
+            return true;
+        }
+        return false;
     }
 
     private boolean updateOrNew(final ITipAnalysis analysis) {

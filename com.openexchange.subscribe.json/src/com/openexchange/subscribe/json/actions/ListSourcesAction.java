@@ -73,8 +73,7 @@ public class ListSourcesAction extends AbstractSubscribeSourcesAction {
      * Initializes a new {@link ListSourcesAction}.
      */
     public ListSourcesAction(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     private static final String[] FIELDS = new String[] { "id", "displayName", "icon", "module", "formDescription" };
@@ -85,8 +84,7 @@ public class ListSourcesAction extends AbstractSubscribeSourcesAction {
     public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException {
         final int module = getModule(subscribeRequest.getRequestData().getModule());
         // Retrieve subscription sources
-        final List<SubscriptionSource> sources =
-            new ArrayList<SubscriptionSource>(getAvailableSources(subscribeRequest.getServerSession()).getSources(module));
+        final List<SubscriptionSource> sources = new ArrayList<SubscriptionSource>(getAvailableSources(subscribeRequest.getServerSession()).getSources(module));
         for (final Iterator<SubscriptionSource> iterator = sources.iterator(); iterator.hasNext();) {
             final SubscriptionSource subscriptionSource = iterator.next();
             if (IGNOREES.contains(subscriptionSource.getId())) {

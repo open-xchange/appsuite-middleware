@@ -69,6 +69,8 @@ public class ServerSetting {
     private boolean contactCollectOnMailAccess;
 
     private int folderTree;
+    
+    private byte[] uuidBinary;
 
 
     public ServerSetting() {
@@ -129,6 +131,14 @@ public class ServerSetting {
 
     public void setFolderTree(final int folderTree) {
         this.folderTree = folderTree;
+    }
+    
+    public byte[] getUuidBinary() {
+        return uuidBinary;
+    }
+    
+    public void setUuidBinary(final byte[] uuidBinary) {
+        this.uuidBinary = uuidBinary;
     }
 
 }

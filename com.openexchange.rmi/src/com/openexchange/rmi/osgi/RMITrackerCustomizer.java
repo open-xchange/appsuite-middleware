@@ -110,6 +110,7 @@ public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Re
         final String name = RMIRegistry.findRMIName(reference, service);
         try {
             RMIRegistry.getRMIRegistry().unbind(name);
+            UnicastRemoteObject.unexportObject(service, true);
         } catch (final AccessException e) {
             log.error(e.getMessage(), e);
         } catch (final RemoteException e) {

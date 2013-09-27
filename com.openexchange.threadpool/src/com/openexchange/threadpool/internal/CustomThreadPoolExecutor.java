@@ -790,7 +790,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
                 // Prepare thread
                 Thread.interrupted(); // clear interrupt status on entry
-                ((CustomThread) thread).clearInterruptorStack();
                 LogProperties.removeLogProperties(); // Drop possible log properties
 
                 boolean ran = false;

@@ -72,11 +72,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
 
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
-        try {
-            return getService().getReadOnly(ctx);
-        } catch (final OXException e) {
-            throw e;
-        }
+        return getService().getReadOnly(ctx);
     }
 
     @Override
@@ -92,11 +88,7 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
 
     @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
-        try {
-            return getService().getWritable(ctx);
-        } catch (final OXException e) {
-            throw e;
-        }
+        return getService().getWritable(ctx);
     }
 
     @Override
@@ -110,6 +102,19 @@ public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<D
         }
         autocommit(con);
         dbService.backWritable(ctx, con);
+    }
+
+    @Override
+    public void releaseWriteConnectionAfterReading(Context ctx, Connection con) {
+        if (con == null) {
+            return;
+        }
+        final DatabaseService dbService = optService();
+        if (null == dbService) {
+            return;
+        }
+        autocommit(con);
+        dbService.backWritableAfterReading(ctx, con);
     }
 
 }

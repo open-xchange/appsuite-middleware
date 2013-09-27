@@ -74,7 +74,6 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -288,11 +287,8 @@ public class DocumentMetadataResource extends AbstractResource implements
 					id,
 					InfostoreFacade.CURRENT_VERSION,
 					session.getContext(),
-					UserStorage.getStorageUser(session.getUserId(),
-							session.getContext()),
-					UserConfigurationStorage.getInstance()
-							.getUserConfigurationSafe(session.getUserId(),
-									session.getContext()));
+					session.getUser(),
+					session.getUserPermissionBits());
 		} catch (final OXException e) {
 			if (e instanceof WebdavProtocolException) {
 				throw (WebdavProtocolException) e;
@@ -494,12 +490,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 			if (propertyHelper.mustWrite()) {
 				final ServerSession session = getSession();
 				final Context ctx = session.getContext();
-				final int userId = session.getUserId();
-				final EffectiveInfostorePermission perm = security
-						.getInfostorePermission(getId(), ctx, UserStorage
-								.getStorageUser(userId, ctx),
-								UserConfigurationStorage.getInstance()
-										.getUserConfigurationSafe(userId, ctx));
+				final EffectiveInfostorePermission perm = security.getInfostorePermission(getId(), ctx, session.getUser(), session.getUserPermissionBits());
 				if (!perm.canWriteObject()) {
 					throw WebdavProtocolException.Code.NO_WRITE_PERMISSION
 							.create(getUrl(), HttpServletResponse.SC_FORBIDDEN);
@@ -737,11 +728,8 @@ public class DocumentMetadataResource extends AbstractResource implements
 					id,
 					InfostoreFacade.CURRENT_VERSION,
 					session.getContext(),
-					UserStorage.getStorageUser(session.getUserId(),
-							session.getContext()),
-					UserConfigurationStorage.getInstance()
-							.getUserConfigurationSafe(session.getUserId(),
-									session.getContext()));
+					session.getUser(),
+					session.getUserPermissionBits());
 			final SetSwitch set = new SetSwitch(this.metadata);
 			final GetSwitch get = new GetSwitch(metadata);
 

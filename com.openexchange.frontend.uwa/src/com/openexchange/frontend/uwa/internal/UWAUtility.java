@@ -50,13 +50,16 @@
 package com.openexchange.frontend.uwa.internal;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
+import com.openexchange.java.Strings;
 
 /**
  * {@link UWAUtility} - A utility class for UAW module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UWAUtility {
@@ -70,7 +73,7 @@ public final class UWAUtility {
 
     /**
      * Checks given UWA widget's URL string for syntactical correctness.
-     * 
+     *
      * @param uwaWidget The UWA widget
      * @throws OXException If UWA widget's URL string is invalid
      */
@@ -83,12 +86,12 @@ public final class UWAUtility {
 
     /**
      * Checks given URL string for syntactical correctness.
-     * 
+     *
      * @param sUrl The URL string
      * @throws OXException If URL string is invalid
      */
     public static void checkUrl(final String sUrl) throws OXException {
-        if (isEmpty(sUrl)) {
+        if (Strings.isEmpty(sUrl)) {
             // Nothing to check
             return;
         }
@@ -99,21 +102,29 @@ public final class UWAUtility {
                 throw new MalformedURLException("Only http & https protocols supported.");
             }
         } catch (final MalformedURLException e) {
-            throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
+            final String message = e.getMessage();
+            if (null == message || !message.startsWith("no protocol: ") || !isUri(sUrl)) {
+                throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
+            }
+            if (!sUrl.startsWith("../")) {
+                throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
+            }
+            try {
+                final String dummyUrl = "http://localhost" + sUrl.substring(2);
+                new java.net.URL(dummyUrl);
+            } catch (final MalformedURLException e1) {
+                throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
+            }
         }
     }
 
-    /** Checks for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
+    private static boolean isUri(final String s) {
+        try {
+            new URI(s);
             return true;
+        } catch (final URISyntaxException e) {
+            return false;
         }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }

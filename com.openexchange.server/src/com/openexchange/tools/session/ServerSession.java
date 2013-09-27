@@ -52,6 +52,7 @@ package com.openexchange.tools.session;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 
@@ -69,33 +70,40 @@ public interface ServerSession extends Session {
      *
      * @return The context object.
      */
-    public Context getContext();
+    Context getContext();
 
     /**
      * Gets the user object
      *
      * @return The user object
      */
-    public User getUser();
+    User getUser();
 
     /**
      * Gets the user configuration object.
      *
      * @return The user configuration object.
      */
-    public UserConfiguration getUserConfiguration();
+    UserConfiguration getUserConfiguration();
 
     /**
      * Gets the user mail settings.
      *
      * @return The user mail settings.
      */
-    public UserSettingMail getUserSettingMail();
+    UserSettingMail getUserSettingMail();
 
     /**
      * Determines if this session is not authenticated and therefore anonymous.
      *
      * @return <code>true</code> if this session is anonymous; otherwise <code>false</code>
      */
-    public boolean isAnonymous();
+    boolean isAnonymous();
+
+    /**
+     * Gets the user permission bits.
+     *
+     * @return The user permission bits
+     */
+    UserPermissionBits getUserPermissionBits();
 }

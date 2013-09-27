@@ -73,11 +73,7 @@ public class DeleteAllVersionsAction extends AbstractDocumentListAction {
             };
         }
 
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
+        doUpdates(updates);
     }
 
     @Override
@@ -94,12 +90,8 @@ public class DeleteAllVersionsAction extends AbstractDocumentListAction {
             }
 
         };
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
 
+        doUpdates(updates);
     }
 
     @Override

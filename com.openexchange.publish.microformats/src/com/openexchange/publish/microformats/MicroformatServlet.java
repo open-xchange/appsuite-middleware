@@ -81,7 +81,6 @@ import com.openexchange.publish.microformats.osgi.StringTranslator;
 import com.openexchange.publish.microformats.tools.HTMLUtils;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.user.UserService;
 
 /**
@@ -223,7 +222,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final AllocatingStringWriter htmlWriter = new AllocatingStringWriter();
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
-            if (isUsingWhitelisting(template.getLevel())) {
+            if (!template.isTrusted()) {
                 //html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
                 html = htmlService.sanitize(html, "microformatWhitelist", false, null, null);
             }
@@ -242,22 +241,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             writer.println("Publishing failed. Please try again later.");
             writer.flush();
         }
-    }
-
-    private boolean isUsingWhitelisting(final TemplateLevel templateLevel) {
-        final String globalWhitelisting = configService.getProperty(USE_WHITELISTING_PROPERTY_NAME, "false");
-
-        if (Boolean.parseBoolean(globalWhitelisting)) {
-            return true;
-        }
-
-        for (final String string : Strings.splitByComma(globalWhitelisting)) {
-            if (templateLevel.name().toLowerCase().equals(string.toLowerCase())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private Contact getContact(final PublicationSession publicationSession, final Context context) throws OXException {

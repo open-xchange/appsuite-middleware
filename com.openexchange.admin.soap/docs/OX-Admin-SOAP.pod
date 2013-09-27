@@ -1,51 +1,8 @@
 
 =head1 Open-Xchange Admin SOAP Interface documentation and examples
 
-This document describes the Open-Xchange Admin SOAP Interface and
-gives some brief examples on how to use it.
-
-=head2 Architecture
-
-The SOAP service communicates with the Admin Daemon using the RMI
-interface. In fact, the Admin SOAP service is just a mapper between
-RMI and SOAP.
-
-   --------------             --------------              -------------
-  |              |           |              |            |             |
-  | Admin Daemon | <- RMI -> | SOAP Service | <- SOAP -> | SOAP client |
-  |              |           |              |            |             |
-   --------------             --------------              -------------
-
-
-=head2 Installation and Configuration
-
-In order to use the SOAP Interface of the Open-Xchange Admin Daemon, you need
-to install the package C<open-xchange-admin-soap>. This package has a dependency
-to the Open-Xchange Server and the Axis2 bundle. The SOAP Interface is a
-service that must be deployed into the Axis2 Bundle.
-
-For more information about the Axis2 bundle, please refer to the
-Quick-OX-Axis2-Integration-Overview document, that ships with the
-Axis2 bundle.
-
-The default configuration of the Admin SOAP service expects the Admin
-Daemon to be accessible on localhost. To change this behaviour, the
-file
-C</opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties>
-must changed accordingly. Just set C<RMI_HOSTNAME> to something
-different.
-
-=head2 How to check, if the SOAP service is installed and working?
-
-To check whether the Admin SOAP service is installed and working,
-point your browser to the URL
-http://localhost/servlet/axis2/services/OXContextService?wsdl
-
-It should display the WSDL (Web Services Description Language) file of
-the OXContextService. This file can also be used to find out what kind
-of SOAP calls exist for each of the modules.
-
-If that does not work, check the logfile of the Open-Xchange Server.
+Please read http://oxpedia.org/wiki/index.php?title=Open-Xchange_Provisioning_using_SOAP on
+how to setup SOAP on Open-Xchange.
 
 =head2 What services do exist?
 
@@ -126,9 +83,8 @@ TaskMgmt related service.
 =back
 
 For an explanation of these services, refer to the RMI javadoc
-documentation as shipped with the Open-Xchange Admin Daemon and the
-Open-Xchange Hosting Plugin (packages C<open-xchange-admin-doc> and
-C<open-xchange-admin-plugin-hosting-doc>).
+documentation as shipped with the Open-Xchange Admin Bundle
+C<open-xchange-admin>.
 
 =head2 perl Programming examples using C<SOAP::Lite>
 
@@ -149,7 +105,7 @@ C<$ctxCreds> in this document and within the example code.
 In addition, all code examples commonly use C<$nameSpace> and
 C<$baseURL>, which are required to create a SOAP client object.
 
- my $baseURL     = "http://localhost/servlet/axis2/services/";
+ my $baseURL     = "http://localhost/webservices/";
  my $nameSpace   = "http://soap.admin.openexchange.com";
 
  my $adminmaster = "oxadminmaster";
@@ -349,13 +305,9 @@ containing the filestore already exists!
 
 =item special parameters
 
-Parameters containing dates must have a special syntax as documented
-in the Axis2 source code:
+Parameters containing dates must have a special syntax
 
  the lexical form of the date is '-'? yyyy '-' mm '-' dd zzzzzz?
-
-see org.apache.axis2.databinding.utils.ConverterUtil.java as shipped
-with the Axis2 source code for more details, method convertToDate.
 
 The user object contains two paramaters representing dates,
 C<birthday> and C<anniversary>. Both parameters only require year,

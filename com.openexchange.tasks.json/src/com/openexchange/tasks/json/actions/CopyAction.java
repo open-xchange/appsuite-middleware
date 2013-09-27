@@ -89,7 +89,7 @@ public class CopyAction extends TaskAction {
     protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
         final int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        final JSONObject jData = (JSONObject) req.getRequest().getData();
+        final JSONObject jData = (JSONObject) req.getRequest().requireData();
         final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
 
         final TasksSQLInterface taskInterface = new TasksSQLImpl(req.getSession());

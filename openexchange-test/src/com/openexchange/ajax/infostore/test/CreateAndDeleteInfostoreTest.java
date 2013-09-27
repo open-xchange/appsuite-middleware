@@ -110,4 +110,40 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         infoMgr.deleteAction(expected);
         assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
     }
+
+    public void testCreatingTwoItemWithFiles() throws Exception {
+
+        FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
+        fMgr.insertFolderOnServer(folder);
+
+        {
+            DocumentMetadata expected = new DocumentMetadataImpl();
+            expected.setCreationDate(new Date());
+            expected.setFolderId(folder.getObjectID());
+            expected.setTitle("InfostoreCreateDeleteTest File1");
+            expected.setLastModified(new Date());
+            File file = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+
+            infoMgr.newAction(expected, file);
+            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+
+            DocumentMetadata actual = infoMgr.getAction(expected.getId());
+            assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
+        }
+
+        {
+            DocumentMetadata expected = new DocumentMetadataImpl();
+            expected.setCreationDate(new Date());
+            expected.setFolderId(folder.getObjectID());
+            expected.setTitle("InfostoreCreateDeleteTest File2");
+            expected.setLastModified(new Date());
+            File file = new File(TestInit.getTestProperty("webdavPropertiesFile"));
+
+            infoMgr.newAction(expected, file);
+            assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+
+            DocumentMetadata actual = infoMgr.getAction(expected.getId());
+            assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
+        }
+    }
 }

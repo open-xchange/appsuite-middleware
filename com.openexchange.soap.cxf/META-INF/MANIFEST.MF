@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SOAP Plugin based on Apache CXF
 Bundle-SymbolicName: com.openexchange.soap.cxf
-Bundle-Version: 7.2.2
+Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.soap.cxf.osgi.CXFActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.java,
+Import-Package: com.openexchange.config,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.sun.istack.internal,
@@ -41,6 +42,8 @@ Import-Package: com.openexchange.java,
  javax.activation,
  javax.annotation,
  javax.annotation.processing,
+ javax.crypto,
+ javax.crypto.spec,
  javax.imageio,
  javax.jws,
  javax.jws.soap,
@@ -104,10 +107,10 @@ Import-Package: com.openexchange.java,
  org.xml.sax.ext,
  org.xml.sax.helpers
 Bundle-ClassPath: .,
- lib/cxf-bundle-2.6.1.jar,
- lib/wsdl4j-1.6.2.jar,
- lib/xmlschema-core-2.0.jar,
- lib/neethi-3.0.0.jar
+ lib/cxf-bundle-2.6.8.jar,
+ lib/wsdl4j-1.6.3.jar,
+ lib/xmlschema-core-2.0.3.jar,
+ lib/neethi-3.0.2.jar
 Export-Package: com.openexchange.soap.cxf,
  org.apache.cxf,
  org.apache.cxf.databinding,

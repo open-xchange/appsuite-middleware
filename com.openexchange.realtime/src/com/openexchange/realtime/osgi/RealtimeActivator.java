@@ -61,6 +61,7 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.payload.converter.impl.DefaultPayloadTreeConverter;
+import com.openexchange.realtime.synthetic.DevNullChannel;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -110,6 +111,8 @@ public class RealtimeActivator extends HousekeepingActivator {
         PayloadTreeNode.CONVERTER = converter;
         
         registerService(PayloadTreeConverter.class, converter);
+        
+        registerService(Channel.class, new DevNullChannel());
         
         openTrackers();
     }

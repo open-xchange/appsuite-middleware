@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.MessagingException;
@@ -119,6 +118,8 @@ public final class NewAction extends AbstractMailAction {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final String FROM = MailJSONField.FROM.getKey();
+
     /**
      * Initializes a new {@link NewAction}.
      * @param services
@@ -165,12 +166,8 @@ public final class NewAction extends AbstractMailAction {
              */
             final InternetAddress from;
             try {
-                String value = jMail.getString(MailJSONField.FROM.getKey());
-                final int endPos;
-                if (value.length() > 0 && '[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
-                    value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
-                }
-                from = parseAddressList(value, true, true)[0];
+                final InternetAddress[] fromAddresses = MessageParser.parseAddressKey(FROM, jMail, true);
+                from = null == fromAddresses || 0 == fromAddresses.length ? null : fromAddresses[0];
             } catch (final AddressException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
@@ -192,6 +189,10 @@ public final class NewAction extends AbstractMailAction {
                  * ... and save draft
                  */
                 final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
+                final ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
+                if (null != sendType) {
+                    composedMail.setSendType(sendType);
+                }
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
@@ -280,10 +281,10 @@ public final class NewAction extends AbstractMailAction {
             }
         }
         // Get rfc822 bytes and create corresponding mail message
-        final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+        final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
         final PutNewMailData data;
         {
-            final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().getData())));
+            final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())));
             message.removeHeader("x-original-headers");
             final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
             final InternetAddress fromAddress;

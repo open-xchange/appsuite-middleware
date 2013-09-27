@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
@@ -117,11 +118,12 @@ public class ReminderCopyTask implements CopyUserTaskService {
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
 
+        final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
         final ObjectMapping<Integer> appointmentMapping = copyTools.checkAndExtractGenericMapping(Appointment.class.getName());
         final ObjectMapping<Integer> taskMapping = copyTools.checkAndExtractGenericMapping(Task.class.getName());
 
-        final Map<Integer, ReminderObject> reminders = loadRemindersFromDB(srcCtx, srcCon, srcUser);
-        exchangeIds(reminders, taskMapping, appointmentMapping, dstUser.getId(), dstCtx, dstCon);
+        final Map<Integer, ReminderObject> reminders = loadRemindersFromDB(srcCtx, srcCon, srcUser, folderMapping);
+        exchangeIds(reminders, taskMapping, appointmentMapping, folderMapping, dstUser.getId(), dstCtx, dstCon);
         writeRemindersToDatabase(dstCon, dstCtx, srcCtx, dstUser.getId(), reminders);
 
         final IntegerMapping mapping = new IntegerMapping();
@@ -137,12 +139,15 @@ public class ReminderCopyTask implements CopyUserTaskService {
 
     }
 
-    private Map<Integer, ReminderObject> loadRemindersFromDB(final Context ctx, final Connection con, final User user) throws OXException {
+    private Map<Integer, ReminderObject> loadRemindersFromDB(final Context ctx, final Connection con, final User user, final ObjectMapping<FolderObject> folderMapping) throws OXException {
         final Map<Integer, ReminderObject> reminders = new HashMap<Integer, ReminderObject>();
         final Date end = new Date(Long.MAX_VALUE);
         final ReminderObject[] reminderArray = ReminderStorage.getInstance().selectReminder(ctx, con, user, end);
         for (int i = 0; i < reminderArray.length; i++) {
-            reminders.put(reminderArray[i].getObjectId(), reminderArray[i]);
+            ReminderObject reminderObject = reminderArray[i];
+            if (folderMapping.getSource(reminderObject.getFolder()) != null) {
+                reminders.put(reminderObject.getObjectId(), reminderObject);
+            }
         }
 
         return reminders;
@@ -155,13 +160,16 @@ public class ReminderCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void exchangeIds(final Map<Integer, ReminderObject> reminders, final ObjectMapping<Integer> taskMapping, final ObjectMapping<Integer> appointmentMapping, final int userId, final Context ctx, final Connection con) throws OXException {
+    private void exchangeIds(final Map<Integer, ReminderObject> reminders, final ObjectMapping<Integer> taskMapping, final ObjectMapping<Integer> appointmentMapping, final ObjectMapping<FolderObject> folderMapping, final int userId, final Context ctx, final Connection con) throws OXException {
         try {
             for (final int reminderId : reminders.keySet()) {
                 final int newReminderId = IDGenerator.getId(ctx, com.openexchange.groupware.Types.REMINDER, con);
                 final ReminderObject reminder = reminders.get(reminderId);
                 reminder.setObjectId(newReminderId);
                 reminder.setUser(userId);
+                FolderObject dstFolder = folderMapping.getDestination(folderMapping.getSource(reminder.getFolder()));
+                reminder.setFolder(dstFolder.getObjectID());
+
                 final int targetId = reminder.getTargetId();
                 int newTargetId = targetId;
                 if (reminder.getModule() == com.openexchange.groupware.Types.APPOINTMENT) {

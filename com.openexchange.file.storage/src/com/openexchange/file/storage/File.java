@@ -156,6 +156,10 @@ public interface File {
 
     int getNumberOfVersions();
 
+    Map<String, Object> getMeta();
+
+    void setMeta(Map<String, Object> properties);
+
     File dup();
 
     void copyInto(File other);
@@ -206,7 +210,8 @@ public interface File {
         CURRENT_VERSION("current_version", 710),
         COLOR_LABEL("color_label", 102),
         LAST_MODIFIED_UTC("last_modified_utc", 6),
-        NUMBER_OF_VERSIONS("number_of_versions", 711);
+        NUMBER_OF_VERSIONS("number_of_versions", 711),
+        META("meta", 23);
 
         private final int number;
 
@@ -273,6 +278,8 @@ public interface File {
                 return switcher.lastModifiedUtc(args);
             case NUMBER_OF_VERSIONS:
                 return switcher.numberOfVersions(args);
+            case META:
+                return switcher.meta(args);
             default:
                 throw new IllegalArgumentException("Don't know field: " + getName());
             }
@@ -329,7 +336,7 @@ public interface File {
 
         static {
             for (final Field field : values()) {
-                byNumber.put(field.getNumber(), field);
+                byNumber.put(Integer.valueOf(field.getNumber()), field);
             }
         }
 
@@ -343,7 +350,7 @@ public interface File {
             }
             try {
                 final int number = Integer.parseInt(key);
-                return byNumber.get(number);
+                return byNumber.get(Integer.valueOf(number));
             } catch (final NumberFormatException x) {
                 return null;
             }

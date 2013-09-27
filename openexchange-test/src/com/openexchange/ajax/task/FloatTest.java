@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import java.math.BigDecimal;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -65,7 +66,7 @@ public class FloatTest extends AbstractTaskTest {
     /**
      * @param name
      */
-    public FloatTest(final String name) {
+    public FloatTest(String name) {
         super(name);
     }
 
@@ -75,22 +76,17 @@ public class FloatTest extends AbstractTaskTest {
      */
     public void testFloats() throws Throwable {
         final Task task = new Task();
-        task.setActualCosts(1f);
-        task.setTargetCosts(1f);
+        task.setActualCosts(new BigDecimal("1"));
+        task.setTargetCosts(new BigDecimal("1"));
         task.setParentFolderID(getPrivateFolder());
         final InsertResponse insertR = getClient().execute(new InsertRequest(task, getTimeZone()));
 
-        final GetResponse getR = TaskTools.get(getClient(), new GetRequest(
-            insertR));
-        final Task reload = getR.getTask(getTimeZone());
-        assertEquals("Actual duration differs.", task.getActualDuration(),
-            reload.getActualDuration());
-        assertEquals("Target duration differs.", task.getTargetDuration(),
-            reload.getTargetDuration());
-        assertEquals("Actual costs differs.", Float.valueOf(task.getActualCosts()),
-            Float.valueOf(reload.getActualCosts()));
-        assertEquals("Target costs differs.", Float.valueOf(task.getTargetCosts()),
-            Float.valueOf(reload.getTargetCosts()));
+        GetResponse getR = getClient().execute(new GetRequest(insertR));
+        Task reload = getR.getTask(getTimeZone());
+        assertEquals("Actual duration differs.", task.getActualDuration(), reload.getActualDuration());
+        assertEquals("Target duration differs.", task.getTargetDuration(), reload.getTargetDuration());
+        assertEquals("Actual costs differs.", task.getActualCosts(), reload.getActualCosts());
+        assertEquals("Target costs differs.", task.getTargetCosts(), reload.getTargetCosts());
 
         getClient().execute(new DeleteRequest(reload));
     }

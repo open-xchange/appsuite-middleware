@@ -18,6 +18,8 @@ public class LoginResponse extends AbstractAJAXResponse {
 
     private String jvmRoute;
 
+    private String password;
+
     /**
      * @param response
      */
@@ -65,6 +67,14 @@ public class LoginResponse extends AbstractAJAXResponse {
      */
     public void setJvmRoute(final String jvmRoute) {
         this.jvmRoute = jvmRoute;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    public String getPassword() {
+        return password;
     }
 
 }

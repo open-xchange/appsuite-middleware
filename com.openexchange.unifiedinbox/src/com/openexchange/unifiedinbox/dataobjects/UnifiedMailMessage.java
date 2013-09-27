@@ -75,14 +75,11 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     private static final long serialVersionUID = 9180380482758580171L;
 
     private final MailMessage delegatee;
-
     private String mailId;
-
     private String folder;
-
     private Integer accountId;
-
     private int undelegatedAccountId;
+    private Integer unreadCount;
 
     /**
      * Initializes a new {@link UnifiedMailMessage}.
@@ -923,12 +920,14 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
 
     @Override
     public int getUnreadMessages() {
-        return delegatee.getUnreadMessages();
+        final Integer unreadCount = this.unreadCount;
+        return null == unreadCount ? -1 : unreadCount.intValue(); //delegatee.getUnreadMessages();
     }
 
     @Override
     public void setUnreadMessages(final int unreadMessages) {
-        delegatee.setUnreadMessages(unreadMessages);
+        this.unreadCount = Integer.valueOf(unreadMessages);
+        // delegatee.setUnreadMessages(unreadMessages);
     }
 
 }

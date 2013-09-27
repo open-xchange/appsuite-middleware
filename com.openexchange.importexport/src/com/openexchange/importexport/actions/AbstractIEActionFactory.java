@@ -55,14 +55,18 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.server.ServiceLookup;
 
 public abstract class AbstractIEActionFactory implements AJAXActionServiceFactory {
+
+    protected ServiceLookup services;
 
     /**
      * Initializes a new {@link AbstractIEActionFactory}.
      */
-    protected AbstractIEActionFactory() {
+    protected AbstractIEActionFactory(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     protected abstract Map<Format, AJAXActionService> getActions();

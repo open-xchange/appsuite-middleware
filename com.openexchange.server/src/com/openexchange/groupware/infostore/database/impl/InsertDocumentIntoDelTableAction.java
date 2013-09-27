@@ -69,55 +69,57 @@ public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction
 
     @Override
     protected void undoAction() throws OXException {
-        if(getDocuments().size() == 0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
         final List<DocumentMetadata> documents = getDocuments();
         final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
 
-        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
+        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length << 1);
 
-        for(int j = 0, size = slices.length; j < size; j++) {
-            updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments())){
+        for (int j = 0, size = slices.length; j < size; j++) {
+            final List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments());
+            for (final String deleteStmt : deleteStmts) {
+                updates.add(new Update(deleteStmt) {
 
-                @Override
-                public void fillStatement() throws SQLException {
-                    stmt.setInt(1, getContext().getContextId());
-                }
+                    @Override
+                    public void fillStatement() throws SQLException {
+                        stmt.setInt(1, getContext().getContextId());
+                    }
 
-            });
+                });
+            }
         }
 
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
+        doUpdates(updates);
     }
 
     @Override
     public void perform() throws OXException {
-        if(getDocuments().size() == 0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
 
         final List<DocumentMetadata> documents = getDocuments();
         final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
 
-        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
+        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length << 1);
 
-        for(int j = 0, size = slices.length; j < size; j++) {
-            updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments())){
+        for (int j = 0, size = slices.length; j < size; j++) {
+            final List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments());
+            for (final String deleteStmt : deleteStmts) {
+                updates.add(new Update(deleteStmt){
 
-                @Override
-                public void fillStatement() throws SQLException {
-                    stmt.setInt(1, getContext().getContextId());
-                }
+                    @Override
+                    public void fillStatement() throws SQLException {
+                        stmt.setInt(1, getContext().getContextId());
+                    }
 
-            });
+                });
+            }
         }
 
-        for(final DocumentMetadata doc : documents) {
+        for (final DocumentMetadata doc : documents) {
             updates.add(new Update(getQueryCatalog().getDelDocumentInsert()) {
 
                 @Override
@@ -128,11 +130,7 @@ public class InsertDocumentIntoDelTableAction extends AbstractDocumentListAction
             });
         }
 
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
+        doUpdates(updates);
     }
 
 }

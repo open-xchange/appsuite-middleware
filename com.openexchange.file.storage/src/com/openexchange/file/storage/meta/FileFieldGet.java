@@ -174,4 +174,9 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
         return md( args ).getVersionComment();
     }
 
+    @Override
+    public Object meta(Object... args) {
+        return md( args ).getMeta();
+    }
+
 }

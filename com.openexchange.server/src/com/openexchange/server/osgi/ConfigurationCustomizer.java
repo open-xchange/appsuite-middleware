@@ -58,27 +58,20 @@ import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.ContactConfig;
 
 /**
- * Configuration service is dynamically pushed into configuration keeping
- * classes.
+ * Configuration service is dynamically pushed into configuration keeping classes.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 final class ConfigurationCustomizer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
     private final BundleContext context;
 
-    /**
-     * Default constructor.
-     */
-    public ConfigurationCustomizer(final BundleContext context) {
+    public ConfigurationCustomizer(BundleContext context) {
         super();
         this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+    public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
         final ConfigurationService confService = context.getService(reference);
         ServerConfig.getInstance().initialize(confService);
         ParticipantConfig.getInstance().initialize(confService);
@@ -86,19 +79,13 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer<Configur
         return confService;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
+    public void modifiedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
+    public void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
         // ConfigurationService is not referenced in ContactConfig.
         // ConfigurationService is not referenced in ParticipantConfig.
         ServerConfig.getInstance().shutdown();

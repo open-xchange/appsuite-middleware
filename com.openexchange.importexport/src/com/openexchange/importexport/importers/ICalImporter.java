@@ -55,6 +55,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TObjectProcedure;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,6 +66,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -81,6 +83,8 @@ import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -92,6 +96,7 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
@@ -114,7 +119,12 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  *         Prinz</a> (changes to new interface, bugfixes, maintenance)
  */
 public class ICalImporter extends AbstractImporter {
-	private static final int APP = 0;
+
+    public ICalImporter(ServiceLookup services) {
+        super(services);
+    }
+
+    private static final int APP = 0;
 	private static final int TASK = 1;
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalImporter.class));
@@ -247,13 +257,13 @@ public class ICalImporter extends AbstractImporter {
 					warnings);
 		}
 		if (taskFolderId != -1) {
-			importTask(is, taskFolderId, taskInterface, parser, ctx, defaultTz,
+			importTask(is, optionalParams, taskFolderId, taskInterface, parser, ctx, defaultTz,
 					list, errors, warnings);
 		}
 		return list;
 	}
 
-	private void importTask(final InputStream is, final int taskFolderId,
+	private void importTask(final InputStream is, final Map<String, String[]> optionalParams, final int taskFolderId,
 			final TasksSQLInterface taskInterface, final ICalParser parser,
 			final Context ctx, final TimeZone defaultTz,
 			final List<ImportResult> list, final List<ConversionError> errors,
@@ -278,6 +288,8 @@ public class ICalImporter extends AbstractImporter {
 			warningList.add(warning);
 		}
 
+        boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
+        Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<String, String>() : null;
 		int index = 0;
 		final Iterator<Task> iter = tasks.iterator();
 		while (iter.hasNext()) {
@@ -291,6 +303,16 @@ public class ICalImporter extends AbstractImporter {
 				// TODO: Verify This
 				final Task task = iter.next();
 				task.setParentFolderID(taskFolderId);
+                if (ignoreUIDs && task.containsUid()) {
+                    // perform fixed UID replacement to keep recurring task relations
+                    String originalUID = task.getUid();
+                    String replacedUID = uidReplacements.get(originalUID);
+                    if (null == replacedUID) {
+                        replacedUID = UUID.randomUUID().toString();
+                        uidReplacements.put(originalUID, replacedUID);
+                    }
+                    task.setUid(replacedUID);
+                }
 				try {
 					taskInterface.insertTaskObject(task);
 					importResult.setObjectId(String.valueOf(task
@@ -345,6 +367,9 @@ public class ICalImporter extends AbstractImporter {
 		for (final ConversionError error : errors) {
 			errorMap.put(error.getIndex(), error);
 		}
+		if (null == appointments) {
+		    appointments = Collections.emptyList();
+		}
 
 		sortSeriesMastersFirst(appointments);
 		final Map<Integer, Integer> pos2Master = handleChangeExceptions(appointments);
@@ -367,6 +392,8 @@ public class ICalImporter extends AbstractImporter {
 
 		final boolean suppressNotification = (optionalParams != null && optionalParams
 				.containsKey("suppressNotification"));
+		boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
+		Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<String, String>() : null;
 		while (iter.hasNext()) {
 			final ImportResult importResult = new ImportResult();
 			final ConversionError error = errorMap.get(index);
@@ -378,35 +405,69 @@ public class ICalImporter extends AbstractImporter {
 				appointmentObj.setContext(session.getContext());
 				appointmentObj.setParentFolderID(appointmentFolderId);
 				appointmentObj.setIgnoreConflicts(true);
+				if (ignoreUIDs && appointmentObj.containsUid()) {
+				    // perform fixed UID replacement to keep recurring appointment relations
+				    String originalUID = appointmentObj.getUid();
+				    String replacedUID = uidReplacements.get(originalUID);
+				    if (null == replacedUID) {
+				        replacedUID = UUID.randomUUID().toString();
+				        uidReplacements.put(originalUID, replacedUID);
+				    }
+				    appointmentObj.setUid(replacedUID);
+				}
+				OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+				FolderObject folder = folderAccess.getFolderObject(appointmentFolderId);
+				if (folder.getType() == FolderObject.PUBLIC) {
+				    if (appointmentObj.getParticipants() != null && appointmentObj.getParticipants().length > 0 && appointmentObj.getPrivateFlag()) {
+				        appointmentObj.removeParticipants();
+			            warnings.add(new ConversionWarning(index, ConversionWarning.Code.PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS));
+			            appointmentObj.setPrivateFlag(false);
+			        }
+				}
 				if (suppressNotification) {
 					appointmentObj.setNotification(false);
 				}
 				// Check for possible full-time appointment
 				check4FullTime(appointmentObj);
+				/*
+				 * ensure there is at least one internal participant
+				 */
+				addUserParticipantIfNeeded(session, folder, appointmentObj);
 				try {
 					final boolean isMaster = appointmentObj.containsUid() && !pos2Master.containsKey(index);
 					final boolean isChange = appointmentObj.containsUid() && pos2Master.containsKey(index);
 					final Date changeDate = new Date(Long.MAX_VALUE);
-					final Integer masterID = master2id.get(pos2Master.get(index));
+					Appointment[] conflicts = null;
 					if(isChange){
-						appointmentObj.setRecurrenceID(masterID);
-						appointmentObj.removeUid();
-						if(appointmentObj.containsRecurrenceDatePosition()) {
-                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
-                        } else {
-                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
-                        }
+					    final Integer masterPos = pos2Master.get(index);
+	                    final Integer masterID = master2id.get(masterPos.intValue());
+					    if (masterID == null) {
+	                        /*
+	                         * In this case the current appointment is a change exception but the corresponding master
+	                         * could not be inserted before. As the result list already contains an error message for the
+	                         * master, we simply skip this one without generating an import result.
+	                         */
+	                        continue;
+	                    } else {
+	                        appointmentObj.setRecurrenceID(masterID);
+	                        appointmentObj.removeUid();
+	                        if(appointmentObj.containsRecurrenceDatePosition()) {
+	                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
+	                        } else {
+	                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+	                        }
+
+	                        appointmentObj.setObjectID(masterID);
+	                        conflicts = appointmentInterface.updateAppointmentObject(appointmentObj, appointmentFolderId, changeDate);
+	                    }
+					} else {
+					    conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
 					}
-					final Appointment[] conflicts;
-					if(isChange){
-						appointmentObj.setObjectID(masterID);
-						conflicts = appointmentInterface.updateAppointmentObject(appointmentObj, appointmentFolderId, changeDate);
-					}  else {
-						conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
-					}
+
 					if(isMaster) {
                         master2id.put(index, appointmentObj.getObjectID());
                     }
+
 					if (conflicts == null || conflicts.length == 0) {
 						importResult.setObjectId(String
 								.valueOf(appointmentObj.getObjectID()));
@@ -617,5 +678,55 @@ public class ICalImporter extends AbstractImporter {
 		return String.valueOf(id);
 
 	}
+
+    /**
+     * Adds the user (or the owner of the shared folder) to the list of participants if needed, i.e. the appointment not yet has any
+     * internal user participants.
+     *
+     * @param session The session
+     * @param targetFolder The target folder
+     * @param appointment The appointment to add the participant if needed
+     * @return <code>true</code> if the participant was added, <code>false</code>, otherwise
+     */
+    private static boolean addUserParticipantIfNeeded(ServerSession session, FolderObject targetFolder, Appointment appointment) {
+        Participant[] currentParticipants = appointment.getParticipants();
+        boolean containsInternalParticpiant = false;
+        if (null != currentParticipants && 0 < currentParticipants.length) {
+            for (Participant participant : appointment.getParticipants()) {
+                if (Participant.GROUP == participant.getType() || Participant.RESOURCE == participant.getType() ||
+                    Participant.USER == participant.getType() || Participant.RESOURCEGROUP == participant.getType()) {
+                    containsInternalParticpiant = true;
+                    break;
+                }
+            }
+        }
+        if (false == containsInternalParticpiant) {
+            UserParticipant userParticipant = new UserParticipant(
+                FolderObject.SHARED == targetFolder.getType() ? targetFolder.getCreatedBy() : session.getUserId());
+            userParticipant.setConfirm(Appointment.ACCEPT);
+            Participant[] newParticipants = null == currentParticipants ?
+                new Participant[1] : Arrays.copyOf(currentParticipants, 1 + currentParticipants.length);
+            newParticipants[newParticipants.length - 1] = userParticipant;
+            appointment.setParticipants(newParticipants);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value whether the supplied parameters indicate that UIDs should be ignored during import or not.
+     *
+     * @param optionalParams The optional parameters as passed from the import request, may be <code>null</code>
+     * @return <code>true</code> if UIDs should be ignored, <code>false</code>, otherwise
+     */
+    private static boolean isIgnoreUIDs(Map<String, String[]> optionalParams) {
+        if (null != optionalParams) {
+            String[] value = optionalParams.get("ignoreUIDs");
+            if (null != value && 0 < value.length) {
+                return Boolean.valueOf(value[0]).booleanValue();
+            }
+        }
+        return false;
+    }
 
 }

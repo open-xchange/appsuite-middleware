@@ -85,7 +85,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
 
 /**
- * The {@link CaldavActivator} initialises and publishes the caldav servlet
+ * The {@link CaldavActivator} initializes and publishes the caldav servlet
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

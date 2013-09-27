@@ -61,6 +61,7 @@ import com.openexchange.publish.online.infostore.InfostoreDocumentPublicationSer
 import com.openexchange.publish.online.infostore.InfostorePublicationServlet;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 public class Activator extends HousekeepingActivator {
 
@@ -72,7 +73,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserConfigurationService.class };
+        return new Class<?>[] {HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserPermissionService.class };
     }
 
     @Override
@@ -135,7 +136,7 @@ public class Activator extends HousekeepingActivator {
             return;
         }
 
-        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        final UserPermissionService userConfigs = getService(UserPermissionService.class);
         if(userConfigs == null) {
             return;
         }

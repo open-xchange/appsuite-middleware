@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.internal.performers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -270,6 +271,14 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                     // return duplicateId;
                 }
             }
+
+            final Set<OXException> warnings = storageParameters.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    addWarning(warning);
+                }
+            }
+
             /*
              * Debug out
              */

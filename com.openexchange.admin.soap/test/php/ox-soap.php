@@ -233,7 +233,7 @@ class Resource {
 function getContextClient($host) {
 
     $client = new SoapClient(NULL, array (
-        "location" => "http://" . $host . "/servlet/axis2/services/OXContextService?wsdl",
+        "location" => "http://" . $host . "/webservices/OXContextService?wsdl",
         "style" => SOAP_RPC,
         "uri" => "http://soap.admin.openexchange.com",
         "use" => SOAP_ENCODED
@@ -245,7 +245,7 @@ function getContextClient($host) {
 function getUtilClient($host) {
 
     $client = new SoapClient(NULL, array (
-        "location" => "http://" . $host . "/servlet/axis2/services/OXUtilService?wsdl",
+        "location" => "http://" . $host . "/webservices/OXUtilService?wsdl",
         "style" => SOAP_RPC,
         "uri" => "http://soap.admin.openexchange.com",
         "use" => SOAP_ENCODED
@@ -257,7 +257,7 @@ function getUtilClient($host) {
 function getGroupClient($host) {
 
     $client = new SoapClient(NULL, array (
-        "location" => "http://" . $host . "/servlet/axis2/services/OXGroupService?wsdl",
+        "location" => "http://" . $host . "/webservices/OXGroupService?wsdl",
         "style" => SOAP_RPC,
         "uri" => "http://soap.admin.openexchange.com",
         "use" => SOAP_ENCODED
@@ -269,7 +269,7 @@ function getGroupClient($host) {
 function getResourceClient($host) {
 
     $client = new SoapClient(NULL, array (
-        "location" => "http://" . $host . "/servlet/axis2/services/OXResourceService?wsdl",
+        "location" => "http://" . $host . "/webservices/OXResourceService?wsdl",
         "style" => SOAP_RPC,
         "uri" => "http://soap.admin.openexchange.com",
         "use" => SOAP_ENCODED
@@ -281,7 +281,7 @@ function getResourceClient($host) {
 function getUserClient($host) {
 
     $client = new SoapClient(NULL, array (
-        "location" => "http://" . $host . "/servlet/axis2/services/OXUserService?wsdl",
+        "location" => "http://" . $host . "/webservices/OXUserService?wsdl",
         "style" => SOAP_RPC,
         "uri" => "http://soap.admin.openexchange.com",
         "use" => SOAP_ENCODED

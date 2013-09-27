@@ -1,0 +1,23 @@
+open-xchange-drive-comet (7.4.0-3) stable; urgency=low
+
+  * Eleventh candidate for 7.4.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 24 Sep 2013 09:39:36 +0200
+
+open-xchange-drive-comet (7.4.0-2) stable; urgency=low
+
+  * Tenth candidate for 7.4.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Sep 2013 10:18:47 +0200
+
+open-xchange-drive-comet (7.4.0-1) stable; urgency=low
+
+  * Ninth candidate for 7.4.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 12 Sep 2013 17:16:29 +0200
+
+open-xchange-drive-comet (7.4.0-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 05 Sep 2013 13:46:32 +0200

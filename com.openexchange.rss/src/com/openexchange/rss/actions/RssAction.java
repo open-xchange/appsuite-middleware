@@ -105,7 +105,7 @@ public class RssAction implements AJAXActionService {
         {
             String urlString = "";
             try {
-                JSONObject data = (JSONObject) request.getData();
+                JSONObject data = (JSONObject) request.requireData();
                 JSONArray test = data.optJSONArray("feedUrl");
 
                 final List<URL> urls;
@@ -202,7 +202,7 @@ public class RssAction implements AJAXActionService {
 
 	/**
      * Checks given URL string for syntactical correctness.
-     * 
+     *
      * @param sUrl The URL string
 	 * @throws MalformedURLException If URL string is invalid
      */

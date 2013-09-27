@@ -57,6 +57,16 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 
 
 public class Node1077Test extends CalendarSqlTest {
+    
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        
+        folders.unsharePrivateFolder(session, ctx);
+        folders.unsharePrivateFolder(session2, ctx);
+        folders.unsharePrivateFolder(session3, ctx);
+        folders.unsharePrivateFolder(session4, ctx);
+    }
 
     // Node 1077
     public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {

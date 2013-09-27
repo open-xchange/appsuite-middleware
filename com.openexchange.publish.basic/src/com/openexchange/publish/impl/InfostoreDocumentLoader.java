@@ -56,11 +56,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link InfostoreDocumentLoader}
@@ -73,18 +73,18 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
 
     private final UserService users;
 
-    private final UserConfigurationService userConfigs;
+    private final UserPermissionService userPermissions;
 
     /**
      * Initializes a new {@link InfostoreDocumentLoader}.
      *
      * @param infostoreFacade
      */
-    public InfostoreDocumentLoader(InfostoreFacade infostoreFacade, UserService userService, UserConfigurationService userConfigService) {
+    public InfostoreDocumentLoader(InfostoreFacade infostoreFacade, UserService userService, UserPermissionService userPermissions) {
         super();
         this.infostore = infostoreFacade;
         this.users = userService;
-        this.userConfigs = userConfigService;
+        this.userPermissions = userPermissions;
     }
 
     @Override
@@ -95,7 +95,7 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
             InfostoreFacade.CURRENT_VERSION,
             publication.getContext(),
             loadUser(publication.getContext(), publication.getUserId()),
-            loadUserConfiguration(publication.getContext(), publication.getUserId()));
+            loadUserPermissionBits(publication.getContext(), publication.getUserId()));
         documents.add(document);
         return documents;
     }
@@ -104,8 +104,8 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
         return users.getUser(userId, ctx);
     }
 
-    protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws OXException {
-        return userConfigs.getUserConfiguration(userId, ctx);
+    protected UserPermissionBits loadUserPermissionBits(Context ctx, int userId) throws OXException {
+        return userPermissions.getUserPermissionBits(userId, ctx);
     }
 
 }

@@ -57,24 +57,28 @@ import com.openexchange.datatypes.genericonf.storage.impl.ClearGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
+    
+    
 
     public static final AtomicReference<GenericConfigurationStorageService> REF =
         new AtomicReference<GenericConfigurationStorageService>();
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DBProvider.class };
+        return new Class[] { DBProvider.class, FullPrimaryKeySupportService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        FullPrimaryKeySupportService fullPrimaryKeySupportService = getService(FullPrimaryKeySupportService.class);
         final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
         mySQLGenericConfigurationStorage.setDBProvider(getService(DBProvider.class));
         registerService(DeleteListener.class, new ClearGenConfTables(), null);
-        registerService(CreateTableService.class, new CreateGenConfTables(), null);
+        registerService(CreateTableService.class, new CreateGenConfTables(fullPrimaryKeySupportService), null);
         registerService(GenericConfigurationStorageService.class, mySQLGenericConfigurationStorage, null);
         REF.set(mySQLGenericConfigurationStorage);
     }

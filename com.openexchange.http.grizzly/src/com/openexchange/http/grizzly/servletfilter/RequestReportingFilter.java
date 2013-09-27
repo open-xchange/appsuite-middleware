@@ -86,6 +86,8 @@ public class RequestReportingFilter implements Filter {
 
     private static final String EAS_PING = "Ping";
 
+    private static final String DRIVE_URI = "/ajax/drive";
+
     private final boolean isFilterEnabled;
 
     /**
@@ -94,7 +96,7 @@ public class RequestReportingFilter implements Filter {
      * @throws OXException If initialization fails
      */
     public RequestReportingFilter() throws OXException {
-        final ConfigurationService configService = Services.getService(ConfigurationService.class);
+        final ConfigurationService configService = Services.optService(ConfigurationService.class);
         if (configService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
@@ -111,33 +113,34 @@ public class RequestReportingFilter implements Filter {
         if (isFilterEnabled) {
             final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
             final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-            final boolean longRunning = EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
-            if (longRunning) { // don't track long running requests
+            if (isLongRunning(httpServletRequest)) { // Do not track long running requests
                 chain.doFilter(request, response);
             } else {
-                final RequestWatcherService requestWatcherService = Services.getService(RequestWatcherService.class);
+                final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
                 // Request watcher is enabled but service is missing, bundle not started etc ..
-                if (requestWatcherService == null) {
-                    LOG.warn("RequestWatcherService is not available. Unable to watch this request.");
+                if (requestWatcher == null) {
+                    if (DEBUG) {
+                        LOG.debug(new StringAllocator(RequestWatcherService.class.getSimpleName()).append(" is not available. Unable to watch this request.").toString());
+                    }
                     chain.doFilter(httpServletRequest, httpServletResponse);
                 } else {
-                    final RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
+                    final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
                     try {
-                        // proceed processing
+                        // Proceed processing
                         chain.doFilter(request, response);
 
-                        // debug duration
+                        // Debug duration
                         if (DEBUG) {
                             LOG.debug(new StringAllocator("Request took ").append(requestRegistryEntry.getAge()).append("ms ").append(" for URL: ").append(
                                 httpServletRequest.getRequestURL()).toString());
                         }
                     } finally {
-                        // remove request from registry after processing finished
-                        requestWatcherService.unregisterRequest(requestRegistryEntry);
+                        // Remove request from watcher after processing finished
+                        requestWatcher.unregisterRequest(requestRegistryEntry);
                     }
                 }
             }
-        } else { // filter isn't enabled
+        } else { // Filter is not enabled
             chain.doFilter(request, response);
         }
     }
@@ -145,6 +148,18 @@ public class RequestReportingFilter implements Filter {
     @Override
     public void destroy() {
         // nothing to do here
+    }
+
+    private boolean isLongRunning(final HttpServletRequest httpServletRequest) {
+        return isDriveRequest(httpServletRequest) || isEASRequest(httpServletRequest);
+    }
+
+    private final boolean isDriveRequest(final HttpServletRequest httpServletRequest) {
+        return DRIVE_URI.equals(httpServletRequest.getRequestURI());
+    }
+
+    private final boolean isEASRequest(final HttpServletRequest httpServletRequest) {
+        return EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(httpServletRequest.getParameter(EAS_CMD));
     }
 
 }

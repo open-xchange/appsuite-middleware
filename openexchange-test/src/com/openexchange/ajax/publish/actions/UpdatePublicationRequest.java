@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.actions;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -84,7 +85,7 @@ public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdateP
     @Override
     public Object getBody() throws JSONException {
         try {
-            return new PublicationWriter().write(getPublication(), null);
+            return new PublicationWriter().write(getPublication(), null, TimeZone.getTimeZone("utc"));
         } catch (OXException e) {
             throw new JSONException(e);
         }

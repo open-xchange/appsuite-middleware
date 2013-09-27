@@ -129,6 +129,7 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
             mp.getWritePermission(),
             mp.getDeletePermission(),
             mp.isAdmin());
+
     }
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };

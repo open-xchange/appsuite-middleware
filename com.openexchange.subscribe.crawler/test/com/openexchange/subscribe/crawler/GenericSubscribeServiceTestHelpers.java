@@ -102,6 +102,10 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         SimConfigurationService config = new SimConfigurationService(System.getProperty("openexchange.propdir"));
         //test with the real crawlers (switch for automated tests (Hudson) / local tests)
         config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
+        config.stringProperties.put("com.openexchange.subscribe.crawler.gmx.de", Boolean.TRUE.toString());
+        config.stringProperties.put("com.openexchange.subscribe.crawler.googlemail", Boolean.TRUE.toString());
+        config.stringProperties.put("com.openexchange.subscribe.crawler.web.de", Boolean.TRUE.toString());
+        config.stringProperties.put("com.openexchange.subscribe.crawler.t-online.de", Boolean.TRUE.toString());
         // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
         activator = new Activator();
         crawlers = activator.getCrawlersFromFilesystem(config);

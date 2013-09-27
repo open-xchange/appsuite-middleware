@@ -342,6 +342,9 @@ public class JSONObject extends AbstractJSONValue {
      */
     public JSONObject(final Reader reader) throws JSONException {
         this();
+        if (null == reader) {
+            throw new JSONException("Reader must not be null.");
+        }
         parse(reader, this);
     }
 
@@ -354,7 +357,12 @@ public class JSONObject extends AbstractJSONValue {
      */
     public JSONObject(final String string) throws JSONException {
         this();
-        parse(new UnsynchronizedStringReader(string), this);
+        if (null == string) {
+            throw new JSONException("String must not be null.");
+        }
+        if (!"{}".equals(string)) {
+            parse(new UnsynchronizedStringReader(string), this);
+        }
     }
 
     /**
@@ -1361,10 +1369,13 @@ public class JSONObject extends AbstractJSONValue {
                     break;
                 case VALUE_NUMBER_FLOAT:
                     try {
-                        jo.put(fieldName, jParser.getFloatValue());
-                    } catch (final JsonParseException e) {
-                        // Outside of range of Java float
-                        jo.put(fieldName, jParser.getDoubleValue());
+                        jo.put(fieldName, jParser.getDecimalValue());
+                    } catch (final RuntimeException e) {
+                        final String text = jParser.getText();
+                        if (!"NaN".equals(text)) {
+                            throw new JSONException("JSON parsing failed. Could not convert \"" + text + "\" to a big decimal number.", e);
+                        }
+                        // Discard
                     }
                     break;
                 case VALUE_NUMBER_INT:

@@ -204,13 +204,12 @@ Replaces: open-xchange-lang-sk-sk (<< 6.21.0-0)
 Conflicts: open-xchange-lang-sk-sk (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for sk_SK
 
-Package: open-xchange-l10n-sv-sv
+Package: open-xchange-l10n-sv-se
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-Replaces: open-xchange-lang-community-sv-sv (<< 6.21.0-0)
-Conflicts: open-xchange-lang-community-sv-sv (<< 6.21.0-0)
-Description: Package containing Open-Xchange backend localization for sv_SV
- This localization package are driven by the community.
+Replaces: open-xchange-lang-community-sv-sv (<< 6.21.0-0), open-xchange-l10n-sv-sv (<< 7.4.0)
+Conflicts: open-xchange-lang-community-sv-sv (<< 6.21.0-0), open-xchange-l10n-sv-sv (<< 7.4.0)
+Description: Package containing Open-Xchange backend localization for sv_SE
 
 Package: open-xchange-l10n-tr-tr
 Architecture: all

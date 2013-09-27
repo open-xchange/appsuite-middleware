@@ -67,6 +67,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -76,6 +77,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -156,7 +158,11 @@ public final class AllAction extends AppointmentAction {
 
         final ServerSession session = req.getSession();
         try {
-            final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
+            final AppointmentSqlFactoryService sqlFactoryService = getService();
+            if (null == sqlFactoryService) {
+                throw ServiceExceptionCode.serviceUnavailable(AppointmentSqlFactoryService.class);
+            }
+            final AppointmentSQLInterface appointmentsql = sqlFactoryService.createAppointmentSql(session);
             final CalendarCollectionService calColl = getService(CalendarCollectionService.class);
             final int userId = session.getUserId();
             if (showAppointmentInAllFolders) {

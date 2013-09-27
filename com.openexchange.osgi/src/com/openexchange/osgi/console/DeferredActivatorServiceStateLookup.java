@@ -78,6 +78,7 @@ public class DeferredActivatorServiceStateLookup implements ServiceStateLookup {
      * @param missing The list of symbolic names of missing services
      * @param present The list of symbolic names of available services
      */
+    @Override
     public void setState(final String name, final List<String> missing, final List<String> present) {
         states.put(name, new ServiceStateImpl(name, missing, present));
     }

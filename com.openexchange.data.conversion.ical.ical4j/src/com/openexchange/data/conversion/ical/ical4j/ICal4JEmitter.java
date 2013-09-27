@@ -55,7 +55,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
@@ -70,7 +69,6 @@ import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.Method;
 import net.fortuna.ical4j.model.property.ProdId;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -330,7 +328,7 @@ public class ICal4JEmitter implements ICalEmitter {
         properties.add(prodId);
         properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
         properties.add(CalScale.GREGORIAN);
-        properties.add(Method.REQUEST);
+        properties.add(Method.PUBLISH);
     }
 
     private Calendar getCalendar(final ICalSession session) throws ConversionError {

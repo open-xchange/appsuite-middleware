@@ -484,7 +484,8 @@ public class RdbTaskStorage extends TaskStorage {
             if (tmp instanceof String) {
                 valueLength = Charsets.getBytes((String) tmp, Charsets.UTF_8).length;
             } else {
-                valueLength = 0;
+                // e.g. BigDecimal (inaccurate because dot and 'e' need to be removed.
+                valueLength = tmp.toString().length();
             }
             int tmp2 = -1;
             try {

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="munin-scripts overrides" basedir=".">
+
+    <description>
+        This build file prepares the open-xchange-munin-scripts package
+    </description>
+    
+    <property name="muninPluginsDir" value="${destDir}/usr/share/munin/plugins" />
+    <property name="muninPluginConfDir" value="${destDir}/etc/munin/plugin-conf.d" />
+    
+    <!-- 
+    mkdir -p $(buildroot)/usr/share/munin/plugins/
+	mkdir -p $(buildroot)/etc/munin/plugin-conf.d/
+	# copy files
+	cp ox_munin_scripts/* $(buildroot)/usr/share/munin/plugins/
+	cp plugin-conf.d/* $(buildroot)/etc/munin/plugin-conf.d/
+	chmod a+x $(buildroot)/usr/share/munin/plugins/* 
+	-->
+    
+    <target name="build">
+        <mkdir dir="${muninPluginsDir}"/>
+        <copy todir="${muninPluginsDir}">
+            <fileset dir="ox_munin_scripts"/>
+        </copy>
+        
+        <mkdir dir="${muninPluginConfDir}"/>
+        <copy todir="${muninPluginConfDir}">
+            <fileset dir="plugin-conf.d"/>
+        </copy>
+        
+        <chmod perm="a+x" file="${muninPluginsDir}/*" />
+    </target>
+
+    <target name="dist" description="Target to copy bundle for a build on the build service.">
+        <property name="destinationDir" value="${packageDir}/${projectName}"/>
+        <mkdir dir="${destinationDir}"/>
+        <copy todir="${destinationDir}">
+            <fileset dir="${basedir}">
+                <exclude name="${excludeBuildScript}"/>
+                <exclude name="${binDir}/**"/>
+                <exclude name="${tmpDir}/**"/>
+                <exclude name="packaging/**"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="setVersion"/>
+
+    <target name="clean" description="Cleans the build artifacts." />
+    
+</project>

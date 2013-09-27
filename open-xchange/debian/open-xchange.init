@@ -68,17 +68,19 @@ case "$1" in
 
   stop)
     echo -n "Stopping $DESC: "
+
+    pidfile=/var/run/open-xchange.pid
+    test -e $pidfile && read pid < $pidfile
     ox_stop_daemon $NAME
+    while ox_is_running open-xchange "/opt/open-xchange/etc" $pid; do
+          sleep 1
+    done
     echo "$NAME."
     ;;
 
   restart|force-reload)
     echo -n "Restarting $DESC: "
-        read pid < /var/run/open-xchange.pid
         $0 stop
-        while ox_is_running open-xchange "/opt/open-xchange/etc" $pid; do
-             sleep 1
-        done
         $0 start
     echo "$NAME."
     ;;

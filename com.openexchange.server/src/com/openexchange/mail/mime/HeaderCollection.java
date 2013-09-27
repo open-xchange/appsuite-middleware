@@ -889,7 +889,7 @@ public class HeaderCollection implements Serializable {
             }
             for (int i = 0; i < length; i++) {
                 final char c = str.charAt(i);
-                if (Strings.isWhitespace(c) || (c >= 128)) {
+                if ((c >= 128) || Strings.isWhitespace(c)) {
                     /*
                      * Whitespace or non-ascii character
                      */

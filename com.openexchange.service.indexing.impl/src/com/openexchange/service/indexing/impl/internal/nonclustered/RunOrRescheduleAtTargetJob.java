@@ -83,7 +83,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 
 /**
  * {@link RunOrRescheduleAtTargetJob}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 @DisallowConcurrentExecution
@@ -109,6 +109,12 @@ public class RunOrRescheduleAtTargetJob implements Job {
         try {
             SolrCoreIdentifier identifier = new SolrCoreIdentifier(jobInfo.contextId, jobInfo.userId, jobInfo.getModule());
             HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+            if (null == hazelcast) {
+                // HazelcastInstance not available
+                String msg = "Job cannot be scheduled as Hazelcast instance is not available." + jobInfo.toString();
+                LOG.error(msg);
+                throw new JobExecutionException(msg, false);
+            }
             // FIXME: This core handling stuff has to be centralized and hidden by a transparent layer.
             IMap<String, String> solrCores = hazelcast.getMap("solrCoreMap");
             String owner = solrCores.get(identifier.toString());
@@ -154,7 +160,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
 
                         return;
                     }
-                    
+
                     executeJob(jobInfo);
                 } else {
                     long interval = 0L;
@@ -181,8 +187,8 @@ public class RunOrRescheduleAtTargetJob implements Job {
                     context.getScheduler().unscheduleJob(context.getTrigger().getKey());
                 }
             }
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 

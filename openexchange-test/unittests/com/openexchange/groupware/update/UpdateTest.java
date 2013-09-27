@@ -1,20 +1,20 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.SortedSet;
 import java.util.List;
+import java.util.SortedSet;
 import junit.framework.TestCase;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -180,6 +180,11 @@ public abstract class UpdateTest extends TestCase {
         @Override
         public void releaseWriteConnection(final Context ctx, final Connection con) {
             Database.back(ctx, true, con);
+        }
+
+        @Override
+        public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+            Database.backAfterReading(ctx, con);
         }
     }
 }

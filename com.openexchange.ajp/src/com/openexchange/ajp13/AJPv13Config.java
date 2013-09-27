@@ -52,12 +52,16 @@ package com.openexchange.ajp13;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.ajp13.util.IPTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceExceptionCode;
 
@@ -111,6 +115,14 @@ public final class AJPv13Config implements Initialization {
 
     private boolean logForwardRequest;
 
+    private List<String> knownProxies = Collections.emptyList();
+
+    private String forHeader = "X-Forwarded-For";
+
+    private String protocolHeader = "X-Forwarded-Proto";
+
+    private boolean isConsiderXForwards;
+
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
@@ -145,6 +157,10 @@ public final class AJPv13Config implements Initialization {
         servletConfigs = null;
         ajpBindAddr = null;
         logForwardRequest = false;
+        knownProxies = Collections.emptyList();
+        forHeader = "X-Forwarded-For";
+        protocolHeader = "X-Forwarded-Proto";
+        isConsiderXForwards = false;
     }
 
     private void init() throws OXException {
@@ -195,6 +211,29 @@ public final class AJPv13Config implements Initialization {
 
             this.watcherFrequency = configService.getIntProperty("com.openexchange.requestwatcher.frequency", 30000);
 
+            {
+                String sProxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
+                if (Strings.isEmpty(sProxyCandidates)) {
+                    knownProxies = Collections.emptyList();
+                } else {
+                    List<String> proxyCandidates = IPTools.splitAndTrim(sProxyCandidates, IPTools.COMMA_SEPARATOR);
+                    List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
+                    if (!erroneousIPs.isEmpty()) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: " + erroneousIPs);
+                        }
+                    } else {
+                        this.knownProxies = proxyCandidates;
+                    }
+                }
+            }
+
+            this.forHeader = configService.getProperty("com.openexchange.server.forHeader", "X-Forwarded-For");
+
+            this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
+
+            this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
+
             logInfo(nonExisting ? " (non-existing)" : " (exists)");
 
         } catch (IOException ioEx) {
@@ -228,6 +267,44 @@ public final class AJPv13Config implements Initialization {
 
     private AJPv13Config() {
         super();
+    }
+
+    /**
+     * Gets if we should consider X-Forward-Headers that reach the backend.
+     * Those can be spoofed by clients so we have to make sure to consider the headers only if the proxy/proxies reliably override those
+     * headers for incoming requests.
+     * Disabled by default as we now use relative redirects for Grizzly.
+     * @return
+     */
+    public static boolean isConsiderXForwards() {
+        return instance.isConsiderXForwards;
+    }
+
+    /**
+     * Gets the knownProxies
+     *
+     * @return The knownProxies
+     */
+    public static List<String> getKnownProxies() {
+        return instance.knownProxies;
+    }
+
+    /**
+     * Gets the forHeader
+     *
+     * @return The forHeader
+     */
+    public static String getForHeader() {
+        return instance.forHeader;
+    }
+
+    /**
+     * Gets the protocolHeader
+     *
+     * @return The protocolHeader
+     */
+    public static String getProtocolHeader() {
+        return instance.protocolHeader;
     }
 
     public static int getAJPPort() {

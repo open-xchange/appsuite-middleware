@@ -61,12 +61,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.FileStorage;
 
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
@@ -217,7 +217,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
 
         } catch (final URISyntaxException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
             return null;
         } finally {
             if(stmt != null) {

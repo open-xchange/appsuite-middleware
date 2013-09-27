@@ -242,17 +242,39 @@ public final class Conversations {
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    @SuppressWarnings("unchecked")
     public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
+        final List<MailMessage> messages = messagesFor(imapFolder, limit, fetchProfile, byEnvelope);
+        if (null == messages || messages.isEmpty()) {
+            return Collections.<Conversation> emptyList();
+        }
+        final List<Conversation> conversations = new ArrayList<Conversation>(messages.size());
+        for (final MailMessage message : messages) {
+            conversations.add(new Conversation(message));
+        }
+        return conversations;
+    }
+
+    /**
+     * Retrieves messages for specified IMAP folder.
+     *
+     * @param imapFolder The IMAP folder
+     * @param limit The limit
+     * @param fetchProfile The fetch profile
+     * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
+     * @return The messages with conversation information (References, In-Reply-To, Message-Id)
+     * @throws MessagingException If a messaging error occurs
+     */
+    @SuppressWarnings("unchecked")
+    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
              * Empty folder...
              */
-            return Collections.<Conversation> emptyList();
+            return Collections.<MailMessage> emptyList();
         }
         final org.apache.commons.logging.Log log = LOG;
-        return (List<Conversation>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (List<MailMessage>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
@@ -307,11 +329,7 @@ public final class Conversations {
                         }
                         // Handle remaining responses
                         protocol.notifyResponseHandlers(r);
-                        final List<Conversation> conversations = new ArrayList<Conversation>(mails.size());
-                        for (final MailMessage mail : mails) {
-                            conversations.add(new Conversation(mail));
-                        }
-                        return conversations;
+                        return mails;
                     } catch (final MessagingException e) {
                         throw new ProtocolException(e.getMessage(), e);
                     } catch (final OXException e) {
@@ -333,7 +351,7 @@ public final class Conversations {
                 } else {
                     protocol.handleResult(response);
                 }
-                return Collections.<Conversation> emptyList();
+                return Collections.<MailMessage> emptyList();
             }
         }));
     }

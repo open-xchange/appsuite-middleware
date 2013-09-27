@@ -69,7 +69,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.tools.oxfolder.GABRestorerMBean;
 import com.openexchange.tools.oxfolder.GABRestorerMBeanImpl;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -107,6 +106,7 @@ public class GABRestorerCLT {
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
         int contextId = -1;
+        boolean error = true;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -122,19 +122,19 @@ public class GABRestorerCLT {
                     } catch (final NumberFormatException e) {
                         System.err.println("Port parameter is not a number: " + val);
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                     if (port < 1 || port > 65535) {
                         System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                 }
             }
             if (!cmd.hasOption('c')) {
                 System.err.println("Missing context identifier.");
                 printHelp();
-                System.exit(0);
+                System.exit(1);
             } else {
                 final String optionValue = cmd.getOptionValue('c');
                 try {
@@ -142,7 +142,7 @@ public class GABRestorerCLT {
                 } catch (final NumberFormatException e) {
                     System.err.println("Context parameter is not a number: " + optionValue);
                     printHelp();
-                    System.exit(0);
+                    System.exit(1);
                 }
             }
 
@@ -168,19 +168,24 @@ public class GABRestorerCLT {
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
-                mbsc.invoke(
-                    OXFolderProperties.getObjectName(GABRestorerMBeanImpl.class.getName(), GABRestorerMBean.GAB_DOMAIN),
-                    "restoreDefaultPermissions",
-                    new Object[] { Integer.valueOf(contextId) },
-                    null);
+                final String[] signature = new String[] { int.class.getName() };
+                final Object[] params = new Object[] { Integer.valueOf(contextId) };
+                mbsc.invoke(OXFolderProperties.getObjectName(GABRestorerMBeanImpl.class.getName(), GABRestorerMBean.GAB_DOMAIN), "restoreDefaultPermissions", params, signature);
 
             } catch (final MalformedObjectNameException e) {
                 // Cannot occur
                 com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GABRestorerCLT.class)).error(e.getMessage(), e);
             } finally {
-                Streams.close(jmxConnector);
+                if (null != jmxConnector) {
+                    try {
+                        jmxConnector.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
             }
 
+            error = false;
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
@@ -208,6 +213,10 @@ public class GABRestorerCLT {
         } catch (final RuntimeException e) {
             System.err.println("Problem in runtime: " + e.getMessage());
             printHelp();
+        } finally {
+            if (error) {
+                System.exit(1);
+            }
         }
     }
 

@@ -49,12 +49,11 @@
 
 package com.openexchange.oauth.internal;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.logging.Log;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 
 /**
@@ -62,41 +61,68 @@ import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CallbackRegistry implements CustomRedirectURLDetermination, Runnable{
+public class CallbackRegistry implements CustomRedirectURLDetermination, Runnable {
 
-	private final ConcurrentHashMap<String, String> tokenMap = new ConcurrentHashMap<String, String>();
-	private final ConcurrentHashMap<String, Long> timestamps = new ConcurrentHashMap<String, Long>();
+    private static final class UrlAndStamp {
 
-	public void add(String callbackUrl, String token) {
-		timestamps.put(token, System.currentTimeMillis());
-		tokenMap.put(token, callbackUrl);
-	}
+        final String callbackUrl;
+        final long stamp;
 
-	@Override
-	public String getURL(HttpServletRequest req) {
-		if (tokenMap.isEmpty()) {
-			return null;
-		}
-		String token = req.getParameter("oauth_token");
-		String callbackURL = tokenMap.remove(token);
-		if (callbackURL != null) {
-			timestamps.remove(token);
-		}
-		return callbackURL;
-	}
+        protected UrlAndStamp(final String callbackUrl, final long stamp) {
+            super();
+            this.callbackUrl = callbackUrl;
+            this.stamp = stamp;
+        }
+    }
 
-	@Override
-	public void run() {
-		long threshhold = System.currentTimeMillis() - 600000;
+    // ----------------------------------------------------------------------------------- //
 
-		for(Map.Entry<String, Long> timestamped: new HashMap<String, Long>(timestamps).entrySet()) {
-			if (threshhold < timestamped.getValue()) {
-				tokenMap.remove(timestamped.getKey());
-				timestamps.remove(timestamped.getKey());
-			}
-		}
-	}
+    private final ConcurrentMap<String, UrlAndStamp> tokenMap;
 
+    /**
+     * Initializes a new {@link CallbackRegistry}.
+     */
+    public CallbackRegistry() {
+        super();
+        tokenMap = new ConcurrentHashMap<String, UrlAndStamp>();
+    }
 
+    /**
+     * Adds given call-back URL and token pair.
+     *
+     * @param callbackUrl The call-back URL
+     * @param token The token
+     */
+    public void add(final String callbackUrl, final String token) {
+        tokenMap.put(token, new UrlAndStamp(callbackUrl, System.currentTimeMillis()));
+    }
+
+    @Override
+    public String getURL(final HttpServletRequest req) {
+        if (tokenMap.isEmpty()) {
+            return null;
+        }
+        final String token = req.getParameter("oauth_token");
+        if (null == token) {
+            return null;
+        }
+        final UrlAndStamp urlAndStamp = tokenMap.remove(token);
+        return null == urlAndStamp ? null : urlAndStamp.callbackUrl;
+    }
+
+    @Override
+    public void run() {
+        try {
+            final long threshhold = System.currentTimeMillis() - 600000;
+            for (final Iterator<UrlAndStamp> iter = tokenMap.values().iterator(); iter.hasNext();) {
+                if (threshhold < iter.next().stamp) {
+                    iter.remove();
+                }
+            }
+        } catch (final Exception e) {
+            final Log logger = com.openexchange.log.Log.loggerFor(CallbackRegistry.class);
+            logger.error(e.getMessage(), e);
+        }
+    }
 
 }

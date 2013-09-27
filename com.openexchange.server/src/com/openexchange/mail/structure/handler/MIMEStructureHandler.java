@@ -110,6 +110,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -199,10 +200,30 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     @Override
     public boolean handleEnd(final MailMessage mail) throws OXException {
+        final JSONObject mailJsonObject = mailJsonObjectQueue.getFirst();
+        /*
+         * Message identifier and folder full name
+         */
+        final String mailId = mail.getMailId();
+        if (null != mailId) {
+            try {
+                mailJsonObject.put(KEY_ID, mailId);
+            } catch (final JSONException e) {
+                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
+        final String folder = mail.getFolder();
+        if (null != folder) {
+            try {
+                mailJsonObject.put(MailJSONField.FOLDER.getKey(), MailFolderUtility.prepareFullname(mail.getAccountId(), folder));
+            } catch (final JSONException e) {
+                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
         /*
          * Probe for "headers" existence
          */
-        final JSONObject headersJsonObject = mailJsonObjectQueue.getFirst().optJSONObject(KEY_HEADERS);
+        final JSONObject headersJsonObject = mailJsonObject.optJSONObject(KEY_HEADERS);
         if (null == headersJsonObject) {
             return true;
         }
@@ -644,6 +665,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             final long size = part.getSize();
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
+                bodyObject.put("exact_size", Streams.countInputStream(part.getInputStream()));
             } else {
                 final ContentType contentType = part.getContentType();
                 if (contentType.startsWith(PRIMARY_TEXT)) {
@@ -662,8 +684,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                             final MatcherReplacer mr = new MatcherReplacer(m, html);
                             final StringBuilder replaceBuffer = new StringBuilder(html.length());
                             if (m.find()) {
-                                replaceBuffer.append("<meta content=\"").append(toLowerCase(contentType.getBaseType()));
-                                replaceBuffer.append("; charset=UTF-8\" http-equiv=\"Content-Type\" />");
+                                replaceBuffer.append("<meta http-equiv=\"Content-Type\" content=\"").append(toLowerCase(contentType.getBaseType()));
+                                replaceBuffer.append("; charset=UTF-8\" />");
                                 final String replacement = replaceBuffer.toString();
                                 replaceBuffer.setLength(0);
                                 mr.appendLiteralReplacement(replaceBuffer, replacement);
@@ -699,6 +721,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             bodyObject.put(KEY_ID, id);
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
+                bodyObject.put("exact_size", Streams.countInputStream(isp.getInputStream()));
             } else {
                 if (contentType.startsWith(PRIMARY_TEXT)) {
                     // Check for special "text/comma-separated-values" Content-Type

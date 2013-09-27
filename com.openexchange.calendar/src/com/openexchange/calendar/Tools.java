@@ -49,6 +49,8 @@
 
 package com.openexchange.calendar;
 
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,6 +73,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -224,6 +227,29 @@ public final class Tools {
             DBUtils.closeResources(rs, stmt, con, true, ctx);
         }
         return folderId;
+    }
+
+    /**
+     * Generates a SQL IN string.
+     */
+    public static String getSqlInString(final TIntSet arr) {
+        if (arr == null) {
+            return null;
+        }
+        final int length = arr.size();
+        if (length <= 0) {
+            return null;
+        }
+        final TIntIterator iter = arr.iterator();
+        final StringAllocator sb = new StringAllocator(length << 2);
+        sb.append('(');
+        sb.append(iter.next());
+        for (int a = 1; a < length; a++) {
+            sb.append(',');
+            sb.append(iter.next());
+        }
+        sb.append(')');
+        return sb.toString();
     }
 
 }

@@ -181,6 +181,7 @@ public final class MessageParser {
             }
         }
         final String lcct = toLowerCase(contentType.getBaseType());
+        final String name = contentType.getNameParameter();
         /*
          * Parse part dependent on its MIME type
          */
@@ -205,7 +206,7 @@ public final class MessageParser {
             for (int i = 0; i < count; i++) {
                 parsePart(multipart.get(i), handler);
             }
-        } else if (isMessage(lcct)) {
+        } else if (isMessage(lcct, name)) {
             /*
              * Pass as a common part
              */
@@ -277,9 +278,13 @@ public final class MessageParser {
      * Checks if content type matches <code>message/rfc822</code> content type.
      *
      * @param contentType The content type
+     * @param name the file name, may be null
      * @return <code>true</code> if content type matches <code>message/rfc822</code>; otherwise <code>false</code>
      */
-    private static boolean isMessage(final String contentType) {
+    private static boolean isMessage(final String contentType, String name) {
+        if (name != null && name.endsWith(".eml")) {
+            return true;
+        }
         return contentType.startsWith(PRIMARY_RFC822, 0);
     }
 

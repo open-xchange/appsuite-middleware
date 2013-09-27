@@ -57,6 +57,7 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -398,7 +399,15 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
-
+    
+    private static String encode(String value) {
+        try {
+            return MimeUtility.encodeText(value, "UTF-8", "Q");
+        } catch (UnsupportedEncodingException e) {
+            return value;
+        }
+    }
+    
     @Override
     public String createSnippet(final Snippet snippet) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
@@ -412,7 +421,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             for (final Map.Entry<String, Object> entry : snippet.getProperties().entrySet()) {
                 final String name = entry.getKey();
                 if (!IGNORABLES.contains(name)) {
-                    mimeMessage.setHeader(name, MimeUtility.encodeText(entry.getValue().toString(), "UTF-8", "Q"));
+                    mimeMessage.setHeader(name,encode(entry.getValue().toString()));
                 }
             }
             // Set other stuff
@@ -573,7 +582,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                         propNames.add(Snippet.PROP_CREATED_BY);
                         break;
                     case DISPLAY_NAME:
-                        updateMessage.setHeader(Property.DISPLAY_NAME.getPropName(), snippet.getDisplayName());
+                        updateMessage.setHeader(Property.DISPLAY_NAME.getPropName(), encode(snippet.getDisplayName()));
                         propNames.add(Snippet.PROP_DISPLAY_NAME);
                         break;
                     case MODULE:
@@ -597,7 +606,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
                 while (nonMatchingHeaders.hasMoreElements()) {
                     final Header hdr = nonMatchingHeaders.nextElement();
-                    updateMessage.setHeader(hdr.getName(), hdr.getValue());
+                    updateMessage.setHeader(hdr.getName(), encode(hdr.getValue()));
                 }
             }
             // Check for content

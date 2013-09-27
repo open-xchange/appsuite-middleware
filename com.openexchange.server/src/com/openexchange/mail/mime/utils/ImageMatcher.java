@@ -80,10 +80,6 @@ public final class ImageMatcher {
 
     private static final int GROUP_IMG_ID = 13;
 
-    private static String REGEX_IMAGE_URL = null;
-
-    private static String REGEX_FILE_URL = null;
-
     /**
      * The pattern to look-up Open-Xchange image URLs inside HTML content.
      *
@@ -95,7 +91,7 @@ public final class ImageMatcher {
      * }
      * </pre>
      */
-    private static Pattern PATTERN_REF_IMG = null;
+    private static volatile Pattern PATTERN_REF_IMG = null;
 
     /**
      * Sets the prefix service.
@@ -107,21 +103,19 @@ public final class ImageMatcher {
      */
     public static void setPrefixService(final DispatcherPrefixService prefixService) {
         if (null == prefixService) {
-            REGEX_IMAGE_URL = null;
-            REGEX_FILE_URL = null;
             PATTERN_REF_IMG = null;
         } else {
             String prefix = DefaultDispatcherPrefixService.getInstance().getPrefix();
             if (prefix.charAt(0) == '/') {
                 prefix = prefix.substring(1);
             }
-            REGEX_IMAGE_URL =
+            final String regexImageUrl =
                 "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
-            REGEX_FILE_URL =
+            final String regexFileUrl =
                 "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + "file([^\"]+?)(?:\\?|&amp;|&)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
 
             PATTERN_REF_IMG =
-                Pattern.compile("(?:" + REGEX_FILE_URL + ")|(?:" + REGEX_IMAGE_URL + ')', Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+                Pattern.compile("(?:" + regexFileUrl + ")|(?:" + regexImageUrl + ')', Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         }
     }
 

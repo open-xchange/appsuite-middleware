@@ -47,24 +47,25 @@
  *
  */
 
-
 package com.openexchange.realtime.presence.subscribe.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import org.osgi.framework.BundleContext;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
+import com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTask;
+import com.openexchange.realtime.presence.subscribe.database.AddUUIDColumnTask;
 import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;
 import com.openexchange.realtime.presence.subscribe.database.PresenceSubscriptionsTable;
-import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
 import com.openexchange.realtime.presence.subscribe.impl.SubscriptionServiceImpl;
 import com.openexchange.user.UserService;
 
@@ -75,50 +76,40 @@ import com.openexchange.user.UserService;
  */
 public class PresenceSubscribeActivator extends HousekeepingActivator {
 
-//    private BundleActivator testFragment;
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class };
+        return new Class<?>[] {
+            ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class,
+            ConfigurationService.class, FullPrimaryKeySupportService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final DatabaseService dbService = getService(DatabaseService.class);
-        SubscriptionsSQL.db = dbService;
+        // SubscriptionsSQL.db = dbService;
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));
         registerService(CreateTableService.class, new PresenceSubscriptionsTable());
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
-            @Override
-            public Collection<? extends UpdateTask> getUpdateTasks() {
-                return Arrays.asList(new CreatePresenceSubscriptionDB(dbService));
-            }
-        });
+        final FullPrimaryKeySupportService fullPrimaryKeySupportService = getService(FullPrimaryKeySupportService.class);
+        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+            registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
-//        try {
-//            Class<? extends BundleActivator> clazz = (Class<? extends BundleActivator>) Class.forName("com.openexchange.realtime.presence.subscribe.test.osgi.Activator");
-//            testFragment = clazz.newInstance();
-//            testFragment.start(context);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+                @Override
+                public Collection<? extends UpdateTask> getUpdateTasks() {
+                    return Arrays.asList(
+                        new CreatePresenceSubscriptionDB(dbService),
+                        new AddUUIDColumnTask(dbService),
+                        new AddPrimaryKeyTask(dbService));
+                }
+            });
+        } else {
+            registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+
+                @Override
+                public Collection<? extends UpdateTask> getUpdateTasks() {
+                    return Arrays.asList(new CreatePresenceSubscriptionDB(dbService), new AddUUIDColumnTask(dbService));
+                }
+            });
+        }
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
-    @Override
-    public void stop(BundleContext context) throws Exception {
-//        try {
-//            if (testFragment != null) {
-//                testFragment.stop(context);
-//            }
-//        } catch (Exception e) {
-//
-//        }
-        super.stop(context);
-    }
-
 }

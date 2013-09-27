@@ -156,6 +156,7 @@ public final class ServiceHolderInit implements Initialization {
             LOG.error("Service holder initialization has not been started", new Throwable());
             return;
         }
+        ServiceHolder.disableServiceUsageInspection();
     }
 
 }

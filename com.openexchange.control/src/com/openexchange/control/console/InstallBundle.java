@@ -92,6 +92,7 @@ public final class InstallBundle extends AbstractConsoleHandler {
             } else {
                 exc.printStackTrace();
             }
+            exit();
         } finally {
             try {
                 close();

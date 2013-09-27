@@ -90,7 +90,7 @@ public final class ClearAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final JSONArray ja = (JSONArray) req.getRequest().getData();
+            final JSONArray ja = (JSONArray) req.getRequest().requireData();
             final boolean hardDelete = req.optBool(AJAXServlet.PARAMETER_HARDDELETE, false);
             /*
              * Clear folder sequentially

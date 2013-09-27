@@ -67,7 +67,7 @@ public class ITipJSONServlet extends MultipleAdapterServletNew {
 
     @Override
     protected boolean hasModulePermission(ServerSession session) {
-        return session.getUserConfiguration().hasCalendar();
+        return session.getUserPermissionBits().hasCalendar();
     }
 
 }

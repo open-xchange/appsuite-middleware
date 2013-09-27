@@ -64,10 +64,19 @@ ox_set_JAVA_BIN
 
 
 test -z "$SERVERNAME" && SERVERNAME=$HOSTNAME
+
+test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xmx280M"
+
+JAVA_OPTS="${JAVA_OXCMD_OPTS} \
+-Djava.awt.headless=true \
+-Dopenexchange.propdir=$PROPERTIESDIR"
+
+CLASSPATH="-classpath @classpath@"
+
 test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
 
 ADMINCP=$(for jar in $LIBPATH/*.jar; do
     echo -n "${jar}:"
     done)
 
-$JAVA_BIN $JAVA_OXCMD_OPTS -classpath ${ADMINCP} com.openexchange.admin.console.StatisticTools "$@"
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH:$ADMINCP com.openexchange.admin.console.StatisticTools "$@"

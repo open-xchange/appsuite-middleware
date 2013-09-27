@@ -83,7 +83,7 @@ public final class UserConfigurationDeleteListener implements DeleteListener {
 				/*
 				 * Delete user configuration
 				 */
-				RdbUserConfigurationStorage.deleteUserConfiguration(deleteEvent.getId(), writeCon, deleteEvent
+				RdbUserPermissionBitsStorage.deleteUserPermissionBits(deleteEvent.getId(), writeCon, deleteEvent
 						.getContext());
 			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);

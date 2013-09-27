@@ -59,9 +59,9 @@ import com.openexchange.datatypes.genericonf.FormElement;
  * {@link SubscriptionSource}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SubscriptionSource {
+
     private String id;
     private String displayName;
     private String icon;
@@ -69,6 +69,13 @@ public class SubscriptionSource {
     private SubscribeService subscribeService;
     private int folderModule = 0;
     private int priority = 0;
+
+    /**
+     * Initializes a new {@link SubscriptionSource}.
+     */
+    public SubscriptionSource() {
+        super();
+    }
 
     public String getId() {
         return id;

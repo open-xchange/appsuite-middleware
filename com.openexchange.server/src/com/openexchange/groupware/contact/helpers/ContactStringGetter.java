@@ -53,6 +53,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -92,12 +94,32 @@ public class ContactStringGetter implements ContactSwitcher {
         }
 	}
 
-	public static final String stringifyTimestamp(final Date date) {
-	    if (date == null) {
-	        return "";
-	    }
-	    return Long.toString(date.getTime());
-	}
+    public static final String stringifyTimestamp(final Date date) {
+        if (date == null) {
+            return "";
+        }
+        return Long.toString(date.getTime());
+    }
+
+    public static String stringifyDistributionList(DistributionListEntryObject[] distList) {
+        if (null == distList || 0 == distList.length) {
+            return "";
+        }
+        StringAllocator allocator = new StringAllocator();
+        for (DistributionListEntryObject member : distList) {
+            if (null != member) {
+                if (null != member.getEmailaddress()) {
+                    allocator.append(member.getEmailaddress().replaceAll(";", "/;"));
+                }
+                allocator.append(';');
+                if (null != member.getDisplayname()) {
+                    allocator.append(member.getDisplayname().replaceAll(";", "/;"));
+                }
+                allocator.append(';');
+            }
+        }
+        return allocator.toString();
+    }
 
 	/* DELEGATE */
 	public ContactSwitcher getDelegate() {
@@ -221,7 +243,7 @@ public class ContactStringGetter implements ContactSwitcher {
 
 	@Override
     public Object distributionlist(final Object... objects) throws OXException {
-		return stringify(delegate.distributionlist(objects));
+		return stringifyDistributionList((DistributionListEntryObject[]) delegate.distributionlist(objects));
 	}
 
 	@Override

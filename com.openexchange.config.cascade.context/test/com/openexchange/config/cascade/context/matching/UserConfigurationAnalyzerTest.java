@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Set;
 import junit.framework.TestCase;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
  */
 public class UserConfigurationAnalyzerTest extends TestCase {
     public void testSample() {
-        UserConfiguration config = new UserConfiguration(0, 0, new int[0], null);
+        UserPermissionBits config = new UserPermissionBits(0, 0, 0);
         config.setActiveSync(true);
         config.setEditPassword(true);
         config.setInfostore(true);

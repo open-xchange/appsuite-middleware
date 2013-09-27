@@ -2,12 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Xerces Compatibility Plugin for Sun JVM
 Bundle-SymbolicName: com.openexchange.xerces.sun
-Bundle-Version: 7.2.2
+Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: lib/xerces.jar
+Bundle-ClassPath: lib/xerces.jar,
+ lib/serializer-2.7.1.jar,
+ lib/xml-apis-1.3.04.jar
 Eclipse-BuddyPolicy: registered
-Export-Package: org.apache.xerces.impl,
+Export-Package: org.apache.xerces.dom,
+ org.apache.xerces.impl,
+ org.apache.xerces.impl.dv,
+ org.apache.xerces.impl.dv.util,
+ org.apache.xerces.impl.validation,
  org.apache.xerces.jaxp,
  org.apache.xerces.jaxp.datatype,
  org.apache.xerces.jaxp.validation,
@@ -25,11 +31,16 @@ Import-Package: javax.xml,
  javax.xml.transform.stream,
  javax.xml.validation,
  org.w3c.dom,
- org.w3c.dom.html,
- org.xml.sax,
- org.xml.sax.ext,
- org.xml.sax.helpers,
+ org.w3c.dom.bootstrap,
+ org.w3c.dom.css,
  org.w3c.dom.events,
+ org.w3c.dom.html,
  org.w3c.dom.ls,
  org.w3c.dom.ranges,
- org.w3c.dom.traversal
+ org.w3c.dom.stylesheets,
+ org.w3c.dom.traversal,
+ org.w3c.dom.views,
+ org.w3c.dom.xpath,
+ org.xml.sax,
+ org.xml.sax.ext,
+ org.xml.sax.helpers

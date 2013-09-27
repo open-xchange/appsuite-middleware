@@ -94,6 +94,11 @@ public class ConfigurableDBProvider implements DBProvider {
         releaseReadConnection(ctx,con);
     }
 
+    @Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        releaseReadConnection(ctx,con);
+    }
+
     public String getDriver() {
         return driver;
     }

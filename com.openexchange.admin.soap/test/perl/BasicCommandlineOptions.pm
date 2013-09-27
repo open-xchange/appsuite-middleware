@@ -9,7 +9,7 @@ sub new {
 	my $self = {};
 	my $shost = $ENV{"SOAPHOST"} || "127.0.0.1";
 	my $mpw = $ENV{"MASTERPW"} || "secret";
-	$self->{'basisUrl'} = "http://$shost/servlet/axis2/services/";
+	$self->{'basisUrl'} = "http://$shost/webservices/";
 	$self->{'serviceNs'} = "http://soap.admin.openexchange.com";
 	$self->{'Context'} = SOAP::Data->type("Context")->value(
 			     \SOAP::Data->value(

@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.facebook.osgi;
 
-import static com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
@@ -63,12 +62,12 @@ import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingService;
 import com.openexchange.messaging.facebook.FacebookOAuthAccountDeleteListener;
+import com.openexchange.messaging.facebook.services.Services;
 import com.openexchange.messaging.facebook.session.FacebookEventHandler;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -98,47 +97,9 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingActivator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
-        final Object service = getService(clazz);
-        getServiceRegistry().addService(clazz, service);
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingActivator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
-        getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-
-                secretService = new WhiteboardSecretService(context);
-                secretService.open();
-                registry.addService(SecretService.class, secretService);
-            }
-
-
+            Services.setServiceLookup(this);
             /*
              * Some init stuff
              */
@@ -174,15 +135,12 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            cleanUp();
+            super.stopBundle();
 
             FacebookConstants.drop();
             FacebookConfiguration.getInstance().drop();
 
-            /*
-             * Clear service registry
-             */
-            getServiceRegistry().clearRegistry();
+            Services.setServiceLookup(null);
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingActivator.class)).error(e.getMessage(), e);
             throw e;

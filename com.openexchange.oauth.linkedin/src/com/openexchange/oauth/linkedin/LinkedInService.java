@@ -54,6 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link LinkedInService}
@@ -61,6 +62,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public interface LinkedInService {
+
+    static final String SERVICE_ID = "com.openexchange.socialplugin.linkedin";
 
     public List<Contact> getContacts(Session session, int user, int contextId, int accountId) throws OXException;
 
@@ -70,6 +73,7 @@ public interface LinkedInService {
      * @return all data on a contact identified by e-mail (special feature, only available with extended API keys)
      */
 	public JSONObject getFullProfileByEMail(List<String> email, Session session, int user, int contextId, int accountId) throws OXException;
+    public JSONObject getFullProfileByFirstAndLastName(String firstName, String lastName, ServerSession session, int uid, int cid, int id) throws OXException;
 
     /**
      * @return all data on a contact identified by id
@@ -100,4 +104,5 @@ public interface LinkedInService {
 	 * @return The messages in the user's inbox
 	 */
 	public JSONObject getMessageInbox(Session session, int i, int j, int k) throws OXException;
+
 }

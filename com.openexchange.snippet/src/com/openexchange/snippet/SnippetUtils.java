@@ -51,13 +51,12 @@ package com.openexchange.snippet;
 
 import java.util.regex.Pattern;
 import com.openexchange.html.HtmlService;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.snippet.internal.Services;
 
 /**
  * {@link SnippetUtils} - Some utility methods for Snippet module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SnippetUtils {
@@ -73,12 +72,12 @@ public final class SnippetUtils {
 
     /**
      * Sanitizes given Snippet content.
-     * 
+     *
      * @param content The content
      * @return The sanitized content
      */
     public static String sanitizeContent(final String content) {
-        if (isEmpty(content) || !HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
+        if (isEmpty(content) || !HTMLDetector.containsHTMLTags(content, true)) {
             return content;
         }
         final HtmlService service = Services.getService(HtmlService.class);

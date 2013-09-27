@@ -59,6 +59,8 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -89,6 +91,7 @@ import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
@@ -127,6 +130,8 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.utils.CP932EmojiMapping;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -695,7 +700,7 @@ public final class MimeMessageUtility {
 
     private static boolean hasAttachments0(final BODYSTRUCTURE bodystructure) {
         boolean found = false;
-        for (int i = 0; (i < bodystructure.bodies.length) && !found; i++) {
+        for (int i = 0; !found && (i < bodystructure.bodies.length); i++) {
             found |= hasAttachments(bodystructure.bodies[i]);
         }
         return found;
@@ -832,6 +837,13 @@ public final class MimeMessageUtility {
                         String decodeWord = MimeUtility.decodeWord(encodedWord);
                         if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
                             decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "GB18030"));
+                        }
+                        sb.append(decodeWord);
+                    } else if (MessageUtility.isShiftJis(charset)) {
+                        final String encodedWord = m.group();
+                        String decodeWord = MimeUtility.decodeWord(encodedWord);
+                        if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+                            decodeWord = CP932EmojiMapping.getInstance().replaceIn(MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932")));
                         }
                         sb.append(decodeWord);
                     } else {
@@ -2065,6 +2077,93 @@ public final class MimeMessageUtility {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    /**
+     * Gets the stream of specified part's raw data.
+     *
+     * @param part Either a message or a body part
+     * @return The stream of specified part's raw data (with the optional empty starting line omitted)
+     * @throws IOException If an I/O error occurs
+     */
+    public static InputStream getStreamFromPart(final Part part) throws IOException {
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pin = new PipedInputStream(pos);
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    part.writeTo(pos);
+                } catch (final Exception e) {
+                    // Ignore
+                    LOG.warn("Error while writing part to stream", e);
+                } finally {
+                    Streams.close(pos);
+                }
+            }
+        }, "MimeMessageUtility.getStreamFromPart").start();
+        return pin;
+    }
+
+    /**
+     * Gets the stream of specified part's raw data.
+     *
+     * @param part Either a message or a body part
+     * @return The stream of specified part's raw data (with the optional empty starting line omitted)
+     * @throws OXException If an I/O error occurs
+     */
+    public static InputStream getStreamFromMailPart(final MailPart part) throws OXException {
+        try {
+            final PipedOutputStream pos = new PipedOutputStream();
+            final PipedInputStream pin = new PipedInputStream(pos);
+            new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        part.writeTo(pos);
+                    } catch (final Exception e) {
+                        // Ignore
+                        LOG.warn("Error while writing part to stream", e);
+                    } finally {
+                        Streams.close(pos);
+                    }
+                }
+            }, "MimeMessageUtility.getStreamFromMailPart").start();
+            return pin;
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the multipart content from specified part.
+     *
+     * @param part The part
+     * @return The multipart or <code>null</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static Multipart getMultipartContentFrom(final Part part) throws MessagingException, IOException {
+        if (null == part) {
+            return null;
+        }
+        final String contentType = getHeader("Content-Type", null, part);
+        if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
+            return null;
+        }
+        final Object content = part.getContent();
+        if (content instanceof Multipart) {
+            return (Multipart) content;
+        }
+        if (content instanceof InputStream) {
+            return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+        }
+        return null;
     }
 
 }

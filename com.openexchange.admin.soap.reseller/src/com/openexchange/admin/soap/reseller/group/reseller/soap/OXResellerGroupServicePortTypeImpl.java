@@ -92,8 +92,8 @@ public class OXResellerGroupServicePortTypeImpl implements OXResellerGroupServic
         final OXGroupInterface groupInterface = getGroupInterface();
         try {
             final List<User> list = parameters.members;
-            if (null == list) {
-                return;
+            if (null == list || list.isEmpty()) {
+                throw new InvalidDataException_Exception("Missing members");
             }
             final com.openexchange.admin.rmi.dataobjects.User[] members = new com.openexchange.admin.rmi.dataobjects.User[list.size()];
             for (int i = 0; i < members.length; i++) {
@@ -226,6 +226,9 @@ public class OXResellerGroupServicePortTypeImpl implements OXResellerGroupServic
         final OXGroupInterface groupInterface = getGroupInterface();
         try {
             final List<User> list = parameters.members;
+            if (null == list || list.isEmpty()) {
+                throw new InvalidDataException_Exception("Missing members");
+            }
             final com.openexchange.admin.rmi.dataobjects.User[] members = new com.openexchange.admin.rmi.dataobjects.User[list.size()];
             for (int i = 0; i < members.length; i++) {
                 members[i] = soap2User(list.get(i));

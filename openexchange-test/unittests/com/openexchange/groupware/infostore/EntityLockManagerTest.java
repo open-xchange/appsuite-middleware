@@ -60,7 +60,7 @@ public class EntityLockManagerTest extends TestCase {
 	@Override
 	public void tearDown() throws Exception {
 		for(final int id : clean) {
-			lockManager.unlock(id, ctx, user, userConfig);
+			lockManager.unlock(id, ctx, user);
 		}
 		lockManager.commit();
 		lockManager.finish();
@@ -77,10 +77,10 @@ public class EntityLockManagerTest extends TestCase {
 	}
 
 	public void testFindLocks() throws Exception {
-		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
 		assertEquals(1, locks.size());
 		final Lock lock = locks.get(0);
 		assertEquals(lockId, lock.getId());
@@ -91,70 +91,70 @@ public class EntityLockManagerTest extends TestCase {
 	}
 
 	public void testIsLocked() throws Exception {
-		assertFalse("Should not be locked", lockManager.isLocked(entity, ctx, user, userConfig));
+		assertFalse("Should not be locked", lockManager.isLocked(entity, ctx, user));
 
-		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		assertTrue("Should be locked", lockManager.isLocked(entity, ctx, user, userConfig));
+		assertTrue("Should be locked", lockManager.isLocked(entity, ctx, user));
 	}
 
 	public void testUnlock() throws Exception {
-		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		lockManager.unlock(lockId, ctx, user, userConfig);
+		lockManager.unlock(lockId, ctx, user);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
 		assertTrue(locks.isEmpty());
 
 	}
 
 	public void testTimeout() throws Exception {
-		final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
 		assertEquals(0, locks.size());
 
 	}
 
 	public void testTimeoutTriggersListener() throws Exception {
-	    final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+	    final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
         final LockExpirySpy spy = new LockExpirySpy();
         lockManager.addExpiryListener(spy);
 	    clean.add(lockId);
 
-        final List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+        final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
         assertEquals("A lock remained, though it should have timed out", 0, locks.size());
         assertEquals("Expected notification about expired lock", 1, spy.getExpired().size());
 	}
 
 	public void testRemoveAll() throws Exception {
-		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
-		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
-		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		lockManager.removeAll(entity, ctx, user, userConfig);
+		lockManager.removeAll(entity, ctx, user);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
 		assertTrue(locks.isEmpty());
 
 	}
 
 	public void testTransferLocks() throws Exception {
-		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
-		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
-		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
+		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 		lockManager.transferLocks(ctx, user.getId(), user.getId()+1);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user, userConfig);
+		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
 		assertEquals("locks are assigned to dest", 3,locks.size());
 		for(final Lock lock : locks) {
 			assertEquals(user.getId()+1, lock.getOwner());

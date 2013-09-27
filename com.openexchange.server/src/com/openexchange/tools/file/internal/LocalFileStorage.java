@@ -65,15 +65,13 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.java.Streams;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
-import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
-public class LocalFileStorage implements FileStorage {
+public class LocalFileStorage extends DefaultFileStorage {
 
     /**
      * Default number of files or directories per directory.
@@ -104,11 +102,6 @@ public class LocalFileStorage implements FileStorage {
      * Depth of directories.
      */
     private final transient int depth = DEFAULT_DEPTH;
-
-    /**
-     * Storage Directory for the File Storage
-     */
-    private final File storage;
 
     /**
      * Whether the path to this filestorage has already been created
@@ -156,22 +149,24 @@ public class LocalFileStorage implements FileStorage {
      * @param entries number of entries per sub directory.
      * @throws OXException if a problem occurs while creating the file storage.
      */
-    public LocalFileStorage(final URI uri) throws OXException {
-        super();
-        storage = new File(uri);
-       	alreadyInitialized = storage.exists();
+    public LocalFileStorage(final URI uri) {
+        this(new File(uri));
+    }
+
+    public LocalFileStorage(File storage) {
+        super(storage);
+        alreadyInitialized = storage.exists();
     }
 
     /**
      * Constructor for subclassing to run tests. It should be removed an the subclass should implement the whole FileStorage interface.
      */
     protected LocalFileStorage() {
-        super();
-        storage = assignStorage();
+        this(assignStorage());
     }
 
     //Ugly workaround because someone insisted to make storage final:
-	private File assignStorage() {
+	private static File assignStorage() {
 		try {
         	return File.createTempFile("test-storage", "tmp");
 		} catch (final IOException e) {
@@ -389,19 +384,6 @@ public class LocalFileStorage implements FileStorage {
     }
 
     /**
-     * Gets a file from the file storage.
-     *
-     * @param identifier identifier of the file.
-     * @return an inputstream from that the file can be read once.
-     * @throws OXException if an error occurs.
-     */
-    @Override
-    public InputStream getFile(final String identifier) throws OXException {
-
-        return load(identifier);
-    }
-
-    /**
      * @return a complete list of files in this filestorage
      */
     @Override
@@ -430,21 +412,6 @@ public class LocalFileStorage implements FileStorage {
         } else {
             allIds.add(prefix + file.getName());
         }
-    }
-
-    @Override
-    public long getFileSize(final String name) throws OXException {
-        final File dataFile = new File(storage, name);
-        if (!dataFile.exists()) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(dataFile.getAbsoluteFile().getAbsolutePath());
-        }
-        return dataFile.length();
-    }
-
-    @Override
-    public String getMimeType(final String name) {
-        final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
-        return map.getContentType(new File(storage, name));
     }
 
     /**

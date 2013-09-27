@@ -4,7 +4,7 @@ use strict;
 use SOAP::Lite;
 
 # basics
-my $baseURL     = "http://localhost/servlet/axis2/services/";
+my $baseURL     = "http://localhost/webservices/";
 my $nameSpace   = "http://soap.admin.openexchange.com";
 
 my $adminmaster = "oxadminmaster";

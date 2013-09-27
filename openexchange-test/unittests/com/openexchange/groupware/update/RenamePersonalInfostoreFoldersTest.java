@@ -1,6 +1,5 @@
 package com.openexchange.groupware.update;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,8 +8,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.tasks.InfostoreRenamePersonalInfostoreFolders;
 
@@ -149,7 +148,7 @@ public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 			if(null != stmt) {
 				stmt.close();
 			}
-			Database.back(existing_ctx_id, true, con);
+			Database.backAfterReading(existing_ctx_id, con);
 		}
 		return names;
 	}

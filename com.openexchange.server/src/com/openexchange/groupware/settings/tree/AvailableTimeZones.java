@@ -51,6 +51,7 @@ package com.openexchange.groupware.settings.tree;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
@@ -102,18 +103,49 @@ public class AvailableTimeZones implements PreferencesItemService {
                 try {
                     final JSONObject json = new JSONObject();
                     final I18nServices i18nServices = I18nServices.getInstance();
+                    Object[][] timezones = new Object[TimeZone.getAvailableIDs().length][3];
+                    
+                    int i = 0;
+                    long now = System.currentTimeMillis();
                     for (final String timeZoneID : TimeZone.getAvailableIDs()) {
                         final int len = timeZoneID.length();
                         if (len >= 4 || SPECIAL.contains(toUpperCase(timeZoneID))) {
-                            json.put(timeZoneID, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));                            
+                            int offset = TimeZone.getTimeZone(timeZoneID).getOffset(now);
+                            timezones[i][0] = offset;
+                            timezones[i][1] = timeZoneID;
+                            timezones[i][2] = prefix(offset, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));
                         }
+                        i++;
                     }
+                    
+                    for(i = 0; i < timezones.length; i++) {
+                        Object[] entry = timezones[i];
+                        if (entry == null || entry[1] == null || entry[2] == null) {
+                            continue;
+                        }
+                        json.put((String) entry[1], (String) entry[2]);
+                    }
+                    
                     setting.setSingleValue(json);
+                
                 } catch (final JSONException e) {
                     throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
             }
 
+            private String prefix(int offset, String translate) {
+                int seconds = offset / 1000;
+                
+                int hours = seconds / 3600;
+                int extraMinutes = (seconds % 3600) / 60;  
+                if (offset > 0) {
+                    return String.format("(GMT+%02d:%02d) %s", hours, extraMinutes, translate);
+                } else {
+                    return String.format("(GMT-%02d:%02d) %s", Math.abs(hours), Math.abs(extraMinutes), translate);
+                }
+            }
+            
+            
             /** ASCII-wise to upper-case */
             private String toUpperCase(final CharSequence chars) {
                 if (null == chars) {

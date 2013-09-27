@@ -55,12 +55,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
+import javax.management.openmbean.CompositeData;
 import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,6 +94,10 @@ public class TransportHandler {
     public void sendReport(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear, final boolean savereport) throws IOException, JSONException {
         final JSONObject metadata = buildJSONObject(totals, macDetails, contextDetails, versions, clc, clcYear);
 
+        send(metadata, savereport);
+    }
+
+    private void send(JSONObject metadata, boolean savereport) throws IOException {
         final ReportConfiguration reportConfiguration = new ReportConfiguration();
 
         final StringBuffer report = new StringBuffer();
@@ -150,7 +156,7 @@ public class TransportHandler {
                 System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
             }
             in.close();
-        }
+        }        
     }
 
     private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {
@@ -231,6 +237,10 @@ public class TransportHandler {
         retval.put("clientlogincountyear", clientlogincountyear);
 
         return retval;
+    }
+
+    public void sendASReport(CompositeData report, boolean savereport) throws IOException, JSONException {
+        send(new JSONObject((String)report.get("data")), savereport);
     }
 
 }

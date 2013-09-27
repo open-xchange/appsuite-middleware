@@ -63,9 +63,9 @@ import com.openexchange.service.indexing.impl.internal.Services;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RecurringJobsManager {
-    
+
     static final String JOB_MAP = "recurringJobs-2";
-    
+
     public static JobInfoWrapper addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
@@ -73,16 +73,16 @@ public class RecurringJobsManager {
         if (ttl <= 0) {
             ttl = 0;
         }
-        
+
         JobInfoWrapper old = recurringJobs.get(jobId);
         if (old != null) {
             infoWrapper.updateLastRun(old.getLastRun());
         }
-        
+
         recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
         return old;
     }
-    
+
     public static boolean touchJob(String jobId) {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
@@ -90,7 +90,7 @@ public class RecurringJobsManager {
         if (infoWrapper == null) {
             return false;
         }
-        
+
         infoWrapper.touch();
         long ttl = infoWrapper.getJobTimeout();
         if (ttl <= 0) {
@@ -99,19 +99,22 @@ public class RecurringJobsManager {
         recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
         return true;
     }
-    
+
     public static JobInfoWrapper getJob(String jobId) {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        if (null == hazelcast) {
+            return null;
+        }
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
         return recurringJobs.get(jobId);
     }
-    
+
     public static int getJobCount() {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
         return recurringJobs.size();
     }
-    
+
     public static List<String> getJobIds() {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);

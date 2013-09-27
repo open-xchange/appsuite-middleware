@@ -96,7 +96,11 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             for (final String servlet : servlets) {
-                httpService.unregister(servlet);
+                try {
+                    httpService.unregister(servlet);
+                } catch (final Exception e) {
+                    LOG.warn("Failed to unregister servlet alias: " + servlet, e);
+                }
             }
         }
     }

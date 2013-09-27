@@ -42,34 +42,34 @@
         <maxWarmingSearchers>5</maxWarmingSearchers>
     </query>
 
-    <requestDispatcher handleSelect="true">
-        <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048000" />
-        <httpCaching never304="true" />
-    </requestDispatcher>
+    <!-- For debugging purposes only --><!-- -->
+    <!-- <requestDispatcher handleSelect="true"> -->
+    <!-- <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048000" /> -->
+    <!-- <httpCaching never304="true" /> -->
+    <!-- </requestDispatcher> -->
+    <!-- <requestHandler name="standard" class="solr.SearchHandler" default="false"> -->
+    <!-- <lst name="defaults"> -->
+    <!-- <str name="echoParams">explicit</str> -->
+    <!-- </lst> -->
+    <!-- </requestHandler> -->
 
-    <!-- For debugging purposes only -->
-    <requestHandler name="standard" class="solr.SearchHandler" default="false">
-        <lst name="defaults">
-            <str name="echoParams">explicit</str>
-        </lst>
-    </requestHandler>
-
-    <requestHandler name="simpleSearch" class="solr.SearchHandler">
+    <requestHandler name="simpleSearch" class="solr.SearchHandler" default="true">
         <lst name="invariants">
             <str name="defType">edismax</str>
             <str name="echoParams">explicit</str>
             <float name="tie">0.01</float>
             <str name="qf">
-                content_gen^1.0 content_de^1.0 content_en^1.0 content_fr^1.0 content_it^1.0 subject_gen^3.0 subject_de^3.0 subject_en^3.0
-                subject_fr^3.0 subject_it^3.0 from^2.0 to^2.0
+                content_gen^1.0 content_de^1.0 content_en^1.0 content_fr^1.0 content_it^1.0 subject_gen^5.0 subject_de^5.0 subject_en^5.0
+                subject_fr^5.0 subject_it^5.0 from^10.0 to^10.0
                 cc^1.0 bcc^1.0
             </str>
         </lst>
         <lst name="defaults">
-            <str name="fl">*</str> <!-- Envelope Felder -->
+            <str name="fl">*</str>
         </lst>
 
         <arr name="components">
+            <!-- TODO: evt. eigene component zum Aufloesen der Sprachfelder -->
             <str>query</str>
         </arr>
     </requestHandler>
@@ -95,26 +95,15 @@
     <requestHandler name="customSearch" class="solr.SearchHandler">
         <lst name="defaults">
             <str name="fl">*</str>
-            <!-- <str name="df">full_name</str> -->
             <str name="q.op">OR</str>
         </lst>
 
-        <!-- Use this only if "components" is not specified to use the defaults -->
-        <!--
-            <arr name="first-components">
-            <str>queryModifier</str>
-            </arr>
-        -->
         <arr name="components">
             <str>query</str>
-            <!-- Uncomment for debugging purposes only -->
-            <!--
-                <str>debug</str>
-            -->
         </arr>
     </requestHandler>
 
-    <requestHandler name="spotlight_from" class="solr.SearchHandler" default="true">
+    <requestHandler name="spotlight_from" class="solr.SearchHandler">
         <lst name="defaults">
             <str name="df">from</str>
             <str name="echoParams">explicit</str>
@@ -122,7 +111,7 @@
         </lst>
     </requestHandler>
 
-    <requestHandler name="spotlight_to" class="solr.SearchHandler" default="true">
+    <requestHandler name="spotlight_to" class="solr.SearchHandler">
         <lst name="defaults">
             <str name="df">to</str>
             <str name="echoParams">explicit</str>
@@ -130,23 +119,15 @@
         </lst>
     </requestHandler>
 
-<!--     <requestHandler name="spotlight_subject" class="solr.SearchHandler" default="true"> -->
-<!--         <lst name="defaults"> -->
-<!--             <str name="df">subject</str> -->
-<!--             <str name="echoParams">explicit</str> -->
-<!--             <str name="fl">uuid,account,full_name,id,from,to,cc,bcc,subject_gen,subject_en,subject_de,subject_fr,subject_it</str> -->
-<!--         </lst> -->
-<!--     </requestHandler> -->
-    
-    <requestHandler name="spotlight_subject" class="solr.SearchHandler" default="true">
+    <requestHandler name="spotlight_subject" class="solr.SearchHandler">
         <lst name="invariants">
             <str name="defType">edismax</str>
             <str name="echoParams">explicit</str>
             <float name="tie">0.01</float>
             <str name="qf">
-                subject_gen^100.0 subject_en^100.0 subject_de^100.0 subject_fr^100.0 subject_it^100.0
+                subject_gen^1.0 subject_en^1.0 subject_de^1.0 subject_fr^1.0 subject_it^1.0
             </str>
-<!--             <str name="mm">75%</str> -->
+            <!-- <str name="mm">75%</str> -->
         </lst>
         <lst name="defaults">
             <str name="fl">uuid,account,full_name,id,from,to,cc,bcc,subject_gen,subject_en,subject_de,subject_fr,subject_it</str>
@@ -166,67 +147,6 @@
             <str name="fl">uuid,account,full_name,id,from,to,cc,bcc,subject_gen,subject_en,subject_de,subject_fr,subject_it</str>
         </lst>
     </requestHandler>
-    
-    <!-- <requestHandler name="personsAndTopics" class="solr.SearchHandler"> -->
-    <!-- <lst name="invariants"> -->
-    <!-- <str name="defType">edismax</str> -->
-    <!-- <str name="echoParams">explicit</str> -->
-    <!-- <float name="tie">0.01</float> -->
-    <!-- <str name="qf"> -->
-    <!-- from^100.0 to^100.0 cc^50.0 bcc^5.0 subject_gen^100.0 subject_en^100.0 subject_de^100.0 subject_fr^100.0 subject_it^100.0 -->
-    <!-- </str> -->
-    <!-- <str name="hl">true</str> -->
-    <!-- <str name="hl.snippets">1</str> -->
-    <!-- <str name="hl.usePhraseHighlighter">true</str> -->
-    <!-- <str name="hl.requireFieldMatch">true</str> -->
-    <!-- </lst> -->
-    <!-- <lst name="defaults"> -->
-    <!-- <str name="fl">uuid from to cc bcc subject_gen subject_en subject_de subject_fr subject_it</str> -->
-    <!-- </lst> -->
-
-    <!-- <arr name="components"> -->
-    <!-- <str>query</str> -->
-    <!-- <str>highlight</str> -->
-    <!-- </arr> -->
-    <!-- </requestHandler> -->
-
-    <!-- <requestHandler name="searchForPerson" class="solr.SearchHandler"> -->
-    <!-- <lst name="invariants"> -->
-    <!-- <str name="defType">edismax</str> -->
-    <!-- <str name="echoParams">explicit</str> -->
-    <!-- <float name="tie">0.01</float> -->
-    <!-- <str name="qf"> -->
-    <!-- from^100.0 to^100.0 cc^50.0 bcc^5.0 -->
-    <!-- </str> -->
-    <!-- </lst> -->
-    <!-- <lst name="defaults"> -->
-    <!-- <str name="fl">uuid account full_name id from to cc bcc subject_gen subject_en subject_de subject_fr subject_it</str> -->
-    <!-- </lst> -->
-
-    <!-- <arr name="components"> -->
-    <!-- <str>query</str> -->
-    <!-- </arr> -->
-    <!-- </requestHandler> -->
-
-    <!-- <requestHandler name="searchForTopic" class="solr.SearchHandler"> -->
-    <!-- <lst name="invariants"> -->
-    <!-- <str name="defType">edismax</str> -->
-    <!-- <str name="echoParams">explicit</str> -->
-    <!-- <float name="tie">0.01</float> -->
-    <!-- <str name="qf"> -->
-    <!-- subject_gen^100.0 subject_en^100.0 subject_de^100.0 subject_fr^100.0 subject_it^100.0 -->
-    <!-- </str> -->
-    <!-- <str name="mm">75%</str> -->
-    <!-- </lst> -->
-    <!-- <lst name="defaults"> -->
-    <!-- <str name="fl">uuid account full_name id from to cc bcc subject_gen subject_en subject_de subject_fr subject_it</str> -->
-    <!-- </lst> -->
-
-    <!-- <arr name="components"> -->
-    <!-- <str>query</str> -->
-    <!-- <str>debug</str> -->
-    <!-- </arr> -->
-    <!-- </requestHandler> -->
 
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
         <lst name="defaults">

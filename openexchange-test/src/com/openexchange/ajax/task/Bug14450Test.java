@@ -49,12 +49,10 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.java.Autoboxing.F;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -104,7 +102,7 @@ public class Bug14450Test extends AbstractTaskTest {
         super.tearDown();
     }
 
-    public void testGetRequest() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testGetRequest() throws OXException, IOException, JSONException, OXException {
         GetRequest request = new GetRequest(task.getParentFolderID(), task.getObjectID());
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);
@@ -113,12 +111,12 @@ public class Bug14450Test extends AbstractTaskTest {
         assertFalse("Task contains actual duration but should not.", toTest.containsActualDuration());
         assertEquals("Actual duration has wrong value.", task.getActualDuration(), toTest.getActualDuration());
         assertFalse("Task contains target costs but should not.", toTest.containsTargetCosts());
-        assertEquals("Target costs has wrong value.", F(task.getTargetCosts()), F(toTest.getTargetCosts()));
+        assertEquals("Target costs has wrong value.", task.getTargetCosts(), toTest.getTargetCosts());
         assertFalse("Task contains actual costs but should not.", toTest.containsActualCosts());
-        assertEquals("Actual costs has wrong value.", F(task.getActualCosts()), F(toTest.getActualCosts()));
+        assertEquals("Actual costs has wrong value.", task.getActualCosts(), toTest.getActualCosts());
     }
 
-    public void testListRequest() throws OXException, IOException, SAXException, JSONException {
+    public void testListRequest() throws OXException, IOException, JSONException {
         ListIDs ids = ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() });
         ListRequest request = new ListRequest(ids, new int[] { Task.TARGET_DURATION, Task.ACTUAL_DURATION, Task.TARGET_COSTS, Task.ACTUAL_COSTS });
         CommonListResponse response = client.execute(request);

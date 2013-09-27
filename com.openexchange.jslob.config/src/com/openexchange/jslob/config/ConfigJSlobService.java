@@ -80,6 +80,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Charsets;
@@ -91,6 +92,7 @@ import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.log.LogFactory;
@@ -100,7 +102,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link ConfigJSlobService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigJSlobService implements JSlobService {
@@ -132,11 +134,11 @@ public final class ConfigJSlobService implements JSlobService {
 
     private final int LOB2CONFIG = 1;
 
-    private final Map<String, JSlob> sharedJSlobs;
+    private final Map<String, SharedJSlobService> sharedJSlobs;
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public ConfigJSlobService(final ServiceLookup services) throws OXException {
@@ -153,12 +155,12 @@ public final class ConfigJSlobService implements JSlobService {
             readPerfMap(file, configTreeEquivalents);
         }
 
-        sharedJSlobs = new ConcurrentHashMap<String, JSlob>();
+        sharedJSlobs = new ConcurrentHashMap<String, SharedJSlobService>();
     }
 
     /**
      * Gets the service look-up.
-     * 
+     *
      * @return The service look-up
      */
     public ServiceLookup getServices() {
@@ -247,7 +249,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Gets the <code>SessiondService</code>.
-     * 
+     *
      * @return The <code>SessiondService</code>
      */
     private SessiondService getSessiondService() {
@@ -263,12 +265,13 @@ public final class ConfigJSlobService implements JSlobService {
         final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
         boolean coreIncluded = false;
         for (final JSlob jSlob : list) {
-            
+
             addConfigTreeToJslob(session, new DefaultJSlob(jSlob));
             ret.add(get(jSlob.getId().getId(), session));
             if (jSlob.getId().getId().equals(CORE)) {
                 coreIncluded = true;
             }
+
         }
         final ConfigView view = getConfigViewFactory().getView(userId, contextId);
         for (final Entry<String, Map<String, AttributedProperty>> entry : preferenceItems.entrySet()) {
@@ -288,13 +291,37 @@ public final class ConfigJSlobService implements JSlobService {
             jSlob.setId(new JSlobId(SERVICE_ID, CORE, userId, contextId));
             addConfigTreeToJslob(session, jSlob);
         }
+        
+        for (JSlob jSlob : ret) {
+            String id = jSlob.getId().getId();
+            for (String sharedId : sharedJSlobs.keySet()) {
+                if (sharedId.startsWith(id)) {
+                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
+                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                    JSONObject jsonObject = jSlob.getJsonObject();
+                    JSONObject sharedObject = sharedJSlob.getJsonObject();
+                    for (String key : sharedObject.keySet()) {
+                        if (sharedObject.hasAndNotNull(key)) {
+                            try {
+                                jsonObject.put(newId, sharedObject);
+                            } catch (JSONException e) {
+                                // should not happen
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return ret;
     }
 
     @Override
-    public Collection<JSlob> getShared() {
-        // return sharedJSlobs;
-        return null;
+    public Collection<JSlob> getShared(Session session) throws OXException {
+        List<JSlob> retval = new LinkedList<JSlob>();
+        for (SharedJSlobService service : sharedJSlobs.values()) {
+            retval.add(service.getJSlob(session));
+        }
+        return retval;
     }
 
     @Override
@@ -314,6 +341,7 @@ public final class ConfigJSlobService implements JSlobService {
                 jsonJSlob = new DefaultJSlob(opt);
             }
         }
+        
         /*
          * Fill with config cascade settings
          */
@@ -326,19 +354,110 @@ public final class ConfigJSlobService implements JSlobService {
         }
 
         addConfigTreeToJslob(session, jsonJSlob);
+        
+        // Search for shared jslobs and merge them if neccessary
+        for (String sharedId : sharedJSlobs.keySet()) {
+            if (sharedId.startsWith(id)) {
+                JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
+                String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                JSONObject jsonObject = jsonJSlob.getJsonObject();
+                JSONObject sharedObject = sharedJSlob.getJsonObject();
+                for (String key : sharedObject.keySet()) {
+                    if (sharedObject.hasAndNotNull(key)) {
+                        try {
+                            jsonObject.put(newId, sharedObject);
+                        } catch (JSONException e) {
+                            // should not happen
+                        }
+                    }
+                }
+            }
+        }
 
         return jsonJSlob;
     }
 
     @Override
-    public JSlob getShared(final String id) {
-        // final Set<String> keySet = sharedJSlobs.keySet();
-        return sharedJSlobs.get(id);
+    public List<JSlob> get(List<String> ids, Session session) throws OXException {
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        final int size = ids.size();
+
+        final List<JSlob> jSlobs;
+        {
+            final List<JSlobId> jSlobIds = new ArrayList<JSlobId>(size);
+            for (final String sId : ids) {
+                jSlobIds.add(new JSlobId(SERVICE_ID, sId, userId, contextId));
+            }
+            jSlobs = getStorage().list(jSlobIds);
+        }
+
+        final List<JSlob> ret = new ArrayList<JSlob>(size);
+        for (int i = 0; i < size; i++) {
+            final JSlob opt = jSlobs.get(i);
+            final String id = ids.get(i);
+            final DefaultJSlob jsonJSlob;
+            {
+                if (null == opt) {
+                    jsonJSlob = new DefaultJSlob(new JSONObject());
+                    jsonJSlob.setId(new JSlobId(SERVICE_ID, id, userId, contextId));
+                } else {
+                    jsonJSlob = new DefaultJSlob(opt);
+                }
+            }
+            /*
+             * Fill with config cascade settings
+             */
+            final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
+            if (null != attributes) {
+                final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                for (final AttributedProperty attributedProperty : attributes.values()) {
+                    add2JSlob(attributedProperty, jsonJSlob, view);
+                }
+            }
+
+            addConfigTreeToJslob(session, jsonJSlob);
+
+            ret.add(jsonJSlob);
+        }
+        
+        for (JSlob jslob : ret) {
+            String id = jslob.getId().getId();
+            // Search for shared jslobs and merge them if neccessary
+            for (String sharedId : sharedJSlobs.keySet()) {
+                if (sharedId.startsWith(id)) {
+                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
+                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                    JSONObject jsonObject = jslob.getJsonObject();
+                    JSONObject sharedObject = sharedJSlob.getJsonObject();
+                    for (String key : sharedObject.keySet()) {
+                        if (sharedObject.hasAndNotNull(key)) {
+                            try {
+                                jsonObject.put(newId, sharedObject);
+                            } catch (JSONException e) {
+                                // should not happen
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    @Override
+    public JSlob getShared(final String id, Session session) throws OXException {
+        SharedJSlobService service = sharedJSlobs.get(id);
+        if (null != service) {
+            return sharedJSlobs.get(id).getJSlob(session);
+        }
+        return null;
     }
 
     /**
      * Adds data from config-tree to jslob mappings.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link DefaultJSlob} instance.
@@ -358,14 +477,17 @@ public final class ConfigJSlobService implements JSlobService {
             for (final Map.Entry<String, String> mapping : entrySet) {
                 final String configTreePath = mapping.getKey();
                 final String lobPath = mapping.getValue();
-
                 try {
                     final Setting setting = configTree.getSettingByPath(configTreePath);
                     stor.readValues(setting);
 
                     jObject.put(lobPath, convert2JS(setting));
                 } catch (final OXException e) {
-                    LOG.warn("Illegal path: " + configTreePath + ". Please check paths.perfMap file.", e);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file (JSlob ID: " + lobPath + ") OR if path-associatd bundle has been started.", e);
+                    } else {
+                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file (JSlob ID: " + lobPath + ") OR if path-associatd bundle has been started.");
+                    }
                 }
             }
 
@@ -380,7 +502,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Converts a tree of settings into the according java script objects.
-     * 
+     *
      * @param setting Tree of settings.
      * @return java script object representing the setting tree.
      * @throws JSONException if the conversion to java script objects fails.
@@ -464,9 +586,17 @@ public final class ConfigJSlobService implements JSlobService {
                         if (path.endsWith("/")) {
                             path = path.substring(0, path.length() - 1);
                         }
-                        final Setting setting = configTree.getSettingByPath(path);
-                        setting.setSingleValue(entry.getValue());
-                        saveSettingWithSubs(stor, setting);
+                        try {
+                            final Setting setting = configTree.getSettingByPath(path);
+                            setting.setSingleValue(entry.getValue());
+                            saveSettingWithSubs(stor, setting);
+                        } catch (OXException x) {
+                            if (SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
+                                LOG.error("Ignoring update to unmappable path", x);
+                            } else {
+                                throw x;
+                            }
+                        }
                     }
                 }
             }
@@ -503,22 +633,17 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public void setShared(final String id, final JSlob jsonJSlob) {
-        if (null == jsonJSlob) {
+    public void setShared(final String id, final SharedJSlobService service) {
+        if (null == service) {
             sharedJSlobs.remove(id);
         } else {
-            final JSONObject jObject = jsonJSlob.getJsonObject();
-            if (null == jObject) {
-                sharedJSlobs.remove(id);
-                return;
-            }
-            sharedJSlobs.put(id, jsonJSlob);
+            sharedJSlobs.put(id, service);
         }
     }
 
     /**
      * Splits a value for a not leaf setting into its sub-settings and stores them.
-     * 
+     *
      * @param storage setting storage.
      * @param setting actual setting.
      * @throws OXException If an error occurs.
@@ -885,7 +1010,7 @@ public final class ConfigJSlobService implements JSlobService {
      * Converts given String to a regular JSON-supported value.
      * <p>
      * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
-     * 
+     *
      * @param propertyValue The value to convert
      * @return The resulting value; either Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object
      */

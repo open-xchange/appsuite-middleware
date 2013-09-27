@@ -56,9 +56,10 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.user.UserConfigProvider;
-import com.openexchange.config.cascade.user.cache.PropertyMapManagement;
+import com.openexchange.config.cascade.user.cache.CacheInvalidator;
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
@@ -83,6 +84,7 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final UserConfigProvider provider = new UserConfigProvider(this);
+        final CacheInvalidator invalidator = new CacheInvalidator(context);
 
         final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put("scope", "user");
@@ -109,10 +111,10 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
                     final SessiondService sessiondService = getService(SessiondService.class);
                     final int contextId = session.getContextId();
                     if (null == sessiondService.getAnyActiveSessionForUser(session.getUserId(), contextId)) {
-                        PropertyMapManagement.getInstance().dropFor(session);
+                        invalidator.invalidateUser(session.getUserId(), session.getContextId());
                     }
                     if ((sessiondService instanceof SessiondServiceExtended) && !((SessiondServiceExtended) sessiondService).hasForContext(contextId)) {
-                        PropertyMapManagement.getInstance().dropFor(contextId);
+                        invalidator.invalidateContext(contextId);
                     }
                 }
             };
@@ -120,6 +122,9 @@ public class UserConfigCascadeActivator extends HousekeepingActivator {
             dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, eventHandler, dict);
         }
+
+        track(CacheEventService.class, invalidator);
+        openTrackers();
     }
 
 }

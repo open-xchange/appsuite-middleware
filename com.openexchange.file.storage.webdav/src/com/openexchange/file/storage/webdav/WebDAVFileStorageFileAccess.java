@@ -75,6 +75,7 @@ import org.apache.jackrabbit.webdav.client.methods.CopyMethod;
 import org.apache.jackrabbit.webdav.client.methods.DavMethod;
 import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.apache.jackrabbit.webdav.client.methods.LockMethod;
+import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropPatchMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
@@ -408,6 +409,39 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             return ret;
         } catch (final OXException e) {
             throw e;
+        } catch (final HttpException e) {
+            throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final DavException e) {
+            throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
+        try {
+            final String fid = checkFolderId(source.getFolder(), rootUri);
+            final String id = source.getId();
+            final String dfid = checkFolderId(destFolder, rootUri);
+            String did = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : id;
+            /*
+             * Perform MOVE
+             */
+            final MoveMethod moveMethod = new MoveMethod(new URI(fid + id, true).toString(), new URI(dfid + did, true).toString(), false);
+            try {
+                initMethod(fid, id, moveMethod);
+                client.executeMethod(moveMethod);
+                moveMethod.checkSuccess();
+            } finally {
+                closeHttpMethod(moveMethod);
+            }
+            /*
+             * Return
+             */
+            return new IDTuple(dfid, did);
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {

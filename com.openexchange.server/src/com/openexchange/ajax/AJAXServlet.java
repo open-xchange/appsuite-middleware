@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -112,6 +113,7 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -264,6 +266,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_REDIRECT = "redirect";
 
     public static final String ACTION_REDEEM = "redeem";
+
+    public static final String ACTION_REDEEM_TOKEN = "redeemToken";
 
     public static final String ACTION_AUTOLOGIN = "autologin";
 
@@ -826,11 +830,23 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             return s;
         }
         try {
+            String prefix = null;
             // Strip possible "\r?\n" and/or "%0A?%0D"
             String retval = PATTERN_CRLF.matcher(s).replaceAll("");
             if (forAnchor) {
                 // Prepare for being used as anchor/link
                 retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, retval.getBytes(Charsets.ISO_8859_1)));
+                final int pos = retval.length() > 6 ? retval.indexOf("://") : -1;
+                if (pos > 0) { // Seems to contain protocol/scheme part; e.g "http://..."
+                    final String tmp = Strings.toLowerCase(retval.substring(0, pos));
+                    if ("https".equals(tmp)) {
+                        prefix = "https://";
+                        retval = retval.substring(pos + 3);
+                    } else if ("http".equals(tmp)) {
+                        prefix = "http://";
+                        retval = retval.substring(pos + 3);
+                    }
+                }
             } else {
                 retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, retval.getBytes(Charsets.ISO_8859_1)));
             }
@@ -858,7 +874,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     matcher = dupSlashes.matcher(retval);
                 }
             }
-            return retval;
+            return null == prefix ? retval : new StringAllocator(prefix).append(retval).toString();
         } catch (final IllegalArgumentException e) {
             throw e;
         } catch (final RuntimeException e) {
@@ -961,7 +977,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             obj.put(STR_ERROR_PARAMS, Collections.emptyList());
 			w.write(substituteJS(obj.toString(), action));
         } catch (final JSONException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         } finally {
             close(w);
         }
@@ -1027,21 +1043,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     private static final int SIZE_THRESHOLD = 1048576;
 
-    private static volatile DeleteOnExitFileCleaningTracker fileCleaningTracker;
-    private static DeleteOnExitFileCleaningTracker fileCleaningTracker() {
-        DeleteOnExitFileCleaningTracker tmp = fileCleaningTracker;
-        if (null == tmp) {
-            synchronized (AJAXServlet.class) {
-                tmp = fileCleaningTracker;
-                if (null == tmp) {
-                    tmp = new DeleteOnExitFileCleaningTracker(false);
-                    fileCleaningTracker = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
     /**
      * Creates a new {@code ServletFileUpload} instance.
      *
@@ -1053,23 +1054,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         // Set factory constraints; threshold for single files
         factory.setSizeThreshold(SIZE_THRESHOLD);
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
-        factory.setFileCleaningTracker(fileCleaningTracker());
         // Create a new file upload handler
         final ServletFileUpload sfu = new ServletFileUpload(factory);
         // Set overall request size constraint
         sfu.setSizeMax(-1);
         return sfu;
-    }
-
-    /**
-     * Exits the file cleaning tracker.
-     */
-    public static void exitTracker() {
-        final DeleteOnExitFileCleaningTracker tracker = AJAXServlet.fileCleaningTracker;
-        if (null != tracker) {
-            tracker.deleteAllTracked();
-            AJAXServlet.fileCleaningTracker = null;
-        }
     }
 
     private static final Set<String> UPLOAD_ACTIONS =
@@ -1119,6 +1108,15 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             {
                 boolean cleanUp = true;
                 try {
+                    // Check request's character encoding
+                    if (null == req.getCharacterEncoding()) {
+                        try {
+                            req.setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                    // Parse multipart request
                     upload.parseRequest(new ServletRequestContext(req), items);
                     cleanUp = false;
                 } catch (final FileUploadException e) {
@@ -1131,6 +1129,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                             final String limit = message.substring(19, pos);
                             throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
                         }
+                    } else if (cause instanceof EOFException) {
+                        // Stream closed/ended unexpectedly
+                        throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
                     }
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
                 } finally {
@@ -1299,10 +1300,25 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         if (LOG.isTraceEnabled()) {
             LOG.trace(new com.openexchange.java.StringAllocator("Called close() with writer").append(w.toString()));
         }
-        // return;
-        /*
-         * if (w == null) { return; } try { w.flush(); // System.out.println("INFOSTORE: Flushed!"); } catch (IOException e) { LOG.error(e);
-         * } try { w.close(); // System.out.println("INFOSTORE: Closed!"); } catch (IOException e) { LOG.error(e); }
+        /*-
+         *
+        if (w != null) {
+            try {
+                w.flush();
+                System.out.println("INFOSTORE: Flushed!");
+            } catch (IOException e) {
+                LOG.error(e);
+            }
+            try {
+                w.close();
+                System.out.println("INFOSTORE: Closed!");
+            } catch (IOException e) {
+                LOG.error(e);
+            }
+        } else {
+            return;
+        }
+         *
          */
     }
 

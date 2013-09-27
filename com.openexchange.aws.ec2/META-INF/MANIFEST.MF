@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange AWS EC2 bundle
 Bundle-SymbolicName: com.openexchange.aws.ec2
-Bundle-Version: 7.2.0
+Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.amazonaws.services.ec2,

@@ -67,6 +67,7 @@ import javax.management.remote.JMXServiceURL;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ConsistencyCheck {
+
     public static void main(final String[] args) {
         final SimpleLexer lexer = new SimpleLexer(args);
         final Configuration config = new Configuration();
@@ -163,12 +164,13 @@ public class ConsistencyCheck {
                 }
             }
         }
-        
+
         try {
             config.run();
             System.out.println("Done");
         } catch (final Exception x) {
             x.printStackTrace();
+            System.exit(1);
         }
 
     }
@@ -274,7 +276,14 @@ public class ConsistencyCheck {
     }
 
     private static final class Configuration {
-        
+
+        /**
+         * Initializes a new {@link ConsistencyCheck.Configuration}.
+         */
+        public Configuration() {
+            super();
+        }
+
         public String getAction() {
             return action;
         }
@@ -413,7 +422,7 @@ public class ConsistencyCheck {
             } finally {
                 disconnect();
             }
-            
+
             if( null != result && result.size() > 0) {
                 for(final String ctx : result) {
                     System.out.println(ctx);

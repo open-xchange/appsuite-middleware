@@ -880,7 +880,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } finally {
             try {
-                rs.close();
+                if (null != rs) {
+                    rs.close();
+                }
             } catch (final SQLException e) {
                 log.error("Error closing resultset!", e);
             }

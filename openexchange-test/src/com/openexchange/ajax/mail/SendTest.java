@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -162,7 +163,11 @@ public final class SendTest extends AbstractMailTest {
         JSONObject jMail = new JSONObject(mailObject_25kb);
         JSONObject jAttach = jMail.getJSONArray("attachments").getJSONObject(0);
 
-        jAttach.put("content", "Pile of poo \uD83D\uDCA9");
+        char a = '\uD83D';
+        char b = '\uDCA9';
+        String s = "Pile of poo ";
+
+        jAttach.put("content", s + a + b);
 
         /*
          * Perform send request
@@ -174,13 +179,13 @@ public final class SendTest extends AbstractMailTest {
         if (null != folderAndID) {
             final GetResponse getResponse = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]));
 
-            final String content = getResponse.getAttachments().getJSONObject(0).getString("content");
+            final String content = getResponse.getAttachments().getJSONObject(0).getString("content").replaceAll(Pattern.quote("&nbsp;"), " ");
             assertTrue("Content is empty", null != content && content.length() > 0);
 
             int pos = content.indexOf("Pile of poo ");
-            assertTrue("Content is empty", pos >= 0);
+            assertTrue("Content not found: \"Pile of poo \" -- Content:\n" + content, pos >= 0);
 
-            pos += 12;
+            pos += s.length();
             assertEquals("Missing \\uD83D unicode", (int) '\uD83D', (int) content.charAt(pos++));
             assertEquals("Missing \\uDCA9 unicode", (int) '\uDCA9', (int) content.charAt(pos++));
         }

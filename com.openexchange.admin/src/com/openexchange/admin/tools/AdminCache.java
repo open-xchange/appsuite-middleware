@@ -51,7 +51,6 @@ package com.openexchange.admin.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -65,14 +64,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -92,7 +89,6 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -160,8 +156,6 @@ public class AdminCache {
         CONF_SERVICE.set(service);
     }
 
-    private static final String DATABASE_INIT_SCRIPTS_ERROR_MESSAGE = "An error occured while reading the database initialization scripts.";
-
     public final static String DATA_TRUNCATION_ERROR_MSG = "Data too long for column(s)";
 
     private PropertyHandler prop = null;
@@ -169,8 +163,6 @@ public class AdminCache {
     private final Log log = LogFactory.getLog(this.getClass());
 
     private OXAdminPoolInterface pool = null;
-
-    private ArrayList<String> ox_queries_initial = null;
 
     /**
      * toggle auth for hosting features like create context etc. where master auth is needed
@@ -181,9 +173,6 @@ public class AdminCache {
      * togle auth when a context based method authentication is need like create user in a context
      */
     private boolean contextAuthenticationDisabled = false;
-
-    // sql filenames order and directory
-    protected boolean log_parsed_sql_queries = false;
 
     // master credentials for authenticating master admin
     private Credentials masterCredentials = null;
@@ -210,7 +199,6 @@ public class AdminCache {
 
     public void initCache(final ConfigurationService service) throws OXGenericException {
         this.prop = new PropertyHandler(System.getProperties());
-        cacheSqlScripts(service);
         configureAuthentication(); // disabling authentication mechs
         readMasterCredentials(service);
         this.log.info("Init Cache");
@@ -474,14 +462,6 @@ public class AdminCache {
         this.lockdb = lockdb;
     }
 
-    public ArrayList<String> getOXDBInitialQueries() throws OXGenericException {
-        if (ox_queries_initial == null) {
-            throw new OXGenericException(DATABASE_INIT_SCRIPTS_ERROR_MESSAGE);
-
-        }
-        return ox_queries_initial;
-    }
-
     public static Connection getSimpleSqlConnection(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
         // System.err.println("-->"+driver+" ->"+url+" "+user+" "+password);
         Class.forName(driver);
@@ -529,67 +509,6 @@ public class AdminCache {
                 log.warn("Error closing simple CONNECTION!", ecp);
             }
         }
-    }
-
-    private void cacheSqlScripts(final ConfigurationService service) {
-
-        if (prop.getSqlProp("LOG_PARSED_QUERIES", "false").equalsIgnoreCase("true")) {
-            log_parsed_sql_queries = true;
-        }
-
-        // ox
-        ox_queries_initial = convertData2Objects(getInitialOXDBOrder(), service);
-    }
-
-    private ArrayList<String> convertData2Objects(String[] sql_files_order, final ConfigurationService service) {
-        final ArrayList<String> al = new ArrayList<String>(sql_files_order.length);
-        final Pattern p = Pattern.compile("(" + PATTERN_REGEX_FUNCTION + "|" + PATTERN_REGEX_NORMAL + ")", Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
-        for (int a = 0; a < sql_files_order.length; a++) {
-            final File tmp = service.getFileByName(sql_files_order[a]);
-            if (null != tmp) {
-                FileInputStream fis = null;
-                try {
-                    fis = new FileInputStream(tmp);
-                    final byte[] b = new byte[(int) tmp.length()];
-                    fis.read(b);
-                    fis.close();
-                    final String data = new String(b);
-                    final Matcher matchy = p.matcher(data);
-                    while (matchy.find()) {
-                        final String exec = matchy.group(0).replaceAll("END\\s*//", "END");
-                        al.add(exec);
-                        if (log_parsed_sql_queries) {
-                            log.info(exec);
-                        }
-                    }
-                    if (log_parsed_sql_queries) {
-                        if (log.isInfoEnabled()) {
-                            log.info(tmp + " PARSED!");
-                        }
-                    }
-                } catch (final Exception exp) {
-                    log.fatal("Parse/Read error on " + tmp, exp);
-                    return null;
-                } finally {
-                    Streams.close(fis);
-                }
-            }
-        }
-        return al;
-    }
-
-    private static String[] getOrdered(String data) {
-        String[] ret = new String[0];
-        if (data != null) {
-            StringTokenizer st = new StringTokenizer(data, ",");
-            ret = new String[st.countTokens()];
-            int a = 0;
-            while (st.hasMoreTokens()) {
-                ret[a] = "" + st.nextToken();
-                a++;
-            }
-        }
-        return ret;
     }
 
     /**
@@ -652,10 +571,6 @@ public class AdminCache {
             throw new StorageException("unsupported password mechanism: " + passwordMech);
         }
         return passwd;
-    }
-
-    private String[] getInitialOXDBOrder() {
-        return getOrdered(prop.getSqlProp("INITIAL_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,virtualfolder.sql,settings.sql,calendar.sql,contacts.sql,tasks.sql,infostore.sql,attachment.sql,misc.sql,ical_vcard.sql"));
     }
 
     private void configureAuthentication() {

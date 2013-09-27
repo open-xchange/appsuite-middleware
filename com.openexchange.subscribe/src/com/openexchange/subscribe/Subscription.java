@@ -65,6 +65,8 @@ public class Subscription extends TargetFolderDefinition {
     private int id;
 
     private long lastUpdate;
+    
+    private long created;
 
     private SubscriptionSource source;
 
@@ -88,6 +90,18 @@ public class Subscription extends TargetFolderDefinition {
 
     public boolean containsLastUpdate() {
         return getLastUpdate() > 0;
+    }
+    
+    public long getCreated() {
+        return created;
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
+    }
+
+    public boolean containsCreated() {
+        return getCreated() > 0;
     }
 
     public Map<String, Object> getConfiguration() {

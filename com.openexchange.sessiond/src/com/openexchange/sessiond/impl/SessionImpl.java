@@ -350,7 +350,7 @@ public final class SessionImpl implements PutIfAbsent {
         try {
             setLocalIp(localIp, true);
         } catch (final OXException e) {
-            LOG.error("Failed to propagate change of IP address.", e);
+            LOG.warn("Failed to distribute change of IP address among remote nodes.", e);
         }
     }
 

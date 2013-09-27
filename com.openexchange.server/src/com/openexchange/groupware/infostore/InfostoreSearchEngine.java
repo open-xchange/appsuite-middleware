@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tx.TransactionAware;
 
@@ -65,7 +65,7 @@ public interface InfostoreSearchEngine extends TransactionAware{
 	public static final int NO_FOLDER = -10;
 	public static final int NOT_SET = -11;
 
-	public SearchIterator<DocumentMetadata> search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void index(DocumentMetadata document, Context ctx, User user, UserConfiguration userConfig) throws  OXException;
-	public void unIndex0r(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public SearchIterator<DocumentMetadata> search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+	public void index(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws  OXException;
+	public void unIndex0r(int id, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 }

@@ -63,7 +63,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageRandomFileAccess;
+import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -73,16 +74,16 @@ import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link InfostoreAdapterFileAccess}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFileAccess {
+public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider {
 
     private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
     private static final Set<Long> VIRTUAL_FOLDERS;
@@ -99,13 +100,14 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
     private final InfostoreSearchEngine search;
     private final Context ctx;
     private final User user;
-    private final UserConfiguration userConfig;
+    private final UserPermissionBits userPermissions;
     private final ServerSession sessionObj;
     private final FileStorageAccountAccess accountAccess;
+    private final int hash;
 
     /**
      * Initializes a new {@link InfostoreAdapterFileAccess}.
-     * 
+     *
      * @param session
      * @param infostore2
      */
@@ -115,17 +117,62 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
 
         this.ctx = sessionObj.getContext();
         this.user = sessionObj.getUser();
-        this.userConfig = sessionObj.getUserConfiguration();
+        this.userPermissions = sessionObj.getUserPermissionBits();
 
         this.infostore = infostore;
         this.search = search;
         this.accountAccess = accountAccess;
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((accountAccess == null) ? 0 : accountAccess.getAccountId().hashCode());
+        result = prime * result + ((ctx == null) ? 0 : ctx.getContextId());
+        result = prime * result + ((user == null) ? 0 : user.getId());
+        hash = result;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof InfostoreAdapterFileAccess)) {
+            return false;
+        }
+        InfostoreAdapterFileAccess other = (InfostoreAdapterFileAccess) obj;
+        if (accountAccess == null) {
+            if (other.accountAccess != null) {
+                return false;
+            }
+        } else if (!accountAccess.getAccountId().equals(other.accountAccess.getAccountId())) {
+            return false;
+        }
+        if (ctx == null) {
+            if (other.ctx != null) {
+                return false;
+            }
+        } else if (ctx.getContextId() != other.ctx.getContextId()) {
+            return false;
+        }
+        if (user == null) {
+            if (other.user != null) {
+                return false;
+            }
+        } else if (user.getId() != other.user.getId()) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).exists(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
+            return getInfostore(folderId).exists(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userPermissions);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -134,7 +181,17 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
+            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userPermissions);
+        } catch (final NumberFormatException e) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
+        }
+    }
+
+    @Override
+    public InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException {
+        try {
+            return getInfostore(folderId).getDocument(
+                ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, ctx, user, userPermissions);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -144,7 +201,7 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         try {
             final DocumentMetadata documentMetadata =
-                getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
+                getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userPermissions);
             return new InfostoreFile(documentMetadata);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
@@ -248,6 +305,20 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
     }
 
     @Override
+    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
+        if (modifiedFields.contains(Field.URL)) {
+            checkUrl(file);
+        }
+        getInfostore(file.getFolderId()).saveDocument(
+            new FileMetadata(file),
+            data,
+            sequenceNumber,
+            FieldMapping.getMatching(modifiedFields),
+            offset,
+            sessionObj);
+    }
+
+    @Override
     public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
         checkUrl(file);
         getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, sessionObj);
@@ -285,7 +356,7 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
                 ignoreDeleted,
                 ctx,
                 user,
-                userConfig);
+                userPermissions);
         return new InfostoreDeltaWrapper(delta);
     }
 
@@ -301,20 +372,47 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
                 ignoreDeleted,
                 ctx,
                 user,
-                userConfig);
+                userPermissions);
         return new InfostoreDeltaWrapper(delta);
     }
 
     @Override
+    public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
+        /*
+         * filter virtual folders
+         */
+        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        List<Long> foldersToQuery = new ArrayList<Long>(folderIds.size());
+        for (String folderId : folderIds) {
+            Long id = Long.valueOf(folderId);
+            if (VIRTUAL_FOLDERS.contains(id)) {
+                sequenceNumbers.put(folderId, Long.valueOf(0L));
+            } else {
+                foldersToQuery.add(id);
+            }
+        }
+        /*
+         * query infostore for non-virtual ones
+         */
+        if (0 < foldersToQuery.size()) {
+            Map<Long, Long> infostoreNumbers = infostore.getSequenceNumbers(foldersToQuery, true, ctx, user, userPermissions);
+            for (Map.Entry<Long, Long> entry : infostoreNumbers.entrySet()) {
+                sequenceNumbers.put(String.valueOf(entry.getKey().longValue()), entry.getValue());
+            }
+        }
+        return sequenceNumbers;
+    }
+
+    @Override
     public TimedResult<File> getDocuments(final String folderId) throws OXException {
-        final TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), ctx, user, userConfig);
+        final TimedResult<DocumentMetadata> documents = getInfostore(folderId).getDocuments(FOLDERID(folderId), ctx, user, userPermissions);
         return new InfostoreTimedResult(documents);
     }
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws OXException {
         final TimedResult<DocumentMetadata> documents =
-            getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), ctx, user, userConfig);
+            getInfostore(folderId).getDocuments(FOLDERID(folderId), FieldMapping.getMatching(fields), ctx, user, userPermissions);
         return new InfostoreTimedResult(documents);
     }
 
@@ -328,7 +426,7 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
                 FieldMapping.getSortDirection(order),
                 ctx,
                 user,
-                userConfig);
+                userPermissions);
         return new InfostoreTimedResult(documents);
     }
 
@@ -337,7 +435,7 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
         final int[] infostoreIDs = IDS(ids);
         TimedResult<DocumentMetadata> documents;
         try {
-            documents = getInfostore(null).getDocuments(infostoreIDs, FieldMapping.getMatching(fields), ctx, user, userConfig);
+            documents = getInfostore(null).getDocuments(infostoreIDs, FieldMapping.getMatching(fields), ctx, user, userPermissions);
             return new InfostoreTimedResult(documents);
         } catch (final IllegalAccessException e) {
             throw new OXException(e);
@@ -346,14 +444,14 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), ctx, user, userConfig);
+        final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), ctx, user, userPermissions);
         return new InfostoreTimedResult(versions);
     }
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
         final TimedResult<DocumentMetadata> versions =
-            getInfostore(folderId).getVersions(ID(id), FieldMapping.getMatching(fields), ctx, user, userConfig);
+            getInfostore(folderId).getVersions(ID(id), FieldMapping.getMatching(fields), ctx, user, userPermissions);
         return new InfostoreTimedResult(versions);
     }
 
@@ -367,7 +465,7 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
                 FieldMapping.getSortDirection(order),
                 ctx,
                 user,
-                userConfig);
+                userPermissions);
         return new InfostoreTimedResult(versions);
     }
 
@@ -385,7 +483,7 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
                 end,
                 ctx,
                 user,
-                userConfig);
+                userPermissions);
         return new InfostoreSearchIterator(iterator);
     }
 
@@ -465,6 +563,17 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
         }
 
         return new IDTuple(destFolder, orig.getId());
+    }
+
+    @Override
+    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
+        /*
+         * use saveFileMetadata method with adjusted folder; the file ID is sufficient to identify the source
+         */
+        update.setFolderId(destFolder);
+        update.setId(source.getId());
+        this.saveFileMetadata(update, sequenceNumber, modifiedFields);
+        return new IDTuple(update.getFolderId(), update.getId());
     }
 
     public InfostoreFacade getInfostore(final String folderId) {

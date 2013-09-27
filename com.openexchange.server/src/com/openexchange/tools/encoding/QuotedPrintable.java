@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.encoding;
 
+import org.apache.commons.logging.Log;
+
 /**
  * QuotedPrintable
  *
@@ -57,7 +59,7 @@ package com.openexchange.tools.encoding;
 
 public final class QuotedPrintable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(QuotedPrintable.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotedPrintable.class);
 
     private QuotedPrintable() {
         super();
@@ -93,7 +95,7 @@ public final class QuotedPrintable {
                 }
             }
         } catch (final Exception exc) {
-            System.out.println(new StringBuilder("encode error: ").append(exc).toString());
+            LOG.error(new StringBuilder("encode error: ").append(exc).toString(), exc);
         }
 
         return sb.toString();

@@ -53,7 +53,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission;
 import com.openexchange.server.Initialization;
 
 /**
@@ -70,27 +69,22 @@ public final class UserConfigurationStorageInit implements Initialization {
         /**
          * Caching
          */
-        CACHING("Caching", CachingUserConfigurationStorage.class.getName()),
+        CACHING("Caching", CachingUserConfigurationStorage.class.getName(), CachingUserPermissionBitsStorage.class.getName()),
         /**
          * Database
          */
-        DB("DB", RdbUserConfigurationStorage.class.getName());
+        DB("DB", CapabilityUserConfigurationStorage.class.getName(), CachingUserPermissionBitsStorage.class.getName());
 
         private final String alias;
 
         private final String impl;
 
-        private UserConfigurationImpl(final String alias, final String impl) {
+        private final String bitImpl;
+
+        private UserConfigurationImpl(final String alias, final String impl, final String bitImpl) {
             this.alias = alias;
             this.impl = impl;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
-
-        public String getImpl() {
-            return impl;
+            this.bitImpl = bitImpl;
         }
     }
 
@@ -124,6 +118,16 @@ public final class UserConfigurationStorageInit implements Initialization {
         return null;
     }
 
+    private static String getUserPermissionBitsImpl(final String alias) {
+        final UserConfigurationImpl[] arr = UserConfigurationImpl.values();
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].alias.equalsIgnoreCase(alias)) {
+                return arr[i].bitImpl;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
@@ -143,6 +147,18 @@ public final class UserConfigurationStorageInit implements Initialization {
                 LOG.info("UserConfigurationStorage implementation: " + implementingClass.getName());
             }
             UserConfigurationStorage.setInstance(implementingClass.newInstance());
+
+            // Now for the permission bits
+            final String bitClassName = getUserPermissionBitsImpl(classNameProp);
+            final Class<? extends UserPermissionBitsStorage> bitsImplementingClass = Class.forName(bitClassName).asSubclass(UserPermissionBitsStorage.class);
+
+            if (LOG.isInfoEnabled()) {
+                LOG.info("UserPermissionBitsStorage implementation: " + bitsImplementingClass.getName());
+            }
+
+            UserPermissionBitsStorage.setInstance(bitsImplementingClass.newInstance());
+
+
         } catch (final ClassNotFoundException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
         } catch (final ClassCastException e) {
@@ -152,10 +168,6 @@ public final class UserConfigurationStorageInit implements Initialization {
         } catch (final IllegalAccessException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
         }
-        // Initialize permissions
-        for (final Permission p : Permission.values()) {
-            p.start();
-        }
     }
 
     @Override
@@ -164,12 +176,9 @@ public final class UserConfigurationStorageInit implements Initialization {
             LOG.error(UserConfigurationStorageInit.class.getName() + " cannot be stopped since it has not been started before");
             return;
         }
-        // Shut-down permissions
-        for (final Permission p : Permission.values()) {
-            p.stop();
-        }
         // Release instance
         UserConfigurationStorage.releaseInstance();
+        UserPermissionBitsStorage.releaseInstance();
     }
 
 }

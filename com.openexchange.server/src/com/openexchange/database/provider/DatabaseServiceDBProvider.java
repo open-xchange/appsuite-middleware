@@ -99,4 +99,15 @@ public class DatabaseServiceDBProvider implements DBProvider {
         autocommit(con);
         databaseService.backWritable(ctx,con);
     }
+
+    @Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        if (con == null) {
+            return;
+        }
+        autocommit(con);
+        databaseService.backWritableAfterReading(ctx, con);
+
+    }
+
 }

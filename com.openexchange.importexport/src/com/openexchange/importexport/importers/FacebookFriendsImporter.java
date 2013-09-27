@@ -67,12 +67,18 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 public class FacebookFriendsImporter extends ContactImporter {
 
-	@Override
+
+    public FacebookFriendsImporter(ServiceLookup services) {
+        super(services);
+    }
+
+    @Override
     public boolean canImport(ServerSession sessObj, Format format,
 			List<String> folders, Map<String, String[]> optionalParams)
 			throws OXException {

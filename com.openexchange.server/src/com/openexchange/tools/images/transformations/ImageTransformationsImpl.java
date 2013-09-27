@@ -459,11 +459,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (null != directory) {
                 orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
             }
-            Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-            if (null != jpegDirectory && jpegDirectory instanceof JpegDirectory) {
-                JpegDirectory jpegDirectory2 = (JpegDirectory) jpegDirectory;
-                width = jpegDirectory2.getImageWidth();
-                height = jpegDirectory2.getImageHeight();
+            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+            if (null != jpegDirectory) {
+                width = jpegDirectory.getImageWidth();
+                height = jpegDirectory.getImageHeight();
             }
         } catch (MetadataException e) {
             LOG.debug("Unable to retrieve image information.", e);
@@ -481,7 +480,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @return The processed buffered image, or the previous image if no processing was necessary
      */
     private static BufferedImage removeTransparencyIfNeeded(BufferedImage image, String formatName) {
-        if (null != formatName && false == ImageTransformationUtility.supportsTransparency(formatName) && null != image) {
+        if (null != image && null != formatName && false == ImageTransformationUtility.supportsTransparency(formatName)) {
             ColorModel colorModel = image.getColorModel();
             if (null != colorModel && colorModel.hasAlpha()) {
                 BufferedImage targetImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);

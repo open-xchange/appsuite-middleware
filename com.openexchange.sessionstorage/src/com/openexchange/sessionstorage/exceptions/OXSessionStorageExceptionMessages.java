@@ -60,17 +60,17 @@ public class OXSessionStorageExceptionMessages implements LocalizableStrings {
 
     public final static String SESSIONSTORAGE_START_FAILED_MSG = "Start of SessionStorageService failed.";
 
-    public final static String SESSIONSTORAGE_SAVE_FAILED_MSG = "Saving session with sessionId %1$s failed.";
+    public final static String SESSIONSTORAGE_SAVE_FAILED_MSG = "Saving session with session identifier %1$s failed.";
 
-    public final static String SESSIONSTORAGE_REMOVE_FAILED_MSG = "Removing session with sessionId %1$s failed.";
+    public final static String SESSIONSTORAGE_REMOVE_FAILED_MSG = "Removing session with session identifier %1$s failed.";
 
-    public final static String SESSIONSTORAGE_SESSION_NOT_FOUND_MSG = "No session with sessionId %1$s found.";
+    public final static String SESSIONSTORAGE_SESSION_NOT_FOUND_MSG = "No session with session identifier %1$s found.";
 
     public final static String SESSIONSTORAGE_DUPLICATE_AUTHID_MSG = "Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.";
 
     public final static String SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG = "Operation %1$s not supported.";
 
-    public final static String SESSIONSTORAGE_ALTID_NOT_FOUND_MSG = "Lookup for session with altId %1$s failed";
+    public final static String SESSIONSTORAGE_ALTID_NOT_FOUND_MSG = "Lookup for session with public identifier %1$s failed";
 
     public final static String SESSIONSTORAGE_NO_USERSESSIONS_MSG = "No sessions found for user %1$s in context %2$s";
 

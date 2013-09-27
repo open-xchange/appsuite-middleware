@@ -80,7 +80,7 @@ public class ReportingInit implements Initialization {
     public void start() {
         try {
             managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
-            managementService.registerMBean(Constants.LOGIN_COUNTER_NAME, new LoginCounter());
+            managementService.registerMBean(Constants.LOGIN_COUNTER_NAME, new LoginCounter(new LoginCounterImpl()));
         } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         }

@@ -63,6 +63,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -214,8 +215,15 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
-
-        return createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
+        String sTimeZone = request.optString("timezone");
+        TimeZone tz;
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        
+        return createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
     private Object loadAllSubscriptions(final JSONObject request, final ServerSession session) throws JSONException, OXException {
@@ -234,12 +242,19 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         } else {
             allSubscriptions = getAllSubscriptions(session, secretService.getSecret(session));
         }
-
+        String sTimeZone = request.optString("timezone");
+        TimeZone tz;
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
 
-        return createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
+        return createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
     private List<Subscription> getSubscriptionsInFolder(final ServerSession session, final String folder, final String secret) throws OXException {
@@ -264,7 +279,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return allSubscriptions;
     }
 
-    private Object createResponse(final List<Subscription> allSubscriptions, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder) throws OXException, JSONException {
+    private Object createResponse(final List<Subscription> allSubscriptions, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder, TimeZone tz) throws OXException, JSONException {
         final JSONArray rows = new JSONArray();
         final SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
         for (final Subscription subscription : allSubscriptions) {
@@ -273,7 +288,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 basicColumns,
                 dynamicColumns,
                 dynamicColumnOrder,
-                subscription.getSource().getFormDescription());
+                subscription.getSource().getFormDescription(), tz);
             rows.put(row);
         }
         return rows;
@@ -329,11 +344,19 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final int id = request.getInt("id");
         final String source = request.optString("source");
         final Subscription subscription = loadSubscription(id, session, source, secretService.getSecret(session));
-        return createResponse(subscription, request.optString("__serverURL"));
+        String sTimeZone = request.optString("timezone");
+        TimeZone tz;
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        
+        return createResponse(subscription, request.optString("__serverURL"), tz);
     }
 
-    private Object createResponse(final Subscription subscription, final String urlPrefix) throws JSONException, OXException {
-        final JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
+    private Object createResponse(final Subscription subscription, final String urlPrefix, TimeZone tz) throws JSONException, OXException {
+        final JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix, tz);
         return object;
     }
 

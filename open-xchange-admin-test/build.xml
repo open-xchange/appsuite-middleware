@@ -2,6 +2,7 @@
 <project name="administration RMI tests" basedir=".">
 
     <property name="bundlesDir" value="bundles"/>
+	<property name="consoleLibDir" value="bundles"/>
     <property name="testJar" value="open-xchange-iface-tests.jar"/>
     <property name="logDir" value="log"/>
 
@@ -13,6 +14,9 @@
         <fileset dir="${bundlesDir}">
             <include name="**/*.jar"/>
         </fileset>
+    	<fileset dir="${consoleLibDir}">
+    	    <include name="**/*.jar"/>
+    	</fileset>
         <fileset dir="${libDir}">
             <include name="*.jar"/>
         </fileset>
@@ -45,6 +49,7 @@
             <test name="com.openexchange.admin.rmi.ResourceTest" todir="${logDir}"/>
             <test name="com.openexchange.admin.rmi.UserTest" todir="${logDir}"/>
             <test name="com.openexchange.admin.rmi.GroupTest" todir="${logDir}"/>
+            <test name="com.openexchange.admin.user.copy.rmi.RoundtripTest" todir="${logDir}"/>
             <formatter type="xml"/>
             <sysproperty key="rmi_test_host" value="${rmiHost}"/>
             <sysproperty key="rmi_test_dbhost" value="${rmiDatabase}"/>

@@ -10,4 +10,14 @@ Package: open-xchange-contact-storage-ldap
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
+Conflicts: open-xchange-contacts-ldap (<< 7.4.0-0)
+Replaces: open-xchange-contacts-ldap (<< 7.4.0-0)
 Description: Contact storage provider using a LDAP server as backend
+
+Package: open-xchange-contacts-ldap
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-contact-storage-ldap
+Section: oldlibs
+Description: transitional dummy package
+ This transitional package ensures that the content of the previous open-xchange-contacts-ldap package is removed from the system and the
+ successor implementation open-xchange-contacts-storage-ldap is installed. This package can be safely removed after the upgrade process.

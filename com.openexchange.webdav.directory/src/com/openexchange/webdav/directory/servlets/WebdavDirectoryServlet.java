@@ -196,16 +196,6 @@ public class WebdavDirectoryServlet extends OXServlet {
         return true;
     }
 
-    @Override
-    protected void decrementRequests() {
-        // Nothing to do
-    }
-
-    @Override
-    protected void incrementRequests() {
-        // Nothing to do
-    }
-
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
 
     @Override

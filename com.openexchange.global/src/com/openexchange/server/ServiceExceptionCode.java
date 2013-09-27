@@ -73,6 +73,19 @@ public enum ServiceExceptionCode implements LogLevelAwareOXExceptionCode {
      */
     SERVICE_INITIALIZATION_FAILED(ServiceExceptionMessage.SERVICE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 3, LogLevel.ERROR);
 
+    /**
+     * Creates a new <code>"SRV-0001"</code> (SERVICE_UNAVAILABLE) exception for specified class
+     *
+     * @param clazz The class of missing service
+     * @return The appropriate {@link OXException} instance
+     */
+    public static OXException serviceUnavailable(final Class<?> clazz) {
+        if (null == clazz) {
+            return null;
+        }
+        return SERVICE_UNAVAILABLE.create(clazz.getName());
+    }
+
     private static final String PREFIX = "SRV";
 
     /**

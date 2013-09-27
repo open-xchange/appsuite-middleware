@@ -62,6 +62,7 @@ import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tokenlogin.TokenLoginService;
 
 /**
  * {@link LoginActivator}
@@ -107,6 +108,7 @@ public class LoginActivator extends HousekeepingActivator {
 
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
         rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context)));
+        track(TokenLoginService.class, new TokenLoginCustomizer(context));
         openTrackers();
     }
 }

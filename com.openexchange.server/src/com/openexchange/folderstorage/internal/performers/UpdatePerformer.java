@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
@@ -369,6 +370,13 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              */
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
+            }
+
+            final Set<OXException> warnings = storageParameters.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    addWarning(warning);
+                }
             }
 
             if (DEBUG_ENABLED) {

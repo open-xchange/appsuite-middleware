@@ -51,6 +51,7 @@
 
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.logging.Log;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.groupware.contact.sqlinjectors.StringSQLInjector;
@@ -67,6 +68,9 @@ import com.openexchange.search.SingleSearchTerm;
   */
 
 public class ContactSearchtermSqlConverter  implements ContactSearchTermConverter {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactSearchtermSqlConverter.class);
+
 	private static final String FOLDER_AJAXNAME = ContactField.FOLDER_ID.getAjaxName();
 
 	private StringBuilder bob;
@@ -154,7 +158,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
         } else if(term instanceof CompositeSearchTerm) {
             traverseViaInorder((CompositeSearchTerm) term);
         } else {
-            System.err.println("Got a search term that was neither Composite nor Single. How?");
+            LOG.error("Got a search term that was neither Composite nor Single. How? " + System.getProperty("line.separator") + term);
         }
 	}
 

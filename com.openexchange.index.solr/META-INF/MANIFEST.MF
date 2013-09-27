@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Index Bundle
 Bundle-SymbolicName: com.openexchange.index.solr
-Bundle-Version: 7.2.0
+Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.index.solr.osgi.SolrIndexActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.config.cascade,
+ com.openexchange.context,
  com.openexchange.database,
  com.openexchange.database.provider,
  com.openexchange.exception,
@@ -20,6 +21,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.infostore.index,
  com.openexchange.groupware.infostore.utils,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.tools.chunk,
  com.openexchange.groupware.update,
  com.openexchange.i18n,
  com.openexchange.index,

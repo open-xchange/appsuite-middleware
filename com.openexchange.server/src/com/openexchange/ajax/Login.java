@@ -71,6 +71,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -96,6 +98,7 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.ajax.login.RedeemToken;
 import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -134,6 +137,8 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -196,6 +201,7 @@ public class Login extends AJAXServlet {
     public static final String ACTION_FORMLOGIN = "formlogin";
     public static final String ACTION_TOKENLOGIN = "tokenLogin";
     public static final String ACTION_TOKENS = "tokens";
+    public static final String ACTION_REDEEM_TOKEN = "redeemToken";
 
     /**
      * <code>"changeip"</code>
@@ -614,21 +620,46 @@ public class Login extends AJAXServlet {
                                 }
                                 try {
                                     final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
+                                    if (!ctx.isEnabled()) {
+                                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                                    }
                                     final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-                                    if (!ctx.isEnabled() || !user.isMailEnabled()) {
+                                    if (!user.isMailEnabled()) {
                                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                                     }
                                 } catch (final UndeclaredThrowableException e) {
                                     throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                                 }
-                                final JSONObject json = new JSONObject();
+
+                                // Request modules
+                                final Future<Object> optModules = getModulesAsync(session, req);
+
+                                // Create JSON object
+                                final JSONObject json = new JSONObject(8);
                                 LoginWriter.write(session, json);
-                                // Append "config/modules"
-                                appendModules(session, json, req);
+
+                                if (null != optModules) {
+                                    // Append "config/modules"
+                                    try {
+                                        final Object oModules = optModules.get();
+                                        if (null != oModules) {
+                                            json.put("modules", oModules);
+                                        }
+                                    } catch (final InterruptedException e) {
+                                        // Keep interrupted state
+                                        Thread.currentThread().interrupt();
+                                        throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                                    } catch (final ExecutionException e) {
+                                        // Cannot occur
+                                        final Throwable cause = e.getCause();
+                                        LOG.warn("Modules could not be added to login JSON response: " + cause.getMessage(), cause);
+                                    }
+                                }
+
+                                // Set data
                                 response.setData(json);
-                                /*
-                                 * Secret already found?
-                                 */
+
+                                // Secret already found?
                                 if (null != secret) {
                                     break NextCookie;
                                 }
@@ -651,6 +682,12 @@ public class Login extends AJAXServlet {
                         }
                         return;
                     }
+
+                    /*-
+                     * Ensure appropriate public-session-cookie is set
+                     */
+                    writePublicSessionCookie(resp, session, req.isSecure(), req.getServerName(), conf);
+
                 } catch (final OXException e) {
                     if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
                         LOG.debug(e.getMessage(), e);
@@ -755,6 +792,8 @@ public class Login extends AJAXServlet {
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
         handlerMap.put(ACTION_TOKENS,  new Tokens(conf));
+        handlerMap.put(ACTION_REDEEM_TOKEN, new RedeemToken(conf));
+
     }
 
     @Override
@@ -902,6 +941,23 @@ public class Login extends AJAXServlet {
     }
 
     /**
+     * Writes the (groupware's) public session cookie <code>"open-xchange-public-session"</code> to specified HTTP servlet response.
+     *
+     * @param resp The HTTP servlet response
+     * @param session The session providing the public session cookie identifier
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writePublicSessionCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
+        final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+        if (null != altId) {
+            final Cookie cookie = new Cookie(PUBLIC_SESSION_NAME, altId);
+            configureCookie(cookie, secure, serverName, conf);
+            resp.addCookie(cookie);
+        }
+    }
+
+    /**
      * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-session-"</code> and a secret cookie identifier.
      *
@@ -1028,26 +1084,30 @@ public class Login extends AJAXServlet {
     private boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login) throws IOException, OXException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+
         // Perform the login
         final Response response = new Response();
         LoginResult result = null;
         try {
-            final Map<String, Object> properties = new HashMap<String, Object>(1);
-            {
-                final String capabilities = req.getParameter("capabilities");
-                if (null != capabilities) {
-                    properties.put("client.capabilities", capabilities);
-                }
-            }
-
+            // Do the login...
             result = login.doLogin(req);
             if (null == result) {
                 return true;
             }
-            {
-                LogProperties.putSessionProperties(result.getSession());
-            }
+
+            // The associated session
+            final Session session = result.getSession();
+
+            // Add session log properties
+            LogProperties.putSessionProperties(session);
+
+            // Request modules
+            final Future<Object> optModules = getModulesAsync(session, req);
+
+            // Add headers and cookies from login result
             addHeadersAndCookies(result, resp);
+
+            // Check result code
             {
                 final ResultCode code = result.getCode();
                 if (null != code) {
@@ -1061,19 +1121,45 @@ public class Login extends AJAXServlet {
                     }
                 }
             }
-            final Session session = result.getSession();
-            session.setParameter("user-agent", req.getHeader("user-agent"));
-            // Write response
-            final JSONObject json = new JSONObject();
-            LoginWriter.write(result, json);
-            // Handle initial multiple
-            if (req.getParameter("multiple") != null) {
-            	JSONArray responses = Multiple.perform(new JSONArray(req.getParameter("multiple")), req, ServerSessionAdapter.valueOf(session));
-            	json.put("multiple", responses);
-            }
-            // Append "config/modules"
-            appendModules(session, json, req);
 
+            // Remember User-Agent
+            session.setParameter("user-agent", req.getHeader("user-agent"));
+
+            // Write response
+            final JSONObject json = new JSONObject(8);
+            LoginWriter.write(result, json);
+
+            // Handle initial multiple
+            final String multipleRequest = req.getParameter("multiple");
+            if (multipleRequest != null) {
+            	final JSONArray dataArray = new JSONArray(multipleRequest);
+            	if (dataArray.length() > 0) {
+            	    JSONArray responses = Multiple.perform(dataArray, req, ServerSessionAdapter.valueOf(session));
+                    json.put("multiple", responses);
+                } else {
+                    json.put("multiple", new JSONArray(0));
+                }
+            }
+
+            if (null != optModules) {
+                // Append "config/modules"
+                try {
+                    final Object oModules = optModules.get();
+                    if (null != oModules) {
+                        json.put("modules", oModules);
+                    }
+                } catch (final InterruptedException e) {
+                    // Keep interrupted state
+                    Thread.currentThread().interrupt();
+                    throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                } catch (final ExecutionException e) {
+                    // Cannot occur
+                    final Throwable cause = e.getCause();
+                    LOG.warn("Modules could not be added to login JSON response: " + cause.getMessage(), cause);
+                }
+            }
+
+            // Set response
             response.setData(json);
         } catch (final OXException e) {
             if (AjaxExceptionCodes.PREFIX.equals(e.getPrefix())) {
@@ -1115,7 +1201,7 @@ public class Login extends AJAXServlet {
             SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
             writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), confReference.get());
             // Login response is unfortunately not conform to default responses.
-            if (req.getParameter("callback") != null && req.getParameter("action").equals(ACTION_LOGIN)) {
+            if (req.getParameter("callback") != null && ACTION_LOGIN.equals(req.getParameter("action"))) {
                 APIResponseRenderer.writeResponse(response, ACTION_LOGIN, req, resp);
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
@@ -1202,6 +1288,13 @@ public class Login extends AJAXServlet {
         }
     }
 
+    /**
+     * Appends the modules to given JSON object.
+     *
+     * @param session The associated session
+     * @param json The JSON object to append to
+     * @param req The request
+     */
     protected static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) {
         final String modules = "modules";
         if (parseBoolean(req.getParameter(modules))) {
@@ -1213,8 +1306,43 @@ public class Login extends AJAXServlet {
                 LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
             } catch (final JSONException e) {
                 LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+            } catch (final Exception e) {
+                LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
             }
         }
+    }
+
+    /**
+     * Asynchronously retrieves modules.
+     *
+     * @param session The associated session
+     * @param req The request
+     * @return The resulting object or <code>null</code>
+     */
+    protected static Future<Object> getModulesAsync(final Session session, final HttpServletRequest req) {
+        final String modules = "modules";
+        if (!parseBoolean(req.getParameter(modules))) {
+            return null;
+        }
+        // Submit task
+        return ThreadPools.getThreadPool().submit(new AbstractTask<Object>() {
+
+            @Override
+            public Object call() throws Exception {
+                try {
+                    final Setting setting = ConfigTree.getInstance().getSettingByPath(modules);
+                    SettingStorage.getInstance(session).readValues(setting);
+                    return convert2JS(setting);
+                } catch (final OXException e) {
+                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                } catch (final JSONException e) {
+                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                } catch (final Exception e) {
+                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                }
+                return null;
+            }
+        });
     }
 
     /**
@@ -1225,7 +1353,7 @@ public class Login extends AJAXServlet {
      *         <code>"1"</code>, <code>"yes"</code> or <code>"on"</code>; otherwise <code>false</code>
      */
     private static boolean parseBoolean(final String parameter) {
-        return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
+        return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "y".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
     }
 
     private void doAuthHeaderLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {

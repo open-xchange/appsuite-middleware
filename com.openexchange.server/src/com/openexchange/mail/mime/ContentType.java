@@ -732,6 +732,13 @@ public class ContentType extends ParameterizedHeader {
     }
 
     /**
+     * @return The removed <code>"charset"</code> parameter value or <code>null</code> if there was none
+     */
+    public String removeCharsetParameter() {
+        return removeParameter(PARAM_CHARSET);
+    }
+
+    /**
      * Sets <code>"name"</code> parameter
      *
      * @param filename The name parameter
@@ -754,6 +761,13 @@ public class ContentType extends ParameterizedHeader {
      */
     public boolean containsNameParameter() {
         return containsParameter(PARAM_NAME);
+    }
+
+    /**
+     * @return The removed <code>"name"</code> parameter value or <code>null</code> if there was none
+     */
+    public String removeNameParameter() {
+        return removeParameter(PARAM_NAME);
     }
 
     /**

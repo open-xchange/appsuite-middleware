@@ -62,7 +62,7 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -82,7 +82,7 @@ public class DelUserFolderDiscoverer extends DBService {
         final User user = UserStorage.getInstance().getUser(userId, ctx);
         int[] accessibleModules;
         try {
-            accessibleModules = RdbUserConfigurationStorage.loadUserConfiguration(userId, ctx).getAccessibleModules();
+            accessibleModules = CapabilityUserConfigurationStorage.loadUserConfiguration(userId, ctx).getAccessibleModules();
         } catch (final OXException e) {
             if (!UserConfigurationCodes.NOT_FOUND.equals(e)) {
                 throw e;

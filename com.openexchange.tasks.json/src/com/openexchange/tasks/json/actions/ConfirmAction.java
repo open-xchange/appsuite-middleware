@@ -94,7 +94,7 @@ public class ConfirmAction extends TaskAction {
      */
     @Override
     protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
-        final JSONObject data = (JSONObject) req.getRequest().getData();
+        final JSONObject data = (JSONObject) req.getRequest().requireData();
         final Task task = new Task();
         final ServerSession session = req.getSession();
         new TaskParser(req.getTimeZone()).parse(task, data, session.getUser().getLocale());

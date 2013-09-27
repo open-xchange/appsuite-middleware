@@ -49,12 +49,14 @@
 
 package com.openexchange.folderstorage.filestorage;
 
-import com.openexchange.exception.OXException;
+import java.util.List;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link FileStorageFolderType} - The folder type for file storage.
@@ -103,24 +105,17 @@ public final class FileStorageFolderType implements FolderType {
         if (null == folderId) {
             return false;
         }
-        /*
-         * <service-id>://<account-id>/<fullname>
-         */
-        final FileStorageFolderIdentifier pfi;
-        try {
-            pfi = new FileStorageFolderIdentifier(folderId);
-        } catch (final OXException e) {
-            // com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageFolderType.class)).warn(e.getMessage(), e);
+        // Check if a real service is defined
+        final List<String> components = IDMangler.unmangle(folderId);
+        if (2 > components.size()) {
             return false;
         }
         /*
          * Check if service exists
          */
+        String serviceID = new FolderID(folderId).getService();
         final FileStorageServiceRegistry registry = serviceRegistry.getService(FileStorageServiceRegistry.class);
-        if (null == registry || !registry.containsFileStorageService(pfi.getServiceId())) {
-            return false;
-        }
-        return true;
+        return null != registry && registry.containsFileStorageService(serviceID);
     }
 
     @Override

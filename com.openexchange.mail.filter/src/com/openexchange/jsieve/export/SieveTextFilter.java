@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -75,6 +74,7 @@ import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 
@@ -532,17 +532,19 @@ public final class SieveTextFilter {
 
     private int getActionCommandSize(final List<ActionCommand> actioncommands) {
         int size = 0;
-        for (final ActionCommand actionCommand : actioncommands) {
-            if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand())) {
-                // The text arguments for vacation end method for enotify are the last in the list
-                final ArrayList<Object> arguments = actionCommand.getArguments();
-                final int size2 = arguments.size();
-                if (0 < size2) {
-                    final ArrayList<String> object =  (ArrayList<String>) arguments.get(size2 - 1);
-                    size += countlines(object.get(0)) + 1;
+        if (null != actioncommands) {
+            for (final ActionCommand actionCommand : actioncommands) {
+                if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand())) {
+                    // The text arguments for vacation end method for enotify are the last in the list
+                    final ArrayList<Object> arguments = actionCommand.getArguments();
+                    final int size2 = arguments.size();
+                    if (0 < size2) {
+                        final ArrayList<String> object = (ArrayList<String>) arguments.get(size2 - 1);
+                        size += countlines(object.get(0)) + 1;
+                    }
+                } else {
+                    size++;
                 }
-            } else {
-                size++;
             }
         }
         return size;
@@ -887,12 +889,12 @@ public final class SieveTextFilter {
     }
 
     private ArrayList<String> stringToList(final String string) {
-        return new ArrayList<String>(Arrays.asList(string.split(CRLF)));
+        return new ArrayList<String>(Arrays.asList(string.split("\r?\n")));
     }
 
     private List<String> stringToListComment(final String string) {
         final ArrayList<String> retval = new ArrayList<String>();
-        final String[] split = string.split(CRLF);
+        final String[] split = string.split("\r?\n");
         for (final String line : split) {
             retval.add(COMMENT_TAG + line);
         }

@@ -88,11 +88,11 @@ public final class FolderWriter {
         }
         try {
             final DefaultFileStorageFolder ret = new DefaultFileStorageFolder();
-            ret.setCreationDate(folder.getCreationDate());
+            ret.setCreationDate(folder.getCreationDateUTC());
             ret.setDefaultFolder(folder.isDefault());
             ret.setExists(true);
             ret.setId(folder.getID());
-            ret.setLastModifiedDate(folder.getLastModified());
+            ret.setLastModifiedDate(folder.getLastModifiedUTC());
             ret.setName(folder.getName());
             ret.setParentId(folder.getParentID());
             ret.setPermissions(parsePermission(folder.getPermissions()));
@@ -103,6 +103,7 @@ public final class FolderWriter {
                 final String[] subfolderIDs = folder.getSubfolderIDs();
                 ret.setSubfolders(subfolderIDs != null && subfolderIDs.length > 0);
             }
+            ret.setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
             return ret;
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

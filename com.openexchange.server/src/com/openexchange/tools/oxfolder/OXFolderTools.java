@@ -77,7 +77,8 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -1495,7 +1496,7 @@ public class OXFolderTools {
     public static boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session, final Connection readCon) throws OXException {
         final int userId = session.getUserId();
         final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+        final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
         try {
             /*
              * Check user permission on folder

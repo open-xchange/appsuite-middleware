@@ -49,6 +49,7 @@
 
 package com.openexchange.index.solr;
 
+import java.util.Locale;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
@@ -67,7 +68,7 @@ public class MockMailSolrIndexAccess extends SolrMailIndexAccess {
      * @throws OXException
      */
     public MockMailSolrIndexAccess(int docs) throws OXException {
-        super(new SolrCoreIdentifier(1, 1, 1), new MockQueryBuilder(), new MockFieldConfiguration());
+        super(new SolrCoreIdentifier(1, 1, 1), new MockQueryBuilder(), new MockFieldConfiguration(), Locale.ENGLISH);
         index = new InMemoryIndex();
         for (int i = 0; i < docs; i++) {
             SolrInputDocument doc = new SolrInputDocument();

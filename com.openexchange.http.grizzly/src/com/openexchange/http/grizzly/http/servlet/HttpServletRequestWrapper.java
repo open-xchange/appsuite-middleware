@@ -105,15 +105,15 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
             this.remoteAddress = remoteAddress;
             this.serverPort = serverPort;
             this.delegate = httpServletRequest;
-    
+
             OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(delegate);
             internalRequest.setXForwardPort(serverPort);
             internalRequest.setxForwardProto(requestScheme);
         }
-    
+
     /**
      * Initializes a new {@link HttpServletRequestWrapper}.
-     * 
+     *
      * @param httpServletRequest the delegate to use with this wrapper
      */
     public HttpServletRequestWrapper(HttpServletRequest httpServletRequest) {

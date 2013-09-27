@@ -52,6 +52,7 @@ package com.openexchange.ajax.framework;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import com.meterware.httpunit.HttpUnitOptions;
@@ -60,7 +61,7 @@ import com.meterware.httpunit.WebConversation;
 /**
  * This class stores the HTTP client instance and the session identifier for an AJAX session. Additionally the fallback web conversation is
  * stored here.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AJAXSession {
@@ -109,7 +110,7 @@ public class AJAXSession {
 
     /**
      * Setup the web conversation here so tests are able to create additional if several users are needed for tests.
-     * 
+     *
      * @return a new web conversation.
      */
     public static WebConversation newWebConversation() {
@@ -122,7 +123,7 @@ public class AJAXSession {
     }
 
     public static DefaultHttpClient newHttpClient() {
-        DefaultHttpClient retval = new DefaultHttpClient();
+        DefaultHttpClient retval = new DefaultHttpClient(new ThreadSafeClientConnManager());
 
         HttpParams params = retval.getParams();
         int minute = 1 * 60 * 1000;

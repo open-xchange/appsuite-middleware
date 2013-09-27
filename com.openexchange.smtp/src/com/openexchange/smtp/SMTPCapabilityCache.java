@@ -119,7 +119,10 @@ public final class SMTPCapabilityCache {
      * Clears this cache.
      */
     public static void clear() {
-        MAP.clear();
+        final ConcurrentMap<InetSocketAddress, Future<Capabilities>> map = MAP;
+        if (null != map) {
+            map.clear();
+        }
     }
 
     /**

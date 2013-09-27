@@ -94,6 +94,7 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -758,7 +759,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         final CompletionFuture<Collection<Integer>> completion = threadPoolS.invoke(searchers);
         final Set<Integer> cids = new HashSet<Integer>();
         try {
-            for (int i = 0; i < searchers.length; i++) {
+            for (ContextSearcher searcher : searchers) {
                 final Future<Collection<Integer>> future = completion.take();
                 cids.addAll(future.get());
             }
@@ -1142,6 +1143,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e);
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
+            contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
+            throw new StorageException(e);
+        } catch (final InvalidDataException e) {
+            LOG.error("InvalidData Error", e);
             contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
             throw new StorageException(e);
         } catch (final Exception e) {
@@ -2380,8 +2385,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // add always the context name
         if (ctx.getName() != null) {
-           // a new context Name has been specified
-           loginMappings.add(ctx.getName());
+            // a new context Name has been specified
+            loginMappings.add(ctx.getName());
         } else {
             // try to read context name from database
             ResultSet rs = null;
@@ -2391,7 +2396,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt.setInt(1, i(ctx.getId()));
                 rs = stmt.executeQuery();
                 if (rs.next()) {
-                   loginMappings.add(rs.getString(1));
+                    loginMappings.add(rs.getString(1));
                 }
             } finally {
                 closeSQLStuff(rs, stmt);

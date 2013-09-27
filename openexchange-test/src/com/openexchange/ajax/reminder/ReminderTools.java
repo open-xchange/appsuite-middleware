@@ -52,7 +52,6 @@ package com.openexchange.ajax.reminder;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Assert;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
@@ -66,23 +65,23 @@ import com.openexchange.groupware.reminder.ReminderObject;
  */
 public final class ReminderTools extends Assert {
 
-    /**
-     * Prevent instantiation
-     */
     private ReminderTools() {
         super();
     }
 
+    /**
+     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}
+     */
+    @Deprecated
     public static RangeResponse get(final AJAXClient client,
         final RangeRequest request) throws OXException, IOException,
-        SAXException, JSONException {
+        JSONException {
         return Executor.execute(client.getSession(), request);
     }
 
-    public static ReminderObject searchByTarget(final ReminderObject[] list,
-        final int targetId) {
+    public static ReminderObject searchByTarget(ReminderObject[] list, int targetId) {
         ReminderObject retval = null;
-        for (final ReminderObject reminder : list) {
+        for (ReminderObject reminder : list) {
             if (reminder.getTargetId() == targetId) {
                 retval = reminder;
                 break;

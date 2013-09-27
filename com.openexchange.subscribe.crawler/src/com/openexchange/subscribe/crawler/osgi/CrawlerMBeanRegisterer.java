@@ -55,12 +55,12 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBean;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBeanImpl;
@@ -111,13 +111,13 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,O
                 final ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl");
                 managementService.registerMBean(objectName, new CrawlerUpdateMBeanImpl(configurationService, activator));
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             } catch (final OXException e) {
-                LOG.error(e);
-            } catch (final NullPointerException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
         return obj;
@@ -136,9 +136,13 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,O
         try {
             if (service instanceof ManagementService) {
                 try {
-                    managementService.unregisterMBean("CrawlerUpdateMBeanImpl");
+                    managementService.unregisterMBean(new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl"));
                 } catch (final OXException e) {
-                    LOG.error(e);
+                    LOG.error(e.getMessage(), e);
+                } catch (final MalformedObjectNameException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final RuntimeException e) {
+                    LOG.error(e.getMessage(), e);
                 }
                 managementService = null;
             }

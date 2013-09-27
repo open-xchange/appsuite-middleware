@@ -119,6 +119,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		Check.isContactFolder(folder, session);
 		Check.noPrivateInPublic(folder, contact, session);
 		Check.canWriteInGAB(storage, session, folderID, contact);
+		
 		/*
 		 * prepare create
 		 */
@@ -197,20 +198,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
-		if (delta.containsContextId() && delta.getContextId() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		}
+		Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+		Check.readOnlyFields(userID, storedContact, delta);
 		/*
 		 * prepare update
 		 */
@@ -232,6 +221,9 @@ public class ContactServiceImpl extends DefaultContactService {
         }
         Tools.invalidateAddressesIfNeeded(delta);
         Tools.setFileAsIfNeeded(delta);
+        Contact updatedContact = new Contact();
+        ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
+        ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
 		/*
 		 * pass through to storage
 		 */
@@ -241,13 +233,20 @@ public class ContactServiceImpl extends DefaultContactService {
 			 * same storage, send update as delta
 			 */
 			sourceStorage.update(session, sourceFolderId, objectID, delta, lastRead);
+	        /*
+	         * merge back differences to supplied contact
+	         */
+	        ContactMapper.getInstance().mergeDifferences(contact, delta);
 		} else {
 			/*
 			 * different storage, perform delete & create of complete contact information
 			 */
 			//TODO: move attachments
-			ContactMapper.getInstance().mergeDifferences(storedContact, delta);
-			targetStorage.create(session, targetFolderId, storedContact);
+			targetStorage.create(session, targetFolderId, updatedContact);
+	        /*
+	         * merge back differences to supplied contact
+	         */
+	        ContactMapper.getInstance().mergeDifferences(contact, updatedContact);
 			try {
 				sourceStorage.delete(session, sourceFolderId, objectID, lastRead);
 			} catch (final OXException e) {
@@ -261,13 +260,10 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * broadcast event
 		 */
-		ContactMapper.getInstance().mergeDifferences(contact, delta);
-		contact.setObjectID(storedContact.getObjectID());
-		contact.setParentFolderID(storedContact.getParentFolderID());
 		for (final ContactStorage contactStorage : Tools.getStorages(session)) {
-			contactStorage.updateReferences(session, contact);
+			contactStorage.updateReferences(session, storedContact, updatedContact);
 		}
-		new EventClient(session).modify(storedContact, contact, targetFolder);
+		new EventClient(session).modify(storedContact, updatedContact, targetFolder);
 	}
 
 	@Override
@@ -307,22 +303,11 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
-		if (delta.containsContextId() && delta.getContextId() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsParentFolderID()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		}
+		Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+        Check.readOnlyFields(userID, storedContact, delta);
+        if (delta.containsParentFolderID()) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+        }
 		/*
 		 * prepare update
 		 */
@@ -343,20 +328,24 @@ public class ContactServiceImpl extends DefaultContactService {
         }
         Tools.invalidateAddressesIfNeeded(delta);
         Tools.setFileAsIfNeeded(delta);
+        Contact updatedContact = new Contact();
+        ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
+        ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
 		/*
 		 * pass through to storage
 		 */
 		storage.update(session, folderID, objectID, delta, lastRead);
 		/*
-		 * broadcast event
+		 * merge back differences to supplied contact
 		 */
 		ContactMapper.getInstance().mergeDifferences(contact, delta);
-		contact.setObjectID(storedContact.getObjectID());
-		contact.setParentFolderID(storedContact.getParentFolderID());
+		/*
+		 * broadcast event
+		 */
 		for (final ContactStorage contactStorage : Tools.getStorages(session)) {
-			contactStorage.updateReferences(session, contact);
+			contactStorage.updateReferences(session, storedContact, updatedContact);
 		}
-		new EventClient(session).modify(storedContact, contact, folder);
+		new EventClient(session).modify(storedContact, updatedContact, folder);
 	}
 
     @Override
@@ -405,20 +394,9 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * check for not allowed changes
          */
-        final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
-        if (delta.containsContextId() && delta.getContextId() > 0) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsCreatedBy()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsCreationDate()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsParentFolderID()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
+        Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+        Check.readOnlyFields(userID, storedContact, delta);
+        if (delta.containsParentFolderID()) {
             throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
         }
         /*
@@ -441,20 +419,24 @@ public class ContactServiceImpl extends DefaultContactService {
         }
         Tools.invalidateAddressesIfNeeded(delta);
         Tools.setFileAsIfNeeded(delta);
+        Contact updatedContact = new Contact();
+        ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
+        ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
         /*
          * pass through to storage
          */
         storage.update(session, folderID, objectID, delta, lastRead);
         /*
-         * broadcast event
+         * merge back differences to supplied contact
          */
         ContactMapper.getInstance().mergeDifferences(contact, delta);
-        contact.setObjectID(storedContact.getObjectID());
-        contact.setParentFolderID(storedContact.getParentFolderID());
+        /*
+         * broadcast event
+         */
         for (final ContactStorage contactStorage : Tools.getStorages(session)) {
-            contactStorage.updateReferences(session, contact);
+            contactStorage.updateReferences(session, storedContact, updatedContact);
         }
-        new EventClient(session).modify(storedContact, contact, Tools.getFolder(contextID, folderID));
+        new EventClient(session).modify(storedContact, updatedContact, Tools.getFolder(contextID, folderID));
     }
 
     @Override
@@ -866,7 +848,7 @@ public class ContactServiceImpl extends DefaultContactService {
         if (null == userIDs || 0 == userIDs.length) {
             searchTerm.addSearchTerm(Tools.createContactFieldTerm(
                 ContactField.INTERNAL_USERID, SingleOperation.GREATER_THAN, Integer.valueOf(0)));
-        } else if (1 == userIDs.length) {
+        } else if (null != userIDs && 1 == userIDs.length) {
             searchTerm.addSearchTerm(Tools.createContactFieldTerm(
                 ContactField.INTERNAL_USERID, SingleOperation.EQUALS, Integer.valueOf(userIDs[0])));
         } else {

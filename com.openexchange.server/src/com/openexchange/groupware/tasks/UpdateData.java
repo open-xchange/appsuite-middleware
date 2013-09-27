@@ -74,7 +74,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.mapping.Status;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
@@ -99,7 +99,7 @@ class UpdateData {
     /**
      * User configuration.
      */
-    private final UserConfiguration userConfig;
+    private final UserPermissionBits userConfig;
 
     /**
      * Folder for permission checks.
@@ -216,7 +216,7 @@ class UpdateData {
      * @param changed the changed task.
      * @param lastRead timestamp when the to update task was read last.
      */
-    UpdateData(final Context ctx, final User user, final UserConfiguration userConfig, final FolderObject folder, final Task changed, final Date lastRead) {
+    UpdateData(final Context ctx, final User user, final UserPermissionBits userConfig, final FolderObject folder, final Task changed, final Date lastRead) {
         this(ctx, user, userConfig, folder, changed, lastRead, ACTIVE);
     }
 
@@ -231,7 +231,7 @@ class UpdateData {
      * @param lastRead timestamp when the to update task was read last.
      * @param type ACTIVE or DELETED.
      */
-    UpdateData(final Context ctx, final User user, final UserConfiguration userConfig, final FolderObject folder, final Task changed, final Date lastRead, final StorageType type) {
+    UpdateData(final Context ctx, final User user, final UserPermissionBits userConfig, final FolderObject folder, final Task changed, final Date lastRead, final StorageType type) {
         super();
         this.ctx = ctx;
         this.user = user;
@@ -253,6 +253,7 @@ class UpdateData {
             origTask = storage.selectTask(ctx, getTaskId(), type);
             origTask.setParentFolderID(getFolderId());
             origTask.setUsers(TaskLogic.createUserParticipants(getOrigParticipants()));
+            origTask.setParticipants(TaskLogic.createParticipants(getOrigParticipants()));
         }
         return origTask;
     }
@@ -751,15 +752,18 @@ class UpdateData {
     }
 
     void updateReminder() throws OXException, OXException {
-        updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getUpdatedFolder());
+        updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getDestFolder(), getUpdatedParticipants(), getUpdatedFolder());
     }
 
-    static void updateReminder(final Context ctx, final Task updated, final User user, final boolean move, final Set<TaskParticipant> removed, final Set<Folder> folders) throws OXException {
+    static void updateReminder(Context ctx, Task updated, User user, boolean move, Set<TaskParticipant> removed, FolderObject destFolder, Set<TaskParticipant> participants, Set<Folder> folders) throws OXException {
         if (updated.containsAlarm()) {
             Reminder.updateAlarm(ctx, updated, user);
         }
         if (move) {
-            Reminder.fixAlarm(ctx, updated, removed, folders);
+            if (Tools.isFolderPrivate(destFolder)) {
+                Tools.fillStandardFolders(ctx.getContextId(), updated.getObjectID(), participants, folders, true);
+            }
+            Reminder.fixAlarm(ctx, updated, removed, participants, folders);
         }
     }
 
@@ -840,7 +844,7 @@ class UpdateData {
      * @throws OXException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException, OXException {
+    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserPermissionBits userConfig, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException, OXException {
         // TODO create insert class
         TaskLogic.checkNewTask(task, userId, userConfig, parts);
         InsertData.insertTask(ctx, task, parts, folders);

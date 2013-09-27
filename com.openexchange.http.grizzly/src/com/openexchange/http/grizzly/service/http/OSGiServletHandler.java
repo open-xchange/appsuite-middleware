@@ -92,6 +92,7 @@
 package com.openexchange.http.grizzly.service.http;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -105,6 +106,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
@@ -121,8 +123,10 @@ import org.glassfish.grizzly.servlet.ServletConfigImpl;
 import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.exceptions.ExceptionUtils;
+import com.openexchange.tools.servlet.UploadServletException;
 
 /**
  * OSGi customized {@link ServletHandler}.
@@ -404,10 +408,46 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                 if (servlet != null) {
                     servlet.service(request, response);
                 }
-            } catch (Throwable throwable) {
+            } catch (final UploadServletException e) {
+                /*
+                 * Log ServletException's own root cause separately
+                 */
+                final Throwable rootCause = e.getRootCause();
+                if (null != rootCause) {
+                    LOG.error(rootCause.getMessage(), rootCause);
+                }
+                /*
+                 * Now log actual UploadServletException...
+                 */
+                LOG.error(e.getMessage(), e);
+                /*
+                 * ... and write bytes
+                 */
+                if (response instanceof HttpServletResponse) {
+                    HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+                    try {
+                        handleUploadServletException(e, httpServletResponse);
+                    } catch (final Exception ie) {
+                        handleThrowable(e, request, response);
+                    }
+                }
+            } catch (final Throwable throwable) {
                 handleThrowable(throwable, request, response);
             }
 
+        }
+
+        private void handleUploadServletException(final UploadServletException e, final HttpServletResponse httpServletResponse) throws IOException {
+            try {
+                final PrintWriter writer = httpServletResponse.getWriter();
+                writer.write(e.getData());
+                writer.flush();
+            } catch (final IllegalStateException ise) {
+                // OutputStream already selected
+                ServletOutputStream out = httpServletResponse.getOutputStream();
+                out.write(e.getData().getBytes(Charsets.UTF_8));
+                out.flush();
+            }
         }
 
         /**
@@ -426,11 +466,9 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
             }
 
             if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
-                HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-                HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-                appendHttpServletRequestInfo(logBuilder, httpServletRequest);
+                appendHttpServletRequestInfo(logBuilder, (HttpServletRequest) request);
                 // 500 - Internal Server Error
-                httpServletResponse.setStatus(500);
+                ((HttpServletResponse) response).setStatus(500);
             } else {
                 appendServletRequestInfo(logBuilder, request);
             }

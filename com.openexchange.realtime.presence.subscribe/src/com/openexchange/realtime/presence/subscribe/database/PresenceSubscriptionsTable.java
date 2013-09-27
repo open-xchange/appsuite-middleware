@@ -60,7 +60,7 @@ public class PresenceSubscriptionsTable extends AbstractCreateTableImpl {
 
     @Override
     public String[] requiredTables() {
-        return NO_TABLES;
+        return new String[] { "user" };
     }
 
     @Override
@@ -79,6 +79,7 @@ public class PresenceSubscriptionsTable extends AbstractCreateTableImpl {
             " status varchar(64) NOT NULL," +
             " request TEXT," +
             " timestamp timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+            " uuid BINARY(16) DEFAULT NULL," +
             " UNIQUE (fromCid, fromUserId, toCid, toUserId)," +
             " UNIQUE (fromId, toCid, toUserId)," +
             " FOREIGN KEY (fromCid, fromUserId) REFERENCES user(cid, id) ON DELETE CASCADE," +

@@ -49,8 +49,13 @@
 
 package com.openexchange.control.console;
 
+import java.io.IOException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
@@ -66,9 +71,16 @@ public final class ShutDown extends AbstractConsoleHandler {
      * @param args The command-line arguments
      */
     public ShutDown(final String args[]) {
+        boolean completed = false;
         try {
             init(args, true);
-            shutdown();
+            boolean waitForExit = false;
+            for (ValueObject valueObject : getParser().getValueObjects()) {
+                if ("-w".equals(valueObject.getValue())) {
+                    waitForExit = true;
+                }
+            }
+            completed = shutdown(waitForExit) || !waitForExit;
         } catch (final Exception exc) {
             final Throwable cause = exc.getCause();
             if (cause != null) {
@@ -80,13 +92,16 @@ public final class ShutDown extends AbstractConsoleHandler {
             } else {
                 exc.printStackTrace();
             }
+            exit();
         } finally {
             try {
                 close();
             } catch (final Exception exc) {
-                System.out.println("closing all connections failed: " + exc);
-                exc.printStackTrace();
+                // Ignore. If the backend terminates successfully exception may appear here.
             }
+        }
+        if (!completed) {
+            System.exit(1);
         }
     }
 
@@ -94,10 +109,25 @@ public final class ShutDown extends AbstractConsoleHandler {
         initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
-    public void shutdown() throws Exception {
+    public boolean shutdown(boolean waitForExit) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-        mBeanServerConnection.invoke(objectName, "shutdown", new Object[] {}, new String[] {});
+        boolean retval = false;
+        try {
+            Object result = mBeanServerConnection.invoke(objectName, "shutdown", new Object[] { Boolean.valueOf(waitForExit) }, new String[] { "boolean" });
+            if (result instanceof Boolean) {
+                retval = ((Boolean) result).booleanValue();
+            }
+        } catch (ReflectionException e) {
+            if (e.getCause() instanceof NoSuchMethodException) {
+                // Happens only once when upgrading to version 7.4.0 because newer CLT tries to stop older backend which does not have extended method.
+                // This can be removed if no version before 7.4.0 is running somewhere anymore.
+                mBeanServerConnection.invoke(objectName, "shutdown", new Object[] { }, new String[] { });
+            } else {
+                throw e;
+            }
+        }
+        return retval;
     }
 
     public static void main(final String args[]) {
@@ -106,7 +136,9 @@ public final class ShutDown extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("shutdown (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) bundle name");
+        System.out.println("Shuts down the OSGi framework through invoking closure of top-level system bundle.");
+        System.out.println("If the parameter -w is defined the tools awaits the completion of the shutdown process and returns if it was successful.");
+        System.out.println("Usage: shutdown (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) (-w (optional))");
     }
 
     @Override

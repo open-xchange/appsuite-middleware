@@ -73,7 +73,7 @@ public class NewAction extends AbstractFileStorageAccountAction {
 
     @Override
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        final FileStorageAccount account = parser.parse((JSONObject) request.getData());
+        final FileStorageAccount account = parser.parse((JSONObject) request.requireData());
         final String id = account.getFileStorageService().getAccountManager().addAccount(account, session);
         return new AJAXRequestResult(id);
     }

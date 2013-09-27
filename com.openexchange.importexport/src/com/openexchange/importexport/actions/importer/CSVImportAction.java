@@ -65,10 +65,19 @@ import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.ServiceLookup;
 
 public class CSVImportAction extends AbstractImportAction implements AJAXActionService {
 
-	public static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVImportAction.class));
+	/**
+     * Initializes a new {@link CSVImportAction}.
+     * @param services
+     */
+    public CSVImportAction(ServiceLookup services) {
+        super(services);
+    }
+
+    public static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVImportAction.class));
 
 	private Importer importer;
 
@@ -78,7 +87,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
 	}
 
     public Importer loadImporter() {
-        final CSVContactImporter imp = new CSVContactImporter();
+        final CSVContactImporter imp = new CSVContactImporter(services);
         try {
             final ConfigurationService conf = ImportExportServices.getConfigurationService();
             final String path = conf.getProperty("com.openexchange.import.mapper.path");

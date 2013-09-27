@@ -252,12 +252,12 @@ public abstract class AbstractICalParserTest extends TestCase {
         final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
         final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
         List<CalendarDataObject> parsed = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
-        assertEquals(0, parsed.size());
+        assertTrue(null == parsed || 0 == parsed.size());
         assertEquals(0, errors.size());
         assertEquals(0, warnings.size());
     }
 
-    
+
     protected void warningOnAppRecurrence(final String recurrence, final String warning) throws ConversionError {
         final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", recurrence);
         assertWarningWhenParsingAppointment(icalText, warning);

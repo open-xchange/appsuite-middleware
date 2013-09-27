@@ -57,6 +57,7 @@ import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.filestorage.FileStorageFolderStorage;
@@ -86,7 +87,7 @@ public final class FileStorageFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageServiceRegistry.class };
+        return new Class<?>[] { FileStorageServiceRegistry.class, IDBasedFolderAccessFactory.class };
     }
 
     @Override

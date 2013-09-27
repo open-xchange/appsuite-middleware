@@ -61,7 +61,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -215,12 +214,11 @@ public class DispatcherServlet extends SessionServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        ServerSession session = null;
-        boolean sessionParamFound = false;
+        ServerSession session;
+        final boolean sessionParamFound;
         {
-            final String sSession = req.getParameter("session");
-            if (sSession != null && sSession.length() > 0) {
-                final String sessionId = getSessionId(req);
+            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            if (sessionId != null && sessionId.length() > 0) {
                 try {
                     session = getSession(req, sessionId, sessiondService);
                 } catch (final OXException e) {
@@ -239,6 +237,9 @@ public class DispatcherServlet extends SessionServlet {
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
                 sessionParamFound = true;
+            } else {
+                session = null;
+                sessionParamFound = false;
             }
         }
         // Check if associated request allows no session (if no "session" parameter was found)
@@ -251,29 +252,7 @@ public class DispatcherServlet extends SessionServlet {
         }
         // Try public session
         if (!mayOmitSession) {
-            final Cookie[] cookies = req.getCookies();
-            if (cookies != null) {
-                ServerSession simpleSession = null;
-                for (final Cookie cookie : cookies) {
-                    if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
-                        final String altId = cookie.getValue();
-                        if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
-                            // same session
-                            simpleSession = session;
-                        } else {
-                            // lookup session by alternative id
-                            simpleSession = ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(cookie.getValue()));
-                        }
-                        break;
-                    }
-                }
-                // Check if a simple (aka public) session has been found
-                if (simpleSession != null) {
-                    checkSecret(hashSource, req, simpleSession);
-                    verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
-                    rememberPublicSession(req, simpleSession);
-                }
-            }
+            findPublicSessionId(req, session, sessiondService);
         }
     }
 
@@ -359,16 +338,26 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * A common result
              */
+            OXException exception = result.getException();
+            if (exception != null) {
+                if (exception.isLoggable(LogLevel.DEBUG)) {
+                    logException(exception, LogLevel.DEBUG);
+                } else {
+                    logException(exception, LogLevel.TRACE);
+                }
+            }
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                logException(e, LogLevel.DEBUG);
                 return;
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
                 final Object[] logArgs = e.getLogArgs();
                 final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
+                logException(e, LogLevel.DEBUG);
                 return;
             }
             // Handle other OXExceptions
@@ -381,6 +370,10 @@ public class DispatcherServlet extends SessionServlet {
                 } else {
                     logException(e);
                 }
+            } else if (e.isLoggable(LogLevel.DEBUG)){
+                logException(e, LogLevel.DEBUG);
+            } else {
+                logException(e, LogLevel.TRACE);
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
@@ -442,7 +435,12 @@ public class DispatcherServlet extends SessionServlet {
         ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
         if (session == null) {
             if (!dispatcher.mayOmitSession(module, action)) {
-                throw dispatcher.mayUseFallbackSession(module, action) ? AjaxExceptionCodes.MISSING_COOKIE.create(Login.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+                if (dispatcher.mayUseFallbackSession(module, action)) {
+                    // "open-xchange-public-session" allowed, but missing for associated action
+                    throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(Login.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_COOKIE.create(Login.PUBLIC_SESSION_NAME);
+                }
+                // "open-xchange-public-session" NOT allowed for associated action, therefore complain about missing "session" parameter
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
             }
             session = fakeSession();
         }

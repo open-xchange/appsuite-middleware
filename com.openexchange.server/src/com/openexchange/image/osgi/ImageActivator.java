@@ -53,8 +53,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.filemanagement.internal.ManagedFileImageDataSource;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.image.Mp3ImageDataSource;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -72,7 +74,7 @@ public class ImageActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[] { ManagedFileManagement.class };
     }
 
     @Override
@@ -92,6 +94,13 @@ public class ImageActivator extends AJAXModuleActivator {
             ImageActionFactory.addMapping(contactDataSource.getRegistrationName(), contactDataSource.getAlias());
         }
         {
+            UserImageDataSource userDataSource = UserImageDataSource.getInstance();
+            Dictionary<String, Object> contactProps = new Hashtable<String, Object>(1);
+            contactProps.put("identifier", userDataSource.getRegistrationName());
+            registerService(DataSource.class, userDataSource, contactProps);
+            ImageActionFactory.addMapping(userDataSource.getRegistrationName(), userDataSource.getAlias());
+        }
+        {
             Mp3ImageDataSource mp3DataSource = Mp3ImageDataSource.getInstance();
             Dictionary<String, Object> mp3Props = new Hashtable<String, Object>(1);
             mp3Props.put("identifier", mp3DataSource.getRegistrationName());
@@ -99,7 +108,8 @@ public class ImageActivator extends AJAXModuleActivator {
             ImageActionFactory.addMapping(mp3DataSource.getRegistrationName(), mp3DataSource.getAlias());
         }
         {
-            ManagedFileImageDataSource imageDataSource = new ManagedFileImageDataSource();
+            ManagedFileManagement service = getService(ManagedFileManagement.class);
+            ManagedFileImageDataSource imageDataSource = new ManagedFileImageDataSource(service);
             Dictionary<String, Object> imageProps = new Hashtable<String, Object>(1);
             imageProps.put("identifier", imageDataSource.getRegistrationName());
             registerService(DataSource.class, imageDataSource, imageProps);

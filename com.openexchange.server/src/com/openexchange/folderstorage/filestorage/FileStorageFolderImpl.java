@@ -50,6 +50,9 @@
 package com.openexchange.folderstorage.filestorage;
 
 import java.util.List;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CacheAware;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
@@ -59,10 +62,14 @@ import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.PutIfAbsent;
+import com.openexchange.session.Session;
 
 /**
  * {@link FileStorageFolderImpl} - A file storage folder.
@@ -72,6 +79,11 @@ import com.openexchange.groupware.container.FolderObject;
 public final class FileStorageFolderImpl extends AbstractFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
+
+    /**
+     * <code>"9"</code>
+     */
+    private static final String INFOSTORE = Integer.toString(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
 
     /**
      * <code>"10"</code>
@@ -103,28 +115,28 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      * Subfolder identifiers and tree identifier are not set within this constructor.
      *
      * @param fsFolder The underlying file storage folder
-     * @param accountId The account identifier
-     * @param serviceId The service identifier
      */
-    public FileStorageFolderImpl(final FileStorageFolder fsFolder, final String accountId, final String serviceId) {
+    public FileStorageFolderImpl(final FileStorageFolder fsFolder, final Session session, final boolean altNames) {
         super();
-        final String fullname = fsFolder.getId();
-        id = FileStorageFolderIdentifier.getFQN(serviceId, accountId, fullname);
+        id = fsFolder.getId();
         name = fsFolder.getName();
-        final boolean isRootFolder = fsFolder.isRootFolder();
-        if (isRootFolder) { // Root folder
+        if (fsFolder.isRootFolder()) {
             parent = PRIVATE_FOLDER_ID;
         } else {
             String parentId = null;
             if (fsFolder instanceof TypeAware) {
                 final FileStorageFolderType folderType = ((TypeAware) fsFolder).getType();
                 if (FileStorageFolderType.HOME_DIRECTORY.equals(folderType)) {
-                    parentId = INFOSTORE_USER;
+                    if (showPersonalBelowInfoStore(session, altNames)) {
+                        parentId = INFOSTORE;
+                    } else {
+                        parentId = INFOSTORE_USER;
+                    }
                 } else if (FileStorageFolderType.PUBLIC_FOLDER.equals(folderType)) {
                     parentId = INFOSTORE_PUBLIC;
                 }
             }
-            parent = null == parentId ? FileStorageFolderIdentifier.getFQN(serviceId, accountId, fsFolder.getParentId()) : parentId;
+            parent = null != parentId ? parentId : fsFolder.getParentId();
         }
         {
             final List<FileStoragePermission> fsPermissions = fsFolder.getPermissions();
@@ -145,6 +157,36 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             cacheable = !fsFolder.isDefaultFolder() && ((CacheAware) fsFolder).cacheable();
         } else {
             cacheable = !fsFolder.isDefaultFolder();
+        }
+        meta = fsFolder.getMeta();
+        supportedCapabilities = fsFolder.getCapabilities();
+    }
+
+    private static boolean showPersonalBelowInfoStore(final Session session, final boolean altNames) {
+        if (!altNames) {
+            return false;
+        }
+        final String paramName = "com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore";
+        final Boolean tmp = (Boolean) session.getParameter(paramName);
+        if (null != tmp) {
+            return tmp.booleanValue();
+        }
+        final ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == configViewFactory) {
+            return false;
+        }
+        try {
+            final ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+            final Boolean b = view.opt(paramName, boolean.class, Boolean.FALSE);
+            if (session instanceof PutIfAbsent) {
+                ((PutIfAbsent) session).setParameterIfAbsent(paramName, b);
+            } else {
+                session.setParameter(paramName, b);
+            }
+            return b.booleanValue();
+        } catch (final OXException e) {
+            com.openexchange.log.Log.loggerFor(SystemInfostoreFolder.class).warn(e.getMessage(), e);
+            return false;
         }
     }
 

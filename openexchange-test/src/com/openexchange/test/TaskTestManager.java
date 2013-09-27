@@ -51,6 +51,7 @@ package com.openexchange.test;
 
 import static junit.framework.Assert.fail;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -298,7 +299,7 @@ public class TaskTestManager implements TestManager{
             break;
         case Task.ACTUAL_COSTS:
         case Task.TARGET_COSTS:
-            retval = Float.valueOf(((String) value));
+            retval = new BigDecimal(value.toString());
             break;
 //        case Task.PERCENT_COMPLETED:
 //            retval = Integer.valueOf(((Long) value).intValue());

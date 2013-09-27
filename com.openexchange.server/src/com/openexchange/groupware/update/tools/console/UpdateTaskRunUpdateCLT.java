@@ -110,6 +110,7 @@ public final class UpdateTaskRunUpdateCLT {
         final CommandLineParser parser = new PosixParser();
         int contextId = -1;
         String schemaName = null;
+        boolean error = true;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -125,12 +126,12 @@ public final class UpdateTaskRunUpdateCLT {
                     } catch (final NumberFormatException e) {
                         System.err.println("Port parameter is not a number: " + val);
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                     if (port < 1 || port > 65535) {
                         System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                 }
             }
@@ -138,7 +139,7 @@ public final class UpdateTaskRunUpdateCLT {
                 if (!cmd.hasOption('n')) {
                     System.err.println("Missing context/schema identifier.");
                     printHelp();
-                    System.exit(0);
+                    System.exit(1);
                 }
                 schemaName = cmd.getOptionValue('n');
             } else {
@@ -148,7 +149,7 @@ public final class UpdateTaskRunUpdateCLT {
                 } catch (final NumberFormatException e) {
                     System.err.println("Context parameter is not a number: " + optionValue);
                     printHelp();
-                    System.exit(0);
+                    System.exit(1);
                 }
             }
 
@@ -187,6 +188,7 @@ public final class UpdateTaskRunUpdateCLT {
                     }
                 }
             }
+            error = false;
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
@@ -214,6 +216,10 @@ public final class UpdateTaskRunUpdateCLT {
         } catch (final RuntimeException e) {
             System.err.println("Problem in runtime: " + e.getMessage());
             printHelp();
+        } finally {
+            if (error) {
+                System.exit(1);
+            }
         }
     }
 

@@ -89,7 +89,9 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.WarningsAware;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -107,7 +109,6 @@ import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
-import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.Tools;
@@ -134,8 +135,8 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.FullnameArgument;
@@ -631,8 +632,8 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Check
          */
-        final FolderStorage dedicatedFolderStorage = folderStorageRegistry.getDedicatedFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
-        if (!dedicatedFolderStorage.containsFolder(FolderStorage.REAL_TREE_ID, folderId, storageType, storageParameters)) {
+        final FolderStorage dedicatedFolderStorage = folderStorageRegistry.getDedicatedFolderStorage(realTreeId, folderId);
+        if (!dedicatedFolderStorage.containsFolder(realTreeId, folderId, storageType, storageParameters)) {
             return false;
         }
 
@@ -926,7 +927,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     }
                 }
             } else {
-                folderStorage.updateLastModified(lastModified, FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+                folderStorage.updateLastModified(lastModified, realTreeId, folderId, storageParameters);
                 final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(storageParameters.getSession());
                 if (null != memoryTable) {
                     memoryTable.initializeFolder(
@@ -1073,7 +1074,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final boolean started = folderStorage.startTransaction(storageParameters, false);
                 try {
                     // Get folder
-                    rootFolder = folderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+                    rootFolder = folderStorage.getFolder(realTreeId, folderId, storageParameters);
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
@@ -1471,11 +1472,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         if (defaultFileStorageAccess instanceof WarningsAware) {
                             addWarnings(storageParameters, (WarningsAware) defaultFileStorageAccess);
                         }
-                        final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(
-                            fileStorageService.getId(),
-                            defaultAccount.getId(),
-                            personalFolder.getId());
-                        return new SortableId[] { new OutlookId(fsfi.toString(), 0, personalFolder.getName()) };
+                        return new SortableId[] { new OutlookId(new FolderID(fileStorageService.getId(), defaultAccount.getId(), personalFolder.getId()).toUniqueID(), 0, personalFolder.getName()) };
                         // TODO: Shared?
                     } finally {
                         defaultFileStorageAccess.close();
@@ -1502,8 +1499,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         final String accountId = defaultAccount.getId();
                         for (int i = 0; i < publicFolders.length; i++) {
                             final FileStorageFolder folder = publicFolders[i];
-                            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(serviceId, accountId, folder.getId());
-                            ret[i] = new OutlookId(fsfi.toString(), i, folder.getName());
+                            ret[i] = new OutlookId(new FolderID(serviceId, accountId, folder.getId()).toUniqueID(), i, folder.getName());
                         }
                         if (defaultFileStorageAccess instanceof WarningsAware) {
                             addWarnings(storageParameters, (WarningsAware) defaultFileStorageAccess);
@@ -1581,10 +1577,11 @@ public final class OutlookFolderStorage implements FolderStorage {
                                     /*
                                      * Check if file storage service provides a root folder
                                      */
-                                    final List<FileStorageAccount> userAccounts;
+                                    List<FileStorageAccount> userAccounts = null;
                                     if (fsService instanceof AccountAware) {
                                         userAccounts = ((AccountAware) fsService).getAccounts(session);
-                                    } else {
+                                    }
+                                    if (null == userAccounts) {
                                         userAccounts = fsService.getAccountManager().getAccounts(session);
                                     }
                                     final Props props = LogProperties.getLogProperties();
@@ -1632,9 +1629,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                                         final FileStorageService tmp = fsa.getFileStorageService();
                                         serviceId = null == tmp ? null : tmp.getId();
                                     }
-                                    final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(serviceId, fsa.getId(), fid);
-                                    l.add(new String[] { fsfi.toString(), fsa.getDisplayName() });
-                                    id2name.put(fsfi.toString(), fsa.getDisplayName());
+                                    FolderID folderID = new FolderID(serviceId, fsa.getId(), fid);
+                                    l.add(new String[] { folderID.toUniqueID(), fsa.getDisplayName() });
+                                    id2name.put(folderID.toUniqueID(), fsa.getDisplayName());
                                 }
                             }
                         }
@@ -1751,7 +1748,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final List<SortableId> sortedIDs = f.get();
             return sortedIDs.toArray(new SortableId[sortedIDs.size()]);
         } catch (final InterruptedException e) {
-            ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+            Thread.currentThread().interrupt();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
@@ -1891,7 +1888,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final List<SortableId> sortedIDs = f.get();
             return sortedIDs.isEmpty() ? new SortableId[0] : sortedIDs.toArray(new SortableId[sortedIDs.size()]);
         } catch (final InterruptedException e) {
-            ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+            Thread.currentThread().interrupt();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
@@ -1908,7 +1905,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             /*
              * Get real folder storage
              */
-            final String parentId = FolderStorage.REAL_TREE_ID;
+            final String parentId = ROOT_ID;
             final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
@@ -1918,7 +1915,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 /*
                  * Get subfolders
                  */
-                final SortableId[] subfolders = folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, parentId, storageParameters);
+                final SortableId[] subfolders = folderStorage.getSubfolders(realTreeId, parentId, storageParameters);
                 /*
                  * Get only private folder
                  */
@@ -2058,10 +2055,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final boolean started = folderStorage.startTransaction(storageParameters, false);
                 try {
                     // Get subfolders
-                    final SortableId[] subfolders = folderStorage.getSubfolders(
-                        FolderStorage.REAL_TREE_ID,
-                        FolderStorage.ROOT_ID,
-                        storageParameters);
+                    final SortableId[] subfolders = folderStorage.getSubfolders(realTreeId, FolderStorage.ROOT_ID, storageParameters);
                     final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
                     for (final SortableId subfolder : subfolders) {
                         final String id = subfolder.getId();
@@ -2073,23 +2067,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                                 put2TreeMap(name, id, treeMap);
                             }
                         }
-                        // if (FolderStorage.PUBLIC_ID.equals(id)) {
-                        // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                        // List<String> list = treeMap.get(localizedName);
-                        // if (null == list) {
-                        // list = new ArrayList<String>(2);
-                        // treeMap.put(localizedName, list);
-                        // }
-                        // list.add(id);
-                        // } else if (FolderStorage.SHARED_ID.equals(id)) {
-                        // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                        // List<String> list = treeMap.get(localizedName);
-                        // if (null == list) {
-                        // list = new ArrayList<String>(2);
-                        // treeMap.put(localizedName, list);
-                        // }
-                        // list.add(id);
-                        // }
                     }
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
@@ -2112,13 +2089,13 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * User configuration
          */
-        final UserConfiguration userConfiguration;
+        final UserPermissionBits userConfiguration;
         {
             final Session s = parameters.getSession();
             if (s instanceof ServerSession) {
-                userConfiguration = ((ServerSession) s).getUserConfiguration();
+                userConfiguration = ((ServerSession) s).getUserPermissionBits();
             } else {
-                userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), parameters.getContext());
+                userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), parameters.getContext());
             }
         }
         /*
@@ -2699,7 +2676,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final ConnectionMode con = storageParameters.<ConnectionMode> getParameter(
             DatabaseFolderType.getInstance(),
             DatabaseParameterConstants.PARAM_CONNECTION);
-        if (null != con && con.readWrite) {
+        if (null != con && con.supports(Mode.WRITE)) {
             return con.connection;
         }
         return null;
@@ -2751,9 +2728,9 @@ public final class OutlookFolderStorage implements FolderStorage {
             return false;
         }
         try {
-            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(folder.getID());
+            FolderID folderID = new FolderID(folder.getID());
             // FileStorage root full name has zero length
-            return 0 == fsfi.getFolderId().length() && fsfi.getServiceId().indexOf(SERVICE_INFOSTORE) < 0;
+            return 0 == folderID.getFolderId().length() && folderID.getService().indexOf(SERVICE_INFOSTORE) < 0;
         } catch (final Exception e) {
             /*
              * Parsing failed

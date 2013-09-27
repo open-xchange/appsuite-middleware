@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tools.chunk;
 
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 
@@ -60,10 +62,12 @@ import com.openexchange.exception.OXException;
 public class ChunkPerformer {
 
     /**
-     * Performs an operation in chunks.
+     * Performs an operation in chunks. This method might be helpful when dealing with custom data structures or
+     * uncommon situations where chunking is needed.
      *
      * @param performable The {@link Performable}.
      * @throws OXException The rethrown {@link OXException} thrown by {@link Performable#perform(int, int)}.
+     * Note that the whole operation fails, if one chunk throws an {@link OXException}.
      */
     public static void perform(Performable performable) throws OXException {
         int sum = performable.getLength();
@@ -77,6 +81,58 @@ public class ChunkPerformer {
 
             off += performable.perform(off, (len + off));
         } while (off < sum);
+    }
+
+    /**
+     * Splits a given {@link List} into chunks and executes the performable for every chunk.
+     * The chunks are sublists of the original list, based on the given offset and chunk size.
+     *
+     * @param list The original list.
+     * @param initialOffset The initial offset that will be used to split the original list into chunks.
+     * @param chunkSize The chunk size.
+     * @param performable The {@link ListPerformable}.
+     * @throws OXException The rethrown {@link OXException} thrown by {@link ListPerformable#perform(List)}.
+     * Note that the whole operation fails, if one chunk throws an {@link OXException}.
+     */
+    public static <T> void perform(final List<T> list, final int initialOffset, final int chunkSize, final ListPerformable<T> performable) throws OXException {
+        int off = initialOffset;
+        int totalLength = list.size() - initialOffset;
+        int len = chunkSize == 0 ? totalLength : chunkSize;
+        do {
+            if ((off + len) > totalLength) {
+                len = totalLength - off;
+            }
+
+            List<T> subList = list.subList(off, (len + off));
+            performable.perform(subList);
+            off += subList.size();
+        } while (off < totalLength);
+    }
+
+    /**
+     * Splits a given array into chunks and executes the performable for every chunk.
+     * The chunks are copied sub arrays of the original one, based on the given offset and chunk size.
+     *
+     * @param list The original array.
+     * @param initialOffset The initial offset that will be used to split the original array into chunks.
+     * @param chunkSize The chunk size.
+     * @param performable The {@link ArrayPerformable}.
+     * @throws OXException The rethrown {@link OXException} thrown by {@link ArrayPerformable#perform(Object[])}.
+     * Note that the whole operation fails, if one chunk throws an {@link OXException}.
+     */
+    public static <T> void perform(final T[] array, final int initialOffset, final int chunkSize, final ArrayPerformable<T> performable) throws OXException {
+        int off = initialOffset;
+        int totalLength = array.length - initialOffset;
+        int len = chunkSize == 0 ? totalLength : chunkSize;
+        do {
+            if ((off + len) > totalLength) {
+                len = totalLength - off;
+            }
+
+            T[] subArray = Arrays.copyOfRange(array, off, (len + off));
+            performable.perform(subArray);
+            off += subArray.length;
+        } while (off < totalLength);
     }
 
 }

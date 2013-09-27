@@ -88,6 +88,7 @@ import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.TimeZoneUtils;
@@ -106,7 +107,11 @@ public class CSVContactImporter extends AbstractImporter {
 	private LinkedList<ContactFieldMapper> mappers;
 
 	private ContactFieldMapper currentMapper;
-
+	
+	
+	public CSVContactImporter(ServiceLookup services) {
+	    super(services);
+	}
 
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
@@ -199,12 +204,19 @@ public class CSVContactImporter extends AbstractImporter {
                 intentions.add(intention);
             }
         }
-
+        
+        int limit = getLimit(sessObj);
+        int count = 0;
         // Build a list of contacts to insert
         final List<Contact> contacts = new ArrayList<Contact>(intentions.size());
         for (final ImportIntention intention : intentions) {
             if (intention.contact != null) {
-                contacts.add(intention.contact);
+                if (limit <= 0 || count <= limit) {
+                    contacts.add(intention.contact);
+                    count++;
+                } else {
+                    intention.exceedsLimit = true;
+                }
             }
         }
 
@@ -227,11 +239,14 @@ public class CSVContactImporter extends AbstractImporter {
 
         // Build result list
         final List<ImportResult> results = new ArrayList<ImportResult>(intentions.size());
-
+        
+        boolean exceeds = false;
         for (final ImportIntention intention : intentions) {
             final boolean notNull = intention.contact != null;
             final boolean isZero = notNull ? intention.contact.getObjectID() == 0 : true;
-            if (notNull && !isZero) {
+            if (intention.exceedsLimit) {
+                exceeds = true;
+            } else if (notNull && !isZero) {
                 final ImportResult result = new ImportResult();
                 result.setFolder(folder);
                 result.setObjectId(Integer.toString(intention.contact.getObjectID()));
@@ -252,7 +267,10 @@ public class CSVContactImporter extends AbstractImporter {
                 results.add(intention.result);
             }
         }
-
+        
+        if (exceeds) {
+            throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
+        }
         return results;
     }
 
@@ -382,6 +400,7 @@ public class CSVContactImporter extends AbstractImporter {
     }
 
     public static final class ImportIntention {
+        public boolean exceedsLimit;
         public Contact contact;
         public ImportResult result;
 

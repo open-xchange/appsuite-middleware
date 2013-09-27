@@ -57,6 +57,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetService;
@@ -80,8 +81,8 @@ public final class AllAction extends SnippetAction {
     /**
      * Initializes a new {@link AllAction}.
      */
-    public AllAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
-        super(services, actions);
+    public AllAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
+        super(services, snippetServices, actions);
     }
 
     @Override
@@ -91,7 +92,7 @@ public final class AllAction extends SnippetAction {
             final String tmp = snippetRequest.getParameter("type", String.class);
             types = isEmpty(tmp) ? new String[0] : SPLIT_CSV.split(tmp);
         }
-        final SnippetService snippetService = getSnippetService();
+        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
 
         final List<Snippet> snippets = snippetService.getManagement(snippetRequest.getSession()).getSnippets(types);
         return new AJAXRequestResult(snippets, "snippet");

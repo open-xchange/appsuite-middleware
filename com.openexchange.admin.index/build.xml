@@ -12,7 +12,7 @@
 
 	<target name="postInstall">
 	    <symlink resource="${sbinInstallDir}/lockindex" link="${destDir}/${sbinInstallDir}/unlockindex" overwrite="true" />
-	    <chmod perm="755" file="${sbinInstallDir}/unlockindex" />
+	    <chmod perm="755" file="${destDir}/${sbinInstallDir}/unlockindex" verbose="true"/>
 	</target>
 
 </project>

@@ -81,4 +81,9 @@ public class AlwaysWriteConnectionProvider implements DBProvider {
         delegate.releaseWriteConnection(ctx, con);
     }
 
+    @Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        delegate.releaseWriteConnectionAfterReading(ctx, con);
+    }
+
 }

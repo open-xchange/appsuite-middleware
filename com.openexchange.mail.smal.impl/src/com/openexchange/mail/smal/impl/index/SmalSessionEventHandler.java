@@ -56,6 +56,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -63,12 +64,14 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexProperties;
 import com.openexchange.index.solr.ModuleSet;
+import com.openexchange.mail.api.IMailProperties;
+import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.index.jobs.CheckForDeletedFoldersJob;
 import com.openexchange.mail.smal.impl.index.jobs.MailFolderJob;
 import com.openexchange.mail.smal.impl.index.jobs.MailJobInfo;
-import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -79,17 +82,17 @@ import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link SmalSessionEventHandler}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SmalSessionEventHandler implements EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalSessionEventHandler.class);
-    
+
     private static final int MAX_OFFSET = 60000 * 5;
-    
+
     private static final long JOB_TIMEOUT = 7 * 24 * 60 * 60000;
-    
+
     private static final int PROGRESSION_RATE = 10;
 
     private static final long START_INTERVAL = 60000 * 60;
@@ -111,7 +114,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 if (session.isTransient()) {
                     return;
                 }
-                
+
                 int contextId = session.getContextId();
                 int userId = session.getUserId();
                 if (!isIndexingPermitted(contextId, userId)) {
@@ -128,17 +131,17 @@ public class SmalSessionEventHandler implements EventHandler {
                     LOG.warn("Could not handle session event.", e);
                     return;
                 }
-                
+
                 Map<Integer, Set<MailFolder>> allFolders = IndexableFoldersCalculator.calculatePrivateMailFolders(
                     session,
                     storageService);
-                scheduleFolderJobs(session, allFolders, storageService, indexingService, isReactivation);
+                scheduleFolderJobs(session, allFolders, indexingService, isReactivation);
             }
         } catch (Exception e) {
             LOG.warn("Error while triggering mail indexing jobs.", e);
         }
     }
-    
+
     private boolean isIndexingPermitted(int contextId, int userId) throws OXException {
         ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
         ConfigView view = config.getView(userId, contextId);
@@ -147,24 +150,24 @@ public class SmalSessionEventHandler implements EventHandler {
         return modules.containsModule(Types.EMAIL);
     }
 
-    private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, MailAccountStorageService storageService, IndexingService indexingService, boolean updateOnly) throws OXException {
+    private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, IndexingService indexingService, boolean updateOnly) throws OXException {
         int contextId = session.getContextId();
         int userId = session.getUserId();
         Random random = new Random();
+        ConfigurationService configurationService = SmalServiceLookup.getServiceStatic(ConfigurationService.class);
+        boolean useOffset = configurationService.getBoolProperty("com.openexchange.mail.smal.useOffset", true);
         for (Integer accountId : allFolders.keySet()) {
-            MailAccount account = storageService.getMailAccount(accountId.intValue(), userId, contextId);
             Set<MailFolder> folders = allFolders.get(accountId);
-            String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(
-                account.getPassword(),
-                session,
-                accountId.intValue(),
-                account.getLogin(),
-                account.getMailServer());
+            MailConfig mailConfig = MailConfig.getConfig(new JobMailConfig(), session, accountId);
 
             for (MailFolder folder : folders) {
-                int offset = random.nextInt(MAX_OFFSET);
+                int offset = 0;
+                if (useOffset) {
+                    offset = random.nextInt(MAX_OFFSET);
+                }
+
                 int priority;
-                if (account.isDefaultAccount() && folder.isInbox()) {
+                if (accountId == MailAccount.DEFAULT_ID) {
                     priority = 15;
                     offset = 0;
                 } else if (folder.isInbox()) {
@@ -176,29 +179,76 @@ public class SmalSessionEventHandler implements EventHandler {
                 }
 
                 JobInfo jobInfo = MailJobInfo.newBuilder(MailFolderJob.class)
-                    .login(account.getLogin())
-                    .accountId(account.getId())
+                    .login(mailConfig.getLogin())
+                    .accountId(accountId)
                     .contextId(contextId)
                     .userId(userId)
                     .primaryPassword(session.getPassword())
-                    .password(decryptedPW)
+                    .password(mailConfig.getPassword())
                     .folder(folder.getFullname())
                     .build();
-                
+
                 Date startDate = new Date(System.currentTimeMillis() + offset);
                 indexingService.scheduleJobWithProgressiveInterval(jobInfo, startDate, JOB_TIMEOUT, START_INTERVAL, PROGRESSION_RATE, priority, updateOnly);
             }
 
-            int offset = random.nextInt(MAX_OFFSET);
+            int offset = 0;
+            if (useOffset) {
+                offset = random.nextInt(MAX_OFFSET);
+            }
             Date startDate = new Date(System.currentTimeMillis() + offset);
             JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
-                .accountId(account.getId())
+                .accountId(accountId)
                 .contextId(contextId)
                 .userId(userId)
                 .primaryPassword(session.getPassword())
-                .password(decryptedPW)
+                .password(mailConfig.getPassword())
                 .build();
             indexingService.scheduleJobWithProgressiveInterval(checkDeletedJobInfo, startDate, JOB_TIMEOUT, START_INTERVAL, PROGRESSION_RATE, IndexingService.DEFAULT_PRIORITY, updateOnly);
         }
+    }
+
+    private static final class JobMailConfig extends MailConfig {
+
+        @Override
+        public MailCapabilities getCapabilities() {
+            return null;
+        }
+
+        @Override
+        public int getPort() {
+            return 0;
+        }
+
+        @Override
+        public String getServer() {
+            return null;
+        }
+
+        @Override
+        public boolean isSecure() {
+            return false;
+        }
+
+        @Override
+        public void setPort(int port) {}
+
+        @Override
+        public void setSecure(boolean secure) {}
+
+        @Override
+        public void setServer(String server) {}
+
+        @Override
+        public IMailProperties getMailProperties() {
+            return null;
+        }
+
+        @Override
+        public void setMailProperties(IMailProperties mailProperties) {}
+
+        @Override
+        protected void parseServerURL(String serverURL) throws OXException {}
+
     }
 }

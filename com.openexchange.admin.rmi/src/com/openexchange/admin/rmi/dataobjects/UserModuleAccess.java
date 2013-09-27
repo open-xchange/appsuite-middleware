@@ -732,4 +732,199 @@ public class UserModuleAccess implements Serializable {
         return true;
     }
 
+    /**
+     * Transfers enabled permissions to <code>enabled</code> and disabled ones to <code>disabled</code>.
+     *
+     * @param enabled The {@code UserModuleAccess} carrying the enabled permissions
+     * @param disabled The {@code UserModuleAccess} carrying the disbaled permissions
+     */
+    public void transferTo(UserModuleAccess enabled, UserModuleAccess disabled) {
+        if (ActiveSync) {
+            enabled.setActiveSync(true);
+        } else {
+            disabled.setActiveSync(true);
+        }
+
+        if (calendar) {
+            enabled.setCalendar(true);
+        } else {
+            disabled.setCalendar(true);
+        }
+
+        if (CollectEmailAddresses) {
+            enabled.setCollectEmailAddresses(true);
+        } else {
+            disabled.setCollectEmailAddresses(true);
+        }
+
+        if (contacts) {
+            enabled.setContacts(true);
+        } else {
+            disabled.setContacts(true);
+        }
+
+        if (delegateTask) {
+            enabled.setDelegateTask(true);
+        } else {
+            disabled.setDelegateTask(true);
+        }
+
+        if (deniedPortal) {
+            enabled.setDeniedPortal(true);
+        } else {
+            disabled.setDeniedPortal(true);
+        }
+
+        if (EditGroup) {
+            enabled.setEditGroup(true);
+        } else {
+            disabled.setEditGroup(true);
+        }
+
+        if (EditPassword) {
+            enabled.setEditPassword(true);
+        } else {
+            disabled.setEditPassword(true);
+        }
+
+        if (editPublicFolders) {
+            enabled.setEditPublicFolders(true);
+        } else {
+            disabled.setEditPublicFolders(true);
+        }
+
+        if (EditResource) {
+            enabled.setEditResource(true);
+        } else {
+            disabled.setEditResource(true);
+        }
+
+        if (forum) {
+            enabled.setForum(true);
+        } else {
+            disabled.setForum(true);
+        }
+
+        if (GlobalAddressBookDisabled) {
+            enabled.setGlobalAddressBookDisabled(true);
+        } else {
+            disabled.setGlobalAddressBookDisabled(true);
+        }
+
+        if (ical) {
+            enabled.setIcal(true);
+        } else {
+            disabled.setIcal(true);
+        }
+
+        if (infostore) {
+            enabled.setInfostore(true);
+        } else {
+            disabled.setInfostore(true);
+        }
+
+        if (MultipleMailAccounts) {
+            enabled.setMultipleMailAccounts(true);
+        } else {
+            disabled.setMultipleMailAccounts(true);
+        }
+
+        if (OLOX20) {
+            enabled.setOLOX20(true);
+        } else {
+            disabled.setOLOX20(true);
+        }
+
+        if (PinboardWrite) {
+            enabled.setPinboardWrite(true);
+        } else {
+            disabled.setPinboardWrite(true);
+        }
+
+        if (Projects) {
+            enabled.setProjects(true);
+        } else {
+            disabled.setProjects(true);
+        }
+
+        if (Publication) {
+            enabled.setPublication(true);
+        } else {
+            disabled.setPublication(true);
+        }
+
+        if (PublicFolderEditable) {
+            enabled.setPublicFolderEditable(true);
+        } else {
+            disabled.setPublicFolderEditable(true);
+        }
+
+        if (readCreateSharedFolders) {
+            enabled.setReadCreateSharedFolders(true);
+        } else {
+            disabled.setReadCreateSharedFolders(true);
+        }
+
+        if (RssBookmarks) {
+            enabled.setRssBookmarks(true);
+        } else {
+            disabled.setRssBookmarks(true);
+        }
+
+        if (RssPortal) {
+            enabled.setRssPortal(true);
+        } else {
+            disabled.setRssPortal(true);
+        }
+
+        if (Subscription) {
+            enabled.setSubscription(true);
+        } else {
+            disabled.setSubscription(true);
+        }
+
+        if (Syncml) {
+            enabled.setSyncml(true);
+        } else {
+            disabled.setSyncml(true);
+        }
+
+        if (Tasks) {
+            enabled.setTasks(true);
+        } else {
+            disabled.setTasks(true);
+        }
+
+        if (USM) {
+            enabled.setUSM(true);
+        } else {
+            disabled.setUSM(true);
+        }
+
+        if (Vcard) {
+            enabled.setVcard(true);
+        } else {
+            disabled.setVcard(true);
+        }
+
+        if (Webdav) {
+            enabled.setWebdav(true);
+        } else {
+            disabled.setWebdav(true);
+        }
+
+        if (WebdavXml) {
+            enabled.setWebdavXml(true);
+        } else {
+            disabled.setWebdavXml(true);
+        }
+
+        if (Webmail) {
+            enabled.setWebmail(true);
+        } else {
+            disabled.setWebmail(true);
+        }
+
+    }
+
 }

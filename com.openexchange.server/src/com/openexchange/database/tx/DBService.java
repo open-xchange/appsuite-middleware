@@ -110,7 +110,8 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
-        if(txState.get() != null && txState.get().preferWriteCon) {
+        final ThreadState threadState = txState.get();
+        if(threadState != null && threadState.preferWriteCon) {
             return getWriteConnection(ctx);
         }
         return provider.getReadConnection(ctx);
@@ -119,11 +120,12 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         final Connection writeCon = provider.getWriteConnection(ctx);
-        if(txState.get() != null && txState.get().preferWriteCon) {
-            txState.get().writeCons.add(writeCon);
+        final ThreadState threadState = txState.get();
+        if(threadState != null && threadState.preferWriteCon) {
+            threadState.writeCons.add(writeCon);
             return writeCon;
-        } else if(txState.get() != null){
-            txState.get().preferWriteCon = true;
+        } else if(threadState != null){
+            threadState.preferWriteCon = true;
         }
 
         return writeCon;
@@ -131,7 +133,8 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
-        if(txState.get() != null && txState.get().preferWriteCon && txState.get().writeCons.contains(con)){
+        final ThreadState threadState = txState.get();
+        if(threadState != null && threadState.preferWriteCon && threadState.writeCons.contains(con)){
             releaseWriteConnection(ctx,con);
             return;
         }
@@ -140,10 +143,20 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
-        if(txState.get() != null && txState.get().preferWriteCon) {
-            txState.get().writeCons.remove(con);
+        final ThreadState threadState = txState.get();
+        if(threadState != null && threadState.preferWriteCon) {
+            threadState.writeCons.remove(con);
         }
         provider.releaseWriteConnection(ctx, con);
+    }
+
+    @Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        final ThreadState threadState = txState.get();
+        if(threadState != null && threadState.preferWriteCon) {
+            threadState.writeCons.remove(con);
+        }
+        provider.releaseWriteConnectionAfterReading(ctx, con);
     }
 
     public void commitDBTransaction() throws OXException {
@@ -235,10 +248,11 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     }
 
     protected void addUndoable(final Undoable undo) {
-        if(null == txState.get() || null == txState.get().undoables) {
+        final ThreadState threadState = txState.get();
+        if(null == threadState || null == threadState.undoables) {
             return;
         }
-        txState.get().undoables.add(undo);
+        threadState.undoables.add(undo);
     }
 
     protected void perform(final UndoableAction action, final boolean dbTransaction) throws OXException {

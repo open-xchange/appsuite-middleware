@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.file.external;
 
+import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 public interface QuotaFileStorage extends FileStorage {
@@ -58,5 +59,19 @@ public interface QuotaFileStorage extends FileStorage {
     long getUsage() throws OXException;
 
     void recalculateUsage() throws OXException;
+
+    String saveNewFile(InputStream file, long sizeHint) throws OXException;
+
+    /**
+     * Appends specified stream to the supplied file.
+     *
+     * @param file The stream to append to the file
+     * @param name The existing file's path in associated file storage
+     * @param offset The offset in bytes where to append the data, must be equal to the file's current length
+     * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
+     * @return The updated length of the file
+     * @throws OXException If appending file fails
+     */
+    long appendToFile(InputStream file, String name, long offset, long sizeHint) throws OXException;
 
 }

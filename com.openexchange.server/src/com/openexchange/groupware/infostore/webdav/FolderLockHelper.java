@@ -53,7 +53,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.FolderLock;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -98,8 +97,7 @@ public class FolderLockHelper extends LockHelper {
                     lock.getDepth(),
                     lock.getOwner(),
                     session.getContext(),
-                    UserStorage.getStorageUser(session.getUserId(), session.getContext()),
-                    UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+                    UserStorage.getStorageUser(session.getUserId(), session.getContext()));
         } catch (final OXException x) {
             throw x;
         }

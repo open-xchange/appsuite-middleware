@@ -72,6 +72,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailFolderStorage;
@@ -99,7 +100,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedInboxFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced {
+public final class UnifiedInboxFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2 {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(UnifiedInboxFolderStorage.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
@@ -262,6 +263,105 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     }
 
     @Override
+    public int[] getTotalAndUnreadCounter(final String fullName) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            return new int[] {0,0};
+        }
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            final List<MailAccount> accounts = getAccounts();
+            final int length = accounts.size();
+            final Executor executor = ThreadPools.getThreadPool().getExecutor();
+            final TrackingCompletionService<int[]> completionService = new UnifiedInboxCompletionService<int[]>(executor);
+            for (final MailAccount mailAccount : accounts) {
+                completionService.submit(new LoggingCallable<int[]>(session) {
+
+                    @Override
+                    public int[] call() throws Exception {
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                        try {
+                            final int accountId = mailAccount.getId();
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
+                            mailAccess.connect();
+                            final String fn = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullName);
+                            // Check if denoted account has such a default folder
+                            if (fn == null) {
+                                return new int[] {0,0};
+                            }
+                            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                            if (messageStorage instanceof IMailFolderStorageEnhanced2) {
+                                return ((IMailFolderStorageEnhanced2) messageStorage).getTotalAndUnreadCounter(fn);
+                            }
+                            if (messageStorage instanceof IMailFolderStorageEnhanced) {
+                                final IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) messageStorage;
+                                return new int[] { enhanced.getTotalCounter(fn), enhanced.getUnreadCounter(fn) };
+                            }
+                            final MailField[] fields = new MailField[] { MailField.ID };
+                            final int count = messageStorage.searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, fields).length;
+                            final MailMessage[] unreadMessages = messageStorage.getUnreadMessages(fn, MailSortField.RECEIVED_DATE, OrderDirection.ASC, fields, -1);
+                            final int unreadCount = unreadMessages.length;
+                            return new int[] { count, unreadCount };
+                        } catch (final OXException e) {
+                            getLogger().debug(e.getMessage(), e);
+                            return new int[] {0,0};
+                        } finally {
+                            closeSafe(mailAccess);
+                        }
+                    }
+                });
+            }
+            // Wait for completion of each submitted task
+            try {
+                int count = 0;
+                int unreadCount = 0;
+                for (int i = 0; i < length; i++) {
+                    final int[] arr = completionService.take().get();
+                    count += arr[0];
+                    unreadCount += arr[1];
+                }
+                if (DEBUG) {
+                    LOG.debug(new StringBuilder(64).append("Retrieving total message count from folder \"").append(fullName).append("\" took ").append(
+                        completionService.getDuration()).append("msec."));
+                }
+                // Return
+                return new int[] { count, unreadCount };
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+            } catch (final ExecutionException e) {
+                throw ThreadPools.launderThrowable(e, OXException.class);
+            }
+        }
+        /*
+         * Subfolder
+         */
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            final int accountId = fa.getAccountId();
+            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect();
+            // Get account's messages
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            if (messageStorage instanceof IMailFolderStorageEnhanced2) {
+                return ((IMailFolderStorageEnhanced2) messageStorage).getTotalAndUnreadCounter(fa.getFullname());
+            }
+            if (messageStorage instanceof IMailFolderStorageEnhanced) {
+                final IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) messageStorage;
+                final int count = enhanced.getTotalCounter(fa.getFullname());
+                final int unreadCount = enhanced.getUnreadCounter(fa.getFullname());
+                return new int[] { count, unreadCount };
+            }
+            final MailField[] fields = new MailField[] { MailField.ID };
+            final int count = messageStorage.searchMessages(fa.getFullname(), null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, fields).length;
+            final MailMessage[] unreadMessages = messageStorage.getUnreadMessages(fa.getFullname(), MailSortField.RECEIVED_DATE, OrderDirection.ASC, fields, -1);
+            final int unreadCount = unreadMessages.length;
+            return new int[] { count, unreadCount };
+        } finally {
+            closeSafe(mailAccess);
+        }
+    }
+
+    @Override
     public int getTotalCounter(final String fullName) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return 0;
@@ -330,7 +430,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             // Get account's messages
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (messageStorage instanceof IMailFolderStorageEnhanced) {
-                return ((IMailFolderStorageEnhanced) messageStorage).getUnreadCounter(fa.getFullname());
+                return ((IMailFolderStorageEnhanced) messageStorage).getTotalCounter(fa.getFullname());
             }
             final MailField[] fields = new MailField[] { MailField.ID };
             final int count = messageStorage.searchMessages(fa.getFullname(), null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, fields).length;
@@ -693,8 +793,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         getAccountId(),
                         getSession(),
                         tmp[0],
-                        tmp[1],
-                        executor), index);
+                        tmp[1]), index);
                 }
             });
         }

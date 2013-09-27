@@ -200,7 +200,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
         try {
             return exists(userId, contextId, con);
         } finally {
-            Database.back(contextId, false, con);
+            Database.backAfterReading(contextId, con);
         }
     }
 

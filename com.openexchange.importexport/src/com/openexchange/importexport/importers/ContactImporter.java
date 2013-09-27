@@ -59,6 +59,7 @@ import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 
@@ -68,6 +69,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class ContactImporter extends AbstractImporter {
+
+
+    protected ContactImporter(ServiceLookup services) {
+        super(services);
+    }
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactImporter.class));
 

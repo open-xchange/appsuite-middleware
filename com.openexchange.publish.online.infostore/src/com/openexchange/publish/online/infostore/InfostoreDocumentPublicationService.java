@@ -112,6 +112,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     @Override
     public void beforeCreate(Publication publication) throws OXException {
         super.beforeCreate(publication);
+        publication.getConfiguration().remove(URL);
         String secret = null;
         Context ctx = publication.getContext();
         while(true) {
@@ -121,6 +122,11 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
             }
         }
         publication.getConfiguration().put(SECRET, secret);
+    }
+    @Override
+    public void beforeUpdate(Publication publication) throws OXException {
+        super.beforeUpdate(publication);
+        publication.getConfiguration().remove(URL);
     }
 
     private String generateSecret() {

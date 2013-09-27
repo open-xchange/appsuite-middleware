@@ -92,5 +92,9 @@ public enum DistListMemberField {
 	 * Context id
 	 */
 	CONTEXT_ID,
+	/**
+	 * UUID
+	 */
+	UUID,
 	;
 }

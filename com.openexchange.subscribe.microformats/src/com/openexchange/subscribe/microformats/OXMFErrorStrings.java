@@ -62,12 +62,12 @@ public class OXMFErrorStrings implements LocalizableStrings{
     public static final String PARSE_EXCEPTION = "A parsing error occurred: %1$s.";
     public static final String PARSE_EXCEPTION_HELP = "Provide well-formed HTML.";
 
-    // An IOException occurred: %1$s. Was trying to get the service at %2$s.
-    public static final String IOException = "An IOException occurred: %1$s. Was trying to get the service at %2$s.";
+    // An I/O error occurred: %1$s. Was trying to get the service at %2$s.
+    public static final String IOException = "An I/O error occurred: %1$s. Was trying to get the service at %2$s.";
     public static final String IOException_HELP = "Try again later.";
 
-    // A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
-    public static final String HttpException = "A HTTPException occurred: %1$s. Was trying to get the service at %2$s.";
+    // A HTTP error occurred: %1$s. Was trying to get the service at %2$s.
+    public static final String HttpException = "A HTTP Error occurred: %1$s. Was trying to get the service at %2$s.";
     public static final String HttpException_HELP = "Try again later.";
 
     // Can only post to external subscription sources.

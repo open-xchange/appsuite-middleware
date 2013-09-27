@@ -397,5 +397,19 @@ public class CompositingFileStorageTest extends TestCase {
         public List<Object> getMemory() {
             return remember;
         }
+
+        @Override
+        public long appendToFile(InputStream file, String name, long offset) throws OXException {
+            return 0;
+        }
+
+        @Override
+        public void setFileLength(long length, String name) throws OXException {
+        }
+
+        @Override
+        public InputStream getFile(String name, long offset, long length) throws OXException {
+            return null;
+        }
     }
 }

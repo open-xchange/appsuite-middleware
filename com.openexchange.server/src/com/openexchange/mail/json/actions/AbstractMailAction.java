@@ -191,7 +191,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        if (!session.getUserConfiguration().hasWebMail()) {
+        if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
         try {
@@ -389,7 +389,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 }
             }
             if (accountId != -1) {
-                if (!session.getUserConfiguration().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
+                if (!session.getUserPermissionBits().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
                     throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
                 }
                 if (checkTransportSupport) {
@@ -435,10 +435,15 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     protected static String getDefaultSendAddress(final ServerSession session) throws OXException {
+        return session.getUserSettingMail().getSendAddr();
+        /*-
+         *
         final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
             MailAccountStorageService.class,
             true);
         return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
+         *
+         */
     }
 
     protected static boolean isEmpty(final String string) {

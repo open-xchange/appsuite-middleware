@@ -243,7 +243,7 @@ public final class AccessedIMAPStore extends IMAPStore {
                 throw e;
             }
             try {
-                imapStoreRef.set(imapAccess.connectIMAPStore(false));
+                imapStoreRef.set(imapAccess.connectIMAPStore(0));
             } catch (final OXException ignore) {
                 // Cannot occur since not borrowed from cache
             }

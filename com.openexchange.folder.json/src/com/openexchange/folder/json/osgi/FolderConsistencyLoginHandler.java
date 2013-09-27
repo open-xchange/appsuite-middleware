@@ -54,6 +54,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.NonTransient;
 import com.openexchange.session.Session;
 
 /**
@@ -61,7 +62,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderConsistencyLoginHandler implements LoginHandlerService {
+public final class FolderConsistencyLoginHandler implements LoginHandlerService, NonTransient {
 
     /**
      * Initializes a new {@link FolderConsistencyLoginHandler}.

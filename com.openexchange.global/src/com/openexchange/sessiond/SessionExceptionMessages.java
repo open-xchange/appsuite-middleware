@@ -98,7 +98,7 @@ public final class SessionExceptionMessages implements LocalizableStrings {
 
     public static final String CONTEXT_LOCKED_MSG = "Context is locked.";
 
-    public static final String WRONG_CLIENT_IP_MSG = "Request to server was refused. Original client IP address changed. Please try again.";
+    public static final String WRONG_CLIENT_IP_MSG = "Request to server was refused. Original client IP address changed. Please try again." + System.getProperty("line.separator") + "Client login IP changed from %1$s to %2$s and is not covered by IP white-list or netmask.";
 
     public static final String WRONG_SESSION_SECRET_MSG = "Your session was invalidated. Please try again.";
 

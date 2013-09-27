@@ -159,7 +159,7 @@ public class CPServlet extends PermissionServlet {
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return session.getUserConfiguration().hasCalendar();
+        return session.getUserPermissionBits().hasCalendar();
     }
 
     @Override
@@ -215,14 +215,15 @@ public class CPServlet extends PermissionServlet {
 
             final CalendarCollectionService calendarTools = getService(CalendarCollectionService.class);
             final Partitioner partitioner = new Partitioner(params, cal, session.getContext(), appointmentSql, calendarTools);
-            final List<Day> perDayList = partitioner.partition(idList);
+            final List<Day> perDayList = partitioner.partition(idList, session.getUserId());
 
             final List<CPAppointment> expandedAppointments = tool.expandAppointements(
                 idList,
                 params.getStart(),
                 params.getEnd(),
                 appointmentSql,
-                calendarTools);
+                calendarTools,
+                session.getUserId());
 
             tool.sort(expandedAppointments);
 
@@ -244,6 +245,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(DAYS, perDayList);
             variables.put(I18N, new I18n(I18nServices.getInstance().getService(locale)));
             variables.put(DOCUMENT_TITLE, getDocumentTitle(session));
+            variables.put(DATE_FORMATTER, new DateFormatter(session.getUser().getLocale(), TimeZone.getTimeZone(session.getUser().getTimeZone())));
 
             for (final CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());

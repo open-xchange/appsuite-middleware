@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 
@@ -80,14 +80,14 @@ public final class DeleteData {
 
     private final Context ctx;
     private final User user;
-    private final UserConfiguration userConfig;
+    private final UserPermissionBits userConfig;
     private final FolderObject folder;
     private final int taskId;
     private final Date lastModified;
 
     private Task task;
 
-    public DeleteData(Context ctx, User user, UserConfiguration userConfig, FolderObject folder, int taskId, Date lastModified) {
+    public DeleteData(Context ctx, User user, UserPermissionBits userConfig, FolderObject folder, int taskId, Date lastModified) {
         super();
         this.ctx = ctx;
         this.user = user;
@@ -128,6 +128,7 @@ public final class DeleteData {
             // Try to block simultaneous deleting of tasks by generating a new identifier.
             IDGenerator.getId(ctx, Types.TASK, con);
             TaskLogic.deleteTask(ctx, con, user.getId(), TaskLogic.clone(getOrigTask()), lastModified);
+            deleteReminder(con);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -145,7 +146,7 @@ public final class DeleteData {
         new EventClient(session).delete(getOrigTask());
     }
 
-    public void deleteReminder() throws OXException {
-        Reminder.deleteReminder(ctx, task);
+    private void deleteReminder(Connection con) throws OXException {
+        Reminder.deleteReminder(ctx, con, task);
     }
 }

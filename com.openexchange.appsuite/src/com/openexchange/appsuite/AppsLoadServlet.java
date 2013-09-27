@@ -84,9 +84,9 @@ public class AppsLoadServlet extends HttpServlet {
      * 
      * @throws IOException
      */
-    public AppsLoadServlet(final File root, final File zoneinfo) throws IOException {
+    public AppsLoadServlet(final File[] roots, final File zoneinfo) throws IOException {
         super();
-        appCache = new FileCache(root);
+        appCache = new FileCache(roots);
         tzCache = new FileCache(zoneinfo);
     }
 
@@ -98,6 +98,15 @@ public class AppsLoadServlet extends HttpServlet {
         "\\\\x00", "\\\\x01", "\\\\x02", "\\\\x03", "\\\\x04", "\\\\x05", "\\\\x06", "\\\\x07", "\\\\b", "\\\\t", "\\\\n", "\\\\v",
         "\\\\f", "\\\\r", "\\\\x0e", "\\\\x0f", "\\\\x10", "\\\\x11", "\\\\x12", "\\\\x13", "\\\\x14", "\\\\x15", "\\\\x16", "\\\\x17",
         "\\\\x18", "\\\\x19", "\\\\x1a", "\\\\x1b", "\\\\x1c", "\\\\x1d", "\\\\x1e", "\\\\x1f" };
+
+    private static byte[] SUFFIX;
+    static {
+        try {
+            SUFFIX = "\n/*:oxsep:*/\n".getBytes(Charsets.UTF_8_NAME);
+        } catch (UnsupportedEncodingException e) {
+            SUFFIX = "\n/*:oxsep:*/\n".getBytes();
+        }
+    }
 
     private static void escape(final CharSequence s, final StringBuffer sb) {
         final Matcher e = escapeRE.matcher(s);
@@ -141,16 +150,73 @@ public class AppsLoadServlet extends HttpServlet {
         super.service(req, resp);
     }
 
+    /*
+     * Errors must not be cached. Since this is controlled by the "Expires" header at the start, data must be buffered until either an error
+     * is found or the end of the data is reached. Since non-error data is cached in RAM anyway, the only overhead is an array of pointers.
+     */
+    private class ErrorWriter {
+
+        private boolean buffering = true;
+
+        private HttpServletResponse resp;
+
+        private OutputStream out;
+
+        private byte[][] buffer;
+
+        private int count = 0;
+
+        public ErrorWriter(HttpServletResponse resp, int length) {
+            this.resp = resp;
+            this.buffer = new byte[length][];
+        }
+
+        private void stopBuffering() throws IOException {
+            buffering = false;
+            out = resp.getOutputStream();
+            for (int i = 0; i < count; i++)
+                write(buffer[i]);
+            buffer = null;
+        }
+
+        public void write(byte[] data) throws IOException {
+            if (buffering) {
+                buffer[count++] = data;
+            } else {
+                out.write(data);
+                out.write(SUFFIX);
+                out.flush();
+            }
+        }
+
+        public void error(byte[] data) throws IOException {
+            if (buffering) {
+                resp.setHeader("Expires", "0");
+                stopBuffering();
+            }
+            write(data);
+        }
+
+        public void done() throws IOException {
+            if (!buffering)
+                return;
+            resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
+            stopBuffering();
+        }
+    }
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final String[] modules = Strings.splitByComma(req.getPathInfo());
+        if (null == modules) {
+            return; // no actual files requested
+        }
         final int length = modules.length;
         if (length < 2) {
             return; // no actual files requested
         }
         resp.setContentType("text/javascript;charset=UTF-8");
-        resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
-        final OutputStream out = resp.getOutputStream();
+        ErrorWriter ew = new ErrorWriter(resp, length);
         for (int i = 1; i < length; i++) {
             final String module = modules[i].replace(' ', '+');
 
@@ -160,8 +226,7 @@ public class AppsLoadServlet extends HttpServlet {
             if (!m.matches()) {
                 final String escapedName = escapeName(module);
                 LOG.debug("Invalid module name: '" + escapedName + "'");
-                out.write(("console.error('Invalid module name: \\'" + escapedName + "\\'');\n").getBytes("UTF-8"));
-                out.flush();
+                ew.error(("console.error('Invalid module name: \\'" + escapedName + "\\'');\n").getBytes("UTF-8"));
                 continue;
             }
 
@@ -182,8 +247,9 @@ public class AppsLoadServlet extends HttpServlet {
                 @Override
                 @SuppressWarnings("deprecation")
                 public byte[] filter(ByteArrayOutputStream baos) {
-                    if (format == null)
+                    if (format == null) {
                         return baos.toByteArray();
+                    }
 
                     // Special cases for JavaScript-friendly reading of raw files:
                     // /text;* returns the file as a UTF-8 string
@@ -200,17 +266,21 @@ public class AppsLoadServlet extends HttpServlet {
                 }
             });
 
-            if (data == null) {
+            if (data != null) {
+                ew.write(data);
+            } else {
                 int len = module.length() - 3;
                 String moduleName = module;
-                if (format == null && ".js".equals(module.substring(len))) {
+                if (format == null && len > 0 && ".js".equals(module.substring(len))) {
                     moduleName = module.substring(0, len);
                 }
-                data = ("define('" + escapeName(moduleName) + "', function () {\n    throw new Error(\"Could not read '" + escapeName(name) + "'\");\n});\n").getBytes(Charsets.UTF_8);
+                name = escapeName(name);
+                ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
+                          "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
+                          "    throw new Error(\"Could not read '" + name + "'\");\n" +
+                          "});\n").getBytes(Charsets.UTF_8));
             }
-
-            out.write(data);
-            out.flush();
         }
+        ew.done();
     }
 }

@@ -54,7 +54,6 @@ import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -95,12 +94,12 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
             /*
              * Register service
              */
-            registerService(OAuthServiceMetaData.class, new OAuthServiceMetaDataTwitterImpl());
+            final OAuthServiceMetaDataTwitterImpl service = new OAuthServiceMetaDataTwitterImpl();
+            registerService(OAuthServiceMetaData.class, service);
 
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "twitter");
             registerService(CapabilityChecker.class, new CapabilityChecker() {
-
                 @Override
                 public boolean isEnabled(String capability, Session ses) throws OXException {
                     if ("twitter".equals(capability)) {
@@ -108,12 +107,11 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
                         if (session.isAnonymous()) {
                             return false;
                         }
-                        final ConfigViewFactory factory = getService(ConfigViewFactory.class);
-                        final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                        return view.opt("com.openexchange.oauth.twitter", boolean.class, Boolean.TRUE).booleanValue();
-                    }
-                    return true;
 
+                        return service.isEnabled(session.getUserId(), session.getContextId());
+                    }
+
+                    return true;
                 }
             }, properties);
 

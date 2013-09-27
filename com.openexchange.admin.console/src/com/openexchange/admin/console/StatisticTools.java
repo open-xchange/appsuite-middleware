@@ -50,7 +50,6 @@
 package com.openexchange.admin.console;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -73,12 +72,13 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import javax.management.openmbean.CompositeDataSupport;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * Implements the CLT showruntimestats.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class StatisticTools extends AbstractJMXTools {
@@ -110,8 +110,15 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_MEMORY_THREADS_STATS_SHORT = 'm';
     private static final String OPT_MEMORY_THREADS_STATS_LONG = "memory";
 
+    private static final char OPT_GC_STATS_SHORT = 'z';
+
+    private static final String OPT_GC_STATS_LONG = "gcstats";
+
     private static final char OPT_MEMORY_THREADS_FULL_STATS_SHORT = 'M';
     private static final String OPT_MEMORY_THREADS_FULL_STATS_LONG = "Memory";
+
+    private static final char OPT_DOCUMENTCONVERTER_STATS_SHORT = 'y';
+    private static final String OPT_DOCUMENTCONVERTER_STATS_LONG = "documentconverterstats";
 
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
@@ -127,6 +134,12 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption usmSessionStats = null;
     private CLIOption clusterStats = null;
     private CLIOption grizzlyStats = null;
+    private CLIOption documentconverterstats = null;
+
+    /**
+     * Option for garbage collection statistics
+     */
+    private CLIOption gcStats = null;
 
     public static void main(final String args[]) {
         final StatisticTools st = new StatisticTools();
@@ -174,6 +187,10 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGrizzlyData(mbc));
             count++;
         }
+        if (null != parser.getOptionValue(this.gcStats) && 0 == count) {
+            System.out.print(showGcData(mbc));
+            count++;
+        }
         if (null != parser.getOptionValue(this.allstats) && 0 == count) {
             System.out.print(showOXData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
@@ -183,6 +200,7 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showMemoryPoolData(mbc));
             System.out.print(showSysThreadingData(mbc));
             System.out.print(showGrizzlyData(mbc));
+            System.out.print(showGcData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
             count++;
         }
@@ -204,6 +222,10 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.memorythreadstatsfull) && 0 == count) {
             System.out.print(showThreadMemory(mbc, true));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.documentconverterstats) && 0 == count) {
+            System.out.print(showDocumentConverterData(mbc));
             count++;
         }
         if (0 == count) {
@@ -397,6 +419,13 @@ public class StatisticTools extends AbstractJMXTools {
             NeededQuadState.notneeded);
         this.clusterStats = setShortLongOpt(parser, 'c', "clusterstats", "shows the cluster statistics", false, NeededQuadState.notneeded);
         this.grizzlyStats = setShortLongOpt(parser, 'g', "grizzlystats", "shows the grizzly statistics", false, NeededQuadState.notneeded);
+        this.gcStats = setShortLongOpt(
+            parser,
+            OPT_GC_STATS_SHORT,
+            OPT_GC_STATS_LONG,
+            "shows the gc statistics",
+            false,
+            NeededQuadState.notneeded);
         this.memorythreadstats = setShortLongOpt(
             parser,
             OPT_MEMORY_THREADS_STATS_SHORT,
@@ -409,6 +438,13 @@ public class StatisticTools extends AbstractJMXTools {
             OPT_MEMORY_THREADS_FULL_STATS_SHORT,
             OPT_MEMORY_THREADS_FULL_STATS_LONG,
             "shows memory usage of threads including stack traces",
+            false,
+            NeededQuadState.notneeded);
+        this.documentconverterstats = setShortLongOpt(
+            parser,
+            OPT_DOCUMENTCONVERTER_STATS_SHORT,
+            OPT_DOCUMENTCONVERTER_STATS_LONG,
+            "shows the documentconverter stats",
             false,
             NeededQuadState.notneeded);
     }
@@ -464,7 +500,8 @@ public class StatisticTools extends AbstractJMXTools {
                 for (final MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                     if ("Cluster".equals(type) && "Config".equals(attributeInfo.getName())) {
                         final String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
-                        for (final String keyword : new String[] { "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=" }) {
+                        for (final String keyword : new String[] {
+                            "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=", "multicastConfig=" }) {
                             final int startIdx = value.indexOf(keyword);
                             if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
                                 sb.append(objectName);
@@ -518,7 +555,7 @@ public class StatisticTools extends AbstractJMXTools {
 
     /**
      * Print Grizzly related management info to given PrintStream if Grizzly's MBeans can be found.
-     * 
+     *
      * @param mbeanServerConnection The MBeanServerConnection to be used for querying MBeans.
      * @param out the {@link PrintStream} to write the output to.
      * @throws IOException
@@ -551,6 +588,109 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
         return sb.toString();
+    }
+
+    static String showDocumentConverterData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(mbeanServerConnection, "com.openexchange.documentconverter:name=DocumentConverterInformation").toString();
+    }
+
+    /**
+     * Method to prepare and display the garbage collection information.
+     *
+     * @param con - The MBeanServerConnection to be used for querying MBeans.
+     * @throws MalformedObjectNameException - thrown while creating {@link ObjectName}
+     * @throws IOException - thrown while using the {@link MBeanServerConnection}
+     * @throws ReflectionException- thrown while using the {@link MBeanServerConnection}
+     * @throws IntrospectionException - thrown while getting {@link MBeanInfo}
+     * @throws InstanceNotFoundException - thrown while getting {@link MBeanAttributeInfo} or {@link MBeanInfo}
+     * @throws MBeanException - thrown while trying to get the attribute from {@link MBeanServerConnection}
+     * @throws AttributeNotFoundException - thrown while trying to get the attribute from {@link MBeanServerConnection}
+     */
+    private static String showGcData(MBeanServerConnection con) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, MBeanException, ReflectionException {
+        final StringBuilder sb = new StringBuilder();
+
+        double uptimeHours = getUptimeHours(con);
+        sb.append(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",hoursUptime=" + uptimeHours + "\n");
+
+        ObjectName domainType = new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",*");
+        Set<ObjectInstance> mbeans = con.queryMBeans(domainType, null);
+
+        for (ObjectInstance mbean : mbeans) {
+            ObjectName objectName = mbean.getObjectName();
+            MBeanInfo beanInfo = con.getMBeanInfo(objectName);
+
+            for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                Object attribute = con.getAttribute(objectName, attributeInfo.getName());
+
+                if (attribute != null) {
+                    sb.append(objectName.getCanonicalName()).append(",").append(attributeInfo.getName()).append(" = ");
+
+                    if (attribute instanceof CompositeDataSupport) {
+                        final CompositeDataSupport compositeDataSupport = (CompositeDataSupport) attribute;
+                        sb.append("[startTime=").append(compositeDataSupport.get("startTime")).append(", endTime=").append(
+                            compositeDataSupport.get("endTime")).append(", GcThreadCount=").append(
+                                compositeDataSupport.get("GcThreadCount")).append(", duration=").append(compositeDataSupport.get("duration")).append(
+                                    "]\n");
+                    } else if (attribute instanceof String[]) {
+                        final String[] stringArray = (String[]) attribute;
+                        sb.append(Arrays.toString(stringArray) + "\n");
+                    } else if (attribute instanceof long[]) {
+                        final long[] longArray = (long[]) attribute;
+                        sb.append(Arrays.toString(longArray) + "\n");
+                    } else {
+                        if (attributeInfo.getName().equalsIgnoreCase("collectioncount") || attributeInfo.getName().equalsIgnoreCase(
+                            "collectiontime")) {
+                            if (attribute instanceof Long) {
+                                Long attributeValue = (Long) attribute;
+                                if (uptimeHours > 1) {
+                                    sb.append((attributeValue.doubleValue() / uptimeHours) + "\n");
+                                } else {
+                                    sb.append(0 + "\n");
+                                }
+                            }
+                        } else {
+                            sb.append(attribute.toString() + "\n");
+                        }
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Returns the number of uptime hours of the JVM
+     *
+     * @param mbeanServerConnection - The MBeanServerConnection to be used for querying MBeans.
+     * @throws MalformedObjectNameException - thrown while creating {@link ObjectName}
+     * @throws IOException - thrown while using the {@link MBeanServerConnection}
+     * @throws ReflectionException- thrown while using the {@link MBeanServerConnection}
+     * @throws IntrospectionException - thrown while getting {@link MBeanInfo}
+     * @throws InstanceNotFoundException - thrown while getting {@link MBeanAttributeInfo} or {@link MBeanInfo}
+     * @throws MBeanException - thrown while trying to get the attribute from {@link MBeanServerConnection}
+     * @throws AttributeNotFoundException - thrown while trying to get the attribute from {@link MBeanServerConnection}
+     * @return double - number of uptime hours of the JVM
+     */
+    private static double getUptimeHours(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, MBeanException, AttributeNotFoundException {
+        double uptimeHours = 0;
+
+        ObjectName domainTypeRuntime = new ObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME + ",*");
+        Set<ObjectInstance> mbeansRuntime = mbeanServerConnection.queryMBeans(domainTypeRuntime, null);
+        for (ObjectInstance mbean : mbeansRuntime) {
+            ObjectName objectName = mbean.getObjectName();
+            MBeanInfo beanInfo = mbeanServerConnection.getMBeanInfo(objectName);
+            for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                if (attributeInfo.getName().equalsIgnoreCase("uptime")) {
+                    Object attribute = mbeanServerConnection.getAttribute(objectName, attributeInfo.getName());
+                    if (attribute instanceof Long) {
+                        Long value = (Long) attribute;
+                        double valueAsDouble = value.doubleValue();
+                        uptimeHours = valueAsDouble / (1000 * 60 * 60);
+                    }
+                }
+            }
+        }
+        return uptimeHours;
     }
 
     private static String extractTextInBrackets(final String value, final int startIdx) {

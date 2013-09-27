@@ -53,6 +53,7 @@ import java.util.Arrays;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
@@ -88,7 +89,7 @@ public class EffectivePermission extends OCLPermission {
     /**
      * The configuration profile of the current logged in user
      */
-    private final UserConfiguration userConfig;
+    private final UserPermissionBits userPermissionBits;
 
     /**
      * A reference to the associated folder object. Only needed when a <code>UserConfiguration</code> instance is present.
@@ -113,7 +114,16 @@ public class EffectivePermission extends OCLPermission {
         this.folderType = folderType;
         this.folderModule = folderModule;
         this.createdBy = createdBy;
-        this.userConfig = userConfig;
+        this.userPermissionBits = userConfig.getUserPermissionBits();
+        validateUserConfig();
+    }
+
+    public EffectivePermission(final int entity, final int fuid, final int folderType, final int folderModule, final int createdBy, final UserPermissionBits userConfig) {
+        super(entity, fuid);
+        this.folderType = folderType;
+        this.folderModule = folderModule;
+        this.createdBy = createdBy;
+        this.userPermissionBits = userConfig;
         validateUserConfig();
     }
 
@@ -131,10 +141,10 @@ public class EffectivePermission extends OCLPermission {
         if (createdBy != ep.createdBy) {
             return false;
         }
-        if (null != userConfig) {
-            return userConfig.equals(ep.userConfig);
+        if (null != userPermissionBits) {
+            return userPermissionBits.equals(ep.userPermissionBits);
         }
-        return (null == ep.userConfig);
+        return (null == ep.userPermissionBits);
     }
 
     @Override
@@ -144,15 +154,15 @@ public class EffectivePermission extends OCLPermission {
         hash = 31 * hash + folderType;
         hash = 31 * hash + folderModule;
         hash = 31 * hash + createdBy;
-        if (null != userConfig) {
-            hash = 31 * hash + userConfig.hashCode();
+        if (null != userPermissionBits) {
+            hash = 31 * hash + userPermissionBits.hashCode();
         }
         return hash;
     }
 
     public boolean hasModuleAccess(final int folderModule) {
         if (validateUserConfig()) {
-            return userConfig.hasModuleAccess(folderModule);
+            return userPermissionBits.hasModuleAccess(folderModule);
         }
         return true;
     }
@@ -162,14 +172,14 @@ public class EffectivePermission extends OCLPermission {
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return false;
-            } else if (folderType == FolderObject.PUBLIC && folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
+            } else if (folderType == FolderObject.PUBLIC && folderModule != FolderObject.INFOSTORE && !userPermissionBits.hasFullPublicFolderAccess()) {
                 return false;
             }
             /*
              * else if (folderType == FolderObject.SHARED && !userConfig.hasFullSharedFolderAccess()) { return false; }
              */
         }
-        return ((folderType == FolderObject.PUBLIC) && (userConfig.getUserId() == createdBy)) || super.isFolderAdmin();
+        return ((folderType == FolderObject.PUBLIC) && (userPermissionBits.getUserId() == createdBy)) || super.isFolderAdmin();
     }
 
     @Override
@@ -191,10 +201,10 @@ public class EffectivePermission extends OCLPermission {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
             } else if (isPublicFolder()) {
-                if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
+                if (folderModule != FolderObject.INFOSTORE && !userPermissionBits.hasFullPublicFolderAccess()) {
                     return superFolderPermission > READ_FOLDER ? READ_FOLDER : superFolderPermission;
                 }
-            } else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
+            } else if (!userPermissionBits.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
                 return NO_PERMISSIONS;
             }
         }
@@ -214,10 +224,10 @@ public class EffectivePermission extends OCLPermission {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
             } else if (isPublicFolder()) {
-                if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
+                if (folderModule != FolderObject.INFOSTORE && !userPermissionBits.hasFullPublicFolderAccess()) {
                     return superReadPermission > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : superReadPermission;
                 }
-            } else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
+            } else if (!userPermissionBits.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
                 return NO_PERMISSIONS;
             }
         }
@@ -239,10 +249,10 @@ public class EffectivePermission extends OCLPermission {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
             } else if (isPublicFolder()) {
-                if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
+                if (folderModule != FolderObject.INFOSTORE && !userPermissionBits.hasFullPublicFolderAccess()) {
                     return NO_PERMISSIONS;
                 }
-            } else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
+            } else if (!userPermissionBits.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
                 return NO_PERMISSIONS;
             }
         }
@@ -261,13 +271,13 @@ public class EffectivePermission extends OCLPermission {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
             } else if (isPublicFolder()) {
-                if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
+                if (folderModule != FolderObject.INFOSTORE && !userPermissionBits.hasFullPublicFolderAccess()) {
                     return NO_PERMISSIONS;
                     /*
                      * return super.getDeletePermission() > DELETE_ALL_OBJECTS ? DELETE_ALL_OBJECTS : super .getDeletePermission();
                      */
                 }
-            } else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
+            } else if (!userPermissionBits.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
                 return NO_PERMISSIONS;
             }
         }
@@ -309,7 +319,7 @@ public class EffectivePermission extends OCLPermission {
          */
         userConfigAlreadyValidated = true;
         userConfigIsValid = false;
-        if (userConfig == null) {
+        if (userPermissionBits == null) {
             return userConfigIsValid;
         }
         try {
@@ -319,11 +329,11 @@ public class EffectivePermission extends OCLPermission {
             }
             OXFolderAccess folderAccess = null;
             if (folderType <= 0) {
-                folderType = (folderAccess = new OXFolderAccess(userConfig.getContext())).getFolderType(fuid, userConfig.getUserId());
+                folderType = (folderAccess = new OXFolderAccess(userPermissionBits.getContext())).getFolderType(fuid, userPermissionBits.getUserId());
             }
             if (folderModule <= 0) {
                 if (folderAccess == null) {
-                    folderAccess = new OXFolderAccess(userConfig.getContext());
+                    folderAccess = new OXFolderAccess(userPermissionBits.getContext());
                 }
                 folderModule = folderAccess.getFolderModule(fuid);
             }
@@ -331,10 +341,10 @@ public class EffectivePermission extends OCLPermission {
             LOG.error(e.getMessage(), e);
             return userConfigIsValid;
         }
-        if (userConfig.getUserId() == getEntity()) {
+        if (userPermissionBits.getUserId() == getEntity()) {
             userConfigIsValid = true;
         } else {
-            final int[] groups = userConfig.getGroups();
+            final int[] groups = userPermissionBits.getGroups();
             for (int i = 0; i < groups.length && !userConfigIsValid; i++) {
                 userConfigIsValid = (groups[i] == getEntity());
             }

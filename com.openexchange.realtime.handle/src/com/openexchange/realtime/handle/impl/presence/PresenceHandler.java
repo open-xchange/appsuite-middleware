@@ -79,7 +79,7 @@ import com.openexchange.realtime.util.IDMap;
  * <li>Change my status</li>
  * </ul>
  * See http://xmpp.org/rfcs/rfc3921.html#presence
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
@@ -192,7 +192,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
     /**
      * Handle the incoming request of userA to subscribe to the presence of userB. This transforms the payload of the incoming stanza and
      * passes it to the PresenceSubscriptionService.
-     * 
+     *
      * <pre>
      * {
      *   "session" : "$session",
@@ -203,9 +203,9 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      *     "message" : "Hello marens, please let me subscribe to your presence, WBR., Mr. X"
      *   }
      * }
-     * 
+     *
      * </pre>
-     * 
+     *
      * @param stanza the incoming Stanza representing the subscribe request
      * @throws OXException if the subscription fails, e.g. Stanza can't be read
      */
@@ -224,7 +224,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
 
     /**
      * Handle userB's incoming approval to prior subscription request of userA.
-     * 
+     *
      * <pre>
      * {
      *   "session" : "$session",
@@ -236,7 +236,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      *   }
      * }
      * </pre>
-     * 
+     *
      * @param stanza the incoming Stanza representing the approval
      * @throws OXException If stanza conversion fails or the subscription can't be approved
      */
@@ -255,7 +255,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
 
     /**
      * Handle userA's request to unsubscribe from the Presence of userB.
-     * 
+     *
      * <pre>
      * {
      *   "session" : "$session",
@@ -264,7 +264,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      *   "type" : "unsubscribe"
      * }
      * </pre>
-     * 
+     *
      * @param stanza
      * @throws OXException
      */
@@ -287,7 +287,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      * <li>by userB to deny a prior subscription request made by userA</li>
      * <li>by userB to cancel the previously granted subscription to userA</li>
      * </ul>
-     * 
+     *
      * <pre>
      * {
      *   "session" : "$session",
@@ -299,7 +299,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      *   }
      * }
      * </pre>
-     * 
+     *
      * @param stanza the Stanza representing the unsubscribed request.
      * @throws OXException If stanza conversion fails or the subscription can't be denied/canceled
      */
@@ -319,7 +319,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
     /**
      * Handle directed Presence Stanzas by delivering them to all connected Resources of the general ID or simply discarding them if no
      * connected Resource can be found.
-     * 
+     *
      * @param presence The directed Presence Stanza
      * @throws OXException If the lookup of the recipient fails due to errors
      */
@@ -386,7 +386,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
 
     /**
      * Change the current Presence status of the client in the ResourceDirectory.
-     * 
+     *
      * @param presence Stanza containing the new Presence Status
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
@@ -403,7 +403,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
                 old.getPresence().getPriority(),
                 old.getTimestamp(),
                 old.getRoutingInfo()));
-            
+
             if (LOG.isDebugEnabled()) {
                 if (old.getPresence() != null) {
                     LOG.debug(String.format(
@@ -422,7 +422,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
 
     /**
      * Inform the Sender about an error while handling his Presence Stanza.
-     * 
+     *
      * @param presence The presence that couldn't be handled
      * @param oxException The OXException that cuased the handling to fail
      */
@@ -439,7 +439,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
             }
             messageDispatcher.send(errorPresence);
         } catch (Exception e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

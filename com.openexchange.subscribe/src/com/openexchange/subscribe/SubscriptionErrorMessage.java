@@ -94,6 +94,10 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
     MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorStrings.MISSING_ARGUMENT, SubscriptionErrorStrings.MISSING_ARGUMENT),
     PERMISSION_DENIED(CATEGORY_WARNING, 12, SubscriptionErrorStrings.PERMISSION_DENIED, SubscriptionErrorStrings.PERMISSION_DENIED),
     /**
+     * Please specify your full E-Mail address as login name.
+     */
+    EMAIL_ADDR_LOGIN(CATEGORY_TRY_AGAIN, 13, SubscriptionErrorStrings.EMAIL_ADDR_LOGIN, SubscriptionErrorStrings.EMAIL_ADDR_LOGIN),
+    /**
      * An unexpected error occurred: %1$s.
      */
     UNEXPECTED_ERROR(CATEGORY_ERROR, 9999, SubscriptionErrorStrings.UNEXPECTED_ERROR, SubscriptionErrorStrings.UNEXPECTED_ERROR),

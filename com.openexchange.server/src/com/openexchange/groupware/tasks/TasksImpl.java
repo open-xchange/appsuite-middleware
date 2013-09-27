@@ -134,7 +134,8 @@ final class TasksImpl extends Tasks {
             for (final int taskId : deleteTask) {
                 final Task task = GetTask.load(ctx, con, folderId, taskId, StorageType.ACTIVE);
                 TaskLogic.deleteTask(ctx, con, userId, task, task.getLastModified());
-                TaskLogic.informDelete(session, ctx, con, task);
+                Reminder.deleteReminder(ctx, con, task);
+                TaskLogic.informDelete(session, task);
             }
             // Remove only participant and participants folder.
             for (final UpdateData data : removeParticipant) {

@@ -56,12 +56,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -74,13 +74,13 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
     private InfostoreFacade infostore = null;
     private final UserService users;
-    private final UserConfigurationService userConfigs;
+    private final UserPermissionService userPermissions;
 
-    public InfostoreFolderLoader(final InfostoreFacade infostore, final UserService users, final UserConfigurationService userConfigs) {
+    public InfostoreFolderLoader(final InfostoreFacade infostore, final UserService users, final UserPermissionService userPermissions) {
         super();
         this.infostore = infostore;
         this.users = users;
-        this.userConfigs = userConfigs;
+        this.userPermissions = userPermissions;
     }
 
 
@@ -104,8 +104,8 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
 
 
-    private UserConfiguration getUserConfig(final Publication publication) throws OXException, OXException {
-        return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
+    private UserPermissionBits getUserConfig(final Publication publication) throws OXException, OXException {
+        return userPermissions.getUserPermissionBits(publication.getUserId(), publication.getContext());
     }
 
 

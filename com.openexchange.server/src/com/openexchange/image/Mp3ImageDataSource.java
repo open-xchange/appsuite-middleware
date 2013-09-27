@@ -68,6 +68,7 @@ import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.TagField;
+import org.jaudiotagger.tag.datatype.AbstractDataType;
 import org.jaudiotagger.tag.datatype.Artwork;
 import org.jaudiotagger.tag.datatype.DataTypes;
 import org.jaudiotagger.tag.id3.AbstractID3v2Frame;
@@ -175,14 +176,14 @@ public final class Mp3ImageDataSource implements ImageDataSource {
                             if (body instanceof FrameBodyAPIC) {
                                 final FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) body;
                                 if (!imageFrameBody.isImageUrl()) {
-                                    imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
-                                    mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                                    imageBytes = (byte[]) getObjectValue(DataTypes.OBJ_PICTURE_DATA, imageFrameBody);
+                                    mimeType = (String) getObjectValue(DataTypes.OBJ_MIME_TYPE, imageFrameBody);
                                 }
                             } else if (body instanceof FrameBodyPIC) {
                                 final FrameBodyPIC imageFrameBody = (FrameBodyPIC) body;
                                 if (!imageFrameBody.isImageUrl()) {
-                                    imageBytes = (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA);
-                                    mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                                    imageBytes = (byte[]) getObjectValue(DataTypes.OBJ_PICTURE_DATA, imageFrameBody);
+                                    mimeType = (String) getObjectValue(DataTypes.OBJ_MIME_TYPE, imageFrameBody);
                                 }
                             } else {
                                 LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
@@ -228,8 +229,8 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         // Return
         final DataProperties properties = new DataProperties();
         if (imageBytes == null) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder("Requested a non-existing image in MP3 file: file-id=").append(fileId).append(" folder=").append(
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder("Requested a non-existing image in MP3 file: file-id=").append(fileId).append(" folder=").append(
                     folderId).append(" context=").append(session.getContextId()).append(" session-user=").append(session.getUserId()).append(
                     "\nReturning an empty image as fallback.").toString());
             }
@@ -244,6 +245,11 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             properties.put(DataProperties.PROPERTY_NAME, "image." + extensions.get(0));
         }
         return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
+    }
+
+    private Object getObjectValue(final String identifier, final AbstractTagFrameBody imageFrameBody) {
+        final AbstractDataType dataType = imageFrameBody.getObject(identifier);
+        return null == dataType ? null: dataType.getValue();
     }
 
     @Override
@@ -324,7 +330,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
     }
 
     private static com.openexchange.file.storage.File optFile(final String fileId, final String folderId, final ServerSession session) throws OXException {
-        if (!session.getUserConfiguration().hasInfostore()) {
+        if (!session.getUserPermissionBits().hasInfostore()) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileId, folderId);
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
@@ -352,7 +358,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
     }
 
     private static ManagedFile optData(final String fileId, final String folderId, final ServerSession session, final ManagedFileManagement fileManagement) throws OXException {
-        if (!session.getUserConfiguration().hasInfostore()) {
+        if (!session.getUserPermissionBits().hasInfostore()) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileId, folderId);
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();

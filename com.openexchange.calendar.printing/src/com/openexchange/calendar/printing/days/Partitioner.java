@@ -62,6 +62,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
 import com.openexchange.calendar.printing.CPParameters;
+import com.openexchange.calendar.printing.CPTool;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
@@ -97,12 +98,12 @@ public class Partitioner {
         this.calendarTools = calendarTools;
     }
 
-    public List<Day> partition(final List<Appointment> idList) {
+    public List<Day> partition(final List<Appointment> idList, int userId) {
         final SortedMap<Date, Day> dayMap = new TreeMap<Date, Day>();
         preFill(dayMap);
 
         for (final Appointment appointment : idList) {
-            calculateToDays(dayMap, appointment);
+            calculateToDays(dayMap, appointment, userId);
         }
 
         final List<Day> retval = new ArrayList<Day>(dayMap.size());
@@ -151,9 +152,12 @@ public class Partitioner {
         displayEnd = cal.getTime();
     }
 
-    private void calculateToDays(final SortedMap<Date, Day> dayMap, final Appointment appointmentId) {
+    private void calculateToDays(final SortedMap<Date, Day> dayMap, final Appointment appointmentId, int userId) {
         try {
             final Appointment appointment = appointmentSql.getObjectById(appointmentId.getObjectID(), appointmentId.getParentFolderID());
+            if (CPTool.hasDeclined(appointment, userId)) {
+                return;
+            }
             if (appointment.isMaster()) {
                 final RecurringResultsInterface results = calendarTools.calculateRecurring(appointment, displayStart.getTime(), CalendarTools.getDayEnd(cal, displayEnd).getTime(), 0);
                 if (results == null) {

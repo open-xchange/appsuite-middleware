@@ -51,13 +51,10 @@ package com.openexchange.realtime.packet;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
 
 /**

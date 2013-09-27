@@ -1,2 +1,6 @@
 com.openexchange.templating.path = @templatepath@
 com.openexchange.templating.assets.path = @templatepath@/assets/
+
+# Define which kind of templates should be trusted.
+# Possible values are server, user, true and false.
+com.openexchange.templating.trusted = server

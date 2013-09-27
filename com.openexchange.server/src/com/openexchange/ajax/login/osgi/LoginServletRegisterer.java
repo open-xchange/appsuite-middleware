@@ -154,7 +154,14 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
     private void addProperty(final Dictionary<String, String> params, final Property property) {
         final String propertyName = property.getPropertyName();
-        params.put(propertyName, configService.getProperty(propertyName, property.getDefaultValue()));
+        final String prop = configService.getProperty(propertyName);
+        if (prop == null) {
+            final String defaultValue = property.getDefaultValue();
+            LOG.warn("Missing configuration property \"" + propertyName + "\". Using fall-back value: " + defaultValue);
+            params.put(propertyName, defaultValue);
+        } else {
+            params.put(propertyName, prop);
+        }
     }
 
     private void addProperty(final Dictionary<String, String> params, final com.openexchange.login.ConfigurationProperty property) {

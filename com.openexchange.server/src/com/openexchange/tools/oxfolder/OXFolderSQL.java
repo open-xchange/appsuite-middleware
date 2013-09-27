@@ -52,9 +52,12 @@ package com.openexchange.tools.oxfolder;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,10 +66,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.service.event.Event;
@@ -82,7 +83,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.sql.DBUtils;
@@ -237,7 +237,7 @@ public final class OXFolderSQL {
      *             or put back into connection pool
      * @throws SQLException If a SQL error occurs
      */
-    public static int[] getSharedFoldersOf(final int owner, final Connection readConArg, final Context ctx) throws OXException, SQLException {
+    public static TIntCollection getSharedFoldersOf(final int owner, final Connection readConArg, final Context ctx) throws OXException, SQLException {
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -253,13 +253,13 @@ public final class OXFolderSQL {
             stmt.setInt(3, owner);
             rs = executeQuery(stmt);
             if (!rs.next()) {
-                return new int[0];
+                return new TIntArrayList(0);
             }
-            final SmartIntArray sia = new SmartIntArray(16);
+            final TIntList sia = new TIntArrayList(16);
             do {
-                sia.append(rs.getInt(1));
+                sia.add(rs.getInt(1));
             } while (rs.next());
-            return sia.toArray();
+            return sia;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
@@ -1663,15 +1663,15 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             rs = executeQuery(stmt);
-            final Set<Integer> deletePerms = new HashSet<Integer>();
-            final Set<Integer> reassignPerms = new HashSet<Integer>();
+            final TIntSet deletePerms = new TIntHashSet();
+            final TIntSet reassignPerms = new TIntHashSet();
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 final int type = rs.getInt(2);
                 if (isMailAdmin || markForDeletion(type)) {
-                    deletePerms.add(Integer.valueOf(fuid));
+                    deletePerms.add(fuid);
                 } else {
-                    reassignPerms.add(Integer.valueOf(fuid));
+                    reassignPerms.add(fuid);
                 }
             }
             rs.close();
@@ -1706,11 +1706,13 @@ public final class OXFolderSQL {
                  * Invalidate cache
                  */
                 try {
-                    for (final Integer fuid : deletePerms) {
-                        FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+                    TIntIterator iter = deletePerms.iterator();
+                    for (int i = deletePerms.size(); i-- > 0;) {
+                        FolderCacheManager.getInstance().removeFolderObject(iter.next(), ctx);
                     }
-                    for (final Integer fuid : reassignPerms) {
-                        FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+                    iter = reassignPerms.iterator();
+                    for (int i = reassignPerms.size(); i-- > 0;) {
+                        FolderCacheManager.getInstance().removeFolderObject(iter.next(), ctx);
                     }
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
@@ -1721,11 +1723,13 @@ public final class OXFolderSQL {
              */
             final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
             if (null != eventAdmin) {
-                for (final Integer fuid : deletePerms) {
-                    broadcastEvent(fuid, false, entity, ctx.getContextId(), eventAdmin);
+                TIntIterator iter = deletePerms.iterator();
+                for (int i = deletePerms.size(); i-- > 0;) {
+                    broadcastEvent(iter.next(), false, entity, ctx.getContextId(), eventAdmin);
                 }
-                for (final Integer fuid : reassignPerms) {
-                    broadcastEvent(fuid, false, entity, ctx.getContextId(), eventAdmin);
+                iter = reassignPerms.iterator();
+                for (int i = reassignPerms.size(); i-- > 0;) {
+                    broadcastEvent(iter.next(), false, entity, ctx.getContextId(), eventAdmin);
                 }
             }
         } finally {
@@ -1733,11 +1737,11 @@ public final class OXFolderSQL {
         }
     }
 
-    private static void broadcastEvent(final Integer fuid, final boolean deleted, final int entity, final int contextId, final EventAdmin eventAdmin) {
+    private static void broadcastEvent(final int fuid, final boolean deleted, final int entity, final int contextId, final EventAdmin eventAdmin) {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
         properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
         properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(entity));
-        properties.put(FolderEventConstants.PROPERTY_FOLDER, fuid.toString());
+        properties.put(FolderEventConstants.PROPERTY_FOLDER, Integer.toString(fuid));
         properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(!deleted));
         /*
          * Create event with push topic
@@ -1755,12 +1759,12 @@ public final class OXFolderSQL {
 
     private static final String SQL_DELETE_PERMS = "DELETE FROM " + TMPL_PERM_TABLE + " WHERE cid = ? AND fuid = ? AND permission_id = ?";
 
-    private static void deletePermissions(final Set<Integer> deletePerms, final int entity, final String permTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void deletePermissions(final TIntSet deletePerms, final int entity, final String permTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
         final int size = deletePerms.size();
         if (size == 0) {
             return;
         }
-        final Iterator<Integer> iter = deletePerms.iterator();
+        final TIntIterator iter = deletePerms.iterator();
         Connection wc = writeConArg;
         boolean closeWrite = false;
         PreparedStatement stmt = null;
@@ -1772,7 +1776,7 @@ public final class OXFolderSQL {
             stmt = wc.prepareStatement(SQL_DELETE_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
             for (int i = 0; i < size; i++) {
                 stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, iter.next().intValue());
+                stmt.setInt(2, iter.next());
                 stmt.setInt(3, entity);
                 stmt.addBatch();
             }
@@ -1786,7 +1790,7 @@ public final class OXFolderSQL {
 
     private static final String SQL_REASSIGN_UPDATE_TIMESTAMP = "UPDATE " + TMPL_FOLDER_TABLE + " SET changed_from = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
 
-    private static void reassignPermissions(final Set<Integer> reassignPerms, final int entity, final int mailAdmin, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void reassignPermissions(final TIntSet reassignPerms, final int entity, final int mailAdmin, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
         final int size = reassignPerms.size();
         if (size == 0) {
             return;
@@ -1810,9 +1814,9 @@ public final class OXFolderSQL {
             // wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE
             // ,
             // permTable));
-            Iterator<Integer> iter = reassignPerms.iterator();
+            TIntIterator iter = reassignPerms.iterator();
             Next: for (int i = 0; i < size; i++) {
-                final int fuid = iter.next().intValue();
+                final int fuid = iter.next();
                 /*
                  * Check if admin already holds permission on current folder
                  */
@@ -1863,7 +1867,7 @@ public final class OXFolderSQL {
                 stmt.setInt(1, mailAdmin);
                 stmt.setLong(2, lastModified);
                 stmt.setInt(3, ctx.getContextId());
-                stmt.setInt(4, iter.next().intValue());
+                stmt.setInt(4, iter.next());
                 stmt.addBatch();
             }
             executeBatch(stmt);
@@ -2025,15 +2029,15 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             rs = executeQuery(stmt);
-            Set<Integer> deleteFolders = new HashSet<Integer>();
-            Set<Integer> reassignFolders = new HashSet<Integer>();
+            TIntSet deleteFolders = new TIntHashSet();
+            TIntSet reassignFolders = new TIntHashSet();
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 final int type = rs.getInt(2);
                 if (isMailAdmin || markForDeletion(type)) {
-                    deleteFolders.add(Integer.valueOf(fuid));
+                    deleteFolders.add(fuid);
                 } else {
-                    reassignFolders.add(Integer.valueOf(fuid));
+                    reassignFolders.add(fuid);
                 }
             }
             rs.close();
@@ -2059,11 +2063,13 @@ public final class OXFolderSQL {
                  * Invalidate cache
                  */
                 try {
-                    for (final Integer fuid : deleteFolders) {
-                        FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+                    TIntIterator iterator = deleteFolders.iterator();
+                    for (int i = deleteFolders.size(); i-- > 0;) {
+                        FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
-                    for (final Integer fuid : reassignFolders) {
-                        FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+                    iterator = reassignFolders.iterator();
+                    for (int i = reassignFolders.size(); i-- > 0;) {
+                        FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
@@ -2076,14 +2082,14 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             rs = executeQuery(stmt);
-            deleteFolders = new HashSet<Integer>();
-            reassignFolders = new HashSet<Integer>();
+            deleteFolders = new TIntHashSet();
+            reassignFolders = new TIntHashSet();
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 if (isMailAdmin) {
-                    deleteFolders.add(Integer.valueOf(fuid));
+                    deleteFolders.add(fuid);
                 } else {
-                    reassignFolders.add(Integer.valueOf(fuid));
+                    reassignFolders.add(fuid);
                 }
             }
             /*
@@ -2104,11 +2110,13 @@ public final class OXFolderSQL {
                  * Invalidate cache
                  */
                 try {
-                    for (final Integer fuid : deleteFolders) {
-                        FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+                    TIntIterator iterator = deleteFolders.iterator();
+                    for (int i = deleteFolders.size(); i-- > 0;) {
+                        FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
-                    for (final Integer fuid : reassignFolders) {
-                        FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+                    iterator = reassignFolders.iterator();
+                    for (int i = reassignFolders.size(); i-- > 0;) {
+                        FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
@@ -2119,11 +2127,13 @@ public final class OXFolderSQL {
              */
             final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
             if (null != eventAdmin) {
-                for (final Integer fuid : deleteFolders) {
-                    broadcastEvent(fuid, true, entity, ctx.getContextId(), eventAdmin);
+                TIntIterator iterator = deleteFolders.iterator();
+                for (int i = deleteFolders.size(); i-- > 0;) {
+                    broadcastEvent(iterator.next(), true, entity, ctx.getContextId(), eventAdmin);
                 }
-                for (final Integer fuid : reassignFolders) {
-                    broadcastEvent(fuid, false, entity, ctx.getContextId(), eventAdmin);
+                iterator = reassignFolders.iterator();
+                for (int i = reassignFolders.size(); i-- > 0;) {
+                    broadcastEvent(iterator.next(), false, entity, ctx.getContextId(), eventAdmin);
                 }
             }
         } finally {
@@ -2133,7 +2143,7 @@ public final class OXFolderSQL {
 
     private static final String SQL_DELETE_FOLDER = "DELETE FROM #FOLDER# WHERE cid = ? AND fuid = ?";
 
-    private static void deleteFolders(final Set<Integer> deleteFolders, final String folderTable, final String permTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void deleteFolders(final TIntSet deleteFolders, final String folderTable, final String permTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
         final int size = deleteFolders.size();
         Connection wc = writeConArg;
         boolean closeWrite = false;
@@ -2142,9 +2152,9 @@ public final class OXFolderSQL {
             /*
              * Delete folder's permissions if any exist
              */
-            Iterator<Integer> iter = deleteFolders.iterator();
+            TIntIterator iter = deleteFolders.iterator();
             for (int i = 0; i < size; i++) {
-                final int fuid = iter.next().intValue();
+                final int fuid = iter.next();
                 checkFolderPermissions(fuid, permTable, writeConArg, ctx);
             }
             /*
@@ -2152,7 +2162,7 @@ public final class OXFolderSQL {
              */
             iter = deleteFolders.iterator();
             for (int i = 0; i < size; i++) {
-                final int fuid = iter.next().intValue();
+                final int fuid = iter.next();
                 deleteSpecialfoldersRefs(fuid, writeConArg, ctx);
             }
             /*
@@ -2165,7 +2175,7 @@ public final class OXFolderSQL {
             stmt = wc.prepareStatement(SQL_DELETE_FOLDER.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
             iter = deleteFolders.iterator();
             for (int i = 0; i < size; i++) {
-                final int fuid = iter.next().intValue();
+                final int fuid = iter.next();
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, fuid);
                 stmt.addBatch();
@@ -2220,7 +2230,7 @@ public final class OXFolderSQL {
 
     private static final String SQL_REASSIGN_FOLDERS_WITH_NAME = "UPDATE #FOLDER# SET created_from = ?, changed_from = ?, changing_date = ?, default_flag = 0, fname = ? WHERE cid = ? AND fuid = ?";
 
-    private static void reassignFolders(final Set<Integer> reassignFolders, final int entity, final int mailAdmin, final long lastModified, final String folderTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void reassignFolders(final TIntSet reassignFolders, final int entity, final int mailAdmin, final long lastModified, final String folderTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
         Connection wc = writeConArg;
         boolean closeWrite = false;
         PreparedStatement stmt = null;
@@ -2230,14 +2240,14 @@ public final class OXFolderSQL {
                 closeWrite = true;
             }
             int size = reassignFolders.size();
-            Iterator<Integer> iter = reassignFolders.iterator();
+            TIntIterator iter = reassignFolders.iterator();
             {
                 /*
                  * Special handling for default infostore folder
                  */
                 boolean found = false;
                 for (int i = 0; i < size && !found; i++) {
-                    final int fuid = iter.next().intValue();
+                    final int fuid = iter.next();
                     final String fname;
                     if ((fname = isDefaultInfostoreFolder(fuid, entity, folderTable, wc, ctx)) != null) {
                         iter.remove();
@@ -2269,7 +2279,7 @@ public final class OXFolderSQL {
                 stmt.setInt(2, mailAdmin);
                 stmt.setLong(3, lastModified);
                 stmt.setInt(4, ctx.getContextId());
-                stmt.setInt(5, iter.next().intValue());
+                stmt.setInt(5, iter.next());
                 stmt.addBatch();
             }
             executeBatch(stmt);

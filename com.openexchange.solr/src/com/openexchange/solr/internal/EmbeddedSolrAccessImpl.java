@@ -72,6 +72,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.log.LogFactory;
+import com.openexchange.solr.SchemaAndConfigStore;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
@@ -144,8 +145,8 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
             ConfigurationService config = Services.getService(ConfigurationService.class);
             String libDir = config.getProperty(SolrProperties.LIB_DIR);
-            String schemaFile = getSchemaFileByModule(module);
-            String configFile = getConfigFileByModule(module);
+            String schemaFile = SchemaAndConfigStore.getSchemaPath(module, SchemaAndConfigStore.getLatestSchemaVersion());
+            String configFile = SchemaAndConfigStore.getConfigPath(module);
             String configDir = config.getProperty(SolrProperties.CONFIG_DIR);
             SolrCoreStore coreStore = indexMysql.getCoreStore(solrCore.getStore());
             SolrCoreConfiguration configuration = new SolrCoreConfiguration(coreStore.getUri(), identifier);
@@ -508,52 +509,6 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
     public CoreContainer getCoreContainer() {
         return coreContainer;
-    }
-
-    private String getConfigFileByModule(final int module) throws OXException {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String configFile;
-        switch (module) {
-        case Types.EMAIL:
-            configFile = config.getProperty(SolrProperties.CONFIG_FILE_MAIL);
-            break;
-
-        case Types.INFOSTORE:
-            configFile = config.getProperty(SolrProperties.CONFIG_FILE_INFOSTORE);
-            break;
-
-        case Types.ATTACHMENT:
-            configFile = config.getProperty(SolrProperties.CONFIG_FILE_ATTACHMENTS);
-            break;
-
-        default:
-            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
-        }
-
-        return configFile;
-    }
-
-    private String getSchemaFileByModule(final int module) throws OXException {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String schemaFile;
-        switch (module) {
-        case Types.EMAIL:
-            schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_MAIL);
-            break;
-
-        case Types.INFOSTORE:
-            schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_INFOSTORE);
-            break;
-
-        case Types.ATTACHMENT:
-            schemaFile = config.getProperty(SolrProperties.SCHEMA_FILE_ATTACHMENTS);
-            break;
-
-        default:
-            throw SolrExceptionCodes.UNKNOWN_MODULE.create(module);
-        }
-
-        return schemaFile;
     }
 
     private SolrServer getSolrServer(final SolrCoreIdentifier identifier) throws OXException {

@@ -126,6 +126,8 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // File name contains illegal characters.
     public static final String VALIDATION_FAILED_CHARACTERS_MSG = "File name contains illegal characters.";
 
+    public static final String NO_OFFSET_FOR_NEW_VERSIONS_MSG = "New file versions can't be saved with an offset.";
+
     private InfostoreExceptionMessages() {
         super();
     }

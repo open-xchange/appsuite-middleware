@@ -91,6 +91,7 @@ import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
+import com.openexchange.ajp13.util.IPTools;
 import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -353,6 +354,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private boolean restrictLongRunning;
 
     /**
+     * Whether to consider X-Forwards header.
+     */
+    private final boolean isConsiderXForwards;
+
+    /**
      * Direct buffer used for sending right away a pong message.
      */
     private static final byte[] pongMessageArray;
@@ -423,6 +429,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor, final boolean forceHttps) {
         super();
+        isConsiderXForwards = AJPv13Config.isConsiderXForwards();
         restrictLongRunning = false;
         this.forceHttps = forceHttps;
         bodyBytes = MessageBytes.newInstance();
@@ -871,8 +878,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      * Enter service stage...
                      */
                     lastWriteAccess = System.currentTimeMillis();
-                    stage = Stage.STAGE_SERVICE;
-                    listenerMonitor.incrementNumProcessing();
                     /*
                      * Form data?
                      */
@@ -913,16 +918,48 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         error = true;
                     } else {
                        /*
-                        * Call Servlet's service() method
+                        * Check for special X-Forwards if enabled
                         */
-                        servlet.service(request, response);
-                        if (!started) {
-                            // Stopped in the meantime
-                            return;
+                        if (isConsiderXForwards) {
+                            // Scheme
+                            String protocol = request.getHeader(AJPv13Config.getProtocolHeader());
+                            if(!isValidProtocol(protocol)) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Could not detect a valid protocol header value in " + protocol + ", falling back to default");
+                                }
+                                 protocol = request.getScheme();
+                            }
+                            // Remote address
+                            String forHeaderValue = request.getHeader(AJPv13Config.getForHeader());
+                            String remoteIP = IPTools.getRemoteIP(forHeaderValue, AJPv13Config.getKnownProxies());
+                            if (remoteIP.isEmpty()) {
+                                if (LOG.isDebugEnabled()) {
+                                    forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
+                                    LOG.debug("Could not detect a valid remote ip in " + AJPv13Config.getForHeader() + ": [" + forHeaderValue + "], falling back to default");
+                                }
+                                remoteIP = request.getRemoteAddr();
+                            }
+                            // Apply values
+                            request.setScheme(protocol);
+                            request.setRemoteAddr(remoteIP);
                         }
-                        response.flushBuffer();
-                        listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
-                        listenerMonitor.incrementNumRequests();
+                        /*
+                         * Call Servlet's service() method
+                         */
+                        listenerMonitor.incrementNumProcessing();
+                        try {
+                            stage = Stage.STAGE_SERVICE;
+                            servlet.service(request, response);
+                            if (!started) {
+                                // Stopped in the meantime
+                                return;
+                            }
+                            response.flushBuffer();
+                            listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
+                            listenerMonitor.incrementNumRequests();
+                        } finally {
+                            listenerMonitor.decrementNumProcessing();
+                        }
                     }
                 } catch (final UploadServletException e) {
                     /*
@@ -957,7 +994,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 } finally {
                     stage = Stage.STAGE_SERVICE_ENDED;
-                    listenerMonitor.decrementNumProcessing();
                     if (longRunningAccepted) {
                         AjpLongRunningRegistry.getInstance().deregisterLongRunning(request);
                     }
@@ -1095,7 +1131,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     if (finished || (max <= 0) || (!isProcessing() || ((System.currentTimeMillis() - getLastWriteAccess()) <= max))) {
                         return;
                     }
-                    boolean doReadMessage = true;
+                    final boolean doReadMessage = true;
                     if (response.isCommitted()) {
                         /*
                          * Write empty SEND-BODY-CHUNK package
@@ -1231,6 +1267,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     public HttpServlet getServlet() {
         return servlet;
+    }
+
+    private final static String HTTP_SCHEME = "http";
+
+    private final static String HTTPS_SCHEME = "https";
+
+    private boolean isValidProtocol(final String protocolHeaderValue) {
+        return HTTP_SCHEME.equals(protocolHeaderValue) || HTTPS_SCHEME.equals(protocolHeaderValue);
     }
 
     private static final String JSESSIONID_URI = AJPv13RequestHandler.JSESSIONID_URI;
@@ -1674,10 +1718,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * @param requestURI The request URI
      */
     private void setServletInstance(final String requestURI) {
+        String charEnc = request.getCharacterEncoding();
+        if (null == charEnc) {
+            charEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
+        }
+        final String DecodedRequestURI = AJPv13Utility.decodeUrl(requestURI,charEnc);
         /*
          * Remove leading slash character
          */
-        final String path = requestURI.length() > 1 ? removeFromPath(requestURI, '/') : requestURI;
+        final String path = DecodedRequestURI.length() > 1 ? removeFromPath(DecodedRequestURI, '/') : DecodedRequestURI;
         /*
          * Lookup path in available servlet paths
          */
@@ -1686,7 +1735,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         HttpServlet servlet = HttpServletManager.getServlet(path, servletId);
         if (servlet == null) {
-            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(requestURI));
+            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(DecodedRequestURI));
         }
         this.servlet = servlet;
         // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
@@ -1708,7 +1757,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 /*
                  * Set complete request URI as path info
                  */
-                request.setPathInfo(requestURI);
+                request.setPathInfo(DecodedRequestURI);
             } else {
                 /*
                  * The path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include
@@ -1719,8 +1768,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * Set path info: The extra path information follows the servlet path but precedes the query string and will start with a
                  * "/" character.
                  */
-                if ((requestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
-                    request.setPathInfo(requestURI.substring(servletPathLen));
+                if ((DecodedRequestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
+                    request.setPathInfo(DecodedRequestURI.substring(servletPathLen));
                 } else {
                     request.setPathInfo(null);
                 }

@@ -56,10 +56,13 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link ServerSessionAdapter}
@@ -115,6 +118,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return null == session ? null : new ServerSessionAdapter(session, context, user);
     }
 
+
     /**
      * Gets the server session for specified session.
      *
@@ -131,12 +135,46 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return null == session ? null : new ServerSessionAdapter(session, context, user, userConfiguration);
     }
 
+    /**
+     * Creates a synthetic server session for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The synthetic server session
+     * @throws OXException If creation of server session fails
+     */
+    public static ServerSession valueOf(int userId, int contextId) throws OXException {
+        return new ServerSessionAdapter(userId, contextId);
+    }
+
     private final Session session;
     private final Context ctx;
     private volatile User user;
     private volatile UserConfiguration userConfiguration;
     private volatile UserSettingMail userSettingMail;
     private final ServerSession serverSession;
+    private volatile UserPermissionBits userPermissionBits;
+
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If creation of server session fails
+     */
+    public ServerSessionAdapter(final int userId, final int contextId) throws OXException {
+        super();
+
+        this.session = new SessionObject("synthetic") {
+            @Override
+            public int getUserId() { return userId; }
+            @Override
+            public int getContextId() {return contextId; }
+        };
+        this.serverSession = null;
+
+        ctx = contextId > 0 ? ContextStorage.getStorageContext(contextId) : null;
+    }
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
@@ -232,6 +270,33 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
             this.ctx = ctx;
             this.user = user;
             this.userConfiguration = userConfiguration;
+        }
+    }
+
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     *
+     * @param session The delegate session
+     * @param ctx The session's context object
+     * @param user The session's user object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
+     */
+    public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration, final UserPermissionBits permissionBits) {
+        super();
+        if (null == session) {
+            throw new IllegalArgumentException("Session is null.");
+        }
+        if (ServerSession.class.isInstance(session)) {
+            this.serverSession = (ServerSession) session;
+            this.session = null;
+            this.ctx = null;
+        } else {
+            this.serverSession = null;
+            this.session = session;
+            this.ctx = ctx;
+            this.user = user;
+            this.userConfiguration = userConfiguration;
+            this.userPermissionBits = permissionBits;
         }
     }
 
@@ -362,6 +427,31 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
                 tmp = user;
                 if (null == tmp) {
                     user = tmp = UserStorage.getStorageUser(userId, ctx);
+                }
+            }
+        }
+        return tmp;
+    }
+
+    @Override
+    public UserPermissionBits getUserPermissionBits() {
+        if (serverSession != null) {
+            return serverSession.getUserPermissionBits();
+        }
+        final int userId = session.getUserId();
+        if (userId <= 0) {
+            return null;
+        }
+        UserPermissionBits tmp = userPermissionBits;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = userPermissionBits;
+                if (null == tmp) {
+                    try {
+                        userPermissionBits = tmp = userId > 0 ? UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx) : null;
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
             }
         }

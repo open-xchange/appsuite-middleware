@@ -899,6 +899,67 @@ public final class IMAPCommandsCollection {
     }
 
     /**
+     * Gets total/unread message count from given IMAP folder
+     *
+     * @param imapFolder The IMAP folder
+     * @return The total/unread message count
+     * @throws MessagingException If determining counts fails
+     */
+    public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+        return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                if (!protocol.isREV1() && !protocol.hasCapability("IMAP4SUNVERSION")) {
+                    /*
+                     * STATUS is rev1 only, however the non-rev1 SIMS2.0 does support this.
+                     */
+                    throw new com.sun.mail.iap.BadCommandException("STATUS not supported");
+                }
+                /*
+                 * Encode the mbox as per RFC2060
+                 */
+                final Argument args = new Argument();
+                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                /*
+                 * Item arguments
+                 */
+                final Argument itemArgs = new Argument();
+                final String[] items = { "MESSAGES", "UNSEEN"};
+                for (int i = 0, len = items.length; i < len; i++) {
+                    itemArgs.writeAtom(items[i]);
+                }
+                args.writeArgument(itemArgs);
+                /*
+                 * Perform command
+                 */
+                final Response[] r = performCommand(protocol, "STATUS", args);
+                final Response response = r[r.length - 1];
+                /*
+                 * Look for STATUS responses
+                 */
+                int[] ret = null;
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        if (ir.keyEquals("STATUS")) {
+                            ret = parseStatusResponse(ir, "MESSAGES", "UNSEEN");
+                            r[i] = null;
+                        }
+                    }
+                }
+                notifyResponseHandlers(r, protocol);
+                protocol.handleResult(response);
+                return ret;
+            }
+        }));
+    }
+
+    /**
      * Parses number of total, recent and unread messages from specified IMAP response whose key is equal to <code>&quot;STATUS&quot;</code>
      * .
      *
@@ -2714,6 +2775,10 @@ public final class IMAPCommandsCollection {
                     }
                 }
 
+                if (null == bodystructure || isApplicationSmil(bodystructure)) {
+                    return null;
+                }
+
                 BodyAndId bid = null;
                 try {
                     bid = getBODYSTRUCTURE(sectionId, bodystructure, null, 1, new boolean[1]);
@@ -2747,7 +2812,7 @@ public final class IMAPCommandsCollection {
                         if (null == message) {
                             return null;
                         }
-                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure);
+                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure, imapFolder.getFullName());
                     } catch (final Exception e) {
                         // Ignore
                     }
@@ -2769,8 +2834,13 @@ public final class IMAPCommandsCollection {
                     byteArray = rd.getByteArray();
                 }
 
-                return toMailPart(byteArray, bid.bodystructure);
+                return toMailPart(byteArray, bid.bodystructure, imapFolder.getFullName());
             }
+
+            private boolean isApplicationSmil(final BODYSTRUCTURE bodystructure) {
+                return bodystructure.isMulti() && "related".equals(toLowerCase(bodystructure.subtype)) && "application/smil".equals(toLowerCase(bodystructure.cParams.get("type")));
+            }
+
         }));
     }
 
@@ -2900,7 +2970,7 @@ public final class IMAPCommandsCollection {
                         if (null == message) {
                             return null;
                         }
-                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure);
+                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure, imapFolder.getFullName());
                     } catch (final Exception e) {
                         // Ignore
                     }
@@ -2922,7 +2992,7 @@ public final class IMAPCommandsCollection {
                     byteArray = rd.getByteArray();
                 }
 
-                return toMailPart(byteArray, bid.bodystructure);
+                return toMailPart(byteArray, bid.bodystructure, imapFolder.getFullName());
             }
 
         }));
@@ -2979,9 +3049,9 @@ public final class IMAPCommandsCollection {
         return null;
     }
 
-    protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure) throws ProtocolException {
+    protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure, final String fullName) throws ProtocolException {
         try {
-            final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure);
+            final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure, fullName);
             ret.applyBodyStructure(bodystructure);
             return ret;
         } catch (final RuntimeException e) {
@@ -2989,9 +3059,9 @@ public final class IMAPCommandsCollection {
         }
     }
 
-    protected static MailPart toMailPart(final ByteArray byteArray, final BODYSTRUCTURE bodystructure) throws ProtocolException {
+    protected static MailPart toMailPart(final ByteArray byteArray, final BODYSTRUCTURE bodystructure, final String fullName) throws ProtocolException {
         try {
-            final IMAPMailPart ret = new IMAPMailPart(byteArray, bodystructure);
+            final IMAPMailPart ret = new IMAPMailPart(byteArray, bodystructure, fullName);
             ret.applyBodyStructure(bodystructure);
             return ret;
         } catch (final IOException e) {
@@ -3507,6 +3577,19 @@ public final class IMAPCommandsCollection {
             this.sectionId = sectionId;
         }
 
+    }
+
+    static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

@@ -56,7 +56,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
@@ -98,9 +97,6 @@ public class PresenceTest {
         assertEquals(Type.NONE, initialPresence.getType());
         assertEquals(realtimeException, initialPresence.getError());
         assertEquals(1, initialPresence.getPayloads().size());
-        
-        initialPresence.transformPayloadsToInternal();
-
     }
 
     @Test

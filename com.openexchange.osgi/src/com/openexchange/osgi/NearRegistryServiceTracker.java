@@ -57,10 +57,13 @@ import com.openexchange.java.ConcurrentList;
 
 /**
  * {@link NearRegistryServiceTracker} - A near-registry service tracker.
+ * <p>
+ * Occurrences of specified service type are collected and available via {@link #getServiceList()}.<br>
+ * This is intended to replace {@link #getServices()} since it requires to obtain tracker's mutex on each invocation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> {
+public final class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implements ServiceListing<S> {
 
     private final List<S> services;
 
@@ -75,11 +78,7 @@ public final class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> {
         services = new ConcurrentList<S>();
     }
 
-    /**
-     * Gets the service list
-     *
-     * @return The service list
-     */
+    @Override
     public List<S> getServiceList() {
         return services;
     }

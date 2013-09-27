@@ -72,15 +72,13 @@ public class ServletActivator extends AbstractSessionServletActivator {
 
     private static final String SUBSCRIPTION_SOURCES_ALIAS_APPENDIX = "subscriptionSources";
 
-    private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class, DispatcherPrefixService.class };
-
     private WhiteboardSubscriptionSourceDiscoveryService discoverer;
 
     private WhiteboardSecretService secretService;
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, DispatcherPrefixService.class };
     }
 
     @Override

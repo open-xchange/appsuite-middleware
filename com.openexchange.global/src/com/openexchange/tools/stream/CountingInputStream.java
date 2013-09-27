@@ -55,22 +55,21 @@ import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * {@link CountingInputStream} - An {@link InputStream} that counts the number of bytes read.
+ * {@link CountingInputStream} - An {@link InputStream} that counts (and optionally limits) the number of bytes read.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CountingInputStream extends FilterInputStream {
 
     private final AtomicLong count;
-
     private volatile long mark;
-
     private volatile long max;
 
     /**
      * Wraps another input stream, counting the number of bytes read.
      *
-     * @param in the input stream to be wrapped
+     * @param in The input stream to be wrapped
+     * @param max The maximum number of bytes allowed being read or <code>-1</code> for no limitation, just counting
      */
     public CountingInputStream(final InputStream in, final long max) {
         super(in);
@@ -91,7 +90,7 @@ public class CountingInputStream extends FilterInputStream {
     }
 
     /**
-     * Returns the number of bytes read.
+     * Returns the number of bytes read so far.
      */
     public long getCount() {
         return count.get();
@@ -101,8 +100,12 @@ public class CountingInputStream extends FilterInputStream {
     public int read() throws IOException {
         final int result = in.read();
         final long max = this.max;
-        if (count.addAndGet((result >= 0L) ? 1 : 0L) > max) {
-            throw new IOException("Max. byte count of " + max + " exceeded.");
+        if (max > 0) {
+            if (count.addAndGet((result >= 0L) ? 1 : 0L) > max) {
+                throw new IOException("Max. byte count of " + max + " exceeded.");
+            }
+        } else {
+            count.addAndGet((result >= 0L) ? 1 : 0L);
         }
         return result;
     }
@@ -111,8 +114,12 @@ public class CountingInputStream extends FilterInputStream {
     public int read(final byte[] b) throws IOException {
         final int result = super.read(b);
         final long max = this.max;
-        if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-            throw new IOException("Max. byte count of " + max + " exceeded.");
+        if (max > 0) {
+            if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
+                throw new IOException("Max. byte count of " + max + " exceeded.");
+            }
+        } else {
+            count.addAndGet((result >= 0L) ? result : 0L);
         }
         return result;
     }
@@ -121,8 +128,12 @@ public class CountingInputStream extends FilterInputStream {
     public int read(final byte[] b, final int off, final int len) throws IOException {
         final int result = in.read(b, off, len);
         final long max = this.max;
-        if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-            throw new IOException("Max. byte count of " + max + " exceeded.");
+        if (max > 0) {
+            if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
+                throw new IOException("Max. byte count of " + max + " exceeded.");
+            }
+        } else {
+            count.addAndGet((result >= 0L) ? result : 0L);
         }
         return result;
     }
@@ -130,7 +141,10 @@ public class CountingInputStream extends FilterInputStream {
     @Override
     public long skip(final long n) throws IOException {
         final long result = in.skip(n);
-        max += n;
+        final long max = this.max;
+        if (max > 0) {
+            this.max = max + n;
+        }
         count.addAndGet(result);
         return result;
     }

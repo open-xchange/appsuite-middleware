@@ -54,6 +54,9 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,6 +65,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -69,29 +73,27 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifIFD0Directory;
-import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
-import com.openexchange.ajax.container.DelegateFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
-import com.openexchange.ajax.helper.HTMLDetector;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.PropertyEvent;
+import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
@@ -106,6 +108,7 @@ import com.openexchange.tools.servlet.http.Tools;
 public class FileResponseRenderer implements ResponseRenderer {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final int BUFLEN = 2048;
 
@@ -126,6 +129,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
 
     private final Tika tika;
+    private final AtomicReference<File> tmpDirReference;
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -133,6 +137,24 @@ public class FileResponseRenderer implements ResponseRenderer {
     public FileResponseRenderer() {
         super();
         tika = new Tika(TikaConfig.getDefaultConfig());
+        final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
+        this.tmpDirReference = tmpDirReference;
+        final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+        // Get configuration service
+        final ConfigurationService cs = registry.getService(ConfigurationService.class);
+        if (null == cs) {
+            throw new IllegalStateException("Missing configuration service");
+        }
+        final String path = cs.getProperty("UPLOAD_DIRECTORY", new PropertyListener() {
+
+            @Override
+            public void onPropertyChange(final PropertyEvent event) {
+                if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
+                    tmpDirReference.set(getTmpDirByPath(event.getValue()));
+                }
+            }
+        });
+        tmpDirReference.set(getTmpDirByPath(path));
     }
 
     @Override
@@ -284,7 +306,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             documentData = Streams.asInputStream(baos);
                             cts = tika.detect(Streams.asInputStream(baos));
                             if ("text/plain".equals(cts)) {
-                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray()) ? "text/html" : cts;
+                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray(), true) ? "text/html" : cts;
                             }
                         } else {
                             cts = contentTypeByFileName;
@@ -301,7 +323,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
                                 final byte[] bytes = Streams.stream2bytes(temp.getStream());
-                                cts = HTMLDetector.containsHTMLTags(bytes) ? "text/html" : cts;
+                                cts = HTMLDetector.containsHTMLTags(bytes, true) ? "text/html" : cts;
                             }
                         } else {
                             cts = fileContentType;
@@ -345,6 +367,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if (length > 0) {
                     resp.setHeader("Accept-Ranges", "bytes");
                     resp.setHeader("Content-Length", Long.toString(length));
+                } else {
+                    resp.setHeader("Accept-Ranges", "none");
                 }
                 /*-
                  * Determine preferred Content-Type
@@ -385,7 +409,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         preferredContentType = detectMimeType(temp.getStream());
                         if ("text/plain".equals(preferredContentType)) {
                             final byte[] bytes = Streams.stream2bytes(temp.getStream());
-                            preferredContentType = HTMLDetector.containsHTMLTags(bytes) ? "text/html" : preferredContentType;
+                            preferredContentType = HTMLDetector.containsHTMLTags(bytes, true) ? "text/html" : preferredContentType;
                         }
                         // One more time...
                         if (equalPrimaryTypes(preferredContentType, contentType)) {
@@ -433,8 +457,8 @@ public class FileResponseRenderer implements ResponseRenderer {
              */
             try {
                 final ServletOutputStream outputStream = resp.getOutputStream();
-                final String sRange;
-                if (length > 0 && null != (sRange = req.getHeader("Range"))) {
+                final String sRange = req.getHeader("Range");
+                if ((length > 0) && (null != sRange)) {
                     // Taken from http://balusc.blogspot.co.uk/2009/02/fileservlet-supporting-resume-and.html
                     // Range header should match format "bytes=n-n,n-n,n-n...". If not, then return 416.
                     if (!PATTERN_BYTE_RANGES.matcher(sRange).matches()) {
@@ -531,24 +555,44 @@ public class FileResponseRenderer implements ResponseRenderer {
                         outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
                     }
                 } else {
-                    final int len = BUFLEN;
-                    final byte[] buf = new byte[len];
-                    if (length > 0) {
-                        // Check actual transferred number of bytes against provided length
-                        long count = 0L;
-                        for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                            outputStream.write(buf, 0, read);
-                            count += read;
-                        }
-                        if (length != count) {
-                            StringAllocator sb = new StringAllocator("Transferred ").append((length > count ? "less" : "more"));
-                            sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
-                            sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
-                            LOG.warn(sb.toString());
+                    // Check if "Range" header was sent by client although we do not know exact size/length
+                    if (length <= 0 && null != sRange) {
+                        // Client requested a range, but cannot be satisfied
+                        setHeaderSafe("Content-Range", "bytes */" + documentData.available(), resp); // Required in 416.
+                        resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                        return;
+                    }
+                    // Check for "off"/"len" parameters
+                    final int off = AJAXRequestDataTools.parseIntParameter(req.getParameter("off"), -1);
+                    final int amount = AJAXRequestDataTools.parseIntParameter(req.getParameter("len"), -1);
+                    if (off >= 0 && amount > 0) {
+                        try {
+                            copy(documentData, outputStream, off, amount);
+                        } catch (final OffsetOutOfRangeIOException e) {
+                            setHeaderSafe("Content-Range", "bytes */" + e.getAvailable(), resp); // Required in 416.
+                            resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                            return;
                         }
                     } else {
-                        for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                            outputStream.write(buf, 0, read);
+                        final int len = BUFLEN;
+                        final byte[] buf = new byte[len];
+                        if (length > 0) {
+                            // Check actual transferred number of bytes against provided length
+                            long count = 0L;
+                            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                                outputStream.write(buf, 0, read);
+                                count += read;
+                            }
+                            if (length != count) {
+                                final StringAllocator sb = new StringAllocator("Transferred ").append((length > count ? "less" : "more"));
+                                sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
+                                sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
+                                LOG.warn(sb.toString());
+                            }
+                        } else {
+                            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                                outputStream.write(buf, 0, read);
+                            }
                         }
                     }
                 }
@@ -621,92 +665,12 @@ public class FileResponseRenderer implements ResponseRenderer {
         return false;
     }
 
-    /** Checks if transformation is needed */
-    private boolean isTransformationNeeded(final AJAXRequestData request, final IFileHolder[] arr, final String delivery) throws OXException, IOException {
-
-        // this check is only for jpeg images, other image formats are always transformated
-        IFileHolder file = arr[0];
-        boolean transformationNeeded = !file.getContentType().toLowerCase().startsWith("image/jpeg");
-        if (!transformationNeeded) {
-            transformationNeeded = request.isSet("cropWidth") || request.isSet("cropHeight");
+    private void setHeaderSafe(final String name, final String value, final HttpServletResponse resp) {
+        try {
+            resp.setHeader(name, value);
+        } catch (final Exception e) {
+            // Ignore
         }
-        if (!transformationNeeded) {
-            // we need repetitive access to the stream for further testing
-            final InputStream stream = file.getStream();
-            if (null == stream) {
-                LOG.warn("(Possible) Image file misses stream data");
-                return false;
-            }
-            BufferedInputStream inputStream = null;
-            if (file.repetitive()) {
-                inputStream = new BufferedInputStream(stream);
-            } else if (stream.markSupported() && file.getLength() > 0 && file.getLength() < 0x20000) {
-                // mark supported, but only allowing files < 128kb
-                final byte[] bytes = Streams.stream2bytes(stream);
-                final DelegateFileHolder dfh = new DelegateFileHolder(file).setStream(new ByteArrayInputStreamClosure(bytes), bytes.length);
-                Streams.close(file);
-                file = dfh;
-                arr[0] = file;
-                inputStream = new BufferedInputStream(file.getStream(), (int) file.getLength());
-            }
-            if (inputStream == null) {
-                // no repetitive stream available... transformation must be done
-                transformationNeeded = true;
-            }
-            else {
-
-                try {
-                    // retrieve MetaData to check if width, height or rotate requires a transformation
-                    final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
-                    if (metadata == null) {
-                        transformationNeeded = true;
-                    } else {
-                        // check for rotation
-                        int orientation = 1;
-                        final ExifIFD0Directory exifDirectory = metadata.getDirectory(ExifIFD0Directory.class);
-                        if(exifDirectory!=null) {
-                            orientation = exifDirectory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-                        }
-                        if(orientation!=1) {
-                            final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
-                            if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
-                                transformationNeeded = true;
-                            }
-                        }
-
-                        // check width & height
-                        final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-                        if (null == jpegDirectory) {
-                            transformationNeeded = true;
-                        } else {
-                            // check width & height
-                            final int width = jpegDirectory.getImageWidth();
-                            final int height = jpegDirectory.getImageHeight();
-                            final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
-                            final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
-                            final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
-
-                            // transformation only required if the image size exceeds the requested size
-                            if(scaleType==ScaleType.CONTAIN) {
-                                transformationNeeded = (maxWidth > 0 && width > maxWidth) || (maxHeight > 0 && height > maxHeight);
-                            }
-                            // cover... the size must have the exact size
-                            else {
-                                transformationNeeded = (maxWidth > 0 && width != maxWidth) || (maxHeight > 0 && height != maxHeight);
-                            }
-                        }
-                    }
-                } catch (final ImageProcessingException e) {
-                    transformationNeeded = true;
-                } catch (final MetadataException e) {
-                    transformationNeeded = true;
-                }
-                if (!file.repetitive() && stream.markSupported()) {
-                    stream.reset();
-                }
-            }
-        }
-        return transformationNeeded;
     }
 
     private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder fileHolder, final String delivery) throws IOException, OXException {
@@ -798,25 +762,49 @@ public class FileResponseRenderer implements ResponseRenderer {
          * transform
          */
         try {
-            final InputStream transformed = transformations.getInputStream(file.getContentType());
-            if (null == transformed) {
-                LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
-                if (markSupported) {
-                    try {
-                        stream.reset();
-                        return file;
-                    } catch (final Exception e) {
-                        LOG.warn("Error resetting input stream", e);
-                    }
+            InputStream transformed;
+            try {
+                transformed = transformations.getInputStream(file.getContentType());
+            } catch (final IOException ioe) {
+                if ("Unsupported Image Type".equals(ioe.getMessage())) {
+                    return handleFailure(file, stream, markSupported);
                 }
-                LOG.error("Unable to transform image from " + file);
-                return file.repetitive() ? file : null;
+                // Rethrow...
+                throw ioe;
+            }
+            if (null == transformed) {
+                if (DEBUG) {
+                    LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
+                }
+                return handleFailure(file, stream, markSupported);
             }
             return new FileHolder(transformed, -1, file.getContentType(), file.getName());
         } catch (final RuntimeException e) {
-            LOG.error("Unable to transform image from " + file);
+            if (DEBUG && file.repetitive()) {
+                try {
+                    final File tmpFile = writeBrokenImage2Disk(file);
+                    LOG.error("Unable to transform image from " + file + ". Unparseable image file is written to disk at: " + tmpFile.getPath());
+                } catch (final Exception x) {
+                    LOG.error("Unable to transform image from " + file);
+                }
+            } else {
+                LOG.error("Unable to transform image from " + file);
+            }
             return file.repetitive() ? file : null;
         }
+    }
+
+    private IFileHolder handleFailure(final IFileHolder file, final InputStream stream, final boolean markSupported) {
+        if (markSupported) {
+            try {
+                stream.reset();
+                return file;
+            } catch (final Exception e) {
+                LOG.warn("Error resetting input stream", e);
+            }
+        }
+        LOG.warn("Unable to transform image from " + file.getName());
+        return file.repetitive() ? file : null;
     }
 
     /**
@@ -824,7 +812,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      * <p>
      * E.g. <code>"inline"</code> is not allowed for <code>"text/html"</code> MIME type.
      *
-     * @param contentDisposition The <i>Content-Disposition</i> value to cehck
+     * @param contentDisposition The <i>Content-Disposition</i> value to check
      * @param file The file
      * @return The checked <i>Content-Disposition</i> value
      */
@@ -838,6 +826,10 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     private boolean isImage(final IFileHolder file) {
+        if (0 == file.getLength()) {
+            // File signals no available data
+            return false;
+        }
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {
             final String fileName = file.getName();
@@ -948,7 +940,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         for (int i = 0; i < start; i++) {
             if (input.read() < 0) {
                 // Stream does not provide enough bytes
-                throw new IOException("Start index " + start + " out of range. Got only " + i);
+                throw new OffsetOutOfRangeIOException(start, i);
             }
             // Valid byte read... Continue.
         }
@@ -991,5 +983,121 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
     } // End of class Range
+
+    private static final class OffsetOutOfRangeIOException extends IOException {
+
+        private static final long serialVersionUID = 8094333124726048736L;
+
+        private final long off;
+        private final long available;
+
+        /**
+         * Initializes a new {@link OffsetOutOfRangeIOException}.
+         */
+        public OffsetOutOfRangeIOException(final long off, final long available) {
+            super("Offset " + off + " out of range. Got only " + available);
+            this.off = off;
+            this.available = available;
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+
+        /**
+         * Gets the off
+         *
+         * @return The off
+         */
+        public long getOff() {
+            return off;
+        }
+
+        /**
+         * Gets the available
+         *
+         * @return The available
+         */
+        public long getAvailable() {
+            return available;
+        }
+
+    } // End of class OffsetOutOfRangeIOException
+
+    /**
+     * Gets the appropriate directory to save to.
+     *
+     * @param path The path as indicated by configuration
+     * @return The directory
+     */
+    static File getTmpDirByPath(final String path) {
+        if (null == path) {
+            throw new IllegalArgumentException("Path is null. Probably property \"UPLOAD_DIRECTORY\" is not set.");
+        }
+        final File tmpDir = new File(path);
+        if (!tmpDir.exists()) {
+            throw new IllegalArgumentException("Directory " + path + " does not exist.");
+        }
+        if (!tmpDir.isDirectory()) {
+            throw new IllegalArgumentException(path + " is not a directory.");
+        }
+        return tmpDir;
+    }
+
+    private static final class FileManagementPropertyListener implements PropertyListener {
+
+        private final AtomicReference<File> ttmpDirReference;
+
+        FileManagementPropertyListener(final AtomicReference<File> tmpDirReference) {
+            super();
+            ttmpDirReference = tmpDirReference;
+        }
+
+        @Override
+        public void onPropertyChange(final PropertyEvent event) {
+            if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
+                ttmpDirReference.set(getTmpDirByPath(event.getValue()));
+            }
+        }
+    }
+
+    private File writeBrokenImage2Disk(final IFileHolder file) throws IOException, OXException, FileNotFoundException {
+        String suffix = null;
+        {
+            final String name = file.getName();
+            if (null != name) {
+                final int pos = name.lastIndexOf('.');
+                if (pos > 0 && pos < name.length() - 1) {
+                    suffix = name.substring(pos);
+                }
+            }
+            if (null == suffix) {
+                final String contentType = file.getContentType();
+                if (null != contentType) {
+                    suffix = "." + MimeType2ExtMap.getFileExtension(contentType);
+                }
+            }
+        }
+       return write2Disk(file, "brokenimage-", suffix);
+    }
+
+    private File write2Disk(final IFileHolder file, final String prefix, final String suffix) throws IOException, OXException, FileNotFoundException {
+        final File directory = tmpDirReference.get();
+        final File newFile = File.createTempFile(null == prefix ? "open-xchange-" : prefix, null == suffix ? ".tmp" : suffix, directory);
+        final InputStream is = file.getStream();
+        final OutputStream out = new FileOutputStream(newFile);
+        try {
+            final int len = 8192;
+            final byte[] buf = new byte[len];
+            for (int read; (read = is.read(buf, 0, len)) > 0;) {
+                out.write(buf, 0, read);
+            }
+            out.flush();
+        } finally {
+            Streams.close(is, out);
+        }
+        return newFile;
+    }
 
 }

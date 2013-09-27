@@ -60,6 +60,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
@@ -85,17 +86,17 @@ public final class DetachAction extends SnippetAction {
     /**
      * Initializes a new {@link DetachAction}.
      */
-    public DetachAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
-        super(services, actions);
+    public DetachAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
+        super(services, snippetServices, actions);
     }
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
         final String id = snippetRequest.checkParameter("id");
-        final SnippetService snippetService = getSnippetService();
+        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
 
         final DefaultSnippet snippet = new DefaultSnippet().setId(id);
-        final JSONArray jsonAttachments = (JSONArray) snippetRequest.getRequestData().getData();
+        final JSONArray jsonAttachments = (JSONArray) snippetRequest.getRequestData().requireData();
         int length = jsonAttachments.length();
         final List<Attachment> attachments = new ArrayList<Attachment>(length);
         for (int i = 0; i < length; i++) {

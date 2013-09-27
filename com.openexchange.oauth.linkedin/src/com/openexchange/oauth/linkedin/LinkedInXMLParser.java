@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -102,14 +102,14 @@ public class LinkedInXMLParser {
                 OXContainerConverter.loadImageFromURL(contact, imageUrl);
             }
         } catch (final ConverterException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
 
         // get the current job and company
         final NodeList positions = person.getElementsByTagName("positions");
         if (null != positions && positions.getLength() > 0) {
             final Element position = (Element) positions.item(0);
-            contact.setTitle(getTextValue(position, "title"));
+            contact.setPosition(getTextValue(position, "title"));
             final NodeList companies = position.getElementsByTagName("company");
             if (companies != null && companies.getLength() > 0) {
                 final Element company = (Element) companies.item(0);
@@ -232,7 +232,7 @@ public class LinkedInXMLParser {
                     OXContainerConverter.loadImageFromURL(contact, imageUrl);
                 }
             } catch (final ConverterException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
 
             // get the current job and company
@@ -245,7 +245,7 @@ public class LinkedInXMLParser {
                     for (int i = 0; i < length; i++) {
                         final JSONObject position = ja.optJSONObject(i);
                         if (position.optBoolean("isCurrent", false)) {
-                            contact.setTitle(position.optString("title", null));
+                            contact.setPosition(position.optString("title", null));
                             final JSONObject company = position.optJSONObject("company");
                             if (null != company) {
                                 contact.setCompany(company.optString("name", null));
@@ -257,7 +257,7 @@ public class LinkedInXMLParser {
                         }
                     }
                     if (null != candidate) {
-                        contact.setTitle(candidate.optString("title", null));
+                        contact.setPosition(candidate.optString("title", null));
                         final JSONObject company = candidate.optJSONObject("company");
                         if (null != company) {
                             contact.setCompany(company.optString("name", null));

@@ -58,6 +58,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -74,16 +75,32 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
+    private final FullPrimaryKeySupportService fullPrimaryKeySupportService;
+
     /**
      *
      */
     private static final String INFOSTORE_RESERVED_PATHS = "infostoreReservedPaths";
 
+    public InfostoreFilenameReservationsCreateTableTask(FullPrimaryKeySupportService service) {
+        this.fullPrimaryKeySupportService = service;
+    }
+
     private String getTableSQL() {
+        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+            return "CREATE TABLE infostoreReservedPaths (" +
+                " cid INT4 unsigned NOT NULL," +
+                " folder INT4 unsigned NOT NULL, " +
+                " name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " +
+                " uuid BINARY(16) NOT NULL, " +
+                " PRIMARY KEY (cid, uuid) " +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        }
         return "CREATE TABLE infostoreReservedPaths (" +
         " cid INT4 unsigned NOT NULL," +
         " folder INT4 unsigned NOT NULL, " +
-        " name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL "+
+        " name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " +
+        " uuid BINARY(16) DEFAULT NULL " +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
@@ -139,12 +156,8 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection writeCon;
-        try {
-            writeCon = ds.getWritable(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final Connection writeCon = ds.getWritable(contextId);
+
         PreparedStatement stmt = null;
         try {
             if (tableExists(writeCon, tablename)) {

@@ -52,7 +52,6 @@ package com.openexchange.groupware.tx;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
 
@@ -99,6 +98,11 @@ public class ConfigurableDBProvider implements DBProvider {
     public void releaseWriteConnection(final Context ctx, final Connection con) {
 		releaseReadConnection(ctx,con);
 	}
+
+	@Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        releaseReadConnection(ctx,con);
+    }
 
 	public String getDriver() {
 		return driver;

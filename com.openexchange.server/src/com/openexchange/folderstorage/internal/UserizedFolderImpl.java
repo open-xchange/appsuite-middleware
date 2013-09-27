@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
@@ -495,6 +496,26 @@ public final class UserizedFolderImpl implements UserizedFolder {
             }
         }
         return map;
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return folder.getMeta();
+    }
+
+    @Override
+    public void setMeta(Map<String, Object> meta) {
+        folder.setMeta(meta);
+    }
+
+    @Override
+    public Set<String> getSupportedCapabilities() {
+        return folder.getSupportedCapabilities();
+    }
+
+    @Override
+    public void setSupportedCapabilities(Set<String> capabilities) {
+        folder.setSupportedCapabilities(capabilities);
     }
 
 }

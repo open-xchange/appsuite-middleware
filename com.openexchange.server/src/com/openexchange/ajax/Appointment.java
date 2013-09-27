@@ -155,6 +155,6 @@ public class Appointment extends DataServlet {
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return session.getUserConfiguration().hasCalendar();
+        return session.getUserPermissionBits().hasCalendar();
     }
 }

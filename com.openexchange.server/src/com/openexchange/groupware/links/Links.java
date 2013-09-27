@@ -62,8 +62,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -75,8 +75,11 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -214,7 +217,7 @@ public class Links {
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
-                final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
+                final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
                 if (!userConfig.hasTask()) {
                     return false;
                 }
@@ -233,7 +236,7 @@ public class Links {
             @Override
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
-                final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
+                final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
                 if (!userConfig.hasTask()) {
                     return false;
                 }
@@ -291,7 +294,7 @@ public class Links {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 try {
                     return DATABASE.exists(oid, InfostoreFacade.CURRENT_VERSION, ct, UserStorage.getStorageUser(so
-                            .getUserId(), ct), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+                            .getUserId(), ct), UserPermissionBitsStorage.getInstance().getUserPermissionBits(
                             so.getUserId(), ct));
                 } catch (final OXException e) {
                     LOG.error("UNABLE TO CHECK INFOSTORE READRIGHT FOR LINK", e);
@@ -361,6 +364,8 @@ public class Links {
         }
 
         PreparedStatement ps = null;
+        UUID uuid = UUID.randomUUID();
+        byte[] uuidBinary = UUIDs.toByteArray(uuid);
         try {
             ps = writecon.prepareStatement(lms.iFperformLinkStorageInsertString());
             ps.setInt(1, l.getFirstId());
@@ -370,6 +375,7 @@ public class Links {
             ps.setInt(5, l.getSecondType());
             ps.setInt(6, l.getSecondFolder());
             ps.setInt(7, l.getContectId());
+            ps.setBytes(8, uuidBinary);
             ps.execute();
         } catch (final SQLException e) {
             throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));

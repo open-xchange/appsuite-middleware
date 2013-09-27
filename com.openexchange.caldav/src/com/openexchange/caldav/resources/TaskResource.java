@@ -126,10 +126,10 @@ public class TaskResource extends CalDAVResource<Task> {
     }
 
     @Override
-    protected void move(final String targetFolderID) throws OXException {
+    protected void move(CalDAVFolderCollection<Task> target) throws OXException {
         final Task task = new Task();
         task.setObjectID(object.getObjectID());
-        task.setParentFolderID(Tools.parse(targetFolderID));
+        task.setParentFolderID(Tools.parse(target.getFolder().getID()));
         getTaskInterface().updateTaskObject(task, parentFolderID, object.getLastModified());
     }
 

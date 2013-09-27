@@ -1,0 +1,158 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.drive.json.action;
+
+import java.util.Arrays;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.drive.DriveFileField;
+import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.json.json.DriveFieldMapper;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.session.ServerSession;
+
+/**
+ * {@link AbstractDriveAction}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public abstract class AbstractDriveAction implements AJAXActionService {
+
+    protected DriveService getDriveService() throws OXException {
+        return Services.getService(DriveService.class, true);
+    }
+
+    protected DriveSubscriptionStore getSubscriptionStore() throws OXException {
+        return Services.getService(DriveSubscriptionStore.class, true);
+    }
+
+    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException;
+
+    protected boolean requiresRootFolderID() {
+        return true;
+    }
+
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        /*
+         * check module permissions
+         */
+        if (false == Services.getService(CapabilityService.class).getCapabilities(session).contains(DriveService.CAPABILITY_DRIVE)) {
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("drive");
+        }
+        /*
+         * Create drive session
+         */
+        String rootFolderID = requestData.getParameter("root");
+        if (requiresRootFolderID() && Strings.isEmpty(rootFolderID)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
+        }
+        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID);
+        /*
+         * extract device name information if present
+         */
+        String device = requestData.getParameter("device");
+        if (false == Strings.isEmpty(device)) {
+            driveSession.setDeviceName(device);
+        }
+        /*
+         * extract diagnostics parameter if present
+         */
+        String diagnostics = requestData.getParameter("diagnostics");
+        if (false == Strings.isEmpty(diagnostics)) {
+            driveSession.setDiagnostics(Boolean.valueOf(diagnostics));
+        }
+        /*
+         * extract columns parameter to fields if present
+         */
+        String columnsValue = requestData.getParameter("columns");
+        if (false == Strings.isEmpty(columnsValue)) {
+            String[] splitted = Strings.splitByComma(columnsValue);
+            int[] columnIDs = new int[splitted.length];
+            for (int i = 0; i < splitted.length; i++) {
+                try {
+                    columnIDs[i] = Integer.parseInt(splitted[i]);
+                } catch (NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("columns");
+                }
+            }
+            DriveFileField[] fields = DriveFieldMapper.getInstance().getFields(columnIDs);
+            driveSession.setFields(Arrays.asList(DriveFieldMapper.getInstance().getFields(columnIDs)));
+        }
+        /*
+         * perform
+         */
+        return doPerform(requestData, driveSession);
+    }
+
+    /**
+     * Enables an unlimited body size by setting the maximum body size in the underlying {@link CountingHttpServletRequest} to
+     * <code>-1</code>.
+     *
+     * @param requestData The AJAX request data
+     */
+    protected void enableUnlimitedBodySize(AJAXRequestData requestData) {
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        if (null != servletRequest && CountingHttpServletRequest.class.isInstance(servletRequest)) {
+            ((CountingHttpServletRequest)servletRequest).setMax(-1);
+        }
+    }
+
+}

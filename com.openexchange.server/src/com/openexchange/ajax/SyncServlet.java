@@ -116,7 +116,7 @@ public class SyncServlet extends PermissionServlet {
 
 	@Override
 	protected boolean hasModulePermission(final ServerSession session) {
-		return session.getUserConfiguration().hasSyncML();
+		return session.getUserPermissionBits().hasSyncML();
 	}
 
 	@Override

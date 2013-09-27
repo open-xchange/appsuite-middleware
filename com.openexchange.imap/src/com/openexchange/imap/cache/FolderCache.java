@@ -60,6 +60,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.cache.util.FolderMap;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.cache.SessionMailCache;
@@ -76,8 +77,6 @@ import com.sun.mail.imap.IMAPStore;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderCache {
-
-    private static final boolean ENABLED = true;
 
     private static final int MAX_CAPACITY_DEFAULT_ACCOUNT = 128;
 
@@ -98,7 +97,7 @@ public final class FolderCache {
      * @return The cached IMAP folder or <code>null</code>
      */
     public static MailFolder optCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) {
-        if (!ENABLED) {
+        if (!IMAPProperties.getInstance().allowFolderCaches()) {
             return null;
         }
         final Session session = folderStorage.getSession();
@@ -142,7 +141,7 @@ public final class FolderCache {
      * @throws OXException If loading the folder fails
      */
     public static void updateCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws OXException {
-        if (!ENABLED) {
+        if (!IMAPProperties.getInstance().allowFolderCaches()) {
             return;
         }
         final Session session = folderStorage.getSession();
@@ -184,7 +183,7 @@ public final class FolderCache {
      * @throws OXException If loading the folder fails
      */
     public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws OXException {
-        if (!ENABLED) {
+        if (!IMAPProperties.getInstance().allowFolderCaches()) {
             return loadFolder(fullName, folderStorage, imapFolder);
         }
         final Session session = folderStorage.getSession();

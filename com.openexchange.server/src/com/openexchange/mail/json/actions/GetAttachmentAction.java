@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -145,9 +144,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 }
             }
             try {
+                // Try to read first byte and push back immediately
                 final PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
-                final int check = in.read();
-                in.unread(check);
+                in.unread(in.read());
                 return in;
             } catch (final com.sun.mail.util.FolderClosedIOException e) {
                 // Need to reconnect
@@ -357,7 +356,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             fileData.put("mailFolder", folderPath);
             fileData.put("mailUID", uid);
             try {
-                if (!session.getUserConfiguration().hasInfostore()) {
+                if (!session.getUserPermissionBits().hasInfostore()) {
                     throw MailExceptionCode.NO_MAIL_ACCESS.create();
                 }
                 final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
@@ -398,27 +397,28 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 performRollback = true;
                 fileAccess.saveDocument(file, mailPart.getInputStream(), System.currentTimeMillis(), fields);
                 fileAccess.commit();
-                fileData.put("id", file.getId());
-                fileData.put("folder_id", file.getFolderId());
-                fileData.put("filename", file.getFileName());
-            } catch (final Exception e) {
-                if (performRollback) {
-                    fileAccess.rollback();
-                }
-                throw e;
+                performRollback = false;
+                /*
+                 * JSON response object
+                 */
+                final JSONObject jFileData = new JSONObject(8);
+                jFileData.put("mailFolder", folderPath);
+                jFileData.put("mailUID", uid);
+                jFileData.put("id", file.getId());
+                jFileData.put("folder_id", file.getFolderId());
+                jFileData.put("filename", file.getFileName());
+                return new AJAXRequestResult(jFileData, "json");
             } finally {
                 if (fileAccess != null) {
+                    if (performRollback) {
+                        fileAccess.rollback();
+                    }
                     fileAccess.finish();
                 }
             }
-            return new AJAXRequestResult(fileData, "json");
-        } catch (final OXException e) {
-            throw e;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

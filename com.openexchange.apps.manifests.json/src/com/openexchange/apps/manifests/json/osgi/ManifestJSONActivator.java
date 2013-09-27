@@ -54,7 +54,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
+import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
@@ -62,10 +64,13 @@ import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.passwordchange.PasswordChangeService;
 
 /**
  * {@link ManifestJSONActivator}
@@ -74,6 +79,8 @@ import com.openexchange.osgi.NearRegistryServiceTracker;
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
 
+    private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
+
     /**
      * Initializes a new {@link ManifestJSONActivator}.
      */
@@ -81,52 +88,71 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         super();
     }
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class};
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class, ConfigViewFactory.class};
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
 
-	    UIVersion.UIVERSION = context.getBundle().getVersion().toString();
+        UIVersion.UIVERSION = context.getBundle().getVersion().toString();
 
-	    final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(context, ServerConfigMatcherService.class);
-	    rememberTracker(matcherTracker);
-	    final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(context, ComputedServerConfigValueService.class);
-	    rememberTracker(computedValueTracker);
+        // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
+        rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
 
-		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
+        final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(
+            context,
+            ServerConfigMatcherService.class);
+        rememberTracker(matcherTracker);
 
-			@Override
-			public List<ServerConfigMatcherService> getMatchers() {
-				return Collections.unmodifiableList(matcherTracker.getServiceList());
-			}
+        final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(
+            context,
+            ComputedServerConfigValueService.class);
+        rememberTracker(computedValueTracker);
 
-			@Override
-			public List<ComputedServerConfigValueService> getComputed() {
-				return Collections.unmodifiableList(computedValueTracker.getServiceList());
-			}
-		}), "apps/manifests");
+        registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
-		openTrackers();
-	}
+            @Override
+            public List<ServerConfigMatcherService> getMatchers() {
+                return Collections.unmodifiableList(matcherTracker.getServiceList());
+            }
+
+            @Override
+            public List<ComputedServerConfigValueService> getComputed() {
+                return Collections.unmodifiableList(computedValueTracker.getServiceList());
+            }
+        }), "apps/manifests");
+
+        openTrackers();
+    }
 
     private JSONArray readManifests() {
-        String property;
+        String[] paths;
         {
             final ConfigurationService conf = getService(ConfigurationService.class);
-            property = conf.getProperty("com.openexchange.apps.manifestPath");
+            String property = conf.getProperty("com.openexchange.apps.manifestPath");
             if (null == property) {
                 property = conf.getProperty("com.openexchange.apps.path");
                 if (null == property) {
                     return new JSONArray(0);
                 }
-                property += "/manifests";
+                paths = property.split(":");
+                for (int i = 0; i < paths.length; i++) {
+                    paths[i] += "/manifests";
+                }
+            } else {
+                paths = property.split(":");
             }
         }
 
-        final String[] paths = property.split(":");
         final JSONArray array = new JSONArray(paths.length << 1);
         for (final String path : paths) {
             final File file = new File(path);
@@ -150,7 +176,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
                 array.put(fileContent.get(i));
             }
         } catch (Exception e) {
-            LogFactory.getLog(ManifestJSONActivator.class).error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } finally {
             Streams.close(r);
         }

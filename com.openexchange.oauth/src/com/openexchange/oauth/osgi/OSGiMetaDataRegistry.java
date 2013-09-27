@@ -57,9 +57,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -74,8 +71,8 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
 
     private static volatile OSGiMetaDataRegistry instance;
 
-    public static void initialize(final ConfigViewFactory configViews) {
-        instance = new OSGiMetaDataRegistry(configViews);
+    public static void initialize() {
+        instance = new OSGiMetaDataRegistry();
     }
 
     /**
@@ -100,7 +97,6 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
             }
         }
     }
-    final ConfigViewFactory configViews;
 
     final ConcurrentMap<String, OAuthServiceMetaData> map;
 
@@ -109,19 +105,16 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
     /**
      * Initializes a new {@link OSGiMetaDataRegistry}.
      */
-    public OSGiMetaDataRegistry(final ConfigViewFactory configViews) {
+    public OSGiMetaDataRegistry() {
         super();
         map = new ConcurrentHashMap<String, OAuthServiceMetaData>();
-        this.configViews = configViews;
     }
 
     @Override
     public List<OAuthServiceMetaData> getAllServices(final int user, final int contextId) throws OXException {
         final java.util.List<OAuthServiceMetaData> retval = new ArrayList<OAuthServiceMetaData>(map.values().size());
-        final ConfigView view = configViews.getView(user, contextId);
         for (final OAuthServiceMetaData metadata : map.values()) {
-            final ComposedConfigProperty<Boolean> property = view.property(metadata.getId(), boolean.class);
-            if (!property.isDefined() || property.get().booleanValue()) {
+            if (metadata.isEnabled(user, contextId)) {
                 retval.add(metadata);
             }
         }
@@ -134,12 +127,12 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         if (null == service) {
             throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
         }
-        final ConfigView view = configViews.getView(user, contextId);
-        final ComposedConfigProperty<Boolean> property = view.property(id, boolean.class);
-        if (!property.isDefined() || property.get().booleanValue()) {
-            return service;
+
+        if (!service.isEnabled(user, contextId)) {
+            throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
         }
-        throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
+
+        return service;
     }
 
     @Override
@@ -147,12 +140,13 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         if (id == null) {
             return false;
         }
-        final ConfigView view = configViews.getView(user, contextId);
-        final ComposedConfigProperty<Boolean> property = view.property(id, boolean.class);
-        if (!property.isDefined() || property.get().booleanValue()) {
-            return map.containsKey(id);
+
+        final OAuthServiceMetaData service = map.get(id);
+        if (null == service) {
+            return false;
         }
-        return false;
+
+        return service.isEnabled(user, contextId);
     }
 
     /**

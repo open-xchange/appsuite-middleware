@@ -52,6 +52,7 @@ package com.openexchange.file.storage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +114,8 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
     protected Date lastModifiedDate;
 
     protected Map<String, Object> properties;
+
+    private Map<String, Object> meta = new HashMap<String, Object>();
 
     /**
      * Initializes a new {@link DefaultFileStorageFolder}.
@@ -535,5 +538,14 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
-
+    
+    @Override
+    public Map<String, Object> getMeta() {
+        return this.meta;
+    }
+    
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
+    }
+    
 }

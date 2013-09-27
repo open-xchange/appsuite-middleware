@@ -64,6 +64,7 @@ import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -125,7 +126,7 @@ public final class UpdateAction extends AbstractFolderAction {
         /*
          * Parse folder object
          */
-        final JSONObject folderObject = (JSONObject) request.getData();
+        final JSONObject folderObject = (JSONObject) request.requireData();
         final Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
         folder.setID(id);
         try {
@@ -149,12 +150,12 @@ public final class UpdateAction extends AbstractFolderAction {
          * Update
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions")).put("altNames", request.getParameter("altNames")).put(PARAM_IGNORE_TRANSLATION, request.getParameter(PARAM_IGNORE_TRANSLATION)).put("autorename", request.getParameter("autorename")));
+        final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions")).put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")));
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */
         final String newId = folder.getID();
-        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC());
+        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(response.getWarnings());
     }
 
 }

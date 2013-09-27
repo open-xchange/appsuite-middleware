@@ -53,7 +53,7 @@ import java.io.Serializable;
 
 /**
  * {@link JSlobId} - The JSlob identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSlobId implements Serializable {
@@ -68,7 +68,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Initializes a new {@link JSlobId}.
-     * 
+     *
      * @param serviceId The JSlob service identifier
      * @param id The JSlob identifier
      * @param user The user identifier
@@ -84,9 +84,9 @@ public final class JSlobId implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + context;
+        result = prime * result + user;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
-        result = prime * result + user;
         hashCode = result;
     }
 
@@ -107,6 +107,9 @@ public final class JSlobId implements Serializable {
         if (context != other.context) {
             return false;
         }
+        if (user != other.user) {
+            return false;
+        }
         if (id == null) {
             if (other.id != null) {
                 return false;
@@ -121,15 +124,12 @@ public final class JSlobId implements Serializable {
         } else if (!serviceId.equals(other.serviceId)) {
             return false;
         }
-        if (user != other.user) {
-            return false;
-        }
         return true;
     }
 
     /**
      * Gets the user identifier.
-     * 
+     *
      * @return The user identifier
      */
     public int getUser() {
@@ -138,7 +138,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Gets the context identifier.
-     * 
+     *
      * @return The context identifier
      */
     public int getContext() {
@@ -147,7 +147,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Gets the JSlob service identifier.
-     * 
+     *
      * @return The JSlob service identifier
      */
     public String getServiceId() {
@@ -156,7 +156,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Gets the JSlob identifier.
-     * 
+     *
      * @return The JSlob identifier
      */
     public String getId() {

@@ -179,6 +179,21 @@ public class CrawlerDescription {
         this.quirkyCookieQuotes = quirkyCookieQuotes;
     }
 
-
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(256);
+        builder.append("CrawlerDescription [");
+        if (displayName != null) {
+            builder.append("displayName=").append(displayName).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        if (workflowString != null) {
+            builder.append("workflowString=").append(workflowString).append(", ");
+        }
+        builder.append("priority=").append(priority).append(", crawlerApiVersion=").append(crawlerApiVersion).append(", module=").append(module).append(", javascriptEnabled=").append(javascriptEnabled).append(", mobileUserAgentEnabled=").append(mobileUserAgentEnabled).append(", quirkyCookieQuotes=").append(quirkyCookieQuotes).append("]");
+        return builder.toString();
+    }
 
 }

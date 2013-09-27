@@ -82,7 +82,7 @@ public abstract class SchemaStore {
         return SINGLETON;
     }
 
-    public abstract SchemaUpdateState getSchema(int poolId, String schemaName) throws OXException;
+    protected abstract SchemaUpdateState getSchema(int poolId, String schemaName, Connection con) throws OXException;
 
     /**
      * Marks given schema as locked due to a start of an update process.
@@ -109,7 +109,28 @@ public abstract class SchemaStore {
     }
 
     public final SchemaUpdateState getSchema(final int contextId) throws OXException {
-        return getSchema(Database.resolvePool(contextId, true), Database.getSchema(contextId));
+        // This method is used when doing a normal login. In this case fetching the Connection runs through replication monitor and
+        // initializes the transaction counter from the master. This allows redirecting subsequent reads after normal login to the master
+        // if the slave is not actual. See bugs 19817 and 27460.
+        Connection con = Database.get(contextId, true);
+        try {
+            return getSchema(Database.resolvePool(contextId, true), Database.getSchema(contextId), con);
+        } finally {
+            // In fact the transaction counter is initialized when returning the connection to the pool ;-)
+            Database.backAfterReading(contextId, con);
+        }
+    }
+
+    public final SchemaUpdateState getSchema(int poolId, String schemaName) throws OXException {
+        // This method is used when creating a context through the administration daemon. In this case we did not write yet the information
+        // into the ConfigDB in which database and schema the context is located. Therefore we are not able to initialize the transaction
+        // counter for the replication monitor.
+        Connection con = Database.get(poolId, schemaName);
+        try {
+            return getSchema(poolId, schemaName, con);
+        } finally {
+            Database.back(poolId, con);
+        }
     }
 
     public abstract ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws OXException;

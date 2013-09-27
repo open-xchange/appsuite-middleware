@@ -42,17 +42,16 @@
         <maxWarmingSearchers>5</maxWarmingSearchers>
     </query>
 
-    <requestDispatcher handleSelect="true">
-        <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048000" />
-        <httpCaching never304="true" />
-    </requestDispatcher>
-
     <!-- For debugging purposes only -->
-    <requestHandler name="standard" class="solr.SearchHandler" default="false">
-        <lst name="defaults">
-            <str name="echoParams">explicit</str>
-        </lst>
-    </requestHandler>
+    <!-- <requestDispatcher handleSelect="true"> -->
+    <!-- <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048000" /> -->
+    <!-- <httpCaching never304="true" /> -->
+    <!-- </requestDispatcher> -->
+    <!-- <requestHandler name="standard" class="solr.SearchHandler" default="false"> -->
+    <!-- <lst name="defaults"> -->
+    <!-- <str name="echoParams">explicit</str> -->
+    <!-- </lst> -->
+    <!-- </requestHandler> -->
 
     <requestHandler name="simpleSearch" class="solr.SearchHandler">
         <lst name="invariants">
@@ -74,7 +73,7 @@
 
     <requestHandler name="allSearch" class="solr.SearchHandler">
         <lst name="defaults">
-            <str name="fl">*</str> <!-- Envelope Felder -->
+            <str name="fl">*</str>
             <str name="df">folder</str>
             <str name="q.op">OR</str>
         </lst>
@@ -83,14 +82,14 @@
             <str>query</str>
         </arr>
     </requestHandler>
-    
+
     <requestHandler name="getSearch" class="solr.SearchHandler">
         <arr name="components">
             <str>searchFieldSupplier</str>
             <str>query</str>
         </arr>
     </requestHandler>
-    
+
     <searchComponent name="searchFieldSupplier" class="de.kippdata.cria.solrext.searchcomponents.SearchFieldSupplier">
         <str name="sf">uuid</str>
     </searchComponent>
@@ -105,30 +104,6 @@
             <str>query</str>
         </arr>
     </requestHandler>
-    
-    <requestHandler name="personsAndTopics" class="solr.SearchHandler">
-        <lst name="invariants">
-            <str name="defType">edismax</str>
-            <str name="echoParams">explicit</str>
-            <float name="tie">0.01</float>
-            <str name="qf">
-                file_name^100 content_gen^50 content_en^50 content_de^50 content_fr^50 content_it^50
-            </str>
-            <str name="fq">module:19</str>
-            <str name="hl">true</str>
-            <str name="hl.snippets">1</str>
-            <str name="hl.usePhraseHighlighter">true</str>
-            <str name="hl.requireFieldMatch">true</str>
-        </lst>
-        <lst name="defaults">
-            <str name="fl">uuid file_name content_gen content_en content_de content_fr content_it</str>
-        </lst>
-
-        <arr name="components">
-            <str>query</str>
-            <str>highlight</str>
-        </arr>
-    </requestHandler>
 
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler">
         <lst name="defaults">
@@ -136,8 +111,7 @@
         </lst>
     </requestHandler>
     <updateRequestProcessorChain name="langid">
-        <processor
-            class="org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory">
+        <processor class="org.apache.solr.update.processor.TikaLanguageIdentifierUpdateProcessorFactory">
             <bool name="langid">true</bool>
             <str name="langid.fl">content</str>
             <str name="langid.whitelist">de,en,fr,it</str>
@@ -149,6 +123,6 @@
         <processor class="solr.LogUpdateProcessorFactory" />
         <processor class="solr.RunUpdateProcessorFactory" />
     </updateRequestProcessorChain>
-    
+
     <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
 </config>

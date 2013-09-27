@@ -52,6 +52,7 @@ package com.openexchange.http.deferrer.impl;
 import static com.openexchange.ajax.AJAXServlet.encodeUrl;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.java.Strings;
 
 /**
  * {@link DefaultDeferringURLService}
@@ -70,11 +71,12 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
         if (url == null) {
             return null;
         }
-        final String deferrerURL = getDeferrerURL();
-        if (deferrerURL == null) {
+        String deferrerURL = getDeferrerURL();
+        if (Strings.isEmpty(deferrerURL)) {
             return url;
         }
-        if (url.startsWith(deferrerURL)) {
+        deferrerURL = deferrerURL.trim();
+        if (seemsAlreadyDeferred(url, deferrerURL)) {
             // Already deferred
             return url;
         }
@@ -82,16 +84,28 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
         return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + encodeUrl(url, false, false);
     }
 
-    public abstract String getDeferrerURL();
+    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL) {
+        final String str = "://";
+        final int pos1 = url.indexOf(str);
+        final int pos2 = deferrerURL.indexOf(str);
+        if (pos1 > 0 && pos2 > 0) {
+            return url.substring(pos1).startsWith(deferrerURL.substring(pos2));
+        }
+        return url.startsWith(deferrerURL);
+    }
+
+    /**
+     * Gets the deferrer URL; e.g. "https://my.maindomain.org"
+     *
+     * @return The deferrer URL
+     */
+    protected abstract String getDeferrerURL();
 
 
     @Override
     public String getBasicDeferrerURL() {
     	final String deferrerURL = getDeferrerURL();
-        if (deferrerURL == null) {
-            return PREFIX.get().getPrefix() + "defer";
-        }
-        return deferrerURL + PREFIX.get().getPrefix() + "defer";
+        return deferrerURL == null ? PREFIX.get().getPrefix() + "defer" : deferrerURL + PREFIX.get().getPrefix() + "defer";
     }
 
 }

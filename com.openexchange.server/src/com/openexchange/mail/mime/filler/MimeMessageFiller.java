@@ -54,12 +54,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -109,6 +109,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -140,10 +141,14 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.utils.MsisdnUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
@@ -466,12 +471,20 @@ public class MimeMessageFiller {
                     }
                 }
             }
-            final List<InternetAddress> aliases;
+            final Set<InternetAddress> aliases;
             final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             final User user = userService.getUser(session.getUserId(), ctx);
-            aliases = new ArrayList<InternetAddress>();
+            aliases = new LinkedHashSet<InternetAddress>();
             for (final String alias : user.getAliases()) {
                 aliases.add(new QuotedInternetAddress(alias));
+            }
+            if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                MsisdnUtility.addMsisdnAddress(aliases, session);
+                final String address = from.getAddress();
+                final int pos = address.indexOf('/');
+                if (pos > 0) {
+                    from.setAddress(address.substring(0, pos));
+                }
             }
             /*
              * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
@@ -603,13 +616,15 @@ public class MimeMessageFiller {
          * Reply-To
          */
         final String hdrReplyTo = mail.getFirstHeader("Reply-To");
-        if (null != hdrReplyTo) {
+        if (!isEmpty(hdrReplyTo) && !toLowerCase(hdrReplyTo).startsWith("null")) {
             InternetAddress[] replyTo = null;
+
             try {
                 replyTo = QuotedInternetAddress.parse(hdrReplyTo, true);
             } catch (final AddressException e) {
                 LOG.error("Specified Reply-To address cannot be parsed", e);
             }
+
             if (null != replyTo) {
                 mimeMessage.setReplyTo(replyTo);
             } else if (mail.containsFrom()) {
@@ -617,17 +632,22 @@ public class MimeMessageFiller {
             }
         } else if (isEmpty(usm.getReplyToAddr())) {
             InternetAddress[] replyTo = null;
+
             final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null != mass) {
-                final String sReplyTo = mass.getMailAccount(mail.getAccountId(), session.getUserId(), session.getContextId()).getReplyTo();
-                if (null != sReplyTo) {
-                    try {
-                        replyTo = QuotedInternetAddress.parse(sReplyTo, true);
-                    } catch (final AddressException e) {
-                        LOG.error("Default Reply-To address cannot be parsed", e);
+                final MailAccount mailAccount = mass.getMailAccount(mail.getAccountId(), session.getUserId(), session.getContextId());
+                if (!UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                    final String sReplyTo = mailAccount.getReplyTo();
+                    if (!isEmpty(sReplyTo) && !toLowerCase(sReplyTo).startsWith("null")) {
+                        try {
+                            replyTo = QuotedInternetAddress.parse(sReplyTo, true);
+                        } catch (final AddressException e) {
+                            LOG.error("Default Reply-To address cannot be parsed", e);
+                        }
                     }
                 }
             }
+
             if (null != replyTo) {
                 mimeMessage.setReplyTo(replyTo);
             } else if (mail.containsFrom()) {
@@ -926,7 +946,7 @@ public class MimeMessageFiller {
                     final byte[] bbuf = new byte[BUF_SIZE];
                     for (int i = 0; i < size; i++) {
                         final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
-                        if (enclosedMailPart.getContentType().startsWith("message/rfc822")) {
+                        if (enclosedMailPart.getContentType().startsWith("message/rfc822") || (enclosedMailPart.getContentType().getNameParameter() != null && enclosedMailPart.getContentType().getNameParameter().endsWith(".eml"))) {
                             addNestedMessage(enclosedMailPart, primaryMultipart, sb, out, bbuf);
                         } else {
                             addMessageBodyPart(primaryMultipart, enclosedMailPart, false);
@@ -985,12 +1005,17 @@ public class MimeMessageFiller {
              * Append VCard
              */
             AppendVCard: if (mail.isAppendVCard()) {
-                final String fileName =
-                    MimeUtility.encodeText(
-                        new com.openexchange.java.StringAllocator(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll("\\s+", "")).append(
-                            ".vcf").toString(),
-                        charset,
-                        "Q");
+                final String fileName;
+                {
+                    final String displayName;
+                    if (session instanceof ServerSession) {
+                        displayName = ((ServerSession) session).getUser().getDisplayName();
+                    } else {
+                        displayName = UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName();
+                    }
+                    final String saneDisplayName = Strings.replaceWhitespacesWith(displayName, "");
+                    fileName = MimeUtility.encodeText(new StringAllocator(saneDisplayName).append(".vcf").toString(), charset, "Q");
+                }
                 for (int i = 0; i < size; i++) {
                     final MailPart part = mail.getEnclosedMailPart(i);
                     if (fileName.equalsIgnoreCase(part.getFileName())) {
@@ -1014,7 +1039,7 @@ public class MimeMessageFiller {
                      */
                     final ContentType ct = new ContentType(MimeTypes.MIME_TEXT_VCARD);
                     ct.setCharsetParameter(charset);
-                    vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, ct)));
+                    vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard.getBytes(Charsets.forName(charset)), ct.toString())));
                     if (fileName != null && !ct.containsNameParameter()) {
                         ct.setNameParameter(fileName);
                     }
@@ -1078,7 +1103,7 @@ public class MimeMessageFiller {
                              *
                              * Well-formed HTML
                              */
-                            if (HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
+                            if (HTMLDetector.containsHTMLTags(content, true)) {
                                 isHtml = true;
                                 if (BODY_START.matcher(content).find()) {
                                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
@@ -1088,7 +1113,7 @@ public class MimeMessageFiller {
                                     sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
                                     sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
                                     sb.append("<head>\n");
-                                    sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>\n");
+                                    sb.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=").append(charset).append("\" />\n");
                                     sb.append("</head>\n");
                                     sb.append("<body>\n");
                                     sb.append(content);
@@ -1185,7 +1210,7 @@ public class MimeMessageFiller {
                 final VersitObject versitObj = converter.convertContact(contact, "3.0");
                 final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream();
                 final VersitDefinition def = Versit.getDefinition(MimeTypes.MIME_TEXT_VCARD);
-                final VersitDefinition.Writer w = def.getWriter(os, MailProperties.getInstance().getDefaultMimeCharset());
+                final VersitDefinition.Writer w = def.getWriter(os, charset);
                 def.write(w, versitObj);
                 w.flush();
                 os.flush();
@@ -2036,7 +2061,11 @@ public class MimeMessageFiller {
             super();
             this.data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
             final DataProperties dataProperties = data.getDataProperties();
-            contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+            final String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+            if (null != contentType && toLowerCase(contentType).indexOf("image/") < 0) {
+                throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
+            }
+            this.contentType = contentType;
             fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
         }
 
@@ -2081,7 +2110,7 @@ public class MimeMessageFiller {
     }
 
     /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
+    static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }

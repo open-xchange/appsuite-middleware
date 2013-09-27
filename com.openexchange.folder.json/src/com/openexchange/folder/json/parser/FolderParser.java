@@ -49,9 +49,11 @@
 
 package com.openexchange.folder.json.parser;
 
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.ContentType;
@@ -152,6 +154,10 @@ public final class FolderParser {
             if (folderJsonObject.hasAndNotNull(FolderField.TOTAL.getName())) {
                 int total = folderJsonObject.getInt(FolderField.TOTAL.getName());
                 folder.setTotal(total);
+            }
+            
+            if (folderJsonObject.hasAndNotNull(FolderField.META.getName())) {
+                folder.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(folderJsonObject.getJSONObject(FolderField.META.getName())));
             }
 
             return folder;

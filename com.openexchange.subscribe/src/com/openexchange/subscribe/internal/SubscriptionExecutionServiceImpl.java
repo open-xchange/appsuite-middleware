@@ -145,6 +145,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             if (!knowsSource) {
                 throw INACTIVE_SOURCE.create();
             }
+            subscribeService.touch(session.getContext(), subscriptionId);
             final Collection<?> data = subscribeService.getContent(subscription);
             storeData(data, subscription);
             return data.size();
@@ -219,6 +220,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             if (!knowsSource) {
                 throw INACTIVE_SOURCE.create();
             }
+            subscribeService.touch(session.getContext(), subscriptionId);
             final Collection<?> data = subscribeService.getContent(subscription);
             storeData(data, subscription);
             return data.size();
@@ -243,6 +245,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                             throw INACTIVE_SOURCE.create();
                         }
                         final SubscribeService subscribeService = source.getSubscribeService();
+                        subscribeService.touch(session.getContext(), subscriptionId);
                         final Collection<?> data = subscribeService.getContent(subscription);
                         storeData(data, subscription);
                         sum += data.size();

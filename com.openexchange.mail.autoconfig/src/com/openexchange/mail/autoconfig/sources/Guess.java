@@ -65,11 +65,11 @@ import com.openexchange.tools.net.URIDefaults;
  */
 public class Guess extends AbstractConfigSource {
 
-    private static final List<String> IMAP_PREFIXES = Arrays.asList("", "imap", "mail");
+    private static final List<String> IMAP_PREFIXES = Arrays.asList("", "imap.", "mail.");
 
-    private static final List<String> SMTP_PREFIXES = Arrays.asList("", "smtp", "mail");
+    private static final List<String> SMTP_PREFIXES = Arrays.asList("", "smtp.", "mail.");
 
-    private static final List<String> POP3_PREFIXES = Arrays.asList("", "pop3", "mail");
+    private static final List<String> POP3_PREFIXES = Arrays.asList("", "pop3.", "mail.");
 
     static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Guess.class);
 

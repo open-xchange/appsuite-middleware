@@ -51,6 +51,7 @@ package com.openexchange.admin.user.copy.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -69,10 +70,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
+
 import com.openexchange.admin.rmi.AbstractRMITest;
+import com.openexchange.admin.rmi.AbstractTest;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -137,7 +141,7 @@ import com.openexchange.subscribe.SubscriptionSource;
 
 /**
  * {@link RoundtripTest}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RoundtripTest extends AbstractRMITest {
@@ -170,6 +174,7 @@ public class RoundtripTest extends AbstractRMITest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        superAdminCredentials = AbstractTest.DummyMasterCredentials();
         ci = getContextInterface();
         Context[] contexts = ci.list("UserMove*", superAdminCredentials);
         for (Context ctx : contexts) {
@@ -180,9 +185,9 @@ public class RoundtripTest extends AbstractRMITest {
                 System.out.println("Error during context deletion.");
             }
         }
-        
+
         admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@netline.de");
-        
+
         int ctxId = Integer.MAX_VALUE;
         boolean created = false;
         while (!created) {
@@ -193,7 +198,7 @@ public class RoundtripTest extends AbstractRMITest {
                 --ctxId;
             }
         }
-        
+
         created = false;
         while (!created) {
             try {
@@ -203,7 +208,7 @@ public class RoundtripTest extends AbstractRMITest {
                 --ctxId;
             }
         }
-            
+
         ui = getUserInterface();
         final User test = newUser("user", "secret", "Test User", "Test", "User", "test.user@netline.de");
         test.setImapServer("devel-mail.netline.de");
@@ -236,9 +241,9 @@ public class RoundtripTest extends AbstractRMITest {
             TimeZone.getTimeZone("Europe/Berlin"));
         com.openexchange.ajax.task.actions.InsertResponse newTaskResponse = userClient.execute(newTaskRequest);
         newTaskResponse.fillTask(newTask);
-        
-        
-        
+
+
+
         FolderObject taskFolder = new FolderObject("Task folder", 90, FolderObject.TASK, FolderObject.PRIVATE, userClient.getValues().getUserId());
         taskFolder.setParentFolderID(userClient.getValues().getPrivateTaskFolder());
         OCLPermission taskPerm = new OCLPermission();
@@ -278,7 +283,7 @@ public class RoundtripTest extends AbstractRMITest {
             TimeZone.getTimeZone("Europe/Berlin"));
         AppointmentInsertResponse appointmentResponse = userClient.execute(newAppointmentRequest);
         appointmentResponse.fillObject(newAppointment);
-        
+
         FolderObject appointmentFolder = com.openexchange.ajax.folder.Create.createPrivateFolder(UUID.randomUUID().toString(), FolderObject.CALENDAR, userClient.getValues().getUserId());
         appointmentFolder.setParentFolderID(userClient.getValues().getPrivateAppointmentFolder());
         OCLPermission appointmentPerm = new OCLPermission();
@@ -290,7 +295,7 @@ public class RoundtripTest extends AbstractRMITest {
         InsertRequest insertAppointmentFolderRequest = new InsertRequest(EnumAPI.OX_OLD, appointmentFolder);
         InsertResponse insertAppointmentFolderResponse = userClient.execute(insertAppointmentFolderRequest);
         insertAppointmentFolderResponse.fillObject(appointmentFolder);
-        
+
         Appointment newFolderAppointment = new Appointment();
         newFolderAppointment.setTitle("Test folder appointment");
         newFolderAppointment.setCreationDate(new Date());
@@ -325,7 +330,7 @@ public class RoundtripTest extends AbstractRMITest {
         com.openexchange.ajax.contact.action.InsertRequest contactRequest2 = new com.openexchange.ajax.contact.action.InsertRequest(c2);
         com.openexchange.ajax.contact.action.InsertResponse response2 = userClient.execute(contactRequest2);
         response2.fillObject(c2);
-        
+
         FolderObject contactFolder = new FolderObject("Contact folder", 92, FolderObject.CONTACT, FolderObject.PRIVATE, userClient.getValues().getUserId());
         contactFolder.setParentFolderID(userClient.getValues().getPrivateContactFolder());
         OCLPermission contactPerm = new OCLPermission();
@@ -372,7 +377,7 @@ public class RoundtripTest extends AbstractRMITest {
         meta.setFolderId(userClient.getValues().getPrivateInfostoreFolder());
         NewInfostoreRequest request = new NewInfostoreRequest(meta, infostore);
         userClient.execute(request);
-        
+
         DynamicFormDescription form = new DynamicFormDescription();
         form.add(FormElement.input("url", "URL", true, null));
         Subscription sub = new Subscription();
@@ -401,11 +406,20 @@ public class RoundtripTest extends AbstractRMITest {
 
     @Override
     public void tearDown() throws Exception {
-        ui.delete(srcCtx, srcUser, getCredentials());
-        ci.delete(srcCtx, superAdminCredentials);
-        ci.delete(dstCtx, superAdminCredentials);
+        try {
+            ui.delete(srcCtx, srcUser, getCredentials());
+            ci.delete(srcCtx, superAdminCredentials);
+            ci.delete(dstCtx, superAdminCredentials);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         super.tearDown();
-        System.gc();
+    }
+
+    @Override
+    public String getRMIHostUrl(String classname) {
+    	return AbstractTest.getRMIHostUrl() + classname;
     }
 
     private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
@@ -415,7 +429,7 @@ public class RoundtripTest extends AbstractRMITest {
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {
         final AJAXSession session = new AJAXSession();
         final LoginRequest loginRequest = new LoginRequest(login, password, LoginTools.generateAuthId(), "Usermovetest", "6.20");
-        final LoginResponse loginResponse = Executor.execute(session, loginRequest, "http", "localhost", 0);
+        final LoginResponse loginResponse = Executor.execute(session, loginRequest);
         session.setId(loginResponse.getSessionId());
         return session;
     }
@@ -554,7 +568,7 @@ public class RoundtripTest extends AbstractRMITest {
             fail("Task lists are not equal.");
         }
         compareLists(origTasks, copiedTasks);
-        
+
         final RangeRequest origReminderRequest = new RangeRequest(new Date(Long.MAX_VALUE));
         final RangeRequest copiedReminderRequest = new RangeRequest(new Date(Long.MAX_VALUE));
         final RangeResponse origReminderResponse = origClient.execute(origReminderRequest);
@@ -590,7 +604,7 @@ public class RoundtripTest extends AbstractRMITest {
             fail("Folder lists are not equal.");
         }
         compareFolders(origFolderList, copiedFolderList);
-        
+
         final AllInfostoreRequest origInfostoreRequest = new AllInfostoreRequest(origClient.getValues().getPrivateInfostoreFolder(), new int[] {700,701,702,703,704,705,706,707,708,709,710,711}, 1, Order.ASCENDING);
         final AbstractColumnsResponse origInfostoreResponse = origClient.execute(origInfostoreRequest);
         Iterator<Object[]> origInfostoreIterator = origInfostoreResponse.iterator();
@@ -616,7 +630,7 @@ public class RoundtripTest extends AbstractRMITest {
             assertEquals("Is current version is not equal.", Boolean.valueOf(String.valueOf(origNext[10])), Boolean.valueOf(String.valueOf(copiedNext[10])));
             assertEquals("Number of versions is not equal.", Integer.valueOf(String.valueOf(origNext[11])), Integer.valueOf(String.valueOf(copiedNext[11])));
         }
-        
+
         MailAccountAllRequest origMailAccountRequest = new MailAccountAllRequest(new int[] {1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038});
         MailAccountAllRequest copiedMailAccountRequest = new MailAccountAllRequest(new int[] {1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038});
         MailAccountAllResponse origMailAccountResponse = origClient.execute(origMailAccountRequest);
@@ -629,7 +643,7 @@ public class RoundtripTest extends AbstractRMITest {
         Collections.sort(origMailAccounts, new MailAccountComparator());
         Collections.sort(copiedMailAccounts, new MailAccountComparator());
         compareMailAccounts(origMailAccounts, copiedMailAccounts);
-        
+
         AllSubscriptionsRequest origSubscriptionsRequest = new AllSubscriptionsRequest();
         AllSubscriptionsRequest copiedSubscriptionsRequest = new AllSubscriptionsRequest();
         AllSubscriptionsResponse origSubscriptionsResponse = origClient.execute(origSubscriptionsRequest);
@@ -876,7 +890,7 @@ public class RoundtripTest extends AbstractRMITest {
             assertEquals("Type last is not equal.", f1.getType(), f2.getType());
         }
     }
-    
+
     private void compareReminders(final List<ReminderObject> orig, final List<ReminderObject> copied) {
         for (int i = 0; i < orig.size(); i++) {
             final ReminderObject r1 = orig.get(i);
@@ -888,7 +902,7 @@ public class RoundtripTest extends AbstractRMITest {
             assertEquals("Recurrence position is not equal.", r1.getRecurrencePosition(), r2.getRecurrencePosition());
         }
     }
-    
+
     private void compareAttachments(final List<AttachmentMetadata> orig, final List<AttachmentMetadata> copied) {
         for (int i = 0; i < orig.size(); i++) {
             AttachmentMetadata a1 = orig.get(i);
@@ -902,7 +916,7 @@ public class RoundtripTest extends AbstractRMITest {
             assertEquals("RTF flag is not equal.", a1.getRtfFlag(), a2.getRtfFlag());
         }
     }
-    
+
     private void compareMailAccounts(final List<MailAccountDescription> orig, final List<MailAccountDescription> copied) {
         for (int i = 0; i < orig.size(); i++) {
             MailAccountDescription m1 = orig.get(i);
@@ -940,7 +954,7 @@ public class RoundtripTest extends AbstractRMITest {
             assertEquals("Unified inbox is not equal.", m1.isUnifiedINBOXEnabled(), m2.isUnifiedINBOXEnabled());
         }
     }
-    
+
     private void compareSubscriptions(final JSONArray orig, final JSONArray copied) throws Exception {
         for (int i = 0; i < orig.length(); i++) {
             JSONArray origSub = orig.getJSONArray(i);
@@ -971,31 +985,31 @@ public class RoundtripTest extends AbstractRMITest {
         }
 
     }
-    
+
     private final class ReminderObjectComparator implements Comparator<ReminderObject> {
 
         @Override
         public int compare(final ReminderObject o1, final ReminderObject o2) {
             return o1.getObjectId() - o2.getObjectId();
         }
-        
+
     }
-    
+
     private final class AttachmentComparator implements Comparator<AttachmentMetadata> {
 
         @Override
         public int compare(final AttachmentMetadata o1, final AttachmentMetadata o2) {
             return o1.getId() - o2.getId();
         }
-        
+
     }
-    
+
     private final class MailAccountComparator implements Comparator<MailAccountDescription> {
 
         @Override
         public int compare(final MailAccountDescription o1, final MailAccountDescription o2) {
             return o1.getId() - o2.getId();
         }
-        
+
     }
 }

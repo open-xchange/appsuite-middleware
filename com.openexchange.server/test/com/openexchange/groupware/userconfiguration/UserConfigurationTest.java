@@ -53,7 +53,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.List;
 import junit.framework.Assert;
 import org.junit.Test;
-import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.Permission;
 
 
 /**
@@ -66,43 +66,43 @@ public class UserConfigurationTest {
 
     @Test
     public void testByBits_GetActiveSync_returnPermission() {
-        List<Permission> userPermissionsByBit = UserConfiguration.Permission.byBits(UserConfiguration.ACTIVE_SYNC);
+        List<Permission> userPermissionsByBit = Permission.byBits(UserConfiguration.ACTIVE_SYNC);
         assertNotNull(userPermissionsByBit);
     }
 
     @Test
     public void testByBits_GetActiveSync_returnCorrectSize() {
-        List<Permission> userPermissionsByBit = UserConfiguration.Permission.byBits(UserConfiguration.ACTIVE_SYNC);
+        List<Permission> userPermissionsByBit = Permission.byBits(UserConfiguration.ACTIVE_SYNC);
         Assert.assertEquals(1, userPermissionsByBit.size());
     }
 
     @Test
     public void testByBits_NoValidBit_returnEmptyPermission() {
-        List<Permission> userPermissionsByBit = UserConfiguration.Permission.byBits(0);
+        List<Permission> userPermissionsByBit = Permission.byBits(0);
         assertNotNull(userPermissionsByBit);
     }
 
     @Test
     public void testByBits_NoValidBit_returnEmptyList() {
-        List<Permission> userPermissionsByBit = UserConfiguration.Permission.byBits(0);
+        List<Permission> userPermissionsByBit = Permission.byBits(0);
         Assert.assertEquals(0, userPermissionsByBit.size());
     }
 
     @Test
     public void testByBits_GetWithThreePermissions_returnCorrectSize() {
-        List<Permission> userPermissionsByBit = UserConfiguration.Permission.byBits(UserConfiguration.ACTIVE_SYNC + UserConfiguration.CALENDAR + UserConfiguration.CALDAV);
+        List<Permission> userPermissionsByBit = Permission.byBits(UserConfiguration.ACTIVE_SYNC + UserConfiguration.CALENDAR + UserConfiguration.CALDAV);
         Assert.assertEquals(3, userPermissionsByBit.size());
     }
 
     @Test
     public void testByBits_GetWithManyPermissions_returnList() {
-        List<Permission> userPermissionsByBit = UserConfiguration.Permission.byBits(2097157);
+        List<Permission> userPermissionsByBit = Permission.byBits(2097157);
         Assert.assertEquals(3, userPermissionsByBit.size());
     }
 
-    @Test
-    public void testByBits_GetWithManyPermissionsWithServiceChecker_returnList() {
-        List<Permission> userPermissionsByBit = UserConfiguration.Permission.byBits(2097157, false);
-        Assert.assertEquals(3, userPermissionsByBit.size());
-    }
+//    @Test
+//    public void testByBits_GetWithManyPermissionsWithServiceChecker_returnList() {
+//        List<Permission> userPermissionsByBit = Permission.byBits(2097157, false);
+//        Assert.assertEquals(3, userPermissionsByBit.size());
+//    }
 }

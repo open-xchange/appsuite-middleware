@@ -50,32 +50,15 @@
 
 package com.openexchange.hazelcast.osgi;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.ClusterListener;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.hazelcast.init.HazelcastInitializer;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceContainer;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
@@ -95,264 +78,100 @@ import com.openexchange.timer.TimerService;
 public class HazelcastActivator extends HousekeepingActivator {
 
     /**
+     * The {@code AtomicReference} for {@code HazelcastInstance}.
+     */
+    public static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = new AtomicReference<HazelcastInstance>();
+
+    /**
      * The logger for HazelcastActivator.
      */
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
-
-    /**
-     * The {@code AtomicReference} for {@code ClusterDiscoveryService}.
-     */
-    protected final AtomicReference<ClusterDiscoveryService> clusterDiscoveryServiceReference;
-
-    /**
-     * The Hazelcast initializer.
-     */
-    protected final HazelcastInitializer initializer;
 
     /**
      * Initializes a new {@link HazelcastActivator}.
      */
     public HazelcastActivator() {
         super();
-        clusterDiscoveryServiceReference = new AtomicReference<ClusterDiscoveryService>();
-        initializer = new HazelcastInitializer(this);
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, TimerService.class, HazelcastConfigurationService.class };
-    }
-
-    /** Gets the ranking */
-    protected static int getRanking(final ServiceReference<?> reference) {
-        final Object property = reference.getProperty(Constants.SERVICE_RANKING);
-        if (null == property) {
-            return 0;
-        }
-        return ((Integer) property).intValue();
+        return new Class[] { HazelcastConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
-        final HazelcastConfigurationService service = getService(HazelcastConfigurationService.class);
-        final String lf = System.getProperty("line.separator");
-        if (!service.isEnabled()) {
-            logger.info(lf + "Hazelcast" + lf + "    Startup of Hazelcast clustering and data distribution platform denied per configuration.");
+        boolean infoEnabled = LOG.isInfoEnabled();
+        String lf = Strings.getLineSeparator();
+        if (infoEnabled) {
+            LOG.info(lf + "Hazelcast:" + lf + "    Starting..." + lf);
+        }
+        long bundleStart = infoEnabled ? System.currentTimeMillis() : 0L;
+        /*
+         * Get hazelcast config service
+         */
+        HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
+        if (false == configService.isEnabled()) {
+            if (infoEnabled) {
+                LOG.info(lf + "Hazelcast:" + lf +
+                    "    Startup of Hazelcast clustering and data distribution platform denied per configuration." + lf);
+            }
             return;
         }
-        final boolean infoEnabled = logger.isInfoEnabled();
-        /*-
-         * Look-up discovery service & obtain its addresses of known nodes in a cluster
-         *
-         * Configure Hazelcast for full TCP/IP cluster
-         * (see http://www.hazelcast.com/documentation.jsp#Config)
-         *
-         * If multicast is not preferred way of discovery for your environment, then you can configure Hazelcast for full TCP/IP cluster.
-         * As configuration below shows, while enable attribute of multicast is set to false, TCP/IP has to be set to true.
-         * For the none-multicast option, all or subset of cluster members' host names and/or IP addresses must be listed.
-         *
-         * Note that all of the cluster members don't have to be listed there but at least one of them has to be active in cluster when a
-         * new member joins.
+        /*
+         * Create hazelcast instance from configuration
          */
-        final BundleContext context = this.context;
-        /*-
-         * Wait for at least one via ClusterListener
-         *
-         * Add cluster listener to manage appearing/disappearing nodes
+        Config config = configService.getConfig();
+        if (infoEnabled) {
+            LOG.info(lf + "Hazelcast:" + lf + "    Creating new hazelcast instance..." + lf);
+            if (config.getNetworkConfig().getJoin().getMulticastConfig().isEnabled()) {
+                LOG.info(lf + "Hazelcast:" + lf +
+                    "    Using network join: " + config.getNetworkConfig().getJoin().getMulticastConfig() + lf);
+            }
+            if (config.getNetworkConfig().getJoin().getTcpIpConfig().isEnabled()) {
+                LOG.info(lf + "Hazelcast:" + lf +
+                    "    Using network join: " + config.getNetworkConfig().getJoin().getTcpIpConfig() + lf);
+            }
+        }
+        long hzStart = infoEnabled ? System.currentTimeMillis() : 0L;
+        HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+        if (infoEnabled) {
+            LOG.info(lf + "Hazelcast:" + lf +
+                "    New hazelcast instance successfully created in " + (System.currentTimeMillis() - hzStart) + " msec." + lf);
+        }
+        /*
+         * Register instance
          */
-        final ClusterListener clusterListener = new HazelcastClusterListener(initializer, System.currentTimeMillis(), logger);
-        registerService(ClusterListener.class, clusterListener);
-        // Trackers
+        registerService(HazelcastInstance.class, hazelcastInstance);
+        REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
+        if (infoEnabled) {
+            LOG.info(lf + "Hazelcast:" + lf + "    Started in " + (System.currentTimeMillis() - bundleStart) + " msec." + lf);
+        }
+        /*
+         * Register management mbean dynamically
+         */
         track(ManagementService.class, new ManagementRegisterer(context));
-        track(ClusterDiscoveryService.class, new ServiceTrackerCustomizer<ClusterDiscoveryService, ClusterDiscoveryService>() {
-
-            private final boolean isSingleton = true;
-
-            private final LinkedList<ServiceContainer<ClusterDiscoveryService>> deactivated =
-                new LinkedList<ServiceContainer<ClusterDiscoveryService>>();
-
-            private int clusterDiscoveryServiceRanking = 0;
-
-            private ClusterDiscoveryService clusterDiscoveryService = null;
-
-            @Override
-            public ClusterDiscoveryService addingService(final ServiceReference<ClusterDiscoveryService> reference) {
-                if (isSingleton) {
-                    final ClusterDiscoveryService discovery = context.getService(reference);
-                    if (!clusterDiscoveryServiceReference.compareAndSet(null, discovery)) {
-                        final com.openexchange.java.StringAllocator msg = new com.openexchange.java.StringAllocator();
-                        msg.append(lf).append("    ").append(ClusterDiscoveryService.class.getName()).append(" is a singleton service!");
-                        msg.append(lf).append("    This service is already tracked as \"").append(
-                            clusterDiscoveryServiceReference.get().getClass().getName()).append("\".");
-                        msg.append(lf).append("    Denying \"").append(discovery.getClass().getName()).append("\".");
-                        final BundleException be = new BundleException(msg.toString(), BundleException.ACTIVATOR_ERROR);
-                        throw new IllegalStateException(msg.toString(), be);
-                    }
-                    startupIfHigherRanked(discovery, getRanking(reference));
-                    return discovery;
-                }
-                synchronized (deactivated) {
-                    final ClusterDiscoveryService discovery = context.getService(reference);
-                    startupIfHigherRanked(discovery, getRanking(reference));
-                    return discovery;
-                }
-            }
-
-            private void startupIfHigherRanked(final ClusterDiscoveryService discovery, final int ranking) {
-                if (null != clusterDiscoveryService) {
-                    if (clusterDiscoveryServiceRanking >= ranking) {
-                        deactivated.addFirst(new ServiceContainer<ClusterDiscoveryService>(discovery, ranking));
-                        return;
-                    }
-                    shutdown();
-                    deactivated.addFirst(new ServiceContainer<ClusterDiscoveryService>(
-                        clusterDiscoveryService,
-                        clusterDiscoveryServiceRanking));
-                }
-                clusterDiscoveryService = discovery;
-                clusterDiscoveryServiceRanking = ranking;
-                /*
-                 * Do start-up
-                 */
-                final long st = System.currentTimeMillis();
-                final List<InetAddress> nodes = discovery.getNodes();
-                if (infoEnabled) {
-                    final long et = System.currentTimeMillis();
-                    logger.info(lf + "Hazelcast" + lf + "    Available cluster nodes received in " + (et - st) + "msec from " +
-                        ClusterDiscoveryService.class.getSimpleName() + ":" + lf + "    " + nodes + "" + lf);
-                }
-                /*-
-                 * Check initially available nodes
-                 */
-                if (nodes.isEmpty()) {
-                    if (HazelcastInitializer.InitMode.INITIALIZED == initializer.init(nodes, false, st, logger)) {
-                        if (infoEnabled) {
-                            logger.info(lf + "Hazelcast:" + lf + "    Initialized Hazelcast instance with empty Open-Xchange nodes." + lf);
-                        }
-                    }
-                } else {
-                    /*
-                     * We already have at least one node at start-up time
-                     */
-                    if (HazelcastInitializer.InitMode.INITIALIZED == initializer.init(nodes, false, st, logger)) {
-                        if (infoEnabled) {
-                            logger.info(lf + "Hazelcast:" + lf + "    Initialized Hazelcast instance via initially available Open-Xchange nodes." + lf);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<ClusterDiscoveryService> reference, final ClusterDiscoveryService service) {
-                // nope
-            }
-
-            @Override
-            public void removedService(final ServiceReference<ClusterDiscoveryService> reference, final ClusterDiscoveryService service) {
-                if (null == service) {
-                    return;
-                }
-                if (isSingleton) {
-                    context.ungetService(reference);
-                    shutdown();
-                    clusterDiscoveryServiceReference.set(null);
-                    return;
-                }
-                synchronized (deactivated) {
-                    for (final Iterator<ServiceContainer<ClusterDiscoveryService>> iterator = deactivated.iterator(); iterator.hasNext();) {
-                        final ServiceContainer<ClusterDiscoveryService> box = iterator.next();
-                        if (box.getService() == service) {
-                            // Wasn't active
-                            iterator.remove();
-                            context.ungetService(reference);
-                            return;
-                        }
-                    }
-                    if (service == clusterDiscoveryService) {
-                        context.ungetService(reference);
-                        shutdown();
-                        clusterDiscoveryService = null;
-                        clusterDiscoveryServiceRanking = 0;
-                        if (!deactivated.isEmpty()) {
-                            final ServiceContainer<ClusterDiscoveryService> box = deactivated.removeFirst();
-                            startupIfHigherRanked(box.getService(), box.getRanking());
-                        }
-                        return;
-                    }
-                }
-                // Eh...
-                context.ungetService(reference);
-            }
-
-            private void shutdown() {
-                final AtomicReference<HazelcastInstance> reference = HazelcastInitializer.REF_HAZELCAST_INSTANCE;
-                final HazelcastInstance hazelcastInstance = reference.get();
-                if (null != hazelcastInstance) {
-                    hazelcastInstance.getLifecycleService().shutdown();
-                    reference.set(null);
-                }
-                Hazelcast.shutdownAll();
-            }
-        });
         openTrackers();
-        // CommandProvider for OSGi console
-        registerService(CommandProvider.class, new UtilCommandProvider(initializer), null);
-    }
-
-    @Override
-    public <S> void registerService(Class<S> clazz, S service) {
-        super.registerService(clazz, service);
-    }
-
-    /** Simple command provider */
-    public static final class UtilCommandProvider implements CommandProvider {
-
-        private final HazelcastInitializer initializer;
-
-        public UtilCommandProvider(final HazelcastInitializer initializer) {
-            super();
-            this.initializer = initializer;
-        }
-
-        @Override
-        public String getHelp() {
-            final StringBuilder help = new StringBuilder();
-            help.append("    addnode - Add a hazelcast node." + System.getProperty("line.separator"));
-            return help.toString();
-        }
-
-        public void _addnode(final CommandInterpreter commandInterpreter) {
-            final String ip = commandInterpreter.nextArgument();
-            if (isEmpty(ip)) {
-                commandInterpreter.println("Couldn't resolve IP: " + ip);
-                return;
-            }
-            try {
-                initializer.init(Collections.singletonList(InetAddress.getByName(ip)), false, System.currentTimeMillis(), LOG);
-                commandInterpreter.println("Added node to Hazelcast cluster: " + ip);
-            } catch (final UnknownHostException e) {
-                LOG.error("Could not register node.", e);
-                commandInterpreter.println("Couldn't resolve IP: " + ip);
-            }
-        }
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        boolean infoEnabled = LOG.isInfoEnabled();
+        if (infoEnabled) {
+            String lf = Strings.getLineSeparator();
+            LOG.info(lf + "Hazelcast:" + lf + "    Shutting down..." + lf);
+        }
+        long start = infoEnabled ? System.currentTimeMillis() : 0L;
+        HazelcastInstance instance = REF_HAZELCAST_INSTANCE.get();
+        if (null != instance) {
+            instance.getLifecycleService().shutdown();
+            REF_HAZELCAST_INSTANCE.set(null);
+        }
+        if (LOG.isInfoEnabled()) {
+            String lf = Strings.getLineSeparator();
+            LOG.info(lf + "Hazelcast:" + lf + "    Shutdown completed after " + (System.currentTimeMillis() - start) + " msec." + lf);
+        }
         super.stopBundle();
     }
 
-    /** Checks for empty string */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
 }

@@ -3429,7 +3429,8 @@ public class AppointmentBugTests extends TestCase {
      * @throws Exception
      *             If an error occurs
      */
-    public void testBug11881() throws Exception {
+    // Invalidated due to US 29162801: "As a calendar user I want to have other participants in a private appointment."
+    public void _testBug11881() throws Exception {
         final Context context = new ContextImpl(contextid);
         int object_id = -1;
         try {

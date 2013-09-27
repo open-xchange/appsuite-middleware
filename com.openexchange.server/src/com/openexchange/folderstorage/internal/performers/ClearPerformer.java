@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -129,6 +130,14 @@ public final class ClearPerformer extends AbstractPerformer {
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
+
+            final Set<OXException> warnings = storageParameters.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    addWarning(warning);
+                }
+            }
+
         } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);

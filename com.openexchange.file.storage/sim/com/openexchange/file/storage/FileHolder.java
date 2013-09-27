@@ -68,19 +68,19 @@ public class FileHolder {
 
     public FileHolder(File file) {
         super();
-        this.file = file;
+        this.file = new DefaultFile(file);
         this.content = null;
     }
 
     public FileHolder(File file, byte[] content) {
         super();
-        this.file = file;
+        this.file = new DefaultFile(file);
         this.content = content;
     }
 
     public FileHolder(File file, InputStream content) {
         super();
-        this.file = file;
+        this.file = new DefaultFile(file);
         byte[] tmp;
         try {
             tmp = IOUtils.toByteArray(content);
@@ -94,6 +94,10 @@ public class FileHolder {
     }
 
     public File getFile() {
+        return new DefaultFile(file);
+    }
+
+    public File getInternalFile() {
         return file;
     }
 
@@ -104,5 +108,6 @@ public class FileHolder {
 
         return new ByteArrayInputStream(content);
     }
+
 
 }

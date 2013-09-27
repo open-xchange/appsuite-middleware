@@ -58,13 +58,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
@@ -74,6 +73,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogFactory;
 
 public class OXUtilMySQLStorageCommon {
 
@@ -82,13 +83,6 @@ public class OXUtilMySQLStorageCommon {
     private static AdminCache cache = ClientAdminThread.cache;
 
     public void createDatabase(final Database db) throws StorageException {
-        final List<String> createTableStatements;
-        try {
-            createTableStatements = cache.getOXDBInitialQueries();
-        } catch (final OXGenericException e) {
-            LOG.error("Error reading DB init Queries!", e);
-            throw new StorageException(e);
-        }
         final Connection con;
         String sql_pass = "";
         if (db.getPassword() != null) {
@@ -114,7 +108,6 @@ public class OXUtilMySQLStorageCommon {
             // See bug 18788.
             created = true;
             con.setCatalog(db.getScheme());
-            pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
             initUpdateTaskTable(con, db.getId().intValue(), db.getScheme());
             con.commit();
@@ -165,77 +158,23 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void pumpData2DatabaseOld(final Connection con, final List<String> db_queries) throws StorageException {
-        Statement stmt = null;
-        try {
-            try {
-                stmt = con.createStatement();
-            } catch (final SQLException e) {
-                throw new StorageException(e.getMessage(), e);
-            }
-            for (final String sqlCreate : db_queries) {
-                stmt.addBatch(sqlCreate);
-            }
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            if (e.getMessage().indexOf("already exists") < 0) { // MySQL error: "PROCEDURE get_mail_service_id already exists"
-                throw new StorageException(e.getMessage(), e);
-            }
-            closeSQLStuff(stmt);
-            stmt = null;
-            if (LOG.isDebugEnabled()) {
-                LOG.info("Batch table creation failed.", e);
-            } else {
-                LOG.info("Batch table creation failed.");
-            }
-            /*
-             * Execute them one-by-one...
-             */
-            try {
-                for (final String sqlCreate : db_queries) {
-                    stmt = con.createStatement();
-                    try {
-                        stmt.executeUpdate(sqlCreate);
-                    } catch (final SQLException sqlException) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.warn("Following SQL CREATE statement failed with \"" + sqlException.getMessage() + "\": "  + sqlCreate, sqlException);
-                        } else {
-                            LOG.warn("Following SQL CREATE statement failed with \"" + sqlException.getMessage() + "\": "  + sqlCreate);
-                        }
-                    } finally {
-                        closeSQLStuff(stmt);
-                        stmt = null;
-                    }
-                }
-            } catch (final SQLException abort) {
-                throw new StorageException(abort.getMessage(), abort);
-            }
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
     private void pumpData2DatabaseNew(final Connection con, final List<CreateTableService> createTables) throws StorageException {
         final Set<String> existingTables = new HashSet<String>();
-        for (final String table : FROM_SCRIPTS) {
-            existingTables.add(table);
-        }
         final List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
         toCreate.addAll(createTables);
-        CreateTableService next;
-        try {
-            while ((next = findNext(toCreate, existingTables)) != null) {
+        for (CreateTableService next; (next = findNext(toCreate, existingTables)) != null;) {
+            try {
                 next.perform(con);
                 for (final String createdTable : next.tablesToCreate()) {
                     existingTables.add(createdTable);
                 }
                 toCreate.remove(next);
+            } catch (final OXException e) {
+                throw new StorageException("Failed to create tables " + Arrays.toString(next.tablesToCreate()) + ": " + e.getMessage(), e);
             }
-        } catch (final OXException e) {
-            throw new StorageException(e.getMessage(), e);
         }
         if (!toCreate.isEmpty()) {
-            final StringBuilder sb = new StringBuilder();
+            final StringAllocator sb = new StringAllocator(2048);
             sb.append("Unable to determine next CreateTableService to execute.\n");
             sb.append("Existing tables: ");
             for (final String existingTable : existingTables) {
@@ -252,7 +191,7 @@ public class OXUtilMySQLStorageCommon {
                 }
                 sb.setCharAt(sb.length() - 1, '\n');
             }
-            sb.setLength(sb.length() - 1);
+            sb.deleteCharAt(sb.length() - 1);
             throw new StorageException(sb.toString());
         }
     }
@@ -315,19 +254,4 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private static final String[] FROM_SCRIPTS = {
-        "sequence_id", "sequence_principal", "sequence_resource", "sequence_resource_group", "sequence_folder", "sequence_calendar",
-        "sequence_contact", "sequence_task", "sequence_project", "sequence_infostore", "sequence_forum", "sequence_pinboard",
-        "sequence_attachment", "sequence_gui_setting", "sequence_reminder", "sequence_ical", "sequence_webdav", "sequence_uid_number",
-        "sequence_gid_number", "sequence_mail_service", "groups", "del_groups", "user", "del_user", "groups_member", "login2user",
-        "user_attribute", "resource", "del_resource", "oxfolder_tree", "oxfolder_permissions",
-        "oxfolder_specialfolders", "oxfolder_userfolders", "oxfolder_userfolders_standardfolders", "del_oxfolder_tree",
-        "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property", "user_configuration", "user_setting_mail",
-        "user_setting_mail_signature", "user_setting_spellcheck", "user_setting_admin", "user_setting", "user_setting_server", "prg_dates",
-        "prg_date_rights", "del_date_rights", "del_dates", "del_dates_members", "prg_dates_members", "prg_dlist", "del_dlist",
-        "prg_contacts_linkage", "prg_contacts_image", "del_contacts_image", "del_contacts", "prg_contacts", "task", "task_folder",
-        "task_participant", "task_eparticipant", "task_removedparticipant", "del_task", "del_task_folder", "del_task_participant",
-        "del_task_eparticipant", "infostore", "infostore_document", "del_infostore", "del_infostore_document", "infostore_property",
-        "infostore_lock", "lock_null", "lock_null_lock", "prg_attachment", "del_attachment", "prg_links", "reminder", "filestore_usage",
-        "ical_principal", "ical_ids", "vcard_principal", "vcard_ids", "version" };
 }

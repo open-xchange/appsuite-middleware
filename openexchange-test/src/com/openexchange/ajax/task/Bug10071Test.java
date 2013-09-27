@@ -49,12 +49,11 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.java.Autoboxing.F;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
@@ -106,7 +105,7 @@ public class Bug10071Test extends AbstractTaskTest {
 
     @SuppressWarnings("unchecked")
     private void setToZero(Mapper mapper) {
-        for (Object value : new Object[] { L(0), F(0) }) {
+        for (Object value : new Object[] { L(0), new BigDecimal(0) }) {
             try {
                 mapper.set(task, value);
             } catch (ClassCastException e) {
@@ -121,7 +120,7 @@ public class Bug10071Test extends AbstractTaskTest {
         super.tearDown();
     }
 
-    public void testDurationAndCostsSetToZero() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testDurationAndCostsSetToZero() throws OXException, IOException, JSONException, OXException {
         GetRequest request = new GetRequest(task);
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);
@@ -135,8 +134,8 @@ public class Bug10071Test extends AbstractTaskTest {
             Object value = response2.getValue(0, attributeId);
             if (Long.class.equals(mapper.get(toTest).getClass())) {
                 value = Long.valueOf((String) value);
-            } else if (Float.class.equals(mapper.get(toTest).getClass())) {
-                value = Float.valueOf((String) value);
+            } else if (BigDecimal.class.equals(mapper.get(toTest).getClass())) {
+                value = new BigDecimal(value.toString());
             }
             assertNotNull("Attribute " + mapper.getDBColumnName() + " is missing in LIST.", value);
             assertEquals("Attribute " + mapper.getDBColumnName() + " has wrong value in LIST.", mapper.get(task), value);

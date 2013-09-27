@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Grizzly Bundle
 Bundle-SymbolicName: com.openexchange.http.grizzly
-Bundle-Version: 7.2.2
+Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -21,6 +21,7 @@ Import-Package: com.google.common.net,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer,
  com.openexchange.tools.exceptions,
+ com.openexchange.tools.servlet,
  com.openexchange.tools.servlet.http,
  javax.management,
  javax.management.modelmbean,
@@ -38,12 +39,13 @@ Import-Package: com.google.common.net,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.service.log,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j,
+ org.slf4j.helpers,
+ org.slf4j.spi
 Bundle-ClassPath: .,
  lib/gmbal-3.0.0-b023.jar,
  lib/management-api-3.0.0-b012.jar,
- lib/slf4j-api-1.6.6.jar,
- lib/slf4j-jcl-1.6.6.jar,
  lib/atmosphere-compat-jbossweb-1.1.0-SNAPSHOT.jar,
  lib/atmosphere-compat-tomcat-1.1.0-SNAPSHOT.jar,
  lib/atmosphere-compat-tomcat7-1.1.0-SNAPSHOT.jar,
@@ -58,18 +60,6 @@ Bundle-ClassPath: .,
  lib/grizzly-portunif-2.2.22-SNAPSHOT.jar,
  lib/grizzly-rcm-2.2.22-SNAPSHOT.jar,
  lib/grizzly-websockets-2.2.22-SNAPSHOT.jar
-Export-Package: com.openexchange.http.grizzly.service.atmosphere,
- org.atmosphere.cache,
- org.atmosphere.client,
- org.atmosphere.config,
- org.atmosphere.config.service,
- org.atmosphere.container,
- org.atmosphere.container.version,
- org.atmosphere.cpr,
- org.atmosphere.di,
- org.atmosphere.handler,
- org.atmosphere.interceptor,
- org.atmosphere.util,
- org.atmosphere.util.uri,
- org.atmosphere.websocket,
- org.atmosphere.websocket.protocol
+Export-Package: com.openexchange.http.grizzly.service.comet,
+ org.glassfish.grizzly.comet,
+ org.glassfish.grizzly.http.server

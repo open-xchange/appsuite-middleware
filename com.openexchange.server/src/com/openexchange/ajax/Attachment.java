@@ -97,6 +97,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.OXAborted;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -481,7 +482,7 @@ public class Attachment extends PermissionServlet {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
             handle(res, t, ResponseFields.ERROR, session);
             return;
@@ -489,17 +490,17 @@ public class Attachment extends PermissionServlet {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException x) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
-            handle(res, new OXException(e), ResponseFields.ERROR, session);
+            handle(res, AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()), ResponseFields.ERROR, session);
             return;
         } catch (final IOException e) {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException x) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
-            handle(res, new OXException(e), ResponseFields.ERROR, session);
+            handle(res, AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage()), ResponseFields.ERROR, session);
             return;
         } finally {
             try {

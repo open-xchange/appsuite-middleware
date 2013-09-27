@@ -168,6 +168,6 @@ public class Tasks extends DataServlet {
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return session.getUserConfiguration().hasTask();
+        return session.getUserPermissionBits().hasTask();
     }
 }

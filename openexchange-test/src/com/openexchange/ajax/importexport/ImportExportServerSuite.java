@@ -54,7 +54,7 @@ import junit.framework.TestSuite;
 
 /**
  * This suite is meant to be used with a running OX.
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public final class ImportExportServerSuite {
 
@@ -74,7 +74,7 @@ public final class ImportExportServerSuite {
 
 		// Overall bug tests.
 		tests.addTestSuite(Bug9209Test.class);
-
+		tests.addTestSuite(DistributionListExportTest.class);
 		return tests;
 	}
 }

@@ -49,22 +49,29 @@
 
 package com.openexchange.oauth.facebook.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
 import com.openexchange.oauth.facebook.FacebookServiceImpl;
 import com.openexchange.oauth.facebook.OAuthServiceMetaDataFacebookImpl;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -81,10 +88,12 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
 
     private ServiceRegistration<OAuthServiceMetaData> registration;
     private ServiceRegistration<FacebookService> registration2;
+    private ServiceRegistration<CapabilityChecker> capabilityChecker;
     private ConfigurationService configurationService;
     private OAuthService oAuthService;
 
     private DeferringURLService deferrer;
+
 
 
     public FacebookRegisterer(final BundleContext context) {
@@ -116,11 +125,31 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
             LOG.info("Parameter com.openexchange.facebook.apiKey : " + configurationService.getProperty("com.openexchange.facebook.apiKey"));
             LOG.info("Parameter com.openexchange.facebook.secretKey :" + configurationService.getProperty("com.openexchange.facebook.secretKey"));
             final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(deferrer);
-            registration = context.registerService(OAuthServiceMetaData.class,
-                facebookMetaDataService, null);
+            registration = context.registerService(OAuthServiceMetaData.class, facebookMetaDataService, null);
             LOG.info("Registering Facebook service.");
-            registration2 = context.registerService(FacebookService.class,
-                new FacebookServiceImpl(oAuthService, facebookMetaDataService), null);
+            registration2 = context.registerService(FacebookService.class, new FacebookServiceImpl(oAuthService, facebookMetaDataService), null);
+
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            final String sCapability = "facebook";
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+            capabilityChecker = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
+                @Override
+                public boolean isEnabled(String capability, Session ses) throws OXException {
+                    if (sCapability.equals(capability)) {
+                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                        if (session.isAnonymous()) {
+                            return false;
+                        }
+
+                        return facebookMetaDataService.isEnabled(session.getUserId(), session.getContextId());
+                    }
+
+                    return true;
+                }
+            }, properties);
+
+            ServiceReference<CapabilityService> capabilityRef = context.getServiceReference(CapabilityService.class);
+            context.getService(capabilityRef).declareCapability(sCapability);
         }
         return obj;
     }
@@ -149,6 +178,10 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
             lock.unlock();
         }
         if (null != unregister) {
+            if (capabilityChecker != null) {
+                capabilityChecker.unregister();
+            }
+
             LOG.info("Unregistering facebook metadata service.");
             unregister.unregister();
             if (registration2 != null){

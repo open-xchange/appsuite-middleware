@@ -55,17 +55,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
-
+import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
@@ -201,7 +198,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 				LOG.error(e);
 				propertyElement.setText(property.getValue());
 			} catch (final IOException e) {
-				LOG.error(e);
+				LOG.error(e.getMessage(), e);
 			}
 		} else {
 			if(property.isDate()) {

@@ -95,7 +95,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         if(folders != null) {
             return folders;
         }
-        return folders = new InfostoreFolderAccess(session);
+        return folders = new InfostoreFolderAccess(session, service.getInfostore());
     }
 
     @Override
@@ -111,12 +111,12 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public void close() {
-
+        // Nope
     }
 
     @Override
     public void connect() throws OXException {
-
+        // Bypassed...
     }
 
     @Override

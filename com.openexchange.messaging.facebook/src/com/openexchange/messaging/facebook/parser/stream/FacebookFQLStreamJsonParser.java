@@ -65,15 +65,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookURLConnectionContent;
-import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
+import com.openexchange.messaging.facebook.services.Services;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingMessage;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.messaging.generic.Utility;
@@ -94,10 +96,27 @@ import com.openexchange.session.Session;
 public final class FacebookFQLStreamJsonParser {
 
     private static final String HTML_ANCHOR_END = "</a>";
-
     private static final String HTML_ANCHOR_START = "<a href='";
+    private static final String HTML_BR = "<br>";
 
-    private static final String HTML_BR = "<br />";
+    protected static volatile Boolean addAsBinaryParts;
+    protected static boolean addAsBinaryParts() {
+        Boolean b = addAsBinaryParts;
+        if (null == b) {
+            synchronized (FacebookFQLStreamJsonParser.class) {
+                b = addAsBinaryParts;
+                if (null == b) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return false;
+                    }
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.messaging.facebook.addAsBinaryParts", false));
+                    addAsBinaryParts = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
 
     /**
      * Initializes a new {@link FacebookFQLStreamJsonParser}.
@@ -131,7 +150,7 @@ public final class FacebookFQLStreamJsonParser {
 
     private interface AttachmentHandler {
 
-        void handleAttachment(JSONObject attachmentInformation, FacebookMessagingMessage message, MultipartProvider multipartProvider) throws OXException, JSONException;
+        boolean handleAttachment(JSONObject attachmentInformation, FacebookMessagingMessage message, MultipartProvider multipartProvider) throws OXException, JSONException;
     }
 
     private static final Map<String, ItemHandler> ITEM_HANDLERS;
@@ -204,10 +223,12 @@ public final class FacebookFQLStreamJsonParser {
         m.put("album", new AttachmentHandler() {
 
             @Override
-            public void handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+            public boolean handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException, JSONException {
+                boolean changed = false;
                 final String name = attachmentInformation.optString("name", null);
                 final String href = attachmentInformation.optString("href", null);
-                if (null != href && null != name) {
+                if (!Strings.isEmpty(href) && !Strings.isEmpty(name)) {
+                    changed = true;
                     final StringBuilder messageText = message.getMessageText();
                     messageText.append(HTML_BR);
                     final int pos = href.indexOf('?');
@@ -233,17 +254,71 @@ public final class FacebookFQLStreamJsonParser {
                         }
                     }
                 }
+                /*
+                 * "media" node
+                 */
+                final JSONArray media = attachmentInformation.optJSONArray("media");
+                if (null != media) {
+                    final int length = media.length();
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject mediaInfo = media.getJSONObject(i);
+                        final String alt = mediaInfo.optString("alt", null);
+                        final String fallbackUrl = mediaInfo.optString("src", null);
+                        final JSONObject photoInfo = mediaInfo.optJSONObject("photo");
+                        String url = null;
+                        if (null != photoInfo) {
+                            final JSONArray images = photoInfo.optJSONArray("images");
+                            if (null != images) {
+                                final int il = images.length();
+                                for (int j = 0; j < il; j++) {
+                                    final JSONObject imageInfo = images.getJSONObject(j);
+                                    final String tmpUrl = imageInfo.optString("src", null);
+                                    url = prefer(url, tmpUrl);
+                                }
+                            }
+                        }
+                        if (null == url) {
+                            url = fallbackUrl;
+                        }
+                        final StringBuilder messageText = message.getMessageText();
+                        changed = true;
+                        messageText.append(HTML_BR);
+                        messageText.append("<img src='").append(url);
+                        if (null == alt) {
+                            messageText.append("'>");
+                        } else {
+                            messageText.append("' alt=\"").append(alt).append("\">");
+                        }
+                    }
+                }
+                return changed;
             }
 
+            private String prefer(final String url1, final String url2) {
+                if (null == url1) {
+                    return url2;
+                }
+                if (url1.indexOf("_s.") > 0) {
+                    return url2;
+                }
+                if (url1.indexOf("_n.") > 0) {
+                    if (url2.indexOf("_b.") > 0) {
+                        return url2;
+                    }
+                }
+                return url1;
+            }
         });
         m.put("link", new AttachmentHandler() {
 
             @Override
-            public void handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) {
+            public boolean handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) {
+                boolean changed = false;
                 final String name = attachmentInformation.optString("name", null);
                 final String href = attachmentInformation.optString("href", null);
                 if (null != href && null != name) {
                     final StringBuilder messageText = message.getMessageText();
+                    changed = true;
                     messageText.append(HTML_BR);
                     final int pos = href.indexOf('?');
                     if (pos < 0) {
@@ -268,12 +343,14 @@ public final class FacebookFQLStreamJsonParser {
                         }
                     }
                 }
+                return changed;
             } // End of handleAttachment
         });
         m.put("group", new AttachmentHandler() {
 
             @Override
-            public void handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+            public boolean handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+                boolean changed = false;
                 /*
                  * A group post
                  */
@@ -285,6 +362,7 @@ public final class FacebookFQLStreamJsonParser {
                 final String href = attachmentInformation.optString("href", null);
                 if (null != href && null != name) {
                     final StringBuilder messageText = message.getMessageText();
+                    changed = true;
                     messageText.append(HTML_BR);
                     final int pos = href.indexOf('?');
                     if (pos < 0) {
@@ -309,13 +387,16 @@ public final class FacebookFQLStreamJsonParser {
                         }
                     }
                 }
+                return changed;
             } // End of handleAttachment
         });
         m.put("video", new AttachmentHandler() {
 
             @Override
-            public void handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+            public boolean handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+                boolean changed = false;
                 String sourceURL = null;
+                String alt = null;
                 String ext = null;
                 /*
                  * "media" node
@@ -332,6 +413,7 @@ public final class FacebookFQLStreamJsonParser {
                         if (null != video) {
                             sourceURL = video.optString("source_url", null);
                             if (null != sourceURL) {
+                                alt = mediaInformation.optString("alt", null);
                                 final int pos = sourceURL.lastIndexOf('.');
                                 if (pos >= 0) {
                                     final String extension = sourceURL.substring(pos + 1);
@@ -350,57 +432,67 @@ public final class FacebookFQLStreamJsonParser {
                  * Source URL present?
                  */
                 if (null != sourceURL) {
-                    try {
-                        final FacebookURLConnectionContent content = new FacebookURLConnectionContent(sourceURL, true);
-                        /*
-                         * Create part
-                         */
-                        final MimeMessagingBodyPart part = new MimeMessagingBodyPart();
-                        final String ct;
-                        final String filename;
-                        {
-                            final MimeContentType mct = new MimeContentType(content.getMimeType());
-                            if (null == ext) {
-                                filename = new StringBuilder("video.").append(Utility.getFileExtensions(mct.getBaseType()).get(0)).toString();
-                            } else {
-                                filename = new StringBuilder("video.").append(ext).toString();
+                    if (addAsBinaryParts()) {
+                        try {
+                            final FacebookURLConnectionContent content = new FacebookURLConnectionContent(sourceURL, true);
+                            /*
+                             * Create part
+                             */
+                            final MimeMessagingBodyPart part = new MimeMessagingBodyPart();
+                            final String ct;
+                            final String filename;
+                            {
+                                final MimeContentType mct = new MimeContentType(content.getMimeType());
+                                if (null == ext) {
+                                    filename = new StringBuilder("video.").append(Utility.getFileExtensions(mct.getBaseType()).get(0)).toString();
+                                } else {
+                                    filename = new StringBuilder("video.").append(ext).toString();
+                                }
+                                mct.setNameParameter(filename);
+                                ct = mct.toString();
                             }
-                            mct.setNameParameter(filename);
-                            ct = mct.toString();
+                            part.setContent(content, ct);
+                            part.setHeader("Content-Type", ct);
+                            /*
+                             * Force base64 encoding to keep data as it is
+                             */
+                            part.setHeader("Content-Transfer-Encoding", "base64");
+                            {
+                                final MimeContentDisposition mcd = new MimeContentDisposition();
+                                mcd.setDisposition("attachment");
+                                mcd.setFilenameParameter(filename);
+                                part.setHeader("Content-Disposition", mcd.toString());
+                            }
+                            /*
+                             * Add to multipart
+                             */
+                            final MimeMultipartContent multipartContent = new MimeMultipartContent();
+                            multipartContent.addBodyPart(part);
+                            multipartProvider.setMultipartContent(multipartContent);
+                        } catch (final OXException e) {
+                            if (!MessagingExceptionCodes.IO_ERROR.equals(e)) {
+                                throw e;
+                            }
+                            // Something went wrong loading URL content... Ignore it
+                            LogFactory.getLog(FacebookFQLStreamJsonParser.class).debug("Couldn't load URL: " + sourceURL, e);
                         }
-                        part.setContent(content, ct);
-                        part.setHeader("Content-Type", ct);
-                        /*
-                         * Force base64 encoding to keep data as it is
-                         */
-                        part.setHeader("Content-Transfer-Encoding", "base64");
-                        {
-                            final MimeContentDisposition mcd = new MimeContentDisposition();
-                            mcd.setDisposition("attachment");
-                            mcd.setFilenameParameter(filename);
-                            part.setHeader("Content-Disposition", mcd.toString());
-                        }
-                        /*
-                         * Add to multipart
-                         */
-                        final MimeMultipartContent multipartContent = new MimeMultipartContent();
-                        multipartContent.addBodyPart(part);
-                        multipartProvider.setMultipartContent(multipartContent);
-                    } catch (final OXException e) {
-                        if (!MessagingExceptionCodes.IO_ERROR.equals(e)) {
-                            throw e;
-                        }
-                        // Something went wrong loading URL content... Ignore it
-                        LogFactory.getLog(FacebookFQLStreamJsonParser.class).debug("Couldn't load URL: " + sourceURL, e);
+                    } else {
+                        final StringBuilder messageText = message.getMessageText();
+                        messageText.append(HTML_BR);
+                        messageText.append("<a href='").append(sourceURL).append("'>");
+                        messageText.append(Strings.isEmpty(alt) ? sourceURL : alt).append("</a>");
                     }
+                    changed = true;
                 }
 
+                return changed;
             } // End of handleAttachment
         });
         m.put("photo", new AttachmentHandler() {
 
             @Override
-            public void handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+            public boolean handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+                boolean changed = false;
                 String sourceUrlBig = null; // src_big - The URL to the full-sized version of the photo being queried. The image can have a maximum width or height of 960px. This URL may be blank.
                 String sourceUrl = null; // src - The URL to the album view version of the photo being queried. The image can have a maximum width or height of 130px. This URL may be blank.
                 String ext = null;
@@ -452,6 +544,7 @@ public final class FacebookFQLStreamJsonParser {
                  * Source URL present?
                  */
                 if (null != sourceUrlBig) {
+                    changed = true;
                     final StringBuilder messageText = message.getMessageText();
                     messageText.append(HTML_BR);
                     messageText.append("<img src='").append(sourceUrlBig);
@@ -461,6 +554,7 @@ public final class FacebookFQLStreamJsonParser {
                         messageText.append("' alt=\"photo.").append(ext).append("\" />");
                     }
                 } else if (null != sourceUrl) {
+                    changed = true;
                     final StringBuilder messageText = message.getMessageText();
                     messageText.append(HTML_BR);
                     messageText.append("<img src='").append(sourceUrl);
@@ -470,12 +564,14 @@ public final class FacebookFQLStreamJsonParser {
                         messageText.append("' alt=\"photo.").append(ext).append("\" />");
                     }
                 }
+                return changed;
             }
         });
         m.put("swf", new AttachmentHandler() {
 
             @Override
-            public void handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+            public boolean handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+                boolean changed = false;
                 String sourceURL = null;
                 /*
                  * "media" node
@@ -502,6 +598,7 @@ public final class FacebookFQLStreamJsonParser {
                  * Source URL present?
                  */
                 if (null != sourceURL && null != nameStr) {
+                    changed = true;
                     final StringBuilder messageText = message.getMessageText();
                     messageText.append(HTML_BR);
                     final int pos = sourceURL.indexOf('?');
@@ -527,20 +624,23 @@ public final class FacebookFQLStreamJsonParser {
                         }
                     }
                 }
+                return changed;
             }
         });
         m.put("event", new AttachmentHandler() {
 
             @Override
-            public void handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+            public boolean handleAttachment(final JSONObject attachmentInformation, final FacebookMessagingMessage message, final MultipartProvider multipartProvider) throws OXException {
+                boolean changed = false;
                 final String name = attachmentInformation.optString("name", null);
                 if (null != name) {
+                    changed = true;
                     final StringBuilder messageText = message.getMessageText();
                     final String href = attachmentInformation.optString("href", null);
                     if (null == href) {
                         messageText.append(HTML_BR).append(name);
                     } else {
-                        messageText.append("<br /><a href='").append(href).append("'>").append(name).append(
+                        messageText.append("<br><a href='").append(href).append("'>").append(name).append(
                             HTML_ANCHOR_END);
                     }
 
@@ -556,6 +656,7 @@ public final class FacebookFQLStreamJsonParser {
                         }
                     }
                 }
+                return changed;
             }
         });
 
@@ -611,27 +712,25 @@ public final class FacebookFQLStreamJsonParser {
              * Check attachment node
              */
             final MultipartProvider multipartProvider = new MultipartProvider();
-            boolean attachmentHandlerFound = false;
-            if (null != attachmentNode && attachmentNode.length() > 0) {
-                for (final String attachName : attachmentNode.keySet()) {
-                    if ("fb_object_type".equals(attachName)) {
-                        /*
-                         * A file attachment is present
-                         */
-                        final String type = attachmentNode.getString("fb_object_type");
+            boolean attachmentHandlerApplied = false;
+            if (null != attachmentNode) {
+                if (attachmentNode.hasAndNotNull("fb_object_type")) {
+                    /*
+                     * A file attachment is present
+                     */
+                    final String type = attachmentNode.getString("fb_object_type");
+                    if (!Strings.isEmpty(type)) {
                         final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(type);
                         if (null == attachmentHandler) {
                             final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamJsonParser.class));
                             logger.warn("Unknown attachment type: " + type);
                             logger.debug("Stream element:\n" + streamElement.toString(2));
                         } else {
-                            attachmentHandler.handleAttachment(attachmentNode, message, multipartProvider);
+                            attachmentHandlerApplied = attachmentHandler.handleAttachment(attachmentNode, message, multipartProvider);
                         }
-                        attachmentHandlerFound = true;
-                        break;
                     }
                 }
-                if (!attachmentHandlerFound && attachmentNode.hasAndNotNull("media")) {
+                if (!attachmentHandlerApplied && attachmentNode.hasAndNotNull("media")) {
                     final JSONArray media = attachmentNode.getJSONArray("media");
                     final int length = media.length();
                     for (int i = 0; i < length; i++) {
@@ -645,9 +744,8 @@ public final class FacebookFQLStreamJsonParser {
                                     logger.warn("Unknown attachment type: " + sType);
                                     logger.debug("Stream element:\n" + streamElement.toString(2));
                                 } else {
-                                    attachmentHandler.handleAttachment(attachmentNode, message, multipartProvider);
+                                    attachmentHandlerApplied = attachmentHandler.handleAttachment(attachmentNode, message, multipartProvider);
                                 }
-                                attachmentHandlerFound = true;
                             }
                         }
                     }
@@ -657,20 +755,29 @@ public final class FacebookFQLStreamJsonParser {
              * Set subject & size
              */
             final StringBuilder messageText = message.getMessageText();
-            final int size = messageText.length();
-            /*
-             * Debug
-             */
-            if (size <= 0 && !attachmentHandlerFound) {
-                final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamJsonParser.class));
-                logger.debug("Stream element lead to empty message:\n" + streamElement.toString(2));
+            int size = messageText.length();
+            if (size <= 0) {
+                if (attachmentHandlerApplied) {
+                    messageText.append(HTML_BR);
+                    messageText.append("&lt;see attachments.&gt;");
+
+                    // System.out.println("-----------------------------------------");
+                    // System.out.println("Applied, but empty:\n"+streamElement.toString(2));
+                    // System.out.println("-----------------------------------------");
+
+                    size = messageText.length();
+                } else {
+                    final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamJsonParser.class));
+                    logger.debug("Stream element is an empty message:\n" + streamElement.toString(2));
+                    return null;
+                }
             }
             message.setSize(size);
             final String htmlContent;
             final String preparedContent;
             {
                 String tmp = messageText.toString();
-                final HtmlService service = FacebookMessagingServiceRegistry.getServiceRegistry().getService(HtmlService.class, true);
+                final HtmlService service = Services.getService(HtmlService.class);
                 htmlContent = service.replaceImages(tmp, session.getSessionID());
                 tmp = replaceImages(tmp);
                 preparedContent = service.replaceImages(tmp, session.getSessionID());

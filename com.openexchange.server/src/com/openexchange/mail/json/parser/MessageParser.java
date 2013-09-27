@@ -51,7 +51,6 @@ package com.openexchange.mail.json.parser;
 
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.isCustomOrReplyHeader;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.quotePersonal;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -63,7 +62,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -72,6 +70,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,6 +92,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -225,22 +226,10 @@ public final class MessageParser {
                 /*
                  * Uploaded files
                  */
-                final int numOfUploadFiles = uploadEvent.getNumberOfUploadFiles();
-                int attachmentCounter = 0;
-                int addedAttachments = 0;
-                while (addedAttachments < numOfUploadFiles) {
-                    /*
-                     * Get uploaded file by field name: file_0, file_1, ...
-                     */
-                    final UploadFile uf;
-                    {
-                        final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName(getFieldName(attachmentCounter++));
-                        uf = null == list || list.isEmpty() ? null : list.get(0);
-                    }
+                for (final UploadFile uf : uploadEvent.getUploadFiles()) {
                     if (uf != null) {
                         final UploadFileMailPart mailPart = provider.getNewFilePart(uf);
                         attachmentHandler.addAttachment(mailPart);
-                        addedAttachments++;
                     }
                 }
             }
@@ -342,12 +331,6 @@ public final class MessageParser {
             dataArguments.put(entry.getKey(), entry.getValue().toString());
         }
         return dataArguments;
-    }
-
-    private static final String UPLOAD_FILE_ATTACHMENT_PREFIX = "file_";
-
-    private static String getFieldName(final int num) {
-        return new com.openexchange.java.StringAllocator(8).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
     }
 
     private static void parse(final ComposedMailMessage transportMail, final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IAttachmentHandler attachmentHandler, final Context ctx, final boolean prepare4Transport) throws OXException {
@@ -835,10 +818,10 @@ public final class MessageParser {
     }
 
     private static void handleMultipleRefs(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final Set<String> contentIds, final boolean prepare4Transport, final Map<String, String> groupedSeqIDs, final Map<String, ReferencedMailPart> retval, final MailAccess<?, ?> access) throws OXException {
-        MailMessage referencedMail =
-            access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
+        final MailPath pMsgRef = prepareMsgref(parentMsgRef);
+        MailMessage referencedMail = access.getMessageStorage().getMessage(pMsgRef.getFolder(), pMsgRef.getMailID(), false);
         if (null == referencedMail) {
-            throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
+            throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(pMsgRef.getMailID(), pMsgRef.getFolder());
         }
         referencedMail.setAccountId(access.getAccountId());
         referencedMail = ManagedMimeMessage.clone(referencedMail);
@@ -857,6 +840,24 @@ public final class MessageParser {
                     throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
                 }
             }
+        }
+    }
+
+    private static MailPath prepareMsgref(final MailPath msgref) throws OXException {
+        final String mailID = msgref.getMailID();
+        if (mailID.startsWith("%64%65%66%61")) {
+            // Referenced by Unified Mail; e.g. "%64%65%66%61ult0%2FIN%42OX%2F%44r%61%66ts%2F2255"
+            return new MailPath(decodeQP(mailID));
+        }
+        return msgref;
+    }
+
+    private static final Pattern DECODE_PATTERN = Pattern.compile("%");
+    private static String decodeQP(final String string) {
+        try {
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(DECODE_PATTERN.matcher(string).replaceAll("="))), com.openexchange.java.Charsets.UTF_8);
+        } catch (final DecoderException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -884,11 +885,11 @@ public final class MessageParser {
     private static final String CT_ALTERNATIVE = "alternative";
 
     private static String parseContentType(final String ctStrArg) {
-        final String ctStr = ctStrArg.toLowerCase(Locale.ENGLISH).trim();
+        final String ctStr = toLowerCase(ctStrArg).trim();
         if (ctStr.indexOf(CT_ALTERNATIVE) != -1) {
             return MimeTypes.MIME_MULTIPART_ALTERNATIVE;
         }
-        if (MimeTypes.MIME_TEXT_PLAIN.equals(ctStr)) {
+        if (MimeTypes.MIME_TEXT_PLAIN.equals(ctStr) || "text".equals(ctStr)) {
             return MimeTypes.MIME_TEXT_PLAIN;
         }
         return MimeTypes.MIME_TEXT_HTML;
@@ -945,7 +946,7 @@ public final class MessageParser {
                 if (length == 0) {
                     return EMPTY_ADDRS;
                 }
-                value = parseAdressArray(jsonArr, length);
+                return parseAdressArray(jsonArr, length);
             } catch (final JSONException e) {
                 LOG.error(e.getMessage(), e);
                 /*
@@ -954,7 +955,7 @@ public final class MessageParser {
                 value = jo.getString(key);
             }
         }
-        return parseAddressList(value, true, true);
+        return parseAddressList(value, true, failOnError);
     }
 
     /**
@@ -967,38 +968,32 @@ public final class MessageParser {
      * @param jsonArray The JSON array
      * @return Parsed address list combined in a {@link String} object
      * @throws JSONException If a JSON error occurs
+     * @throws AddressException If constructing an address fails
      */
-    private static String parseAdressArray(final JSONArray jsonArray, final int length) throws JSONException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length << 6);
-        {
-            /*
-             * Add first address
-             */
-            final JSONArray persAndAddr = jsonArray.getJSONArray(0);
-            final String personal = persAndAddr.getString(0);
-            final boolean hasPersonal = (personal != null && !"null".equals(personal));
-            if (hasPersonal) {
-                sb.append(quotePersonal(personal)).append(" <");
-            }
-            sb.append(persAndAddr.getString(1));
-            if (hasPersonal) {
-                sb.append('>');
-            }
-        }
-        for (int i = 1; i < length; i++) {
-            sb.append(", ");
+    private static InternetAddress[] parseAdressArray(final JSONArray jsonArray, final int length) throws JSONException, AddressException {
+        final List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
+        for (int i = 0; i < length; i++) {
             final JSONArray persAndAddr = jsonArray.getJSONArray(i);
-            final String personal = persAndAddr.getString(0);
-            final boolean hasPersonal = (personal != null && !"null".equals(personal));
-            if (hasPersonal) {
-                sb.append(quotePersonal(personal)).append(" <");
-            }
-            sb.append(persAndAddr.getString(1));
-            if (hasPersonal) {
-                sb.append('>');
+            final int pLen = persAndAddr.length();
+            if (pLen != 0) {
+                if (1 == pLen) {
+                    addresses.add(new QuotedInternetAddress(persAndAddr.getString(0)));
+                } else {
+                    final String personal = persAndAddr.getString(0);
+                    final boolean hasPersonal = (personal != null && !"null".equals(personal));
+                    if (hasPersonal) {
+                        try {
+                            addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), personal, "UTF-8"));
+                        } catch (final UnsupportedEncodingException x) {
+                            // Cannot occur
+                        }
+                    } else {
+                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(1)));
+                    }
+                }
             }
         }
-        return sb.toString();
+        return addresses.toArray(new InternetAddress[0]);
     }
 
     private static InternetAddress getEmailAddress(final String addrStr) {

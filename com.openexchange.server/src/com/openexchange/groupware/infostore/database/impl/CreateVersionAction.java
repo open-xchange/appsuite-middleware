@@ -65,22 +65,15 @@ public class CreateVersionAction extends AbstractDocumentListAction {
                 stmt.setInt(1, getContext().getContextId());
             }
         };
-        try {
-            doUpdates(update);
-        } catch (final OXException e) {
-            throw e;
-        }
 
+        doUpdates(update);
     }
 
     @Override
     public void perform() throws OXException {
         assureExistence();
-        try {
-            doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getWritableVersionFields(), getDocuments());
-        } catch (final OXException e) {
-            throw e;
-        }
+
+        doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getWritableVersionFields(), getDocuments());
     }
 
     @Override

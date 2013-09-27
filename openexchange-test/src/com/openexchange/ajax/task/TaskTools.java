@@ -178,6 +178,10 @@ public final class TaskTools extends Assert {
         return updateTask(conversation, hostName, sessionId, folderId, task.getObjectID(), jsonObj, lastModified);
     }
 
+    /**
+     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}
+     */
+    @Deprecated
     public static UpdateResponse update(final AJAXClient client, final UpdateRequest request) throws OXException, IOException, JSONException {
         return Executor.execute(client, request);
     }

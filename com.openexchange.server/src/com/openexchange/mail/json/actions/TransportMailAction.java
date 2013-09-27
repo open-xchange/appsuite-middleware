@@ -107,7 +107,7 @@ public final class TransportMailAction extends AbstractMailAction {
             /*
              * Parse structured JSON mail object
              */
-            final ComposedMailMessage composedMail = MIMEStructureParser.parseStructure((JSONObject) req.getRequest().getData(), session);
+            final ComposedMailMessage composedMail = MIMEStructureParser.parseStructure((JSONObject) req.getRequest().requireData(), session);
             if (recipients != null && recipients.length > 0) {
                 composedMail.addRecipients(recipients);
             }

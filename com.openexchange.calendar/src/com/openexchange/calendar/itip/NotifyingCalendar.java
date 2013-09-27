@@ -495,7 +495,9 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                 return;
             }
             if (target.containsRecurrenceDatePosition() && target.getRecurrenceDatePosition() != null || target.containsRecurrencePosition() && target.getRecurrencePosition() != 0) {
-                calendarCollection.setRecurrencePositionOrDateInDAO(target, true);
+                if (!(target.getRecurrenceDatePosition() != null && target.getRecurrencePosition() != 0)) {
+                    calendarCollection.setRecurrencePositionOrDateInDAO(target, true);
+                }
                 RecurringResultsInterface recResults;
                 if (!isException) {
                     recResults = calendarCollection.calculateRecurring(target, 0, 0, target.getRecurrencePosition());

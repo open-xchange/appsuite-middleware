@@ -104,7 +104,9 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             throw OAuthExceptionCodes.CANCELED_BY_USER.create();
         }
         String oauthTokenSecret = (String) state.get(OAuthConstants.ARGUMENT_SECRET);
-        oauthTokenSecret = stripExpireParam(oauthTokenSecret);
+        if (oauthTokenSecret != null) {
+            oauthTokenSecret = stripExpireParam(oauthTokenSecret);
+        }
         session.setParameter(uuid, null);
         /*
          * The OAuth verifier (PIN)
@@ -134,12 +136,12 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         return arguments;
     }
 
+    private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
+
     /*
      * Fixes bug 24332
      */
     private String stripExpireParam(final String token) {
-    	Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
-
         if (token.indexOf("&expires") < 0) {
             return token;
         }

@@ -49,7 +49,37 @@
 
 package com.openexchange.groupware.infostore;
 
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.*;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.ALREADY_LOCKED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.COULD_NOT_LOAD_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DELETE_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DOCUMENT_CONTAINS_NO_FILE_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DOCUMENT_NOT_EXISTS_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DUPLICATE_SUBFOLDER_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.FILENAME_NOT_UNIQUE_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.ITERATE_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.LOCKED_BY_ANOTHER_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.MODIFIED_CONCURRENTLY_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NEW_ID_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_ALL_DELETED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_EXIST_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_INFOSTORE_FOLDER_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_CREATE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DELETE_PERMISSION_FOR_VERSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DELETE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_READ_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_SOURCE_DELETE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_TARGET_CREATE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_WRITE_PERMISSION_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NUMBER_OF_VERSIONS_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.PREFETCH_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.TOO_LONG_VALUES_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.UPDATED_BETWEEN_DO_AND_UNDO_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.VALIDATION_FAILED_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.WRITE_PERMS_FOR_LOCK_MISSING_MSG;
+import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.WRITE_PERMS_FOR_UNLOCK_MISSING_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -127,6 +157,8 @@ public enum InfostoreExceptionCodes implements OXExceptionCode {
     VALIDATION_FAILED_SLASH(InfostoreExceptionMessages.VALIDATION_FAILED_SLASH_MSG, CATEGORY_USER_INPUT, 2101),
     /** File name contains illegal characters. */
     VALIDATION_FAILED_CHARACTERS(InfostoreExceptionMessages.VALIDATION_FAILED_CHARACTERS_MSG, CATEGORY_USER_INPUT, 2101),
+    /** New file versions can't be saved with an offset. */
+    NO_OFFSET_FOR_NEW_VERSIONS(InfostoreExceptionMessages.NO_OFFSET_FOR_NEW_VERSIONS_MSG, CATEGORY_USER_INPUT, 2102),
     ;
 
     private final String message;

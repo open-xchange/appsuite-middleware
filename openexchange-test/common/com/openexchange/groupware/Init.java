@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,9 @@ import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.internal.AbstractCapabilityService;
 import com.openexchange.charset.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
@@ -128,6 +132,8 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
+import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
@@ -139,8 +145,8 @@ import com.openexchange.i18n.impl.TranslationsI18N;
 import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.imap.IMAPStoreCache;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
@@ -191,7 +197,9 @@ import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
+import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.version.Version;
 import com.openexchange.version.internal.Numbers;
 import com.openexchange.xml.jdom.JDOMParser;
@@ -326,7 +334,7 @@ public final class Init {
 
         new GroupInit() };
 
-	private static boolean databaseUpdateinitialized = false;
+    private static boolean databaseUpdateinitialized = false;
 
     public static void injectProperty() {
         final String propDir1 = TestInit.getTestProperty("openexchange.propdir");
@@ -366,6 +374,7 @@ public final class Init {
         startAndInjectBasicServices();
         startAndInjectHTMLService();
         startAndInjectServerConfiguration();
+        startAndInjectFullPrimaryKeySupportService();
         startAndInjectNotification();
         startAndInjectQuotaService();
         startAndInjectCache();
@@ -390,10 +399,46 @@ public final class Init {
         startAndInjectXMLServices();
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
-        startAndInjectContactServices();        
+        startAndInjectContactServices();
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
+        startAndInjectCapabilitiesServices();
+    }
 
+    /**
+     * 
+     */
+    private static void startAndInjectCapabilitiesServices() {
+        AbstractCapabilityService c = new AbstractCapabilityService(new ServiceLookup() {
+
+            @Override
+            public <S> S getService(final Class<? extends S> clazz) {
+                return TestServiceRegistry.getInstance().getService(clazz);
+            }
+
+            @Override
+            public <S> S getOptionalService(final Class<? extends S> clazz) {
+                return null;
+            }
+        }, null) {
+
+            @Override
+            protected Map<String, List<CapabilityChecker>> getCheckers() {
+                return Collections.emptyMap();
+            }
+        };
+
+        services.put(CapabilityService.class, c);
+        TestServiceRegistry.getInstance().addService(CapabilityService.class, c);
+    }
+
+    /**
+     * 
+     */
+    private static void startAndInjectFullPrimaryKeySupportService() {
+        FullPrimaryKeySupportImpl s = new FullPrimaryKeySupportImpl(null);
+        services.put(FullPrimaryKeySupportService.class, s);
+        TestServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, s);
     }
 
     private static void startVersionBundle() throws Exception {
@@ -451,7 +496,9 @@ public final class Init {
                 throw getWrappingOXException(e);
             }
             services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
+            services.put(UserPermissionService.class, new UserPermissionServiceImpl());
             TestServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
+            TestServiceRegistry.getInstance().addService(UserPermissionService.class, services.get(UserPermissionService.class));
         }
     }
 
@@ -474,7 +521,7 @@ public final class Init {
 
     private static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
-        final Component c = new Component() {
+        new Component() {
             private static final long serialVersionUID = 2411378382745647554L;
             @Override
             public String getAbbreviation() {
@@ -482,9 +529,9 @@ public final class Init {
             }
         };
         return new OXException(
-        		9999,
-        		null == message ? "[Not available]" : message,
-        		cause);
+            9999,
+            null == message ? "[Not available]" : message,
+                cause);
     }
 
     private static void startAndInjectCalendarServices() {
@@ -507,19 +554,19 @@ public final class Init {
                      * Compose cache configuration
                      */
                     final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                            "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                            "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
-                            "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                            "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                            "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
-                            "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
-                            "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                            "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                            "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
-                            "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
-                            "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                            "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                            "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                        "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                        "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
+                        "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                        "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                        "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
+                        "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                        "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                        "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                        "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                        "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
                     final CacheService cacheService = TestServiceRegistry.getInstance().getService(CacheService.class);
                     cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
                     CalendarVolatileCache.initInstance(cacheService.getCache(regionName));
@@ -558,7 +605,7 @@ public final class Init {
                 ContactService.class, services.get(ContactService.class));
         }
     }
-    
+
     private static void startAndInjectIDGeneratorService() {
         final IDGeneratorService idService = new IDGeneratorServiceImpl();
         TestServiceRegistry.getInstance().addService(IDGeneratorService.class, idService);
@@ -587,7 +634,7 @@ public final class Init {
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
                 }
-            });                
+            });
         }
     }
 
@@ -616,8 +663,8 @@ public final class Init {
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         final String directory_name = config.getProperty("i18n.language.path");
         if (directory_name == null) {
-        	LOG.error("Tried to load i18n files and did not find a property");
-        	return;
+            LOG.error("Tried to load i18n files and did not find a property");
+            return;
         }
         final File dir = new File(directory_name);
         final I18nServices i18nServices = I18nServices.getInstance();
@@ -674,11 +721,12 @@ public final class Init {
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
-    	if(databaseUpdateinitialized ) {
+        if(databaseUpdateinitialized ) {
             return;
         }
-    	InternalList.getInstance().start();
-    	databaseUpdateinitialized = true;
+        // ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
+        InternalList.getInstance().start();
+        databaseUpdateinitialized = true;
     }
 
     private static void startAndInjectMonitoringBundle() {
@@ -711,7 +759,7 @@ public final class Init {
             reg.addService(ContextService.class, services.get(ContextService.class));
             reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             reg.addService(UserService.class, services.get(UserService.class));
-//            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+            //            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
             reg.addService(ContactService.class, services.get(ContactService.class));
         }
     }
@@ -814,12 +862,12 @@ public final class Init {
     public static void startAndInjectQuotaService() {
         if (null == TestServiceRegistry.getInstance().getService(QuotaService.class)) {
             QuotaService quotaService = new QuotaService() {
-                
+
                 @Override
                 public Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException {
                     return UnlimitedQuota.getInstance();
                 }
-                
+
                 @Override
                 public Quota getQuotaFor(Resource resource, Session session) throws OXException {
                     return UnlimitedQuota.getInstance();
@@ -883,9 +931,9 @@ public final class Init {
         // for (final Initialization init: started) {
         // init.stop();
         // }
-//        stopMailBundle();
-//        stopDatabaseBundle();
-//        stopThreadPoolBundle();
+        //        stopMailBundle();
+        //        stopDatabaseBundle();
+        //        stopThreadPoolBundle();
         if (!running.compareAndSet(true, false)) {
             /*
              * Already stopped

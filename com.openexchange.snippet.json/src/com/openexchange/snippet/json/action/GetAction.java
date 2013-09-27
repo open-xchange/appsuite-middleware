@@ -60,6 +60,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetService;
@@ -88,15 +89,15 @@ public final class GetAction extends SnippetAction {
      *
      * @param services The service look-up
      */
-    public GetAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
-        super(services, actions);
+    public GetAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
+        super(services, snippetServices, actions);
         restMethods = Collections.singletonList(Method.GET);
     }
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException {
         final String id = snippetRequest.checkParameter("id");
-        SnippetService snippetService = getSnippetService();
+        SnippetService snippetService = getSnippetService(snippetRequest.getSession());
         Snippet snippet = snippetService.getManagement(snippetRequest.getSession()).getSnippet(id);
 
         return new AJAXRequestResult(snippet, "snippet");

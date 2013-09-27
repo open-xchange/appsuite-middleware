@@ -50,13 +50,14 @@
 package com.openexchange.folderstorage.database.getfolder;
 
 import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
@@ -67,8 +68,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.PutIfAbsent;
+import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -102,6 +107,10 @@ public final class SystemInfostoreFolder {
         // Enforce getSubfolders() on storage
         retval.setSubfolderIDs(null);
         retval.setSubscribedSubfolders(true);
+        // Don't cache if altNames enabled -- "Shared files" is supposed NOT to be displayed if no shared files exist
+        if (altNames) {
+            retval.setCacheable(false);
+        }
         return retval;
     }
 
@@ -111,78 +120,12 @@ public final class SystemInfostoreFolder {
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context
+     * @param altNames Whether to prefer alternative names for infostore folders
      * @param con The connection
      * @return The database folder representing system infostore folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static int[] getSystemInfostoreFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
-        try {
-            /*
-             * The system infostore folder
-             */
-            final List<FolderObject> l;
-            final int size;
-            {
-                final Queue<FolderObject> q =
-                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                        FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
-                        user.getId(),
-                        user.getGroups(),
-                        ctx,
-                        userConfiguration,
-                        null,
-                        con)).asQueue();
-                size = q.size();
-                /*
-                 * Write UserStore first
-                 */
-                final Iterator<FolderObject> iter = q.iterator();
-                l = new ArrayList<FolderObject>(size);
-                for (int j = 0; j < size; j++) {
-                    final FolderObject fobj = iter.next();
-                    if (fobj.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-                        l.add(0, fobj);
-                    } else {
-                        l.add(fobj);
-                    }
-                }
-            }
-            final TIntList subfolderIds = new TIntArrayList(size);
-            final Iterator<FolderObject> iter = l.iterator();
-            for (int i = 0; i < size; i++) {
-                subfolderIds.add(iter.next().getObjectID());
-            }
-            /*
-             * Check if user has non-tree-visible folders
-             */
-            final boolean hasNonTreeVisibleFolders = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
-                FolderObject.INFOSTORE,
-                user.getId(),
-                user.getGroups(),
-                userConfiguration,
-                ctx,
-                con);
-            if (hasNonTreeVisibleFolders) {
-                subfolderIds.add(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
-            }
-            return subfolderIds.toArray();
-        } catch (final SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Gets the subfolder identifiers of database folder representing system infostore folder. <code>false</code>.
-     *
-     * @param user The user
-     * @param userConfiguration The user configuration
-     * @param ctx The context
-     * @param altNames TODO
-     * @param con The connection
-     * @return The database folder representing system infostore folder
-     * @throws OXException If the database folder cannot be returned
-     */
-    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final boolean altNames, final Connection con) throws OXException {
+    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserPermissionBits userConfiguration, final Context ctx, final boolean altNames, final Session session, final Connection con) throws OXException {
         try {
             /*
              * The system infostore folder
@@ -221,12 +164,15 @@ public final class SystemInfostoreFolder {
                 final FolderObject fo = iter.next();
                 final int fuid = fo.getObjectID();
                 if (fuid == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
-                    if (altNames) {
+                    if (showPersonalBelowInfoStore(session, altNames)) {
                         // Check if there are shared files -- discard if there are none
                         final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(fuid, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, null);
+                        subfolders.remove(getDefaultInfoStoreFolderId(session, ctx));
                         if (!subfolders.isEmpty()) {
                             subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME)));
                         }
+                    } else if (altNames) {
+                        subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME)));
                     } else {
                         subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME)));
                     }
@@ -247,7 +193,7 @@ public final class SystemInfostoreFolder {
                 ctx,
                 con);
             if (hasNonTreeVisibleFolders) {
-                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID), null == sh ? (altNames ? FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME: FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME) : (sh.getString(altNames ? FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME: FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME))));
+                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID), sh.getString(altNames ? FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME: FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME)));
             }
             return subfolderIds;
         } catch (final SQLException e) {
@@ -260,6 +206,54 @@ public final class SystemInfostoreFolder {
         final String[] ret = new String[length];
         System.arraycopy(values, 0, ret, 0, length);
         return values;
+    }
+
+    private static boolean showPersonalBelowInfoStore(final Session session, final boolean altNames) {
+        if (!altNames) {
+            return false;
+        }
+        final String paramName = "com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore";
+        final Boolean tmp = (Boolean) session.getParameter(paramName);
+        if (null != tmp) {
+            return tmp.booleanValue();
+        }
+        final ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == configViewFactory) {
+            return false;
+        }
+        try {
+            final ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+            final Boolean b = view.opt(paramName, boolean.class, Boolean.FALSE);
+            if (session instanceof PutIfAbsent) {
+                ((PutIfAbsent) session).setParameterIfAbsent(paramName, b);
+            } else {
+                session.setParameter(paramName, b);
+            }
+            return b.booleanValue();
+        } catch (final OXException e) {
+            com.openexchange.log.Log.loggerFor(SystemInfostoreFolder.class).warn(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private static int getDefaultInfoStoreFolderId(final Session session, final Context ctx) {
+        final String paramName = "com.openexchange.folderstorage.defaultInfoStoreFolderId";
+        final String tmp = (String) session.getParameter(paramName);
+        if (null != tmp) {
+            return Integer.parseInt(tmp);
+        }
+        try {
+            final int id = new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
+            if (session instanceof PutIfAbsent) {
+                ((PutIfAbsent) session).setParameterIfAbsent(paramName, Integer.toString(id));
+            } else {
+                session.setParameter(paramName, Integer.toString(id));
+            }
+            return id;
+        } catch (final OXException e) {
+            com.openexchange.log.Log.loggerFor(SystemInfostoreFolder.class).error(e.getMessage(), e);
+            return -1;
+        }
     }
 
 }

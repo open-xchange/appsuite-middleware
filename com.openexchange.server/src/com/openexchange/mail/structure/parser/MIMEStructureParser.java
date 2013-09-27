@@ -349,7 +349,7 @@ public final class MIMEStructureParser {
                  * A multipart
                  */
                 parseMultipartBody(jsonPart.getJSONArray("body"), mimePart, contentType.getSubType());
-            } else if (contentType.startsWith("message/rfc822")) {
+            } else if (contentType.startsWith("message/rfc822") || (contentType.getNameParameter() != null && contentType.getNameParameter().endsWith(".eml"))) {
                 /*
                  * A nested message
                  */

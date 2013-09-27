@@ -138,8 +138,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
      * The new UIDLs are automatically added to used {@link POP3StorageUIDLMap UIDL map}.
      *
      * @param pop3Messages The POP3 messages
-     * @return The
-     * @throws OXException
+     * @throws OXException If append operation fails
      */
     public void appendPOP3Messages(final MailMessage[] pop3Messages) throws OXException {
         final MailMessage[] pop3Msgs;
@@ -159,7 +158,10 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
          */
         final String[] uidls = new String[pop3Msgs.length];
         for (int i = 0; i < uidls.length; i++) {
-            uidls[i] = pop3Msgs[i].getMailId();
+            final MailMessage mailMessage = pop3Msgs[i];
+            if (null != mailMessage) {
+                uidls[i] = mailMessage.getMailId();
+            }
         }
         /*
          * Append to mail account storage
@@ -170,7 +172,10 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
          */
         final FullnameUIDPair[] pairs = new FullnameUIDPair[uids.length];
         for (int i = 0; i < pairs.length; i++) {
-            pairs[i] = FullnameUIDPair.newINBOXInstance(uids[i]);
+            final String mailId = uids[i];
+            if (null != mailId) {
+                pairs[i] = FullnameUIDPair.newINBOXInstance(mailId);
+            }
         }
         uidlMap.addMappings(uidls, pairs);
     }
@@ -373,11 +378,13 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     }
 
     private void setFolderAndAccount(final String folder, final MailMessage mailMessage) throws OXException {
-        if (mailMessage.containsFolder()) {
-            mailMessage.setFolder(folder);
-        }
-        if (mailMessage.containsAccountName()) {
-            setAccountInfo(mailMessage);
+        if (null != mailMessage) {
+            if (mailMessage.containsFolder()) {
+                mailMessage.setFolder(folder);
+            }
+            if (mailMessage.containsAccountName()) {
+                setAccountInfo(mailMessage);
+            }
         }
     }
 
@@ -389,6 +396,9 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
      * @throws OXException If mail account cannot be obtained
      */
     private MailMessage setAccountInfo(final MailMessage mailMessage) throws OXException {
+        if (null == mailMessage) {
+            return mailMessage;
+        }
         final MailAccount account = getMailAccount();
         final String name = account.getName();
         final int id = account.getId();

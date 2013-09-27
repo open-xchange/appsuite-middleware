@@ -79,7 +79,7 @@ public class TaskAuthorization implements AttachmentAuthorization {
                 .ACTIVE);
             task.setParentFolderID(folderId);
             final FolderObject folder = Tools.getFolder(session.getContext(), folderId);
-            Permission.checkWriteInFolder(session.getContext(), session.getUser(), session.getUserConfiguration(), folder, task);
+            Permission.checkWriteInFolder(session.getContext(), session.getUser(), session.getUserPermissionBits(), folder, task);
             // Check if task appears in folder.
             foldStor.selectFolderById(session.getContext(), taskId, folderId, StorageType
                 .ACTIVE);
@@ -111,7 +111,7 @@ public class TaskAuthorization implements AttachmentAuthorization {
             throw e;
         }
         try {
-            Permission.canReadInFolder(session.getContext(), session.getUser(), session.getUserConfiguration(), folder, task);
+            Permission.canReadInFolder(session.getContext(), session.getUser(), session.getUserPermissionBits(), folder, task);
         } catch (final OXException e) {
             throw e;
         }

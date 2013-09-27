@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.json.actions;
 
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -59,31 +60,49 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.json.I18nServices;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
-public abstract class AbstractSubscribeSourcesAction  implements AJAXActionService {
+public abstract class AbstractSubscribeSourcesAction implements AJAXActionService {
 
-	protected ServiceLookup services;
+    /** The service look-up */
+    protected final ServiceLookup services;
 
-	public abstract AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException;
+    /**
+     * Initializes a new {@link AbstractSubscribeSourcesAction}.
+     */
+    protected AbstractSubscribeSourcesAction(final ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
-	@Override
-    public AJAXRequestResult perform(AJAXRequestData requestData,
-			ServerSession session) throws OXException {
-		SubscribeRequest subscribeRequest = new SubscribeRequest(requestData, session);
-		return perform(subscribeRequest);
-	}
+    /**
+     * Performs given subscribe request.
+     *
+     * @param subscribeRequest The request
+     * @return The request result
+     * @throws OXException If a Open-Xchange error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException;
 
-	protected SubscriptionSourceDiscoveryService getAvailableSources(final ServerSession session) throws OXException {
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        try {
+            return perform(new SubscribeRequest(requestData, session));
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected SubscriptionSourceDiscoveryService getAvailableSources(final ServerSession session) throws OXException {
         return services.getService(SubscriptionSourceDiscoveryService.class).filter(session.getUserId(), session.getContextId());
     }
 
-	protected Translator createTranslator(final ServerSession session) {
+    protected Translator createTranslator(final ServerSession session) {
         final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
         return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }

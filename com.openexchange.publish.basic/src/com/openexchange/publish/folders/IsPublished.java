@@ -118,7 +118,7 @@ public class IsPublished implements AdditionalFolderField {
 
     @Override
     public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
-        if (!session.getUserConfiguration().isPublication()) {
+        if (!session.getUserPermissionBits().isPublication()) {
             return allFalse(folder.size());
         }
         List<Entity> folderIdsToQuery = new ArrayList<Entity>(folder.size());

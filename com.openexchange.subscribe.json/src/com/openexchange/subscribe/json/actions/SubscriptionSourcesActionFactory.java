@@ -56,35 +56,38 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
 public class SubscriptionSourcesActionFactory implements AJAXActionServiceFactory {
 
-	private final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
+    private final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(6);
 
-	public SubscriptionSourcesActionFactory(final ServiceLookup services){
-		//someone decided to describe this one way and implement it another ... This works for both
-		actions.put("listSources", new ListSourcesAction(services));
-		actions.put("all", new ListSourcesAction(services));
-		actions.put("getSource", new GetSourceAction(services));
-		actions.put("get", new GetSourceAction(services));
-	}
+    /**
+     * Initializes a new {@link SubscriptionSourcesActionFactory}.
+     *
+     * @param services The servie look-up
+     */
+    public SubscriptionSourcesActionFactory(final ServiceLookup services) {
+        super();
+        // someone decided to describe this one way and implement it another ... This works for both
+        actions.put("listSources", new ListSourcesAction(services));
+        actions.put("all", new ListSourcesAction(services));
+        actions.put("getSource", new GetSourceAction(services));
+        actions.put("get", new GetSourceAction(services));
+    }
 
-	@Override
-    public AJAXActionService createActionService(final String action)
-			throws OXException {
-		if (actions.containsKey(action)){
-			return actions.get(action);
-		}
-        // TODO: fill this exception
-        throw new OXException();
-	}
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        if (actions.containsKey(action)) {
+            return actions.get(action);
+        }
+        throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+    }
 
-	@Override
+    @Override
     public Collection<? extends AJAXActionService> getSupportedServices() {
         return java.util.Collections.unmodifiableCollection(actions.values());
     }

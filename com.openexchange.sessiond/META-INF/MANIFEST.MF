@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SessionD
 Bundle-SymbolicName: com.openexchange.sessiond
-Bundle-Version: 7.2.2
+Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
+ com.openexchange.context,
  com.openexchange.crypto,
  com.openexchange.exception,
  com.openexchange.groupware,

@@ -109,7 +109,8 @@ public enum SessionExceptionCodes implements OXExceptionCode {
      */
     CONTEXT_LOCKED(CONTEXT_LOCKED_MSG, Category.CATEGORY_TRY_AGAIN, 204),
     /**
-     * Request to server was refused. Original client IP address changed. Please try again.
+     * Request to server was refused. Original client IP address changed. Please try again.<br>
+     * Client login IP changed from %1$s to %2$s and is not covered by IP white-list or netmask.
      */
     WRONG_CLIENT_IP(WRONG_CLIENT_IP_MSG, Category.CATEGORY_PERMISSION_DENIED, 205),
     /**

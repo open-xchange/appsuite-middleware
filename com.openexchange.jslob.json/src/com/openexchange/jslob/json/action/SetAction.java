@@ -106,7 +106,7 @@ public final class SetAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-        final Object data = jslobRequest.getRequestData().getData();
+        final Object data = jslobRequest.getRequestData().requireData();
         /*
          * A null value is considered as a remove operation
          */

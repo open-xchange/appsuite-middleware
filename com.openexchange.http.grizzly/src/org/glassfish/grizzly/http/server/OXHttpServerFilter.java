@@ -210,11 +210,9 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         // Ping stuff
         pingMap = new ConcurrentHashMap<FilterChainContext, WatchInfo>(512);
         {
-            final ConfigurationService service = Services.getService(ConfigurationService.class);
+            final ConfigurationService service = Services.optService(ConfigurationService.class);
             pingDelay = null == service ? 90000 : service.getIntProperty("com.openexchange.http.grizzly.pingDelay", 90000);
-
             maxPingCount = null == service ? 9 : service.getIntProperty("com.openexchange.http.grizzly.maxPingCount", 9);
-
             ping = null == service ? Ping.PROCESSING : Ping.pingFor(service.getProperty("com.openexchange.http.grizzly.ping", "PROCESSING").trim());
         }
         // Rest
@@ -314,7 +312,10 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final WatchInfo watchInfo = pingMap.remove(ctx);
                         if (null != watchInfo) {
                             watchInfo.timerTask.cancel(false);
-                            Services.getService(TimerService.class).purge();
+                            final TimerService timerService = Services.optService(TimerService.class);
+                            if (null != timerService) {
+                                timerService.purge();
+                            }
                         }
                     }
                 }
@@ -359,7 +360,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     private void initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
         final Ping ping = this.ping;
         if (ping != Ping.NONE) {
-            final TimerService timerService = Services.getService(TimerService.class);
+            final TimerService timerService = Services.optService(TimerService.class);
             if (null != timerService) {
                 final ConcurrentMap<FilterChainContext, WatchInfo> cm = pingMap;
                 final Logger logger = LOGGER;

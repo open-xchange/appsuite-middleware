@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.calendar;
 
+import gnu.trove.TCollections;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.FolderObject;
@@ -66,7 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 public class CalendarFolderObject implements Serializable {
 
-    private static final Set<Integer> EMPTY = Collections.emptySet();
+    private static final TIntSet EMPTY = TCollections.unmodifiableSet(new TIntHashSet(0));
 
     private static final long serialVersionUID = -2356348744702379243L;
 
@@ -74,11 +74,11 @@ public class CalendarFolderObject implements Serializable {
 
     private final int cid;
 
-    private Set<Integer> privatefolder = EMPTY;
+    private TIntSet privatefolder = EMPTY;
 
-    private Set<Integer> publicfolder = EMPTY;
+    private TIntSet publicfolder = EMPTY;
 
-    private Set<Integer> sharedfolder = EMPTY;
+    private TIntSet sharedfolder = EMPTY;
 
     private final boolean fill_shared;
 
@@ -86,17 +86,17 @@ public class CalendarFolderObject implements Serializable {
 
     public static final String IDENTIFIER = "CalendarFolderObject@";
 
-    private Set<Integer> publicReadableAllSet = EMPTY;
+    private TIntSet publicReadableAllSet = EMPTY;
 
-    private Set<Integer> publicReadableOwnSet = EMPTY;
+    private TIntSet publicReadableOwnSet = EMPTY;
 
-    private Set<Integer> privateReadableAllSet = EMPTY;
+    private TIntSet privateReadableAllSet = EMPTY;
 
-    private Set<Integer> privateReadableOwnSet = EMPTY;
+    private TIntSet privateReadableOwnSet = EMPTY;
 
-    private Set<Integer> sharedReadableAllSet = EMPTY;
+    private TIntSet sharedReadableAllSet = EMPTY;
 
-    private Set<Integer> sharedReadableOwnSet = EMPTY;
+    private TIntSet sharedReadableOwnSet = EMPTY;
 
     /**
      * Constructs a CalendarFolderObject. Note that it still has to be filled using {@link #addFolder(boolean, boolean, boolean, int, int)}
@@ -123,38 +123,37 @@ public class CalendarFolderObject implements Serializable {
      * @param type The folder type as per the type constants in the {@link FolderObject}
      */
     public void addFolder(final boolean readall, final boolean readown, final boolean shared, final int folderid, final int type) {
-        final Integer folderID = Integer.valueOf(folderid);
         if (!shared) {
             if (type == FolderObject.PRIVATE) {
                 if (privatefolder == EMPTY) {
-                    privatefolder = new HashSet<Integer>(4);
+                    privatefolder = new TIntHashSet(4);
                 }
-                privatefolder.add(folderID);
+                privatefolder.add(folderid);
                 if (readall) {
                     if (privateReadableAllSet == EMPTY) {
-                        privateReadableAllSet = new HashSet<Integer>(4);
+                        privateReadableAllSet = new TIntHashSet(4);
                     }
-                    privateReadableAllSet.add(folderID);
+                    privateReadableAllSet.add(folderid);
                 } else if (readown) {
                     if (privateReadableOwnSet == EMPTY) {
-                        privateReadableOwnSet = new HashSet<Integer>(4);
+                        privateReadableOwnSet = new TIntHashSet(4);
                     }
-                    privateReadableOwnSet.add(folderID);
+                    privateReadableOwnSet.add(folderid);
                 }
             } else if (type == FolderObject.PUBLIC) {
                 if (publicfolder == EMPTY) {
-                    publicfolder = new HashSet<Integer>(4);
+                    publicfolder = new TIntHashSet(4);
                 }
                 if (readall) {
                     if (publicReadableAllSet == EMPTY) {
-                        publicReadableAllSet = new HashSet<Integer>(4);
+                        publicReadableAllSet = new TIntHashSet(4);
                     }
-                    publicReadableAllSet.add(folderID);
+                    publicReadableAllSet.add(folderid);
                 } else if (readown) {
                     if (publicReadableOwnSet == EMPTY) {
-                        publicReadableOwnSet = new HashSet<Integer>(4);
+                        publicReadableOwnSet = new TIntHashSet(4);
                     }
-                    publicReadableOwnSet.add(folderID);
+                    publicReadableOwnSet.add(folderid);
                 }
             } else {
                 if (LOG.isWarnEnabled()) {
@@ -163,19 +162,19 @@ public class CalendarFolderObject implements Serializable {
             }
         } else if (fill_shared) {
             if (sharedfolder == EMPTY) {
-                sharedfolder = new HashSet<Integer>(4);
+                sharedfolder = new TIntHashSet(4);
             }
-            sharedfolder.add(folderID);
+            sharedfolder.add(folderid);
             if (readall) {
                 if (sharedReadableAllSet == EMPTY) {
-                    sharedReadableAllSet = new HashSet<Integer>(4);
+                    sharedReadableAllSet = new TIntHashSet(4);
                 }
-                sharedReadableAllSet.add(folderID);
+                sharedReadableAllSet.add(folderid);
             } else if (readown) {
                 if (sharedReadableOwnSet == EMPTY) {
-                    sharedReadableOwnSet = new HashSet<Integer>(4);
+                    sharedReadableOwnSet = new TIntHashSet(4);
                 }
-                sharedReadableOwnSet.add(folderID);
+                sharedReadableOwnSet.add(folderid);
             }
         }
     }
@@ -183,14 +182,14 @@ public class CalendarFolderObject implements Serializable {
     /**
      * @return a set of all private calendar folders that this user can see
      */
-    public final Set<Integer> getPrivateFolders() {
+    public final TIntSet getPrivateFolders() {
         return privatefolder;
     }
 
     /**
      * @return a set of all public calendar folders that this user can see
      */
-    public final Set<Integer> getPublicFolders() {
+    public final TIntSet getPublicFolders() {
         return publicfolder;
     }
 
@@ -199,49 +198,49 @@ public class CalendarFolderObject implements Serializable {
      *
      * @return
      */
-    public final Set<Integer> getSharedFolderList() {
+    public final TIntSet getSharedFolderList() {
         return sharedfolder;
     }
 
     /**
      * @return a set of all private calendar folders in which the user may read all entries
      */
-    public final Set<Integer> getPrivateReadableAll() {
+    public final TIntSet getPrivateReadableAll() {
         return privateReadableAllSet;
     }
 
     /**
      * @return a set of all private calendar folders in which the user may read her own objects
      */
-    public final Set<Integer> getPrivateReadableOwn() {
+    public final TIntSet getPrivateReadableOwn() {
         return privateReadableOwnSet;
     }
 
     /**
      * @return a set of all public calendar folders in which the user may read all entries
      */
-    public final Set<Integer> getPublicReadableAll() {
+    public final TIntSet getPublicReadableAll() {
         return publicReadableAllSet;
     }
 
     /**
      * @return a set of all public folders in which the user may read her own entries
      */
-    public final Set<Integer> getPublicReadableOwn() {
+    public final TIntSet getPublicReadableOwn() {
         return publicReadableOwnSet;
     }
 
     /**
      * @return a set of all shared folders in which the user may read all entries
      */
-    public final Set<Integer> getSharedReadableAll() {
+    public final TIntSet getSharedReadableAll() {
         return sharedReadableAllSet;
     }
 
     /**
      * @return a set of all shared folders in which the user may read her own entries
      */
-    public final Set<Integer> getSharedReadableOwn() {
+    public final TIntSet getSharedReadableOwn() {
         return sharedReadableOwnSet;
     }
 

@@ -67,7 +67,7 @@ public class TemplateExceptionMessage implements LocalizableStrings {
 
     public final static String IOException_HELP = "Verify file system and templates.";
 
-    public final static String IOException_MSG = "An IOException occurred.";
+    public final static String IOException_MSG = "An I/O error occurred.";
 
     public final static String UnderlyingException_HELP = "Please correct the template";
 

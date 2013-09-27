@@ -187,6 +187,17 @@ public abstract class ServiceHolder<S> {
         serviceUsageInspection = true;
     }
 
+    /**
+     * Disables the service usage inspection
+     */
+    static void disableServiceUsageInspection() {
+        final Timer timer = ServiceHolder.serviceHolderTimer;
+        if (null != timer) {
+            timer.cancel();
+            ServiceHolder.serviceHolderTimer = null;
+        }
+    }
+
     private static boolean serviceUsageInspection = false;
 
     protected static volatile int serviceUsageTimeout;

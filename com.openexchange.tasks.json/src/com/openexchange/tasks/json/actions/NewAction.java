@@ -90,7 +90,7 @@ public class NewAction extends TaskAction {
     @Override
     protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         final Task task = new Task();
-        final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
+        final JSONObject jsonobject = (JSONObject) req.getRequest().requireData();
         ServerSession session = req.getSession();
         final TaskParser taskParser = new TaskParser(req.getTimeZone());
         taskParser.parse(task, jsonobject, session.getUser().getLocale());

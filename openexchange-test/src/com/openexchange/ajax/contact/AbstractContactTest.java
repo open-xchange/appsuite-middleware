@@ -56,6 +56,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
@@ -263,6 +264,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         final Contact contactObj = new Contact();
         contactObj.setSurName(title);
         contactObj.setParentFolderID(contactFolderId);
+        contactObj.setDisplayName(UUID.randomUUID().toString());
 
         final DistributionListEntryObject[] entry = new DistributionListEntryObject[3];
         entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
@@ -436,7 +438,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         contactObj.setCountryHome("country home");
         contactObj.setCountryOther("country other");
         contactObj.setDepartment("department");
-        contactObj.setDisplayName("display name");
+        contactObj.setDisplayName("display name" + UUID.randomUUID().toString());
         contactObj.setEmail1("email1@test.de");
         contactObj.setEmail2("email2@test.de");
         contactObj.setEmail3("email3@test.de");

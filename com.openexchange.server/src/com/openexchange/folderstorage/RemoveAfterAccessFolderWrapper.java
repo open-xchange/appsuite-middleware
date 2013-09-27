@@ -51,6 +51,8 @@ package com.openexchange.folderstorage;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link RemoveAfterAccessFolderWrapper} - Simple wrapper for {@link Folder} to enhance with {@link RemoveAfterAccessFolder} behavior.
@@ -373,6 +375,26 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
     @Override
     public boolean isGlobalID() {
         return folder.isGlobalID();
+    }
+
+    @Override
+    public void setMeta(Map<String, Object> meta) {
+        folder.setMeta(meta);
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return folder.getMeta();
+    }
+
+    @Override
+    public Set<String> getSupportedCapabilities() {
+        return folder.getSupportedCapabilities();
+    }
+
+    @Override
+    public void setSupportedCapabilities(Set<String> capabilities) {
+        folder.setSupportedCapabilities(capabilities);
     }
 
 }

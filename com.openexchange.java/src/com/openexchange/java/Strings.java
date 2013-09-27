@@ -51,6 +51,7 @@ package com.openexchange.java;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
@@ -232,6 +233,20 @@ public class Strings {
     }
 
     /**
+     * Replaces whitespaces in given string with specified <code>replacement</code>.
+     *
+     * @param s The string replacement
+     * @param replacement The string replacement
+     * @return The replaced string
+     */
+    public static String replaceWhitespacesWith(final String s, final String replacement) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_WHITESPACE.matcher(s).replaceAll(null == replacement ? "" : quoteReplacement(replacement));
+    }
+
+    /**
      * Returns a literal replacement <code>String</code> for the specified <code>String</code>. This method produces a <code>String</code>
      * that will work as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class. The
      * <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\') and
@@ -265,7 +280,7 @@ public class Strings {
      * Checks for an empty string.
      *
      * @param string The string
-     * @return <code>true</code> if empty; else <code>false</code>
+     * @return <code>true</code> if input is null or empty; else <code>false</code>
      */
     public static boolean isEmpty(final String string) {
         if (null == string) {
@@ -274,7 +289,7 @@ public class Strings {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+            isWhitespace = isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -521,6 +536,39 @@ public class Strings {
             return s.substring(1, s.length() - 1);
         }
         return s;
+    }
+
+    /**
+     * Generates a string of code points for given string
+     *
+     * @param str The string
+     * @return The code points
+     */
+    public static String toCodePoints(final String str) {
+        if (null == str) {
+            return null;
+        }
+        final int length = str.length();
+        final StringAllocator sb = new StringAllocator(length << 1);
+        for (int i = 0; i < length; i++) {
+            sb.append(' ').append(str.codePointAt(i));
+        }
+        return sb.deleteCharAt(0).toString();
+    }
+
+    /**
+     * Generates a string of code points for given string
+     *
+     * @param str The string
+     * @param out The print stream to print to
+     * @return The code points
+     */
+    public static void outCodePoints(final String str, final PrintStream out) {
+        if (null == out) {
+            System.out.println(toCodePoints(str));
+        } else {
+            out.println(toCodePoints(str));
+        }
     }
 
     /** ASCII-wise to upper-case */

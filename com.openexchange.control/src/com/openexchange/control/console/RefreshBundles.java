@@ -68,27 +68,34 @@ public final class RefreshBundles extends AbstractConsoleHandler {
      * @param args The command-line arguments
      */
     public RefreshBundles(final String args[]) {
+        boolean error = true;
         try {
             init(args, true);
             refresh();
+            error = false;
         } catch (final Exception exc) {
             final Throwable cause = exc.getCause();
-            if (cause != null) {
+            if (null == cause) {
+                System.out.println(exc.getMessage());
+                exc.printStackTrace(System.out);
+            } else {
                 if (cause instanceof BundleNotFoundException) {
                     System.out.println(cause.getMessage());
                 } else {
-                    exc.printStackTrace();
+                    System.out.println(exc.getMessage());
+                    exc.printStackTrace(System.out);
                 }
-            } else {
-                exc.printStackTrace();
             }
         } finally {
             try {
                 close();
             } catch (final Exception exc) {
-                System.out.println("closing all connections failed: " + exc);
-                exc.printStackTrace();
+                System.out.println("closing all connections failed: " + exc.getMessage());
+                exc.printStackTrace(System.out);
             }
+        }
+        if (error) {
+            exit();
         }
     }
 

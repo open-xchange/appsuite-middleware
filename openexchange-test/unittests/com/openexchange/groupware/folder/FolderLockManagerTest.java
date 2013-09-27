@@ -49,7 +49,7 @@ public class FolderLockManagerTest extends FolderTestCase{
 	@Override
 	public void tearDown() throws Exception {
 		for(final int id : unlock) {
-			lockManager.unlock(id, ctx, user, userConfig);
+			lockManager.unlock(id, ctx, user);
 		}
 		lockManager.commit();
 		lockManager.finish();
@@ -67,10 +67,10 @@ public class FolderLockManagerTest extends FolderTestCase{
 	}
 
 	public void testFindDepth0Locks() throws Exception {
-		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user);
 		unlock.add(lockId);
 
-		final List<FolderLock> locks =  lockManager.findFolderLocks(entity, ctx, user, userConfig);
+		final List<FolderLock> locks =  lockManager.findFolderLocks(entity, ctx, user);
 		assertEquals(1, locks.size());
 		final Lock lock = locks.get(0);
 		assertEquals(lockId, lock.getId());
@@ -81,10 +81,10 @@ public class FolderLockManagerTest extends FolderTestCase{
 	}
 
 	public void testFindDepth1Locks() throws Exception {
-		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 1, "Me", ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 1, "Me", ctx, user);
 		unlock.add(lockId);
 
-		final List<FolderLock> locks =  lockManager.findFolderLocks(entityDepth1, ctx, user, userConfig);
+		final List<FolderLock> locks =  lockManager.findFolderLocks(entityDepth1, ctx, user);
 		assertEquals(1, locks.size());
 		final Lock lock = locks.get(0);
 		assertEquals(lockId, lock.getId());
@@ -95,10 +95,10 @@ public class FolderLockManagerTest extends FolderTestCase{
 	}
 
 	public void testFindDepthInfinityLocks() throws Exception {
-		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, LockManager.INFINITE, "Me",  ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, LockManager.INFINITE, "Me",  ctx, user);
 		unlock.add(lockId);
 
-		final List<FolderLock> locks =  lockManager.findFolderLocks(entityDepth2, ctx, user, userConfig);
+		final List<FolderLock> locks =  lockManager.findFolderLocks(entityDepth2, ctx, user);
 		assertEquals(1, locks.size());
 		final Lock lock = locks.get(0);
 		assertEquals(lockId, lock.getId());
@@ -109,13 +109,13 @@ public class FolderLockManagerTest extends FolderTestCase{
 	}
 
 	public void testLoadOwnLocks() throws Exception {
-		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, LockManager.INFINITE, "Me",  ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, LockManager.INFINITE, "Me",  ctx, user);
 		unlock.add(lockId);
 
-		final int lockId2 = lockManager.lock(entityDepth1, LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user, userConfig);
+		final int lockId2 = lockManager.lock(entityDepth1, LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user);
 		unlock.add(lockId2);
 
-		final Map<Integer, List<FolderLock>> lockMap = lockManager.loadOwnLocks(Arrays.asList(entity, entityDepth1, entityDepth2), ctx, user, userConfig);
+		final Map<Integer, List<FolderLock>> lockMap = lockManager.loadOwnLocks(Arrays.asList(entity, entityDepth1, entityDepth2), ctx, user);
 
 		assertTrue(lockMap.get(entityDepth2).isEmpty());
 		assertEquals(1, lockMap.get(entityDepth1).size());
@@ -127,21 +127,21 @@ public class FolderLockManagerTest extends FolderTestCase{
 	}
 
 	public void testUnlock() throws Exception {
-		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user);
 		unlock.add(lockId);
 
-		lockManager.unlock(lockId, ctx, user, userConfig);
+		lockManager.unlock(lockId, ctx, user);
 
-		final List<FolderLock> locks =  lockManager.findFolderLocks(entity, ctx, user, userConfig);
+		final List<FolderLock> locks =  lockManager.findFolderLocks(entity, ctx, user);
 		assertTrue(locks.isEmpty());
 
 	}
 
 	public void testTimeout() throws Exception {
-		final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user, userConfig);
+		final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, 0, "Me", ctx, user);
 		unlock.add(lockId);
 
-		final List<FolderLock> locks =  lockManager.findFolderLocks(entity, ctx, user, userConfig);
+		final List<FolderLock> locks =  lockManager.findFolderLocks(entity, ctx, user);
 		assertEquals(0, locks.size());
 
 	}

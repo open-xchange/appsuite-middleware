@@ -329,5 +329,4 @@ final class LoggerTask extends AbstractTask<Object> {
             throw new IllegalArgumentException(sb.toString(), e);
         }
     }
-
 }

@@ -61,8 +61,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -88,24 +90,25 @@ public final class DeleteAction extends SnippetAction {
      *
      * @param services The service look-up
      */
-    public DeleteAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
-        super(services, actions);
+    public DeleteAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
+        super(services, snippetServices, actions);
         restMethods = Collections.singletonList(Method.DELETE);
     }
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
         final JSONArray ids = (JSONArray) snippetRequest.getRequestData().getData();
+        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
         if (null != ids) {
             final int length = ids.length();
 
-            SnippetManagement management = getSnippetService().getManagement(snippetRequest.getSession());
+            SnippetManagement management = snippetService.getManagement(snippetRequest.getSession());
             for (int i = 0; i < length; i++) {
                 management.deleteSnippet(ids.getString(i));
             }
         } else {
             final String id = snippetRequest.checkParameter("id");
-            getSnippetService().getManagement(snippetRequest.getSession()).deleteSnippet(id);
+            snippetService.getManagement(snippetRequest.getSession()).deleteSnippet(id);
         }
 
         return new AJAXRequestResult(new JSONObject(0), "json");

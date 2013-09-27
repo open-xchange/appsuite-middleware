@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Chat Bundle
 Bundle-SymbolicName: com.openexchange.chat
-Bundle-Version: 7.2.0
+Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.chat.osgi.ChatActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

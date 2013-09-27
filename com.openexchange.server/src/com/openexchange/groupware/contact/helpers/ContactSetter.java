@@ -1366,7 +1366,22 @@ public class ContactSetter implements ContactSwitcher {
         if(objects[1] == null) {
             return conObj;
         }
-        final DistributionListEntryObject[] value = (DistributionListEntryObject[]) objects[1];
+        final DistributionListEntryObject[] value;
+        if (String.class.isInstance(objects[1])) {
+            String[] splitted = ((String)objects[1]).split("(?<!/);");
+            if (0 != splitted.length % 2) {
+                throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Invalid number of properties for distribution list");
+            }
+            value = new DistributionListEntryObject[splitted.length / 2];
+            for (int i = 0; i < value.length; i++) {
+                int offset = 2 * i;
+                value[i] = new DistributionListEntryObject();
+                value[i].setEmailaddress(splitted[0 + offset].replaceAll("/;", ";"));
+                value[i].setDisplayname(splitted[1 + offset].replaceAll("/;", ";"));
+            }
+        } else {
+            value = (DistributionListEntryObject[]) objects[1];
+        }
         conObj.setDistributionList(value);
         return conObj;
     }

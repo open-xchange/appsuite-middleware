@@ -71,13 +71,13 @@ public class CapabilityActionFactory implements AJAXActionServiceFactory {
      *
      * @param services The service look-up
      */
-    public CapabilityActionFactory(ServiceLookup services) {
+    public CapabilityActionFactory(final ServiceLookup services) {
         super();
         this.allAction = new CapabilityAllAction(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
+    public AJAXActionService createActionService(final String action) throws OXException {
         if ("all".equals(action)) {
             return allAction;
         }

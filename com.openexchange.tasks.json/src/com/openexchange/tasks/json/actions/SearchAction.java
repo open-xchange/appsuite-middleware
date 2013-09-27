@@ -111,7 +111,7 @@ public class SearchAction extends TaskAction {
         Date timestamp = new Date(0);
         Date lastModified = null;
 
-        final JSONObject jData = (JSONObject) req.getRequest().getData();
+        final JSONObject jData = (JSONObject) req.getRequest().requireData();
         final TaskSearchObject searchObj = new TaskSearchObject();
         if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
             searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));

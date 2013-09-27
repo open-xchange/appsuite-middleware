@@ -127,7 +127,7 @@ public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
         if (hasImage) {
             return new Parameter[] {
                 new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-                new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getObjectID())),
+                new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getInternalUserId())),
                 new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactData.getLastModified().getTime())),
                 new FieldParameter("json", stringifiedJSON),
                 new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactData.getImage1()), "image/jpg") };
@@ -135,7 +135,7 @@ public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
 
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getObjectID())),
+            new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getInternalUserId())),
             new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactData.getLastModified().getTime())) };
     }
 

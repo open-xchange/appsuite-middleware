@@ -157,6 +157,11 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
     }
 
     @Override
+    public boolean isTrackable() {
+        return false;
+    }
+
+    @Override
     public boolean isCacheable() {
         /*
          * Return false to let closeInternal() being called

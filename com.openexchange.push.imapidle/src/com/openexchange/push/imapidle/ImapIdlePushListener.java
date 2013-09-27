@@ -606,28 +606,30 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 return false;
             }
             dropSessionRef("MSG".equals(e.getPrefix()) && 1001 == e.getCode());
-            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
-                LOG.error(e);
+                LOG.error("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
+            } else {
+                LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms");
             }
             try {
                 Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
-                ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+                Thread.currentThread().interrupt();
                 if (isDebugEnabled()) {
                     LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
                 }
             }
         } catch (final MessagingException e) {
             dropSessionRef(e instanceof javax.mail.AuthenticationFailedException);
-            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
-                LOG.error(e);
+                LOG.error("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
+            } else {
+                LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms");
             }
             try {
                 Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
-                ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+                Thread.currentThread().interrupt();
                 if (isDebugEnabled()) {
                     LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
                 }
@@ -636,14 +638,15 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             throw e;
         } catch (final RuntimeException e) {
             dropSessionRef(false);
-            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
-                LOG.error(e);
+                LOG.error("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
+            } else {
+                LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms");
             }
             try {
                 Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
-                ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+                Thread.currentThread().interrupt();
                 if (isDebugEnabled()) {
                     LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
                 }

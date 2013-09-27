@@ -129,12 +129,4 @@ public interface UserConfigurationService {
      */
     public void removeUserConfiguration(int userId, Context ctx) throws OXException;
 
-    /**
-     * Saves specified user configuration.
-     *
-     * @param userConfiguration The user configuration to save.
-     * @throws OXException If saving user configuration fails.
-     */
-    public void saveUserConfiguration(final UserConfiguration userConfiguration) throws OXException;
-
 }

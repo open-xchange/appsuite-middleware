@@ -86,20 +86,18 @@ public class DeleteAction extends TaskAction {
         super(services);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
-     */
     @Override
     protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
         final Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        if (req.getRequest().getData() instanceof JSONObject) {
-            final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
+        final Object data = req.getRequest().getData();
+        if (data instanceof JSONObject) {
+            final JSONObject jsonobject = (JSONObject) data;
             final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
             final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
             final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
             sqlinterface.deleteTaskObject(id, inFolder, timestamp);
-        } else if (req.getRequest().getData() instanceof JSONArray) {
-            JSONArray jsonArray = (JSONArray) req.getRequest().getData();
+        } else if (data instanceof JSONArray) {
+            JSONArray jsonArray = (JSONArray) data;
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject json = jsonArray.getJSONObject(i);
                 final int id = DataParser.checkInt(json, AJAXServlet.PARAMETER_ID);

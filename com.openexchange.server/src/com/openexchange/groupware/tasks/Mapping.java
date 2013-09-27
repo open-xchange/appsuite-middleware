@@ -49,7 +49,11 @@
 
 package com.openexchange.groupware.tasks;
 
-import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.TCollections;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.PreparedStatement;
@@ -59,13 +63,8 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -1295,25 +1294,25 @@ public final class Mapping {
      * This map does the mapping from the unique field identifier to the
      * according mapper.
      */
-    private static final Map<Integer, Mapper<?>> ID_MAPPING;
+    private static final TIntObjectMap<Mapper<?>> ID_MAPPING;
 
     /**
      * This set contains all possible fields that can be used with tasks.
      */
-    private static final Set<Integer> ALL_ATTRIBUTES;
+    private static final TIntSet ALL_ATTRIBUTES;
 
     /**
      * @param attributeId identifier of the attribute.
      * @return the mapper implementation for the given attribute.
      */
     public static Mapper<?> getMapping(final int attributeId) {
-        return ID_MAPPING.get(I(attributeId));
+        return ID_MAPPING.get(attributeId);
     }
     /**
      * returns all known field mappers
      */
     public static Collection<Mapper<?>> getAllFieldMappers() {
-        return ID_MAPPING.values();
+        return ID_MAPPING.valueCollection();
     }
 
     /**
@@ -1325,25 +1324,25 @@ public final class Mapping {
     static boolean implemented(final int[] attributes) {
         boolean retval = true;
         for (int i = 0; i < attributes.length && retval; i++) {
-            retval = ALL_ATTRIBUTES.contains(Integer.valueOf(attributes[i]));
+            retval = ALL_ATTRIBUTES.contains(attributes[i]);
         }
         return retval;
     }
 
     static {
-        final Map<Integer, Mapper<?>> tmp = new HashMap<Integer, Mapper<?>>();
+        final TIntObjectMap<Mapper<?>> tmp = new TIntObjectHashMap<Mapper<?>>();
         for (final Mapper<?> mapper : MAPPERS) {
-            tmp.put(Integer.valueOf(mapper.getId()), mapper);
+            tmp.put(mapper.getId(), mapper);
         }
         final Mapper<Integer> identifier = new ObjectID();
-        tmp.put(Integer.valueOf(identifier.getId()), identifier);
-        ID_MAPPING = Collections.unmodifiableMap(tmp);
-        final Set<Integer> tmp2 = new HashSet<Integer>();
+        tmp.put(identifier.getId(), identifier);
+        ID_MAPPING = TCollections.unmodifiableMap(tmp);
+        final TIntSet tmp2 = new TIntHashSet();
         tmp2.addAll(ID_MAPPING.keySet());
-        tmp2.add(Integer.valueOf(CalendarObject.PARTICIPANTS));
-        tmp2.add(Integer.valueOf(FolderChildObject.FOLDER_ID));
-        tmp2.add(Integer.valueOf(CalendarObject.ALARM));
-        ALL_ATTRIBUTES = Collections.unmodifiableSet(tmp2);
+        tmp2.add(CalendarObject.PARTICIPANTS);
+        tmp2.add(FolderChildObject.FOLDER_ID);
+        tmp2.add(CalendarObject.ALARM);
+        ALL_ATTRIBUTES = TCollections.unmodifiableSet(tmp2);
         final List<Mapper<String>> tmp3 = new ArrayList<Mapper<String>>();
         for (final Mapper<? extends Object> mapper : Mapping.MAPPERS) {
             for (final Type t : mapper.getClass().getGenericInterfaces()) {

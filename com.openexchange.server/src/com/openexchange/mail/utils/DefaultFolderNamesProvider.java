@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.utils;
 
+import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_CONFIRMED_HAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_CONFIRMED_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_DRAFTS;
@@ -94,9 +95,8 @@ public final class DefaultFolderNamesProvider {
         if (MailAccount.DEFAULT_ID == accountId) {
             fallbackProvider = DEFAULT_PROVIDER;
         } else {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            fallbackProvider = new DefaultAccountProvider(storageService.getDefaultMailAccount(user, cid));
+            final MailAccountStorageService storageService = ServerServiceRegistry.getServize(MailAccountStorageService.class, true);
+            fallbackProvider = new DefaultAccountFallbackProvider(storageService.getDefaultMailAccount(user, cid));
         }
     }
 
@@ -309,41 +309,41 @@ public final class DefaultFolderNamesProvider {
      */
     public String[] getDefaultFolderFullnames(final String trashFullname, final String sentFullname, final String draftsFullname, final String spamFullname, final String confirmedSpamFullname, final String confirmedHamFullname, final boolean isSpamEnabled) {
         final String[] fullnames = new String[isSpamEnabled ? 6 : 4];
-        if ((draftsFullname != null) && (draftsFullname.length() != 0)) {
-            fullnames[INDEX_DRAFTS] = draftsFullname;
-        } else {
+        if (isEmpty(draftsFullname)) {
             fullnames[INDEX_DRAFTS] = null;
+        } else {
+            fullnames[INDEX_DRAFTS] = draftsFullname;
         }
 
-        if ((sentFullname != null) && (sentFullname.length() != 0)) {
-            fullnames[INDEX_SENT] = sentFullname;
-        } else {
+        if (isEmpty(sentFullname)) {
             fullnames[INDEX_SENT] = null;
+        } else {
+            fullnames[INDEX_SENT] = sentFullname;
         }
 
-        if ((spamFullname != null) && (spamFullname.length() != 0)) {
-            fullnames[INDEX_SPAM] = spamFullname;
-        } else {
+        if (isEmpty(spamFullname)) {
             fullnames[INDEX_SPAM] = null;
+        } else {
+            fullnames[INDEX_SPAM] = spamFullname;
         }
 
-        if ((trashFullname != null) && (trashFullname.length() != 0)) {
-            fullnames[INDEX_TRASH] = trashFullname;
-        } else {
+        if (isEmpty(trashFullname)) {
             fullnames[INDEX_TRASH] = null;
+        } else {
+            fullnames[INDEX_TRASH] = trashFullname;
         }
 
         if (isSpamEnabled) {
-            if ((confirmedSpamFullname != null) && (confirmedSpamFullname.length() != 0)) {
-                fullnames[INDEX_CONFIRMED_SPAM] = confirmedSpamFullname;
-            } else {
+            if (isEmpty(confirmedSpamFullname)) {
                 fullnames[INDEX_CONFIRMED_SPAM] = null;
+            } else {
+                fullnames[INDEX_CONFIRMED_SPAM] = confirmedSpamFullname;
             }
 
-            if ((confirmedHamFullname != null) && (confirmedHamFullname.length() != 0)) {
-                fullnames[INDEX_CONFIRMED_HAM] = confirmedHamFullname;
-            } else {
+            if (isEmpty(confirmedHamFullname)) {
                 fullnames[INDEX_CONFIRMED_HAM] = null;
+            } else {
+                fullnames[INDEX_CONFIRMED_HAM] = confirmedHamFullname;
             }
         }
         return fullnames;
@@ -367,11 +367,11 @@ public final class DefaultFolderNamesProvider {
         String getConfirmedHam();
     }
 
-    private static final class DefaultAccountProvider implements FallbackProvider {
+    private static final class DefaultAccountFallbackProvider implements FallbackProvider {
 
         private final MailAccount defaultAccount;
 
-        public DefaultAccountProvider(final MailAccount defaultAccount) {
+        public DefaultAccountFallbackProvider(final MailAccount defaultAccount) {
             super();
             this.defaultAccount = defaultAccount;
         }
@@ -379,7 +379,7 @@ public final class DefaultFolderNamesProvider {
         @Override
         public String getConfirmedHam() {
             final String ret = defaultAccount.getConfirmedHam();
-            if (ret == null || ret.length() == 0) {
+            if (isEmpty(ret)) {
                 return DEFAULT_PROVIDER.getConfirmedHam();
             }
             return ret;
@@ -388,7 +388,7 @@ public final class DefaultFolderNamesProvider {
         @Override
         public String getConfirmedSpam() {
             final String ret = defaultAccount.getConfirmedSpam();
-            if (ret == null || ret.length() == 0) {
+            if (isEmpty(ret)) {
                 return DEFAULT_PROVIDER.getConfirmedSpam();
             }
             return ret;
@@ -397,7 +397,7 @@ public final class DefaultFolderNamesProvider {
         @Override
         public String getDrafts() {
             final String ret = defaultAccount.getDrafts();
-            if (ret == null || ret.length() == 0) {
+            if (isEmpty(ret)) {
                 return DEFAULT_PROVIDER.getDrafts();
             }
             return ret;
@@ -406,7 +406,7 @@ public final class DefaultFolderNamesProvider {
         @Override
         public String getSent() {
             final String ret = defaultAccount.getSent();
-            if (ret == null || ret.length() == 0) {
+            if (isEmpty(ret)) {
                 return DEFAULT_PROVIDER.getSent();
             }
             return ret;
@@ -415,7 +415,7 @@ public final class DefaultFolderNamesProvider {
         @Override
         public String getSpam() {
             final String ret = defaultAccount.getSpam();
-            if (ret == null || ret.length() == 0) {
+            if (isEmpty(ret)) {
                 return DEFAULT_PROVIDER.getSpam();
             }
             return ret;
@@ -424,7 +424,7 @@ public final class DefaultFolderNamesProvider {
         @Override
         public String getTrash() {
             final String ret = defaultAccount.getTrash();
-            if (ret == null || ret.length() == 0) {
+            if (isEmpty(ret)) {
                 return DEFAULT_PROVIDER.getTrash();
             }
             return ret;

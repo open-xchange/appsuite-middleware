@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.management.MBeanException;
+import com.openexchange.report.LoginCounterService;
 
 /**
  * {@link LoginCounterMBean}
@@ -65,7 +66,7 @@ public interface LoginCounterMBean {
     /**
      * The key to receive the summed up number of logins.
      */
-    public static final String SUM = "sum";
+    public static final String SUM = LoginCounterService.SUM;
 
     /**
      * Gets the number of logins happened in specified range.

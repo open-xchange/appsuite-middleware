@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/jdom-2.0.3.jar" sourcepath="lib/src/jdom-2.0.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jdom-2.0.5.jar" sourcepath="lib/src/jdom-2.0.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/joox-1.1.0.jar" sourcepath="lib/src/joox-1.1.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/stax-1.2.0.jar" sourcepath="lib/src/stax-src-1.2.0.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.dynamicjava.stax-api-1.0.jar" sourcepath="lib/src/org.dynamicjava.stax-api-1.0-src.zip"/>

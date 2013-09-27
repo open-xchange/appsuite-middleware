@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -72,6 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.Rate.Result;
+import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * {@link RateLimiter}
@@ -96,16 +98,12 @@ public final class RateLimiter {
 
         @Override
         public String getValue(final HttpServletRequest servletRequest) {
-            final Cookie[] cookies = servletRequest.getCookies();
+            final Map<String, Cookie> cookies = Cookies.cookieMapFor(servletRequest);
             if (null == cookies) {
                 return null;
             }
-            for (final Cookie cookie : cookies) {
-                if ("jsessionid".equals(toLowerCase(cookie.getName()))) {
-                    return cookie.getValue();
-                }
-            }
-            return null;
+            final Cookie cookie = cookies.get("JSESSIONID");
+            return null == cookie ? null : cookie.getValue();
         }
     };
 
@@ -120,16 +118,12 @@ public final class RateLimiter {
 
         @Override
         public String getValue(final HttpServletRequest servletRequest) {
-            final Cookie[] cookies = servletRequest.getCookies();
+            final Map<String, Cookie> cookies = Cookies.cookieMapFor(servletRequest);
             if (null == cookies) {
                 return null;
             }
-            for (final Cookie cookie : cookies) {
-                if (cookieName.equals(toLowerCase(cookie.getName()))) {
-                    return cookie.getValue();
-                }
-            }
-            return null;
+            final Cookie cookie = cookies.get(cookieName);
+            return null == cookie ? null : cookie.getValue();
         }
 
     }
@@ -175,6 +169,10 @@ public final class RateLimiter {
                 tmp = keyPartProviders;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return Collections.emptyList();
+                    }
                     final String sProviders = service.getProperty("com.openexchange.servlet.maxRateKeyPartProviders");
                     if (isEmpty(sProviders)) {
                         tmp = Collections.emptyList();
@@ -210,7 +208,10 @@ public final class RateLimiter {
                 tmp = considerRemotePort;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null == service ? "false" : service.getProperty("com.openexchange.servlet.maxRateConsiderRemotePort", "false"));
+                    if (null == service) {
+                        return false;
+                    }
+                    tmp = Boolean.valueOf(service.getProperty("com.openexchange.servlet.maxRateConsiderRemotePort", "false"));
                     considerRemotePort = tmp;
                 }
             }
@@ -332,7 +333,10 @@ public final class RateLimiter {
                 tmp = bucketMap;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final int maxCapacity = null == service ? 250000 : service.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
+                    if (null == service) {
+                        return null;
+                    }
+                    final int maxCapacity = service.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
                     final ConcurrentLinkedHashMap<Key, Rate> tmp2 = new ConcurrentLinkedHashMap<Key, Rate>(256, 0.75F, 16, maxCapacity, new LRUPolicy());
                     tmp = tmp2;
                     bucketMap = tmp;
@@ -374,7 +378,11 @@ public final class RateLimiter {
                 tmp = maxRate;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? "1500" : service.getProperty("com.openexchange.servlet.maxRate", "1500"));
+                    if (null == service) {
+                        // Service not yet available
+                        return 1500;
+                    }
+                    tmp = Integer.valueOf(service.getProperty("com.openexchange.servlet.maxRate", "1500"));
                     maxRate = tmp;
                 }
             }
@@ -391,7 +399,11 @@ public final class RateLimiter {
                 tmp = maxRateTimeWindow;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? "300000" : service.getProperty("com.openexchange.servlet.maxRateTimeWindow", "300000"));
+                    if (null == service) {
+                        // Service not yet available
+                        return 300000;
+                    }
+                    tmp = Integer.valueOf(service.getProperty("com.openexchange.servlet.maxRateTimeWindow", "300000"));
                     maxRateTimeWindow = tmp;
                 }
             }
@@ -408,7 +420,11 @@ public final class RateLimiter {
                 tmp = omitLocals;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null == service ? "false" : service.getProperty("com.openexchange.servlet.maxRateOmitLocals", "false"));
+                    if (null == service) {
+                        // Service not yet available
+                        return false;
+                    }
+                    tmp = Boolean.valueOf(service.getProperty("com.openexchange.servlet.maxRateOmitLocals", "false"));
                     omitLocals = tmp;
                 }
             }
@@ -457,6 +473,10 @@ public final class RateLimiter {
             //maxRatePerMinute <<= 2;
         }
         final ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+        if (null == bucketMap) {
+            // Not yet fully initialized
+            return true;
+        }
         final Key key = new Key(servletRequest, userAgent);
         while (true) {
             Rate rate = bucketMap.get(key);
@@ -554,10 +574,13 @@ public final class RateLimiter {
                 tmp = userAgentCheckers;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return Collections.emptyList();
+                    }
                     final String sProviders;
                     {
                         final String defaultValue = "\"Open-Xchange .NET HTTP Client*\", \"Open-Xchange USM HTTP Client*\", \"Jakarta Commons-HttpClient*\"";
-                        sProviders = null == service ? defaultValue : service.getProperty("com.openexchange.servlet.maxRateLenientClients", defaultValue);
+                        sProviders = service.getProperty("com.openexchange.servlet.maxRateLenientClients", defaultValue);
                     }
                     if (isEmpty(sProviders)) {
                         tmp = Collections.emptyList();

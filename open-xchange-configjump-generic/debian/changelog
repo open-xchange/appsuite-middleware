@@ -1,3 +1,81 @@
+open-xchange-configjump-generic (7.4.0-11) stable; urgency=low
+
+  * Eleventh candidate for 7.4.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 24 Sep 2013 09:39:24 +0200
+
+open-xchange-configjump-generic (7.4.0-10) stable; urgency=low
+
+  * Tenth candidate for 7.4.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Sep 2013 10:18:35 +0200
+
+open-xchange-configjump-generic (7.4.0-9) stable; urgency=low
+
+  * Ninth candidate for 7.4.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 12 Sep 2013 17:16:17 +0200
+
+open-xchange-configjump-generic (7.4.0-8) stable; urgency=low
+
+  * Eighth candidate for 7.4.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 02 Sep 2013 12:18:42 +0200
+
+open-xchange-configjump-generic (7.4.0-7) stable; urgency=low
+
+  * Seventh candidate for 7.4.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 27 Aug 2013 13:43:56 +0200
+
+open-xchange-configjump-generic (7.4.0-6) stable; urgency=low
+
+  * Sixth candidate for 7.4.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 23 Aug 2013 12:08:53 +0200
+
+open-xchange-configjump-generic (7.4.0-5) stable; urgency=low
+
+  * Fifth release candidate for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 19 Aug 2013 11:54:14 +0200
+
+open-xchange-configjump-generic (7.4.0-4) stable; urgency=low
+
+  * Fourth release candidate for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 13 Aug 2013 08:26:32 +0200
+
+open-xchange-configjump-generic (7.4.0-3) stable; urgency=low
+
+  * Third release candidate for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 06 Aug 2013 11:42:02 +0200
+
+open-xchange-configjump-generic (7.4.0-2) stable; urgency=low
+
+  * Second release candidate for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 02 Aug 2013 13:42:39 +0200
+
+open-xchange-configjump-generic (7.4.0-1) stable; urgency=low
+
+  * First release candidate for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 17 Jul 2013 10:19:20 +0200
+
+open-xchange-configjump-generic (7.4.0-0) unstable; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 16 Jul 2013 15:15:33 +0200
+
+open-xchange-configjump-generic (7.4.0-0) UNRELEASED; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 15 Apr 2013 10:29:18 +0200
+
 open-xchange-configjump-generic (7.2.2-18) stable; urgency=low
 
   * Build for patch 2013-09-26
@@ -112,6 +190,18 @@ open-xchange-configjump-generic (7.2.2-0) UNRELEASED; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 27 May 2013 17:14:05 +0200
 
+open-xchange-configjump-generic (7.2.1-7) stable; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 12 Jul 2013 18:12:54 +0200
+
+open-xchange-configjump-generic (7.2.1-6) stable; urgency=low
+
+  * Build for patch 2013-06-27
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 03 Jul 2013 16:58:12 +0200
+
 open-xchange-configjump-generic (7.2.1-5) UNRELEASED; urgency=low
 
   * Build for patch 2013-06-11
@@ -214,6 +304,12 @@ open-xchange-configjump-generic (7.2.0-0) UNRELEASED; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 15 Mar 2013 13:32:50 +0100
 
+open-xchange-configjump-generic (7.0.2-14) stable; urgency=low
+
+  * Build for patch 2013-09-12
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 11 Sep 2013 15:04:59 +0200
+
 open-xchange-configjump-generic (7.0.2-13) stable; urgency=low
 
   * Build for patch 2013-08-22
@@ -302,19 +398,19 @@ open-xchange-configjump-generic (7.0.1-8) unstable; urgency=low
 
   * Build for patch 2013-05-22
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Wed, 22 May 2013 12:09:07 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 22 May 2013 12:09:07 +0200
 
 open-xchange-configjump-generic (7.0.1-7) unstable; urgency=low
 
   * Build for patch 2013-05-09
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Mon, 13 May 2013 14:25:59 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 May 2013 14:25:59 +0200
 
 open-xchange-configjump-generic (7.0.1-6) unstable; urgency=low
 
   * Build for patch 2013-04-04
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 02 Apr 2013 09:53:14 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 09:53:14 +0200
 
 open-xchange-configjump-generic (7.0.1-5) unstable; urgency=low
 
@@ -428,13 +524,13 @@ open-xchange-configjump-generic (6.22.1-15) unstable; urgency=low
 
   * Build for patch 2013-05-09
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Mon, 13 May 2013 11:47:25 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 May 2013 11:47:25 +0200
 
 open-xchange-configjump-generic (6.22.1-14) unstable; urgency=low
 
   * Build for patch 2013-04-04
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 02 Apr 2013 09:10:36 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 09:10:36 +0200
 
 open-xchange-configjump-generic (6.22.1-13) unstable; urgency=low
 
@@ -520,6 +616,12 @@ open-xchange-configjump-generic (6.22.1-0) unstable; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Oct 2012 10:04:23 +0200
 
+open-xchange-configjump-generic (6.22.0-13) stable; urgency=low
+
+  * Build for patch 2013-09-03
+
+ -- Carsten Hoeger <choegeropen-xchange.com>  Wed, 28 Aug 2013 17:09:34 +0200
+
 open-xchange-configjump-generic (6.22.0-12) unstable; urgency=low
 
   * Build for patch 2013-06-13
@@ -530,13 +632,13 @@ open-xchange-configjump-generic (6.22.0-11) unstable; urgency=low
 
   * Build for patch 2013-05-09
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Mon, 13 May 2013 14:06:19 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 May 2013 14:06:19 +0200
 
 open-xchange-configjump-generic (6.22.0-10) unstable; urgency=low
 
   * Build for patch 2013-04-04
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 02 Apr 2013 11:07:47 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 11:07:47 +0200
 
 open-xchange-configjump-generic (6.22.0-9) unstable; urgency=low
 

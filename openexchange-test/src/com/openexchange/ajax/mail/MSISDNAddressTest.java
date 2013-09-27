@@ -114,6 +114,7 @@ public class MSISDNAddressTest extends AbstractMailTest {
     private void setCellularNumberOfContact(String cellPhoneNumber) throws OXException, IOException, JSONException {
         Contact changedContactData = new Contact();
         changedContactData.setObjectID(contactData.getObjectID());
+        changedContactData.setInternalUserId(contactData.getInternalUserId());
         changedContactData.setCellularTelephone1(validTestCellPhoneNumber);
         changedContactData.setLastModified(new Date());
         UpdateRequest updateRequest = new UpdateRequest(changedContactData, null);

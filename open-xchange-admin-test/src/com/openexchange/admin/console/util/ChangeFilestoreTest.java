@@ -49,10 +49,8 @@
 
 package com.openexchange.admin.console.util;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.util.filestore.ChangeFilestore;

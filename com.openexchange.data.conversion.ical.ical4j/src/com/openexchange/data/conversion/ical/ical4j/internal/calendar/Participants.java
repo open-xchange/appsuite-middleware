@@ -170,9 +170,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             parameters.add(Rsvp.TRUE);
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
-            LOG.error(e); // Shouldn't happen
+            LOG.error(e.getMessage(), e); // Shouldn't happen
         } catch (AddressException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -216,7 +216,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e); // Shouldn't happen
         } catch (AddressException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

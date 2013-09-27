@@ -49,8 +49,12 @@
 
 package com.openexchange.snippet.rdb.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.Constants;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
@@ -61,6 +65,8 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.rdb.RdbSnippetService;
 import com.openexchange.snippet.rdb.Services;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetCreateTableTask;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetDeleteListener;
@@ -83,7 +89,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, CacheService.class, CryptoService.class,
-            IDGeneratorService.class };
+            IDGeneratorService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -99,8 +105,12 @@ public class RdbSnippetActivator extends HousekeepingActivator {
             registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
             registerService(CreateTableService.class, createTableTask);
             registerService(DeleteListener.class, new RdbSnippetDeleteListener());
-
-
+            /*
+             * Register
+             */
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
+            registerService(SnippetService.class, new RdbSnippetService(), properties);
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;

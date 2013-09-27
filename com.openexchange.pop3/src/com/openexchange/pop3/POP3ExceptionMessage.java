@@ -179,7 +179,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
      * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
      * In that case, please try to empty your deleted items first, or delete smaller messages first.
      */
-    public final static String MOVE_ON_DELETE_FAILED_MSG = "This message could not be moved to trash folder, possibly because your mailbox is nearly full."+LINE_SEPARATOR+"In that case, please try to empty your deleted items first, or delete smaller messages first.";
+    public final static String MOVE_ON_DELETE_FAILED_MSG = "This message could not be moved to trash folder, possibly because your mailbox is nearly full. In that case, please try to empty your deleted items first, or delete smaller messages first.";
     /**
      * Missing %1$s folder in mail move operation
      */
@@ -304,12 +304,12 @@ public class POP3ExceptionMessage implements LocalizableStrings {
      * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s).<br>
      * Error message from server: %5$s
      */
-    public final static String LOGIN_DELAY_MSG = "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s)."+LINE_SEPARATOR+"Error message from server: %5$s";
+    public final static String LOGIN_DELAY_MSG = "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s";
     /**
      * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
      * Error message from server: %6$s
      */
-    public final static String LOGIN_DELAY2_MSG = "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds."+LINE_SEPARATOR+"Error message from server: %6$s";
+    public final static String LOGIN_DELAY2_MSG = "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds. Error message from server: %6$s";
     /**
      * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
      */

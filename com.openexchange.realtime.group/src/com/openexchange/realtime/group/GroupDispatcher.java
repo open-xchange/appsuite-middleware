@@ -58,6 +58,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -68,9 +70,11 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
+import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ActionHandler;
 import com.openexchange.server.ServiceLookup;
 
@@ -84,24 +88,25 @@ import com.openexchange.server.ServiceLookup;
  */
 public class GroupDispatcher implements ComponentHandle {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
+    /** The logger constant. */
+    static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
 
-    /**
-     * The <code>ServiceLookup</code> reference.
-     */
+    /** The <code>ServiceLookup</code> reference. */
     public static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
 
     /** The collection of IDs that might be concurrently accessed */
     private final AtomicReference<Set<ID>> idsRef = new AtomicReference<Set<ID>>(Collections.<ID> emptySet());
 
-    private final Map<ID, String> stamps = new HashMap<ID, String>();
+    private final Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
 
     /** ID of the group */
     private final ID id;
 
-    private long sequenceNumber = 0;
+    /** Sequence numer */
+    private final AtomicLong sequenceNumber = new AtomicLong();
 
-    private ActionHandler handler = null;
+    /** Action handler */
+    private final ActionHandler handler;
 
     /**
      * Initializes a new {@link GroupDispatcher}.
@@ -119,6 +124,7 @@ public class GroupDispatcher implements ComponentHandle {
      * @param handler An action handler for introspection
      */
     public GroupDispatcher(ID id, ActionHandler handler) {
+        super();
         this.id = id;
         this.handler = handler;
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
@@ -235,6 +241,18 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     /**
+     * Relay this message just to a specific receiver
+     */
+    public void relayToID(Stanza stanza, ID id) throws OXException {
+        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
+
+        // Send a copy of the stanza
+        Stanza copy = copyFor(stanza, id);
+        stamp(copy);
+        dispatcher.send(copy);
+    }
+
+    /**
      * Deliver this stanza to its recipient. Delegates to the {@link MessageDispatcher}
      */
     public void send(Stanza stanza) throws OXException {
@@ -344,8 +362,7 @@ public class GroupDispatcher implements ComponentHandle {
     public void stamp(Stanza s) {
         s.setSelector(getStamp(s.getTo()));
         s.setSequencePrincipal(id);
-        s.setSequenceNumber(sequenceNumber);
-        sequenceNumber++;
+        s.setSequenceNumber(sequenceNumber.getAndIncrement());
     }
 
     /**
@@ -376,6 +393,7 @@ public class GroupDispatcher implements ComponentHandle {
         Stanza copy = stanza.newInstance();
         copy.setTo(to);
         copy.setFrom(stanza.getFrom());
+        copy.setTracer(stanza.getTracer());
         copyPayload(stanza, copy);
 
         return copy;
@@ -465,7 +483,7 @@ public class GroupDispatcher implements ComponentHandle {
             try {
                 leave(id);
             } catch (OXException e) {
-                // Ignore
+                LOG.error("Error while handling LEAVE for ID:" + id, e);
             }
         }
     };
@@ -483,11 +501,23 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     public Stanza getWelcomeMessage(ID onBehalfOf) {
-        throw new UnsupportedOperationException("Clients can not join this group synchronously");
+        Stanza welcome = new Message();
+        welcome.setTo(onBehalfOf);
+        welcome.setFrom(getId());
+        welcome.setSelector(getStamp(onBehalfOf));
+        welcome.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                        new PayloadElement("Welcome", "json", "group", "message")).build()));
+        return welcome;
     }
 
     public Stanza getSignOffMessage(ID onBehalfOf) {
-        throw new UnsupportedOperationException("Clients can not leave this group synchronously");
+        Stanza goodbye = new Message();
+        goodbye.setTo(onBehalfOf);
+        goodbye.setFrom(getId());
+        goodbye.setSelector(getStamp(onBehalfOf));
+        goodbye.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                        new PayloadElement("Goodbye", "json", "group", "message")).build()));
+        return goodbye;
     }
 
 }

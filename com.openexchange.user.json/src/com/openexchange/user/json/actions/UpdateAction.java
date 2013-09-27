@@ -138,7 +138,7 @@ public final class UpdateAction extends AbstractUserAction {
 	        if (null == timeZoneID) {
 	            timeZoneID = session.getUser().getTimeZone();
 	        }
-	        final JSONObject jData = containsImage ? new JSONObject(request.getUploadEvent().getFormField("json")) : (JSONObject) request.getData();
+	        final JSONObject jData = containsImage ? new JSONObject(request.getUploadEvent().getFormField("json")) : (JSONObject) request.requireData();
 	        Contact parsedUserContact;
 	        User parsedUser;
 			parsedUserContact = ContactMapper.getInstance().deserialize(jData, ContactMapper.getInstance().getAllFields(), timeZoneID);

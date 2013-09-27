@@ -214,6 +214,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         beforeUpdate(publication);
         STORAGE.updatePublication(publication);
         afterUpdate(publication);
+        modifyOutgoing(publication);
     }
 
     private Publication publicationForPermissionCheck(final Publication publication) throws OXException {

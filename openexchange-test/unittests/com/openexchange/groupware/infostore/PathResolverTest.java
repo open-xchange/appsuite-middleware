@@ -17,8 +17,8 @@ import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
@@ -51,7 +51,7 @@ public class PathResolverTest extends TestCase {
 	ServerSession session;
 	private Context ctx = null;
 	private User user;
-	private UserConfiguration userConfig;
+	private UserPermissionBits userPerm;
 
 
     @Override
@@ -61,11 +61,11 @@ public class PathResolverTest extends TestCase {
 		ctx = getContext();
 
         final UserStorage userStorage = UserStorage.getInstance();
-        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+        final UserPermissionBitsStorage userConfigStorage = UserPermissionBitsStorage.getInstance();
 
         session = ServerSessionFactory.createServerSession(userStorage.getUserId(getUsername(), ctx), ctx, "gnitzelgnatzel");
 		user = userStorage.getUser(session.getUserId(), ctx);
-		userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
+		userPerm = userConfigStorage.getUserPermissionBits(session.getUserId(), ctx);
 
 		findRoot();
 
@@ -128,43 +128,43 @@ public class PathResolverTest extends TestCase {
 	}
 
 	public void testResolvePathDocument() throws Exception {
-		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/document.txt"), ctx, user, userConfig);
+		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/document.txt"), ctx, user, userPerm);
 		assertTrue(resolved.isDocument());
 		assertFalse(resolved.isFolder());
 		assertEquals(id6, resolved.getId());
 
-		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path/document.txt"), ctx, user, userConfig);
+		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path/document.txt"), ctx, user, userPerm);
 		assertTrue(resolved.isDocument());
 		assertFalse(resolved.isFolder());
 		assertEquals(id6, resolved.getId());
 	}
 
 	public void testResolvePathFolder() throws Exception {
-		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path"), ctx, user, userConfig);
+		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path"), ctx, user, userPerm);
 		assertFalse(resolved.isDocument());
 		assertTrue(resolved.isFolder());
 		assertEquals(id5, resolved.getId());
 
-		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path"), ctx, user, userConfig);
+		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path"), ctx, user, userPerm);
 		assertFalse(resolved.isDocument());
 		assertTrue(resolved.isFolder());
 		assertEquals(id5, resolved.getId());
 	}
 
 	public void testGetPathDocument() throws Exception {
-		final WebdavPath path = pathResolver.getPathForDocument(root, id6, ctx, user, userConfig);
+		final WebdavPath path = pathResolver.getPathForDocument(root, id6, ctx, user, userPerm);
         assertComponents(path, "this", "is", "a","nice","path","document.txt");
 	}
 
 	public void testGetPathFolder() throws Exception {
-		final WebdavPath path = pathResolver.getPathForFolder(root, id5, ctx, user, userConfig);
+		final WebdavPath path = pathResolver.getPathForFolder(root, id5, ctx, user, userPerm);
         assertComponents(path, "this","is","a","nice","path");
 
 	}
 
 	public void testNotExists() throws Exception {
 		try {
-			pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), ctx, user, userConfig);
+			pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), ctx, user, userPerm);
 			fail("Expected OXObjectNotFoundException");
 		} catch (final OXException x) {
 			assertTrue(true);
@@ -174,13 +174,13 @@ public class PathResolverTest extends TestCase {
     // Bug 12279
     public void testCaseSensitive() throws Exception {
         try {
-			pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), ctx, user, userConfig);
+			pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), ctx, user, userPerm);
 			fail("Expected OXObjectNotFoundException");
 		} catch (final OXException x) {
 			assertTrue(true);
 		}
         try {
-            pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/PaTh"), ctx, user, userConfig);
+            pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/PaTh"), ctx, user, userPerm);
             fail("Expected OXObjectNotFoundException");
         } catch (final OXException x) {
             assertTrue(true);
@@ -193,20 +193,20 @@ public class PathResolverTest extends TestCase {
         aliases.registerNameWithIDAndParent("ALIAS!", id5, id4);
         pathResolver.setAliases(aliases);
 
-        final Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/ALIAS!"), ctx, user, userConfig);
+        final Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/ALIAS!"), ctx, user, userPerm);
         assertFalse(resolved.isDocument());
         assertTrue(resolved.isFolder());
         assertEquals(id5, resolved.getId());
 
         pathResolver.clearCache();
 
-        final WebdavPath path = pathResolver.getPathForFolder(root, id5, ctx, user, userConfig);
+        final WebdavPath path = pathResolver.getPathForFolder(root, id5, ctx, user, userPerm);
         assertComponents(path, "this","is","a","nice","ALIAS!");
 
         pathResolver.clearCache();
 
         try {
-            pathResolver.resolve(root, new WebdavPath("this/ALIAS!/a/nice"), ctx, user, userConfig);
+            pathResolver.resolve(root, new WebdavPath("this/ALIAS!/a/nice"), ctx, user, userPerm);
             fail("Expected OXObjectNotFoundException");
         } catch (final OXException x) {
             assertTrue(true);

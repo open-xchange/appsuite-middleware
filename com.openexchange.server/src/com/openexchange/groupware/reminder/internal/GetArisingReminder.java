@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
@@ -122,7 +123,7 @@ public class GetArisingReminder {
                     LOG.debug(re.getMessage(), re);
                     continue;
                 }
-                if (appointment.containsUntil() && appointment.getUntil().after(now)) {
+                if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE && (!appointment.containsUntil() || appointment.getUntil().after(now))) {
                     retval.add(reminder);
                 } else if (appointment.getEndDate().after(now)) {
                     retval.add(reminder);

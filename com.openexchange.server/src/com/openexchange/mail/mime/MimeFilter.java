@@ -58,8 +58,8 @@ import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.ParseException;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocaleTools;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -73,6 +73,7 @@ import com.openexchange.mail.utils.MessageUtility;
 public class MimeFilter {
 
     private static final String MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
+    private static final String CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
 
     /**
      * Gets the MIME filter for specified alias.
@@ -143,13 +144,13 @@ public class MimeFilter {
         }
         try {
             final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
-            final String contentType = LocaleTools.toLowerCase(mimeMessage.getContentType());
+            final String contentType = toLowerCase(mimeMessage.getContentType());
             if (!contentType.startsWith("multipart/")) {
                 // Nothing to filter
                 return mimeMessage;
             }
             final MimeMultipart newMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
-            handlePart((Multipart) mimeMessage.getContent(), newMultipart);
+            handlePart(getMultipartContent(mimeMessage), newMultipart);
             MessageUtility.setContent(newMultipart, mimeMessage);
             // mimeMessage.setContent(newMultipart);
             MimeMessageConverter.saveChanges(mimeMessage);
@@ -169,6 +170,24 @@ public class MimeFilter {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private Multipart getMultipartContent(final MimeMessage mimeMessage) throws IOException, MessagingException, ParseException {
+        try {
+            return (Multipart) mimeMessage.getContent();
+        } catch (final javax.mail.internet.ParseException e) {
+            // Sanitize parameterized headers
+            try {
+                final String sContentType = mimeMessage.getHeader(CONTENT_TYPE, null);
+                mimeMessage.setHeader(CONTENT_TYPE, new ContentType(sContentType).toString(true));
+                MimeMessageConverter.saveChanges(mimeMessage);
+            } catch (final Exception x) {
+                // Content-Type cannot be sanitized
+                com.openexchange.log.Log.loggerFor(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
+                throw e;
+            }
+            return (Multipart) mimeMessage.getContent();
         }
     }
 
@@ -209,10 +228,11 @@ public class MimeFilter {
         for (int i = 0; i < count; i++) {
             final BodyPart bodyPart = multipart.getBodyPart(i);
             String contentType = bodyPart.getContentType();
+            String name = new ContentType(contentType).getNameParameter();
             if (isEmpty(contentType)) {
                 newMultipart.addBodyPart(bodyPart);
             } else {
-                contentType = LocaleTools.toLowerCase(contentType.trim());
+                contentType = toLowerCase(contentType.trim());
                 if (contentType.startsWith("multipart/")) {
                     final MimeMultipart newSubMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
                     {
@@ -227,7 +247,7 @@ public class MimeFilter {
                     MessageUtility.setContent(newSubMultipart, mimeBodyPart);
                     // mimeBodyPart.setContent(newSubMultipart);
                     newMultipart.addBodyPart(mimeBodyPart);
-                } else if (contentType.startsWith("message/rfc822")) {
+                } else if (contentType.startsWith("message/rfc822") || (name != null && name.endsWith(".eml"))) {
                     final MimeFilter nestedFilter = new MimeFilter(ignorableContentTypes);
                     final MimeMessage filteredMessage;
                     {
@@ -267,6 +287,19 @@ public class MimeFilter {
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

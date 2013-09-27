@@ -75,8 +75,9 @@ public class GrizzlOXAddOn implements AddOn {
 
     public GrizzlOXAddOn() {
         //1. BackendRouteFilter
-        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-        final String backendRoute = configurationService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
+        ConfigurationService configurationService = Services.optService(ConfigurationService.class);
+        final String defaultRoute = "";
+        final String backendRoute = null == configurationService ? defaultRoute : configurationService.getProperty("com.openexchange.http.grizzly.backendRoute", defaultRoute);
         AppendBackendRouteFilter appendBackendRouteFilter = new AppendBackendRouteFilter(backendRoute);
         filters.add(appendBackendRouteFilter);
     }

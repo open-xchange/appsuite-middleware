@@ -89,6 +89,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -301,6 +302,7 @@ public final class GetAction extends AbstractMailAction {
                         is = null;
                         fileHolder.close();
                         // Filter MIME message
+                        MimeMessageConverter.saveChanges(mimeMessage);
                         mimeMessage = mimeFilter.filter(mimeMessage);
                         fileHolder = new ThresholdFileHolder();
                         mimeMessage.writeTo(fileHolder.asOutputStream());

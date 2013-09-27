@@ -83,20 +83,21 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         assertEquals(2, appointments.size());
     }
 
-    // Bug 11869
-    public void testAppShouldCorrectParticipantsInPrivateAppoitment() throws ConversionError {
-        final Date start = D("24/02/1981 10:00");
-        final Date end =   D("24/02/1981 12:00");
-        final String icalText = fixtures.veventWithSimpleProperties(start, end,
-        "CLASS"    ,    "PRIVATE",
-        "ATTENDEE" ,     "MAILTO:mickey@disney.invalid");
-
-        assertWarningWhenParsingAppointment(icalText, "Private appointments can not have attendees. Removing attendees and accepting appointment anyway.");
-
-        final Appointment appointment = parseAppointment(icalText);
-
-        assertNull(appointment.getParticipants());
-    }
+    //Deactivated test, private appointments with participants are allowed since OX 7.4
+//    // Bug 11869
+//    public void testAppShouldCorrectParticipantsInPrivateAppoitment() throws ConversionError {
+//        final Date start = D("24/02/1981 10:00");
+//        final Date end =   D("24/02/1981 12:00");
+//        final String icalText = fixtures.veventWithSimpleProperties(start, end,
+//        "CLASS"    ,    "PRIVATE",
+//        "ATTENDEE" ,     "MAILTO:mickey@disney.invalid");
+//
+//        assertWarningWhenParsingAppointment(icalText, "Private appointments can not have attendees. Removing attendees and accepting appointment anyway.");
+//
+//        final Appointment appointment = parseAppointment(icalText);
+//
+//        assertNull(appointment.getParticipants());
+//    }
 
 
     public void testAppShouldInterpretConfidentialAsPrivate() throws ConversionError {

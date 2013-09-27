@@ -51,6 +51,7 @@ package com.openexchange.ajax.infostore.actions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -69,7 +70,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
  */
 public class InfostoreTestManager {
 
-    private Set<DocumentMetadata> createdEntities;
+    private final Set<DocumentMetadata> createdEntities;
 
     private AJAXClient client;
 
@@ -111,10 +112,14 @@ public class InfostoreTestManager {
     }
 
     public void cleanUp() throws OXException, IOException, SAXException, JSONException {
-        for (DocumentMetadata data : new HashSet<DocumentMetadata>(getCreatedEntities())) {
-            deleteAction(data.getId(), (int) data.getFolderId(), new Date(Long.MAX_VALUE));
+        List<Integer> objectIDs = new ArrayList<Integer>(createdEntities.size());
+        List<Integer> folderIDs = new ArrayList<Integer>(createdEntities.size());
+        for (DocumentMetadata metadata : createdEntities) {
+            objectIDs.add(Integer.valueOf(metadata.getId()));
+            folderIDs.add(Integer.valueOf((int)metadata.getFolderId()));
         }
-        createdEntities = new HashSet<DocumentMetadata>();
+        deleteAction(objectIDs, folderIDs, new Date(Long.MAX_VALUE));
+        createdEntities.clear();
     }
 
     private void removeFromCreatedEntities(Collection<Integer> ids) {

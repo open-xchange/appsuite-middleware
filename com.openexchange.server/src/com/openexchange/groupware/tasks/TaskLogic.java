@@ -53,7 +53,6 @@ import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.f;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.isTransactionRollbackException;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -67,8 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -85,7 +82,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -97,11 +94,6 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TaskLogic {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskLogic.class));
 
     /**
      * Prevent instantiation
@@ -119,7 +111,7 @@ public final class TaskLogic {
      * @param userConfig groupware configuration of the user that wants to create the task.
      * @throws OXException if the task can't be created.
      */
-    static void checkNewTask(final Task task, final int userId, final UserConfiguration userConfig, final Set<TaskParticipant> participants) throws OXException {
+    static void checkNewTask(final Task task, final int userId, final UserPermissionBits userConfig, final Set<TaskParticipant> participants) throws OXException {
         checkMissingAttributes(task, userId);
         checkData(task);
         checkDates(task);
@@ -143,7 +135,7 @@ public final class TaskLogic {
      * @param oldParts participants of the original task.
      * @throws OXException if the check fails.
      */
-    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserConfiguration userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws OXException {
+    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserPermissionBits userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws OXException {
         if (task.containsUid()) {
             if (!oldTask.getUid().equals(task.getUid())) {
                 throw TaskExceptionCode.NO_UID_CHANGE.create();
@@ -225,13 +217,6 @@ public final class TaskLogic {
                     throw TaskExceptionCode.INVALID_DATA.create(result);
                 }
             }
-        }
-        final int limit = 130000;
-        if (task.containsActualCosts() && null != task.getActualCosts() && (limit < f(task.getActualCosts()) || -limit > f(task.getActualCosts()))) {
-            throw TaskExceptionCode.COSTS_OFF_LIMIT.create();
-        }
-        if (task.containsTargetCosts() && null != task.getTargetCosts() && (limit < f(task.getTargetCosts()) || -limit > f(task.getTargetCosts()))) {
-            throw TaskExceptionCode.COSTS_OFF_LIMIT.create();
         }
     }
 
@@ -706,35 +691,6 @@ public final class TaskLogic {
     /**
      * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
      *
-     * @param ctx Conetxt
-     * @param task fully loaded task object to delete.
-     * @param lastModified last modification timestamp for concurrent conflicts.
-     * @throws OXException if an exception occurs.
-     */
-    public static void deleteTask(final Context ctx, final Connection con, final int userId, final Task task, final Date lastModified) throws OXException {
-        final int taskId = task.getObjectID();
-        // Load the folders remembering all task source folders on move
-        // operations for clients.
-        final Set<Folder> movedSourceFolders = foldStor.selectFolder(ctx, con, taskId, DELETED);
-        // Delete them to be able to remove the dummy task for them.
-        foldStor.deleteFolder(ctx, con, taskId, movedSourceFolders, DELETED, true);
-        // Delete dummy task.
-        storage.delete(ctx, con, taskId, new Date(Long.MAX_VALUE), DELETED, false);
-        // Move task to delete to deleted tables.
-        task.setLastModified(new Date());
-        task.setModifiedBy(userId);
-        storage.insertTask(ctx, con, task, DELETED);
-        final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
-        deleteFolder(ctx, con, task.getObjectID(), removed);
-        storage.delete(ctx, con, task.getObjectID(), lastModified, ACTIVE);
-        // Insert the folders remembering all task source folders on move
-        // operations.
-        foldStor.insertFolder(ctx, con, taskId, movedSourceFolders, DELETED);
-    }
-
-    /**
-     * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
-     *
      * @param session Session.
      * @param task fully loaded task object to delete.
      * @param lastModified last modification timestamp for concurrent conflicts.
@@ -750,8 +706,9 @@ public final class TaskLogic {
                     DBUtils.startTransaction(con);
                     final Task t = clone(task);
                     deleteTask(ctx, con, userId, t, lastModified);
-                    informDelete(session, ctx, con, t);
+                    Reminder.deleteReminder(ctx, con, task);
                     con.commit();
+                    informDelete(session, t);
                 } catch (final SQLException e) {
                     rollback(con);
                     if (!condition.isFailedTransactionRollback(e)) {
@@ -821,13 +778,10 @@ public final class TaskLogic {
      * Informs other systems about a deleted task.
      *
      * @param session Session.
-     * @param ctx the context.
-     * @param con writable database connection.
      * @param task Task object.
      * @throws OXException if an exception occurs.
      */
-    static void informDelete(final Session session, final Context ctx, final Connection con, final Task task) throws OXException {
-        Reminder.deleteReminder(ctx, task);
+    static void informDelete(Session session, Task task) throws OXException {
         try {
             new EventClient(session).delete(task);
         } catch (final OXException e) {
@@ -858,6 +812,7 @@ public final class TaskLogic {
         parts.addAll(external);
         task.setParticipants(TaskLogic.createParticipants(parts));
         task.setUsers(TaskLogic.createUserParticipants(parts));
+
         // Now remove it.
         partStor.deleteInternal(ctx, con, taskId, internal, type, true);
         if (ACTIVE == type) {
@@ -867,8 +822,38 @@ public final class TaskLogic {
         partStor.deleteExternal(ctx, con, taskId, external, type, true);
         foldStor.deleteFolder(ctx, con, taskId, folders, type);
         storage.delete(ctx, con, taskId, task.getLastModified(), type);
+        Reminder.deleteReminder(ctx, con, task);
         if (ACTIVE == type) {
-            informDelete(session, ctx, con, task);
+            informDelete(session, task);
         }
+    }
+
+    /**
+     * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
+     *
+     * @param ctx Context
+     * @param task fully loaded task object to delete.
+     * @param lastModified last modification timestamp for concurrent conflicts.
+     * @throws OXException if an exception occurs.
+     */
+    public static void deleteTask(final Context ctx, final Connection con, final int userId, final Task task, final Date lastModified) throws OXException {
+        final int taskId = task.getObjectID();
+        // Load the folders remembering all task source folders on move
+        // operations for clients.
+        final Set<Folder> movedSourceFolders = foldStor.selectFolder(ctx, con, taskId, DELETED);
+        // Delete them to be able to remove the dummy task for them.
+        foldStor.deleteFolder(ctx, con, taskId, movedSourceFolders, DELETED, true);
+        // Delete dummy task.
+        storage.delete(ctx, con, taskId, new Date(Long.MAX_VALUE), DELETED, false);
+        // Move task to delete to deleted tables.
+        task.setLastModified(new Date());
+        task.setModifiedBy(userId);
+        storage.insertTask(ctx, con, task, DELETED);
+        final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
+        deleteFolder(ctx, con, task.getObjectID(), removed);
+        storage.delete(ctx, con, task.getObjectID(), lastModified, ACTIVE);
+        // Insert the folders remembering all task source folders on move
+        // operations.
+        foldStor.insertFolder(ctx, con, taskId, movedSourceFolders, DELETED);
     }
 }

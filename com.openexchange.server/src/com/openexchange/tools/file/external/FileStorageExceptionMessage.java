@@ -72,8 +72,8 @@ public class FileStorageExceptionMessage implements LocalizableStrings {
     // May be used to turn the IOException of getInstance into a proper OXException
     public final static String INSTANTIATIONERROR_MSG = "File store could not be accessed: %s";
 
-    // Cannot create directory \"%1$s\" for FileStorage.
-    public final static String CREATE_DIR_FAILED_MSG = "Cannot create directory \"%1$s\" for FileStorage.";
+    // Cannot create directory "%1$s" in file storage.
+    public final static String CREATE_DIR_FAILED_MSG = "Cannot create directory \"%1$s\" in file storage.";
 
     // Unsupported encoding.
     public final static String ENCODING_MSG = "Unsupported encoding.";
@@ -90,13 +90,22 @@ public class FileStorageExceptionMessage implements LocalizableStrings {
     // Cannot remove lock file.
     public final static String UNLOCK_MSG = "Cannot remove lock file.";
 
-    // Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore.
-    public final static String LOCK_MSG = "Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the file store.";
+    // Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time.
+    public final static String LOCK_MSG = "Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time.";
 
-    // Eliminating the FileStorage failed.
-    public final static String NOT_ELIMINATED_MSG = "Eliminating the FileStorage failed.";
+    // Eliminating the file storage failed.
+    public final static String NOT_ELIMINATED_MSG = "Eliminating the file storage failed.";
 
-    // File does not exist in filestore \"%1$s\". Consider running consistency tool.
+    // File does not exist in file storage "%1$s". Consider running consistency tool.
     public final static String FILE_NOT_FOUND_MSG = "File does not exist in file store \"%1$s\". Consider running the consistency tool.";
+
+    // The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.
+    public final static String INVALID_RANGE_MSG = "The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.";
+
+    // The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+    public final static String INVALID_OFFSET_MSG = "The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.";
+
+    // The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+    public final static String INVALID_LENGTH_MSG = "The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.";
 
 }

@@ -346,9 +346,9 @@ public final class ReminderRequest {
     protected boolean hasModulePermission(final ReminderObject reminderObj) {
         switch (reminderObj.getModule()) {
         case Types.APPOINTMENT:
-            return session.getUserConfiguration().hasCalendar();
+            return session.getUserPermissionBits().hasCalendar();
         case Types.TASK:
-            return session.getUserConfiguration().hasTask();
+            return session.getUserPermissionBits().hasTask();
         default:
             return true;
         }

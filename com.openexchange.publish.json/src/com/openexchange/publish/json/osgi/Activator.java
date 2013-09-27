@@ -62,7 +62,8 @@ public class Activator extends CompositeBundleActivator {
     private static final BundleActivator[] ACTIVATORS = {
         new ServletActivator(),
         new PreferencesActivator(),
-        new TrackerActivator()
+        new TrackerActivator(),
+        new ServiceActivator()        
     };
 
     @Override

@@ -71,6 +71,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -82,10 +83,11 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
@@ -107,7 +109,6 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
-import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -119,8 +120,8 @@ import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -142,7 +143,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolderStorage implements FolderStorage {
+public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DatabaseFolderStorage.class));
@@ -215,13 +216,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         @Override
         public void close() {
-            if (connection.readWrite) {
-                databaseService.backWritable(contextId, connection.connection);
-            } else {
-                databaseService.backReadOnly(contextId, connection.connection);
-            }
+            connection.close(databaseService, contextId);
         }
     }
+
+    static final EnumSet<Mode> WRITEES = EnumSet.of(Mode.WRITE, Mode.WRITE_AFTER_READ);
 
     /**
      * Initializes a new {@link DatabaseFolderStorage}.
@@ -254,13 +253,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
         Connection con = null;
         boolean close = true;
-        boolean readOnly = true;
+        Mode mode = Mode.READ;
+        boolean modified = false;
         try {
             {
                 final ConnectionMode conMode = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
                 if (null != conMode) {
                     con = conMode.connection;
-                    readOnly = !conMode.readWrite;
+                    mode = conMode.readWrite;
                     close = false;
                 } else {
                     con = databaseService.getReadOnly(contextId);
@@ -281,12 +281,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             /*
              * Upgrade to read-write connection & repeat if check was performed with read-only connection
              */
-            if (readOnly) {
+            if (Mode.READ == mode) {
                 if (close) {
                     databaseService.backReadOnly(contextId, con);
                 }
                 con = databaseService.getWritable(contextId);
-                readOnly = false;
+                mode = Mode.WRITE_AFTER_READ;
                 // Query again...
                 nonExistingParents = OXFolderSQL.getNonExistingParents(context, con);
                 if (null == nonExistingParents || 0 == nonExistingParents.length) {
@@ -312,6 +312,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                             shared.add(folderId);
                         } else {
                             manager.deleteValidatedFolder(folderId, now, -1, true);
+                            modified = true;
                         }
                     }
                 }
@@ -329,10 +330,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
             } while (++runCount <= MAX && null != nonExistingParents && nonExistingParents.length > 0);
         } finally {
             if (null != con && close) {
-                if (readOnly) {
+                if (Mode.READ == mode) {
                     databaseService.backReadOnly(contextId, con);
                 } else {
-                    databaseService.backWritable(contextId, con);
+                    if (modified) {
+                        databaseService.backWritable(contextId, con);
+                    } else {
+                        databaseService.backWritableAfterReading(contextId, con);
+                    }
                 }
             }
             STAMPS.put(contextId, Long.valueOf(now));
@@ -368,7 +373,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         if (null == con) {
             return;
         }
-        if (con.readWrite) {
+        if (WRITEES.contains(con.readWrite)) {
             try {
                 con.connection.commit();
             } catch (final SQLException e) {
@@ -377,7 +382,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 DBUtils.autocommit(con.connection);
                 final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
                 if (null != databaseService) {
-                    databaseService.backWritable(params.getContext(), con.connection);
+                    con.close(databaseService, params.getContext().getContextId());
                 }
                 final FolderType folderType = getFolderType();
                 params.putParameter(folderType, PARAM_CONNECTION, null);
@@ -396,7 +401,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void restore(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(true, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final Session session = storageParameters.getSession();
@@ -423,7 +428,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(true, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.WRITE_AFTER_READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final Session session = storageParameters.getSession();
@@ -528,6 +533,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 throw OXFolderExceptionCode.CREATE_FAILED.create(new Object[0]);
             }
             folder.setID(String.valueOf(fuid));
+
+            final List<OXException> warnings = folderManager.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         } finally {
             provider.close();
         }
@@ -581,7 +593,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(true, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final FolderObject fo = getFolderObject(Integer.parseInt(folderId), storageParameters.getContext(), con);
@@ -591,6 +603,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.clearFolder(fo, true, System.currentTimeMillis());
+
+            final List<OXException> warnings = folderManager.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         } finally {
             provider.close();
         }
@@ -598,7 +617,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void deleteFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(true, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final FolderObject fo = new FolderObject();
@@ -621,6 +640,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
              *
              */
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
+
+            final List<OXException> warnings = folderManager.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         } finally {
             provider.close();
         }
@@ -628,7 +654,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final Session session = storageParameters.getSession();
@@ -671,7 +697,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
             return SystemType.getInstance();
         } else {
-            final ConnectionProvider provider = getConnection(false, storageParameters);
+            final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
             try {
                 final FolderObject p = getFolderAccess(storageParameters.getContext(), provider.getConnection()).getFolderObject(pid);
                 final int parentType = p.getType();
@@ -689,7 +715,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
@@ -741,7 +767,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public boolean isEmpty(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
@@ -793,7 +819,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void updateLastModified(final long lastModified, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(true, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
@@ -820,18 +846,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -926,13 +952,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
             final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
@@ -967,7 +993,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Batch load
                  */
-                provider = getConnection(false, storageParameters);
+                provider = getConnection(Mode.READ, storageParameters);
                 final Connection con = provider.getConnection();
                 if (!map.isEmpty()) {
                     final Session session = storageParameters.getSession();
@@ -1012,7 +1038,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             for (final String folderIdentifier : folderIdentifiers) {
                 list.add(getUnsignedInteger(folderIdentifier));
             }
-            provider = getConnection(false, storageParameters);
+            provider = getConnection(Mode.READ, storageParameters);
             final Connection con = provider.getConnection();
             final List<FolderObject> folders =
                 OXFolderBatchLoader.loadFolderObjectsFromDB(
@@ -1054,19 +1080,19 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
             final int iType = getTypeByFolderTypeWithShared(type);
@@ -1167,20 +1193,20 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<FolderIdNamePair> subfolderIds =
@@ -1211,13 +1237,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds =
@@ -1237,13 +1263,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
@@ -1262,13 +1288,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userConfiguration, ctx, con);
@@ -1287,13 +1313,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userConfiguration, ctx, con);
@@ -1312,17 +1338,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, con);
+                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, storageParameters.getSession(), con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1343,11 +1369,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         defaultFileStorageAccess.connect();
                         try {
                             final FileStorageFolder personalFolder = defaultFileStorageAccess.getFolderAccess().getPersonalFolder();
-                            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(
-                                fileStorageService.getId(),
-                                defaultAccount.getId(),
-                                personalFolder.getId());
-                            return new SortableId[] { new DatabaseId(fsfi.toString(), 0, personalFolder.getName()) };
+                            FolderID folderID = new FolderID(fileStorageService.getId(), defaultAccount.getId(), personalFolder.getId());
+                            return new SortableId[] { new DatabaseId(folderID.toUniqueID(), 0, personalFolder.getName()) };
                             // TODO: Shared?
                         } finally {
                             defaultFileStorageAccess.close();
@@ -1372,8 +1395,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                             final String accountId = defaultAccount.getId();
                             for (int i = 0; i < publicFolders.length; i++) {
                                 final FileStorageFolder folder = publicFolders[i];
-                                final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(serviceId, accountId, folder.getId());
-                                ret[i] = new DatabaseId(fsfi.toString(), i, folder.getName());
+                                FolderID folderID = new FolderID(serviceId, accountId, folder.getId());
+                                ret[i] = new DatabaseId(folderID.toUniqueID(), i, folder.getName());
                             }
                             return ret;
                         } finally {
@@ -1450,14 +1473,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
         if (null == con) {
             return;
         }
-        if (con.readWrite) {
+        if (con.isWritable()) {
             try {
                 DBUtils.rollback(con.connection);
             } finally {
                 DBUtils.autocommit(con.connection);
                 final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
                 if (null != databaseService) {
-                    databaseService.backWritable(params.getContext(), con.connection);
+                    con.close(databaseService, params.getContext().getContextId());
                 }
                 params.putParameter(getFolderType(), PARAM_CONNECTION, null);
             }
@@ -1471,13 +1494,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
+        return startTransaction(parameters, modify ? Mode.WRITE : Mode.READ);
+    }
+
+    @Override
+    public boolean startTransaction(final StorageParameters parameters, final Mode mode) throws OXException {
         final FolderType folderType = getFolderType();
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
             final Context context = parameters.getContext();
             ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
             if (null != con) {
-                if (con.readWrite || modify == con.readWrite) {
+                if (con.supports(mode)) {
                     // Connection already present in proper access mode
                     return false;
                 }
@@ -1487,7 +1515,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  * commit, restore auto-commit & push to pool
                  */
                 parameters.putParameter(folderType, PARAM_CONNECTION, null);
-                if (con.readWrite) {
+                if (con.isWritable()) {
                     try {
                         con.connection.commit();
                     } catch (final Exception e) {
@@ -1495,28 +1523,24 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         DBUtils.rollback(con.connection);
                     }
                     DBUtils.autocommit(con.connection);
-                    databaseService.backWritable(context, con.connection);
-                } else {
-                    databaseService.backReadOnly(context, con.connection);
                 }
+                con.close(databaseService, context.getContextId());
             }
-            if (modify) {
-                con = new ConnectionMode(databaseService.getWritable(context), true);
+            if (WRITEES.contains(mode)) {
+                con = new ConnectionMode(databaseService.getWritable(context), mode);
                 con.connection.setAutoCommit(false);
             } else {
-                con = new ConnectionMode(databaseService.getReadOnly(context), false);
+                con = new ConnectionMode(databaseService.getReadOnly(context), mode);
             }
             // Put to parameters
             if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, con)) {
                 // Success
             } else {
                 // Fail
-                if (modify) {
+                if (con.isWritable()) {
                     con.connection.setAutoCommit(true);
-                    databaseService.backWritable(context, con.connection);
-                } else {
-                    databaseService.backReadOnly(context, con.connection);
                 }
+                con.close(databaseService, context.getContextId());
             }
             return true;
         } catch (final SQLException e) {
@@ -1526,7 +1550,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(true, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final Session session = storageParameters.getSession();
@@ -1618,6 +1642,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+
+            final List<OXException> warnings = folderManager.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         } finally {
             provider.close();
         }
@@ -1635,18 +1666,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -1726,7 +1757,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
@@ -1751,18 +1782,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -1845,14 +1876,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return new OXFolderAccess(con, ctx);
     }
 
-    private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
+    private static ConnectionProvider getConnection(final Mode mode, final StorageParameters storageParameters) throws OXException {
         ConnectionMode connection = optParameter(ConnectionMode.class, PARAM_CONNECTION, storageParameters);
         if (null != connection) {
             return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }
         final Context context = storageParameters.getContext();
         final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        connection = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
+        connection = WRITEES.contains(mode) ? new ConnectionMode(databaseService.getWritable(context), mode) : new ConnectionMode(databaseService.getReadOnly(context), mode);
         return new ClosingConnectionProvider(connection, databaseService, context.getContextId());
     }
 
@@ -2008,7 +2039,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         /**
          * Whether connection is read-write or read-only.
          */
-        public final boolean readWrite;
+        public Mode readWrite;
 
         /**
          * Initializes a new {@link ConnectionMode}.
@@ -2016,10 +2047,40 @@ public final class DatabaseFolderStorage implements FolderStorage {
          * @param connection
          * @param readWrite
          */
-        public ConnectionMode(final Connection connection, final boolean readWrite) {
+        public ConnectionMode(final Connection connection, final Mode readWrite) {
             super();
             this.connection = connection;
             this.readWrite = readWrite;
+        }
+
+        public boolean isWritable () {
+            return WRITEES.contains(readWrite);
+        }
+
+        public boolean supports(Mode mode) {
+            if (isWritable()) {
+                if (WRITEES.contains(mode)) {
+                    readWrite = mode;
+                }
+                return true;
+            }
+            return readWrite == mode;
+        }
+
+        /**
+         * Closes the connection
+         *
+         * @param databaseService The database service
+         * @param contextId The context identifier
+         */
+        public void close(final DatabaseService databaseService, final int contextId) {
+            if (Mode.WRITE == readWrite) {
+                databaseService.backWritable(contextId, connection);
+            } else if (Mode.WRITE_AFTER_READ == readWrite) {
+                databaseService.backWritableAfterReading(contextId, connection);
+            } else {
+                databaseService.backReadOnly(contextId, connection);
+            }
         }
     }
 

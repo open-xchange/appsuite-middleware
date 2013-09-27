@@ -149,7 +149,8 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     IRREGULAR_COLUMN_ID(IRREGULAR_COLUMN_ID_MSG, Category.CATEGORY_USER_INPUT, 1314),
     NO_CONTENT(NO_CONTENT_MSG, Category.CATEGORY_USER_INPUT, 1315),
     /** Something went wrong reading from specified file. Please try again. */
-    IOEXCEPTION_RETRY(IOEXCEPTION_RETRY_MSG, CATEGORY_TRY_AGAIN, 1316),
+    IOEXCEPTION_RETRY(IOEXCEPTION_RETRY_MSG, CATEGORY_TRY_AGAIN, 1316), 
+    LIMIT_EXCEEDED(LIMIT_EXCEEDED_MSG, CATEGORY_WARNING, 1317)
     ;
 
     private String message;

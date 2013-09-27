@@ -1,0 +1,110 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.tools.file;
+
+import java.io.InputStream;
+import com.openexchange.exception.OXException;
+
+/**
+ * {@link AppendFileAction}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class AppendFileAction extends FileStreamAction {
+
+    private final String fileStorageID;
+    private final long offset;
+    private long fileSize;
+
+    /**
+     * Initializes a new {@link AppendFileAction}.
+     *
+     * @param storage The storage to save the stream to
+     * @param data The input stream
+     * @param fileStorageID The ID of the file to append the data to
+     * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
+     * @param offset The offset in bytes where to append the data
+     */
+    public AppendFileAction(FileStorage storage, InputStream data, String fileStorageID, long sizeHint, long offset) {
+        super(storage, data, sizeHint, false);
+        this.fileStorageID = fileStorageID;
+        this.offset = offset;
+    }
+
+    /**
+     * Gets the resulting filesize as reported by the storage after the stream was processed.
+     *
+     * @return The file size in bytes
+     */
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    @Override
+    public String getFileStorageID() {
+        return fileStorageID;
+    }
+
+    @Override
+    protected void store(FileStorage storage, InputStream stream) throws OXException {
+        fileSize = storage.appendToFile(stream, fileStorageID, offset);
+    }
+
+    @Override
+    protected void store(QuotaFileStorage storage, InputStream stream, long sizeHint) throws OXException {
+        fileSize = storage.appendToFile(stream, fileStorageID, offset, sizeHint);
+    }
+
+    @Override
+    protected void undo(FileStorage storage) throws OXException {
+        storage.setFileLength(offset, fileStorageID);
+    }
+
+}

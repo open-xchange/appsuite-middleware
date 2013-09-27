@@ -108,8 +108,8 @@ public final class RangeAction extends AbstractReminderAction {
         try {
             final ServerSession session = req.getSession();
             final ReminderService reminderSql = new ReminderHandler(session.getContext());
-            final JSONArray jsonResponseArray = new JSONArray();
             final SearchIterator<ReminderObject> it = reminderSql.getArisingReminder(session, session.getContext(), session.getUser(), end);
+            final JSONArray jsonResponseArray = new JSONArray();
             try {
                 while (it.hasNext()) {
                     final ReminderObject reminder = it.next();
@@ -135,8 +135,8 @@ public final class RangeAction extends AbstractReminderAction {
                             }
                         }
                     }
-                    if (hasModulePermission(reminder, session)) {
-                        final JSONObject jsonReminderObj = new JSONObject();
+                    if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
+                        final JSONObject jsonReminderObj = new JSONObject(12);
                         reminderWriter.writeObject(reminder, jsonReminderObj);
                         jsonResponseArray.put(jsonReminderObj);
                     }

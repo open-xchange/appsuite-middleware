@@ -148,7 +148,7 @@ public class VCardTokenizer {
                 }
             }
         } catch (final IOException e) {
-            LOG.error("IOException while trying to tokenize stream that was a VCARD (supposedly)", e);
+            LOG.error("I/O error while trying to tokenize stream that was a vCard (supposedly)", e);
             Streams.close(vcard);
         }
         return chunks;

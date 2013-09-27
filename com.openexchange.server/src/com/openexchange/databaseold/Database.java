@@ -51,10 +51,10 @@ package com.openexchange.databaseold;
 
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -78,7 +78,13 @@ public final class Database {
         Database.databaseService = databaseService;
     }
 
-    private static DatabaseService getDatabaseService() throws OXException {
+    /**
+     * Gets the database service.
+     *
+     * @return The database service
+     * @throws OXException If service is unavailable at the moment
+     */
+    public static DatabaseService getDatabaseService() throws OXException {
         final DatabaseService databaseService = Database.databaseService;
         if (null == databaseService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());

@@ -60,6 +60,7 @@ public abstract class GetCore extends PublicationAbstraction {
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
 
+        boolean error = true;
         String successtext = null;
         try {
             parser.ownparse(args);
@@ -73,11 +74,15 @@ public abstract class GetCore extends PublicationAbstraction {
             maincall(parser, oxpub, publication, auth);
 
             publication = oxpub.getPublication(publication.getContext(), publication.getUrl(), auth);
-            
+
             createMessageForStdout(publication.toString(), null, null, parser);
-            sysexit(0);
+            error = false;
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);
+        } finally {
+            if (error) {
+                sysexit(SYSEXIT_UNKNOWN_OPTION);
+            }
         }
     }
 

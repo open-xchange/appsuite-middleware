@@ -57,12 +57,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.rdb.RdbSnippetManagement;
+import com.openexchange.snippet.rdb.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -117,13 +120,28 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
             /*
              * Delete them
              */
+            boolean supportsAttachments;
+            {
+                final ConfigViewFactory factory = Services.optService(ConfigViewFactory.class);
+                if (null == factory) {
+                    supportsAttachments = false;
+                } else {
+                    try {
+                        final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property("com.openexchange.snippet.rdb.supportsAttachments", boolean.class);
+                        supportsAttachments = property.isDefined() ? property.get().booleanValue() : false;
+                    } catch (final Exception e) {
+                        supportsAttachments = false;
+                    }
+                }
+            }
             final AtomicReference<OXException> error = new AtomicReference<OXException>();
+            final boolean supportsAttach = supportsAttachments;
             ids.forEach(new TIntProcedure() {
 
                 @Override
                 public boolean execute(final int id) {
                     try {
-                        RdbSnippetManagement.deleteSnippet(id, userId, contextId, writeCon);
+                        RdbSnippetManagement.deleteSnippet(id, userId, contextId, supportsAttach, writeCon);
                         return true;
                     } catch (final OXException e) {
                         error.set(e);

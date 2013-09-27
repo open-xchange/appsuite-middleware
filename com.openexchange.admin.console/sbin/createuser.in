@@ -62,8 +62,6 @@ test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
-test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
-
 BNAME=$(basename $0)
 CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|exists\|changeaccessglobal\|getaccesscombinationnameforuser\|list\|change\)\(.*\)/\1 \2/') )
 MODULE=${CMDARR[1]}
@@ -96,8 +94,18 @@ esac
 
 JAVAMAIN="com.openexchange.admin.console.${MODULE}.${ACTION}"
 
+test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xmx280M"
+
+JAVA_OPTS="${JAVA_OXCMD_OPTS} \
+-Djava.awt.headless=true \
+-Dopenexchange.propdir=$PROPERTIESDIR"
+
+CLASSPATH="-classpath @classpath@"
+
+test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
+
 ADMINCP=$(for jar in $LIBPATH/*.jar; do
     echo -n "${jar}:"
     done)
 
-$JAVA_BIN $JAVA_OXCMD_OPTS -classpath ${ADMINCP} $JAVAMAIN "$@"
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH:$ADMINCP $JAVAMAIN "$@"

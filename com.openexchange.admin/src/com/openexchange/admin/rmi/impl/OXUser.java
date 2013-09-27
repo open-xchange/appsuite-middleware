@@ -145,7 +145,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("No capabilities specified.");
         }
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        
+
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + user + " - "+ (null == capsToAdd ? "" : capsToAdd.toString())+" | "+(null == capsToRemove ? "" : capsToRemove.toString()) + " - " + auth);
         }
@@ -285,6 +285,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 } catch (final PluginException e) {
                                     log.error("Error while calling change for plugin: " + bundlename, e);
                                     throw new StorageException(e);
+                                } catch (final RuntimeException e) {
+                                    log.error("Error while calling change for plugin: " + bundlename, e);
+                                    throw new StorageException(e);
                                 }
                             }
                         }
@@ -328,6 +331,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 final CacheKey key = cacheService.newCacheKey(ctx.getId().intValue(), userid);
                 Cache jcs = cacheService.getCache("User");
+                jcs.remove(key);
+
+                jcs = cacheService.getCache("UserPermissionBits");
                 jcs.remove(key);
 
                 jcs = cacheService.getCache("UserConfiguration");
@@ -397,7 +403,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
 //      JCS
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
+            UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (final OXException e) {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);
         }
@@ -471,7 +477,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
 //      JCS
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
+            UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (final OXException e) {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);
         }
@@ -671,30 +677,71 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
 
-                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !tool.isContextAdmin(ctx, usr.getId().intValue()))) {
-                                try {
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Calling create for plugin: " + bundlename);
-                                    }
-                                    oxuser.create(ctx, usr, access, auth);
-                                    interfacelist.add(oxuser);
-                                } catch (final PluginException e) {
-                                    log.error("Error while calling create for plugin: " + bundlename, e);
-                                    log.info("Now doing rollback for everything until now...");
-                                    for (final OXUserPluginInterface oxuserinterface : interfacelist) {
-                                        try {
-                                            oxuserinterface.delete(ctx, new User[] { usr }, auth);
-                                        } catch (final PluginException e1) {
-                                            log.error("Error doing rollback for plugin: " + bundlename, e1);
-                                        }
-                                    }
+                            try {
+                                final boolean canHandleContextAdmin = oxuser.canHandleContextAdmin();
+                                if (canHandleContextAdmin || (!canHandleContextAdmin && !tool.isContextAdmin(ctx, usr.getId().intValue()))) {
                                     try {
-                                        oxu.delete(ctx, usr);
-                                    } catch (final StorageException e1) {
-                                        log.error("Error doing rollback for creating user in database", e1);
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Calling create for plugin: " + bundlename);
+                                        }
+                                        oxuser.create(ctx, usr, access, auth);
+                                        interfacelist.add(oxuser);
+                                    } catch (final PluginException e) {
+                                        log.error("Error while calling create for plugin: " + bundlename, e);
+                                        log.info("Now doing rollback for everything until now...");
+                                        for (final OXUserPluginInterface oxuserinterface : interfacelist) {
+                                            try {
+                                                oxuserinterface.delete(ctx, new User[] { usr }, auth);
+                                            } catch (final PluginException e1) {
+                                                log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                            } catch (final RuntimeException e1) {
+                                                log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                            }
+                                        }
+                                        try {
+                                            oxu.delete(ctx, usr);
+                                        } catch (final StorageException e1) {
+                                            log.error("Error doing rollback for creating user in database", e1);
+                                        }
+                                        throw new StorageException(e);
+                                    } catch (final RuntimeException e) {
+                                        log.error("Error while calling create for plugin: " + bundlename, e);
+                                        log.info("Now doing rollback for everything until now...");
+                                        for (final OXUserPluginInterface oxuserinterface : interfacelist) {
+                                            try {
+                                                oxuserinterface.delete(ctx, new User[] { usr }, auth);
+                                            } catch (final PluginException e1) {
+                                                log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                            } catch (final RuntimeException e1) {
+                                                log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                            }
+                                        }
+                                        try {
+                                            oxu.delete(ctx, usr);
+                                        } catch (final StorageException e1) {
+                                            log.error("Error doing rollback for creating user in database", e1);
+                                        }
+                                        throw new StorageException(e);
                                     }
-                                    throw new StorageException(e);
                                 }
+                            } catch (final RuntimeException e) {
+                                log.error("Error while calling canHandleContextAdmin for plugin: " + bundlename, e);
+                                log.info("Now doing rollback for everything until now...");
+                                for (final OXUserPluginInterface oxuserinterface : interfacelist) {
+                                    try {
+                                        oxuserinterface.delete(ctx, new User[] { usr }, auth);
+                                    } catch (final PluginException e1) {
+                                        log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                    } catch (final RuntimeException e1) {
+                                        log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                    }
+                                }
+                                try {
+                                    oxu.delete(ctx, usr);
+                                } catch (final StorageException e1) {
+                                    log.error("Error doing rollback for creating user in database", e1);
+                                }
+                                throw new StorageException(e);
                             }
                         }
                     }
@@ -858,16 +905,18 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (null != cacheService) {
             try {
                 final Cache usercCache = cacheService.getCache("User");
+                final Cache upCache = cacheService.getCache("UserPermissionBits");
                 final Cache ucCache = cacheService.getCache("UserConfiguration");
                 final Cache usmCache = cacheService.getCache("UserSettingMail");
                 for (final User user : users) {
                     final CacheKey key = cacheService.newCacheKey(i(ctx.getId()), user.getId());
                     usercCache.remove(key);
                     usercCache.remove(cacheService.newCacheKey(i(ctx.getId()), user.getName()));
+                    upCache.remove(key);
                     ucCache.remove(key);
                     usmCache.remove(key);
                     try {
-                        UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(),
+                        UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(),
                                 new ContextImpl(ctx.getId().intValue()));
                     } catch (final OXException e) {
                         log.error("Error removing user " + user.getId() + " in context " + ctx.getId()
@@ -988,7 +1037,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new InvalidDataException("Username and userid missing.");
                 }
                 // ok , try to get the username by id or username
-                if (username == null) {
+                if (username == null && null != userid) {
                     usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
                 }
 
@@ -1028,6 +1077,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         log.debug(Arrays.toString(retusers));
         return retusers;
+    }
+
+    @Override
+    public UserModuleAccess moduleAccessForName(final String accessCombinationName) {
+        return null == accessCombinationName ? null : cache.getAccessCombinationNames().get(accessCombinationName);
     }
 
     @Override
@@ -1191,11 +1245,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final PluginException e) {
             log.error("Error while calling delete for plugin: " + bundlename, e);
             return e;
+        } catch (final RuntimeException e) {
+            log.error("Error while calling delete for plugin: " + bundlename, e);
+            return e;
         }
     }
 
     /**
-     * checking for some requirements when changing exisiting user data
+     * checking for some requirements when changing existing user data
      *
      * @param ctx
      * @param newuser

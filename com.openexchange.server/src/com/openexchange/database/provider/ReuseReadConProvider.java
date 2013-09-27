@@ -101,4 +101,9 @@ public class ReuseReadConProvider implements DBProvider {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        throw new UnsupportedOperationException();
+    }
+
 }

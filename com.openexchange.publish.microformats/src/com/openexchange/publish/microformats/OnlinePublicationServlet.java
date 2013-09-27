@@ -65,12 +65,12 @@ import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.RateLimitedException;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link OnlinePublicationServlet}
@@ -97,7 +97,7 @@ public class OnlinePublicationServlet extends HttpServlet {
      */
     private static final Pattern SPLIT2 = Pattern.compile("\\+");
 
-    protected static ContextService contexts = null;
+    protected static volatile ContextService contexts;
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
@@ -115,10 +115,10 @@ public class OnlinePublicationServlet extends HttpServlet {
         contexts = service;
     }
 
-    protected static UserConfigurationService userConfigs = null;
+    protected static volatile UserPermissionService userPermissions;
 
-    public static void setUserConfigurationService(final UserConfigurationService userConfigurationService) {
-        userConfigs = userConfigurationService;
+    public static void setUserPermissionService(final UserPermissionService service) {
+        userPermissions = service;
     }
 
     protected boolean checkProtected(final Publication publication, final Map<String, String> args, final HttpServletResponse resp) throws IOException {
@@ -140,8 +140,8 @@ public class OnlinePublicationServlet extends HttpServlet {
         final int userId = publication.getUserId();
 
         try {
-            final UserConfiguration userConfiguration = userConfigs.getUserConfiguration(userId, ctx);
-            if (userConfiguration.isPublication()) {
+            final UserPermissionBits userPerm = userPermissions.getUserPermissionBits(userId, ctx);
+            if (userPerm.isPublication()) {
                 return true;
             }
         } catch (final OXException e) {

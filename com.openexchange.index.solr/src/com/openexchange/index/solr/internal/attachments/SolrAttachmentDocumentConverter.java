@@ -67,6 +67,7 @@ import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.converter.AbstractDocumentConverter;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.textxtraction.TextXtractService;
 
 /**
@@ -186,7 +187,10 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
                 String extractedText = xtractService.extractFrom(file, mimeType);
                 setFieldInDocument(inputDocument, AttachmentIndexField.CONTENT, extractedText);
             } catch (Throwable t) {
-                LOG.warn("Error during text extraction. Skipping attachments content...", t);
+                ExceptionUtils.handleThrowable(t);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Error during text extraction. Skipping attachments content.\nCause: " + t.getMessage());
+                }
             }
         }
 

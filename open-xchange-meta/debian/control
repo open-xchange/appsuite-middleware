@@ -8,7 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-meta-oxucs
 Architecture: all
-Depends: ${all-lang-ui-ox6}, ${all-lang-backend}, univention-config-registry, open-xchange-authentication-ucs, open-xchange-spamhandler-spamassassin, open-xchange-mailfilter, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-push-imapidle, open-xchange-configjump-generic, open-xchange-configjump-generic-gui, open-xchange-dav, open-xchange-cluster-discovery-mdns, open-xchange-meta-backend-ox6, open-xchange-meta-ui-ox6
+Depends: ${all-lang-ui-ox6}, ${all-lang-backend}, univention-config-registry, open-xchange-authentication-ucs, open-xchange-spamhandler-spamassassin, open-xchange-mailfilter, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-push-imapidle, open-xchange-configjump-generic, open-xchange-configjump-generic-gui, open-xchange-dav, open-xchange-meta-backend-ox6, open-xchange-meta-ui-ox6
 Recommends: open-xchange-meta-ui-appsuite, open-xchange-meta-backend-appsuite, ${all-lang-ui-appsuite}
 Conflicts: open-xchange-push-mailnotify, open-xchange-gui-ie6-compat
 Description: The Open-Xchange Meta package for OX into UCS integration

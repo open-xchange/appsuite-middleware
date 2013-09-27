@@ -175,6 +175,13 @@ public interface IIMAPProperties extends IMailProperties {
     public int getMaxNumConnection();
 
     /**
+     * Whether to allow folder caches.
+     *
+     * @return <code>true</code> if folder caches are allowed; otherwise <code>false</code>
+     */
+    public boolean allowFolderCaches();
+
+    /**
      * Gets the map holding IMAP servers with new ACL Extension.
      *
      * @return The map holding IMAP servers with new ACL Extension

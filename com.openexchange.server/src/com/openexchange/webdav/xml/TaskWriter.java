@@ -263,7 +263,7 @@ public class TaskWriter extends CalendarWriter {
                 addElement(END_DATE, taskObj.getEndDate(), e_prop);
             }
             if (taskObj.containsActualCosts()) {
-                addElement(ACTUAL_COSTS, taskObj.getActualCosts().floatValue(), e_prop);
+                addElement(ACTUAL_COSTS, taskObj.getActualCosts(), e_prop);
             }
             if (taskObj.containsActualDuration()) {
                 addElement(ACTUAL_DURATION, taskObj.getActualDuration(), e_prop);
@@ -284,7 +284,7 @@ public class TaskWriter extends CalendarWriter {
                 addElement(STATUS, taskObj.getStatus(), e_prop);
             }
             if (taskObj.containsTargetCosts()) {
-                addElement(TARGET_COSTS, taskObj.getTargetCosts().floatValue(), e_prop);
+                addElement(TARGET_COSTS, taskObj.getTargetCosts(), e_prop);
             }
             if (taskObj.containsTargetDuration()) {
                 addElement(TARGET_DURATION, taskObj.getTargetDuration(), e_prop);

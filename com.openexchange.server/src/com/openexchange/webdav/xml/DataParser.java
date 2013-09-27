@@ -50,12 +50,13 @@
 package com.openexchange.webdav.xml;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.DataFields;
 
@@ -176,13 +177,13 @@ public class DataParser {
         return 0;
     }
 
-    public float getValueAsFloat(final XmlPullParser parser) throws XmlPullParserException, IOException {
+    public BigDecimal getValueAsBigDecimal(XmlPullParser parser) throws XmlPullParserException, IOException {
         String s = null;
 
         if ((s = getValue(parser)) != null && s.length() > 0) {
-            return Float.parseFloat(s);
+            return new BigDecimal(s);
         }
-        return 0;
+        return new BigDecimal(0);
     }
 
     public long getValueAsLong(final XmlPullParser parser) throws XmlPullParserException, IOException {

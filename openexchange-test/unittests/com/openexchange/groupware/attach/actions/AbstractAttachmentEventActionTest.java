@@ -1,13 +1,13 @@
 
 package com.openexchange.groupware.attach.actions;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -100,6 +100,13 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
             ok(write.remove(con));
             log.append("Release WriteConnection: " + con + "\n");
             delegate.releaseWriteConnection(ctx, con);
+        }
+
+        @Override
+        public void releaseWriteConnectionAfterReading(Context ctx, Connection con) {
+            ok(write.remove(con));
+            log.append("Release WriteConnectionAfterReading: " + con + "\n");
+            delegate.releaseWriteConnectionAfterReading(ctx, con);
         }
 
         private void ok(final boolean b) {

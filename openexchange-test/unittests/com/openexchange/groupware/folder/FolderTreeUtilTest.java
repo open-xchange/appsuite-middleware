@@ -71,7 +71,7 @@ public class FolderTreeUtilTest extends FolderTestCase {
 
         final FolderObject subsubfolder = mkdir(subfolder.getObjectID(), "subsubfolder");
 
-        final List<Integer> ids = treeUtil.getPath(subsubfolder.getObjectID(), ctx, user, userConfig);
+        final List<Integer> ids = treeUtil.getPath(subsubfolder.getObjectID(), ctx, user);
 
         assertEquals(6, ids.size());
 

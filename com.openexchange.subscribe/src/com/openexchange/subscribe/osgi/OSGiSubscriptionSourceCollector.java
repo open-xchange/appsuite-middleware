@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.osgi;
 
+import java.util.Collection;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -67,32 +68,37 @@ import com.openexchange.subscribe.SubscriptionSourceCollector;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector implements ServiceTrackerCustomizer {
+public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector implements ServiceTrackerCustomizer<SubscribeService, SubscribeService> {
 
-    private final ServiceTracker tracker;
+    private final ServiceTracker<SubscribeService, SubscribeService> tracker;
     private final BundleContext context;
-    private boolean grabbedAll;
+    private volatile boolean grabbedAll;
 
-    public OSGiSubscriptionSourceCollector(final BundleContext context) throws InvalidSyntaxException {
+    public OSGiSubscriptionSourceCollector(final BundleContext context) {
         this.context = context;
-        this.tracker = new ServiceTracker(context,SubscribeService.class.getName(), this);
+        this.tracker = new ServiceTracker<SubscribeService, SubscribeService>(context, SubscribeService.class, this);
         tracker.open();
     }
 
     private void grabAll() {
-        if(grabbedAll) {
+        if (grabbedAll) {
             return;
         }
-        try {
-            final ServiceReference[] serviceReferences = context.getAllServiceReferences(SubscribeService.class.getName(), null);
-            if(serviceReferences != null) {
-                for (final ServiceReference reference : serviceReferences) {
-                    addingService(reference);
-                }
+        synchronized (this) {
+            if (grabbedAll) {
+                return;
             }
-            grabbedAll = true;
-        } catch (final InvalidSyntaxException x) {
-            // IGNORE, we didn't specify a filter, so won't happen
+            try {
+                final Collection<ServiceReference<SubscribeService>> serviceReferences = context.getServiceReferences(SubscribeService.class, null);
+                if (serviceReferences != null) {
+                    for (final ServiceReference<SubscribeService> reference : serviceReferences) {
+                        addingService(reference);
+                    }
+                }
+                grabbedAll = true;
+            } catch (final InvalidSyntaxException x) {
+                // IGNORE, we didn't specify a filter, so won't happen
+            }
         }
     }
 
@@ -101,20 +107,20 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final SubscribeService subscribeService = (SubscribeService) context.getService(reference);
+    public SubscribeService addingService(final ServiceReference<SubscribeService> reference) {
+        final SubscribeService subscribeService = context.getService(reference);
         addSubscribeService(subscribeService);
         return subscribeService;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<SubscribeService> reference, final SubscribeService service) {
         // IGNORE
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        removeSubscribeService(((SubscribeService) service).getSubscriptionSource().getId());
+    public void removedService(final ServiceReference<SubscribeService> reference, final SubscribeService service) {
+        removeSubscribeService(service.getSubscriptionSource().getId());
     }
 
     @Override

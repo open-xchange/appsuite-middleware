@@ -49,40 +49,40 @@
 
 package com.openexchange.admin.console;
 
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
  * @author d7
- *
  */
 public class StatisticToolsTest extends AbstractTest {
-    
+
     @Test
     public void testgetServerStats() {
         resetBuffers();
-        final StatisticTools statisticTools = new StatisticTools(){
+        final StatisticTools statisticTools = new StatisticTools() {
+
             @Override
             protected void sysexit(int exitCode) {
                 StatisticToolsTest.this.returnCode = exitCode;
             }
         };
-        statisticTools.start(new String[]{"-x"}, "showruntimestats");
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
+        statisticTools.start(new String[] { "-x" }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCode);
     }
 
     @Test
     public void testgetAdminStats() {
         resetBuffers();
-        final StatisticTools statisticTools = new StatisticTools(){
+        final StatisticTools statisticTools = new StatisticTools() {
+
             @Override
             protected void sysexit(int exitCode) {
                 StatisticToolsTest.this.returnCode = exitCode;
             }
         };
-        statisticTools.start(new String[]{"-x", "-A"}, "showruntimestats");
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
+        statisticTools.start(new String[] { "-x", "-A" }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCode);
     }
-    
+
 }

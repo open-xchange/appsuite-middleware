@@ -93,7 +93,7 @@ public final class LoginCounterTool {
         CommandLineParser parser = new PosixParser();
         Date startDate = null;
         Date endDate = null;
-
+        boolean error = true;
         try {
             final CommandLine cmd = parser.parse(countingOptions, args);
             if (cmd.hasOption('h')) {
@@ -105,7 +105,7 @@ public final class LoginCounterTool {
             if (!cmd.hasOption('s') || !cmd.hasOption('e')) {
                 System.out.println("Parameters 'start' and 'end' are required.");
                 printHelp();
-                System.exit(0);
+                System.exit(1);
                 return;
             }
             // Parse dates
@@ -134,7 +134,7 @@ public final class LoginCounterTool {
                 if (null == startDate) {
                     System.out.println("Wrong format for parameter 'start': " + source + " (specified arguments: " + Arrays.toString(args) + ")");
                     printHelp();
-                    System.exit(0);
+                    System.exit(1);
                 }
             }
             if (null == endDate) {
@@ -144,7 +144,7 @@ public final class LoginCounterTool {
                 } catch (java.text.ParseException e) {
                     System.out.println("Wrong format for parameter 'end': " + source + " (specified arguments: " + Arrays.toString(args) + ")");
                     printHelp();
-                    System.exit(0);
+                    System.exit(1);
                 }
             }
 
@@ -160,8 +160,13 @@ public final class LoginCounterTool {
 
                 writeNumberOfLogins(mbsc, startDate, endDate, cmd.hasOption('a'), regex);
             } finally {
-                jmxConnector.close();
+                try {
+                    jmxConnector.close();
+                } catch (Exception e) {
+                    // Ignore
+                }
             }
+            error = false;
         } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
@@ -169,6 +174,10 @@ public final class LoginCounterTool {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
+        } finally {
+            if (error) {
+                System.exit(1);
+            }
         }
     }
 

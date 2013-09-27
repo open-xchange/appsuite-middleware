@@ -203,7 +203,7 @@ public final class SimHttpServletResponse implements HttpServletResponse {
      *
      * @return The headers
      */
-    public Map<String, String> getHeader() {
+    public Map<String, String> getHeaders() {
         return headers;
     }
 
@@ -238,14 +238,13 @@ public final class SimHttpServletResponse implements HttpServletResponse {
 
     @Override
     public void sendError(int sc, String msg) throws IOException {
-        // TODO Auto-generated method stub
-
+        status = sc;
+        statusMessage = msg;
     }
 
     @Override
     public void sendError(int sc) throws IOException {
-        // TODO Auto-generated method stub
-
+        status = sc;
     }
 
     @Override

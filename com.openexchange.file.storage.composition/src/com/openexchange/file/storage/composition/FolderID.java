@@ -175,4 +175,9 @@ public class FolderID {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return toUniqueID();
+    }
+
 }

@@ -61,7 +61,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.TargetFolderSession;
@@ -71,7 +71,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link DocumentMetadataHolderFolderUpdaterStrategy}
@@ -83,13 +83,13 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DocumentMetadataHolderFolderUpdaterStrategy.class));
 
     private final UserService users;
-    private final UserConfigurationService userConfigs;
+    private final UserPermissionService userPermissions;
     private final InfostoreFacade infostore;
 
-    public DocumentMetadataHolderFolderUpdaterStrategy(final UserService users, final UserConfigurationService userConfigs, final InfostoreFacade infostore) {
+    public DocumentMetadataHolderFolderUpdaterStrategy(final UserService users, final UserPermissionService userPermissions, final InfostoreFacade infostore) {
         super();
         this.users = users;
-        this.userConfigs = userConfigs;
+        this.userPermissions = userPermissions;
         this.infostore = infostore;
     }
 
@@ -216,12 +216,12 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
         public int folderId;
         public User user;
-        public UserConfiguration userConfig;
+        public UserPermissionBits userConfig;
         public ServerSession serverSession;
 
         public InfostoreSession(final TargetFolderDefinition target) throws OXException, OXException, OXException {
             user = users.getUser(target.getUserId(), target.getContext());
-            userConfig = userConfigs.getUserConfiguration(target.getUserId(), target.getContext());
+            userConfig = userPermissions.getUserPermissionBits(target.getUserId(), target.getContext());
 
             serverSession = new ServerSessionAdapter(new TargetFolderSession(target), target.getContext(), user);
             folderId = target.getFolderIdAsInt();

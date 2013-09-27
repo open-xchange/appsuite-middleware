@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link SaneScriptTags}
@@ -121,7 +122,9 @@ public final class SaneScriptTags {
         do {
             final String entity = toLowerCase(m.group(1));
             if (REPLACEES.contains(entity)) {
-                m.appendReplacement(sb, Matcher.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+            } else {
+                m.appendReplacement(sb, "$0");
             }
         } while (m.find());
         m.appendTail(sb);
@@ -139,7 +142,7 @@ public final class SaneScriptTags {
             }
             sb.setLength(0);
             do {
-                m.appendReplacement(sb, Matcher.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
             } while (m.find());
             m.appendTail(sb);
         }
@@ -220,7 +223,7 @@ public final class SaneScriptTags {
 
     private static String toLowerCase(final CharSequence chars) {
         final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
+        final StringAllocator builder = new StringAllocator(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

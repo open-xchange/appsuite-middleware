@@ -51,6 +51,7 @@ package com.openexchange.folderstorage;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -153,4 +154,14 @@ public interface UserizedFolder extends ParameterizedFolder {
      * @param locale The locale for this user-sensitive folder
      */
     void setLocale(Locale locale);
+
+    /**
+     * Sets the dynamic metadata
+     */
+    void setMeta(Map<String, Object> meta);
+    
+    /**
+     * @return the dynamic properties
+     */
+    Map<String, Object> getMeta();
 }

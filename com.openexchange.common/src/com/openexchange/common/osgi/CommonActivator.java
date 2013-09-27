@@ -82,22 +82,22 @@ public final class CommonActivator implements BundleActivator {
             // Add any start-up operations here
             {
                 final String mailcap = "" +
-                		"#\n" + 
-                		"#\n" + 
-                		"# Default mailcap file for the JavaMail System.\n" + 
-                		"#\n" + 
-                		"# JavaMail content-handlers:\n" + 
-                		"#\n" + 
-                		"text/plain;;        x-java-content-handler=com.sun.mail.handlers.text_plain\n" + 
-                		"text/html;;     x-java-content-handler=com.sun.mail.handlers.text_html\n" + 
-                		"text/xml;;      x-java-content-handler=com.sun.mail.handlers.text_xml\n" + 
-                		"multipart/*;;       x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true\n" + 
-                		"message/rfc822;;    x-java-content-handler=com.sun.mail.handlers.message_rfc822\n" + 
-                		"#\n" + 
-                		"# can't support image types because java.awt.Toolkit doesn't work on servers\n" + 
-                		"#\n" + 
-                		"#image/gif;;        x-java-content-handler=com.sun.mail.handlers.image_gif\n" + 
-                		"#image/jpeg;;       x-java-content-handler=com.sun.mail.handlers.image_jpeg\n" + 
+                		"#\n" +
+                		"#\n" +
+                		"# Default mailcap file for the JavaMail System.\n" +
+                		"#\n" +
+                		"# JavaMail content-handlers:\n" +
+                		"#\n" +
+                		"text/plain;;        x-java-content-handler=com.sun.mail.handlers.text_plain\n" +
+                		"text/html;;     x-java-content-handler=com.sun.mail.handlers.text_html\n" +
+                		"text/xml;;      x-java-content-handler=com.sun.mail.handlers.text_xml\n" +
+                		"multipart/*;;       x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true\n" +
+                		"message/rfc822;;    x-java-content-handler=com.sun.mail.handlers.message_rfc822\n" +
+                		"#\n" +
+                		"# can't support image types because java.awt.Toolkit doesn't work on servers\n" +
+                		"#\n" +
+                		"#image/gif;;        x-java-content-handler=com.sun.mail.handlers.image_gif\n" +
+                		"#image/jpeg;;       x-java-content-handler=com.sun.mail.handlers.image_jpeg\n" +
                 		"";
                 mailcapRegistration = context.registerService(MailcapCommandMap.class, new OXMailcapCommandMap(mailcap), null);
             }
@@ -118,6 +118,7 @@ public final class CommonActivator implements BundleActivator {
                 mailcapRegistration.unregister();
                 this.mailcapRegistration = null;
             }
+            com.mysql.jdbc.AbandonedConnectionCleanupThread.shutdown();
         } catch (final Exception e) {
             logger.info("Stopping bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
             throw e;

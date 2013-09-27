@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: File system file storage
+Bundle-SymbolicName: com.openexchange.file.storage.fs
+Bundle-Version: 7.4.0
+Bundle-Activator: com.openexchange.file.storage.fs.osgi.FSFSActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.datatypes.genericonf,
+ com.openexchange.exception,
+ com.openexchange.file.storage,
+ com.openexchange.file.storage.generic,
+ com.openexchange.groupware.results,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools,
+ com.openexchange.tools.iterator,
+ com.openexchange.tx,
+ org.osgi.framework;version="1.3.0"
+

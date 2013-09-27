@@ -59,6 +59,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.google.gdata.client.GoogleService.InvalidCredentialsException;
@@ -76,6 +77,7 @@ import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
@@ -92,9 +94,11 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GoogleAPIStep.class);
 
     public GoogleAPIStep() {
+        super();
     }
 
     public GoogleAPIStep(final String username, final String password) {
+        this();
         this.username = username;
         this.password = password;
     }
@@ -107,6 +111,13 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         // Request the feed
         URL feedUrl;
         try {
+            // Check login to be an E-Mail address
+            try {
+                new QuotedInternetAddress(username, true);
+            } catch (final AddressException e) {
+                throw SubscriptionErrorMessage.EMAIL_ADDR_LOGIN.create();
+            }
+            // Go ahead...
             final ContactsService myService = new ContactsService("com.openexchange");
             myService.setUserCredentials(username, password);
             feedUrl = new URL("http://www.google.com/m8/feeds/contacts/" + username + "/full?max-results=5000");
@@ -296,7 +307,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
         } catch (final ServiceException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }

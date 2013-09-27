@@ -49,8 +49,10 @@
 
 package com.openexchange.html.internal.css;
 
-import java.util.HashSet;
-import java.util.Locale;
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -63,7 +65,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -146,10 +147,10 @@ public final class CSSMatcher {
             GroupType.NON_CAPTURING);
 
         final String strCOLOR_SYSTEM = "ActiveBorder|ActiveCaption|AppWorkspace|Background|" +
-                "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" +
-                "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" +
-                "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" +
-                "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
+            "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" +
+            "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" +
+            "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" +
+            "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
 
         final String strCOLOR_RGB_HEX = "#?\\p{XDigit}{3,6}";
 
@@ -162,7 +163,7 @@ public final class CSSMatcher {
                 strPERCENTAGE,
                 strCSV_DELIM,
                 strPERCENTAGE)),
-            GroupType.NON_CAPTURING), "\\)");
+                GroupType.NON_CAPTURING), "\\)");
 
         final String strCOLOR = RegexUtility.group(RegexUtility.concat(
             strCOLOR_KEYWORD,
@@ -214,11 +215,11 @@ public final class CSSMatcher {
         /*
          * Ensure to check against pattern first
          */
-        final Set<Integer> patIndices = new HashSet<Integer>(2);
+        final TIntSet patIndices = new TIntHashSet(2);
         for (int i = 0; i < size; i++) {
             final String allowedValue = allowedValues[i];
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
-                patIndices.add(Integer.valueOf(i));
+                patIndices.add(i);
                 if (allowedValue.indexOf('d') >= 0) {
                     return false;
                 }
@@ -238,7 +239,7 @@ public final class CSSMatcher {
          */
         boolean retval = false;
         for (int i = 0; i < size && !retval; i++) {
-            if (!patIndices.contains(Integer.valueOf(i))) {
+            if (!patIndices.contains(i)) {
                 /*
                  * Check against non-pattern allowed value
                  */
@@ -274,11 +275,13 @@ public final class CSSMatcher {
     }
 
     /** Matches a starting CSS block */
-    static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/]*?\\{");
+    protected static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/*]*?\\{");
+
     /** Matches a complete CSS block, but not appropriate for possible nested blocks */
     private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
+
     /** Matches a CR?LF plus indention */
-    static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
+    protected static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
@@ -292,7 +295,16 @@ public final class CSSMatcher {
         return checkCSS(cssBuilder, styleMap, cssPrefix, false);
     }
 
-    private static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean internallyInvoked) {
+    /**
+     * Checks the CSS provided by given <code>Stringer</code>.
+     *
+     * @param cssBuilder The CSS content
+     * @param styleMap The style map
+     * @param cssPrefix The CSS prefix
+     * @param internallyInvoked <code>true</code> if already internally invoked; otherwise <code>false</code>
+     * @return <code>true</code> if modified; otherwise <code>false</code>
+     */
+    protected static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean internallyInvoked) {
         // Schedule separate task to monitor duration
         // User StringBuffer-based invocation to honor concurrency
         final Stringer cssBld = new StringBufferStringer(new StringBuffer(cssBuilder.toString()));
@@ -597,36 +609,50 @@ public final class CSSMatcher {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
         final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
-        final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(css.length()));
-        final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
-        if (!m.find()) {
-            return false;
+        try {
+            final int cssLength = css.length();
+            final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
+            final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
+            if (!m.find()) {
+                return false;
+            }
+            cssBuilder.setLength(0);
+            int lastPos = 0;
+            do {
+                // Check prefix part
+                cssElemsBuffer.append(css.substring(lastPos, m.start()));
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                final String prefix = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Check block part
+                {
+                    int i = m.end();
+                    for (char c; i < cssLength && (c = css.charAt(i++)) != '}';) {
+                        cssElemsBuffer.append(c);
+                    }
+                    lastPos = i + 1;
+                }
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                cssElemsBuffer.insert(0, m.group()).append('}').append('\n'); // Surround with block definition
+                // Add to main builder
+                cssBuilder.append(prefix);
+                cssBuilder.append(cssElemsBuffer);
+                cssElemsBuffer.setLength(0);
+            } while (lastPos < cssLength && m.find(lastPos));
+            if (lastPos < cssLength) {
+                cssElemsBuffer.append(css.substring(lastPos, cssLength));
+            }
+            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+            final String tail = cssElemsBuffer.toString();
+            cssElemsBuffer.setLength(0);
+            cssBuilder.append(tail);
+            return modified;
+        } catch (final RuntimeException unchecked) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unchecked exception while processing CSS content:" + System.getProperty("line.separator") + css, unchecked);
+            }
+            throw unchecked;
         }
-        cssBuilder.setLength(0);
-        int lastPos = 0;
-        do {
-            // Check prefix part
-            cssElemsBuffer.append(css.substring(lastPos, m.start()));
-            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-            final String prefix = cssElemsBuffer.toString();
-            cssElemsBuffer.setLength(0);
-            // Check block part
-            cssElemsBuffer.append(m.group(2));
-            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-            cssElemsBuffer.insert(0, m.group(1)).append('}').append('\n'); // Surround with block definition
-            final String block = cssElemsBuffer.toString();
-            cssElemsBuffer.setLength(0);
-            // Add to main builder
-            cssBuilder.append(prefix);
-            cssBuilder.append(block);
-            lastPos = m.end();
-        } while (m.find());
-        cssElemsBuffer.append(css.substring(lastPos, css.length()));
-        modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-        final String tail = cssElemsBuffer.toString();
-        cssElemsBuffer.setLength(0);
-        cssBuilder.append(tail);
-        return modified;
     }
 
     /**
@@ -651,18 +677,28 @@ public final class CSSMatcher {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
             final String css = CRLF.matcher(cssBuilder.toString()).replaceAll(" ");
-            final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+            final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             cssBuilder.setLength(0);
+            int lastPos = 0;
             while (m.find()) {
-                modified |= checkCSSElements(cssElemsBuffer.append(m.group(2)), styleMap, removeIfAbsent);
+                {
+                    int i = m.end();
+                    for (char c; (c = css.charAt(i++)) != '}';) {
+                        cssElemsBuffer.append(c);
+                    }
+                    lastPos = i + 1;
+                }
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                 tmpBuilder.setLength(0);
                 mr.appendLiteralReplacement(
                     cssBuilder,
-                    tmpBuilder.append(m.group(1)).append(cssElemsBuffer.toString()).append('}').append('\n').toString());
+                    tmpBuilder.append(m.group()).append(cssElemsBuffer.toString()).append('}').append('\n').toString());
                 cssElemsBuffer.setLength(0);
             }
-            mr.appendTail(cssBuilder);
+            if (lastPos < css.length()) {
+                cssBuilder.append(css.substring(lastPos));
+            }
             return modified;
         }
         return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
@@ -671,6 +707,8 @@ public final class CSSMatcher {
     private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
         "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]]+);?",
         Pattern.CASE_INSENSITIVE);
+    //private static final Pattern PATTERN_START_STYLE_LINE = Pattern.compile(
+    //    "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]])");
 
     /**
      * Corrects rgb functions; e.g.<br>
@@ -693,6 +731,24 @@ public final class CSSMatcher {
         mr.appendTail(cssBuilder);
     }
 
+    private static final Pattern PATTERN_INLINE_DATA = Pattern.compile("url\\(data:[^,]+,.+?\\)");
+
+    private static boolean dropInlineData(final Stringer cssBuilder) {
+        // url(data:font/woff;charset=utf-8;base64,
+        if (cssBuilder.indexOf("data") < 0) {
+            return false;
+        }
+        final Matcher m = PATTERN_INLINE_DATA.matcher(cssBuilder.toString());
+        final StringBuffer sb = new StringBuffer(cssBuilder.length());
+        while (m.find()) {
+            m.appendReplacement(sb, "");
+        }
+        m.appendTail(sb);
+        cssBuilder.setLength(0);
+        cssBuilder.append(sb);
+        return true;
+    }
+
     /**
      * Iterates over CSS elements contained in specified string argument and checks each element and its value against given style map
      *
@@ -708,6 +764,7 @@ public final class CSSMatcher {
         }
         boolean modified = false;
         correctRGBFunc(cssBuilder);
+        modified = dropInlineData(cssBuilder);
         /*
          * Feed matcher with buffer's content and reset
          */
@@ -723,9 +780,9 @@ public final class CSSMatcher {
         while (m.find()) {
             final String elementName = m.group(1);
             if (null != elementName) {
-                if (styleMap.containsKey(elementName.toLowerCase(Locale.ENGLISH))) {
+                if (styleMap.containsKey(toLowerCase(elementName))) {
                     elemBuilder.append(elementName).append(':').append(' ');
-                    final Set<String> allowedValuesSet = styleMap.get(elementName.toLowerCase(Locale.ENGLISH));
+                    final Set<String> allowedValuesSet = styleMap.get(toLowerCase(elementName));
                     final String elementValues = m.group(2);
                     boolean hasValues = false;
                     if (matches(elementValues, allowedValuesSet)) {
@@ -779,32 +836,10 @@ public final class CSSMatcher {
      * @return <code>true</code> if specified string argument contains at least one CSS element; otherwise <code>false</code>
      */
     public static boolean containsCSSElement(final String css) {
-        if (null == css || isEmpty(css)) {
+        if (null == css || Strings.isEmpty(css)) {
             return false;
         }
         return PATTERN_STYLE_LINE.matcher(css).find();
-    }
-
-    static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }

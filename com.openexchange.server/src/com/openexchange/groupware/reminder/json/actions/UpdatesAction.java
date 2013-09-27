@@ -68,6 +68,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -80,12 +81,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 }, responseDescription = "")
 public final class UpdatesAction extends AbstractReminderAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatesAction.class));
-
     /**
      * Initializes a new {@link UpdatesAction}.
-     * @param services
      */
     public UpdatesAction(final ServiceLookup services) {
         super(services);
@@ -102,18 +99,18 @@ public final class UpdatesAction extends AbstractReminderAction {
 
         final JSONArray jsonResponseArray = new JSONArray();
         SearchIterator<?> it = null;
-
         try {
-            final ReminderService reminderSql = new ReminderHandler(req.getSession().getContext());
-            it = reminderSql.listModifiedReminder(req.getSession().getUserId(), timestamp);
+            final ServerSession session = req.getSession();
+            final ReminderService reminderSql = new ReminderHandler(session.getContext());
 
+            it = reminderSql.listModifiedReminder(session.getUserId(), timestamp);
             while (it.hasNext()) {
                 final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
-                final ReminderObject reminderObj = (ReminderObject) it.next();
+                final ReminderObject reminder = (ReminderObject) it.next();
 
-                if (reminderObj.isRecurrenceAppointment()) {
-                    final int targetId = reminderObj.getTargetId();
-                    final int inFolder = reminderObj.getFolder();
+                if (reminder.isRecurrenceAppointment()) {
+                    // final int targetId = reminder.getTargetId();
+                    // final int inFolder = reminder.getFolder();
 
                     // currently disabled because not used by the UI
                     // final ReminderObject latestReminder = getLatestReminder(targetId, inFolder, sessionObj, end);
@@ -126,16 +123,14 @@ public final class UpdatesAction extends AbstractReminderAction {
                     // }
                 }
 
-                if (hasModulePermission(reminderObj, req.getSession())) {
+                if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
                     final JSONObject jsonReminderObj = new JSONObject();
-                    reminderWriter.writeObject(reminderObj, jsonReminderObj);
+                    reminderWriter.writeObject(reminder, jsonReminderObj);
                     jsonResponseArray.put(jsonReminderObj);
                 }
             }
 
             return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
-        } catch (final OXException e) {
-            throw e;
         } finally {
             if (null != it) {
                 it.close();

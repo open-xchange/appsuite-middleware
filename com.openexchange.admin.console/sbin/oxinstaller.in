@@ -290,7 +290,7 @@ setup()
     v_cache_hosting ${CONFDIR}/cache.ccf LTCP $UDPDISCOVERYPORT
     v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $GWCACHEPORT ${CONFDIR}/cache.ccf
 
-    v_setprop com.openexchange.cluster.name $OXCLUSTERNAME ${CONFDIR}/cluster.properties
+    v_setprop com.openexchange.hazelcast.group.name $OXCLUSTERNAME ${CONFDIR}/hazelcast.properties
 
     #
     # administration configuration files

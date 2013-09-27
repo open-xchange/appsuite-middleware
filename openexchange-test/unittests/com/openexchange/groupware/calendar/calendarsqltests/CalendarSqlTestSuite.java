@@ -82,7 +82,6 @@ public class CalendarSqlTestSuite {
         tests.addTestSuite(Bug12377Test.class);
         tests.addTestSuite(Bug12269Test.class);
         tests.addTestSuite(Bug12072Test.class);
-        tests.addTestSuite(Bug11881Test.class);
         tests.addTestSuite(Bug11865Test.class);
         tests.addTestSuite(Bug11803Test.class);
         tests.addTestSuite(Bug11730Test.class);

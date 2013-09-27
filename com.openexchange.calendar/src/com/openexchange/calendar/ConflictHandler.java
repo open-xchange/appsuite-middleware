@@ -149,15 +149,24 @@ public class ConflictHandler {
          * Using original method {@link #resolveResourceConflicts(Date, Date)}
          * for non series appointments.
          */
+        Date start = cdao.getStartDate();
+        Date end = cdao.getEndDate();
         if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
-            if (request_participants) {
-                return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
+            if ((cdao.getRecurrenceDatePosition() != null || cdao.getRecurrencePosition() != 0) && cdao.getRecurrenceID() == 0) { //new ChangeException
+                CalendarDataObject exceptionToCreate = getExceptionToCreate();
+                start = exceptionToCreate.getStartDate();
+                end = exceptionToCreate.getEndDate();
             }
-            return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
+            
+            if (request_participants) {
+                return resolveParticipantConflicts(start, end);
+            }
+            return resolveResourceConflicts(start, end);
         }
         if (request_participants) {
             return resolveParticipantsRecurring();
         }
+        
         // Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)} for series appointments.
         final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
         final Date resultStart = new Date(results.getRecurringResult(0).getStart());
@@ -175,6 +184,28 @@ public class ConflictHandler {
         });
         return resultConflicts;
 	}
+    
+    private CalendarDataObject getExceptionToCreate() throws OXException {
+        CalendarDataObject clone = edao.clone();
+        if (cdao.containsRecurrencePosition()) {
+            clone.setRecurrencePosition(cdao.getRecurrencePosition());
+        }
+        if (cdao.containsRecurrenceDatePosition()) {
+            clone.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
+        }
+        
+        recColl.setRecurrencePositionOrDateInDAO(clone, true);
+
+        final RecurringResultsInterface rss = recColl.calculateRecurringIgnoringExceptions(edao, 0, 0, clone.getRecurrencePosition());
+        if (rss == null) {
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create();
+        }
+        final RecurringResultInterface rs = rss.getRecurringResult(0);
+        clone.setStartDate(new Date(rs.getStart()));
+        clone.setEndDate(new Date(rs.getEnd()));
+        
+        return clone;
+    }
 
     private CalendarDataObject[] resolveParticipantsRecurring() throws OXException {
         final long limit = CalendarConfig.getSeriesConflictLimit() ? System.currentTimeMillis() + Constants.MILLI_YEAR : 0;

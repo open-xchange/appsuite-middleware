@@ -51,14 +51,18 @@ package com.openexchange.realtime.presence.subscribe.database;
 
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.subscribe.impl.Subscription;
 import com.openexchange.realtime.presence.subscribe.impl.SubscriptionParticipant;
@@ -75,13 +79,13 @@ import com.openexchange.sql.grammar.UPDATE;
 
 /**
  * {@link SubscriptionsSQL}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SubscriptionsSQL {
 
-    public static DatabaseService db;
+    // public static volatile DatabaseService db;
 
     private static final Table table = new Table("presenceSubscriptions");
 
@@ -100,6 +104,8 @@ public class SubscriptionsSQL {
     private static final Column request = new Column("request");
 
     private static final Column timestamp = new Column("timestamp");
+
+    private static final Column uuid = new Column("uuid");
 
     // @formatter:off
 
@@ -125,7 +131,7 @@ public class SubscriptionsSQL {
 
     /**
      * Persist a Subscription
-     * 
+     *
      * @param subscription the Subscrption to persist
      * @throws OXException
      */
@@ -177,6 +183,10 @@ public class SubscriptionsSQL {
             update = update.SET(request, PLACEHOLDER);
         }
 
+        if (null != subscription.getUuid()) {
+            insert = insert.SET(uuid, PLACEHOLDER);
+        }
+
         update.WHERE(p);
 
         Connection connection = dbService.getWritable(subscription.getFrom().getCid());
@@ -202,6 +212,8 @@ public class SubscriptionsSQL {
                 if (subscription.getRequest() != null && !subscription.getRequest().trim().equals("")) {
                     values.add(subscription.getRequest());
                 }
+                byte[] uuidBinary = UUIDs.toByteArray(subscription.getUuid());
+                values.add(uuidBinary);
                 new StatementBuilder().executeStatement(connection, insert, values);
             }
         } catch (SQLException e) {
@@ -220,7 +232,7 @@ public class SubscriptionsSQL {
 
     /**
      * Get a list of Subscriptions the SubscriptionParticipant sent TO others.
-     * 
+     *
      * @param recipient the SubscriptionParticipant that sent the subscriptions
      * @return a list of subscriptions the SubscriptionParticipant sent to others
      * @throws OXException
@@ -252,7 +264,7 @@ public class SubscriptionsSQL {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
-                    dbService.backWritable(sender.getCid(), connection);
+                    dbService.backWritableAfterReading(sender.getCid(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
@@ -262,7 +274,7 @@ public class SubscriptionsSQL {
 
     /**
      * Get a list of Subscriptions the SubscriptionParticipant received FROM others.
-     * 
+     *
      * @param recipient the SubscriptionParticipant that received the subscriptions
      * @return a list of subscriptions the SubscriptionParticipant received
      * @throws OXException
@@ -287,7 +299,7 @@ public class SubscriptionsSQL {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
-                    dbService.backWritable(recipient.getCid(), connection);
+                    dbService.backWritableAfterReading(recipient.getCid(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
@@ -298,7 +310,7 @@ public class SubscriptionsSQL {
     /**
      * Get the pending Subscriptions for a SubscriptionParticipant. This will return all the subscriptions sent TO the recipient by others
      * and haven't been approved or canceled by the recipient, yet.
-     * 
+     *
      * @param recipient the SubscriptionParticipant
      * @return the list of subscriptions that haven't been approved or canceled by the recipient and are in a pending state
      * @throws OXException
@@ -324,13 +336,14 @@ public class SubscriptionsSQL {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
-                    dbService.backWritable(recipient.getCid(), connection);
+                    dbService.backWritableAfterReading(recipient.getCid(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
             }
         }
     }
+
 
     private List<Subscription> handleResultSet(ResultSet rs) throws SQLException {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
@@ -351,6 +364,17 @@ public class SubscriptionsSQL {
             String req = rs.getString(request.getName());
             if (req != null && !req.trim().equals("")) {
                 subscription.setRequest(req);
+            }
+
+            try {
+                byte[] uuidBinary = Streams.stream2bytes(rs.getBinaryStream("uuid"));
+            if (!rs.wasNull()) {
+                UUID uuid = UUIDs.toUUID(uuidBinary);
+                subscription.setUuid(uuid);
+            }
+            } catch (IOException e) {
+                UUID uuid = UUID.randomUUID();
+                subscription.setUuid(uuid);
             }
 
             subscriptions.add(subscription);

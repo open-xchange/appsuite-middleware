@@ -61,17 +61,32 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 
 	private InfostoreQueryCatalog queries = null;
 
-	protected final void fillStmt(final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
-		final GetSwitch get = new GetSwitch(doc);
-		int i = 1;
-		for(final Metadata m : fields) {
-			stmt.setObject(i++, process(m, m.doSwitch(get)));
-		}
+    protected final void fillStmt(final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
+        fillStmt(1, stmt, fields, doc, additional);
+    }
 
-		for(final Object o : additional) {
-			stmt.setObject(i++, o);
-		}
-	}
+    /**
+     * Fills the supplied prepared statement using the values of the denoted fields from a document.
+     *
+     * @param parameterIndex The (1-based) parameter index to start with
+     * @param stmt The statement to populate
+     * @param fields The used fields
+     * @param doc The document to get the field values from
+     * @param additional Any additional arbitrary fields to set in the statement after the document values were set
+     * @return The updated parameter index
+     * @throws SQLException
+     */
+    protected final int fillStmt(int parameterIndex, final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
+        final GetSwitch get = new GetSwitch(doc);
+        for(final Metadata m : fields) {
+            stmt.setObject(parameterIndex++, process(m, m.doSwitch(get)));
+        }
+
+        for(final Object o : additional) {
+            stmt.setObject(parameterIndex++, o);
+        }
+        return parameterIndex;
+    }
 
 	private final Object process(final Metadata field, final Object value) {
 		switch(field.getId()) {

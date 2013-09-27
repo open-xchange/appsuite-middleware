@@ -229,7 +229,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     sb.append("src=\"").append(uri.toString()).append('"');
                 }
             } catch (final MalformedURLException e) {
-                LOG.warn("Invalid URL found in \"img\" tag: " + imgTag, e);
+                LOG.debug("Invalid URL found in \"img\" tag: " + imgTag + ". Keeping original content.", e);
                 sb.append(srcMatcher.group());
             } catch (final OXException e) {
                 LOG.warn("Proxy registration failed for \"img\" tag: " + imgTag, e);
@@ -755,19 +755,17 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final String HTML_BR = "<br>"; // + Strings.getLineSeparator();
-    private static final String HTML_NBSP = "&nbsp;";
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
-    private static final Pattern PATTERN_SPACE = Pattern.compile(" ");
 
     @Override
     public String htmlFormat(final String plainText, final boolean withQuote, final String commentId) {
-        return PATTERN_SPACE.matcher(PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR)).replaceAll(HTML_NBSP);
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, commentId)).replaceAll(HTML_BR);
     }
 
     @Override
     public String htmlFormat(final String plainText, final boolean withQuote) {
-        return PATTERN_SPACE.matcher(PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR)).replaceAll(HTML_NBSP);
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
     }
 
     private String escape(final String s, final boolean withQuote, final String commentId) {
@@ -845,7 +843,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlFormat(plainText, true);
     }
 
-    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;\\[\\]]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
 
     /**
      * The regular expression to match URLs inside text:<br>
@@ -1222,9 +1220,9 @@ public final class HtmlServiceImpl implements HtmlService {
                     final byte[] responseBody = get.getResponseBody();
                     try {
                         final String charSet = get.getResponseCharSet();
-                        css.append(new String(responseBody, null == charSet ? "ISO-8859-1" : charSet));
+                        css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
                     } catch (final UnsupportedCharsetException e) {
-                        css.append(new String(responseBody, "ISO-8859-1"));
+                        css.append(new String(responseBody, Charsets.ISO_8859_1));
                     }
                 }
             } catch (final HttpException e) {
@@ -1253,7 +1251,7 @@ public final class HtmlServiceImpl implements HtmlService {
             sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">").append(lineSeparator);
             sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(lineSeparator);
             sb.append("<head>").append(lineSeparator);
-            sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>").append(lineSeparator);
+            sb.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=").append(charset).append("\" />").append(lineSeparator);
             sb.append("</head>").append(lineSeparator);
             sb.append("<body>").append(lineSeparator);
             sb.append(htmlContent);
@@ -1271,7 +1269,7 @@ public final class HtmlServiceImpl implements HtmlService {
         // Check for <head> tag
         if (!HEAD_START.matcher(htmlContent).find()) {
             sb.append("<head>").append(lineSeparator);
-            sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>").append(lineSeparator);
+            sb.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=").append(charset).append("\" />").append(lineSeparator);
             sb.append("</head>").append(lineSeparator);
         }
         // Check for <body> tag
@@ -1329,12 +1327,12 @@ public final class HtmlServiceImpl implements HtmlService {
                 /*-
                  * In reverse order:
                  *
-                 * "\r\n    <meta content=\"text/html; charset=" + <charset> + "\" http-equiv=\"Content-Type\" />\r\n "
+                 * "\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + <charset> + "\" />\r\n "
                  *
                  */
-                sb.insert(start, "\" http-equiv=\"Content-Type\" />\r\n ");
+                sb.insert(start, "\" />\r\n ");
                 sb.insert(start, cs);
-                sb.insert(start, "\r\n    <meta content=\"text/html; charset=");
+                sb.insert(start, "\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=");
                 html = sb.toString();
             }
         }

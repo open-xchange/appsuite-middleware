@@ -50,9 +50,7 @@ package com.openexchange.halo.linkedin;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
@@ -62,6 +60,7 @@ import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -70,7 +69,7 @@ import com.openexchange.user.UserService;
 public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
 	public LinkedinProfileDataSource(final ServiceLookup serviceLookup) {
-		this.serviceLookup = serviceLookup;
+		super(serviceLookup);
 	}
 
 	@Override
@@ -80,7 +79,6 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 
 	@Override
 	public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-		final String password = session.getPassword();
 		final int uid = session.getUserId();
 		final int cid = session.getContextId();
 
@@ -92,13 +90,13 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 
 		final List<String> email = getEMail(contact);
 		if(email == null || email.isEmpty()) {
-            throw new OXException(2).setPrefix("HAL-LI").setLogMessage("Need an e-mail address to look up LinkedIn data");
+            throw LinkedinHaloExceptionCodes.MISSING_EMAIL_ADDR.create();
         }
 
 
-		final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
-		if(accounts.size() == 0) {
-            throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+		final List<OAuthAccount> accounts = getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid);
+		if(accounts.isEmpty()) {
+            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
 
 		final OAuthAccount linkedinAccount = accounts.get(0);

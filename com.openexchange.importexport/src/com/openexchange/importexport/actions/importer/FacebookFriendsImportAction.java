@@ -52,11 +52,16 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.FacebookFriendsImporter;
 import com.openexchange.importexport.importers.Importer;
+import com.openexchange.server.ServiceLookup;
 
 public class FacebookFriendsImportAction extends AbstractImportAction implements
 		AJAXActionService {
 
-	private Importer importer;
+    public FacebookFriendsImportAction(ServiceLookup services) {
+        super(services);
+    }
+
+    private Importer importer;
 
 	@Override
 	public Format getFormat() {
@@ -66,7 +71,7 @@ public class FacebookFriendsImportAction extends AbstractImportAction implements
 	@Override
 	public Importer getImporter() {
 		if(importer == null) {
-            importer = new FacebookFriendsImporter();
+            importer = new FacebookFriendsImporter(services);
         }
 		return importer;
 	}

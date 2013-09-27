@@ -49,9 +49,14 @@
 
 package com.openexchange.html.tools;
 
+import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Strings;
 
 /**
  * {@link HTMLUtils}
@@ -84,4 +89,35 @@ public final class HTMLUtils {
         html = matcher.appendTail(sb).toString();
         return html;
     }
+
+    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
+
+    /**
+     * URL decodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String decodeUrl(final String s, final String charset) {
+        try {
+            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+        } catch (final DecoderException e) {
+            return s;
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

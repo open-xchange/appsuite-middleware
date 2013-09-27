@@ -89,7 +89,7 @@ public final class SearchAction extends AbstractGroupAction {
 
     @Override
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        if (!req.getSession().getUserConfiguration().hasGroupware()) {
+        if (!req.getSession().getUserPermissionBits().hasGroupware()) {
             return new AJAXRequestResult(new JSONArray(0), "json");
         }
 

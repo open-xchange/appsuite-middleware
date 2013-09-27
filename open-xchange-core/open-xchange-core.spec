@@ -9,12 +9,12 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 21
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/            
+URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Requires:      open-xchange-osgi >= @OXVERSION@
@@ -139,6 +139,10 @@ Provides:      open-xchange-passwordchange-servlet = %{version}
 Obsoletes:     open-xchange-passwordchange-servlet <= %{version}
 Provides:      open-xchange-file-storage-webdav = %{version}
 Obsoletes:     open-xchange-file-storage-webdav <= %{version}
+Provides:      open-xchange-cluster-discovery-mdns = %{version}
+Obsoletes:     open-xchange-cluster-discovery-mdns <= %{version}
+Provides:      open-xchange-cluster-discovery-static = %{version}
+Obsoletes:     open-xchange-cluster-discovery-static <= %{version}
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
@@ -176,6 +180,27 @@ find %{buildroot}/opt/open-xchange/etc \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+
+%pre
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # SoftwareChange_Request-1564
+    VALUE="empty"
+    if [ -e /opt/open-xchange/bundles/com.openexchange.cluster.discovery.mdns.jar ]; then
+        VALUE="multicast"
+    elif [ -e /opt/open-xchange/bundles/com.openexchange.cluster.discovery.static.jar ]; then
+        VALUE="static"
+    fi
+    pfile=/opt/open-xchange/etc/hazelcast.properties
+    if [ -e $pfile ] && ! ox_exists_property com.openexchange.hazelcast.network.join $pfile; then
+        ox_set_property com.openexchange.hazelcast.network.join "$VALUE" $pfile
+    fi
+fi
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
@@ -215,6 +240,25 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1559
+pfile=/opt/open-xchange/etc/mail.properties
+VALUE=$(ox_read_property com.openexchange.mail.mailAccessCacheIdleSeconds $pfile)
+if [ "$VALUE" == "7" ]; then
+    ox_set_property com.openexchange.mail.mailAccessCacheIdleSeconds 4 $pfile
+fi
+
+# SoftwareChange_Request-1557
+pfile=/opt/open-xchange/etc/mail.properties
+if ! ox_exists_property com.openexchange.mail.maxForwardCount $pfile; then
+    ox_set_property com.openexchange.mail.maxForwardCount 8 $pfile
+fi
+
+# SoftwareChange_Request-1518
+pfile=/opt/open-xchange/etc/mail.properties
+if ! ox_exists_property com.openexchange.mail.hideDetailsForDefaultAccount $pfile; then
+    ox_set_property com.openexchange.mail.hideDetailsForDefaultAccount false $pfile
+fi
+
 # SoftwareChange_Request-1497
 pfile=/opt/open-xchange/etc/hazelcast.properties
 if ! ox_exists_property com.openexchange.hazelcast.logging.enabled $pfile; then
@@ -250,6 +294,12 @@ if ! ox_exists_property com.openexchange.mail.supportMsisdnAddresses $pfile; the
     ox_set_property com.openexchange.mail.supportMsisdnAddresses false $pfile
 fi
 
+# SoftwareChange_Request-1458
+pfile=/opt/open-xchange/etc/mail.properties
+if ! ox_exists_property com.openexchange.mail.maxMailSize $pfile; then
+    ox_set_property com.openexchange.mail.maxMailSize -1 $pfile
+fi
+
 # SoftwareChange_Request-1455
 pfile=/opt/open-xchange/etc/sessiond.properties
 if ! ox_exists_property com.openexchange.sessiond.asyncPutToSessionStorage $pfile; then
@@ -261,6 +311,30 @@ ox_set_property com.openexchange.push.udp.pushEnabled false /opt/open-xchange/et
 ox_set_property com.openexchange.push.udp.registerDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
 ox_set_property com.openexchange.push.udp.eventDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
 ox_set_property com.openexchange.push.udp.multicastEnabled false /opt/open-xchange/etc/push-udp.properties
+
+# SoftwareChange_Request-1446
+pfile=/opt/open-xchange/etc/server.properties
+VALUE=$(ox_read_property MAX_UPLOAD_SIZE $pfile)
+if [ "$VALUE" == "0" ]; then
+    ox_set_property MAX_UPLOAD_SIZE 104857600 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.defaultMaxConcurrentAJAXRequests $pfile)
+if [ "$VALUE" == "250" ]; then
+    ox_set_property com.openexchange.defaultMaxConcurrentAJAXRequests 100 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.servlet.maxActiveSessions $pfile)
+if [ "$VALUE" == "-1" ]; then
+    ox_set_property com.openexchange.servlet.maxActiveSessions 250000 $pfile
+fi
+pfile=/opt/open-xchange/etc/sessiond.properties
+VALUE=$(ox_read_property com.openexchange.sessiond.maxSession $pfile)
+if [ "$VALUE" == "5000" ]; then
+    ox_set_property com.openexchange.sessiond.maxSession 50000 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.sessiond.randomTokenTimeout $pfile)
+if [ "$VALUE" == "1M" ]; then
+    ox_set_property com.openexchange.sessiond.randomTokenTimeout 30000 $pfile
+fi
 
 # SoftwareChange_Request-1445
 pfile=/opt/open-xchange/etc/hazelcast.properties
@@ -274,18 +348,6 @@ if ! ox_exists_property com.openexchange.log.maxMessageLength $pfile; then
     ox_set_property com.openexchange.log.maxMessageLength -1 $pfile
 fi
 
-# SoftwareChange_Request-1358
-# -----------------------------------------------------------------------
-if [ ${1:-0} -eq 2 ]; then
-   # updating?
-   pfile=/opt/open-xchange/etc/mdns.properties
-   mdnsjar=/opt/open-xchange/bundles/com.openexchange.cluster.discovery.mdns.jar
-   # open-xchange-cluster-discovery-mdns installed? if not, disable
-   if [ ! -e $mdnsjar ]; then
-       ox_set_property com.openexchange.mdns.enabled false $pfile
-   fi
-fi
-
 # SoftwareChange_Request-1365
 pfile=/opt/open-xchange/etc/configdb.properties
 if ! ox_exists_property com.openexchange.database.replicationMonitor $pfile; then
@@ -297,13 +359,6 @@ fi
 pfile=/opt/open-xchange/etc/foldercache.properties
 if ! ox_exists_property com.openexchange.folderstorage.database.preferDisplayName $pfile; then
     ox_set_property com.openexchange.folderstorage.database.preferDisplayName false $pfile
-fi
-
-# SoftwareChange_Request-1328
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/mdns.properties
-if ! ox_exists_property com.openexchange.mdns.interface $pfile; then
-    ox_set_property com.openexchange.mdns.interface '' $pfile
 fi
 
 # SoftwareChange_Request-1335
@@ -443,7 +498,13 @@ for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
         elif [ "$opt" = "-XX:NewRatio=" ]; then
             opt="-XX:NewRatio=3"
         fi
-        nopts="$nopts $opt"
+        if [ "$opt" == "-XX:+UseConcMarkSweepGC" -o "$opt" == "-XX:+UseParNewGC" -o "$opt" == "-XX:CMSInitiatingOccupancyFraction=75" -o "$opt" == "-XX:+UseCMSInitiatingOccupancyOnly" ]; then
+            if ! echo $nopts | grep -- "-XX:+UseParallelGC" > /dev/null && ! echo $nopts | grep -- "-XX:+UseParallelOldGC" > /dev/null; then
+                nopts="$nopts $opt"
+            fi
+        else
+            nopts="$nopts $opt"
+        fi
     fi
 done
 # -----------------------------------------------------------------------
@@ -647,11 +708,51 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
-# Patch_Request-1593
+# SoftwareChange_Request-1529
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; then
+    ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
+fi
+
+# SoftwareChange_Request-1540
+pfile=/opt/open-xchange/etc/permissions.properties
+if ! grep "com.openexchange.capability.boring" >/dev/null $pfile; then
+    echo -e "\n# Mark this installation as boring, i.e. disable an easter egg\n" >> $pfile
+    echo "# com.openexchange.capability.boring=true" >> $pfile
+fi
+
+# SoftwareChange_Request-1556
+pfile=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >/dev/null $pfile; then
+    echo -e "\n# v7.4.0 update tasks start here\n" >> $pfile
+    echo "# Changes the columns actual_costs and target_costs for tasks from float to NUMERIC(12, 2)" >> $pfile
+    echo "!com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >> $pfile
+fi
+
+# SoftwareChange_Request-1558
+pfile=/opt/open-xchange/etc/import.properties
+if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
+    echo -e "\n# sets the limit on how many contacts can be imported at once\n" >> $pfile
+    echo "# -1 means unlimited, defaults to -1" >> $pfile
+    echo "# com.openexchange.import.contacts.limit=-1" >> $pfile
+fi
+
+# SoftwareChange_Request-1564
+[ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
+TOVALUE=$(ox_read_property com.openexchange.hazelcast.group.name /opt/open-xchange/etc/hazelcast.properties)
+if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
+    ox_set_property com.openexchange.hazelcast.group.name "$VALUE" /opt/open-xchange/etc/hazelcast.properties
+fi
+rm -f /opt/open-xchange/etc/cluster.properties
+[ -e /opt/open-xchange/etc/static-cluster-discovery.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.discovery.static.nodes /opt/open-xchange/etc/static-cluster-discovery.properties)
+TOVALUE=$(ox_read_property com.openexchange.hazelcast.network.join.static.nodes /opt/open-xchange/etc/hazelcast.properties)
+if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
+    ox_set_property com.openexchange.hazelcast.network.join.static.nodes "$VALUE" /opt/open-xchange/etc/hazelcast.properties
+fi
 pfile=/opt/open-xchange/etc/hazelcast.properties
-OLDNAMES=( com.openexchange.hazelcast.interfaces )
-NEWNAMES=( com.openexchange.hazelcast.network.interfaces )
-DEFAULTS=( 127.0.0.1 )
+OLDNAMES=( com.openexchange.hazelcast.interfaces com.openexchange.hazelcast.mergeFirstRunDelay com.openexchange.hazelcast.mergeRunDelay com.openexchange.hazelcast.networkConfig.port com.openexchange.hazelcast.networkConfig.portAutoIncrement com.openexchange.hazelcast.networkConfig.outboundPortDefinitions com.openexchange.hazelcast.enableIPv6Support )
+NEWNAMES=( com.openexchange.hazelcast.network.interfaces com.openexchange.hazelcast.merge.firstRunDelay com.openexchange.hazelcast.merge.runDelay com.openexchange.hazelcast.network.port com.openexchange.hazelcast.network.portAutoIncrement com.openexchange.hazelcast.network.outboundPortDefinitions com.openexchange.hazelcast.network.enableIPv6Support )
+DEFAULTS=( 127.0.0.1 120s 120s 5701 true "" false )
 for I in $(seq 1 ${#OLDNAMES[@]}); do
     OLDNAME=${OLDNAMES[$I-1]}
     NEWNAME=${NEWNAMES[$I-1]}
@@ -666,8 +767,8 @@ for I in $(seq 1 ${#OLDNAMES[@]}); do
         ox_set_property $NEWNAME "$VALUE" $pfile
     fi
 done
-NEWPROPS=( com.openexchange.hazelcast.group.password com.openexchange.hazelcast.memcache.enabled com.openexchange.hazelcast.rest.enabled com.openexchange.hazelcast.socket.bindAny )
-DEFAULTS=( 'wtV6$VQk8#+3ds!a' false false false )
+NEWPROPS=( com.openexchange.hazelcast.jmxDetailed com.openexchange.hazelcast.network.join.multicast.group com.openexchange.hazelcast.network.join.multicast.port com.openexchange.hazelcast.group.password com.openexchange.hazelcast.memcache.enabled com.openexchange.hazelcast.rest.enabled com.openexchange.hazelcast.socket.bindAny )
+DEFAULTS=( false 224.2.2.3 54327 'wtV6$VQk8#+3ds!a' false false false )
 for I in $(seq 1 ${#NEWPROPS[@]}); do
     NEWPROP=${NEWPROPS[$I-1]}
     DEFAULT=${DEFAULTS[$I-1]}
@@ -675,6 +776,58 @@ for I in $(seq 1 ${#NEWPROPS[@]}); do
         ox_set_property $NEWPROP "$DEFAULT" $pfile
     fi
 done
+
+# SoftwareChange_Request-1601
+ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-1607
+pfile=/opt/open-xchange/etc/preview.properties
+VALUE=$(ox_read_property com.openexchange.preview.cache.quota $pfile)
+if [ "$VALUE" == "0" ]; then
+    ox_set_property com.openexchange.preview.cache.quota 10485760 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.preview.cache.quotaPerDocument $pfile)
+if [ "$VALUE" == "0" ]; then
+    ox_set_property com.openexchange.preview.cache.quotaPerDocument 524288 $pfile
+fi
+if ! ox_exists_property com.openexchange.preview.cache.type $pfile; then
+    ox_set_property com.openexchange.preview.cache.type "FS" $pfile
+fi
+if ! ox_exists_property com.openexchange.preview.cache.quotaAware $pfile; then
+    ox_set_property com.openexchange.preview.cache.quotaAware false $pfile
+fi
+
+# SoftwareChange_Request-1610
+pfile=/opt/open-xchange/etc/templating.properties
+if ! ox_exists_property com.openexchange.templating.trusted $pfile; then
+    ox_set_property com.openexchange.templating.trusted server $pfile
+fi
+
+# SoftwareChange_Request-1620, 1631
+PFILE=/opt/open-xchange/etc/file-logging.properties
+if ! ox_exists_property org.glassfish.grizzly.level $PFILE; then
+    ox_set_property org.glassfish.grizzly.level WARNING $PFILE
+fi
+if ! grep com.openexchange.appsuite.level >/dev/null $PFILE; then
+    echo -e "\n# Log access to UI files\n" >> $PFILE
+    echo "# com.openexchange.appsuite.level=FINE" >> $PFILE
+fi
+if ! ox_exists_property com.openexchange.ajax.requesthandler.DispatcherServlet.level $PFILE; then
+    ox_set_property com.openexchange.ajax.requesthandler.DispatcherServlet.level INFO $PFILE
+fi
+
+# SoftwareChange_Request-1635
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.filestore $PFILE; then
+    ox_set_property com.openexchange.capability.filestore true $PFILE
+fi
+
+# SoftwareChange_Request-1636
+PFILE=/opt/open-xchange/etc/file-logging.properties
+VALUE=$(ox_read_property org.jaudiotagger.level $PFILE)
+if [ "$VALUE" == "WARNING" -o -z "$VALUE" ]; then
+    ox_set_property org.jaudiotagger.level SEVERE $PFILE
+fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
@@ -719,16 +872,32 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Tue Sep 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Eleventh candidate for 7.4.0 release
+* Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Tenth candidate for 7.4.0 release
 * Tue Sep 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-26
+* Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Ninth candidate for 7.4.0 release
+* Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-12
 * Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-12
 * Thu Sep 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-05
 * Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-26
+* Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Eighth candidate for 7.4.0 release
 * Fri Aug 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-30
+* Wed Aug 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-03
+* Tue Aug 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.4.0 release
+* Fri Aug 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.4.0 release
 * Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-22
 * Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -737,22 +906,38 @@ Build for patch 2013-08-22
 Build for patch 2013-08-19
 * Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-21
+* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.4.0
+* Tue Aug 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.4.0
+* Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.0
 * Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-09
 * Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-02
+* Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.4.0
 * Fri Jul 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-26
 * Wed Jul 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-02
+* Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.4.0
+* Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.0
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second build for patch  2013-07-18
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
+* Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-18
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-10
+* Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-27
 * Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.2 release
 * Fri Jun 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -819,6 +1004,8 @@ First candidate for 7.2.1 release
 Build for patch 2013-04-30
 * Wed Apr 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-09
+* Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.0
 * Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.2.1
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>

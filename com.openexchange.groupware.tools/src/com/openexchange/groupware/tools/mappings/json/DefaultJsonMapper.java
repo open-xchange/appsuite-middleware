@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -87,7 +87,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	/**
 	 * Maps column IDs to enum values
 	 */
-	protected final Map<Integer, E> columnMap;
+	protected final TIntObjectMap<E> columnMap;
 
 	/**
 	 * Initializes a new {@link DefaultJsonMapper}.
@@ -95,9 +95,9 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	public DefaultJsonMapper() {
 		super();
 		this.mappings = createMappings();
-		this.columnMap = new HashMap<Integer, E>(this.mappings.size());
+		this.columnMap = new TIntObjectHashMap<E>(this.mappings.size());
 		for (final Entry<E, ? extends JsonMapping<? extends Object, O>> entry : this.mappings.entrySet()) {
-			this.columnMap.put(Integer.valueOf(entry.getValue().getColumnID()), entry.getKey());
+			this.columnMap.put(entry.getValue().getColumnID(), entry.getKey());
 		}
 	}
 
@@ -234,7 +234,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 
     @Override
     public E getMappedField(final int columnID) {
-        return this.columnMap.get(Integer.valueOf(columnID));
+        return this.columnMap.get(columnID);
     }
 
     @Override

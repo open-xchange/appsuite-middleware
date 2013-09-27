@@ -60,7 +60,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
@@ -99,32 +98,6 @@ public final class ThreadPools {
      */
     public static TimerService getTimerService() {
         return ThreadPoolActivator.REF_TIMER.get();
-    }
-
-    /**
-     * Handles specified unexpectedly interrupted thread.
-     *
-     * @param t The unexpectedly interrupted thread
-     */
-    public static void unexpectedlyInterrupted(final Thread t) {
-        // Keep interrupted flag
-        t.interrupt();
-        if (t instanceof InterruptorAware) {
-            final StackTraceElement[] interruptorStack = ((InterruptorAware) t).getInterruptorStack();
-            if (null != interruptorStack) {
-                final StringBuilder sb = new StringBuilder(256).append("Thread interrupted unexpectedly at:");
-                if (Log.appendTraceToMessage()) {
-                    final String lineSeparator = System.getProperty("line.separator");
-                    sb.append(lineSeparator);
-                    appendStackTrace(interruptorStack, sb, lineSeparator);
-                    LOG.error(sb.toString());
-                } else {
-                    final Throwable th = new Throwable();
-                    th.setStackTrace(interruptorStack);
-                    LOG.error(sb.toString(), th);
-                }
-            }
-        }
     }
 
     /**

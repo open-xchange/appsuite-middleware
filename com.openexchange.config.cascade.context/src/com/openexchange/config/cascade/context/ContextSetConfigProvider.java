@@ -69,8 +69,10 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -89,12 +91,12 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     private final List<ContextSetConfig> contextSetConfigs;
     private final List<AdditionalPredicates> additionalPredicates;
 
-    private final UserConfigurationService userConfigs;
+    private final UserPermissionService userPermissions;
     private final UserConfigurationAnalyzer userConfigAnalyzer = new UserConfigurationAnalyzer();
 
     private final ConfigViewFactory configViews;
 
-    public ContextSetConfigProvider(final ContextService contexts, final ConfigurationService config, final UserConfigurationService userConfigs, final ConfigViewFactory configViews) {
+    public ContextSetConfigProvider(final ContextService contexts, final ConfigurationService config, final UserPermissionService userPermissions, final ConfigViewFactory configViews) {
         super(contexts);
 
         final Map<String, Object> yamlInFolder = config.getYamlInFolder("contextSets");
@@ -107,11 +109,11 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
             prepare(yamlInFolder);
         }
 
-        this.userConfigs = userConfigs;
+        this.userPermissions = userPermissions;
         this.configViews = configViews;
     }
 
-    protected Set<String> getSpecification(final Context context, final UserConfiguration userConfig) throws OXException {
+    protected Set<String> getSpecification(final Context context, final UserPermissionBits perms) throws OXException {
         Set<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
         if (typeValues == null) {
             typeValues = Collections.emptySet();
@@ -129,10 +131,10 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         }
 
         // The ones from user configuration
-        tags.addAll(userConfigAnalyzer.getTags(userConfig));
+        tags.addAll(userConfigAnalyzer.getTags(perms));
 
         // Now let's try modifications by cascade, first those below the contextSet level
-        final ConfigView view = configViews.getView(userConfig.getUserId(), context.getContextId());
+        final ConfigView view = configViews.getView(perms.getUserId(), context.getContextId());
 
         final String[] searchPath = configViews.getSearchPath();
         for (final String scope : searchPath) {
@@ -158,7 +160,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     @Override
     protected BasicProperty get(final String property, final Context context, final int user) throws OXException {
-        final List<Map<String, Object>> config = getConfigData(getSpecification(context, getUserConfiguration(context, user)));
+        final List<Map<String, Object>> config = getConfigData(getSpecification(context, getUserPermissionBits(context, user)));
 
         final String value = findFirst(config, property);
 
@@ -198,8 +200,8 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
 
-    private UserConfiguration getUserConfiguration(final Context ctx, final int user) throws OXException {
-        return userConfigs.getUserConfiguration(user, ctx, false);
+    private UserPermissionBits getUserPermissionBits(final Context ctx, final int user) throws OXException {
+        return userPermissions.getUserPermissionBits(user, ctx);
     }
 
     @Override

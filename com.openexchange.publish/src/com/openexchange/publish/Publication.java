@@ -78,6 +78,8 @@ public class Publication {
     private String displayName;
 
     private Boolean enabled = null;
+    
+    private long created = 0;
 
 
     public int getId() {
@@ -86,6 +88,15 @@ public class Publication {
 
     public void setId(final int id) {
         this.id = id;
+    }
+    
+    
+    public void setCreated(long created) {
+        this.created = created;
+    }
+
+    public long getCreated() {
+        return created;
     }
 
     public String getEntityId() {

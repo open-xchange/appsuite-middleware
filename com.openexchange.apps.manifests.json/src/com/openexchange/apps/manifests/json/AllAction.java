@@ -94,10 +94,23 @@ public class AllAction implements AJAXActionService {
     public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services) throws OXException {
         JSONArray result = new JSONArray();
         try {
-            if (!session.isAnonymous()) {
-                Set<Capability> capabilities = services.getService(CapabilityService.class).getCapabilities(session);
-                Map<String, Capability> capMap = new HashMap<String, Capability>();
+            if (session.isAnonymous()) {
+                // Deliver no apps and only plugins with the namespace 'signin'
 
+                for (int i = 0, size = manifests.length(); i < size; i++) {
+                    JSONObject definition = manifests.getJSONObject(i);
+                    if (isSigninPlugin(definition)) {
+                        result.put(new JSONObject(definition));
+                    }
+                }
+
+            } else {
+                Set<Capability> capabilities = services.getService(CapabilityService.class).getCapabilities(
+                    session.getUserId(),
+                    session.getContextId(),
+                    true);
+
+                Map<String, Capability> capMap = new HashMap<String, Capability>(capabilities.size());
                 for (Capability capability : capabilities) {
                     capMap.put(capability.getId(), capability);
                 }
@@ -108,16 +121,6 @@ public class AllAction implements AJAXActionService {
                         result.put(new JSONObject(definition));
                     //}
                 }
-            } else {
-                // Deliver no apps and only plugins with the namespace 'signin'
-
-                for (int i = 0, size = manifests.length(); i < size; i++) {
-                    JSONObject definition = manifests.getJSONObject(i);
-                    if (isSigninPlugin(definition)) {
-                        result.put(new JSONObject(definition));
-                    }
-                }
-
             }
         } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);

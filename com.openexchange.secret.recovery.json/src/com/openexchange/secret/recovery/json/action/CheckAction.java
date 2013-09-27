@@ -86,9 +86,8 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
 
         final String diagnosis = secretInconsistencyDetector.isSecretWorking(req.getSession());
         final JSONObject object = new JSONObject(2);
-        if (diagnosis == null) {
-            object.put("secretWorks", true);
-        } else {
+        object.put("secretWorks", diagnosis == null);
+        if (diagnosis != null) {
             LOG.info("Secrets in session " + req.getSession().getSessionID() + " seem to need migration: " + diagnosis);
             object.put("secretWorks", false);
             object.put("diagnosis", diagnosis);

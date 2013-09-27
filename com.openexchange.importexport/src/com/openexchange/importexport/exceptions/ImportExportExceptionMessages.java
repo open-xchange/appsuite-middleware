@@ -160,6 +160,9 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
     // Could not create: %s
     public static final String COULD_NOT_CREATE_EXT_MSG = "Could not create: %s";
 
+    // Could not create: %s
+    public static final String LIMIT_EXCEEDED_MSG = "Import limit exceeded. Only imported the first %1$s contacts";
+
     private ImportExportExceptionMessages() {
         super();
     }

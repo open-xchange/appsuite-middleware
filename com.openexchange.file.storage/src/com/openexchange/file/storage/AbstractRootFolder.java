@@ -150,5 +150,10 @@ public abstract class AbstractRootFolder implements FileStorageFolder {
     public Map<String, Object> getProperties() {
         return Collections.emptyMap();
     }
+    
+    @Override
+    public Map<String, Object> getMeta() {
+        return Collections.emptyMap();
+    }
 
 }

@@ -102,7 +102,12 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
      * @throws NullPointerException if <code>str</code> is <code>null</code>
      */
     public StringAllocator(final String str) {
-        super(str.length() + 16);
+        this(null == str ? "null" : str, 16);
+    }
+
+    /** Only internally used */
+    private StringAllocator(final String str, final int off) {
+        super(str.length() + off);
         append(str);
     }
 

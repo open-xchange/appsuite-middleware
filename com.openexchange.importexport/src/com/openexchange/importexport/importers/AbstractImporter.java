@@ -49,7 +49,10 @@
 
 package com.openexchange.importexport.importers;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 
 /**
@@ -57,10 +60,24 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public abstract class AbstractImporter implements Importer {
+    
+    private static final String CONTACT_LIMIT = "com.openexchange.import.contacts.limit".intern();
+    
+    protected ServiceLookup services;
 
-    protected AbstractImporter() {
+    protected AbstractImporter(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     protected abstract String getNameForFieldInTruncationError(int id, OXException dataTruncation);
+    
+    
+    
+    protected int getLimit(Session session) throws OXException {
+        if (services == null) {
+            return 0;
+        }
+        return services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).opt(CONTACT_LIMIT, int.class, 0);
+    }
 }

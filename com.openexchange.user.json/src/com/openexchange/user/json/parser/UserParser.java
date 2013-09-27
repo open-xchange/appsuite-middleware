@@ -148,8 +148,8 @@ public final class UserParser {
                 contact.setParentFolderID(parseInt(userJSONObject, UserField.FOLDER_ID.getName()));
             }
 
-            if (userJSONObject.has(UserField.ID.getName())) {
-                contact.setObjectID(parseInt(userJSONObject, UserField.ID.getName()));
+            if (userJSONObject.has(UserField.CONTACT_ID.getName())) {
+                contact.setObjectID(parseInt(userJSONObject, UserField.CONTACT_ID.getName()));
             }
 
             if (userJSONObject.has(UserField.INTERNAL_USERID.getName())) {
@@ -1287,6 +1287,17 @@ public final class UserParser {
         @Override
         public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException {
             contactobject.setUserField20(parseString(jsonobject, ContactFields.USERFIELD20));
+        }
+    }, new JSONAttributeMapper() {
+
+        @Override
+        public boolean jsonObjectContains(final JSONObject jsonobject) {
+            return jsonobject.has(ContactFields.UID);
+        }
+
+        @Override
+        public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException {
+            contactobject.setUid(parseString(jsonobject, ContactFields.UID));
         }
     } };
 

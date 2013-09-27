@@ -72,7 +72,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
@@ -114,6 +113,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.filemanagement.DistributedFileManagement;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
@@ -137,6 +137,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
@@ -179,7 +180,6 @@ import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
 import com.openexchange.search.internal.SearchServiceImpl;
@@ -204,7 +204,9 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
+import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 
@@ -438,6 +440,8 @@ public final class ServerActivator extends HousekeepingActivator {
         // Distributed files
         track(DistributedFileManagement.class, new DistributedFilesListener());
 
+        // CapabilityService
+        track(CapabilityService.class, new CapabilityRegistrationListener());
         /*
          * Register EventHandler
          */
@@ -500,6 +504,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track candidates for file storage
          */
         track(FileStorageFactoryCandidate.class, new CompositeFileStorageFactory());
+        track(ManagedFileManagement.class, new RegistryCustomizer<ManagedFileManagement>(context, ManagedFileManagement.class));
 
         // Start up server the usual way
         starter.start();
@@ -519,6 +524,12 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(
             UserConfigurationService.class,
             ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
+
+        ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
+        registerService(
+            UserPermissionService.class,
+            ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
+
         registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
         {
@@ -556,7 +567,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());
-        registerService(LoginHandlerService.class, new LastLoginRecorder());
         // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());
@@ -705,7 +715,6 @@ public final class ServerActivator extends HousekeepingActivator {
             eventHandlerList.clear();
             // Stop all inside the server.
             starter.stop();
-            AJAXServlet.exitTracker();
             /*
              * Clear service registry
              */

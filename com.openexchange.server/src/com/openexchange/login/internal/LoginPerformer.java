@@ -84,6 +84,7 @@ import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.NonTransient;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -93,6 +94,8 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
@@ -157,6 +160,7 @@ public final class LoginPerformer {
      * @throws OXException If login fails
      */
     private LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties, final LoginMethodClosure loginMethod) throws OXException {
+        sanityChecks(request, properties);
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
@@ -226,6 +230,14 @@ public final class LoginPerformer {
                 ((SessionEnhancement) authed).enhanceSession(session);
             }
             retval.setSession(session);
+
+            // init session
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            serverSession.getUser();
+            serverSession.getUserSettingMail();
+            serverSession.getUserPermissionBits();
+            //serverSession.getUserConfiguration();
+
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
             return retval;
@@ -241,24 +253,28 @@ public final class LoginPerformer {
         }
     }
 
-    private void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
-        try {
-            final String client = request.getClient();
-            // Check for OLOX v2.0
-            if ("USM-JSON".equalsIgnoreCase(client)) {
-                final UserConfigurationStorage ucs = UserConfigurationStorage.getInstance();
-                final UserConfiguration userConfiguration = ucs.getUserConfiguration(user.getId(), user.getGroups(), ctx);
-                if (!userConfiguration.hasOLOX20()) {
-                    // Deny login for OLOX v2.0 client since disabled as per user configuration
-                    throw LoginExceptionCodes.CLIENT_DENIED.create(client);
-                }
-            }
-        } catch (final OXException e) {
-            throw e;
+    private static void sanityChecks(LoginRequest request, Map<String, Object> properties) throws OXException {
+        // Check if somebody is using the User-Agent as client parameter
+        String client = request.getClient();
+        if (null != client && client.equals(request.getUserAgent())) {
+            throw LoginExceptionCodes.DONT_USER_AGENT.create();
         }
     }
 
-    private Context findContext(final String contextInfo) throws OXException {
+    private static void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
+        final String client = request.getClient();
+        // Check for OLOX v2.0
+        if ("USM-JSON".equalsIgnoreCase(client)) {
+            final UserConfigurationStorage ucs = UserConfigurationStorage.getInstance();
+            final UserConfiguration userConfiguration = ucs.getUserConfiguration(user.getId(), user.getGroups(), ctx);
+            if (!userConfiguration.hasOLOX20()) {
+                // Deny login for OLOX v2.0 client since disabled as per user configuration
+                throw LoginExceptionCodes.CLIENT_DENIED.create(client);
+            }
+        }
+    }
+
+    private static Context findContext(final String contextInfo) throws OXException {
         final ContextStorage contextStor = ContextStorage.getInstance();
         final int contextId = contextStor.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
@@ -271,7 +287,7 @@ public final class LoginPerformer {
         return context;
     }
 
-    private User findUser(final Context ctx, final String userInfo) throws OXException {
+    private static User findUser(final Context ctx, final String userInfo) throws OXException {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         final UserStorage us = UserStorage.getInstance();
         int userId = 0;
@@ -331,8 +347,13 @@ public final class LoginPerformer {
         } else {
             ThreadPoolCompletionService<Void> completionService = null;
             int blocking = 0;
+            boolean tranzient = login.getSession().isTransient();
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
+                if (tranzient && NonTransient.class.isInstance(handler)) {
+                    // skip
+                    continue;
+                }
                 if (handler instanceof Blocking) {
                     // Current LoginHandlerService must not be invoked concurrently
                     if (null == completionService) {

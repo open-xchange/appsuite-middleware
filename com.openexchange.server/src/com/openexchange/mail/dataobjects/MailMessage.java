@@ -1005,6 +1005,7 @@ public abstract class MailMessage extends MailPart {
                 }
             }
         }
+        final Date sentDate = this.sentDate;
         return sentDate == null ? null : new Date(sentDate.getTime());
     }
 
@@ -1040,6 +1041,7 @@ public abstract class MailMessage extends MailPart {
      * @return The received date
      */
     public Date getReceivedDate() {
+        final Date receivedDate = this.receivedDate;
         return receivedDate == null ? null : new Date(receivedDate.getTime());
     }
 
@@ -1238,7 +1240,7 @@ public abstract class MailMessage extends MailPart {
             final String dispNotTo = getFirstHeader(MessageHeaders.HDR_DISP_NOT_TO);
             if (dispNotTo != null) {
                 try {
-                    setDispositionNotification(new QuotedInternetAddress(dispNotTo, true));
+                    setDispositionNotification(new QuotedInternetAddress(dispNotTo, false));
                 } catch (final AddressException e) {
                     LOG.debug(e.getMessage(), e);
                     setDispositionNotification(new PlainTextAddress(dispNotTo));

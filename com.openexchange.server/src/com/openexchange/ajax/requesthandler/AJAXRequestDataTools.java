@@ -199,44 +199,40 @@ public class AJAXRequestDataTools {
             retval.setUploadStreamProvider(new HTTPRequestInputStreamProvider(req));
         } else {
             /*
-             * Guess an appropriate body object (if the request indicates a body object)
+             * Guess an appropriate body object
              */
-            if (hasBody(req)) {
-                UnsynchronizedPushbackReader reader = null;
-                try {
-                    reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
-                    int read = reader.read();
-                    if (read < 0) {
-                        trySetDataByParameter(req, retval);
-                    } else {
-                        // Skip whitespaces
-                        while (isWhitespace((char) read)) {
-                            read = reader.read();
-                            if (read < 0) {
-                                trySetDataByParameter(req, retval);
-                                Streams.close(reader);
-                                reader = null;
-                                return retval;
-                            }
-                        }
-                        // Check first non-whitespace character
-                        final char c = (char) read;
-                        reader.unread(c);
-                        if ('[' == c || '{' == c) {
-                            try {
-                                retval.setData(JSONObject.parse(reader));
-                            } catch (JSONException e) {
-                                retval.setData(AJAXServlet.readFrom(reader));
-                            }
-                        } else {
-                            retval.setData(AJAXServlet.readFrom(reader));
+            UnsynchronizedPushbackReader reader = null;
+            try {
+                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+                int read = reader.read();
+                if (read < 0) {
+                    trySetDataByParameter(req, retval);
+                } else {
+                    // Skip whitespaces
+                    while (isWhitespace((char) read)) {
+                        read = reader.read();
+                        if (read < 0) {
+                            trySetDataByParameter(req, retval);
+                            Streams.close(reader);
+                            reader = null;
+                            return retval;
                         }
                     }
-                } finally {
-                    Streams.close(reader);
+                    // Check first non-whitespace character
+                    final char c = (char) read;
+                    reader.unread(c);
+                    if ('[' == c || '{' == c) {
+                        try {
+                            retval.setData(JSONObject.parse(reader));
+                        } catch (JSONException e) {
+                            retval.setData(AJAXServlet.readFrom(reader));
+                        }
+                    } else {
+                        retval.setData(AJAXServlet.readFrom(reader));
+                    }
                 }
-            } else {
-                trySetDataByParameter(req, retval);
+            } finally {
+                Streams.close(reader);
             }
         }
         return retval;
@@ -321,16 +317,34 @@ public class AJAXRequestDataTools {
         "on")));
 
     /**
-     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter.
+     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter value.
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
      *
-     * @param parameter The parameter
+     * @param parameter The parameter value
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String parameter) {
         return (null != parameter) && BOOL_VALS.contains(toLowerCase(parameter.trim()));
+    }
+
+    /**
+     * Parses denoted <tt>int</tt> value from specified <tt>String</tt> parameter.
+     *
+     * @param parameter The parameter value
+     * @param defaultInt The default <tt>int</tt> to return if absent or unparseable
+     * @return The parsed <tt>int</tt> value or <tt>defaultInt</tt>
+     */
+    public static int parseIntParameter(final String parameter, final int defaultInt) {
+        if (null == parameter) {
+            return defaultInt;
+        }
+        try {
+            return Integer.parseInt(parameter);
+        } catch (final NumberFormatException e) {
+            return defaultInt;
+        }
     }
 
     /**

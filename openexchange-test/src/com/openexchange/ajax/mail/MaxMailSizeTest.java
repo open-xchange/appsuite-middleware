@@ -61,7 +61,7 @@ import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link MaxMailSizeTest} Tests the Parameter com.openexchange.mail.maxMailSize with a value of 5000000 (Must be set at server startup).
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MaxMailSizeTest extends AbstractMailTest {
@@ -70,7 +70,7 @@ public class MaxMailSizeTest extends AbstractMailTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of this test.
      */
     public MaxMailSizeTest(String name) {
@@ -101,6 +101,24 @@ public class MaxMailSizeTest extends AbstractMailTest {
         mail.setBody("Test Mail");
         mail.sanitize();
 
+        class FooInputStream extends InputStream {
+
+            private final long size;
+
+            private long read = 0L;
+
+            public FooInputStream(long size) {
+                super();
+                this.size = size;
+            }
+
+            @Override
+            public int read() throws IOException {
+                return read++ < size ? 'a' : -1;
+            }
+
+        }
+
         TestMail inSentBox = manager.send(mail, new FooInputStream(3500000L)); // Results in approx. 4800000 Byte Mail Size
         assertFalse("Sending resulted in error.", manager.getLastResponse().hasError());
         assertEquals("Mail went into inbox", values.getSentFolder(), inSentBox.getFolder());
@@ -119,28 +137,6 @@ public class MaxMailSizeTest extends AbstractMailTest {
         assertTrue("Should not pass", manager.getLastResponse().hasError());
         OXException exception = manager.getLastResponse().getException();
         assertEquals("Wrong exception.", MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.getNumber(), exception.getCode());
-    }
-
-    private class FooInputStream extends InputStream {
-
-        private long size;
-
-        private long read = 0L;
-
-        public FooInputStream(long size) {
-            this.size = size;
-        }
-
-        @Override
-        public int read() throws IOException {
-            if (read < size) {
-                read++;
-                return 'a';
-            } else {
-                return -1;
-            }
-        }
-
     }
 
 }

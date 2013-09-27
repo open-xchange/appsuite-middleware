@@ -97,7 +97,7 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
     @Override
     public Object getBody() throws JSONException {
         try {
-            return new SubscriptionJSONWriter().write(getSubscription(), getFormDescription(), null);
+            return new SubscriptionJSONWriter().write(getSubscription(), getFormDescription(), null, null);
         } catch (OXException e) {
             throw new JSONException(e);
         }

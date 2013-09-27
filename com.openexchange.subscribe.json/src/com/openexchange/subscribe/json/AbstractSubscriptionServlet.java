@@ -72,7 +72,7 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return session.getUserConfiguration().isSubscription();
+        return session.getUserPermissionBits().isSubscription();
     }
 
     protected void writeOXException(final OXException x, final HttpServletResponse resp, final Session session) {

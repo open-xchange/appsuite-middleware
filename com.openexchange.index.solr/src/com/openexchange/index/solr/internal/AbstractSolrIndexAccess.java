@@ -323,7 +323,7 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         if (maxRows > chunkSize) {
             maxRows = chunkSize;
         }
-        
+
         long numFound = -1L;
         do {
             solrQuery.setStart(off);
@@ -338,11 +338,11 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             if (results == null) {
                 return Indexes.emptyResult();
             }
-            
+
             if (numFound < 0) {
                 numFound = results.getNumFound();
             }
-            
+
             for (SolrDocument document : results) {
                 if (highlighting != null && document.containsKey(uuidField)) {
                     String uuid = (String) document.getFieldValue(uuidField);
@@ -365,8 +365,8 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             fetched += maxRows;
             off += maxRows;
         } while (fetched < len);
-        
-        if (indexDocuments.isEmpty()) {
+
+        if (numFound == 0L && indexDocuments.isEmpty()) {
             return Indexes.emptyResult();
         }
 

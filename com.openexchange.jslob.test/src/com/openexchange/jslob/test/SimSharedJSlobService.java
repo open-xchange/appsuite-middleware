@@ -54,6 +54,7 @@ import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.shared.SharedJSlobService;
+import com.openexchange.session.Session;
 
 /**
  * {@link SimSharedJSlobService}
@@ -90,7 +91,7 @@ public class SimSharedJSlobService implements SharedJSlobService {
      * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
      */
     @Override
-    public JSlob getJSlob() {
+    public JSlob getJSlob(Session session) {
         return jslob;
     }
 

@@ -53,8 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -62,6 +63,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link SelectForUpdateReservation}
@@ -74,7 +78,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private static final String LOCK_FOLDER_SQL = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ? FOR UPDATE ";
 
-    private static final String RESERVE_NAME_SQL = "INSERT INTO infostoreReservedPaths (cid, folder, name) VALUES (?, ?, ?)";
+    private static final String RESERVE_NAME_SQL = "INSERT INTO infostoreReservedPaths (uuid, cid, folder, name) VALUES (?, ?, ?, ?)";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SelectForUpdateReservation.class));
 
@@ -124,47 +128,46 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     }
 
     public boolean reserve() throws SQLException, OXException {
-        if(reserved) {
+        if (reserved) {
             return true;
         }
         if (!mustReserveName()) {
             return true;
         }
         boolean free = false;
+        boolean rollback = false;
         try {
             startTransaction();
+            rollback = true;
             lockFolder();
             free = checkFree();
             if (free) {
                 reserveFilename();
             }
             commit();
+            rollback = false;
         } catch (final SQLException x) {
-            rollback();
             throw x;
         } finally {
+            if (rollback) {
+                rollback();
+            }
             finishTransaction();
         }
         return reserved = free;
     }
 
     protected boolean mustReserveName() {
-        if (null == fileName) {
-            return false;
-        }
-        if ("".equals(fileName.trim())) {
-            return false;
-        }
-        return true;
+        return !Strings.isEmpty(fileName);
     }
 
-    private void finishTransaction() throws SQLException {
-        con.setAutoCommit(true);
+    private void finishTransaction() {
+        Databases.autocommit(con);
         releaseConnection();
     }
 
-    private void rollback() throws SQLException {
-        con.rollback();
+    private void rollback() {
+        Databases.rollback(con);
     }
 
     private void commit() throws SQLException {
@@ -172,7 +175,18 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     }
 
     private void reserveFilename() throws SQLException {
-        exec(RESERVE_NAME_SQL, ctx.getContextId(), folderId, fileName);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(RESERVE_NAME_SQL);
+            int pos = 1;
+            stmt.setBytes(pos++, UUIDs.toByteArray(UUID.randomUUID()));
+            stmt.setLong(pos++, ctx.getContextId());
+            stmt.setLong(pos++, folderId);
+            stmt.setString(pos, fileName);
+            stmt.executeUpdate();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
     private boolean checkFree() throws OXException, SQLException {
@@ -193,19 +207,11 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
             }
         } finally {
             if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    throw e;
-                }
+                iter.close();
             }
         }
 
-        return !hasResult(
-            "SELECT 1 FROM infostoreReservedPaths WHERE cid = ? AND folder = ? AND name = ?",
-            ctx.getContextId(),
-            folderId,
-            fileName);
+        return !hasResult("SELECT 1 FROM infostoreReservedPaths WHERE cid = ? AND folder = ? AND name = ?", ctx.getContextId(), folderId, fileName);
     }
 
     private void lockFolder() throws SQLException {
@@ -250,7 +256,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private void startTransaction() throws OXException, SQLException {
         openConnection();
-        con.setAutoCommit(false);
+        Databases.startTransaction(con);
     }
 
 

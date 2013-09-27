@@ -65,6 +65,14 @@ public class FileStorageEventConstants {
 
     public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
 
+    public static final String UPDATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/update";
+
+    public static final String CREATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/insert";
+
+    public static final String DELETE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/delete";
+
+    public static final String ALL_FOLDER_TOPICS = "com/openexchange/groupware/fsfolder/*";
+
     public static final String SESSION = "session";
 
     public static final String SERVICE = "service";
@@ -72,6 +80,10 @@ public class FileStorageEventConstants {
     public static final String ACCOUNT_ID = "accountId";
 
     public static final String FOLDER_ID = "folderId";
+
+    public static final String PARENT_FOLDER_ID = "parentFolderId";
+
+    public static final String FOLDER_PATH = "folderPath";
 
     public static final String OBJECT_ID = "objectId";
 

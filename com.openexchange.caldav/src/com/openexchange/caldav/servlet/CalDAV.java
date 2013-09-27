@@ -194,7 +194,7 @@ public class CalDAV extends OXServlet {
     private boolean checkPermission(final ServerSession session) {
         try {
             final ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
-            return property.isDefined() && property.get() && session.getUserConfiguration().hasCalendar();
+            return property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar();
         } catch (final OXException e) {
             return false;
         }
@@ -223,16 +223,6 @@ public class CalDAV extends OXServlet {
 
     private boolean mustLogOut(final HttpServletRequest req) {
         return true; // Check this
-    }
-
-    @Override
-    protected void decrementRequests() {
-        // Nothing to do
-    }
-
-    @Override
-    protected void incrementRequests() {
-        // Nothing to do
     }
 
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();

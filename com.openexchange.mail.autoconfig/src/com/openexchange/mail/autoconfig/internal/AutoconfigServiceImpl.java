@@ -51,6 +51,7 @@ package com.openexchange.mail.autoconfig.internal;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
@@ -64,6 +65,7 @@ import com.openexchange.mail.autoconfig.sources.ConfigSource;
 import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
 import com.openexchange.mail.autoconfig.sources.Guess;
 import com.openexchange.mail.autoconfig.sources.ISPDB;
+import com.openexchange.mail.autoconfig.sources.OutlookComConfigSource;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 
@@ -78,6 +80,7 @@ public class AutoconfigServiceImpl implements AutoconfigService {
 
     public AutoconfigServiceImpl(final ServiceLookup services) {
         sources = new LinkedList<ConfigSource>();
+        sources.add(new OutlookComConfigSource());
         sources.add(new ConfigurationFile(services));
         sources.add(new ConfigServer());
         sources.add(new ISPDB(services));
@@ -95,8 +98,8 @@ public class AutoconfigServiceImpl implements AutoconfigService {
             throw AutoconfigException.invalidMail(email);
         }
 
-        String mailLocalPart = null;
-        String mailDomain = null;
+        final String mailLocalPart;
+        final String mailDomain;
         try {
             mailLocalPart = getLocalPart(internetAddress);
             mailDomain = getDomain(internetAddress);
@@ -114,12 +117,14 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         return null;
     }
 
+    private static final Pattern PATTERN_SPLIT = Pattern.compile("@");
+
     private String getDomain(final QuotedInternetAddress internetAddress) {
-        return IDNA.toIDN(internetAddress.getAddress()).split("@")[1];
+        return PATTERN_SPLIT.split(IDNA.toIDN(internetAddress.getAddress()))[1];
     }
 
     private String getLocalPart(final QuotedInternetAddress internetAddress) {
-        return internetAddress.getAddress().split("@")[0];
+        return PATTERN_SPLIT.split(internetAddress.getAddress())[0];
     }
 
 }

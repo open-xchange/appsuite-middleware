@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange console tools bundle
+Bundle-SymbolicName: com.openexchange.admin.console.common
+Bundle-Version: 7.4.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.admin.rmi,
+ com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.rmi.extensions,
+ com.openexchange.java,
+ org.apache.commons.cli,
+ org.apache.commons.logging
+Export-Package: au.com.bytecode.opencsv,
+ au.com.bytecode.opencsv.bean,
+ com.openexchange.admin.console,
+ com.openexchange.admin.console.context.extensioninterfaces,
+ com.openexchange.admin.console.exception,
+ com.openexchange.admin.console.user
+Bundle-ClassPath: lib/opencsv-2.0.jar,
+ .

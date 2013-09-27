@@ -56,6 +56,7 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdateSubscriptionAction}
@@ -69,31 +70,20 @@ public class UpdateSubscriptionAction extends AbstractSubscribeAction {
 	 * @param services
 	 */
 	public UpdateSubscriptionAction(ServiceLookup services) {
-		super();
-		this.services = services;
-
+		super(services);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.subscribe.json.actions.AbstractSubscribeSourcesAction#perform(com.openexchange.subscribe.json.actions.SubscribeRequest)
-	 */
 	@Override
-	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {
-		Subscription subscription;
-		try {
-			subscription = getSubscription(subscribeRequest.getRequestData(), subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-			final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
-	        subscribeService.update(subscription);
-	        String urlPrefix = "";
-			if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
-				urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
-			}
-			return new AJAXRequestResult(1, "json");
-		} catch (JSONException e) {
-			throw new OXException(e);
+	public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
+		final ServerSession session = subscribeRequest.getServerSession();
+        Subscription subscription = getSubscription(subscribeRequest.getRequestData(), session, services.getService(SecretService.class).getSecret(session));
+		final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
+        subscribeService.update(subscription);
+        String urlPrefix = "";
+		if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
+			urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
 		}
-
+		return new AJAXRequestResult(Integer.valueOf(1), "json");
 	}
 
 }

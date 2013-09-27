@@ -66,13 +66,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
@@ -84,6 +83,7 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.impl.DBPool;
@@ -410,7 +410,7 @@ public final class OXFolderIteratorSQL {
         final List<String> whereClauses = new ArrayList<String>(3);
         /*-
          * Optional:
-         * 
+         *
          * WHERE ot.cid = ? AND (ot.permission_flag = 1 AND ot.created_from = ?)
          *
          * 1. cid
@@ -584,7 +584,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      * @throws SearchIteratorException If a search iterator error occurs
      */
-    public static SearchIterator<FolderObject> getUserRootFoldersIterator(final int userId, final int[] memberInGroups, final UserConfiguration userConfig, final Context ctx) throws OXException {
+    public static SearchIterator<FolderObject> getUserRootFoldersIterator(final int userId, final int[] memberInGroups, final UserPermissionBits userConfig, final Context ctx) throws OXException {
         StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(SYSTEM_TYPE).append(") AND (ot.parent = 0)");
         /*
          * Check whether to display shared folder
@@ -647,7 +647,7 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible sub folders of a
      * certain parent folder.
      */
-    public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig, final Timestamp since) throws SQLException, OXException {
+    public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserPermissionBits userConfig, final Timestamp since) throws SQLException, OXException {
         return getVisibleSubfoldersIterator(parentFolderId, userId, groups, ctx, userConfig, since, null);
     }
 
@@ -655,23 +655,23 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible sub folders of a
      * certain parent folder.
      */
-    public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserConfiguration userConfig, final Timestamp since, final Connection con) throws SQLException, OXException {
+    public static SearchIterator<FolderObject> getVisibleSubfoldersIterator(final int parentFolderId, final int userId, final int[] groups, final Context ctx, final UserPermissionBits userConfiguration, final Timestamp since, final Connection con) throws SQLException, OXException {
         if (parentFolderId == SYSTEM_PRIVATE_FOLDER_ID) {
-            return getVisiblePrivateFolders(userId, groups, userConfig.getAccessibleModules(), ctx, since, con);
+            return getVisiblePrivateFolders(userId, groups, userConfiguration.getAccessibleModules(), ctx, since, con);
         } else if (parentFolderId == SYSTEM_PUBLIC_FOLDER_ID) {
-            return getVisiblePublicFolders(userId, groups, userConfig.getAccessibleModules(), ctx, since, con);
+            return getVisiblePublicFolders(userId, groups, userConfiguration.getAccessibleModules(), ctx, since, con);
         } else if (parentFolderId == SYSTEM_SHARED_FOLDER_ID) {
-            return getVisibleSharedFolders(userId, groups, userConfig.getAccessibleModules(), ctx, since, con);
+            return getVisibleSharedFolders(userId, groups, userConfiguration.getAccessibleModules(), ctx, since, con);
         } else {
             /*
              * Check user's effective permission on subfolder's parent
              */
             final FolderObject parentFolder = new OXFolderAccess(con, ctx).getFolderObject(parentFolderId);
-            final OCLPermission effectivePerm = parentFolder.getEffectiveUserPermission(userId, userConfig);
+            final OCLPermission effectivePerm = parentFolder.getEffectiveUserPermission(userId, userConfiguration);
             if (effectivePerm.getFolderPermission() < OCLPermission.READ_FOLDER) {
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
-            return getVisibleSubfoldersIterator(parentFolder, userId, groups, userConfig.getAccessibleModules(), ctx, since, con);
+            return getVisibleSubfoldersIterator(parentFolder, userId, groups, userConfiguration.getAccessibleModules(), ctx, since, con);
         }
     }
 
@@ -1084,8 +1084,7 @@ public final class OXFolderIteratorSQL {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
             try {
-                final List<Condition> conditions = new ArrayList<Condition>(1);
-                conditions.add(new ConditionTreeMap.ParentCondition(parent));
+                final List<Condition> conditions = Collections.<Condition> singletonList(new ConditionTreeMap.ParentCondition(parent));
                 return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
             } catch (final Exception e) {
                 LOG.debug(e.getMessage(), e);
@@ -1300,7 +1299,7 @@ public final class OXFolderIteratorSQL {
      *         visible)
      * @throws OXException If all visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersNotSeenInTreeView(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws OXException {
+    public static SearchIterator<FolderObject> getAllVisibleFoldersNotSeenInTreeView(final int userId, final int[] groups, final UserPermissionBits userConfig, final Context ctx) throws OXException {
         return getVisibleFoldersNotSeenInTreeViewNew(null, userId, groups, userConfig, ctx, null);
     }
 
@@ -1316,7 +1315,7 @@ public final class OXFolderIteratorSQL {
      *         visible)
      * @throws OXException If all visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
-    public static SearchIterator<FolderObject> getAllVisibleFoldersNotSeenInTreeView(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
+    public static SearchIterator<FolderObject> getAllVisibleFoldersNotSeenInTreeView(final int userId, final int[] groups, final UserPermissionBits userConfig, final Context ctx, final Connection readCon) throws OXException {
         return getVisibleFoldersNotSeenInTreeViewNew(null, userId, groups, userConfig, ctx, readCon);
     }
 
@@ -1327,14 +1326,14 @@ public final class OXFolderIteratorSQL {
      * @param module The module whose non-hierarchic-visible folders should be determined
      * @param userId The user ID
      * @param groups The user's group IDs
-     * @param userConfig The user configuration
+     * @param userConfiguration The user configuration
      * @param ctx The context
      * @param readCon An readable connection (optional: may be <code>null</code>)
      * @return An iterator for specified module's visible public folders that are not visible in hierarchic tree-view
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
-    public static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
-        return getVisibleFoldersNotSeenInTreeViewNew(Integer.valueOf(module), userId, groups, userConfig, ctx, readCon);
+    public static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserPermissionBits userConfiguration, final Context ctx, final Connection readCon) throws OXException {
+        return getVisibleFoldersNotSeenInTreeViewNew(Integer.valueOf(module), userId, groups, userConfiguration, ctx, readCon);
     }
 
     /**
@@ -1349,7 +1348,7 @@ public final class OXFolderIteratorSQL {
      * @return <code>true</code> if non-tree-visible folder of specified module exist; otherwise <code>false</code>
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
-    public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
+    public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserPermissionBits userConfig, final Context ctx, final Connection readCon) throws OXException {
         final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(PUBLIC);
         condBuilder.append(") AND (ot.module = ").append(module);
         condBuilder.append(')');
@@ -1418,7 +1417,7 @@ public final class OXFolderIteratorSQL {
         }
     }
 
-    private static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeViewNew(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
+    private static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeViewNew(final Integer module, final int userId, final int[] groups, final UserPermissionBits userConfiguration, final Context ctx, final Connection readCon) throws OXException {
         final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(PUBLIC);
         if (null != module) {
             condBuilder.append(") AND (ot.module = ").append(module.intValue());
@@ -1439,7 +1438,7 @@ public final class OXFolderIteratorSQL {
              */
             stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent", // fuid, parent, ...
                 permissionIds(userId, groups, ctx),
-                StringCollection.getSqlInString(userConfig.getAccessibleModules()),
+                StringCollection.getSqlInString(userConfiguration.getAccessibleModules()),
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT)));
             int pos = 1;
@@ -1625,9 +1624,9 @@ public final class OXFolderIteratorSQL {
                 stmt.setInt(pos, module.intValue());
             }
             rs = executeQuery(stmt);
-            final Set<Integer> nonVisibleSet = new HashSet<Integer>(1024);
+            final TIntSet nonVisibleSet = new TIntHashSet(1024);
             while (rs.next()) {
-                nonVisibleSet.add(Integer.valueOf(rs.getInt(1)));
+                nonVisibleSet.add(rs.getInt(1));
             }
             rs.close();
             rs = null;
@@ -1638,7 +1637,7 @@ public final class OXFolderIteratorSQL {
              * 3.) Filter all visible public folders with a non-visible parent
              */
             for (final Iterator<FolderObject> iter = q.iterator(); iter.hasNext();) {
-                if (!nonVisibleSet.contains(Integer.valueOf(iter.next().getParentFolderID()))) {
+                if (!nonVisibleSet.contains(iter.next().getParentFolderID())) {
                     iter.remove();
                 }
             }
@@ -1652,11 +1651,11 @@ public final class OXFolderIteratorSQL {
         }
     }
 
-    private static Set<Integer> queue2IDSet(final Queue<FolderObject> q, final int size) {
-        final Set<Integer> retval = new HashSet<Integer>(size);
+    private static TIntSet queue2IDSet(final Queue<FolderObject> q, final int size) {
+        final TIntSet retval = new TIntHashSet(size);
         final Iterator<FolderObject> iter = q.iterator();
-        for (int i = 0; i < size; i++) {
-            retval.add(Integer.valueOf(iter.next().getObjectID()));
+        for (int i = size; i-- > 0;) {
+            retval.add(iter.next().getObjectID());
         }
         return retval;
     }
@@ -1665,13 +1664,13 @@ public final class OXFolderIteratorSQL {
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> which represent all visible folders lying on path from given
      * folder to root folder.
      */
-    public static SearchIterator<FolderObject> getFoldersOnPathToRoot(final int folderId, final int userId, final UserConfiguration userConfig, final Locale locale, final Context ctx) throws OXException {
+    public static SearchIterator<FolderObject> getFoldersOnPathToRoot(final int folderId, final int userId, final UserPermissionBits userConfig, final Locale locale, final Context ctx) throws OXException {
         final List<FolderObject> folderList = new ArrayList<FolderObject>();
         fillAncestor(folderList, folderId, userId, userConfig, locale, null, ctx);
         return new FolderObjectIterator(folderList, false);
     }
 
-    private static void fillAncestor(final List<FolderObject> folderList, final int folderId, final int userId, final UserConfiguration userConfig, final Locale locale, final UserStorage userStoreArg, final Context ctx) throws OXException {
+    private static void fillAncestor(final List<FolderObject> folderList, final int folderId, final int userId, final UserPermissionBits userConfig, final Locale locale, final UserStorage userStoreArg, final Context ctx) throws OXException {
         final OXFolderAccess access = new OXFolderAccess(ctx);
         if (checkForSpecialFolder(folderList, folderId, locale, access)) {
             return;
@@ -1835,7 +1834,7 @@ public final class OXFolderIteratorSQL {
         return true;
     }
 
-    private static boolean hasNonVisibleParent(final FolderObject fo, final int userId, final UserConfiguration userConf, final OXFolderAccess access) throws OXException, SQLException {
+    private static boolean hasNonVisibleParent(final FolderObject fo, final int userId, final UserPermissionBits userConf, final OXFolderAccess access) throws OXException, SQLException {
         if (fo.getParentFolderID() == SYSTEM_ROOT_FOLDER_ID) {
             return false;
         }
