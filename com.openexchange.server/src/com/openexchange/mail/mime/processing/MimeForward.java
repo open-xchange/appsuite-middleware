@@ -79,6 +79,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -366,6 +367,13 @@ public final class MimeForward {
                         new LocaleAndTimeZone(getUser(session, ctx)),
                         originalMsg,
                         isHtml);
+                {
+                    final String cs = contentType.getCharsetParameter();
+                    if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
+                        // Select default charset
+                        contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                    }
+                }
                 MessageUtility.setText(txt, contentType.getCharsetParameter(), contentType.getSubType(), textPart);
                 // textPart.setText(txt, contentType.getCharsetParameter(), contentType.getSubType());
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -414,6 +422,13 @@ public final class MimeForward {
                 new LocaleAndTimeZone(getUser(session, ctx)),
                 originalMsg,
                 originalContentType.startsWith(TEXT_HTM));
+            {
+                final String cs = originalContentType.getCharsetParameter();
+                if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
+                    // Select default charset
+                    originalContentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                }
+            }
             MessageUtility.setText(txt, originalContentType.getCharsetParameter(), originalContentType.getSubType(), forwardMsg);
             // forwardMsg.setText(txt,originalContentType.getCharsetParameter(),originalContentType.getSubType());
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
