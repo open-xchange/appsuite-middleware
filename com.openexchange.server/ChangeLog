@@ -1,3 +1,7 @@
+* 2013-09-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29002: Keep proper emoji characters on reply/forward operation
+
 * 2013-09-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 28932: Deal with possible 'NumberFormatException' gracefully
