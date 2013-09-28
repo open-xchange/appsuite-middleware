@@ -1,6 +1,7 @@
 * 2013-09-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 29002: Keep proper emoji characters on reply/forward operation
+ - Fix for bug 28942: Prepare UTC-only properties to not specify a time zone
 
 * 2013-09-25 - thorben.betten@open-xchange.com
 

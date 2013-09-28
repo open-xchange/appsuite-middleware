@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -58,15 +59,20 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
@@ -96,6 +102,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -466,7 +473,7 @@ public class ICal4JParser implements ICalParser {
             	workaroundFor17492(
             	workaroundFor17963(
             	workaroundFor20453(
-            	workaroundFor27706(
+            	workaroundFor27706And28942(
             	removeAnnoyingWhitespaces(chunk.toString()
                 )))))))))
             ); // FIXME: Encoding?
@@ -505,13 +512,62 @@ public class ICal4JParser implements ICalParser {
 			;
 	}
 
-	private String workaroundFor27706(final String input) {
-        return input
-            .replaceAll("DTSTAMP;TZID=UTC:\\s*([0-9]{8}T[0-9]{6})", "DTSTAMP:$1Z")
-            .replaceAll("DTSTART;TZID=UTC:\\s*([0-9]{8}T[0-9]{6})", "DTSTART:$1Z")
-            .replaceAll("DTEND;TZID=UTC:\\s*([0-9]{8}T[0-9]{6})", "DTEND:$1Z")
-            ;
+	private String workaroundFor27706And28942(final String input) {
+	    Matcher m = Pattern.compile("DTSTAMP;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(input);
+	    final StringBuffer sb = new StringBuffer(input.length());
+	    while (m.find()) {
+	        final TimeZone tz = getTimeZone(m.group(1));
+	        m.appendReplacement(sb, Strings.quoteReplacement("DTSTAMP:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+	    m.appendTail(sb);
+
+	    m = Pattern.compile("DTSTART;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("DTSTART:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        m = Pattern.compile("DTEND;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("DTEND:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        m = Pattern.compile("CREATED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
     }
+
+	private static final SimpleDateFormat UTC_PROPERTY;
+
+	static {
+	    final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+	    sdf.setTimeZone(getTimeZone("UTC"));
+	    UTC_PROPERTY = sdf;
+	}
+
+	private String getUtcPropertyFrom(final String s, final TimeZone tz) {
+	    try {
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+            sdf.setTimeZone(tz);
+            final Date d = sdf.parse(s);
+            synchronized (UTC_PROPERTY) {
+                return UTC_PROPERTY.format(d);
+            }
+        } catch (final ParseException e) {
+            return s;
+        }
+	}
 
 	/**
      * Method written out of laziness: Because you can spread iCal attributes
