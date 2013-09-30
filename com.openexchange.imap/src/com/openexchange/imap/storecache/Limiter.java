@@ -50,7 +50,6 @@
 package com.openexchange.imap.storecache;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import com.sun.mail.imap.JavaIMAPStore;
 
 /**
  * {@link Limiter} - A simple limiter backed by a {@link AtomicInteger}.
@@ -63,7 +62,7 @@ public final class Limiter {
     private final AtomicInteger cur;
 
     /**
-     * Initializes a new {@link JavaIMAPStore.Limiter}.
+     * Initializes a new {@link Limiter}.
      */
     public Limiter(final int max) {
         super();
