@@ -295,7 +295,12 @@ public class QueuingIMAPStore extends IMAPStore {
     @Override
     protected IMAPProtocol newIMAPProtocol(final String host, final int port, final String user, final String password) throws IOException, ProtocolException {
         try {
-            final CountingQueue<QueuedIMAPProtocol> q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0), logger);
+            final int permits = PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0);
+            if (permits <= 0) {
+                // No connection restriction -- delegate to super implementation
+                return super.newIMAPProtocol(host, port, user, password);
+            }
+            final CountingQueue<QueuedIMAPProtocol> q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), permits, logger);
             if (null == q) {
                 // No connection restriction -- delegate to super implementation
                 return super.newIMAPProtocol(host, port, user, password);
