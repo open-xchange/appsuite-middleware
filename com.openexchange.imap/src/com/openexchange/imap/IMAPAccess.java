@@ -118,7 +118,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.JavaIMAPStore;
+import com.sun.mail.imap.QueuingIMAPStore;
 
 /**
  * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
@@ -1241,7 +1241,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Custom IMAP store
          */
-        imapProps.put("mail.imap.class", JavaIMAPStore.class.getName());
+        // imapProps.put("mail.imap.class", JavaIMAPStore.class.getName());
+        imapProps.put("mail.imap.class", QueuingIMAPStore.class.getName());
         /*
          * Set timeouts
          */
@@ -1317,7 +1318,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Create new IMAP session from initialized properties
          */
         final javax.mail.Session imapSession = javax.mail.Session.getInstance(imapProps, null);
-        imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", JavaIMAPStore.class.getName(), "Open-Xchange, Inc.", "7.2.2"));
+        // imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", JavaIMAPStore.class.getName(), "Open-Xchange, Inc.", "7.2.2"));
+        imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", QueuingIMAPStore.class.getName(), "Open-Xchange, Inc.", "7.4.1"));
         return imapSession;
     }
 
