@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,31 +51,23 @@ package com.openexchange.aws.s3;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URI;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
-import com.amazonaws.services.s3.model.CreateBucketRequest;
+import com.amazonaws.services.s3.internal.BucketNameUtils;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.DeleteObjectsResult.DeletedObject;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ListBucketsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.ProgressEvent;
@@ -83,9 +75,9 @@ import com.amazonaws.services.s3.model.ProgressListener;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
 import com.openexchange.aws.s3.exceptions.OXAWSS3ExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
 
@@ -97,14 +89,8 @@ import com.openexchange.tools.file.external.FileStorage;
 public class AWSS3FileStorage implements FileStorage {
 
     private static final Log LOG = LogFactory.getLog(AWSS3FileStorage.class);
-
     private final AmazonS3 amazonS3;
-
-    private final AWSS3Configuration config;
-
-    private final URI uri;
-
-    private final Bucket bucket;
+    private final String bucketName;
 
     /**
      * Initializes a new {@link AWSS3FileStorage}.
@@ -114,45 +100,28 @@ public class AWSS3FileStorage implements FileStorage {
     public AWSS3FileStorage(AmazonS3 amazonS3, AWSS3Configuration config, URI uri) throws OXException {
         super();
         this.amazonS3 = amazonS3;
-        this.config = config;
-        this.uri = uri;
-        this.bucket = init();
+        this.bucketName = initBucket(uri);
     }
 
-    private Bucket init() throws OXException {
-        Bucket retval = null;
+    /**
+     * Initializes the bucket denoted by the supplied URI, creating the bucket dynamically if needed.
+     *
+     * @param uri The file storage URI
+     * @return The bucket name
+     * @throws OXException If initialization fails
+     */
+    private String initBucket(URI uri) throws OXException {
         try {
-            String path = null;
-            if (uri.getPath() == null || uri.getPath().equals("")) {
-                path = config.getDefaultBucket();
-            } else {
-                path = getContextId(uri);
+            String bucketName = extractBucketName(uri);
+            if (false == amazonS3.doesBucketExist(bucketName)) {
+                amazonS3.createBucket(bucketName);
             }
-            ListBucketsRequest listBucketsRequest = new ListBucketsRequest();
-            List<Bucket> buckets = amazonS3.listBuckets(listBucketsRequest);
-            boolean bucketExists = false;
-            for (Bucket b : buckets) {
-                if (b.getName().equals(path)) {
-                    bucketExists = true;
-                    retval = b;
-                    break;
-                }
-            }
-            if (!bucketExists) {
-                CreateBucketRequest createBucketRequest = new CreateBucketRequest(path);
-                retval = amazonS3.createBucket(createBucketRequest);
-            }
-            if (config.isVersioningEnabled()) {
-                SetBucketVersioningConfigurationRequest versioningConfigurationRequest = new SetBucketVersioningConfigurationRequest(
-                    retval.getName(),
-                    new BucketVersioningConfiguration(BucketVersioningConfiguration.ENABLED));
-                amazonS3.setBucketVersioningConfiguration(versioningConfigurationRequest);
-            }
+            return bucketName;
+        } catch (IllegalArgumentException e) {
+            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
         } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e.getMessage());
+            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
         }
-        return retval;
     }
 
     @Override
@@ -163,8 +132,8 @@ public class AWSS3FileStorage implements FileStorage {
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(file.available());
             final PutObjectRequest putRequest = new PutObjectRequest(
-                bucket.getName(),
-                generateMD5(String.valueOf(System.currentTimeMillis())),
+                bucketName,
+                newUid(),
                 file,
                 metadata);
             putRequest.setProgressListener(new ProgressListener() {
@@ -204,7 +173,7 @@ public class AWSS3FileStorage implements FileStorage {
     public InputStream getFile(String name) throws OXException {
         InputStream retval = null;
         try {
-            final GetObjectRequest getRequest = new GetObjectRequest(bucket.getName(), name);
+            final GetObjectRequest getRequest = new GetObjectRequest(bucketName, name);
             getRequest.setProgressListener(new ProgressListener() {
 
                 @Override
@@ -238,7 +207,7 @@ public class AWSS3FileStorage implements FileStorage {
     public SortedSet<String> getFileList() throws OXException {
         SortedSet<String> retval = new TreeSet<String>();
         try {
-            ObjectListing listing = amazonS3.listObjects(bucket.getName());
+            ObjectListing listing = amazonS3.listObjects(bucketName);
             List<S3ObjectSummary> summaries = listing.getObjectSummaries();
             for (S3ObjectSummary summary : summaries) {
                 retval.add(summary.getKey());
@@ -255,7 +224,7 @@ public class AWSS3FileStorage implements FileStorage {
     public long getFileSize(final String name) throws OXException {
         long retval = 0;
         try {
-            final GetObjectRequest getRequest = new GetObjectRequest(bucket.getName(), name);
+            final GetObjectRequest getRequest = new GetObjectRequest(bucketName, name);
             getRequest.setProgressListener(new ProgressListener() {
 
                 @Override
@@ -290,7 +259,7 @@ public class AWSS3FileStorage implements FileStorage {
     public String getMimeType(String name) throws OXException {
         String retval = null;
         try {
-            final GetObjectRequest getRequest = new GetObjectRequest(bucket.getName(), name);
+            final GetObjectRequest getRequest = new GetObjectRequest(bucketName, name);
             getRequest.setProgressListener(new ProgressListener() {
 
                 @Override
@@ -323,7 +292,7 @@ public class AWSS3FileStorage implements FileStorage {
     @Override
     public boolean deleteFile(String identifier) throws OXException {
         try {
-            DeleteObjectRequest deleteRequest = new DeleteObjectRequest(bucket.getName(), identifier);
+            DeleteObjectRequest deleteRequest = new DeleteObjectRequest(bucketName, identifier);
             amazonS3.deleteObject(deleteRequest);
             return true;
         } catch (AmazonClientException e) {
@@ -336,7 +305,7 @@ public class AWSS3FileStorage implements FileStorage {
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
         Set<String> retval = new TreeSet<String>();
         try {
-            DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucket.getName());
+            DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName);
             List<KeyVersion> keys = new ArrayList<KeyVersion>();
             for (String file : identifiers) {
                 KeyVersion keyVersion = new KeyVersion(file);
@@ -358,62 +327,28 @@ public class AWSS3FileStorage implements FileStorage {
     public void remove() throws OXException {
         try {
             List<KeyVersion> allFiles = new ArrayList<KeyVersion>();
-            ObjectListing listing = amazonS3.listObjects(bucket.getName());
+            ObjectListing listing = amazonS3.listObjects(bucketName);
             List<S3ObjectSummary> summaries = listing.getObjectSummaries();
             for (S3ObjectSummary summary : summaries) {
                 allFiles.add(new KeyVersion(summary.getKey()));
             }
-            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucket.getName());
+            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
             deleteObjectsRequest.setKeys(allFiles);
             amazonS3.deleteObjects(deleteObjectsRequest);
         } catch (AmazonClientException e) {
             LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_DELETE_ALL_ERROR.create(bucket.getName(), e.getMessage());
+            throw OXAWSS3ExceptionCodes.S3_DELETE_ALL_ERROR.create(bucketName, e.getMessage());
         }
     }
 
     @Override
     public void recreateStateFile() throws OXException {
-        if (!config.isVersioningEnabled()) {
-            throw OXAWSS3ExceptionCodes.S3_VERSIONING_DISABLED.create();
-        }
+        // no
     }
 
     @Override
     public boolean stateFileIsCorrect() throws OXException {
-        if (!config.isVersioningEnabled()) {
-            throw OXAWSS3ExceptionCodes.S3_VERSIONING_DISABLED.create();
-        }
         return true;
-    }
-
-    private String generateMD5(String input) throws OXException {
-        MessageDigest md;
-        String retval = null;
-        try {
-            md = MessageDigest.getInstance("MD5");
-            byte[] message = input.getBytes("UTF-8");
-            byte[] digest = md.digest(message);
-            BigInteger bigInt = new BigInteger(digest);
-            retval = bigInt.toString(16);
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_CREATE_HASH_FAILED.create(input, e.getMessage());
-        } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_CREATE_HASH_FAILED.create(input, e.getMessage());
-        }
-        return retval;
-    }
-
-    private String getContextId(URI u) {
-        String path = u.getPath();
-        Pattern pattern = Pattern.compile("(.*?)(\\d+)(.*?)");
-        Matcher m = pattern.matcher(path);
-        if (m.matches()) {
-            return m.group(2);
-        }
-        return null;
     }
 
     @Override
@@ -429,6 +364,26 @@ public class AWSS3FileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
         throw new UnsupportedOperationException("not implemented");
+    }
+
+    /**
+     * Extracts and validates the bucket name part from the configured file storage URI.
+     *
+     * @param uri The file storage URI
+     * @return The bucket name
+     * @throws IllegalArgumentException If the specified bucket name doesn't follow Amazon S3's guidelines
+     */
+    private static String extractBucketName(URI uri) throws IllegalArgumentException {
+        String path = uri.getPath();
+        while (0 < path.length() && '/' == path.charAt(0)) {
+            path = path.substring(1);
+        }
+        new BucketNameUtils().validateBucketName(path);
+        return path;
+    }
+
+    private static String newUid() {
+        return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 
 }
