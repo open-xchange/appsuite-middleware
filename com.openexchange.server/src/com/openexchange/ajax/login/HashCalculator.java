@@ -72,17 +72,31 @@ public class HashCalculator {
     private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
     private static final HashCalculator SINGLETON = new HashCalculator();
 
-    private String[] fields = new String[0];
-    private String salt;
-
-    private HashCalculator() {
-        super();
-    }
-
+    /**
+     * Gets the singleton instance of {@link HashCalculator}.
+     *
+     * @return The instance
+     */
     public static HashCalculator getInstance() {
         return SINGLETON;
     }
 
+    // -------------------------------------------------------------------------------------------- //
+
+    private volatile String[] fields;
+    private volatile String salt;
+
+    private HashCalculator() {
+        super();
+        fields = new String[0];
+        salt = "";
+    }
+
+    /**
+     * Configures this {@link HashCalculator} using specified configuration service.
+     *
+     * @param service The configuration service
+     */
     public void configure(ConfigurationService service) {
         final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
         fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
@@ -115,13 +129,19 @@ public class HashCalculator {
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
             }
-            for (final String field : fields) {
-                final String header = req.getHeader(field);
-                if (!isEmpty(header)) {
-                    md.update(header.getBytes(Charsets.UTF_8));
+            final String[] fields = this.fields;
+            if (null != fields) {
+                for (final String field : fields) {
+                    final String header = req.getHeader(field);
+                    if (!isEmpty(header)) {
+                        md.update(header.getBytes(Charsets.UTF_8));
+                    }
                 }
             }
-            md.update(salt.getBytes());
+            final String salt = this.salt;
+            if (null != salt) {
+                md.update(salt.getBytes());
+            }
             return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {
             LOG.fatal(e.getMessage(), e);
@@ -148,6 +168,28 @@ public class HashCalculator {
     public static String getClient(final HttpServletRequest req) {
         final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
         return isEmpty(parameter) ? "default" : parameter;
+    }
+
+    /**
+     * Gets the calculated hash string for user-agent only.
+     *
+     * @param req The HTTP Servlet request
+     * @param userAgent The optional <code>User-Agent</code> identifier
+     * @return The calculated hash string
+     */
+    public String getUserAgentHash(final HttpServletRequest req, final String userAgent) {
+        try {
+            final MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update((null == userAgent ? parseUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
+            final String salt = this.salt;
+            if (null != salt) {
+                md.update(salt.getBytes());
+            }
+            return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
+        } catch (final NoSuchAlgorithmException e) {
+            LOG.fatal(e.getMessage(), e);
+        }
+        return "";
     }
 
     private static String parseUserAgent(final HttpServletRequest req, final String defaultValue) {
