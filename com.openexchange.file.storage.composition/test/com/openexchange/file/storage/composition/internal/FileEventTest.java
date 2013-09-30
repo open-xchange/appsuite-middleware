@@ -220,7 +220,7 @@ public class FileEventTest {
                 assertFalse("Wrong id.", file.getId().equals(objectId));
             }
         });
-        String copyId = fileAccess.copy(file.getId(), dstFolder.toUniqueID(), null, null, null);
+        String copyId = fileAccess.copy(file.getId(), FileStorageFileAccess.CURRENT_VERSION, dstFolder.toUniqueID(), null, null, null);
         File copy = fileAccess.getFileMetadata(copyId, FileStorageFileAccess.CURRENT_VERSION);
         assertNotNull("Copy was null.", copy);
     }

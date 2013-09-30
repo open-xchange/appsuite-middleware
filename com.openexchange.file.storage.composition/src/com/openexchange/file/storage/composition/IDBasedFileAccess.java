@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -103,15 +104,17 @@ public interface IDBasedFileAccess extends TransactionAware {
     public void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
 
     /**
-     * Copy a file from the source to the destination.
+     * Copies a file from the source to the destination.
+     *
      * @param sourceId The file to copy
+     * @param version The source version to copy, or {@link FileStorageFileAccess#CURRENT_VERSION} to use the current one
      * @param destFolderId The folder to copy into
      * @param update Optional updates to the copy. May be null
      * @param newData Optional new binary data. May be null
      * @param The fields to use from the update.
      * @throws OXException If operation fails
      */
-    public String copy(String sourceId, String destFolderId, File update, InputStream newData, List<File.Field> modifiedFields) throws OXException;
+    String copy(String sourceId, String version, String destFolderId, File update, InputStream newData, List<File.Field> modifiedFields) throws OXException;
 
     /**
      * Load the documents content

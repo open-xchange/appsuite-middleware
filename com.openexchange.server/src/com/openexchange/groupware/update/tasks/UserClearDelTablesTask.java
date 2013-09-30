@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -58,9 +57,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -78,6 +75,8 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
         "passwordMech", "homeDirectory", "loginShell" };
 
     private static final String TABLE = "del_user";
+    
+    private static final String ALTER_TABLE = "ALTER TABLE del_user MODIFY ";
 
     /**
      * Initializes a new {@link UserClearDelTablesTask}.
@@ -98,6 +97,30 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
+            stmt = con.prepareStatement(ALTER_TABLE + "mail VARCHAR (256) NOT NULL DEFAULT ''");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "mailEnabled BOOLEAN NOT NULL DEFAULT false");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "preferredLanguage VARCHAR (10) NOT NULL DEFAULT ''");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "shadowLastChange INTEGER NOT NULL DEFAULT -1");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "timeZone VARCHAR(128) NOT NULL DEFAULT ''");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "passwordMech VARCHAR(32) NOT NULL DEFAULT ''");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "homeDirectory VARCHAR(128) NOT NULL DEFAULT ''");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "loginShell VARCHAR(128) NOT NULL DEFAULT ''");
+            stmt.execute();
+            stmt.close();
             for (String column : OBSOLETE_COLUMNS) {
                 if (Tools.isNullable(con, TABLE, column)) {
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = NULL");
@@ -116,7 +139,7 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
                         stmt.setDate(1, new java.sql.Date(0));
                         break;
                     default:
-                        stmt.setInt(1, 0);
+                        stmt.setInt(1, -1);
                         break;
                     }
                     stmt.executeUpdate();
@@ -143,11 +166,6 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[0];
-    }
-    
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(BACKGROUND);
     }
 
 }

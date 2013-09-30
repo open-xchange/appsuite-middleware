@@ -71,7 +71,11 @@ public class DriveEventSubscriptionsDeleteListener implements DeleteListener {
             try {
                 deleteSubscriptions(writeCon, event.getContext().getContextId());
             } catch (SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                if ("42S02".equals(e.getSQLState())) {
+                    // "Table 'driveEventSubscriptions' doesn't exist" => no update task for drive tables in this schema yet, so ignore
+                } else {
+                    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                }
             } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -84,7 +88,11 @@ public class DriveEventSubscriptionsDeleteListener implements DeleteListener {
                     deleteSubscriptions(writeCon, event.getContext().getContextId(), event.getId());
                 }
             } catch (SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                if ("42S02".equals(e.getSQLState())) {
+                    // "Table 'driveEventSubscriptions' doesn't exist" => no update task for drive tables in this schema yet, so ignore
+                } else {
+                    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                }
             } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             }
