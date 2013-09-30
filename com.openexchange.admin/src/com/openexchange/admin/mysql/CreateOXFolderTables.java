@@ -58,7 +58,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CreateOXFolderTables extends AbstractCreateTableImpl {
-    
+
     private static final String oxfolderTreeTableName = "oxfolder_tree";
     private static final String oxfolderPermissionsTableName = "oxfolder_permissions";
     private static final String oxfolderSpecialfoldersTableName = "oxfolder_specialfolders";
@@ -68,7 +68,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
     private static final String delOxfolderPermissionsTableName = "del_oxfolder_permissions";
     private static final String oxfolderLockTableName = "oxfolder_lock";
     private static final String oxfolderPropertyTableName = "oxfolder_property";
-    
+
     private static final String createOxfolderTreeTable = "CREATE TABLE `oxfolder_tree` ("
        + "`fuid` INT4 UNSIGNED NOT NULL,"
        + "`cid` INT4 UNSIGNED NOT NULL,"
@@ -91,7 +91,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
        + "FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),"
        + "FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createOxfolderPermissionsTable = "CREATE TABLE `oxfolder_permissions` ("
        + "`cid` INT4 UNSIGNED NOT NULL,"
        + "`fuid` INT4 UNSIGNED NOT NULL,"
@@ -107,7 +107,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
        + "INDEX `principal` (`cid`, `permission_id`, `fuid`),"
        + "FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createOxfolderSpecialfoldersTable = "CREATE TABLE `oxfolder_specialfolders` ("
         + "`tag` VARCHAR(16) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "`cid` INT4 UNSIGNED NOT NULL,"
@@ -115,7 +115,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
         + "PRIMARY KEY (`cid`,`fuid`,`tag`),"
         + "FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)"
       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createOxfolderUserfoldersTable = "CREATE TABLE `oxfolder_userfolders` ("
        + "`module` TINYINT UNSIGNED NOT NULL,"
        + "`cid` INT4 UNSIGNED NOT NULL,"
@@ -124,7 +124,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
        + "`img` VARCHAR(32) NOT NULL,"
        + "PRIMARY KEY (`cid`,`module`)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createOxfolderUserfoldersStandardfoldersTable = "CREATE TABLE `oxfolder_userfolders_standardfolders` ("
        + "`owner` INT4 UNSIGNED NOT NULL,"
        + "`cid` INT4 UNSIGNED NOT NULL,"
@@ -133,12 +133,12 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (`owner`, `cid`, `module`, `fuid`),"
        + "FOREIGN KEY (`cid`, `fuid`) REFERENCES oxfolder_tree (`cid`, `fuid`)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createDelOxfolderTreeTable = "CREATE TABLE `del_oxfolder_tree` ("
        + "`fuid` INT4 UNSIGNED NOT NULL,"
        + "`cid` INT4 UNSIGNED NOT NULL,"
        + "`parent` INT4 UNSIGNED NOT NULL,"
-       + "`fname` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+       + "`fname` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
        + "`module` TINYINT UNSIGNED NOT NULL,"
        + "`type` TINYINT UNSIGNED NOT NULL,"
        + "`creating_date` BIGINT(64) NOT NULL,"
@@ -156,7 +156,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
        + "FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),"
        + "FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createDelOxfolderPermissionsTable = "CREATE TABLE `del_oxfolder_permissions` ("
        + "`cid` INT4 UNSIGNED NOT NULL,"
        + "`fuid` INT4 UNSIGNED NOT NULL,"
@@ -172,7 +172,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
        + "INDEX `principal` (`cid`, `permission_id`, `fuid`),"
        + "FOREIGN KEY (`cid`, `fuid`) REFERENCES del_oxfolder_tree (`cid`, `fuid`)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createOxfolderLockTable = "CREATE TABLE `oxfolder_lock` ("
        + "`cid` INT4 UNSIGNED NOT NULL,"
        + "`id` INT4 UNSIGNED NOT NULL,"
@@ -185,7 +185,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
        + "`ownerDesc` VARCHAR(128) default NULL,"
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createOxfolderPropertyTable = "CREATE TABLE `oxfolder_property` ("
        + "`cid` INT4 UNSIGNED NOT NULL,"
        + "`id` INT4 UNSIGNED NOT NULL,"

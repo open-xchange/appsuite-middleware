@@ -691,6 +691,12 @@ public final class InternalList {
         // Removes obsolete data from the 'del_infostore_document' table
         list.add(new InfostoreClearDelTablesTask());
 
+        // Removes obsolete data from the 'del_oxfolder_tree', and 'virtualBackupTree' tables
+        list.add(new com.openexchange.groupware.update.tasks.FolderClearDelTablesTasks());
+
+        // Adds default values to the 'del_oxfolder_tree', and 'virtualBackupTree' tables.
+        list.add(new com.openexchange.groupware.update.tasks.FolderDefaultValuesForDelTablesTasks());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
