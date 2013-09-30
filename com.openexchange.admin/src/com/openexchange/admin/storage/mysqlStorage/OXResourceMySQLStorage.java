@@ -604,7 +604,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         PreparedStatement del_st = null;
         final int context_id = ctx.getId();
         try {
-            del_st = con.prepareStatement("" + "INSERT " + "into del_resource " + "(id,cid,identifier,displayName,mail,description,lastModified) " + "VALUES " + "(?,?,?,?,?,?,?)");
+            del_st = con.prepareStatement("" + "INSERT " + "into del_resource " + "(id,cid,identifier,displayName,mail,description,lastModified,available) " + "VALUES " + "(?,?,?,?,?,?,?,?)");
             del_st.setInt(1, resource_id);
             del_st.setInt(2, context_id);
             del_st.setString(3, "");
@@ -612,6 +612,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             del_st.setNull(5, Types.VARCHAR);
             del_st.setString(6, "");
             del_st.setLong(7, System.currentTimeMillis());
+            del_st.setInt(8, 0);
             del_st.executeUpdate();
         }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
