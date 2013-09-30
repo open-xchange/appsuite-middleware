@@ -849,7 +849,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     @Override
-    public String copy(final String sourceId, final String destFolderId, final File update, InputStream newData, final List<File.Field> fields) throws OXException {
+    public String copy(final String sourceId, String version, final String destFolderId, final File update, InputStream newData, final List<File.Field> fields) throws OXException {
         final FileID source = new FileID(sourceId);
         FolderID dest = null;
 
@@ -857,7 +857,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         if(destFolderId != null) {
             dest = new FolderID(destFolderId);
         } else {
-            fileMetadata = getFileMetadata(sourceId, FileStorageFileAccess.CURRENT_VERSION);
+            fileMetadata = getFileMetadata(sourceId, version);
             dest = new FolderID(fileMetadata.getFolderId());
         }
 
@@ -868,7 +868,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         }
 
         if(fileMetadata == null) {
-            fileMetadata = getFileMetadata(sourceId, FileStorageFileAccess.CURRENT_VERSION);
+            fileMetadata = getFileMetadata(sourceId, version);
         }
 
         if(update != null) {
@@ -876,7 +876,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         }
 
         if(newData == null) {
-            newData = getDocument(sourceId, FileStorageFileAccess.CURRENT_VERSION);
+            newData = getDocument(sourceId, version);
         }
 
         fileMetadata.setId(FileStorageFileAccess.NEW);

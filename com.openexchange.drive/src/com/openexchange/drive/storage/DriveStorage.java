@@ -173,7 +173,8 @@ public class DriveStorage {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(targetPath, targetFileName));
         }
-        String targetId = getFileAccess().copy(sourceFile.getId(), copiedFile.getFolderId(), copiedFile, null, fileFields);
+        String targetId = getFileAccess().copy(
+            sourceFile.getId(), sourceFile.getVersion(), copiedFile.getFolderId(), copiedFile, null, fileFields);
         copiedFile.setId(targetId);
         return copiedFile;
     }
