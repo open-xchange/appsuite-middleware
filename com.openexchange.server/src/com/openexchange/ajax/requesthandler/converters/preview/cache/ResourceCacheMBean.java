@@ -53,11 +53,11 @@ import javax.management.MBeanException;
 
 
 /**
- * {@link PreviewCacheMBean} - The Mbean for preview cache.
+ * {@link ResourceCacheMBean} - The Mbean for resource cache.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface PreviewCacheMBean {
+public interface ResourceCacheMBean {
 
     /**
      * Clears all cache entries for given context.

@@ -74,6 +74,8 @@ import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -83,6 +85,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.ajax.requesthandler.cache.CachedResource;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -94,11 +99,15 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FileResponseRenderer}
@@ -257,7 +266,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             contentDisposition = unquote(contentDisposition);
             // Write to Servlet's output stream
-            file = transformIfImage(requestData, file, delivery);
+            file = transformIfImage(requestData, result, file, delivery);
             if (null == file) {
                 // Quit with 404
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
@@ -673,7 +682,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder fileHolder, final String delivery) throws IOException, OXException {
+    private IFileHolder transformIfImage(final AJAXRequestData request, final AJAXRequestResult result, final IFileHolder fileHolder, final String delivery) throws IOException, OXException {
         /*
          * check input
          */
@@ -716,6 +725,38 @@ public class FileResponseRenderer implements ResponseRenderer {
 
             if (!transform) {
                 return fileHolder;
+            }
+        }
+
+        // Check cache first
+        final ResourceCache previewCache = ResourceCaches.getResourceCache();
+        // Get eTag from result that provides the IFileHolder
+        final String eTag = result.getHeader("ETag");
+        final boolean isValidEtag = !isEmpty(eTag);
+        if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
+            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
+            final CachedResource cachedResource = previewCache.get(cacheKey, 0, request.getSession().getContextId());
+            if (null != cachedResource) {
+                // Scaled version already cached
+                // Create appropriate IFileHolder
+                String contentType = cachedResource.getFileType();
+                if (null == contentType) {
+                    contentType = "image/jpeg";
+                }
+                final IFileHolder ret;
+                {
+                    final InputStream inputStream = cachedResource.getInputStream();
+                    if (null == inputStream) {
+                        final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedResource.getBytes());
+                        responseFileHolder.setContentType(contentType);
+                        responseFileHolder.setName(cachedResource.getFileName());
+                        ret = responseFileHolder;
+                    } else {
+                        // From stream
+                        ret = new FileHolder(inputStream, cachedResource.getSize(), contentType, cachedResource.getFileName());
+                    }
+                }
+                return ret;
             }
         }
 
@@ -778,7 +819,51 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
                 return handleFailure(file, stream, markSupported);
             }
-            return new FileHolder(transformed, -1, file.getContentType(), file.getName());
+            // Return immediately if not cacheable
+            if (null == previewCache || !isValidEtag) {
+                return new FileHolder(transformed, -1, file.getContentType(), file.getName());
+            }
+            // (Asynchronously) Add to cache if possible
+            final byte[] bytes = Streams.stream2bytes(transformed);
+            final int size = bytes.length;
+            // Specify task
+            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
+            final ServerSession session = request.getSession();
+            final String fileName = file.getName();
+            final String contentType = file.getContentType();
+            final AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws OXException {
+                    final CachedResource preview = new CachedResource(bytes, fileName, contentType, bytes.length);
+                    previewCache.save(cacheKey, preview, 0, session.getContextId());
+                    return null;
+                }
+            };
+            // Acquire thread pool service
+            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+            if (null == threadPool) {
+                final Thread thread = Thread.currentThread();
+                boolean ran = false;
+                task.beforeExecute(thread);
+                try {
+                    task.call();
+                    ran = true;
+                    task.afterExecute(null);
+                } catch (final Exception ex) {
+                    if (!ran) {
+                        task.afterExecute(ex);
+                    }
+                    // Else the exception occurred within
+                    // afterExecute itself in which case we don't
+                    // want to call it again.
+                    throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage()));
+                }
+            } else {
+                threadPool.submit(task);
+            }
+            // Return
+            return new FileHolder(new ByteArrayInputStreamClosure(bytes), size, contentType, fileName);
         } catch (final RuntimeException e) {
             if (DEBUG && file.repetitive()) {
                 try {

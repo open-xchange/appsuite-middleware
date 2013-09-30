@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,94 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache;
+package com.openexchange.ajax.requesthandler.cache;
 
-import java.util.concurrent.atomic.AtomicReference;
-import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import org.apache.commons.logging.Log;
-import com.openexchange.preview.cache.PreviewCache;
-
+import java.io.InputStream;
 
 /**
- * {@link PreviewCacheMBeanImpl}
+ * {@link CachedResource} - A cached resource.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PreviewCacheMBeanImpl extends StandardMBean implements PreviewCacheMBean {
+public final class CachedResource {
 
-    /** The cache reference */
-    public static final AtomicReference<PreviewCache> CACHE_REF = new AtomicReference<PreviewCache>();
+    private final byte[] bytes;
+    private final InputStream in;
+    private final String fileName;
+    private final String fileType;
+    private final long size;
 
     /**
-     * Initializes a new {@link PreviewCacheMBeanImpl}.
-     *
-     * @throws NotCompliantMBeanException
+     * Initializes a new {@link CachedResource}.
      */
-    public PreviewCacheMBeanImpl() throws NotCompliantMBeanException {
-        super(PreviewCacheMBean.class);
+    public CachedResource(final byte[] bytes, final String fileName, final String fileType, final long size) {
+        super();
+        in = null;
+        this.bytes = bytes;
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.size = size;
     }
 
-    @Override
-    public void clearFor(final int contextId) throws MBeanException {
-        final PreviewCache previewCache = CACHE_REF.get();
-        if (null != previewCache) {
-            try {
-                previewCache.clearFor(contextId);
-            } catch (final Exception e) {
-                final Log log = com.openexchange.log.Log.loggerFor(PreviewCacheMBeanImpl.class);
-                log.error(e.getMessage(), e);
-                throw new MBeanException(new Exception(e.getMessage()));
-            }
-        }
+    /**
+     * Initializes a new {@link CachedResource}.
+     */
+    public CachedResource(final InputStream in, final String fileName, final String fileType, final long size) {
+        super();
+        bytes = null;
+        this.in = in;
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.size = size;
+    }
+
+    /**
+     * Gets the size
+     *
+     * @return The size or <code>-1</code> if unknown
+     */
+    public long getSize() {
+        return size;
+    }
+
+    /**
+     * Gets the bytes
+     * <p>
+     * If <code>null</code> check {@link #getInputStream()}.
+     *
+     * @return The bytes or <code>null</code>
+     */
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    /**
+     * Gets the input stream
+     * <p>
+     * If <code>null</code> check {@link #getBytes()}.
+     *
+     * @return The input stream or <code>null</code>
+     */
+    public InputStream getInputStream() {
+        return in;
+    }
+
+    /**
+     * Gets the file name
+     *
+     * @return The file name
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * Gets the file MIME type
+     *
+     * @return The file MIME type
+     */
+    public String getFileType() {
+        return fileType;
     }
 
 }

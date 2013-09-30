@@ -60,11 +60,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.FileStorePreviewCacheImpl;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheMBean;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheMBeanImpl;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.RdbPreviewCacheImpl;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImpl;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.RdbResourceCacheImpl;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBean;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBeanImpl;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.AddRefIdForPreviewCacheTable;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.DropDataFromPreviewCacheTable;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateDataTableService;
@@ -81,22 +82,21 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.preview.cache.PreviewCache;
 
 
 /**
- * {@link PreviewCacheActivator} - Activator for preview document cache.
+ * {@link ResourceCacheActivator} - Activator for resource cache.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PreviewCacheActivator extends HousekeepingActivator {
+public final class ResourceCacheActivator extends HousekeepingActivator {
 
     private volatile ObjectName objectName;
 
     /**
-     * Initializes a new {@link PreviewCacheActivator}.
+     * Initializes a new {@link ResourceCacheActivator}.
      */
-    public PreviewCacheActivator() {
+    public ResourceCacheActivator() {
         super();
     }
 
@@ -139,31 +139,31 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
         track(ManagementService.class, new ServiceTrackerCustomizerImpl(context));
         openTrackers();
         // Init service
-        final PreviewCache cache;
+        final ResourceCache cache;
         final EventHandler eventHandler;
         {
             final ConfigurationService configurationService = getService(ConfigurationService.class);
             final String type = configurationService.getProperty("com.openexchange.preview.cache.type", "FS").trim();
             if ("DB".equalsIgnoreCase(type)) {
-                final RdbPreviewCacheImpl rdbPreviewCacheImpl = new RdbPreviewCacheImpl();
+                final RdbResourceCacheImpl rdbPreviewCacheImpl = new RdbResourceCacheImpl();
                 cache = rdbPreviewCacheImpl;
                 eventHandler = rdbPreviewCacheImpl;
             } else {
                 final boolean quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", false);
-                final FileStorePreviewCacheImpl fileStorePreviewCache = new FileStorePreviewCacheImpl(quotaAware);
+                final FileStoreResourceCacheImpl fileStorePreviewCache = new FileStoreResourceCacheImpl(quotaAware);
                 cache = fileStorePreviewCache;
                 eventHandler = fileStorePreviewCache;
             }
         }
-        PreviewCacheMBeanImpl.CACHE_REF.set(cache);
+        ResourceCacheMBeanImpl.CACHE_REF.set(cache);
         // Register stuff
-        registerService(PreviewCache.class, cache);
+        registerService(ResourceCache.class, cache);
         {
             final Dictionary<String, Object> d = new Hashtable<String, Object>(1);
             d.put(EventConstants.EVENT_TOPIC, new String[] { FileStorageEventConstants.UPDATE_TOPIC, FileStorageEventConstants.DELETE_TOPIC });
             registerService(EventHandler.class, eventHandler, d);
         }
-        AbstractPreviewResultConverter.setPreviewCache(cache);
+        ResourceCaches.setResourceCache(cache);
         /*
          * Register update task, create table job and delete listener
          */
@@ -175,8 +175,7 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        AbstractPreviewResultConverter.setPreviewCache(null);
-        PreviewCacheMBeanImpl.CACHE_REF.set(null);
+        ResourceCaches.setResourceCache(null);
         super.stopBundle();
     }
 
@@ -184,17 +183,17 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
         ObjectName objectName = this.objectName;
         if (objectName == null) {
             try {
-                objectName = getObjectName(PreviewCacheMBean.class.getName(), "com.openexchange.preview.cache");
+                objectName = getObjectName(ResourceCacheMBean.class.getName(), "com.openexchange.preview.cache");
                 this.objectName = objectName;
-                management.registerMBean(objectName, new PreviewCacheMBeanImpl());
+                management.registerMBean(objectName, new ResourceCacheMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(PreviewCacheActivator.class);
+                final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCacheActivator.class);
                 LOG.error(e.getMessage(), e);
             } catch (final NotCompliantMBeanException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(PreviewCacheActivator.class);
+                final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCacheActivator.class);
                 LOG.error(e.getMessage(), e);
             } catch (final OXException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(PreviewCacheActivator.class);
+                final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCacheActivator.class);
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -206,7 +205,7 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(PreviewCacheActivator.class);
+                final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCacheActivator.class);
                 LOG.error(e.getMessage(), e);
             } finally {
                 this.objectName = null;

@@ -47,32 +47,32 @@
  *
  */
 
-package com.openexchange.preview.cache;
+package com.openexchange.ajax.requesthandler.cache;
 
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link PreviewCache} - The preview cache for documents.
+ * {@link ResourceCache} - The cache for all kinds of requested resources that support ETag-wise access.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface PreviewCache {
+public interface ResourceCache {
 
     /**
-     * Stores given preview document's binary content.
+     * Stores given resource's binary content.
      *
      * @param id The identifier (cache key) for the cached document
-     * @param preview The cached preview
+     * @param resource The cached preview
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> if successfully saved; otherwise <code>false</code> if impossible to store (e.g. due to quota restrictions)
      * @throws OXException If operations fails
      */
-    boolean save(String id, CachedPreview preview, int userId, int contextId) throws OXException;
+    boolean save(String id, CachedResource resource, int userId, int contextId) throws OXException;
 
     /**
-     * Stores given preview document's binary content.
+     * Stores given resource's binary content.
      *
      * @param id The identifier (cache key) for the cached document
      * @param in The binary stream
@@ -86,7 +86,7 @@ public interface PreviewCache {
     boolean save(String id, InputStream in, String optName, String optType, int userId, int contextId) throws OXException;
 
     /**
-     * Stores given preview document's binary content.
+     * Stores given resource's binary content.
      *
      * @param id The identifier (cache key) for the cached document
      * @param bytes The binary content
@@ -121,7 +121,7 @@ public interface PreviewCache {
     boolean ensureUnexceededContextQuota(long desiredSize, long total, long totalPerDocument, int contextId, String ignoree) throws OXException;
 
     /**
-     * Gets the preview document.
+     * Gets the resource.
      *
      * @param id The document identifier
      * @param userId The user identifier or <code>-1</code> for context-global document
@@ -129,10 +129,10 @@ public interface PreviewCache {
      * @return The preview document or <code>null</code>
      * @throws OXException If retrieving document data fails
      */
-    CachedPreview get(String id, int userId, int contextId) throws OXException;
+    CachedResource get(String id, int userId, int contextId) throws OXException;
 
     /**
-     * Removes the preview documents associated with specified user.
+     * Removes the resources associated with specified user.
      *
      * @param userId The user identifier or <code>-1</code> for context-global document
      * @param contextId The context identifier
@@ -141,7 +141,7 @@ public interface PreviewCache {
     void remove(int userId, int contextId) throws OXException;
 
     /**
-     * Removes the preview documents associated with specified user.
+     * Removes the resources associated with specified user.
      *
      * @param id The document identifier prefix
      * @param userId The user identifier
@@ -159,9 +159,9 @@ public interface PreviewCache {
     void clearFor(int contextId) throws OXException;
 
     /**
-     * Tests for existence of denoted preview document.
+     * Tests for existence of denoted resource.
      *
-     * @param id The identifier (cache key) for the cached document
+     * @param id The identifier (cache key) for the cached resource
      * @param userId The user identifier or <code>-1</code> for context-global document
      * @param contextId The context identifier
      * @return <code>true</code> if exists; otherwise <code>false</code>

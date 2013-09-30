@@ -63,6 +63,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.cache.CachedResource;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -75,8 +78,6 @@ import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
-import com.openexchange.preview.cache.CachedPreview;
-import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -119,13 +120,13 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         try {
             // Check cache first
-            final PreviewCache previewCache = AbstractPreviewResultConverter.getPreviewCache();
+            final ResourceCache previewCache = ResourceCaches.getResourceCache();
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
-                final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
+                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
+                final CachedResource cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
                     // Create appropriate IFileHolder
@@ -185,12 +186,12 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;
                 // Specify task
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
+                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
 
                     @Override
                     public Void call() throws OXException {
-                        final CachedPreview preview = new CachedPreview(bytes, fileName, "image/jpeg", bytes.length);
+                        final CachedResource preview = new CachedResource(bytes, fileName, "image/jpeg", bytes.length);
                         previewCache.save(cacheKey, preview, 0, session.getContextId());
                         return null;
                     }

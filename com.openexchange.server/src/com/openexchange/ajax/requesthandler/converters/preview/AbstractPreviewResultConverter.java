@@ -54,11 +54,7 @@ import static com.openexchange.java.Charsets.toAsciiString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,7 +64,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
@@ -77,21 +72,21 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.cache.CachedResource;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
-import com.openexchange.preview.cache.CachedPreview;
 import com.openexchange.preview.cache.CachedPreviewDocument;
-import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -108,26 +103,6 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractPreviewResultConverter implements ResultConverter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPreviewResultConverter.class));
-
-    private static final AtomicReference<PreviewCache> CACHE_REF = new AtomicReference<PreviewCache>();
-
-    /**
-     * Sets the preview cache reference.
-     *
-     * @param ref The reference
-     */
-    public static void setPreviewCache(final PreviewCache ref) {
-        CACHE_REF.set(ref);
-    }
-
-    /**
-     * Gets the preview cache reference.
-     *
-     * @return The preview cache or <code>null</code> if absent
-     */
-    protected static PreviewCache getPreviewCache() {
-        return CACHE_REF.get();
-    }
 
     private static final Charset UTF8 = Charsets.UTF_8;
     private static final byte[] DELIM = new byte[] { '\r', '\n' };
@@ -154,74 +129,17 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         return "file";
     }
 
-    /**
-     * Generates the key for preview cache.
-     *
-     * @param eTag The ETag identifier
-     * @param requestData The request data
-     * @param optParameters Optional parameters to consider
-     * @return The appropriate cache key
-     */
-    protected String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData) {
-        final StringAllocator sb = new StringAllocator(512);
-        sb.append(requestData.getModule());
-        sb.append('-').append(requestData.getAction());
-        sb.append('-').append(requestData.getSession().getContextId());
-        List<String> parameters = new ArrayList<String>(requestData.getParameters().keySet());
-        Collections.sort(parameters);
-
-        for (final String name : parameters) {
-            if (!name.equalsIgnoreCase("session") && !name.equalsIgnoreCase("action")) {
-                sb.append('-').append(name);
-                final String parameter = requestData.getParameter(name);
-                if (!isEmpty(parameter)) {
-                    sb.append('=').append(parameter);
-                }
-            }
-        }
-        try {
-            final byte[] md5Bytes = sb.toString().getBytes("UTF-8");
-            sb.setNewLength(0);
-            return sb.append(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(md5Bytes))).toString();
-        } catch (UnsupportedEncodingException e) {
-            // Shouldn't happen
-            LOG.error(e.getMessage(),e);
-        } catch (NoSuchAlgorithmException e) {
-            // Shouldn't happen
-            LOG.error(e.getMessage(),e);
-        }
-        return sb.toString();
-    }
-
-    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-
-    /**
-     * Turns array of bytes into string representing each byte as unsigned hex number.
-     *
-     * @param hash Array of bytes to convert to hex-string
-     * @return Generated hex string
-     */
-    public static String asHex(final byte[] hash) {
-        final int length = hash.length;
-        final char[] buf = new char[length * 2];
-        for (int i = 0, x = 0; i < length; i++) {
-            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
-            buf[x++] = HEX_CHARS[hash[i] & 0xf];
-        }
-        return new String(buf);
-    }
-
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         IFileHolder fileHolder = null;
         try {
             // Check cache first
-            final PreviewCache previewCache = getPreviewCache();
+            final ResourceCache previewCache = ResourceCaches.getResourceCache();
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
-                final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
+                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
+                final CachedResource cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     /*
                      * Get content according to output format
@@ -304,7 +222,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                     if (null != content) {
                         final int size = content.size();
                         if (size > 0) {
-                            final String cacheKey = generatePreviewCacheKey(eTag, requestData);
+                            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
                             final byte[] bytes;
                             if (1 == content.size()) {
                                 bytes = toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8))));
@@ -325,7 +243,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
                                 @Override
                                 public Void call() throws OXException {
-                                    final CachedPreview preview = new CachedPreview(bytes, fileName, fileType, bytes.length);
+                                    final CachedResource preview = new CachedResource(bytes, fileName, fileType, bytes.length);
                                     previewCache.save(cacheKey, preview, 0, session.getContextId());
                                     return null;
                                 }
