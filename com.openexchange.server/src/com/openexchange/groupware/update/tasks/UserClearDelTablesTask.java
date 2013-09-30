@@ -71,12 +71,10 @@ import com.openexchange.tools.update.Tools;
 public class UserClearDelTablesTask extends UpdateTaskAdapter {
 
     private static final String[] OBSOLETE_COLUMNS = new String[] {
-        "imapServer", "imapLogin", "mail", "mailDomain", "preferredLanguage", "shadowLastChange", "smtpServer", "timeZone", "userPassword",
+        "imapServer", "imapLogin", "mail", "mailEnabled", "mailDomain", "preferredLanguage", "shadowLastChange", "smtpServer", "timeZone", "userPassword",
         "passwordMech", "homeDirectory", "loginShell" };
 
     private static final String TABLE = "del_user";
-    
-    private static final String ALTER_TABLE = "ALTER TABLE del_user MODIFY ";
 
     /**
      * Initializes a new {@link UserClearDelTablesTask}.
@@ -97,37 +95,40 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
-            stmt = con.prepareStatement(ALTER_TABLE + "mail VARCHAR (256) NOT NULL DEFAULT ''");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "mailEnabled BOOLEAN NOT NULL DEFAULT false");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "preferredLanguage VARCHAR (10) NOT NULL DEFAULT ''");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "shadowLastChange INTEGER NOT NULL DEFAULT -1");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "timeZone VARCHAR(128) NOT NULL DEFAULT ''");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "passwordMech VARCHAR(32) NOT NULL DEFAULT ''");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "homeDirectory VARCHAR(128) NOT NULL DEFAULT ''");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "loginShell VARCHAR(128) NOT NULL DEFAULT ''");
-            stmt.execute();
-            stmt.close();
             for (String column : OBSOLETE_COLUMNS) {
+                int type = Tools.getColumnType(con, TABLE, column);
+                if (!Tools.hasDefaultValue(con, TABLE, column)) {
+                    stmt = con.prepareStatement("ALTER TABLE " + TABLE + " ALTER " + column + " SET DEFAULT ?");
+                    switch (type) {
+                    case java.sql.Types.CHAR:
+                    case java.sql.Types.VARCHAR:
+                        stmt.setString(1, "");
+                        break;
+                    case java.sql.Types.DATE:
+                    case java.sql.Types.TIMESTAMP:
+                        stmt.setDate(1, new java.sql.Date(0));
+                        break;
+                    case java.sql.Types.TINYINT:
+                    case java.sql.Types.BOOLEAN:
+                        stmt.setInt(1, 0);
+                        break;
+                    case java.sql.Types.BLOB:
+                    case -1:
+                        stmt.cancel();
+                        stmt.close();
+                        continue;
+                    default:
+                        stmt.setInt(1, -1);
+                        break;
+                    }
+                    stmt.executeUpdate();
+                    stmt.close();
+                }
                 if (Tools.isNullable(con, TABLE, column)) {
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = NULL");
                     stmt.executeUpdate();
                     stmt.close();
                 } else {
-                    int type = Tools.getColumnType(con, TABLE, column);
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = ?");
                     switch (type) {
                     case java.sql.Types.CHAR:
@@ -137,6 +138,10 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
                     case java.sql.Types.DATE:
                     case java.sql.Types.TIMESTAMP:
                         stmt.setDate(1, new java.sql.Date(0));
+                        break;
+                    case java.sql.Types.TINYINT:
+                    case java.sql.Types.BOOLEAN:
+                        stmt.setInt(1, 0);
                         break;
                     default:
                         stmt.setInt(1, -1);

@@ -73,8 +73,6 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
     private static final String[] OBSOLETE_COLUMNS = new String[] { "identifier", "displayName", "mail", "available", "description" };
 
     private static final String TABLE = "del_resource";
-    
-    private static final String ALTER_TABLE = "ALTER TABLE del_resource MODIFY ";
 
     /**
      * Initializes a new {@link ResourceClearDelTablesTask}.
@@ -95,28 +93,40 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
-            stmt = con.prepareStatement(ALTER_TABLE + "identifier VARCHAR (128) NOT NULL DEFAULT ''");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "displayName VARCHAR (128) NOT NULL DEFAULT ''");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "mail VARCHAR (256) DEFAULT NULL");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "available BOOLEAN NOT NULL DEFAULT false");
-            stmt.execute();
-            stmt.close();
-            stmt = con.prepareStatement(ALTER_TABLE + "description TEXT DEFAULT NULL");
-            stmt.execute();
-            stmt.close();
             for (String column : OBSOLETE_COLUMNS) {
+                int type = Tools.getColumnType(con, TABLE, column);
+                if (!Tools.hasDefaultValue(con, TABLE, column)) {
+                    stmt = con.prepareStatement("ALTER TABLE " + TABLE + " ALTER " + column + " SET DEFAULT ?");
+                    switch (type) {
+                    case java.sql.Types.CHAR:
+                    case java.sql.Types.VARCHAR:
+                        stmt.setString(1, "");
+                        break;
+                    case java.sql.Types.DATE:
+                    case java.sql.Types.TIMESTAMP:
+                        stmt.setDate(1, new java.sql.Date(0));
+                        break;
+                    case java.sql.Types.TINYINT:
+                    case java.sql.Types.BOOLEAN:
+                        stmt.setInt(1, 0);
+                        break;
+                    case java.sql.Types.BLOB:
+                    case -1:
+                        stmt.cancel();
+                        stmt.close();
+                        continue;
+                    default:
+                        stmt.setInt(1, -1);
+                        break;
+                    }
+                    stmt.executeUpdate();
+                    stmt.close();
+                }
                 if (Tools.isNullable(con, TABLE, column)) {
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = NULL");
                     stmt.executeUpdate();
                     stmt.close();
                 } else {
-                    int type = Tools.getColumnType(con, TABLE, column);
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = ?");
                     switch (type) {
                     case java.sql.Types.CHAR:
@@ -127,8 +137,12 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
                     case java.sql.Types.TIMESTAMP:
                         stmt.setDate(1, new java.sql.Date(0));
                         break;
-                    default:
+                    case java.sql.Types.TINYINT:
+                    case java.sql.Types.BOOLEAN:
                         stmt.setInt(1, 0);
+                        break;
+                    default:
+                        stmt.setInt(1, -1);
                         break;
                     }
                     stmt.executeUpdate();
