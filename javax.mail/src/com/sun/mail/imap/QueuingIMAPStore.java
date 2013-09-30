@@ -148,7 +148,7 @@ public class QueuingIMAPStore extends IMAPStore {
         }
     }
 
-    /** Mapping for the login-permitting semaphores */
+    /** Mapping for the queues */
     private static final ConcurrentMap<URLName, CountingQueue<QueuedIMAPProtocol>> queues = new ConcurrentHashMap<URLName, CountingQueue<QueuedIMAPProtocol>>(16);
 
     private static CountingQueue<QueuedIMAPProtocol> initQueue(final URLName url, final int permits, final MailLogger logger) {
