@@ -177,6 +177,16 @@ public class HashCalculator {
      * Gets the calculated hash string for user-agent only.
      *
      * @param req The HTTP Servlet request
+     * @return The calculated hash string
+     */
+    public String getUserAgentHash(final HttpServletRequest req) {
+        return getUserAgentHash(req, null);
+    }
+
+    /**
+     * Gets the calculated hash string for user-agent only.
+     *
+     * @param req The HTTP Servlet request
      * @param userAgent The optional <code>User-Agent</code> identifier
      * @return The calculated hash string
      */

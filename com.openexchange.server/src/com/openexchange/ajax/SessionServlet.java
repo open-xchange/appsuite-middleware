@@ -238,11 +238,11 @@ public abstract class SessionServlet extends AJAXServlet {
         findPublicSessionId(req, session, sessiondService);
     }
 
-    private static final String PUBLIC_SESSION_NAME = LoginServlet.PUBLIC_SESSION_NAME;
+    private static final String PUBLIC_SESSION_PREFIX = LoginServlet.PUBLIC_SESSION_PREFIX;
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
 
     /**
-     * Looks-up <code>"open-xchange-public-session"</code> cookie and remember appropriate session if possible to validate it.
+     * Looks-up <code>"open-xchange-public-session"</code> cookie and remembers appropriate session if possible to validate it.
      *
      * @param req The HTTP request
      * @param session The looked-up session
@@ -252,7 +252,7 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies != null) {
-            final Cookie cookie = cookies.get(PUBLIC_SESSION_NAME);
+            final Cookie cookie = cookies.get(PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req));
             if (null != cookie) {
                 final String altId = cookie.getValue();
                 if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
@@ -785,7 +785,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (cookies == null) {
             return;
         }
-        final List<String> cookieNames = Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, LoginServlet.PUBLIC_SESSION_NAME);
+        final List<String> cookieNames = Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req));
         for (final String cookieName : cookieNames) {
             final Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {

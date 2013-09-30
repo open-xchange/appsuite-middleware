@@ -150,7 +150,7 @@ public final class Tokens implements LoginRequestHandler {
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        LoginServlet.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
+        LoginServlet.writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
         try {
             ResponseWriter.write(response, resp.getWriter(), locale);
         } catch (JSONException e) {

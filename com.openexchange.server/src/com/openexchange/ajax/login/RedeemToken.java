@@ -144,7 +144,7 @@ public class RedeemToken implements LoginRequestHandler {
             return;
         }
         // Write cookie accordingly
-        LoginServlet.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
+        LoginServlet.writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
         // Generate JSON response
         try {
             final JSONObject json = new JSONObject(12);

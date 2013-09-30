@@ -1,6 +1,7 @@
 * 2013-09-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 29071: Extended preview cache to also keep scaled images to have computation once, but not on every new client request
+ - Fix for bug 29032: Added client-specific hash to public session cookie
 
 * 2013-09-28 - thorben.betten@open-xchange.com
 
