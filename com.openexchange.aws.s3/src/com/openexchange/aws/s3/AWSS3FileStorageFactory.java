@@ -50,7 +50,12 @@
 package com.openexchange.aws.s3;
 
 import java.net.URI;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.internal.BucketNameUtils;
+import com.openexchange.aws.s3.exceptions.OXAWSS3ExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
@@ -62,21 +67,42 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  */
 public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
 
+    /**
+     * The URI scheme identifying S3 file storages.
+     */
+    private static final String S3_SCHEME = "s3";
+
+    /**
+     * The file storage's ranking compared to other sharing the same URL scheme.
+     */
+    private static final int RANKING = 5634;
+
+    private final ConcurrentMap<URI, AWSS3FileStorage> storages;
     private final AmazonS3 s3client;
-    private final AWSS3Configuration config;
 
     /**
      * Initializes a new {@link AWSS3FileStorageFactory}.
+     *
+     * @param s3client The S3 client to use
      */
-    public AWSS3FileStorageFactory(AmazonS3 s3client, AWSS3Configuration config) {
+    public AWSS3FileStorageFactory(AmazonS3 s3client) {
         super();
+        this.storages = new ConcurrentHashMap<URI, AWSS3FileStorage>();
         this.s3client = s3client;
-        this.config = config;
     }
 
     @Override
     public AWSS3FileStorage getFileStorage(URI uri) throws OXException {
-        return new AWSS3FileStorage(s3client, config, uri);
+        AWSS3FileStorage storage = storages.get(uri);
+        if (null == storage) {
+            String bucketName = initBucket(uri);
+            AWSS3FileStorage newStorage = new AWSS3FileStorage(s3client, bucketName);
+            storage = storages.putIfAbsent(uri, newStorage);
+            if (null == storage) {
+                storage = newStorage;
+            }
+        }
+        return storage;
     }
 
     @Override
@@ -86,12 +112,49 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
 
     @Override
     public boolean supports(URI uri) {
-        return "s3".equalsIgnoreCase(uri.getScheme());
+        return null != uri && S3_SCHEME.equalsIgnoreCase(uri.getScheme());
     }
 
     @Override
     public int getRanking() {
-        return Integer.MAX_VALUE;
+        return RANKING;
+    }
+
+    /**
+     * Extracts and validates the bucket name part from the configured file storage URI.
+     *
+     * @param uri The file storage URI
+     * @return The bucket name
+     * @throws IllegalArgumentException If the specified bucket name doesn't follow Amazon S3's guidelines
+     */
+    private static String extractBucketName(URI uri) throws IllegalArgumentException {
+        String path = uri.getPath();
+        while (0 < path.length() && '/' == path.charAt(0)) {
+            path = path.substring(1);
+        }
+        new BucketNameUtils().validateBucketName(path);
+        return path;
+    }
+
+    /**
+     * Initializes the bucket denoted by the supplied URI, creating the bucket dynamically if needed.
+     *
+     * @param uri The file storage URI
+     * @return The bucket name
+     * @throws OXException If initialization fails
+     */
+    private String initBucket(URI uri) throws OXException {
+        try {
+            String bucketName = extractBucketName(uri);
+            if (false == s3client.doesBucketExist(bucketName)) {
+                s3client.createBucket(bucketName);
+            }
+            return bucketName;
+        } catch (IllegalArgumentException e) {
+            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
+        } catch (AmazonClientException e) {
+            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

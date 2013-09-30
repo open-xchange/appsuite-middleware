@@ -51,7 +51,6 @@ package com.openexchange.aws.s3;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +60,6 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.internal.BucketNameUtils;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
@@ -95,33 +93,14 @@ public class AWSS3FileStorage implements FileStorage {
     /**
      * Initializes a new {@link AWSS3FileStorage}.
      *
+     * @param amazonS3 The underlying S3 client
+     * @param bucketName The bucket name to use
      * @throws OXException
      */
-    public AWSS3FileStorage(AmazonS3 amazonS3, AWSS3Configuration config, URI uri) throws OXException {
+    public AWSS3FileStorage(AmazonS3 amazonS3, String bucketName) throws OXException {
         super();
         this.amazonS3 = amazonS3;
-        this.bucketName = initBucket(uri);
-    }
-
-    /**
-     * Initializes the bucket denoted by the supplied URI, creating the bucket dynamically if needed.
-     *
-     * @param uri The file storage URI
-     * @return The bucket name
-     * @throws OXException If initialization fails
-     */
-    private String initBucket(URI uri) throws OXException {
-        try {
-            String bucketName = extractBucketName(uri);
-            if (false == amazonS3.doesBucketExist(bucketName)) {
-                amazonS3.createBucket(bucketName);
-            }
-            return bucketName;
-        } catch (IllegalArgumentException e) {
-            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
-        } catch (AmazonClientException e) {
-            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
-        }
+        this.bucketName = bucketName;
     }
 
     @Override
@@ -364,22 +343,6 @@ public class AWSS3FileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
         throw new UnsupportedOperationException("not implemented");
-    }
-
-    /**
-     * Extracts and validates the bucket name part from the configured file storage URI.
-     *
-     * @param uri The file storage URI
-     * @return The bucket name
-     * @throws IllegalArgumentException If the specified bucket name doesn't follow Amazon S3's guidelines
-     */
-    private static String extractBucketName(URI uri) throws IllegalArgumentException {
-        String path = uri.getPath();
-        while (0 < path.length() && '/' == path.charAt(0)) {
-            path = path.substring(1);
-        }
-        new BucketNameUtils().validateBucketName(path);
-        return path;
     }
 
     private static String newUid() {
