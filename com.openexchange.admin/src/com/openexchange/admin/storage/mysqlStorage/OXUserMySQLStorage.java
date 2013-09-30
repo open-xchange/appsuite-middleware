@@ -2610,32 +2610,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st.close();
             rs.close();
 
-            del_st = write_ox_con.prepareStatement("INSERT into del_user (id,cid,mailEnabled,contactId,uidNumber,gidNumber,mail,preferredLanguage,shadowLastChange,timeZone,passwordMech,homeDirectory,loginShell) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            del_st = write_ox_con.prepareStatement("INSERT into del_user (id,cid,contactId,uidNumber,gidNumber) VALUES (?,?,?,?,?)");
             del_st.setInt(1, user_id);
             del_st.setInt(2, ctx.getId());
-            del_st.setInt(3, 0);
             if (contactid != -1) {
-                del_st.setInt(4, contactid);
+                del_st.setInt(3, contactid);
+            } else {
+                del_st.setNull(3, Types.INTEGER);
+            }
+            if (uidnumber != -1) {
+                del_st.setInt(4, uidnumber);
             } else {
                 del_st.setNull(4, Types.INTEGER);
             }
-            if (uidnumber != -1) {
-                del_st.setInt(5, uidnumber);
+            if (gidnumber != -1) {
+                del_st.setInt(5, gidnumber);
             } else {
                 del_st.setNull(5, Types.INTEGER);
             }
-            if (gidnumber != -1) {
-                del_st.setInt(6, gidnumber);
-            } else {
-                del_st.setNull(6, Types.INTEGER);
-            }
-            del_st.setString(7, "");
-            del_st.setString(8, "");
-            del_st.setInt(9, 0);
-            del_st.setString(10, "");
-            del_st.setString(11, "");
-            del_st.setString(12, "");
-            del_st.setString(13, "");
             del_st.executeUpdate();
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);

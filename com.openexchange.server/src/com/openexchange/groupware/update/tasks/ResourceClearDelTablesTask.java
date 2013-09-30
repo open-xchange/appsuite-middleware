@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -58,9 +57,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -76,6 +73,8 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
     private static final String[] OBSOLETE_COLUMNS = new String[] { "identifier", "displayName", "mail", "available", "description" };
 
     private static final String TABLE = "del_resource";
+    
+    private static final String ALTER_TABLE = "ALTER TABLE del_resource MODIFY ";
 
     /**
      * Initializes a new {@link ResourceClearDelTablesTask}.
@@ -96,6 +95,21 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
+            stmt = con.prepareStatement(ALTER_TABLE + "identifier VARCHAR (128) NOT NULL DEFAULT ''");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "displayName VARCHAR (128) NOT NULL DEFAULT ''");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "mail VARCHAR (256) DEFAULT NULL");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "available BOOLEAN NOT NULL DEFAULT false");
+            stmt.execute();
+            stmt.close();
+            stmt = con.prepareStatement(ALTER_TABLE + "description TEXT DEFAULT NULL");
+            stmt.execute();
+            stmt.close();
             for (String column : OBSOLETE_COLUMNS) {
                 if (Tools.isNullable(con, TABLE, column)) {
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = NULL");
@@ -141,11 +155,6 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[0];
-    }
-    
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(BACKGROUND);
     }
 
 }
