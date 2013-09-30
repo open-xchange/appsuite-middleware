@@ -224,7 +224,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         final ServerSession session;
         {
-            final String sSession = req.getParameter("session");
+            final String sSession = req.getParameter(PARAMETER_SESSION);
             if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
                 session = getSession(req, sessionId, sessiondService);
