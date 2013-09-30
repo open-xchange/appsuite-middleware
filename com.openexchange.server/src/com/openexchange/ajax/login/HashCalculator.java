@@ -98,9 +98,11 @@ public class HashCalculator {
      * @param service The configuration service
      */
     public void configure(ConfigurationService service) {
-        final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
-        fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
-        salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890");
+        if (null != service) {
+            final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
+            fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
+            salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890");
+        }
     }
 
     /**
