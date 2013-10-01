@@ -121,44 +121,20 @@ public class AWSS3FileStorage implements FileStorage {
     @Override
     public String saveNewFile(InputStream file) throws OXException {
         /*
-         * initiate multipart
+         * upload in multipart chunks to provide the correct content length
          */
         String key = newUid();
         String uploadID = initiateMultipartUpload(key);
-        /*
-         * upload in chunks to provide the correct content length
-         */
-        boolean comleted = false;
-        DigestInputStream digestStream = null;
+        boolean completed = false;
         try {
-            List<PartETag> partETags = new ArrayList<PartETag>();
-            byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
-            int read;
-            int partNumber = 1;
-            digestStream = new DigestInputStream(file, MessageDigest.getInstance("MD5"));
-            while (-1 != (read = digestStream.read(buffer, 0, UPLOAD_BUFFER_SIZE))) {
-                byte[] digest = digestStream.getMessageDigest().digest();
-                ByteArrayInputStream bais = null;
-                try {
-                    bais = new ByteArrayInputStream(buffer, 0, read);
-                    UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
-                        .withInputStream(bais).withPartSize(read).withPartNumber(partNumber++).withMD5Digest(Base64.encode(digest));
-                    partETags.add(amazonS3.uploadPart(request).getPartETag());
-                } finally {
-                    Streams.close(bais);
-                }
-            }
+            List<PartETag> partETags = uploadMultiparted(file, key, uploadID);
             amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, key, uploadID, partETags));
-            comleted = true;
+            completed = true;
             return key;
-        } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (AmazonClientException e) {
             throw wrap(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
-            if (false == comleted) {
+            if (false == completed) {
                 try {
                     amazonS3.abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, key, uploadID));
                 } catch (AmazonClientException e) {
@@ -270,10 +246,49 @@ public class AWSS3FileStorage implements FileStorage {
          * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
          * http://ceph.com/docs/next/radosgw/s3/#features-support
          */
-
-
-        // http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadUploadPartCopy.html
-        throw new UnsupportedOperationException("not implemented");
+        /*
+         * prepare temporary file for append operation
+         */
+        String tempKey = newUid();
+        String uploadID = initiateMultipartUpload(name);
+        boolean completed = false;
+        try {
+            /*
+             * upload existing data as first part
+             */
+            List<PartETag> partETags = new ArrayList<PartETag>();
+            InputStream inputStream = null;
+            try {
+                inputStream = getFile(name);
+                UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(tempKey).withUploadId(uploadID)
+                    .withInputStream(inputStream).withPartSize(offset).withPartNumber(1);
+                partETags.add(amazonS3.uploadPart(request).getPartETag());
+            } finally {
+                Streams.close(inputStream);
+            }
+            /*
+             * append new data to multipart
+             */
+            partETags.addAll(uploadMultiparted(file, tempKey, uploadID, 2));
+            amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, tempKey, uploadID, partETags));
+            completed = true;
+            /*
+             * replace old file, cleanup
+             */
+            amazonS3.copyObject(bucketName, tempKey, bucketName, name);
+            amazonS3.deleteObject(bucketName, tempKey);
+            return getMetadata(name).getContentLength();
+        } catch (AmazonClientException e) {
+            throw wrap(e);
+        } finally {
+            if (false == completed) {
+                try {
+                    amazonS3.abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, tempKey, uploadID));
+                } catch (AmazonClientException e) {
+                    LOG.warn("Error aborting multipart upload", e);
+                }
+            }
+        }
     }
 
     @Override
@@ -354,6 +369,38 @@ public class AWSS3FileStorage implements FileStorage {
             throw wrap(e);
         } catch (AmazonClientException e) {
             throw wrap(e);
+        }
+    }
+
+    private List<PartETag> uploadMultiparted(InputStream inputStream, String key, String uploadID) throws OXException, AmazonClientException {
+        return uploadMultiparted(inputStream, key, uploadID, 1);
+    }
+
+    private List<PartETag> uploadMultiparted(InputStream inputStream, String key, String uploadID, int currentPartNumber) throws OXException, AmazonClientException {
+        DigestInputStream digestStream = null;
+        try {
+            List<PartETag> partETags = new ArrayList<PartETag>();
+            byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
+            int read;
+            int partNumber = currentPartNumber;
+            digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
+            while (-1 != (read = digestStream.read(buffer, 0, UPLOAD_BUFFER_SIZE))) {
+                byte[] digest = digestStream.getMessageDigest().digest();
+                ByteArrayInputStream bais = null;
+                try {
+                    bais = new ByteArrayInputStream(buffer, 0, read);
+                    UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
+                        .withInputStream(bais).withPartSize(read).withPartNumber(partNumber++).withMD5Digest(Base64.encode(digest));
+                    partETags.add(amazonS3.uploadPart(request).getPartETag());
+                } finally {
+                    Streams.close(bais);
+                }
+            }
+            return partETags;
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }
 
