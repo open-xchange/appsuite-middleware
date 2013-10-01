@@ -314,15 +314,22 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
     @Override
     public FileStorageFolder[] getRootFolders(final Locale locale) throws OXException {
         final List<AccessWrapper> accessWrappers = getAllAccountAccesses();
-        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
+        final List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
         // Sort according to account name
         Collections.sort(accessWrappers, new AccessWrapperComparator(locale == null ? Locale.US : locale));
-        for (AccessWrapper accessWrapper : accessWrappers) {
-            FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
-            FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-            FileStorageFolder rootFolder = folderAccess.getRootFolder();
-            if (null != rootFolder) {
-                folders.add(IDManglingFolder.withUniqueID(rootFolder, accountAccess.getService().getId(), accountAccess.getAccountId()));
+        for (final AccessWrapper accessWrapper : accessWrappers) {
+            final FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
+            final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
+            try {
+                final FileStorageFolder rootFolder = folderAccess.getRootFolder();
+                if (null != rootFolder) {
+                    folders.add(IDManglingFolder.withUniqueID(rootFolder, accountAccess.getService().getId(), accountAccess.getAccountId()));
+                }
+            } catch (final OXException e) {
+                // Check for com.openexchange.folderstorage.FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE -- 'FLD-0003'
+                if (3 != e.getCode() || !"FLD".equals(e.getPrefix())) {
+                    throw e;
+                }
             }
         }
         return folders.toArray(new FileStorageFolder[folders.size()]);
