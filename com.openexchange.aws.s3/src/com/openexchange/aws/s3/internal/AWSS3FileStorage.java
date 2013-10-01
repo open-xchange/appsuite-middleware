@@ -56,7 +56,6 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -68,7 +67,6 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
-import com.amazonaws.services.s3.model.CopyPartRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.DeleteObjectsResult;
@@ -197,21 +195,13 @@ public class AWSS3FileStorage implements FileStorage {
 
     @Override
     public long getFileSize(final String name) throws OXException {
-        try {
-            return amazonS3.getObjectMetadata(bucketName, name).getContentLength();
-        } catch (AmazonClientException e) {
-            throw wrap(e);
-        }
+        return getMetadata(name).getContentLength();
     }
 
     @Override
     public String getMimeType(String name) throws OXException {
         //TODO: makes no sense at storage layer
-        try {
-            return amazonS3.getObjectMetadata(bucketName, name).getContentType();
-        } catch (AmazonClientException e) {
-            throw wrap(e);
-        }
+        return getMetadata(name).getContentType();
     }
 
     @Override
@@ -276,6 +266,12 @@ public class AWSS3FileStorage implements FileStorage {
 
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
+        /*
+         * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
+         * http://ceph.com/docs/next/radosgw/s3/#features-support
+         */
+
+
         // http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadUploadPartCopy.html
         throw new UnsupportedOperationException("not implemented");
     }
@@ -283,30 +279,36 @@ public class AWSS3FileStorage implements FileStorage {
     @Override
     public void setFileLength(long length, String name) throws OXException {
         /*
-         * TODO: not supported by ceph (fails with "NoSuchKey")
-         * http://ceph.com/docs/next/radosgw/s3/#features-support
+         * TODO: This would be much more efficient using the "CopyPartRequest", which is not yet supported by ceph
+         * see: http://ceph.com/docs/next/radosgw/s3/#features-support
          */
-
         /*
-         * 'rename' previous file to temporary file name
+         * copy previous file to temporary file
          */
         String tempKey = newUid();
-        amazonS3.copyObject(bucketName, name, bucketName, tempKey);
-        amazonS3.deleteObject(bucketName, name);
-        /*
-         * copy $length bytes from previous file to new current file via multipart 'upload'
-         */
-        String uploadID = initiateMultipartUpload(name);
-        CopyPartRequest request = new CopyPartRequest()
-            .withSourceBucketName(bucketName).withSourceKey(tempKey)
-            .withDestinationBucketName(bucketName).withDestinationKey(name)
-            .withFirstByte(0L).withLastByte(length).withUploadId(uploadID).withPartNumber(1);
-        PartETag eTag = amazonS3.copyPart(request).getPartETag();
-        amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, name, uploadID, Collections.singletonList(eTag)));
-        /*
-         * delete previous file
-         */
-        deleteFile(tempKey);
+        try {
+            amazonS3.copyObject(bucketName, name, bucketName, tempKey);
+            /*
+             * upload $length bytes from previous file to new current file
+             */
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(length);
+            InputStream inputStream = null;
+            try {
+                inputStream = getFile(tempKey, 0, length);
+                amazonS3.putObject(bucketName, name, inputStream, metadata);
+            } finally {
+                Streams.close(inputStream);
+            }
+        } catch (AmazonClientException e) {
+            throw wrap(e);
+        } finally {
+            try {
+                amazonS3.deleteObject(bucketName, tempKey);
+            } catch (AmazonClientException e) {
+                LOG.warn("Error cleaning up temporary file", e);
+            }
+        }
     }
 
     @Override
