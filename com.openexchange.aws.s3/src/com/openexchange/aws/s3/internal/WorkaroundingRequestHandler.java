@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,46 @@
  *
  */
 
-package com.openexchange.aws.s3;
+package com.openexchange.aws.s3.internal;
+
+import com.amazonaws.Request;
+import com.amazonaws.handlers.RequestHandler;
+import com.amazonaws.services.s3.Headers;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
+import com.amazonaws.util.TimingInfo;
 
 /**
- * {@link AWSS3Configuration}
+ * {@link WorkaroundingRequestHandler}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AWSS3Configuration {
-
-    private final String defaultBucket;
-
-    private final boolean versioningEnabled;
+public class WorkaroundingRequestHandler implements RequestHandler {
 
     /**
-     * Initializes a new {@link AWSS3Configuration}.
+     * Initializes a new {@link WorkaroundingRequestHandler}.
      */
-    public AWSS3Configuration(String defaultBucket, boolean versioningEnabled) {
+    public WorkaroundingRequestHandler() {
         super();
-        this.defaultBucket = defaultBucket;
-        this.versioningEnabled = versioningEnabled;
     }
 
-    public String getDefaultBucket() {
-        return defaultBucket;
+    @Override
+    public void beforeRequest(Request<?> request) {
+        if (InitiateMultipartUploadRequest.class.isInstance(request.getOriginalRequest())) {
+            /*
+             * re-add "Content-Length" header to satisfy internal chekcs in ceph rados ateway
+             */
+            request.addHeader(Headers.CONTENT_LENGTH, String.valueOf(0));
+        }
     }
 
-    public boolean isVersioningEnabled() {
-        return versioningEnabled;
+    @Override
+    public void afterResponse(Request<?> request, Object response, TimingInfo timingInfo) {
+        // no
+    }
+
+    @Override
+    public void afterError(Request<?> request, Exception e) {
+        // no
     }
 
 }

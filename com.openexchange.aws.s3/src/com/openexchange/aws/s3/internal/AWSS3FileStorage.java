@@ -47,11 +47,16 @@
  *
  */
 
-package com.openexchange.aws.s3;
+package com.openexchange.aws.s3.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -59,25 +64,30 @@ import java.util.TreeSet;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
+import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
+import com.amazonaws.services.s3.model.CopyPartRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.DeleteObjectsResult.DeletedObject;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.ProgressEvent;
-import com.amazonaws.services.s3.model.ProgressListener;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.openexchange.aws.s3.exceptions.OXAWSS3ExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
+import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
  * {@link AWSS3FileStorage}
@@ -87,7 +97,13 @@ import com.openexchange.tools.file.external.FileStorage;
 public class AWSS3FileStorage implements FileStorage {
 
     private static final Log LOG = LogFactory.getLog(AWSS3FileStorage.class);
-    private final AmazonS3 amazonS3;
+
+    /**
+     * The size of the in-memory buffer for uploads to use.
+     */
+    private static final int UPLOAD_BUFFER_SIZE = 1024 * 1024 * 2; // 2 MiB
+
+    private final AmazonS3Client amazonS3;
     private final String bucketName;
 
     /**
@@ -97,89 +113,70 @@ public class AWSS3FileStorage implements FileStorage {
      * @param bucketName The bucket name to use
      * @throws OXException
      */
-    public AWSS3FileStorage(AmazonS3 amazonS3, String bucketName) throws OXException {
+    public AWSS3FileStorage(AmazonS3Client amazonS3, String bucketName) throws OXException {
         super();
         this.amazonS3 = amazonS3;
         this.bucketName = bucketName;
+        this.amazonS3.addRequestHandler(new WorkaroundingRequestHandler());
     }
 
     @Override
-    @SuppressWarnings("synthetic-access")
     public String saveNewFile(InputStream file) throws OXException {
-        String retval = null;
+        /*
+         * initiate multipart
+         */
+        String key = newUid();
+        String uploadID = initiateMultipartUpload(key);
+        /*
+         * upload in chunks to provide the correct content length
+         */
+        boolean comleted = false;
+        DigestInputStream digestStream = null;
         try {
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(file.available());
-            final PutObjectRequest putRequest = new PutObjectRequest(
-                bucketName,
-                newUid(),
-                file,
-                metadata);
-            putRequest.setProgressListener(new ProgressListener() {
-
-                @Override
-                public void progressChanged(ProgressEvent progressEvent) {
-                    if (progressEvent.getEventCode() == ProgressEvent.FAILED_EVENT_CODE) {
-                        LOG.warn("Transfer failed");
-                    }
-                    if (progressEvent.getEventCode() == ProgressEvent.CANCELED_EVENT_CODE) {
-                        LOG.info("Transfer cancelled by user");
-                    }
-                    if (progressEvent.getEventCode() == ProgressEvent.COMPLETED_EVENT_CODE) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Request saveNewFile on object " + putRequest.getKey() + " completed");
-                        }
-                    }
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(progressEvent.getBytesTransfered() + " Bytes transferred");
-                    }
+            List<PartETag> partETags = new ArrayList<PartETag>();
+            byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
+            int read;
+            int partNumber = 1;
+            digestStream = new DigestInputStream(file, MessageDigest.getInstance("MD5"));
+            while (-1 != (read = digestStream.read(buffer, 0, UPLOAD_BUFFER_SIZE))) {
+                byte[] digest = digestStream.getMessageDigest().digest();
+                ByteArrayInputStream bais = null;
+                try {
+                    bais = new ByteArrayInputStream(buffer, 0, read);
+                    UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
+                        .withInputStream(bais).withPartSize(read).withPartNumber(partNumber++).withMD5Digest(Base64.encode(digest));
+                    partETags.add(amazonS3.uploadPart(request).getPartETag());
+                } finally {
+                    Streams.close(bais);
                 }
-            });
-            amazonS3.putObject(putRequest);
-            retval = putRequest.getKey();
+            }
+            amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, key, uploadID, partETags));
+            comleted = true;
+            return key;
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_IOERROR.create();
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_SAVE_FAILED.create(e.getMessage());
+            throw wrap(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } finally {
+            if (false == comleted) {
+                try {
+                    amazonS3.abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, key, uploadID));
+                } catch (AmazonClientException e) {
+                    LOG.warn("Error aborting multipart upload", e);
+                }
+            }
         }
-        return retval;
     }
 
     @Override
-    @SuppressWarnings("synthetic-access")
     public InputStream getFile(String name) throws OXException {
-        InputStream retval = null;
         try {
-            final GetObjectRequest getRequest = new GetObjectRequest(bucketName, name);
-            getRequest.setProgressListener(new ProgressListener() {
-
-                @Override
-                public void progressChanged(ProgressEvent progressEvent) {
-                    if (progressEvent.getEventCode() == ProgressEvent.FAILED_EVENT_CODE) {
-                        LOG.warn("Transfer failed");
-                    }
-                    if (progressEvent.getEventCode() == ProgressEvent.CANCELED_EVENT_CODE) {
-                        LOG.info("Transfer cancelled by user");
-                    }
-                    if (progressEvent.getEventCode() == ProgressEvent.COMPLETED_EVENT_CODE) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Request getFile on object " + getRequest.getKey() + " completed");
-                        }
-                    }
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(progressEvent.getBytesTransfered() + " Bytes transferred");
-                    }
-                }
-            });
-            S3Object object = amazonS3.getObject(getRequest);
-            retval = object.getObjectContent();
+            return amazonS3.getObject(bucketName, name).getObjectContent();
         } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_GET_FILE_FAILED.create(name, e.getMessage());
+            throw wrap(e);
         }
-        return retval;
     }
 
     @Override
@@ -199,84 +196,31 @@ public class AWSS3FileStorage implements FileStorage {
     }
 
     @Override
-    @SuppressWarnings("synthetic-access")
     public long getFileSize(final String name) throws OXException {
-        long retval = 0;
         try {
-            final GetObjectRequest getRequest = new GetObjectRequest(bucketName, name);
-            getRequest.setProgressListener(new ProgressListener() {
-
-                @Override
-                public void progressChanged(ProgressEvent progressEvent) {
-                    if (progressEvent.getEventCode() == ProgressEvent.FAILED_EVENT_CODE) {
-                        LOG.warn("Transfer failed");
-                    }
-                    if (progressEvent.getEventCode() == ProgressEvent.CANCELED_EVENT_CODE) {
-                        LOG.info("Transfer cancelled by user");
-                    }
-                    if (progressEvent.getEventCode() == ProgressEvent.COMPLETED_EVENT_CODE) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Request getFileSize on object " + getRequest.getKey() + " completed");
-                        }
-                    }
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(progressEvent.getBytesTransfered() + " Bytes transferred");
-                    }
-                }
-            });
-            S3Object object = amazonS3.getObject(getRequest);
-            retval = object.getObjectMetadata().getContentLength();
+            return amazonS3.getObjectMetadata(bucketName, name).getContentLength();
         } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_GET_FILESIZE_FAILED.create(name, e.getMessage());
+            throw wrap(e);
         }
-        return retval;
     }
 
     @Override
-    @SuppressWarnings("synthetic-access")
     public String getMimeType(String name) throws OXException {
-        String retval = null;
+        //TODO: makes no sense at storage layer
         try {
-            final GetObjectRequest getRequest = new GetObjectRequest(bucketName, name);
-            getRequest.setProgressListener(new ProgressListener() {
-
-                @Override
-                public void progressChanged(ProgressEvent progressEvent) {
-                    if (progressEvent.getEventCode() == ProgressEvent.FAILED_EVENT_CODE) {
-                        LOG.warn("Transfer failed");
-                    }
-                    if (progressEvent.getEventCode() == ProgressEvent.CANCELED_EVENT_CODE) {
-                        LOG.info("Transfer cancelled by user");
-                    }
-                    if (progressEvent.getEventCode() == ProgressEvent.COMPLETED_EVENT_CODE) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Request getMimeType on object " + getRequest.getKey() + " completed");
-                        }
-                    }
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(progressEvent.getBytesTransfered() + " Bytes transferred");
-                    }
-                }
-            });
-            S3Object object = amazonS3.getObject(getRequest);
-            retval = object.getObjectMetadata().getContentType();
+            return amazonS3.getObjectMetadata(bucketName, name).getContentType();
         } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_GET_MIMETYPE_FAILED.create(name, e.getMessage());
+            throw wrap(e);
         }
-        return retval;
     }
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
         try {
-            DeleteObjectRequest deleteRequest = new DeleteObjectRequest(bucketName, identifier);
-            amazonS3.deleteObject(deleteRequest);
+            amazonS3.deleteObject(bucketName, identifier);
             return true;
         } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_DELETE_FILE_FAILED.create(identifier, e.getMessage());
+            throw wrap(e);
         }
     }
 
@@ -332,17 +276,92 @@ public class AWSS3FileStorage implements FileStorage {
 
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
+        // http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadUploadPartCopy.html
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void setFileLength(long length, String name) throws OXException {
-        throw new UnsupportedOperationException("not implemented");
+        /*
+         * TODO: not supported by ceph (fails with "NoSuchKey")
+         * http://ceph.com/docs/next/radosgw/s3/#features-support
+         */
+
+        /*
+         * 'rename' previous file to temporary file name
+         */
+        String tempKey = newUid();
+        amazonS3.copyObject(bucketName, name, bucketName, tempKey);
+        amazonS3.deleteObject(bucketName, name);
+        /*
+         * copy $length bytes from previous file to new current file via multipart 'upload'
+         */
+        String uploadID = initiateMultipartUpload(name);
+        CopyPartRequest request = new CopyPartRequest()
+            .withSourceBucketName(bucketName).withSourceKey(tempKey)
+            .withDestinationBucketName(bucketName).withDestinationKey(name)
+            .withFirstByte(0L).withLastByte(length).withUploadId(uploadID).withPartNumber(1);
+        PartETag eTag = amazonS3.copyPart(request).getPartETag();
+        amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, name, uploadID, Collections.singletonList(eTag)));
+        /*
+         * delete previous file
+         */
+        deleteFile(tempKey);
     }
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
-        throw new UnsupportedOperationException("not implemented");
+        GetObjectRequest request = new GetObjectRequest(bucketName, name);
+        request.setRange(offset, offset + length);
+        try {
+            return amazonS3.getObject(request).getObjectContent();
+        } catch (AmazonClientException e) {
+            throw wrap(e);
+        }
+    }
+
+    /**
+     * Initiates a new multipart upload for a file with the supplied key.
+     *
+     * @param key The key for the new file
+     * @return The upload ID for the multipart upload
+     * @throws OXException
+     */
+    private String initiateMultipartUpload(String key) throws OXException {
+        try {
+            return amazonS3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, key)).getUploadId();
+        } catch (AmazonClientException e) {
+            throw wrap(e);
+        }
+    }
+
+    /**
+     * Gets metadata for an existing file.
+     *
+     * @param key The key of the file
+     * @return The metadata
+     * @throws OXException
+     */
+    private ObjectMetadata getMetadata(String key) throws OXException {
+        try {
+            return amazonS3.getObjectMetadata(bucketName, key);
+        } catch (AmazonServiceException e) {
+            if ("NoSuchKey".equals(e.getErrorCode())) {
+                throw FileStorageCodes.FILE_NOT_FOUND.create(e, key);
+            }
+            throw wrap(e);
+        } catch (AmazonClientException e) {
+            throw wrap(e);
+        }
+    }
+
+    private static OXException wrap(AmazonClientException e) {
+        //TODO
+        if (AmazonServiceException.class.isInstance(e)) {
+            AmazonServiceException ase = (AmazonServiceException)e;
+
+        }
+        return FileStorageCodes.IOERROR.create(e, e.getMessage());
     }
 
     private static String newUid() {

@@ -6,11 +6,17 @@ Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.amazonaws,
+ com.amazonaws.auth,
  com.amazonaws.event,
+ com.amazonaws.handlers,
+ com.amazonaws.http,
+ com.amazonaws.regions,
  com.amazonaws.services.s3,
  com.amazonaws.services.s3.internal,
  com.amazonaws.services.s3.model,
+ com.amazonaws.services.s3.model.transform,
  com.amazonaws.services.s3.transfer,
+ com.amazonaws.util,
  com.openexchange.cache.dynamic,
  com.openexchange.config,
  com.openexchange.exception,
@@ -20,8 +26,8 @@ Import-Package: com.amazonaws,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.tools.encoding,
  com.openexchange.tools.file.external,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-Activator: com.openexchange.aws.s3.osgi.AWSS3Activator
-Export-Package: com.openexchange.aws.s3
