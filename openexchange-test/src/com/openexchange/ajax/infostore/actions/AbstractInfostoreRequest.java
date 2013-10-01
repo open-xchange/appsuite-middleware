@@ -63,6 +63,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -92,13 +93,20 @@ public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> i
     }
 
     public String writeJSON(DocumentMetadata data) throws JSONException {
-        return convertToJSON(data);
+        return convertToJSON(data, null);
     }
 
-    public static String convertToJSON(DocumentMetadata data) throws JSONException{
+    public String writeJSON(DocumentMetadata data,Metadata[] fields) throws JSONException {
+        return convertToJSON(data,fields);
+    }
+
+    public static String convertToJSON(DocumentMetadata data, Metadata[] fields) throws JSONException{
+        if (fields == null) {
+            fields = Metadata.HTTPAPI_VALUES_ARRAY;
+        }
         StringWriter results = new StringWriter();
         InfostoreWriter writer = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
-        writer.write(data, TimeZone.getDefault());
+        writer.writeLimited(data, fields, TimeZone.getDefault());
         return results.getBuffer().toString();
     }
 

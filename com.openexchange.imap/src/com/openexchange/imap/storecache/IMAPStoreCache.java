@@ -169,16 +169,16 @@ public final class IMAPStoreCache {
      * -------------------------------------- Member stuff --------------------------------------
      */
 
+    private static enum Container {
+        UNBOUNDED, BOUNDARY_AWARE, NON_CACHING;
+    }
+
+    private final Container containerType;
     private final Protocol protocol;
-
     private final ConcurrentMap<Key, IMAPStoreContainer> map;
-
     private final ConcurrentMap<User, Queue<Key>> keys;
-
     private final boolean checkConnected;
-
     private volatile ScheduledTimerTask timerTask;
-
     private final RefusedExecutionBehavior<Object> behavior;
 
     /**
@@ -186,6 +186,7 @@ public final class IMAPStoreCache {
      */
     private IMAPStoreCache(final boolean checkConnected) {
         super();
+        containerType = Container.NON_CACHING;
         behavior = CallerRunsBehavior.getInstance();
         this.checkConnected = checkConnected;
         protocol = IMAPProvider.PROTOCOL_IMAP;
@@ -267,7 +268,7 @@ public final class IMAPStoreCache {
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final IMAPStoreContainer newContainer = new BoundaryAwareIMAPStoreContainer(server, port, login, pw);
+            final IMAPStoreContainer newContainer = newContainer(server, port, login, pw);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -285,6 +286,19 @@ public final class IMAPStoreCache {
             }
         }
         return container;
+    }
+
+    private IMAPStoreContainer newContainer(final String server, final int port, final String login, final String pw) {
+        switch (containerType) {
+        case UNBOUNDED:
+            return new UnboundedIMAPStoreContainer(server, port, login, pw);
+        case BOUNDARY_AWARE:
+            return new BoundaryAwareIMAPStoreContainer(server, port, login, pw);
+        case NON_CACHING:
+            return new NonCachingIMAPStoreContainer(server, port, login, pw);
+        default:
+            return new BoundaryAwareIMAPStoreContainer(server, port, login, pw);
+        }
     }
 
     /**

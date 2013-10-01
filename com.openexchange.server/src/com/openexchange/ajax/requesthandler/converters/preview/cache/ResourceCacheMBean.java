@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,23 @@
  *
  */
 
-package com.openexchange.aws.s3;
+package com.openexchange.ajax.requesthandler.converters.preview.cache;
+
+import javax.management.MBeanException;
+
 
 /**
- * {@link AWSS3Configuration}
+ * {@link ResourceCacheMBean} - The Mbean for resource cache.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AWSS3Configuration {
-
-    private final String defaultBucket;
-
-    private final boolean versioningEnabled;
+public interface ResourceCacheMBean {
 
     /**
-     * Initializes a new {@link AWSS3Configuration}.
+     * Clears all cache entries for given context.
+     *
+     * @param contextId The context identifier
+     * @throws MBeanException If operation fails
      */
-    public AWSS3Configuration(String defaultBucket, boolean versioningEnabled) {
-        super();
-        this.defaultBucket = defaultBucket;
-        this.versioningEnabled = versioningEnabled;
-    }
-
-    public String getDefaultBucket() {
-        return defaultBucket;
-    }
-
-    public boolean isVersioningEnabled() {
-        return versioningEnabled;
-    }
-
+    void clearFor(int contextId) throws MBeanException;
 }

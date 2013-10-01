@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache;
+package com.openexchange.ajax.infostore.actions;
 
-import javax.management.MBeanException;
+import java.util.Date;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest;
+import com.openexchange.groupware.search.Order;
 
 
 /**
- * {@link PreviewCacheMBean} - The Mbean for preview cache.
+ * {@link UpdatesInfostoreRequest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface PreviewCacheMBean {
+public class UpdatesInfostoreRequest extends AbstractUpdatesRequest<UpdatesInfostoreResponse> {
 
-    /**
-     * Clears all cache entries for given context.
-     *
-     * @param contextId The context identifier
-     * @throws MBeanException If operation fails
-     */
-    void clearFor(int contextId) throws MBeanException;
+    public UpdatesInfostoreRequest(int folderId, int[] columns, int sort, Order order) {
+        this(folderId, columns, sort, order, Ignore.NONE, new Date(), true);
+    }
+
+    public UpdatesInfostoreRequest(int folderId, int[] columns, int sort, Order order, Ignore ignore) {
+        this(folderId, columns, sort, order, ignore, new Date(), true);
+    }
+
+    public UpdatesInfostoreRequest(int folderId, int[] columns, int sort, Order order, Ignore ignore, boolean failOnError) {
+        this(folderId, columns, sort, order, ignore, new Date(), failOnError);
+    }
+
+    public UpdatesInfostoreRequest(int folderId, int[] columns, int sort, Order order, Ignore ignore, Date lastModified, boolean failOnError) {
+        super("/ajax/infostore", folderId, columns, sort, order, lastModified, ignore, failOnError);
+    }
+
+    @Override
+    public UpdatesInfostoreParser getParser() {
+        return new UpdatesInfostoreParser(isFailOnError(), getColumns());
+    }
+
 }

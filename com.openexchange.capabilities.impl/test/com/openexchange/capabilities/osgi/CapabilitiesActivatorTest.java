@@ -49,6 +49,10 @@
 
 package com.openexchange.capabilities.osgi;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
@@ -56,8 +60,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import org.powermock.api.mockito.PowerMockito;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.ServiceProvider;
 import com.openexchange.osgi.SimpleServiceProvider;
@@ -123,6 +130,11 @@ public class CapabilitiesActivatorTest {
 
     @Test
     public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
+        final List<ServiceTracker<?, ?>> serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
+        ServiceTracker<?, ?> serviceTracker = PowerMockito.mock(ServiceTracker.class);
+        serviceTrackers.add(serviceTracker);
+        MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.SERVICE_TRACKERS, serviceTrackers);
+
         this.capabilitiesActivator.stopBundle();
 
         ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.capabilitiesActivator);
@@ -130,6 +142,11 @@ public class CapabilitiesActivatorTest {
 
     @Test
     public void testStopBundle_EverythingFine_AllServicesClosed() throws Exception {
+        final Map<Object, ServiceRegistration<?>> serviceRegistrations = new LinkedHashMap<Object, ServiceRegistration<?>>(6);
+        ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
+        serviceRegistrations.put(CapabilityService.class, serviceRegistration);
+        MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.SERVICE_REGISTRATIONS, serviceRegistrations);
+
         this.capabilitiesActivator.stopBundle();
 
         ServiceMockActivatorAsserter.verifyAllServicesUnregistered(this.capabilitiesActivator);

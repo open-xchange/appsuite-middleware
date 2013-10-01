@@ -89,7 +89,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link AutoLogin}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AutoLogin extends AbstractLoginRequestHandler {
@@ -100,7 +100,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
 
     /**
      * Initializes a new {@link AutoLogin}.
-     * 
+     *
      */
     public AutoLogin(LoginConfiguration conf) {
         this.conf = conf;
@@ -222,7 +222,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             /*-
              * Ensure appropriate public-session-cookie is set
              */
-            writePublicSessionCookie(resp, session, req.isSecure(), req.getServerName(), conf);
+            writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), conf);
 
         } catch (final OXException e) {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {

@@ -49,6 +49,10 @@
 
 package com.openexchange.tokenlogin.impl.osgi;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -59,7 +63,9 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
+import org.osgi.util.tracker.ServiceTracker;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -70,6 +76,7 @@ import com.openexchange.osgi.SimpleServiceProvider;
 import com.openexchange.test.mock.InjectionFieldConstants;
 import com.openexchange.test.mock.MockUtils;
 import com.openexchange.test.mock.assertion.ServiceMockActivatorAsserter;
+import com.openexchange.tokenlogin.TokenLoginService;
 import com.openexchange.tokenlogin.impl.Services;
 
 /**
@@ -194,6 +201,23 @@ public class TokenLoginActivatorTest {
 
     @Test
     public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
+        final List<ServiceTracker<?, ?>> serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
+        ServiceTracker<?, ?> serviceTracker = PowerMockito.mock(ServiceTracker.class);
+        serviceTrackers.add(serviceTracker);
+        MockUtils.injectValueIntoPrivateField(this.tokenLoginActivator, InjectionFieldConstants.SERVICE_TRACKERS, serviceTrackers);
+
+        this.tokenLoginActivator.stopBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.tokenLoginActivator);
+    }
+
+    @Test
+    public void testStopBundle_EverythingFine_AllServicesUnregistered() throws Exception {
+        final Map<Object, ServiceRegistration<?>> serviceRegistrations = new LinkedHashMap<Object, ServiceRegistration<?>>(6);
+        ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
+        serviceRegistrations.put(TokenLoginService.class, serviceRegistration);
+        MockUtils.injectValueIntoPrivateField(this.tokenLoginActivator, InjectionFieldConstants.SERVICE_REGISTRATIONS, serviceRegistrations);
+
         this.tokenLoginActivator.stopBundle();
 
         ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.tokenLoginActivator);

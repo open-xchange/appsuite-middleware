@@ -147,7 +147,7 @@ public class JavaIMAPStore extends IMAPStore {
     /*-
      * 
     @Override
-    protected IMAPProtocol newIMAPProtocol(String host, int port) throws IOException, ProtocolException {
+    protected IMAPProtocol newIMAPProtocol(String host, int port, String user, String password) throws IOException, ProtocolException {
         return new JavaIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger);
     }
     */

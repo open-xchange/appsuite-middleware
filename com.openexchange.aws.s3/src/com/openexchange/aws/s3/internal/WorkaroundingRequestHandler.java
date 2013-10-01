@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache;
+package com.openexchange.aws.s3.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
-import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import org.apache.commons.logging.Log;
-import com.openexchange.preview.cache.PreviewCache;
-
+import com.amazonaws.Request;
+import com.amazonaws.handlers.RequestHandler;
+import com.amazonaws.services.s3.Headers;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
+import com.amazonaws.util.TimingInfo;
 
 /**
- * {@link PreviewCacheMBeanImpl}
+ * {@link WorkaroundingRequestHandler}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class PreviewCacheMBeanImpl extends StandardMBean implements PreviewCacheMBean {
-
-    /** The cache reference */
-    public static final AtomicReference<PreviewCache> CACHE_REF = new AtomicReference<PreviewCache>();
+public class WorkaroundingRequestHandler implements RequestHandler {
 
     /**
-     * Initializes a new {@link PreviewCacheMBeanImpl}.
-     *
-     * @throws NotCompliantMBeanException
+     * Initializes a new {@link WorkaroundingRequestHandler}.
      */
-    public PreviewCacheMBeanImpl() throws NotCompliantMBeanException {
-        super(PreviewCacheMBean.class);
+    public WorkaroundingRequestHandler() {
+        super();
     }
 
     @Override
-    public void clearFor(final int contextId) throws MBeanException {
-        final PreviewCache previewCache = CACHE_REF.get();
-        if (null != previewCache) {
-            try {
-                previewCache.clearFor(contextId);
-            } catch (final Exception e) {
-                final Log log = com.openexchange.log.Log.loggerFor(PreviewCacheMBeanImpl.class);
-                log.error(e.getMessage(), e);
-                throw new MBeanException(new Exception(e.getMessage()));
-            }
+    public void beforeRequest(Request<?> request) {
+        if (InitiateMultipartUploadRequest.class.isInstance(request.getOriginalRequest())) {
+            /*
+             * re-add "Content-Length" header to satisfy internal checks in ceph rados gateway
+             * see: http://tracker.ceph.com/issues/6449
+             */
+            request.addHeader(Headers.CONTENT_LENGTH, String.valueOf(0));
         }
+    }
+
+    @Override
+    public void afterResponse(Request<?> request, Object response, TimingInfo timingInfo) {
+        // no
+    }
+
+    @Override
+    public void afterError(Request<?> request, Exception e) {
+        // no
     }
 
 }

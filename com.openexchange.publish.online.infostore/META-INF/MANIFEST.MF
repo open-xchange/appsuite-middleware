@@ -38,6 +38,8 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.userconf,
  javax.servlet,
  javax.servlet.http,
+ org.apache.commons.lang,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.service.http
+ org.osgi.service.http,
+ org.osgi.util.tracker

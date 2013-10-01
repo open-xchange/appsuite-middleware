@@ -58,6 +58,7 @@ import com.openexchange.file.storage.infostore.folder.FolderParser;
 import com.openexchange.file.storage.infostore.folder.FolderWriter;
 import com.openexchange.file.storage.infostore.folder.ParsedFolder;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -207,7 +208,14 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return getFolder(INFOSTORE_FOLDER_ID);
+        try {
+            return getFolder(INFOSTORE_FOLDER_ID);
+        } catch (final OXException e) {
+            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                return null;
+            }
+            throw e;
+        }
     }
 
     @Override

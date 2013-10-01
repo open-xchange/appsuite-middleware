@@ -697,7 +697,7 @@ public class IMAPStore extends Store
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("trying to connect to host \"" + host +
 				"\", port " + port + ", isSSL " + isSSL);
-                protocol = newIMAPProtocol(host, port);
+                protocol = newIMAPProtocol(host, port, user, password);
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("protocolConnect login" +
 				", host=" + host +
@@ -744,7 +744,7 @@ public class IMAPStore extends Store
      *
      * @since JavaMail 1.4.6
      */
-    protected IMAPProtocol newIMAPProtocol(String host, int port)
+    protected IMAPProtocol newIMAPProtocol(String host, int port, String user, String password)
 				throws IOException, ProtocolException {
     return new IMAPProtocol(name, host, port, 
             session.getProperties(),
@@ -977,7 +977,7 @@ public class IMAPStore extends Store
 			refreshPassword();
 		            // Going to establish a second connection -- await possible in-use store connections
                     // Use cached host, port and timeout values.
-                    p = newIMAPProtocol(host, port); 
+                    p = newIMAPProtocol(host, port, user, password); 
                     p.setFailOnNOFetch(failOnNOFetch);
                     // Use cached auth info
                     login(p, user, password);
@@ -1085,7 +1085,7 @@ public class IMAPStore extends Store
 		    if (forcePasswordRefresh)
 			refreshPassword();
                     // Use cached host, port and timeout values.
-                    p = newIMAPProtocol(host, port);
+                    p = newIMAPProtocol(host, port, user, password);
                     p.setFailOnNOFetch(failOnNOFetch);
                     // Use cached auth info
                     login(p, user, password);

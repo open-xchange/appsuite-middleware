@@ -77,80 +77,37 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-            registerServlet();
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        unregisterServlet();
-    }
-
-    @Override
     protected void startBundle() throws Exception {
-        final InfostoreDocumentPublicationService infostorePublisher = new InfostoreDocumentPublicationService();
-        InfostorePublicationServlet.setInfostoreDocumentPublicationService(infostorePublisher);
+        final IDBasedFileAccessFactory fileAccessFactory = getService(IDBasedFileAccessFactory.class);
+
+        final InfostoreDocumentPublicationService infostorePublisher = new InfostoreDocumentPublicationService(fileAccessFactory);
         registerService(PublicationService.class, infostorePublisher, null);
 
-        registerServlet();
+        final HttpService httpService = getService(HttpService.class);
+        final PublicationDataLoaderService publicationDataLoaderService = getService(PublicationDataLoaderService.class);
+        final ContextService contextService = getService(ContextService.class);
 
+        if (servlet == null) {
+            try {
+                httpService.registerServlet(ALIAS, servlet = new InfostorePublicationServlet(
+                    contextService,
+                    publicationDataLoaderService,
+                    fileAccessFactory,
+                    infostorePublisher), null, null);
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
     }
+
     @Override
     protected void stopBundle() throws Exception {
-        InfostorePublicationServlet.setInfostoreDocumentPublicationService(null);
-        cleanUp();
-
-        unregisterServlet();
-    }
-
-    private void unregisterServlet() {
-        InfostorePublicationServlet.setContextService(null);
-        InfostorePublicationServlet.setPublicationDataLoaderService(null);
+        super.stopBundle();
 
         final HttpService httpService = getService(HttpService.class);
         if(httpService != null && servlet != null) {
             httpService.unregister(ALIAS);
             servlet = null;
         }
-
     }
-
-    private void registerServlet() {
-        final HttpService httpService = getService(HttpService.class);
-        if(httpService == null) {
-            return;
-        }
-
-        final PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
-        if(dataLoader == null) {
-            return;
-        }
-
-        final ContextService contexts = getService(ContextService.class);
-        if(contexts == null) {
-            return;
-        }
-        
-        final IDBasedFileAccessFactory fileAccessFactory = getService(IDBasedFileAccessFactory.class);
-        if (fileAccessFactory == null) {
-            return;
-        }
-
-        InfostorePublicationServlet.setContextService(contexts);
-
-        InfostorePublicationServlet.setPublicationDataLoaderService(dataLoader);
-        
-        InfostorePublicationServlet.setIDBasedFileAccessFactory(fileAccessFactory);
-
-        if(servlet == null) {
-            try {
-                httpService.registerServlet(ALIAS, servlet = new InfostorePublicationServlet(), null, null);
-            } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-
-    }
-
-
 }

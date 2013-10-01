@@ -49,27 +49,32 @@
 
 package com.openexchange.publish.basic;
 
-import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.publish.impl.ContactFolderLoaderTest;
+import com.openexchange.publish.impl.IDBasedFileAccessDocumentLoaderTest;
+import com.openexchange.publish.impl.IDBasedFolderAccessFolderLoaderTest;
 import com.openexchange.publish.impl.InfostoreDocumentLoaderTest;
+import com.openexchange.publish.osgi.LoaderActivatorTest;
 import com.openexchange.publish.tools.CompositePublicationTargetDiscovererTest;
 import com.openexchange.publish.tools.PublicationTargetCollectorTest;
-
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    ContactFolderLoaderTest.class,
+    InfostoreDocumentLoaderTest.class,
+    CompositePublicationTargetDiscovererTest.class,
+    PublicationTargetCollectorTest.class,
+    IDBasedFileAccessDocumentLoaderTest.class,
+    IDBasedFolderAccessFolderLoaderTest.class,
+    LoaderActivatorTest.class
+})
 public class UnitTests extends TestSuite {
-    public static Test suite() {
-        final TestSuite pubSuite = new TestSuite();
-        pubSuite.addTestSuite(ContactFolderLoaderTest.class);
-        pubSuite.addTestSuite(InfostoreDocumentLoaderTest.class);
-        // pubSuite.addTestSuite(PublicationSQLTest.class);
-        pubSuite.addTestSuite(CompositePublicationTargetDiscovererTest.class);
-        pubSuite.addTestSuite(PublicationTargetCollectorTest.class);
-        return pubSuite;
-    }
 }

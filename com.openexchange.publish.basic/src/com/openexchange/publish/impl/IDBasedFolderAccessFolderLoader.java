@@ -59,6 +59,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.tools.PublicationSession;
@@ -72,9 +73,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderService {
-    
+
     private final IDBasedFolderAccessFactory folderFactory;
-    
+
     private final IDBasedFileAccessFactory fileFactory;
 
     /**
@@ -82,24 +83,31 @@ public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderSer
      */
     public IDBasedFolderAccessFolderLoader(IDBasedFolderAccessFactory folderFactory, IDBasedFileAccessFactory fileFactory) {
         super();
+
         this.folderFactory = folderFactory;
         this.fileFactory = fileFactory;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public Collection<? extends Object> load(Publication publication) throws OXException {
         ArrayList<DocumentMetadata> folderItems = new ArrayList<DocumentMetadata>();
-        Session session = new PublicationSession(publication);
-        IDBasedFolderAccess folderAccess = folderFactory.createAccess(session);
-        IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
-        SearchIterator<File> filesInFolder = fileAccess.getDocuments(folderAccess.getFolder(publication.getEntityId()).getId()).results();
-        while (filesInFolder.hasNext()) {
-            final File file = filesInFolder.next();
-            DocumentMetadata metaData = FileMetadata.getMetadata(file);
-            folderItems.add(metaData);
+
+        if (publication != null) {
+            Session session = new PublicationSession(publication);
+            IDBasedFolderAccess folderAccess = folderFactory.createAccess(session);
+            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
+            TimedResult<File> documents = fileAccess.getDocuments(folderAccess.getFolder(publication.getEntityId()).getId());
+            if (documents != null) {
+                SearchIterator<File> filesInFolder = documents.results();
+                while (filesInFolder.hasNext()) {
+                    final File file = filesInFolder.next();
+                    DocumentMetadata metaData = FileMetadata.getMetadata(file);
+                    folderItems.add(metaData);
+                }
+            }
         }
         return folderItems;
     }

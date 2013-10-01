@@ -56,6 +56,7 @@ import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import com.sun.mail.imap.QueuingIMAPStore;
 import com.sun.mail.util.MailLogger;
 
 
@@ -123,7 +124,7 @@ public final class JavaMailActivator implements BundleActivator {
     @Override
     public void stop(final BundleContext context) throws Exception {
         try {
-            // Nothing to do
+            QueuingIMAPStore.shutdown();
         } catch (final Exception e) {
             final MailLogger logger = new MailLogger(JavaMailActivator.class, "JavaMail Activator", true, System.out);
             logger.log(Level.SEVERE, "Error stopping JavaMail bundle.", e);

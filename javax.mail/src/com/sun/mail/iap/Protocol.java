@@ -183,6 +183,13 @@ public class Protocol {
     }
     
     /**
+     * Clears response handlers.
+     */
+    public void clearHandlers() {
+    handlers.clear();
+    }
+    
+    /**
      * Adds a response handler.
      */
     public void addResponseHandler(ResponseHandler h) {

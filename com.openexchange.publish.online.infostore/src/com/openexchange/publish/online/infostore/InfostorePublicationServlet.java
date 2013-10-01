@@ -65,17 +65,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.online.infostore.util.InfostorePublicationUtils;
 import com.openexchange.publish.tools.PublicationSession;
-import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.RateLimitedException;
@@ -95,29 +93,25 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostorePublicationServlet.class));
 
-    private static final String SELF_DESTRUCT = "selfDestruct";
+    private final String SELF_DESTRUCT = "selfDestruct";
 
-    private static final String DESTROY_DOCUMENT = "destroyDocument";
+    private final String DESTROY_DOCUMENT = "destroyDocument";
 
-    private static volatile PublicationDataLoaderService loader;
-    private static volatile InfostoreDocumentPublicationService publisher;
-    private static volatile ContextService contexts;
-    private static volatile IDBasedFileAccessFactory fileAccessFactory;
+    private volatile PublicationDataLoaderService dataLoader;
 
-    public static void setPublicationDataLoaderService(final PublicationDataLoaderService service) {
-        loader = service;
-    }
+    private volatile InfostoreDocumentPublicationService publisher;
 
-    public static void setInfostoreDocumentPublicationService(final InfostoreDocumentPublicationService service) {
-        publisher = service;
-    }
+    private volatile ContextService context;
 
-    public static void setContextService(final ContextService service) {
-        contexts  = service;
-    }
-    
-    public static void setIDBasedFileAccessFactory(final IDBasedFileAccessFactory service) {
-        fileAccessFactory = service;
+    private volatile IDBasedFileAccessFactory fileAccessFactory;
+
+    public InfostorePublicationServlet(ContextService context, PublicationDataLoaderService dataLoader, IDBasedFileAccessFactory fileAccessFactory, InfostoreDocumentPublicationService publicationService) {
+        super();
+
+        this.context = context;
+        this.dataLoader = dataLoader;
+        this.fileAccessFactory = fileAccessFactory;
+        this.publisher = publicationService;
     }
 
     @Override
@@ -145,7 +139,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         handle(req, resp);
     }
 
-    private static final Pattern SPLIT = Pattern.compile("/");
+    private final Pattern SPLIT = Pattern.compile("/");
 
     private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
@@ -158,7 +152,7 @@ public class InfostorePublicationServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            final DocumentMetadata document = loadDocumentMetadata(publication);
+            final DocumentMetadata document = InfostorePublicationUtils.loadDocumentMetadata(publication, this.fileAccessFactory);
             final InputStream is = loadContent(publication);
             configureHeaders(document, req, resp);
             write(is, resp);
@@ -197,7 +191,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         return publication.getConfiguration().get(SELF_DESTRUCT) == Boolean.TRUE;
     }
 
-    private static final boolean isIE(final HttpServletRequest req) {
+    private final boolean isIE(final HttpServletRequest req) {
         final String userAgent = req.getHeader("User-Agent");
         return null != userAgent && userAgent.contains("MSIE");
     }
@@ -209,21 +203,6 @@ public class InfostorePublicationServlet extends HttpServlet {
             resp.setHeader("Content-Disposition", "attachment; filename=\""
                 + Helper.encodeFilename(fileName, "UTF-8", isIE(req)) + "\"");
         }
-    }
-
-    /**
-     * Loads the meta-data of the document associated with specified publication.
-     *
-     * @param publication The publication
-     * @return The associated document's meta-data or <b><code>null</code></b>
-     * @throws OXException If loading meta-data fails
-     */
-    public static DocumentMetadata loadDocumentMetadata(final Publication publication) throws OXException {
-        final String entityId = publication.getEntityId();
-        Session session = new PublicationSession(publication);
-        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-        File file = fileAccess.getFileMetadata(entityId, String.valueOf(1));
-        return FileMetadata.getMetadata(file);
     }
 
     private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
@@ -245,7 +224,7 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     private InputStream loadContent(final Publication publication) throws OXException {
-        final Collection<? extends Object> load = loader.load(publication);
+        final Collection<? extends Object> load = dataLoader.load(publication);
         if(load == null || load.isEmpty()) {
             return new ByteArrayInputStream(new byte[0]);
         }
@@ -275,7 +254,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         if(cid == -1) {
             throw new IllegalArgumentException("URL did not contain context id");
         }
-        return contexts.getContext(cid);
+        return context.getContext(cid);
     }
 
 }

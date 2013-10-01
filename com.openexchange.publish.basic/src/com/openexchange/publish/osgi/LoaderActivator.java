@@ -83,11 +83,6 @@ public class LoaderActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class, CacheService.class, ContactService.class };
     }

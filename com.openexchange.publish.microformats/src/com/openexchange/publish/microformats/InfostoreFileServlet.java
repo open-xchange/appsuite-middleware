@@ -101,9 +101,9 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     public static void setInfostorePublisher(final OXMFPublicationService service) {
         infostorePublisher = service;
     }
-    
+
     private static volatile IDBasedFileAccessFactory fileFactory;
-    
+
     public static void setFileFactory(final IDBasedFileAccessFactory service) {
         fileFactory = service;
     }
@@ -111,7 +111,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static volatile FileResponseRenderer fileResponseRenderer;
 
     public static void setFileResponseRenderer(final FileResponseRenderer renderer) {
-    	fileResponseRenderer = renderer;
+        fileResponseRenderer = renderer;
     }
 
     @Override
@@ -153,7 +153,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     }
 
-    private DocumentMetadata loadMetadata(final Publication publication, final int infoId) throws OXException {
+    protected DocumentMetadata loadMetadata(final Publication publication, final int infoId) throws OXException {
         try {
             Session session = new PublicationSession(publication);
             IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
@@ -167,10 +167,10 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     }
 
     private void writeFile(final Session session, final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
-    	final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/infostore", resp);
-    	final AJAXRequestResult result = new AJAXRequestResult(new FileHolder(fileData, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName()), "file");
+        final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/infostore", resp);
+        final AJAXRequestResult result = new AJAXRequestResult(new FileHolder(fileData, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName()), "file");
 
-    	fileResponseRenderer.write(request, result, req, resp);
+        fileResponseRenderer.write(request, result, req, resp);
     }
 
     private InputStream loadFile(final Publication publication, final int infoId) throws OXException {

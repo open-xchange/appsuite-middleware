@@ -47,15 +47,15 @@
  *
  */
 
-package com.openexchange.aws.s3;
+package com.openexchange.aws.s3.internal;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.internal.BucketNameUtils;
-import com.openexchange.aws.s3.exceptions.OXAWSS3ExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
@@ -78,14 +78,14 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
     private static final int RANKING = 5634;
 
     private final ConcurrentMap<URI, AWSS3FileStorage> storages;
-    private final AmazonS3 s3client;
+    private final AmazonS3Client s3client;
 
     /**
      * Initializes a new {@link AWSS3FileStorageFactory}.
      *
      * @param s3client The S3 client to use
      */
-    public AWSS3FileStorageFactory(AmazonS3 s3client) {
+    public AWSS3FileStorageFactory(AmazonS3Client s3client) {
         super();
         this.storages = new ConcurrentHashMap<URI, AWSS3FileStorage>();
         this.s3client = s3client;
@@ -93,6 +93,7 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
 
     @Override
     public AWSS3FileStorage getFileStorage(URI uri) throws OXException {
+        try { uri = new URI("s3:/development"); } catch (URISyntaxException e) { }
         AWSS3FileStorage storage = storages.get(uri);
         if (null == storage) {
             String bucketName = initBucket(uri);
@@ -112,7 +113,8 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
 
     @Override
     public boolean supports(URI uri) {
-        return null != uri && S3_SCHEME.equalsIgnoreCase(uri.getScheme());
+        return true;
+         //return null != uri && S3_SCHEME.equalsIgnoreCase(uri.getScheme());
     }
 
     @Override
@@ -151,9 +153,11 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
             }
             return bucketName;
         } catch (IllegalArgumentException e) {
-            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
+            throw AwsS3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (AmazonClientException e) {
-            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
+            throw AwsS3ExceptionCode.wrap(e);
+        } catch (RuntimeException e) {
+            throw AwsS3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

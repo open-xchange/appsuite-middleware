@@ -65,6 +65,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.ajax.requesthandler.cache.CachedResource;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -75,8 +77,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
-import com.openexchange.preview.cache.CachedPreview;
-import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -85,13 +85,13 @@ import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
- * {@link FileStorePreviewCacheImpl} - The database-backed preview cache implementation for documents.
+ * {@link FileStoreResourceCacheImpl} - The database-backed preview cache implementation for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandler {
+public final class FileStoreResourceCacheImpl implements ResourceCache, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileStorePreviewCacheImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileStoreResourceCacheImpl.class);
 
     private static final ConcurrentTIntObjectHashMap<FileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<FileStorage>();
 
@@ -118,9 +118,9 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
     private final boolean quotaAware;
 
     /**
-     * Initializes a new {@link FileStorePreviewCacheImpl}.
+     * Initializes a new {@link FileStoreResourceCacheImpl}.
      */
-    public FileStorePreviewCacheImpl(final boolean quotaAware) {
+    public FileStoreResourceCacheImpl(final boolean quotaAware) {
         super();
         this.quotaAware = quotaAware;
     }
@@ -167,12 +167,12 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
     }
 
     @Override
-    public boolean save(final String id, final CachedPreview preview, final int userId, final int contextId) throws OXException {
-        final InputStream in = preview.getInputStream();
+    public boolean save(final String id, final CachedResource resource, final int userId, final int contextId) throws OXException {
+        final InputStream in = resource.getInputStream();
         if (null == in) {
-            return save(id, preview.getBytes(), preview.getFileName(), preview.getFileType(), userId, contextId);
+            return save(id, resource.getBytes(), resource.getFileName(), resource.getFileType(), userId, contextId);
         }
-        return save(id, in, preview.getFileName(), preview.getFileType(), userId, contextId);
+        return save(id, in, resource.getFileName(), resource.getFileType(), userId, contextId);
     }
 
     @Override
@@ -494,7 +494,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
     }
 
     @Override
-    public CachedPreview get(final String id, final int userId, final int contextId) throws OXException {
+    public CachedResource get(final String id, final int userId, final int contextId) throws OXException {
         if (null == id || contextId <= 0) {
             return null;
         }
@@ -510,7 +510,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
         }
     }
 
-    private CachedPreview load(final String id, final int userId, final int contextId, final Connection con) throws OXException {
+    private CachedResource load(final String id, final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -532,7 +532,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
             }
             final String refIf = rs.getString(1);
             final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-            return new CachedPreview(fileStorage.getFile(refIf), rs.getString(2), rs.getString(3), rs.getLong(4));
+            return new CachedResource(fileStorage.getFile(refIf), rs.getString(2), rs.getString(3), rs.getLong(4));
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

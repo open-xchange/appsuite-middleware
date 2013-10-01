@@ -49,24 +49,22 @@
 
 package com.openexchange.publish.microformats;
 
-import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UnitTests {
-
-    public UnitTests() {
-        super();
-    }
-
-    public static final Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(ContactTemplateUtilsTest.class);
-        tests.addTestSuite(OXMFPublicationServiceTest.class);
-        return tests;
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    ContactTemplateUtilsTest.class,
+    InfostoreFileServletTest.class,
+    InfostoreTemplateUtilsTest.class,
+    OXMFPublicationServiceTest.class
+})
+public class UnitTests extends TestSuite {
 }

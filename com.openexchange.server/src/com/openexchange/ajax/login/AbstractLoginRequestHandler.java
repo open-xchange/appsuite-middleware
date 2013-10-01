@@ -217,7 +217,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             final Session session = result.getSession();
             // Store associated session
             SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
-            LoginServlet.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+            LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
             // Login response is unfortunately not conform to default responses.
             if (req.getParameter("callback") != null && LoginServlet.ACTION_LOGIN.equals(req.getParameter("action"))) {
                 APIResponseRenderer.writeResponse(response, LoginServlet.ACTION_LOGIN, req, resp);
@@ -288,15 +288,16 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
     /**
      * Writes the (groupware's) public session cookie <code>"open-xchange-public-session"</code> to specified HTTP servlet response.
      *
-     * @param resp The HTTP servlet response
+     * @param req The HTTP request
+     * @param resp The HTTP response
      * @param session The session providing the public session cookie identifier
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
      * @param serverName The HTTP request's server name
      */
-    public void writePublicSessionCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
+    public void writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            final Cookie cookie = new Cookie(LoginServlet.PUBLIC_SESSION_NAME, altId);
+            final Cookie cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
             LoginServlet.configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }

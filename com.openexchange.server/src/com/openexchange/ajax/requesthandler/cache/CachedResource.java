@@ -47,16 +47,16 @@
  *
  */
 
-package com.openexchange.preview.cache;
+package com.openexchange.ajax.requesthandler.cache;
 
 import java.io.InputStream;
 
 /**
- * {@link CachedPreview} - A cached preview document.
- * 
+ * {@link CachedResource} - A cached resource.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CachedPreview {
+public final class CachedResource {
 
     private final byte[] bytes;
     private final InputStream in;
@@ -65,9 +65,9 @@ public final class CachedPreview {
     private final long size;
 
     /**
-     * Initializes a new {@link CachedPreview}.
+     * Initializes a new {@link CachedResource}.
      */
-    public CachedPreview(final byte[] bytes, final String fileName, final String fileType, final long size) {
+    public CachedResource(final byte[] bytes, final String fileName, final String fileType, final long size) {
         super();
         in = null;
         this.bytes = bytes;
@@ -77,9 +77,9 @@ public final class CachedPreview {
     }
 
     /**
-     * Initializes a new {@link CachedPreview}.
+     * Initializes a new {@link CachedResource}.
      */
-    public CachedPreview(final InputStream in, final String fileName, final String fileType, final long size) {
+    public CachedResource(final InputStream in, final String fileName, final String fileType, final long size) {
         super();
         bytes = null;
         this.in = in;
@@ -90,7 +90,7 @@ public final class CachedPreview {
 
     /**
      * Gets the size
-     * 
+     *
      * @return The size or <code>-1</code> if unknown
      */
     public long getSize() {
@@ -101,7 +101,7 @@ public final class CachedPreview {
      * Gets the bytes
      * <p>
      * If <code>null</code> check {@link #getInputStream()}.
-     * 
+     *
      * @return The bytes or <code>null</code>
      */
     public byte[] getBytes() {
@@ -112,7 +112,7 @@ public final class CachedPreview {
      * Gets the input stream
      * <p>
      * If <code>null</code> check {@link #getBytes()}.
-     * 
+     *
      * @return The input stream or <code>null</code>
      */
     public InputStream getInputStream() {
@@ -121,7 +121,7 @@ public final class CachedPreview {
 
     /**
      * Gets the file name
-     * 
+     *
      * @return The file name
      */
     public String getFileName() {
@@ -130,7 +130,7 @@ public final class CachedPreview {
 
     /**
      * Gets the file MIME type
-     * 
+     *
      * @return The file MIME type
      */
     public String getFileType() {

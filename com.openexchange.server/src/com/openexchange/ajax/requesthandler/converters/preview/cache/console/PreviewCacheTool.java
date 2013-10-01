@@ -64,7 +64,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheMBean;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBean;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -117,7 +117,7 @@ public final class PreviewCacheTool {
                 MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
                 try {
-                    PreviewCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
+                    ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
                     previceCacheProxy.clearFor(Integer.parseInt(contextOptionVal.trim()));
                     System.out.println("All cache entries cleared for context " + contextOptionVal);
                 } catch (Exception e) {
@@ -151,8 +151,8 @@ public final class PreviewCacheTool {
         helpFormatter.printHelp("clearpreviewcache", sOptions);
     }
 
-    private static PreviewCacheMBean previewCacheMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
-        return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(PreviewCacheMBean.class.getName(), "com.openexchange.preview.cache"), PreviewCacheMBean.class, false);
+    private static ResourceCacheMBean previewCacheMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
+        return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(ResourceCacheMBean.class.getName(), "com.openexchange.preview.cache"), ResourceCacheMBean.class, false);
     }
 
     /**

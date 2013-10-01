@@ -81,9 +81,9 @@ import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.AutoLogin;
-import com.openexchange.ajax.login.Login;
 import com.openexchange.ajax.login.FormLogin;
 import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.Login;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginRequestImpl;
@@ -132,7 +132,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Servlet doing the login and logout stuff.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class LoginServlet extends AJAXServlet {
@@ -171,9 +171,9 @@ public class LoginServlet extends AJAXServlet {
     public static final String SECRET_PREFIX = "open-xchange-secret-".intern();
 
     /**
-     * <code>"open-xchange-public-session"</code>
+     * <code>"open-xchange-public-session-"</code>
      */
-    public static final String PUBLIC_SESSION_NAME = "open-xchange-public-session".intern();
+    public static final String PUBLIC_SESSION_PREFIX = "open-xchange-public-session-".intern();
 
     public static final String ACTION_FORMLOGIN = "formlogin";
 
@@ -356,7 +356,7 @@ public class LoginServlet extends AJAXServlet {
                     hash = HashCalculator.getInstance().getHash(req, client);
                     session.setHash(hash);
                 }
-                writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
+                writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
                 resp.sendRedirect(LoginTools.generateRedirectURL(
                     req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
                     req.getParameter("store"),
@@ -525,7 +525,7 @@ public class LoginServlet extends AJAXServlet {
                     hash = HashCalculator.getInstance().getHash(req, client);
                     session.setHash(hash);
                 }
-                writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
+                writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
 
                 try {
                     final JSONObject json = new JSONObject();
@@ -680,7 +680,7 @@ public class LoginServlet extends AJAXServlet {
             if (type == CookieType.SESSION) {
                 writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
             } else {
-                writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+                writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
             }
             // Refresh HTTP session, too
             req.getSession();
@@ -721,7 +721,7 @@ public class LoginServlet extends AJAXServlet {
     /**
      * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-session-"</code> and a secret cookie identifier.
-     * 
+     *
      * @param resp The HTTP servlet response
      * @param session The session providing the secret cookie identifier
      * @param hash The hash string used for composing cookie name
@@ -763,7 +763,7 @@ public class LoginServlet extends AJAXServlet {
 
     /**
      * Appends the modules to given JSON object.
-     * 
+     *
      * @param session The associated session
      * @param json The JSON object to append to
      * @param req The request
@@ -787,7 +787,7 @@ public class LoginServlet extends AJAXServlet {
 
     /**
      * Parses the specified parameter to a <code>boolean</code> value.
-     * 
+     *
      * @param parameter The parameter value
      * @return <code>true</code> if parameter is <b>not</b> <code>null</code> and is (ignore-case) one of the values <code>"true"</code>,
      *         <code>"1"</code>, <code>"yes"</code> or <code>"on"</code>; otherwise <code>false</code>
@@ -845,7 +845,7 @@ public class LoginServlet extends AJAXServlet {
         final LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
         final Session session = result.getSession();
         Tools.disableCaching(resp);
-        writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+        writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
         addHeadersAndCookies(result, resp);
         resp.sendRedirect(LoginTools.generateRedirectURL(null, conf.getHttpAuthAutoLogin(), session.getSessionID(), conf.getUiWebPath()));
     }
@@ -853,21 +853,22 @@ public class LoginServlet extends AJAXServlet {
     /**
      * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
-     * 
-     * @param resp The HTTP servlet response
+     *
+     * @param req The HTTP request
+     * @param resp The HTTP response
      * @param session The session providing the secret cookie identifier
      * @param hash The hash string used for composing cookie name
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
      * @param serverName The HTTP request's server name
      */
-    public static void writeSecretCookie(HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
+    public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
         Cookie cookie = new Cookie(LoginServlet.SECRET_PREFIX + hash, session.getSecret());
         configureCookie(cookie, secure, serverName, conf);
         resp.addCookie(cookie);
 
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            cookie = new Cookie(LoginServlet.PUBLIC_SESSION_NAME, altId);
+            cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
             configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }

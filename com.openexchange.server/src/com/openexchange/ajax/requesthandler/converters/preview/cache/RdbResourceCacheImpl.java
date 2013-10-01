@@ -62,6 +62,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.ajax.requesthandler.cache.CachedResource;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -69,25 +71,23 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
-import com.openexchange.preview.cache.CachedPreview;
-import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link RdbPreviewCacheImpl} - The database-backed preview cache implementation for documents.
+ * {@link RdbResourceCacheImpl} - The database-backed preview cache implementation for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbPreviewCacheImpl implements PreviewCache, EventHandler {
+public final class RdbResourceCacheImpl implements ResourceCache, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbPreviewCacheImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbResourceCacheImpl.class);
 
     /**
-     * Initializes a new {@link RdbPreviewCacheImpl}.
+     * Initializes a new {@link RdbResourceCacheImpl}.
      */
-    public RdbPreviewCacheImpl() {
+    public RdbResourceCacheImpl() {
         super();
     }
 
@@ -116,12 +116,12 @@ public final class RdbPreviewCacheImpl implements PreviewCache, EventHandler {
     }
 
     @Override
-    public boolean save(final String id, final CachedPreview preview, final int userId, final int contextId) throws OXException {
-        final InputStream in = preview.getInputStream();
+    public boolean save(final String id, final CachedResource resource, final int userId, final int contextId) throws OXException {
+        final InputStream in = resource.getInputStream();
         if (null == in) {
-            return save(id, preview.getBytes(), preview.getFileName(), preview.getFileType(), userId, contextId);
+            return save(id, resource.getBytes(), resource.getFileName(), resource.getFileType(), userId, contextId);
         }
-        return save(id, in, preview.getFileName(), preview.getFileType(), userId, contextId);
+        return save(id, in, resource.getFileName(), resource.getFileType(), userId, contextId);
     }
 
     @Override
@@ -458,7 +458,7 @@ public final class RdbPreviewCacheImpl implements PreviewCache, EventHandler {
     }
 
     @Override
-    public CachedPreview get(final String id, final int userId, final int contextId) throws OXException {
+    public CachedResource get(final String id, final int userId, final int contextId) throws OXException {
         if (null == id || contextId <= 0) {
             return null;
         }
@@ -474,7 +474,7 @@ public final class RdbPreviewCacheImpl implements PreviewCache, EventHandler {
         }
     }
 
-    private CachedPreview load(final String id, final int userId, final int contextId, final Connection con) throws OXException {
+    private CachedResource load(final String id, final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -517,7 +517,7 @@ public final class RdbPreviewCacheImpl implements PreviewCache, EventHandler {
                 return null;
             }
             // Return CachedPreview instance
-            return new CachedPreview(Streams.stream2bytes(rs.getBinaryStream(1)), fileName, fileType, size);
+            return new CachedResource(Streams.stream2bytes(rs.getBinaryStream(1)), fileName, fileType, size);
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final IOException e) {

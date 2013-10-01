@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -58,9 +57,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -74,7 +71,7 @@ import com.openexchange.tools.update.Tools;
 public class UserClearDelTablesTask extends UpdateTaskAdapter {
 
     private static final String[] OBSOLETE_COLUMNS = new String[] {
-        "imapServer", "imapLogin", "mail", "mailDomain", "preferredLanguage", "shadowLastChange", "smtpServer", "timeZone", "userPassword",
+        "imapServer", "imapLogin", "mail", "mailEnabled", "mailDomain", "preferredLanguage", "shadowLastChange", "smtpServer", "timeZone", "userPassword",
         "passwordMech", "homeDirectory", "loginShell" };
 
     private static final String TABLE = "del_user";
@@ -99,12 +96,39 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
         try {
             con.setAutoCommit(false);
             for (String column : OBSOLETE_COLUMNS) {
+                int type = Tools.getColumnType(con, TABLE, column);
+                if (!Tools.hasDefaultValue(con, TABLE, column)) {
+                    stmt = con.prepareStatement("ALTER TABLE " + TABLE + " ALTER " + column + " SET DEFAULT ?");
+                    switch (type) {
+                    case java.sql.Types.CHAR:
+                    case java.sql.Types.VARCHAR:
+                        stmt.setString(1, "");
+                        break;
+                    case java.sql.Types.DATE:
+                    case java.sql.Types.TIMESTAMP:
+                        stmt.setDate(1, new java.sql.Date(0));
+                        break;
+                    case java.sql.Types.TINYINT:
+                    case java.sql.Types.BOOLEAN:
+                        stmt.setInt(1, 0);
+                        break;
+                    case java.sql.Types.BLOB:
+                    case -1:
+                        stmt.cancel();
+                        stmt.close();
+                        continue;
+                    default:
+                        stmt.setInt(1, -1);
+                        break;
+                    }
+                    stmt.executeUpdate();
+                    stmt.close();
+                }
                 if (Tools.isNullable(con, TABLE, column)) {
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = NULL");
                     stmt.executeUpdate();
                     stmt.close();
                 } else {
-                    int type = Tools.getColumnType(con, TABLE, column);
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = ?");
                     switch (type) {
                     case java.sql.Types.CHAR:
@@ -115,8 +139,12 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
                     case java.sql.Types.TIMESTAMP:
                         stmt.setDate(1, new java.sql.Date(0));
                         break;
-                    default:
+                    case java.sql.Types.TINYINT:
+                    case java.sql.Types.BOOLEAN:
                         stmt.setInt(1, 0);
+                        break;
+                    default:
+                        stmt.setInt(1, -1);
                         break;
                     }
                     stmt.executeUpdate();
@@ -143,11 +171,6 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[0];
-    }
-    
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(BACKGROUND);
     }
 
 }

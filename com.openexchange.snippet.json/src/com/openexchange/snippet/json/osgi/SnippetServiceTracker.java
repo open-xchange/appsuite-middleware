@@ -49,8 +49,8 @@
 
 package com.openexchange.snippet.json.osgi;
 
+import static com.openexchange.snippet.json.osgi.RankedService.getRanking;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.snippet.SnippetService;
@@ -101,21 +101,6 @@ public final class SnippetServiceTracker implements ServiceTrackerCustomizer<Sni
     public void removedService(final ServiceReference<SnippetService> reference, final SnippetService service) {
         queue.remove(new RankedService<SnippetService>(service, getRanking(reference)));
         context.ungetService(reference);
-    }
-
-    private int getRanking(final ServiceReference<SnippetService> reference) {
-        int ranking = 0;
-        {
-            final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
-            if (null != oRanking) {
-                try {
-                    ranking = Integer.parseInt(oRanking.toString().trim());
-                } catch (final NumberFormatException e) {
-                    ranking = 0;
-                }
-            }
-        }
-        return ranking;
     }
 
 }

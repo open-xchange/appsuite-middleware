@@ -91,12 +91,13 @@ public class CopyAction extends AbstractWriteAction {
         final String id = request.getId();
         final File file = request.getFile();
         final String folder = file.getFolderId();
+        String version = request.getVersion();
 
         String newId = null;
         if(request.hasUploads()) {
-            newId = fileAccess.copy(id, folder, file, request.getUploadedFileData(), request.getSentColumns());
+            newId = fileAccess.copy(id, version, folder, file, request.getUploadedFileData(), request.getSentColumns());
         } else {
-            newId = fileAccess.copy(id, folder, file, null, request.getSentColumns());
+            newId = fileAccess.copy(id, version, folder, file, null, request.getSentColumns());
         }
 
         return new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));

@@ -20,15 +20,15 @@
  *    according to their respective licenses.
  *
  *    Any modifications to this package must retain all copyright notices
- *    of the original copyright holder_MSG = s) for the original code used.
+ *    of the original copyright holder(s) for the original code used.
  *
  *    After any such modifications, the original and derivative code shall remain
- *    under the copyright of the copyright holder_MSG = s) and/or original author_MSG = s)per
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
  *    the Attribution and Assignment Agreement that can be located at
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright _MSG = C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,36 @@
  *
  */
 
-package com.openexchange.aws.s3.exceptions;
+package com.openexchange.ajax.infostore.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Set;
+import org.json.JSONArray;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 
 /**
- * {@link OXAWSS3ExceptionMessages}
+ * {@link UpdatesInfostoreResponse}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class OXAWSS3ExceptionMessages implements LocalizableStrings {
+public class UpdatesInfostoreResponse extends AbstractColumnsResponse {
 
-    public final static String S3_IOERROR_MSG = "IO error.";
+    private final Set<String> deleted;
 
-    public final static String S3_SAVE_FAILED_MSG = "Saving new file failed: %1$s";
+    private final Set<JSONArray> newAndModified;
 
-    public final static String S3_GET_FILE_FAILED_MSG = "Get file %1$s failed: %2$s";
+    public UpdatesInfostoreResponse(Response response, Set<String> deleted, Set<JSONArray> newAndModified) {
+        super(response);
+        this.deleted = deleted;
+        this.newAndModified = newAndModified;
+    }
 
-    public final static String S3_GET_FILELIST_FAILED_MSG = "Get file listing failed: %1$s";
+    public Set<String> getDeleted() {
+        return deleted;
+    }
 
-    public final static String S3_GET_FILESIZE_FAILED_MSG = "Get size of file %1$s failed: %2$s";
-
-    public final static String S3_GET_MIMETYPE_FAILED_MSG = "Get mime type of file %1$s failed: %2$s";
-
-    public final static String S3_DELETE_FILE_FAILED_MSG = "Delete file %1$s failed: %2$s";
-
-    public final static String S3_DELETE_MULTIPLE_FAILED_MSG = "Delete %1$i failed: %2$s";
-
-    public final static String S3_CREATE_HASH_FAILED_MSG = "Creating md5 hash of file %1$s failed: %2$s";
-
-    public final static String S3_INITIALIZATION_ERROR_MSG = "Could not initialize filestorage: %1$s";
-
-    public final static String S3_DELETE_ALL_ERROR_MSG = "Deletion of all files in bucket %1$s failed: %2$s";
-
-    public final static String S3_VERSIONING_DISABLED_MSG = "Versioning is disabled";
-
-    /**
-     * Initializes a new {@link OXAWSS3ExceptionMessages}.
-     */
-    private OXAWSS3ExceptionMessages() {
-        super();
+    public Set<JSONArray> getNewAndModified() {
+        return newAndModified;
     }
 
 }
