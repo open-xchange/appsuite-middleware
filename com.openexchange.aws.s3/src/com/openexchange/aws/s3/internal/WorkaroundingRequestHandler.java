@@ -73,7 +73,8 @@ public class WorkaroundingRequestHandler implements RequestHandler {
     public void beforeRequest(Request<?> request) {
         if (InitiateMultipartUploadRequest.class.isInstance(request.getOriginalRequest())) {
             /*
-             * re-add "Content-Length" header to satisfy internal chekcs in ceph rados ateway
+             * re-add "Content-Length" header to satisfy internal checks in ceph rados gateway
+             * see: http://tracker.ceph.com/issues/6449
              */
             request.addHeader(Headers.CONTENT_LENGTH, String.valueOf(0));
         }
