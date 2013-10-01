@@ -57,9 +57,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.StringTokenizer;
 import java.util.concurrent.BlockingQueue;
@@ -149,29 +149,33 @@ public class QueuingIMAPStore extends IMAPStore {
     }
 
     /** Mapping for the queues */
-    private static final ConcurrentMap<URLName, CountingQueue<QueuedIMAPProtocol>> queues = new ConcurrentHashMap<URLName, CountingQueue<QueuedIMAPProtocol>>(16);
+    private static final ConcurrentMap<URLName, CountingQueue> queues = new ConcurrentHashMap<URLName, CountingQueue>(16);
 
-    private static CountingQueue<QueuedIMAPProtocol> initQueue(final URLName url, final int permits, final MailLogger logger) {
+    private static CountingQueue initQueue(final URLName url, final int permits, final MailLogger logger) {
         if (permits <= 0) {
             return null;
         }
-        CountingQueue<QueuedIMAPProtocol> q = queues.get(url);
+        CountingQueue q = queues.get(url);
         if (null == q) {
-            final CountingQueue<QueuedIMAPProtocol> ns = new CountingQueue<QueuedIMAPProtocol>(permits);
+            final CountingQueue ns = new CountingQueue(permits);
             q = queues.putIfAbsent(url, ns);
             if (null == q) {
                 q = ns;
-                final CountingQueue<QueuedIMAPProtocol> tq = q;
-                final ConcurrentMap<URLName, CountingQueue<QueuedIMAPProtocol>> tqueues = queues;
+                final CountingQueue tq = q;
+                final ConcurrentMap<URLName, CountingQueue> tqueues = queues;
                 final AtomicInteger noneCount = new AtomicInteger();
                 final AtomicReference<ScheduledFuture<?>> futureRef = new AtomicReference<ScheduledFuture<?>>();
                 final Runnable t = new Runnable() {
 
                     @Override
                     public void run() {
-                        if (tq.isEmpty()) {
+                        if (logger.isLoggable(Level.FINE)) {
+                            logger.fine("Cleaner run. Elements in queue " + tq.hashCode() + ": " + tq.size());
+                        }
+                        final boolean wasEmpty = tq.closeElapsed(System.currentTimeMillis() - 4000);
+                        if (wasEmpty) {
                             if (noneCount.incrementAndGet() >= 10) {
-                                // Encountered this empty queue 10 times
+                                // Seen this queue as empty for 10 times
                                 if (tqueues.remove(url, tq)) {
                                     // Atomically removed queue
                                     final ScheduledFuture<?> future = futureRef.getAndSet(null);
@@ -180,30 +184,8 @@ public class QueuingIMAPStore extends IMAPStore {
                                     }
                                 }
                             }
-                            return;
-                        }
-                        noneCount.set(0);
-                        if (logger.isLoggable(Level.FINE)) {
-                            logger.fine("Cleaner run. Elements in queue " + tq.hashCode() + ": " + tq.size());
-                        }
-                        final long minStamp = System.currentTimeMillis() - 4000;
-                        for (final Iterator<QueuedIMAPProtocol> iterator = tq.iterator(); iterator.hasNext();) {
-                            final QueuedIMAPProtocol queuedIMAPProtocol = iterator.next();
-                            if (queuedIMAPProtocol.getAuthenticatedStamp() < minStamp) {
-                                iterator.remove();
-                                boolean loggedOut = false;
-                                try {
-                                    queuedIMAPProtocol.realLogout();
-                                    loggedOut = true;
-                                } catch (final Exception e) {
-                                    // Ignore
-                                } finally {
-                                    if (!loggedOut) {
-                                        // An error occurred during LOGOUT attempt
-                                        tq.decrementNewCount();
-                                    }
-                                }
-                            }
+                        } else {
+                            noneCount.set(0);
                         }
                     }
                 };
@@ -300,7 +282,7 @@ public class QueuingIMAPStore extends IMAPStore {
                 // No connection restriction -- delegate to super implementation
                 return super.newIMAPProtocol(host, port, user, password);
             }
-            final CountingQueue<QueuedIMAPProtocol> q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), permits, logger);
+            final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), permits, logger);
             if (null == q) {
                 // No connection restriction -- delegate to super implementation
                 return super.newIMAPProtocol(host, port, user, password);
@@ -387,11 +369,11 @@ public class QueuingIMAPStore extends IMAPStore {
 
     // --------------------------------------------------------------------------------------------------------- //
 
-    static final class CountingQueue<E> extends AbstractQueue<E> implements BlockingQueue<E>, java.io.Serializable {
+    static final class CountingQueue extends AbstractQueue<QueuedIMAPProtocol> implements BlockingQueue<QueuedIMAPProtocol>, java.io.Serializable {
 
         private static final long serialVersionUID = 5595510919245408276L;
 
-        final Queue<E> q;
+        final PriorityQueue<QueuedIMAPProtocol> q;
         final ReentrantLock lock = new ReentrantLock(true);
         private final Condition notEmpty = lock.newCondition();
         private final int max;
@@ -402,7 +384,7 @@ public class QueuingIMAPStore extends IMAPStore {
          */
         public CountingQueue(final int max) {
             super();
-            q = new LinkedList<E>();
+            q = new PriorityQueue<QueuedIMAPProtocol>(max);
             this.max = max;
         }
 
@@ -422,15 +404,56 @@ public class QueuingIMAPStore extends IMAPStore {
         }
 
         /**
+         * Closes elapsed elements. Signals <code>true</code> if queue is empty at the time of invocation.
+         *
+         * @param minStamp The minimum allowed time stamp
+         * @return <code>true</code> if nothing happened because queue was empty; otherwise <code>false</code>
+         */
+        public boolean closeElapsed(final long minStamp) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                if (q.isEmpty()) {
+                    return true;
+                }
+                QueuedIMAPProtocol x;
+                while (((x = q.peek()) != null) && (x.getAuthenticatedStamp() < minStamp)) {
+                    x = q.poll();
+                    assert x != null;
+                    // Perform LOGOUT on polled IMAP protocol
+                    safeLogout(x);
+                }
+                return false;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private void safeLogout(final QueuedIMAPProtocol x) {
+            boolean loggedOut = false;
+            try {
+                x.realLogout(); // Implicitly triggers #decrementNewCount() through QueuedIMAPProtocol#authenticatedStatusChanging()
+                loggedOut = true;
+            } catch (final Exception e) {
+                // Ignore
+            } finally {
+                if (!loggedOut) {
+                    // An error occurred during LOGOUT attempt
+                    decrementNewCount();
+                }
+            }
+        }
+
+        /**
          * Takes or increments the new count. Waiting for available elements if none in queue and count is exceeded.
          *
          * @throws InterruptedException If interrupted while waiting
          */
-        public E takeOrIncrement() throws InterruptedException {
+        public QueuedIMAPProtocol takeOrIncrement() throws InterruptedException {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
-                E x;
+                QueuedIMAPProtocol x;
                 try {
                     while (((x = q.poll()) == null) && (newCount >= max)) {
                         notEmpty.await();
@@ -477,7 +500,7 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws NullPointerException if the specified element is null
          */
         @Override
-        public boolean add(final E e) {
+        public boolean add(final QueuedIMAPProtocol e) {
             return offer(e);
         }
 
@@ -491,7 +514,7 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws NullPointerException if the specified element is null
          */
         @Override
-        public boolean offer(final E e) {
+        public boolean offer(final QueuedIMAPProtocol e) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -513,7 +536,7 @@ public class QueuingIMAPStore extends IMAPStore {
          *             the priority queue's ordering
          * @throws NullPointerException if the specified element is null
          */
-        public boolean offerIfAbsent(final E e) {
+        public boolean offerIfAbsent(final QueuedIMAPProtocol e) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -538,7 +561,7 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws NullPointerException if the specified element is null
          */
         @Override
-        public void put(final E e) {
+        public void put(final QueuedIMAPProtocol e) {
             offer(e); // never need to block
         }
 
@@ -554,12 +577,12 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws NullPointerException if the specified element is null
          */
         @Override
-        public boolean offer(final E e, final long timeout, final TimeUnit unit) {
+        public boolean offer(final QueuedIMAPProtocol e, final long timeout, final TimeUnit unit) {
             return offer(e); // never need to block
         }
 
         @Override
-        public E poll() {
+        public QueuedIMAPProtocol poll() {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -570,7 +593,7 @@ public class QueuingIMAPStore extends IMAPStore {
         }
 
         @Override
-        public E take() throws InterruptedException {
+        public QueuedIMAPProtocol take() throws InterruptedException {
             final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
@@ -582,7 +605,7 @@ public class QueuingIMAPStore extends IMAPStore {
                     notEmpty.signal(); // propagate to non-interrupted thread
                     throw ie;
                 }
-                final E x = q.poll();
+                final QueuedIMAPProtocol x = q.poll();
                 assert x != null;
                 return x;
             } finally {
@@ -591,13 +614,13 @@ public class QueuingIMAPStore extends IMAPStore {
         }
 
         @Override
-        public E poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+        public QueuedIMAPProtocol poll(final long timeout, final TimeUnit unit) throws InterruptedException {
             long nanos = unit.toNanos(timeout);
             final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
                 for (;;) {
-                    final E x = q.poll();
+                    final QueuedIMAPProtocol x = q.poll();
                     if (x != null) {
                         return x;
                     }
@@ -617,7 +640,7 @@ public class QueuingIMAPStore extends IMAPStore {
         }
 
         @Override
-        public E peek() {
+        public QueuedIMAPProtocol peek() {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -724,7 +747,7 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws IllegalArgumentException {@inheritDoc}
          */
         @Override
-        public int drainTo(final Collection<? super E> c) {
+        public int drainTo(final Collection<? super QueuedIMAPProtocol> c) {
             if (c == null) {
                 throw new NullPointerException();
             }
@@ -735,7 +758,7 @@ public class QueuingIMAPStore extends IMAPStore {
             lock.lock();
             try {
                 int n = 0;
-                E e;
+                QueuedIMAPProtocol e;
                 while ((e = q.poll()) != null) {
                     c.add(e);
                     ++n;
@@ -753,7 +776,7 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws IllegalArgumentException {@inheritDoc}
          */
         @Override
-        public int drainTo(final Collection<? super E> c, final int maxElements) {
+        public int drainTo(final Collection<? super QueuedIMAPProtocol> c, final int maxElements) {
             if (c == null) {
                 throw new NullPointerException();
             }
@@ -767,7 +790,7 @@ public class QueuingIMAPStore extends IMAPStore {
             lock.lock();
             try {
                 int n = 0;
-                E e;
+                QueuedIMAPProtocol e;
                 while (n < maxElements && (e = q.poll()) != null) {
                     c.add(e);
                     ++n;
@@ -842,14 +865,14 @@ public class QueuingIMAPStore extends IMAPStore {
          * @return an iterator over the elements in this queue
          */
         @Override
-        public Iterator<E> iterator() {
+        public Iterator<QueuedIMAPProtocol> iterator() {
             return new Itr(toArray());
         }
 
         /**
          * Snapshot iterator that works off copy of underlying q array.
          */
-        private class Itr implements Iterator<E> {
+        private class Itr implements Iterator<QueuedIMAPProtocol> {
 
             final Object[] array; // Array of all elements
             int cursor; // index of next element to return;
@@ -867,12 +890,12 @@ public class QueuingIMAPStore extends IMAPStore {
 
             @SuppressWarnings("unchecked")
             @Override
-            public E next() {
+            public QueuedIMAPProtocol next() {
                 if (cursor >= array.length) {
                     throw new NoSuchElementException();
                 }
                 lastRet = cursor;
-                return (E) array[cursor++];
+                return (QueuedIMAPProtocol) array[cursor++];
             }
 
             @Override
@@ -886,7 +909,7 @@ public class QueuingIMAPStore extends IMAPStore {
                 // not just a .equals element.
                 lock.lock();
                 try {
-                    for (final Iterator<E> it = q.iterator(); it.hasNext();) {
+                    for (final Iterator<QueuedIMAPProtocol> it = q.iterator(); it.hasNext();) {
                         if (it.next() == x) {
                             it.remove();
                             return;

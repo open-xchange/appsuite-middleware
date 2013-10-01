@@ -69,7 +69,7 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
     private final int maxNumAuthenticated;
 
     /** The queue */
-    private final CountingQueue<QueuedIMAPProtocol> queue;
+    private final CountingQueue queue;
 
     /** The time stamp */
     private volatile long stamp;
@@ -88,7 +88,7 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
      * @param logger The logger
      * @param q
      */
-    public QueuedIMAPProtocol(final String name, final String host, final int port, final Properties props, final boolean isSSL, final MailLogger logger, final CountingQueue<QueuedIMAPProtocol> q) throws IOException, ProtocolException {
+    public QueuedIMAPProtocol(final String name, final String host, final int port, final Properties props, final boolean isSSL, final MailLogger logger, final CountingQueue q) throws IOException, ProtocolException {
         super(name, host, port, props, isSSL, logger);
         this.queue = q;
         this.maxNumAuthenticated = PropUtil.getIntProperty(props, "mail.imap.maxNumAuthenticated", 0);
