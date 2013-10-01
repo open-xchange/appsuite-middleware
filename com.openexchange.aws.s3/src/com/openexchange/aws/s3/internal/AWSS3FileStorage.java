@@ -314,7 +314,7 @@ public class AWSS3FileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
         GetObjectRequest request = new GetObjectRequest(bucketName, name);
-        request.setRange(offset, offset + length);
+        request.setRange(offset, offset + length - 1);
         try {
             return amazonS3.getObject(request).getObjectContent();
         } catch (AmazonClientException e) {
