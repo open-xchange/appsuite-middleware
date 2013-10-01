@@ -57,6 +57,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -138,6 +139,42 @@ public abstract class JDBC4ConnectionReturner implements Connection {
         checkForAlreadyClosed();
         if (assign.isToConfigDB() && (usedForUpdate || !usedAsRead)) {
             int contextId = assign.getContextId();
+            // Increment transaction counter dependent on transaction state or not
+            boolean inTransaction = !delegate.getAutoCommit();
+            if (inTransaction) {
+                // Ok -- We are already in a transaction
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    stmt = delegate.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
+                    stmt.setInt(1, assign.getContextId());
+                    stmt.execute();
+                    stmt.close();
+                    stmt = delegate.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
+                    stmt.setInt(1, assign.getContextId());
+                    result = stmt.executeQuery();
+                    if (result.next()) {
+                        assign.setTransaction(result.getLong(1));
+                    } else {
+                        LOG.error("Updating transaction for replication monitor failed for context " + assign.getContextId() + ".");
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
+            } else {
+                // Transaction has not been initiated -- Do CAS-style increment
+                long transactionCounter;
+                do {
+                    transactionCounter = getTransactionCount(contextId);
+                    if (transactionCounter < 0) {
+                        throw new SQLException("Updating transaction for replication monitor failed for context " + contextId + ".");
+                    }
+                } while (!compareAndSet(transactionCounter, transactionCounter + 1, contextId));
+                assign.setTransaction(transactionCounter + 1);
+            }
+            /*-
+             * TODO: Review old implementation
+             *
             PreparedStatement stmt = null;
             ResultSet result = null;
             Long transactionCounter = null;
@@ -180,8 +217,37 @@ public abstract class JDBC4ConnectionReturner implements Connection {
                     LOG.error(e1.getMessage(), e1);
                 }
             }
+             * 
+             */
         }
+        // Delegate commit() to underlying connection
         delegate.commit();
+    }
+
+    private long getTransactionCount(final int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = delegate.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
+            stmt.setInt(1, contextId);
+            result = stmt.executeQuery();
+            return result.next() ? result.getLong(1) : -1L;
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private boolean compareAndSet(final long expect, final long update, final int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = delegate.prepareStatement("UPDATE replicationMonitor SET transaction=? WHERE cid=? AND transaction=?");
+            stmt.setLong(1, update);
+            stmt.setInt(2, contextId);
+            stmt.setLong(3, expect);
+            return stmt.executeUpdate() > 0;
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
     @Override
@@ -467,5 +533,48 @@ public abstract class JDBC4ConnectionReturner implements Connection {
         if (null == delegate) {
             throw new SQLException("Connection was already closed.");
         }
+    }
+
+    // ------------------------------------------------------------------------------ //
+
+    /**
+     * Closes the ResultSet.
+     *
+     * @param result <code>null</code> or a ResultSet to close.
+     */
+    private static void closeSQLStuff(final ResultSet result) {
+        if (result != null) {
+            try {
+                result.close();
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Closes the {@link Statement}.
+     *
+     * @param stmt <code>null</code> or a {@link Statement} to close.
+     */
+    private static void closeSQLStuff(final Statement stmt) {
+        if (null != stmt) {
+            try {
+                stmt.close();
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Closes the ResultSet and the Statement.
+     *
+     * @param result <code>null</code> or a ResultSet to close.
+     * @param stmt <code>null</code> or a Statement to close.
+     */
+    private static void closeSQLStuff(final ResultSet result, final Statement stmt) {
+        closeSQLStuff(result);
+        closeSQLStuff(stmt);
     }
 }
