@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.publish.Publication;
@@ -67,7 +68,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class IDBasedFileAccessDocumentLoader implements PublicationDataLoaderService {
-    
+
     private final IDBasedFileAccessFactory fileFactory;
 
 
@@ -87,7 +88,7 @@ public class IDBasedFileAccessDocumentLoader implements PublicationDataLoaderSer
         ArrayList<InputStream> documents = new ArrayList<InputStream>();
         Session session = new PublicationSession(publication);
         IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
-        InputStream is = fileAccess.getDocument(publication.getEntityId(), String.valueOf(1));
+        InputStream is = fileAccess.getDocument(publication.getEntityId(), FileStorageFileAccess.CURRENT_VERSION);
         documents.add(is);
         return documents;
     }
