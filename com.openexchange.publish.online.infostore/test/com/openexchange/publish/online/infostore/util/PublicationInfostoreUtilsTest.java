@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,79 @@
  *
  */
 
-package com.openexchange.publish.impl;
+package com.openexchange.publish.online.infostore.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.IDBasedFolderAccess;
-import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.tools.PublicationSession;
-import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
- * {@link IDBasedFolderAccessFolderLoader}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * Unit tests for {@link InfostorePublicationUtils}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.1
  */
-public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderService {
-
-    private final IDBasedFolderAccessFactory folderFactory;
-
-    private final IDBasedFileAccessFactory fileFactory;
+@RunWith(PowerMockRunner.class)
+public class PublicationInfostoreUtilsTest {
 
     /**
-     * Initializes a new {@link IDBasedFolderAccessFolderLoader}.
+     * Mock of the {@link Publication}
      */
-    public IDBasedFolderAccessFolderLoader(IDBasedFolderAccessFactory folderFactory, IDBasedFileAccessFactory fileFactory) {
-        super();
+    private Publication publication;
 
-        this.folderFactory = folderFactory;
-        this.fileFactory = fileFactory;
+    /**
+     * Mock of the {@link IDBasedFileAccessFactory}
+     */
+    private IDBasedFileAccessFactory fileAccessFactory = null;
+
+    /**
+     * Mock of the {@link IDBasedFileAccess}
+     */
+    private IDBasedFileAccess fileAccess = null;
+
+    @Before
+    public void setUp() throws Exception {
+        // MEMBERS
+        this.publication = PowerMockito.mock(Publication.class);
+        this.fileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
+        this.fileAccess = PowerMockito.mock(IDBasedFileAccess.class);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<? extends Object> load(Publication publication) throws OXException {
-        ArrayList<DocumentMetadata> folderItems = new ArrayList<DocumentMetadata>();
+    @Test(expected = IllegalArgumentException.class)
+    public void testLoadDocumentMetadata_PublicationNull_ThrowException() throws OXException {
+        InfostorePublicationUtils.loadDocumentMetadata(null, this.fileAccessFactory);
+    }
 
-        if (publication != null) {
-            Session session = new PublicationSession(publication);
-            IDBasedFolderAccess folderAccess = folderFactory.createAccess(session);
-            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
-            TimedResult<File> documents = fileAccess.getDocuments(folderAccess.getFolder(publication.getEntityId()).getId());
-            if (documents != null) {
-                SearchIterator<File> filesInFolder = documents.results();
-                while (filesInFolder.hasNext()) {
-                    final File file = filesInFolder.next();
-                    DocumentMetadata metaData = FileMetadata.getMetadata(file);
-                    folderItems.add(metaData);
-                }
-            }
-        }
-        return folderItems;
+    @Test(expected = IllegalArgumentException.class)
+    public void testLoadDocumentMetadata_FactoryNull_ThrowException() throws OXException {
+        InfostorePublicationUtils.loadDocumentMetadata(this.publication, null);
+    }
+
+    @Test
+    public void testLoadDocumentMetadata_NoFileAccess_ReturnNull() throws OXException {
+        DocumentMetadata loadDocumentMetadata = InfostorePublicationUtils.loadDocumentMetadata(this.publication, this.fileAccessFactory);
+
+        Assert.assertNull(loadDocumentMetadata);
+    }
+
+    @Test
+    public void testLoadDocumentMetadata_NoFileAccess_ReturndfdNull() throws OXException {
+        PowerMockito.when(this.fileAccessFactory.createAccess((com.openexchange.session.Session) Matchers.any())).thenReturn(
+            this.fileAccess);
+
+        DocumentMetadata loadDocumentMetadata = InfostorePublicationUtils.loadDocumentMetadata(this.publication, this.fileAccessFactory);
+
+        Assert.assertNotNull(loadDocumentMetadata);
     }
 
 }

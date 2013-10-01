@@ -80,16 +80,22 @@ public class IDBasedFileAccessDocumentLoader implements PublicationDataLoaderSer
         this.fileFactory = fileFactory;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public Collection<? extends Object> load(Publication publication) throws OXException {
         ArrayList<InputStream> documents = new ArrayList<InputStream>();
-        Session session = new PublicationSession(publication);
-        IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
-        InputStream is = fileAccess.getDocument(publication.getEntityId(), FileStorageFileAccess.CURRENT_VERSION);
-        documents.add(is);
+
+        if (publication != null) {
+            Session session = new PublicationSession(publication);
+            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
+            InputStream is = fileAccess.getDocument(publication.getEntityId(), FileStorageFileAccess.CURRENT_VERSION);
+            if (is != null) {
+                documents.add(is);
+            }
+        }
+
         return documents;
     }
 

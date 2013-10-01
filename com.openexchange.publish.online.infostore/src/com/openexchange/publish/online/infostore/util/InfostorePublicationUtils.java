@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,47 @@
  *
  */
 
-package com.openexchange.publish.impl;
+package com.openexchange.publish.online.infostore.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import org.apache.commons.lang.Validate;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.IDBasedFolderAccess;
-import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
-
 
 /**
- * {@link IDBasedFolderAccessFolderLoader}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link InfostorePublicationUtils}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.1
  */
-public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderService {
-
-    private final IDBasedFolderAccessFactory folderFactory;
-
-    private final IDBasedFileAccessFactory fileFactory;
+public class InfostorePublicationUtils {
 
     /**
-     * Initializes a new {@link IDBasedFolderAccessFolderLoader}.
+     * Loads the meta-data of the document associated with specified publication.
+     * 
+     * @param publication The publication
+     * @return The associated document's meta-data or <b><code>null</code></b>
+     * @throws OXException If loading meta-data fails
      */
-    public IDBasedFolderAccessFolderLoader(IDBasedFolderAccessFactory folderFactory, IDBasedFileAccessFactory fileFactory) {
-        super();
+    public static DocumentMetadata loadDocumentMetadata(final Publication publication, IDBasedFileAccessFactory fileAccessFactory) throws OXException {
+        Validate.notNull(publication, "Publication cannot be null!");
+        Validate.notNull(fileAccessFactory, "IDBasedFileAccessFactory cannot be null!");
 
-        this.folderFactory = folderFactory;
-        this.fileFactory = fileFactory;
-    }
+        Session session = new PublicationSession(publication);
+        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<? extends Object> load(Publication publication) throws OXException {
-        ArrayList<DocumentMetadata> folderItems = new ArrayList<DocumentMetadata>();
-
-        if (publication != null) {
-            Session session = new PublicationSession(publication);
-            IDBasedFolderAccess folderAccess = folderFactory.createAccess(session);
-            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
-            TimedResult<File> documents = fileAccess.getDocuments(folderAccess.getFolder(publication.getEntityId()).getId());
-            if (documents != null) {
-                SearchIterator<File> filesInFolder = documents.results();
-                while (filesInFolder.hasNext()) {
-                    final File file = filesInFolder.next();
-                    DocumentMetadata metaData = FileMetadata.getMetadata(file);
-                    folderItems.add(metaData);
-                }
-            }
+        if (fileAccess != null) {
+            final String entityId = publication.getEntityId();
+            File file = fileAccess.getFileMetadata(entityId, String.valueOf(1));
+            return FileMetadata.getMetadata(file);
         }
-        return folderItems;
+        return null;
     }
 
 }

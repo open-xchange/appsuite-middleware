@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.capabilities.osgi;
+package com.openexchange.publish.online.infostore.osgi;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -57,98 +57,123 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.caching.CacheService;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.context.ContextService;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.osgi.ServiceProvider;
 import com.openexchange.osgi.SimpleServiceProvider;
+import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.PublicationService;
 import com.openexchange.test.mock.InjectionFieldConstants;
 import com.openexchange.test.mock.MockUtils;
 import com.openexchange.test.mock.assertion.ServiceMockActivatorAsserter;
 
+
 /**
- * Unit tests for {@link CapabilitiesActivator}
+ * Unit tests for {@link Activator}
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * @since 7.4.1
  */
-public class CapabilitiesActivatorTest {
+@RunWith(PowerMockRunner.class)
+public class ActivatorTest {
 
     /**
-     * Instance to test
+     * Class under test
      */
-    private CapabilitiesActivator capabilitiesActivator = null;
+    private Activator activator = null;
 
-    private ConfigurationService configurationService = PowerMockito.mock(ConfigurationService.class);
+    /**
+     * {@link IDBasedFileAccessFactory} mock
+     */
+    private IDBasedFileAccessFactory idBasedFileAccessFactory;
 
-    private CacheService cacheService = PowerMockito.mock(CacheService.class);
+    /**
+     * {@link HttpService} mock
+     */
+    private HttpService httpService = null;
 
+    /**
+     * {@link PublicationDataLoaderService} mock
+     */
+    private PublicationDataLoaderService publicationDataLoaderService = null;
+
+    /**
+     * {@link ContextService} mock
+     */
+    private ContextService contextService = null;
+
+    /**
+     * {@link BundleContext} mock
+     */
     private BundleContext bundleContext;
 
+    /**
+     * {@link Bundle} mock
+     */
     private Bundle bundle;
 
-    /**
-     * {@inheritDoc}
-     */
     @Before
-    public void setUp() {
-        this.capabilitiesActivator = new CapabilitiesActivator();
+    public void setUp() throws Exception {
+        this.activator = new Activator();
 
         // MEMBERS
         this.bundleContext = PowerMockito.mock(BundleContext.class);
         this.bundle = PowerMockito.mock(Bundle.class);
+        this.idBasedFileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
+        this.httpService = PowerMockito.mock(HttpService.class);
+        this.publicationDataLoaderService = PowerMockito.mock(PublicationDataLoaderService.class);
+        this.contextService = PowerMockito.mock(ContextService.class);
 
+        // SERVICES
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>();
-        services.putIfAbsent(ConfigurationService.class, new SimpleServiceProvider<Object>(configurationService));
-        services.putIfAbsent(CacheService.class, new SimpleServiceProvider<Object>(cacheService));
-        MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.SERVICES, services);
+        services.putIfAbsent(IDBasedFileAccessFactory.class, new SimpleServiceProvider<Object>(idBasedFileAccessFactory));
+        services.putIfAbsent(HttpService.class, new SimpleServiceProvider<Object>(httpService));
+        services.putIfAbsent(PublicationDataLoaderService.class, new SimpleServiceProvider<Object>(publicationDataLoaderService));
+        services.putIfAbsent(ContextService.class, new SimpleServiceProvider<Object>(contextService));
+        MockUtils.injectValueIntoPrivateField(this.activator, InjectionFieldConstants.SERVICES, services);
 
         // CONTEXT
         Mockito.when(this.bundleContext.getBundle()).thenReturn(this.bundle);
-        MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.CONTEXT, bundleContext);
+        MockUtils.injectValueIntoPrivateField(this.activator, InjectionFieldConstants.CONTEXT, bundleContext);
     }
 
     @Test
-    public void testStartBundle_EverythingFine_AllServicesRegistered() throws Exception {
-        this.capabilitiesActivator.startBundle();
+    public void testStartBundle_Fine_OneServiceRegistered() throws Exception {
+        this.activator.startBundle();
 
-        ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.capabilitiesActivator, 4);
+        ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.activator, 1);
     }
 
     @Test
-    public void testStartBundle_EverythingFine_AllTrackersRegistered() throws Exception {
-        this.capabilitiesActivator.startBundle();
+    public void testStopBundle_Fine_AllServicesUnregistered() throws Exception {
+        final Map<Object, ServiceRegistration<?>> serviceRegistrations = new LinkedHashMap<Object, ServiceRegistration<?>>(6);
+        ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
+        serviceRegistrations.put(PublicationService.class, serviceRegistration);
+        MockUtils.injectValueIntoPrivateField(this.activator, InjectionFieldConstants.SERVICE_REGISTRATIONS, serviceRegistrations);
 
-        ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.capabilitiesActivator, 3);
+        this.activator.stopBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServicesUnregistered(this.activator);
     }
 
     @Test
-    public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
+    public void testStopBundle_Fine_AllTrackersClosed() throws Exception {
         final List<ServiceTracker<?, ?>> serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
         ServiceTracker<?, ?> serviceTracker = PowerMockito.mock(ServiceTracker.class);
         serviceTrackers.add(serviceTracker);
-        MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.SERVICE_TRACKERS, serviceTrackers);
+        MockUtils.injectValueIntoPrivateField(this.activator, InjectionFieldConstants.SERVICE_TRACKERS, serviceTrackers);
 
-        this.capabilitiesActivator.stopBundle();
+        this.activator.stopBundle();
 
-        ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.capabilitiesActivator);
-    }
-
-    @Test
-    public void testStopBundle_EverythingFine_AllServicesClosed() throws Exception {
-        final Map<Object, ServiceRegistration<?>> serviceRegistrations = new LinkedHashMap<Object, ServiceRegistration<?>>(6);
-        ServiceRegistration<?> serviceRegistration = PowerMockito.mock(ServiceRegistration.class);
-        serviceRegistrations.put(CapabilityService.class, serviceRegistration);
-        MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.SERVICE_REGISTRATIONS, serviceRegistrations);
-
-        this.capabilitiesActivator.stopBundle();
-
-        ServiceMockActivatorAsserter.verifyAllServicesUnregistered(this.capabilitiesActivator);
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.activator);
     }
 }
