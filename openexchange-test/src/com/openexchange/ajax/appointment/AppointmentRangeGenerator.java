@@ -49,54 +49,90 @@
 
 package com.openexchange.ajax.appointment;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
-import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Random;
 
-public class AppointmentAJAXSuite extends TestSuite{
-
-    private AppointmentAJAXSuite() {
-        super();
+/**
+ * Generates random date ranges spanning from am to pm on a workday. {@link AppointmentRangeGenerator}
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
+class AppointmentRangeGenerator {
+    
+    /**
+     * A DateRange container consisting of a start- and endDate. 
+     * {@link AppointmentRange}
+     *
+     * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+     */
+    public  class AppointmentRange {
+        public Date startDate;
+        public Date endDate;
+        
+        public AppointmentRange(Date startDate, Date endDate) {
+            this.startDate = startDate;
+            this.endDate = endDate;
+        }
     }
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-        tests.addTestSuite(ConfirmOthers.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(FreeBusyTest.class);
-        tests.addTestSuite(HasTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(UpdatesForModifiedAndDeletedTest.class);
-        tests.addTestSuite(ConflictTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(PortalSearchTest.class);
-        tests.addTestSuite(FunambolTest.class);
-        tests.addTestSuite(NewListTest.class);
-        tests.addTestSuite(UserStory2173Test.class);
-        tests.addTestSuite(CalendarTestManagerTest.class);
-        tests.addTestSuite(UserStory1085Test.class);
-        tests.addTestSuite(AppointmentAttachmentTests.class);
-        tests.addTestSuite(ConfirmationsTest.class);
-        tests.addTestSuite(SharedFoldersShowOwnersPrivateAppointmentsAsBlocks.class);
-        tests.addTestSuite(CreatedByTest.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(DeleteMultipleAppointmentTest.class);
-        tests.addTestSuite(GetChangeExceptionsTest.class);
-        tests.addTest(RecurrenceTestSuite.suite());
-        tests.addTest(AppointmentBugTestSuite.suite());
-        tests.addTest(NewAppointmentHttpApiTestSuite.suite());
-        tests.addTestSuite(PrivateTests.class);
-        return tests;
+    private final Random random;
+
+    private final Calendar calendar;
+
+    /**
+     * Initializes a new {@link AppointmentRangeGenerator}.
+     * 
+     * @param calendar Calendar of the user
+     */
+    public AppointmentRangeGenerator(Calendar calendar) {
+        this.random = new Random();
+        this.calendar = calendar;
+    }
+
+    /**
+     * Returns a random date range spanning from am to pm on a workday.
+     * 
+     * @return a random date range spanning from am to pm on a workday.
+     */
+    public AppointmentRange getDateRange() {
+        Date startDate, endDate;
+
+        calendar.set(Calendar.DAY_OF_WEEK, getRandomWorkDay());
+
+        calendar.set(Calendar.HOUR_OF_DAY, getRandomAMTime());
+        startDate = calendar.getTime();
+
+        calendar.set(Calendar.HOUR_OF_DAY, getRandomPMTime());
+        endDate = calendar.getTime();
+
+        return new AppointmentRange(startDate, endDate);
+    }
+
+    /**
+     * Generate a random workday MO-FR
+     * 
+     * @return and int for the random workday
+     */
+    private int getRandomWorkDay() {
+        return Calendar.MONDAY + random.nextInt(5);
+    }
+
+    /**
+     * Generate a random full hour AM time between 0 and 11
+     * 
+     * @return a random full hour PM time between 0 and 11
+     */
+    private int getRandomAMTime() {
+        return random.nextInt(12);
+    }
+
+    /**
+     * Generate a random full hour PM time between 12 and 23
+     * 
+     * @return a random full hour PM time between 12 and 23
+     */
+    private int getRandomPMTime() {
+        return 12 + random.nextInt(12);
     }
 }

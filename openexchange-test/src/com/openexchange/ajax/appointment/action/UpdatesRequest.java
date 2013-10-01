@@ -54,10 +54,13 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 
 /**
- *
+ * Request to get updated appointments.
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> {
 
@@ -66,16 +69,63 @@ public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> 
     private final Date timestamp;
     private final boolean recurrenceMaster;
     private final boolean showPrivates;
+    private final Ignore ignore;
 
+    /**
+     * Initializes a new {@link UpdatesRequest} that doesn't show private appointments and ignores updates for deleted. 
+     * 
+     * @param folderId Folder id to use for the request
+     * @param columns  Columns to use for the request
+     * @param timestamp Timestamp to use for the request
+     * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
+     */
     public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
-        this(folderId,columns,timestamp,recurrenceMaster,false);
+        this(folderId, columns, timestamp, recurrenceMaster, false, Ignore.DELETED);
     }
+
+    /**
+     * Initializes a new {@link UpdatesRequest} that ignores updates for deleted.
+     * 
+     * @param folderId Folder id to use for the request
+     * @param columns  Columns to use for the request
+     * @param timestamp Timestamp to use for the request
+     * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
+     * @param showPrivates When true, shows private appointments of the folder owner (Only works in shared folders)
+     */
     public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates) {
+        this(folderId, columns, timestamp, recurrenceMaster, showPrivates, Ignore.DELETED);
+    }
+
+    /**
+     * Initializes a new {@link UpdatesRequest}. Ignores private appointments by default.
+     * 
+     * @param folderId Folder id to use for the request
+     * @param columns  Columns to use for the request
+     * @param timestamp Timestamp to use for the request
+     * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
+     * @param ignore What kind of updates should be ignored
+     */
+    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, Ignore ignore) {
+        this(folderId, columns, timestamp, recurrenceMaster, false, ignore);
+    }
+
+    /**
+     * Initializes a new {@link UpdatesRequest}.
+     * 
+     * @param folderId Folder id to use for the request
+     * @param columns  Columns to use for the request
+     * @param timestamp Timestamp to use for the request
+     * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
+     * @param showPrivates When true, shows private appointments of the folder owner (Only works in shared folders)
+     * @param ignore What kind of updates should be ignored
+     */
+    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates, Ignore ignore) {
         this.folderId = folderId;
         this.columns = columns;
         this.timestamp = timestamp;
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
+        this.ignore = ignore;
     }
 
     @Override
@@ -95,7 +145,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> 
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, timestamp));
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "deleted"));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, ignore.getValue()));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER, recurrenceMaster));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
         return parameterList.toArray(new Parameter[parameterList.size()]);
