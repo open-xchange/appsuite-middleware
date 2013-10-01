@@ -50,6 +50,7 @@
 package com.openexchange.aws.s3.internal;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.amazonaws.AmazonClientException;
@@ -93,7 +94,7 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
 
     @Override
     public AWSS3FileStorage getFileStorage(URI uri) throws OXException {
-//        try { uri = new URI("s3:/development"); } catch (URISyntaxException e) { }
+        try { uri = new URI("s3:/development"); } catch (URISyntaxException e) { }
         AWSS3FileStorage storage = storages.get(uri);
         if (null == storage) {
             String bucketName = initBucket(uri);
@@ -113,8 +114,8 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
 
     @Override
     public boolean supports(URI uri) {
-//        return true;
-        return null != uri && S3_SCHEME.equalsIgnoreCase(uri.getScheme());
+        return true;
+         //return null != uri && S3_SCHEME.equalsIgnoreCase(uri.getScheme());
     }
 
     @Override

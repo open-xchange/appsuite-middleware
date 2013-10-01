@@ -358,10 +358,14 @@ public class AWSS3FileStorage implements FileStorage {
     }
 
     private static OXException wrap(AmazonClientException e) {
-        //TODO
         if (AmazonServiceException.class.isInstance(e)) {
-            AmazonServiceException ase = (AmazonServiceException)e;
-
+            final AmazonServiceException serviceError = (AmazonServiceException) e;
+            // Get the error code
+            final String errorCode = serviceError.getErrorCode();
+            final AwsS3ExceptionCode code = AwsS3ExceptionCode.getCodeFor(errorCode);
+            if (null != code) {
+                return code.create(e, new Object[0]);
+            }
         }
         return FileStorageCodes.IOERROR.create(e, e.getMessage());
     }
