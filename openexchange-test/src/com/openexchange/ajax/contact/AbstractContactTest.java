@@ -649,6 +649,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             inputStream = httpResponse.getEntity().getContent();
             final int len = 8192;
             final byte[] buf = new byte[len];
+            @SuppressWarnings("resource") //Closing a ByteArrayOutputStream has no effect
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
             for (int read; (read = inputStream.read(buf, 0, len)) > 0;) {
                 out.write(buf, 0, read);
@@ -663,14 +664,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
                 }
             }
         }
-    }
-
-    public Contact[] listModifiedAppointment(final int inFolder, final Date modified) throws Exception {
-        final int[] cols = new int[]{ Appointment.OBJECT_ID };
-        final UpdatesRequest request = new UpdatesRequest(inFolder, cols, 0, null, modified);
-        final ContactUpdatesResponse response = client.execute(request);
-
-        return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
 
     protected Contact[] jsonArray2ContactArray(final JSONArray jsonArray, final int[] cols) throws Exception {
@@ -1357,7 +1350,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
         DeleteRequest[] deleteRequests = new DeleteRequest[numContacts];
         for (int i = 0; i < numContacts; i++) {
             Contact contact = contacts[i];
-            contact.setDisplayName(contact.getDisplayName() + " was updated");
             deleteRequests[i] = new DeleteRequest(contact);
         }
         MultipleRequest<CommonDeleteResponse> multipleDelete = MultipleRequest.create(deleteRequests);
