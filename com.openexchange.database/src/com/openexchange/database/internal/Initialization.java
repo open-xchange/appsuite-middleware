@@ -57,6 +57,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -165,12 +166,15 @@ public final class Initialization {
     public Timer getTimer() {
         return timer;
     }
-    
+
     private String parseConfigDBSchema() {
         String schemaName = null;
         String url = configuration.getReadUrl();
-        if (null != url) {
-            schemaName = url.substring(url.lastIndexOf("/") + 1, url.length());
+        if (!Strings.isEmpty(url)) {
+            int lastPos = url.lastIndexOf('/');
+            if (lastPos > 0) {
+                schemaName = url.substring(lastPos + 1);
+            }
         }
         return schemaName;
     }

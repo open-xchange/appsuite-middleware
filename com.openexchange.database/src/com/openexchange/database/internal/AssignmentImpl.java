@@ -49,6 +49,7 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.database.internal.ConfigDatabaseServiceImpl.getConfigDBSchemaName;
 import java.io.Serializable;
 import com.openexchange.database.Assignment;
 
@@ -133,10 +134,10 @@ public class AssignmentImpl implements Serializable, Assignment {
         this.transaction = transaction;
         transactionInitialized = true;
     }
-    
+
     @Override
     public boolean isToConfigDB() {
-        return ConfigDatabaseServiceImpl.getConfigDBSchemaName().equals(schema) || null == schema;
+        return null == schema || schema.equals(getConfigDBSchemaName());
     }
 
     @Override
