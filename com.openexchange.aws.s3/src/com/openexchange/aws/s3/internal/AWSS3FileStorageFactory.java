@@ -56,7 +56,6 @@ import java.util.concurrent.ConcurrentMap;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.internal.BucketNameUtils;
-import com.openexchange.aws.s3.exceptions.OXAWSS3ExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
@@ -154,9 +153,11 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
             }
             return bucketName;
         } catch (IllegalArgumentException e) {
-            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
+            throw AwsS3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (AmazonClientException e) {
-            throw OXAWSS3ExceptionCodes.S3_INITIALIZATION_ERROR.create(e, e.getMessage());
+            throw AwsS3ExceptionCode.wrap(e);
+        } catch (RuntimeException e) {
+            throw AwsS3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.aws.s3.internal;
 
+import static com.openexchange.aws.s3.internal.AwsS3ExceptionCode.wrap;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,7 +79,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.UploadPartRequest;
-import com.openexchange.aws.s3.exceptions.OXAWSS3ExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
@@ -156,15 +156,10 @@ public class AWSS3FileStorage implements FileStorage {
     @Override
     public SortedSet<String> getFileList() throws OXException {
         SortedSet<String> retval = new TreeSet<String>();
-        try {
-            ObjectListing listing = amazonS3.listObjects(bucketName);
-            List<S3ObjectSummary> summaries = listing.getObjectSummaries();
-            for (S3ObjectSummary summary : summaries) {
-                retval.add(summary.getKey());
-            }
-        } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_GET_FILELIST_FAILED.create(e.getMessage());
+        ObjectListing listing = amazonS3.listObjects(bucketName);
+        List<S3ObjectSummary> summaries = listing.getObjectSummaries();
+        for (S3ObjectSummary summary : summaries) {
+            retval.add(summary.getKey());
         }
         return retval;
     }
@@ -193,7 +188,7 @@ public class AWSS3FileStorage implements FileStorage {
     @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
         Set<String> retval = new TreeSet<String>();
-        try {
+        {
             DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName);
             List<KeyVersion> keys = new ArrayList<KeyVersion>();
             for (String file : identifiers) {
@@ -205,29 +200,21 @@ public class AWSS3FileStorage implements FileStorage {
             for (DeletedObject object : deleteResult.getDeletedObjects()) {
                 retval.add(object.getKey());
             }
-        } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_DELETE_MULTIPLE_FAILED.create(identifiers.length, e.getMessage());
         }
         return retval;
     }
 
     @Override
     public void remove() throws OXException {
-        try {
-            List<KeyVersion> allFiles = new ArrayList<KeyVersion>();
-            ObjectListing listing = amazonS3.listObjects(bucketName);
-            List<S3ObjectSummary> summaries = listing.getObjectSummaries();
-            for (S3ObjectSummary summary : summaries) {
-                allFiles.add(new KeyVersion(summary.getKey()));
-            }
-            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
-            deleteObjectsRequest.setKeys(allFiles);
-            amazonS3.deleteObjects(deleteObjectsRequest);
-        } catch (AmazonClientException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXAWSS3ExceptionCodes.S3_DELETE_ALL_ERROR.create(bucketName, e.getMessage());
+        List<KeyVersion> allFiles = new ArrayList<KeyVersion>();
+        ObjectListing listing = amazonS3.listObjects(bucketName);
+        List<S3ObjectSummary> summaries = listing.getObjectSummaries();
+        for (S3ObjectSummary summary : summaries) {
+            allFiles.add(new KeyVersion(summary.getKey()));
         }
+        DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
+        deleteObjectsRequest.setKeys(allFiles);
+        amazonS3.deleteObjects(deleteObjectsRequest);
     }
 
     @Override
@@ -402,19 +389,6 @@ public class AWSS3FileStorage implements FileStorage {
         } catch (NoSuchAlgorithmException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
-    }
-
-    private static OXException wrap(AmazonClientException e) {
-        if (AmazonServiceException.class.isInstance(e)) {
-            final AmazonServiceException serviceError = (AmazonServiceException) e;
-            // Get the error code
-            final String errorCode = serviceError.getErrorCode();
-            final AwsS3ExceptionCode code = AwsS3ExceptionCode.getCodeFor(errorCode);
-            if (null != code) {
-                return code.create(e, new Object[0]);
-            }
-        }
-        return FileStorageCodes.IOERROR.create(e, e.getMessage());
     }
 
     private static String newUid() {

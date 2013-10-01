@@ -54,10 +54,13 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
  * {@link AwsS3ExceptionCode} - Enumeration of all {@link OXException}s known in AWS S3 module.
@@ -491,6 +494,25 @@ public enum AwsS3ExceptionCode implements OXExceptionCode {
             return null;
         }
         return MAP.get(toLowerCase(errorCode));
+    }
+
+    /**
+     * Wraps given Amazon S3 exception with an appropriate error code.
+     *
+     * @param e The Amazon S3 exception
+     * @return The wrapping error code
+     */
+    public static OXException wrap(final AmazonClientException e) {
+        if (AmazonServiceException.class.isInstance(e)) {
+            final AmazonServiceException serviceError = (AmazonServiceException) e;
+            // Get the error code
+            final String errorCode = serviceError.getErrorCode();
+            final AwsS3ExceptionCode code = AwsS3ExceptionCode.getCodeFor(errorCode);
+            if (null != code) {
+                return code.create(e, new Object[0]);
+            }
+        }
+        return FileStorageCodes.IOERROR.create(e, e.getMessage());
     }
 
     private final Category category;
