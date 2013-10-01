@@ -63,7 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -95,7 +95,7 @@ public class InfostoreDowngradeTest extends TestCase {
         Init.startServer();
         AJAXConfig.init();
 
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME)));
         userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
         user = UserStorage.getInstance().getUser(userId, ctx);
         permissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
@@ -104,7 +104,7 @@ public class InfostoreDowngradeTest extends TestCase {
         final FolderObject fo = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
         folderId = fo.getObjectID();
 
-        database = new InfostoreFacadeImpl(new DBPoolProvider());
+        database = new EventFiringInfostoreFacadeImpl(new DBPoolProvider());
         database.setTransactional(true);
 
         session = ServerSessionFactory.createServerSession(userId, ctx, "Blubb");

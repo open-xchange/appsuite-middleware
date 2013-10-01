@@ -56,7 +56,7 @@ import com.openexchange.groupware.container.DataObject;
 
 
 /**
- * {@link AbstractUpdatesResponse} - 
+ * {@link AbstractUpdatesResponse} -
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -78,9 +78,9 @@ public class AbstractUpdatesResponse extends AbstractColumnsResponse {
         super.setArray(array);
         initUpdatedIds(array);
     }
-    
+
     /**
-     * Get a collection of object ids that were modified(new or updated) during the request. 
+     * Get a collection of object ids that were modified(new or updated) during the request.
      * @return a collection of object ids that were modified during the request.
      */
     public Set<Integer> getNewOrModifiedIds() {
@@ -88,7 +88,7 @@ public class AbstractUpdatesResponse extends AbstractColumnsResponse {
     }
 
     /**
-     * Get a collection of object ids that were deleted during the request. 
+     * Get a collection of object ids that were deleted during the request.
      * @return a collection of object ids that were deleted during the request.
      */
     public Set<Integer> getDeletedIds() {
@@ -97,7 +97,7 @@ public class AbstractUpdatesResponse extends AbstractColumnsResponse {
 
     /*
      * Deleted Objects are represented as String ids on the toplevel of the response array
-     * 
+     *
      * New or modified Objects are represented as array on the toplevel of the response array
      * [
      *  31279,
@@ -124,11 +124,23 @@ public class AbstractUpdatesResponse extends AbstractColumnsResponse {
 
         for(Object[] objectArray : responseData) {
             if(objectArray.length == 1) {
-                Integer objectId = (Integer)objectArray[0];
-                deletedIds.add(objectId);
+                Object obj = objectArray[0];
+                int id;
+                if (obj instanceof String) {
+                    id = Integer.parseInt((String)obj);
+                } else {
+                    id = ((Integer)obj).intValue();
+                }
+                deletedIds.add(id);
             } else {
-                Integer objectId = (Integer) objectArray[idPosition];
-                newOrModifiedIds.add(objectId);
+                Object obj = objectArray[idPosition];
+                int id;
+                if (obj instanceof String) {
+                    id = Integer.parseInt((String)obj);
+                } else {
+                    id = ((Integer)obj).intValue();
+                }
+                newOrModifiedIds.add(id);
             }
         }
     }

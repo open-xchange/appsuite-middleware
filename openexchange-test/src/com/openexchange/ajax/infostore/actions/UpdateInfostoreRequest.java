@@ -53,10 +53,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 /**
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
@@ -65,30 +67,29 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
 
     private DocumentMetadata metadata;
     private File upload;
-    private final long folderId;
+    private Metadata[] fields;
     private final int id;
+    private final Date lastModified;
 
-    public UpdateInfostoreRequest() {
-        this(null, null);
-    }
-
-    public UpdateInfostoreRequest(final long folderId, final int id, final File upload) {
-        this.folderId = folderId;
+    public UpdateInfostoreRequest(int id, Date lastModified, File upload) {
         this.id = id;
         this.upload = upload;
+        this.lastModified = lastModified;
     }
 
-    public UpdateInfostoreRequest(DocumentMetadata data, File upload) {
+    public UpdateInfostoreRequest(DocumentMetadata data, Metadata[] fields, File upload, Date lastModified) {
         this.metadata = data;
-        this.folderId = null == data ? 0L : data.getFolderId();
-        this.id = null == data ? 0 : data.getId();
-        this.upload = upload;
-    }
-
-    public UpdateInfostoreRequest(DocumentMetadata data) {
-        this.metadata = data;
-        this.folderId = data.getFolderId();
         this.id = data.getId();
+        this.lastModified = lastModified;
+        this.upload = upload;
+        this.fields = fields;
+    }
+
+    public UpdateInfostoreRequest(DocumentMetadata data, Metadata[] fields, Date lastModified) {
+        this.metadata = data;
+        this.id = data.getId();
+        this.lastModified = lastModified;
+        this.fields = fields;
     }
 
     public void setMetadata(DocumentMetadata metadata) {
@@ -101,7 +102,7 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
 
     @Override
     public String getBody() throws JSONException {
-        return writeJSON(getMetadata());
+        return writeJSON(getMetadata(), fields);
     }
 
     @Override
@@ -114,7 +115,7 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
         List<Parameter> tmp = new ArrayList<Parameter>(3);
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
-        tmp.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        tmp.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified));
         if (null != upload) {
             tmp.add(new FieldParameter("json", getBody()));
             tmp.add(new FileParameter("file", upload.getName(), new FileInputStream(upload), metadata.getFileMIMEType()));

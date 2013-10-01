@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,75 +49,44 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.HashSet;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.writer.InfostoreWriter;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.writer.ResponseWriter;
+
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link UpdatesInfostoreParser}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class UpdatesInfostoreParser extends AbstractAJAXParser<UpdatesInfostoreResponse> {
 
-    private boolean failOnError;
-
-    public static final String INFOSTORE_URL = "/ajax/infostore";
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    public boolean getFailOnError() {
-        return failOnError;
+    public UpdatesInfostoreParser(boolean failOnError, int[] columns) {
+        super(failOnError);
     }
 
     @Override
-    public String getServletPath() {
-        return INFOSTORE_URL;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    public String writeJSON(DocumentMetadata data) throws JSONException {
-        return convertToJSON(data, null);
-    }
-
-    public String writeJSON(DocumentMetadata data,Metadata[] fields) throws JSONException {
-        return convertToJSON(data,fields);
-    }
-
-    public static String convertToJSON(DocumentMetadata data, Metadata[] fields) throws JSONException{
-        if (fields == null) {
-            fields = Metadata.HTTPAPI_VALUES_ARRAY;
+    protected UpdatesInfostoreResponse createResponse(Response response) throws JSONException {
+        Set<String> deleted = new HashSet<String>();
+        Set<JSONArray> newAndModified = new HashSet<JSONArray>();
+        JSONObject json = ResponseWriter.getJSON(response);
+        JSONArray data = json.getJSONArray(ResponseFields.DATA);
+        for (int i = 0; i < data.length(); i++) {
+            Object obj = data.get(i);
+            if (obj instanceof String) {
+                deleted.add((String)obj);
+            } else {
+                newAndModified.add((JSONArray)obj);
+            }
         }
-        StringWriter results = new StringWriter();
-        InfostoreWriter writer = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
-        writer.writeLimited(data, fields, TimeZone.getDefault());
-        return results.getBuffer().toString();
+
+        return new UpdatesInfostoreResponse(response, deleted, newAndModified);
     }
 
-    public JSONArray writeFolderAndIDList(List<Integer> ids, List<Integer> folders) throws JSONException {
-        JSONArray array = new JSONArray();
-        for (int i = 0, length = ids.size(); i < length; i++) {
-            JSONObject tuple = new JSONObject();
-            tuple.put(AJAXServlet.PARAMETER_ID, ids.get(i).intValue());
-            tuple.put(AJAXServlet.PARAMETER_FOLDERID, folders.get(i).intValue());
-            array.put(tuple);
-        }
-        return array;
-    }
 }

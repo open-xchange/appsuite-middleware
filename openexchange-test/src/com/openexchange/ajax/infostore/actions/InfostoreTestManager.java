@@ -64,6 +64,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -152,6 +153,20 @@ public class InfostoreTestManager {
         lastResponse = newResponse;
         data.setId(newResponse.getID());
         createdEntities.add(data);
+    }
+
+    public void updateAction(DocumentMetadata data, Metadata[] fields, Date timestamp) throws OXException, IOException, JSONException {
+        UpdateInfostoreRequest updateRequest = new UpdateInfostoreRequest(data, fields, timestamp);
+        updateRequest.setFailOnError(getFailOnError());
+        UpdateInfostoreResponse updateResponse = getClient().execute(updateRequest);
+        lastResponse = updateResponse;
+    }
+    
+    public void updateAction(DocumentMetadata data, File file, Metadata[] fields, Date timestamp) throws OXException, IOException, JSONException {
+        UpdateInfostoreRequest updateRequest = new UpdateInfostoreRequest(data, fields, file, timestamp);
+        updateRequest.setFailOnError(getFailOnError());
+        UpdateInfostoreResponse updateResponse = getClient().execute(updateRequest);
+        lastResponse = updateResponse;
     }
 
     public void deleteAction(List<Integer> ids, List<Integer> folders, Date timestamp) throws OXException, IOException, SAXException, JSONException {
