@@ -521,19 +521,19 @@ public class ICal4JParser implements ICalParser {
         }
 	    m.appendTail(sb);
 
-	    m = Pattern.compile("DTSTART;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+	    m = Pattern.compile("COMPLETED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
         while (m.find()) {
             final TimeZone tz = getTimeZone(m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("DTSTART:" + getUtcPropertyFrom(m.group(2), tz)));
+            m.appendReplacement(sb, Strings.quoteReplacement("COMPLETED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
 
-        m = Pattern.compile("DTEND;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        m = Pattern.compile("LAST-MODIFIED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
         while (m.find()) {
             final TimeZone tz = getTimeZone(m.group(1));
-            m.appendReplacement(sb, Strings.quoteReplacement("DTEND:" + getUtcPropertyFrom(m.group(2), tz)));
+            m.appendReplacement(sb, Strings.quoteReplacement("LAST-MODIFIED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
 
@@ -542,6 +542,14 @@ public class ICal4JParser implements ICalParser {
         while (m.find()) {
             final TimeZone tz = getTimeZone(m.group(1));
             m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        m = Pattern.compile("TRIGGER;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("TRIGGER:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
 
