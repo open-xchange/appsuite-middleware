@@ -1,3 +1,7 @@
+* 2013-10-01 - thorben.betten@open-xchange.com
+
+ - Change for bug 29081: Adapted category of error code 'UWA_WIDGET-0004' to USER_INPUT to display meaningful error message to the user
+
 * 2013-09-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 29071: Extended preview cache to also keep scaled images to have computation once, but not on every new client request

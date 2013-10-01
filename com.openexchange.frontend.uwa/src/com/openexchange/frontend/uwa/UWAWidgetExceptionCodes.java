@@ -67,7 +67,7 @@ public enum UWAWidgetExceptionCodes implements OXExceptionCode {
     UNEXPECTED_ERROR(UWAWidgetExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     SQLError(UWAWidgetExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2),
     NOT_FOUND(UWAWidgetExceptionMessages.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 3),
-    PROTECTED(UWAWidgetExceptionMessages.PROTECTED_MSG, CATEGORY_ERROR, 4),
+    PROTECTED(UWAWidgetExceptionMessages.PROTECTED_MSG, CATEGORY_USER_INPUT, 4),
     INVALID_CONFIGURATION("Invalid configuration in widget definition file. Please ensure the file looks like this:\nwidget12:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget1\n  visible: true\n  title:Widget 1\n\nwidget13:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget2\n  visible: true\n  title:Widget 2\n", CATEGORY_CONFIGURATION, 5),
     /**
      * The string cannot be parsed to a valid URL.
