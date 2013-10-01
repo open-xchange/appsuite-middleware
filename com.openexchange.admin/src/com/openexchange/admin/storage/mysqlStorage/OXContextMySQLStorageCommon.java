@@ -444,6 +444,10 @@ public class OXContextMySQLStorageCommon {
                 public String getSchema() {
                     return db.getScheme();
                 }
+                @Override
+                public boolean isToConfigDB() {
+                    return true;
+                }
             });
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);

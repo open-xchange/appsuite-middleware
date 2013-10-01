@@ -109,7 +109,8 @@ public final class Initialization {
         final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
-        configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor);
+        String configDBSchemaName = parseConfigDBSchema();
+        configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor, configDBSchemaName);
         // Context database assignments.
         contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
         if (null != cacheService) {
@@ -163,5 +164,14 @@ public final class Initialization {
 
     public Timer getTimer() {
         return timer;
+    }
+    
+    private String parseConfigDBSchema() {
+        String schemaName = null;
+        String url = configuration.getReadUrl();
+        if (null != url) {
+            schemaName = url.substring(url.lastIndexOf("/") + 1, url.length());
+        }
+        return schemaName;
     }
 }

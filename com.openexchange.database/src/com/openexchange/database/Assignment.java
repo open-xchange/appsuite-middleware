@@ -66,5 +66,7 @@ public interface Assignment {
     int getWritePoolId();
 
     String getSchema();
+    
+    boolean isToConfigDB();
 
 }

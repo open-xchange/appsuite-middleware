@@ -73,16 +73,18 @@ import com.openexchange.log.LogProperties;
 public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigDatabaseServiceImpl.class));
+    private static String configDBSchemaName;
 
     private final Pools pools;
     private final ConfigDatabaseAssignmentService assignmentService;
     private final ReplicationMonitor monitor;
 
-    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor) {
+    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor, String configDBSchemaName) {
         super();
         this.assignmentService = assignmentService;
         this.pools = pools;
         this.monitor = monitor;
+        ConfigDatabaseServiceImpl.configDBSchemaName = configDBSchemaName;
     }
 
     private Connection get(final boolean write) throws OXException {
@@ -166,5 +168,9 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     @Override
     public String getServerName() throws OXException {
         return Server.getServerName();
+    }
+    
+    public static String getConfigDBSchemaName() {
+        return configDBSchemaName != null ? configDBSchemaName : "configdb";
     }
 }

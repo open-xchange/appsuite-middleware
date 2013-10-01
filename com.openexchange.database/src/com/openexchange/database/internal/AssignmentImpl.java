@@ -133,6 +133,11 @@ public class AssignmentImpl implements Serializable, Assignment {
         this.transaction = transaction;
         transactionInitialized = true;
     }
+    
+    @Override
+    public boolean isToConfigDB() {
+        return ConfigDatabaseServiceImpl.getConfigDBSchemaName().equals(schema) || null == schema;
+    }
 
     @Override
     public int hashCode() {
