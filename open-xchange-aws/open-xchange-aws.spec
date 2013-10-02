@@ -14,11 +14,11 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange AWS cluster package
+Summary:       The Open-Xchange Amazon S3 package
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
-This package installs the OSGi bundles needed for the AWS cluster.
+This package installs the OSGi bundles needed for Amazon S3 access.
 
 Authors:
 --------
