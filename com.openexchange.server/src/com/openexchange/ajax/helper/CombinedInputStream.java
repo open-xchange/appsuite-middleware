@@ -61,9 +61,7 @@ import java.io.InputStream;
 public final class CombinedInputStream extends InputStream {
 
     private final byte[] consumed;
-
     private final InputStream remaining;
-
     private int count;
 
     /**
@@ -77,7 +75,8 @@ public final class CombinedInputStream extends InputStream {
         super();
         if (null == consumed) {
             throw new IllegalArgumentException("Byte array is null.");
-        } else if (null == remaining) {
+        }
+        if (null == remaining) {
             throw new IllegalArgumentException("Input stream array is null.");
         }
         this.consumed = new byte[consumed.length];
@@ -125,6 +124,11 @@ public final class CombinedInputStream extends InputStream {
             return buffered + remaining.read(b, off + buffered, len - buffered);
         }
         return remaining.read(b, off, len);
+    }
+
+    @Override
+    public void close() throws IOException {
+        remaining.close();
     }
 
 }
