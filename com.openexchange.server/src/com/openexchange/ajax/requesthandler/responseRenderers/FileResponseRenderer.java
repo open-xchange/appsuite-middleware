@@ -81,6 +81,7 @@ import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
+import com.openexchange.ajax.helper.ImageUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -764,19 +765,35 @@ public class FileResponseRenderer implements ResponseRenderer {
         IFileHolder file = fileHolder;
 
         // Build transformations
-        final InputStream stream = file.getStream();
+        InputStream stream = file.getStream();
         if (null == stream) {
             LOG.warn("(Possible) Image file misses stream data");
             return file;
         }
-        // mark stream if possible
+
+        // Check for an animated .gif image
+        {
+            if (file.repetitive()) {
+                if (ImageUtils.isAnimatedGif(stream)) {
+                    return fileHolder;
+                }
+            } else {
+                final AtomicReference<InputStream> ref = new AtomicReference<InputStream>();
+                if (ImageUtils.isAnimatedGif(stream, ref)) {
+                    return new FileHolder(ref.get(), -1, file.getContentType(), file.getName());
+                }
+                stream = ref.get();
+            }
+        }
+
+        // Mark stream if possible
         final boolean markSupported = file.repetitive() ? false : stream.markSupported();
         if (markSupported) {
             stream.mark(131072); // 128KB
         }
-        // start transformations: scale, rotate, ...
+        // Start transformations: scale, rotate, ...
         final ImageTransformations transformations = scaler.transfom(stream);
-        // rotate by default when not delivering as download
+        // Rotate by default when not delivering as download
         final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
@@ -794,13 +811,13 @@ public class FileResponseRenderer implements ResponseRenderer {
             final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
-        // compress by default when not delivering as download
+        // Compress by default when not delivering as download
         final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
         if ((null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
         /*
-         * transform
+         * Transform
          */
         try {
             InputStream transformed;
