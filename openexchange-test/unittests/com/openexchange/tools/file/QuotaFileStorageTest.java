@@ -319,6 +319,11 @@ public class QuotaFileStorageTest extends TestCase {
         public void writeAssignment(final Connection con, final Assignment assignment) throws OXException {
             // Nothing to do
         }
+
+        @Override
+        public void backForUpdateTaskAfterReading(int contextId, Connection con) {
+            //nothing to do
+        }
     }
 
     private static void rmdir(final File tempFile) {

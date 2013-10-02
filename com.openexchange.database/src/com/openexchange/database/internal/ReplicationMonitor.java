@@ -51,7 +51,6 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.database.internal.DBUtils.autocommit;
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
-import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -85,6 +84,7 @@ public class ReplicationMonitor {
     private final AtomicLong masterInsteadOfSlaveFetched = new AtomicLong();
 
     private final boolean active;
+
     private final boolean checkWriteCons;
 
     ReplicationMonitor(boolean active, boolean checkWriteCons) {
@@ -276,34 +276,13 @@ public class ReplicationMonitor {
     }
 
     private static long lastLogged = 0;
-    
+
     public static long getLastLogged() {
         return lastLogged;
     }
-    
+
     public static void setLastLogged(long lastLogged) {
         ReplicationMonitor.lastLogged = lastLogged;
-    }
-
-    private static void increaseTransactionCounter(AssignmentImpl assign, Connection con) throws SQLException {
-//        PreparedStatement stmt = null;
-//        ResultSet result = null;
-//        try {
-//            stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
-//            stmt.setInt(1, assign.getContextId());
-//            stmt.execute();
-//            stmt.close();
-//            stmt = con.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
-//            stmt.setInt(1, assign.getContextId());
-//            result = stmt.executeQuery();
-//            if (result.next()) {
-//                assign.setTransaction(result.getLong(1));
-//            } else {
-//                LOG.error("Updating transaction for replication monitor failed for context " + assign.getContextId() + ".");
-//            }
-//        } finally {
-//            closeSQLStuff(result, stmt);
-//        }
     }
 
     private void incrementFetched(final Assignment assign, final boolean write) {
@@ -340,32 +319,57 @@ public class ReplicationMonitor {
             LOG.error(e1.getMessage(), e1);
             return;
         }
-
-        try {
-            boolean isTransaction = !con.getAutoCommit();
-            if (isTransaction) {
-                increaseTransactionCounter(assign, con);
-                con.commit();
-            } else {
-                con.setAutoCommit(false);
-                increaseTransactionCounter(assign, con);
-                con.commit();
-            }
-        } catch (final SQLException e) {
-            rollback(con);
-            if (1146 == e.getErrorCode()) {
-                if (lastLogged + 300000 < System.currentTimeMillis()) {
-                    lastLogged = System.currentTimeMillis();
-                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(e1.getMessage(), e1);
-                }
-            } else {
-                final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                LOG.error(e1.getMessage(), e1);
-            }
-        } finally {
-            autocommit(con);
-        }
+        //
+        // try {
+        // boolean isTransaction = !con.getAutoCommit();
+        // int contextId = assign.getContextId();
+        // if (isTransaction) {
+        // // Ok -- We are already in a transaction
+        // Savepoint save = con.setSavepoint();
+        // PreparedStatement stmt = null;
+        // ResultSet result = null;
+        // try {
+        // stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
+        // stmt.setInt(1, contextId);
+        // stmt.execute();
+        // stmt.close();
+        // stmt = con.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
+        // stmt.setInt(1, assign.getContextId());
+        // result = stmt.executeQuery();
+        // if (result.next()) {
+        // assign.setTransaction(result.getLong(1));
+        // } else {
+        // LOG.error("Updating transaction for replication monitor failed for context " + contextId + ".");
+        // }
+        // } catch (SQLException e) {
+        // con.rollback(save);
+        // throw e;
+        // } finally {
+        // closeSQLStuff(result, stmt);
+        // }
+        // } else {
+        // // Transaction has not been initiated -- Do CAS-style increment
+        // long transactionCounter;
+        // do {
+        // transactionCounter = getTransactionCount(contextId, con);
+        // if (transactionCounter < 0) {
+        // throw new SQLException("Updating transaction for replication monitor failed for context " + contextId + ".");
+        // }
+        // } while (!compareAndSet(transactionCounter, transactionCounter + 1, contextId, con));
+        // assign.setTransaction(transactionCounter + 1);
+        // }
+        // } catch (final SQLException e) {
+        // if (1146 == e.getErrorCode()) {
+        // if (lastLogged + 300000 < System.currentTimeMillis()) {
+        // lastLogged = System.currentTimeMillis();
+        // final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        // LOG.error(e1.getMessage(), e1);
+        // }
+        // } else {
+        // final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        // LOG.error(e1.getMessage(), e1);
+        // }
+        autocommit(con);
     }
 
 }
