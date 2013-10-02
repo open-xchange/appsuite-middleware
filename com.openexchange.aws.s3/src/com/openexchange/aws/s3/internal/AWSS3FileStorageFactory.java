@@ -49,7 +49,20 @@
 
 package com.openexchange.aws.s3.internal;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URI;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -65,6 +78,7 @@ import com.amazonaws.services.s3.model.Region;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
@@ -159,16 +173,17 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
          * instantiate client
          */
         AmazonS3Client client = null;
-        if (configService.getBoolProperty("com.openexchange.aws.s3." + filestoreID + ".encryption", false)) {
-            /*
-             * use AmazonS3EncryptionClient
-             */
-            client = new AmazonS3EncryptionClient(credentials, getEncryptionMaterials(filestoreID));
-        } else {
+        String encryption = configService.getProperty("com.openexchange.aws.s3." + filestoreID + ".encryption", "none");
+        if (Strings.isEmpty(encryption) || "none".equals(encryption)) {
             /*
              * use default AmazonS3Client
              */
             client = new AmazonS3Client(credentials);
+        } else {
+            /*
+             * use AmazonS3EncryptionClient
+             */
+            client = new AmazonS3EncryptionClient(credentials, getEncryptionMaterials(filestoreID, encryption));
         }
         /*
          * configure client
@@ -190,23 +205,68 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
         return client;
     }
 
-    private EncryptionMaterials getEncryptionMaterials(String filestoreID) throws OXException {
-        return null;
-        //TODO: configure encryption differently ~ http://aws.amazon.com/articles/2850096021478074/
+    private EncryptionMaterials getEncryptionMaterials(String filestoreID, String encryptionMode) throws OXException {
+        if ("rsa".equalsIgnoreCase(encryptionMode)) {
+            String keyStore = requireProperty("com.openexchange.aws.s3." + filestoreID + ".encryption.rsa.keyStore");
+            String password = requireProperty("com.openexchange.aws.s3." + filestoreID + ".encryption.rsa.password");
+            KeyPair keyPair = extractKeys(keyStore, password);
+            return new EncryptionMaterials(keyPair);
+        } else {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unknown encryption mode: " + encryptionMode);
+        }
+    }
 
-//        try {
-//            String aesKey = requireProperty("com.openexchange.aws.s3." + filestoreID + ".aesKey");
-//            String aesIV = requireProperty("com.openexchange.aws.s3." + filestoreID + ".aesIV");
-//            String aesSalt = requireProperty("com.openexchange.aws.s3." + filestoreID + ".aesSalt");
-//            byte[] key = (aesIV + aesKey + aesSalt).getBytes("UTF-8");
-//            final MessageDigest sha = MessageDigest.getInstance("SHA-256");
-//            key = sha.digest();
-//            return new EncryptionMaterials(new SecretKeySpec(key, "AES"));
-//        } catch (NoSuchAlgorithmException e) {
-//            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unable to initialize encryption for " + filestoreID);
-//        } catch (UnsupportedEncodingException e) {
-//            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unable to initialize encryption for " + filestoreID);
-//        }
+    /**
+     * Extracts the private/public key pair from a PKCS #12 keystore file referenced by the supplied path.
+     *
+     * @param pathToKeyStore The path to the keystore file
+     * @param password The password to access the keystore
+     * @return The key pair
+     * @throws OXException
+     */
+    private static KeyPair extractKeys(String pathToKeyStore, String password) throws OXException {
+        PrivateKey privateKey = null;
+        PublicKey publicKey = null;
+        char[] passwordChars = null == password ? null : password.toCharArray();
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(pathToKeyStore);
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(inputStream, passwordChars);
+            while (keyStore.aliases().hasMoreElements()) {
+                String alias = keyStore.aliases().nextElement();
+                if (keyStore.isKeyEntry(alias)) {
+                    Key key = keyStore.getKey(alias, passwordChars);
+                    if (null != key && PrivateKey.class.isInstance(key)) {
+                        privateKey = (PrivateKey) keyStore.getKey(alias, passwordChars);
+                        Certificate certificate = keyStore.getCertificate(alias);
+                        publicKey = certificate.getPublicKey();
+                        break;
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+        } catch (KeyStoreException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+        } catch (NoSuchAlgorithmException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+        } catch (CertificateException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+        } catch (IOException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+        } catch (UnrecoverableKeyException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+        } finally {
+            Streams.close(inputStream);
+        }
+        if (null == privateKey) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No private key found in " + pathToKeyStore);
+        }
+        if (null == publicKey) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No private key found in " + pathToKeyStore);
+        }
+        return new KeyPair(publicKey, privateKey);
     }
 
     /**
