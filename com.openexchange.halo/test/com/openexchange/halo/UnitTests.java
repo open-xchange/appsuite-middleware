@@ -47,69 +47,22 @@
  *
  */
 
-package com.openexchange.halo.linkedin;
+package com.openexchange.halo;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactImageSource;
-import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.linkedin.LinkedInService;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.halo.internal.ContactHaloImplTest;
+
 
 /**
- * {@link AbstractLinkedinDataSource}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractLinkedinDataSource implements HaloContactDataSource {
-
-    protected final ServiceLookup serviceLookup;
-
-    /**
-     * Initializes a new {@link AbstractLinkedinDataSource}.
-     */
-    protected AbstractLinkedinDataSource(final ServiceLookup serviceLookup) {
-        super();
-        this.serviceLookup = ExceptionOnAbsenceServiceLookup.valueOf(serviceLookup);
-    }
-
-    /**
-     * Gets the service look-up.
-     */
-    public ServiceLookup getServiceLookup() {
-        return serviceLookup;
-    }
-
-    public LinkedInService getLinkedinService() {
-        return serviceLookup.getService(LinkedInService.class);
-    }
-
-    public OAuthService getOauthService() {
-        return serviceLookup.getService(OAuthService.class);
-    }
-
-    @Override
-    public String getId() {
-        return "com.openexchange.halo.linkedIn:fullProfile";
-    }
-
-    @Override
-    public boolean isAvailable(final ServerSession session) throws OXException {
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
-        if (getOauthService().getMetaDataRegistry().containsService(LinkedInService.SERVICE_ID, uid, cid)) {
-            return !getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid).isEmpty();
-        }
-
-        return false;
-    }
-
-    @Override
-    public abstract AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException;
-
+@RunWith(Suite.class)
+@SuiteClasses({
+    ContactHaloImplTest.class    
+})
+public class UnitTests {
 }

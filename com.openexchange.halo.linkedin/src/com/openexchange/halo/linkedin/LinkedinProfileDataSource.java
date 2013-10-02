@@ -57,7 +57,9 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.halo.Picture;
 import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.linkedin.LinkedInService;
@@ -66,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 
-public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
+public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource, HaloContactImageSource {
 
 	public LinkedinProfileDataSource(final ServiceLookup serviceLookup) {
 		super(serviceLookup);
@@ -119,4 +121,14 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
         }
 		return emails;
 	}
+
+    @Override
+    public int getPriority() {
+        return 2000;
+    }
+
+    @Override
+    public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+        return null;
+    }
 }

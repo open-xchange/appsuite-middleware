@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -67,6 +68,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.java.UnsynchronizedStringReader;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -77,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestDataTools {
+    
+    private static final Log LOG = LogFactory.getLog(AJAXRequestDataTools.class);
 
     private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
 
@@ -231,6 +235,8 @@ public class AJAXRequestDataTools {
                         retval.setData(AJAXServlet.readFrom(reader));
                     }
                 }
+            } catch (IOException x) {
+                LOG.debug(x.getMessage(), x);
             } finally {
                 Streams.close(reader);
             }

@@ -61,6 +61,8 @@ public interface ContactHalo {
 
 	public abstract AJAXRequestResult investigate(String provider,
 			Contact contact, AJAXRequestData req, ServerSession session) throws OXException;
+	
+	public abstract Picture getPicture(Contact contact, ServerSession session) throws OXException;
 
 	public abstract List<String> getProviders(ServerSession session) throws OXException;
 

@@ -47,69 +47,46 @@
  *
  */
 
-package com.openexchange.halo.linkedin;
+package com.openexchange.halo;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactImageSource;
-import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.linkedin.LinkedInService;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import java.util.UUID;
+import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.java.util.UUIDs;
+
 
 /**
- * {@link AbstractLinkedinDataSource}
+ * {@link Picture}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractLinkedinDataSource implements HaloContactDataSource {
-
-    protected final ServiceLookup serviceLookup;
-
-    /**
-     * Initializes a new {@link AbstractLinkedinDataSource}.
-     */
-    protected AbstractLinkedinDataSource(final ServiceLookup serviceLookup) {
-        super();
-        this.serviceLookup = ExceptionOnAbsenceServiceLookup.valueOf(serviceLookup);
+public class Picture {
+    private String etag;
+    private IFileHolder fileHolder;
+    
+    public Picture() {
+        // Initialize with a default random etag.
+        this(UUIDs.getUnformattedString(UUID.randomUUID()), null);
+    }
+    
+    public Picture(String etag, IFileHolder fileHolder) {
+        this.etag = etag;
+        this.fileHolder = fileHolder;
+    }
+    
+    public String getEtag() {
+        return etag;
     }
 
-    /**
-     * Gets the service look-up.
-     */
-    public ServiceLookup getServiceLookup() {
-        return serviceLookup;
+    public void setEtag(String etag) {
+        this.etag = etag;
     }
-
-    public LinkedInService getLinkedinService() {
-        return serviceLookup.getService(LinkedInService.class);
+    
+    public IFileHolder getFileHolder() {
+        return fileHolder;
     }
-
-    public OAuthService getOauthService() {
-        return serviceLookup.getService(OAuthService.class);
+    
+    public void setFileHolder(IFileHolder fileHolder) {
+        this.fileHolder = fileHolder;
     }
-
-    @Override
-    public String getId() {
-        return "com.openexchange.halo.linkedIn:fullProfile";
-    }
-
-    @Override
-    public boolean isAvailable(final ServerSession session) throws OXException {
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
-        if (getOauthService().getMetaDataRegistry().containsService(LinkedInService.SERVICE_ID, uid, cid)) {
-            return !getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid).isEmpty();
-        }
-
-        return false;
-    }
-
-    @Override
-    public abstract AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException;
 
 }

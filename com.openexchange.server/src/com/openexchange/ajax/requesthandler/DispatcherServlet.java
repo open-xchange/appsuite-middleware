@@ -312,6 +312,8 @@ public class DispatcherServlet extends SessionServlet {
      */
     private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
 
+    private static final AJAXRequestResult.ResultType NOT_FOUND = AJAXRequestResult.ResultType.NOT_FOUND;
+
     /**
      * The <code>direct</code> result type.
      */
@@ -367,6 +369,12 @@ public class DispatcherServlet extends SessionServlet {
                 Tools.setETag(requestData.getETag(), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, httpResponse);
                 return;
             }
+            
+            if (NOT_FOUND.equals(result.getType())) {
+                httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            };
+            
             if (DIRECT.equals(result.getType())) {
                 // No further processing
                 return;

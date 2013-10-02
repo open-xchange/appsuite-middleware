@@ -50,18 +50,36 @@
 package com.openexchange.halo.contacts;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
-
+import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.halo.Picture;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
-public class ContactDataSource implements HaloContactDataSource {
-
+public class ContactDataSource implements HaloContactDataSource, HaloContactImageSource {
+    
+    private ServiceLookup services = null;
+    
+    public ContactDataSource(ServiceLookup services) {
+        this.services = services;
+    }
+    
 	@Override
 	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session)
 			throws OXException {
@@ -83,5 +101,120 @@ public class ContactDataSource implements HaloContactDataSource {
 	public boolean isAvailable(ServerSession session) {
 		return true;
 	}
+
+    @Override
+    public int getPriority() {
+        return 10000; // Pretty likely
+    }
+
+    @Override
+    public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+        List<Contact> mergedContacts = contactQuery.getMergedContacts();
+        Collections.sort(mergedContacts,  new ImagePrecedence());
+        
+        for (final Contact contact : mergedContacts) {
+            if (contact.getImage1() != null) {
+                ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
+                holder.setContentType(contact.getImageContentType());
+                holder.setName("image");
+                
+                return new Picture(contact.getParentFolderID() + "/" + contact.getObjectID() + "/" + contact.getLastModified().getTime(), holder);
+            }
+        }
+        
+        // Try with explicit load
+        for (Contact c : mergedContacts) {
+            final Contact contact = getContact(session, c.getParentFolderID()+"", c.getObjectID()+"");
+            if (contact.getImage1() != null) {
+                ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
+                holder.setContentType(contact.getImageContentType());
+                holder.setName("image");
+                
+                return new Picture(contact.getParentFolderID() + "/" + contact.getObjectID() + "/" + contact.getLastModified().getTime(), holder);
+            }
+        }
+        
+        Contact contact = contactQuery.getContact();
+        
+        Picture p = searchByMailAddress(session, contact.getEmail1());
+        if (p != null) {
+            return p;
+        }
+        
+        p = searchByMailAddress(session, contact.getEmail2());
+        if (p != null) {
+            return p;
+        }
+        
+        p = searchByMailAddress(session, contact.getEmail3());
+        if (p != null) {
+            return p;
+        }
+        // Give up
+        
+        return null;
+    }
+    
+    private Picture searchByMailAddress(ServerSession session, String email) throws OXException {
+        if (email == null) {
+            return null;
+        }
+        ContactSearchObject cso = new ContactSearchObject();
+        cso.setEmail1(email);
+        cso.setEmail2(email);
+        cso.setEmail3(email);
+        cso.setOrSearch(true);
+        
+        SearchIterator<Contact> result = services.getService(ContactService.class).searchContacts(session, cso, new ContactField[]{ContactField.FOLDER_ID, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.LAST_MODIFIED});
+        if (result == null) {
+            return null;
+        }
+        
+        List<Contact> contacts = new ArrayList<Contact>();
+        while(result.hasNext()) {
+            Contact contact = result.next();
+            if (contact.getImage1() != null) {
+                contacts.add(contact);
+            }
+        }
+        Collections.sort(contacts, new ImagePrecedence());
+        
+        for (Contact contact : contacts) {
+            ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
+            holder.setContentType(contact.getImageContentType());
+            holder.setName("image");
+            
+            return new Picture(contact.getParentFolderID() + "/" + contact.getObjectID()+ "/" + contact.getLastModified().getTime(), holder);
+        }
+        
+        return null;
+    }
+
+    private Contact getContact(ServerSession session, String folderId, String id) throws OXException {
+        return services.getService(ContactService.class).getContact(session, folderId, id);
+    }
+    
+    private static class ImagePrecedence implements Comparator<Contact> {
+
+        @Override
+        public int compare(Contact o1, Contact o2) {
+            if (o1.getParentFolderID() == 6 && o2.getParentFolderID() != 6) {
+                return -1;
+            }
+            
+            if (o1.getParentFolderID() != 6 && o2.getParentFolderID() == 6) {
+                return 1;
+            }
+            Date lastModified1 = o1.getLastModified();
+            Date lastModified2 = o2.getLastModified();
+            if (lastModified1 == null) {
+                lastModified1 = new Date(Long.MIN_VALUE);
+            }
+            if (lastModified2 == null) {
+                lastModified2 = new Date(Long.MIN_VALUE);
+            }
+            return lastModified2.compareTo(lastModified1);
+        }
+    }
 
 }

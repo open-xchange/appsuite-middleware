@@ -179,7 +179,11 @@ public class AJAXRequestResult {
         /**
          * The special result directly responded to client.
          */
-        DIRECT;
+        DIRECT, 
+        /**
+         * The request went to a resource that could not be found
+         */
+        NOT_FOUND;
     }
 
     /**
