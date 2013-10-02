@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange AWS bundle
-Bundle-SymbolicName: com.openexchange.aws
-Bundle-Version: 7.4.0
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Name: Amazon Web Services
+Bundle-SymbolicName: com.amazonaws
+Bundle-Version: 1.5.8
+Bundle-Vendor: Amazon Web Services, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/aws-java-sdk-1.5.8.jar
@@ -149,12 +149,7 @@ Export-Package: com.amazonaws,
  com.amazonaws.transform,
  com.amazonaws.util,
  com.amazonaws.util.json
-Import-Package: com.openexchange.config,
- com.openexchange.exception,
- com.openexchange.i18n,
- com.openexchange.log,
- com.openexchange.osgi,
- javax.crypto,
+Import-Package: javax.crypto,
  javax.crypto.spec,
  javax.net.ssl,
  javax.xml.parsers,
@@ -179,4 +174,3 @@ Import-Package: com.openexchange.config,
  org.w3c.dom,
  org.xml.sax,
  org.xml.sax.helpers
-Bundle-Activator: com.openexchange.aws.osgi.AWSActivator
