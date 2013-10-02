@@ -62,7 +62,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
- * {@link PushMSDelayQueue}
+ * {@link PushMSDelayQueue}&nbsp;-&nbsp;A&nbsp;custom&nbsp;<code>java.util.concurrent.DelayQueue</code>;
+ * <br>e.g. enhanced by {@link #offerIfAbsentElseReschedule(DelayedPushMsObject) offerIfAbsentElseReschedule()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
