@@ -51,8 +51,6 @@ package com.openexchange.aws.s3.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.openexchange.aws.s3.internal.AWSS3FileStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -76,28 +74,21 @@ public class AWSS3Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, AmazonS3.class };
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.aws.s3");
-//        ConfigurationService configService = getService(ConfigurationService.class);
-//        String defaultBucket = configService.getProperty("com.openexchange.aws.s3.defaultBucket");
-//        boolean versioningEnabled = configService.getBoolProperty("com.openexchange.s3.versioning", true);
-//        AWSS3Configuration config = new AWSS3Configuration(defaultBucket, versioningEnabled);
-
-        // TODO: don't use extra "s3 service", but instantiate the s3 client here
-        AmazonS3 s3Client = getService(AmazonS3.class);
-        AWSS3FileStorageFactory fileStorage = new AWSS3FileStorageFactory((AmazonS3Client)s3Client);
-        registerService(FileStorageFactoryCandidate.class, fileStorage);
+        ConfigurationService configService = getService(ConfigurationService.class);
+        AWSS3FileStorageFactory factory = new AWSS3FileStorageFactory(configService);
+        registerService(FileStorageFactoryCandidate.class, factory);
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.aws.s3");
-        unregisterServices();
-        cleanUp();
+        super.stopBundle();
     }
 
 }

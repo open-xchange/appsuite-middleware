@@ -50,13 +50,22 @@
 package com.openexchange.aws.s3.internal;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.internal.BucketNameUtils;
+import com.amazonaws.services.s3.AmazonS3EncryptionClient;
+import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.model.EncryptionMaterials;
+import com.amazonaws.services.s3.model.Region;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
@@ -73,31 +82,38 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
     private static final String S3_SCHEME = "s3";
 
     /**
+     * The expected pattern for file store names - hard-coded at
+     * com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage.create(Context, User, UserModuleAccess) ,
+     * so expect nothing else.
+     */
+    private static final Pattern CTX_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_store");
+
+    /**
      * The file storage's ranking compared to other sharing the same URL scheme.
      */
     private static final int RANKING = 5634;
 
     private final ConcurrentMap<URI, AWSS3FileStorage> storages;
-    private final AmazonS3Client s3client;
+    private final ConfigurationService configService;
 
     /**
      * Initializes a new {@link AWSS3FileStorageFactory}.
      *
-     * @param s3client The S3 client to use
+     * @param configService The configuration service to use
      */
-    public AWSS3FileStorageFactory(AmazonS3Client s3client) {
+    public AWSS3FileStorageFactory(ConfigurationService configService) {
         super();
+        this.configService = configService;
         this.storages = new ConcurrentHashMap<URI, AWSS3FileStorage>();
-        this.s3client = s3client;
     }
 
     @Override
     public AWSS3FileStorage getFileStorage(URI uri) throws OXException {
-        try { uri = new URI("s3:/development"); } catch (URISyntaxException e) { }
         AWSS3FileStorage storage = storages.get(uri);
         if (null == storage) {
-            String bucketName = initBucket(uri);
-            AWSS3FileStorage newStorage = new AWSS3FileStorage(s3client, bucketName);
+            AmazonS3Client client = initClient(uri);
+            String bucketName = initBucket(client, uri);
+            AWSS3FileStorage newStorage = new AWSS3FileStorage(client, bucketName);
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {
                 storage = newStorage;
@@ -113,8 +129,7 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
 
     @Override
     public boolean supports(URI uri) {
-        return true;
-         //return null != uri && S3_SCHEME.equalsIgnoreCase(uri.getScheme());
+         return null != uri && S3_SCHEME.equalsIgnoreCase(uri.getScheme());
     }
 
     @Override
@@ -123,19 +138,75 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
     }
 
     /**
-     * Extracts and validates the bucket name part from the configured file storage URI.
+     * Initializes an {@link AmazonS3Client} as configured by the referenced authority part of the supplied URI.
      *
-     * @param uri The file storage URI
-     * @return The bucket name
-     * @throws IllegalArgumentException If the specified bucket name doesn't follow Amazon S3's guidelines
+     * @param uri The URI to to create the client for
+     * @return The client
+     * @throws OXException
      */
-    private static String extractBucketName(URI uri) throws IllegalArgumentException {
-        String path = uri.getPath();
-        while (0 < path.length() && '/' == path.charAt(0)) {
-            path = path.substring(1);
+    private AmazonS3Client initClient(URI uri) throws OXException {
+        /*
+         * extract filestore ID from authority part of URI
+         */
+        String filestoreID = extractFilestoreID(uri);
+        /*
+         * prepare credentials
+         */
+        String accessKey = requireProperty("com.openexchange.aws.s3." + filestoreID + ".accessKey");
+        String secretKey = requireProperty("com.openexchange.aws.s3." + filestoreID + ".secretKey");
+        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        /*
+         * instantiate client
+         */
+        AmazonS3Client client = null;
+        if (configService.getBoolProperty("com.openexchange.aws.s3." + filestoreID + ".encryption", false)) {
+            /*
+             * use AmazonS3EncryptionClient
+             */
+            client = new AmazonS3EncryptionClient(credentials, getEncryptionMaterials(filestoreID));
+        } else {
+            /*
+             * use default AmazonS3Client
+             */
+            client = new AmazonS3Client(credentials);
         }
-        new BucketNameUtils().validateBucketName(path);
-        return path;
+        /*
+         * configure client
+         */
+        String endpoint = configService.getProperty("com.openexchange.aws.s3." + filestoreID + ".endpoint");
+        if (false == Strings.isEmpty(endpoint)) {
+            client.setEndpoint(endpoint);
+        } else {
+            String region = configService.getProperty("com.openexchange.aws.s3." + filestoreID + ".region", "us-west-2");
+            try {
+                client.setRegion(com.amazonaws.regions.Region.getRegion(Regions.fromName(region)));
+            } catch (IllegalArgumentException e) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, region);
+            }
+        }
+        if (configService.getBoolProperty("com.openexchange.aws.s3." + filestoreID + ".pathStyleAccess", true)) {
+            client.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
+        }
+        return client;
+    }
+
+    private EncryptionMaterials getEncryptionMaterials(String filestoreID) throws OXException {
+        return null;
+        //TODO: configure encryption differently ~ http://aws.amazon.com/articles/2850096021478074/
+
+//        try {
+//            String aesKey = requireProperty("com.openexchange.aws.s3." + filestoreID + ".aesKey");
+//            String aesIV = requireProperty("com.openexchange.aws.s3." + filestoreID + ".aesIV");
+//            String aesSalt = requireProperty("com.openexchange.aws.s3." + filestoreID + ".aesSalt");
+//            byte[] key = (aesIV + aesKey + aesSalt).getBytes("UTF-8");
+//            final MessageDigest sha = MessageDigest.getInstance("SHA-256");
+//            key = sha.digest();
+//            return new EncryptionMaterials(new SecretKeySpec(key, "AES"));
+//        } catch (NoSuchAlgorithmException e) {
+//            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unable to initialize encryption for " + filestoreID);
+//        } catch (UnsupportedEncodingException e) {
+//            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unable to initialize encryption for " + filestoreID);
+//        }
     }
 
     /**
@@ -145,11 +216,13 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
      * @return The bucket name
      * @throws OXException If initialization fails
      */
-    private String initBucket(URI uri) throws OXException {
+    private String initBucket(AmazonS3Client s3client, URI uri) throws OXException {
         try {
             String bucketName = extractBucketName(uri);
             if (false == s3client.doesBucketExist(bucketName)) {
-                s3client.createBucket(bucketName);
+                String filestoreID = extractFilestoreID(uri);
+                String region = configService.getProperty("com.openexchange.aws.s3." + filestoreID + ".region", "us-west-2");
+                s3client.createBucket(bucketName, Region.fromValue(region));
             }
             return bucketName;
         } catch (IllegalArgumentException e) {
@@ -159,6 +232,58 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
         } catch (RuntimeException e) {
             throw AwsS3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private String requireProperty(String propertyName) throws OXException {
+        String property = configService.getProperty(propertyName);
+        if (Strings.isEmpty(property)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propertyName);
+        }
+        return property;
+    }
+
+    /**
+     * Extracts and validates the bucket name from the configured file store URI, i.e. the 'path' part of the URI.
+     *
+     * @param uri The file store URI
+     * @return The bucket name
+     * @throws IllegalArgumentException If the specified bucket name doesn't follow Amazon S3's guidelines
+     */
+    private static String extractBucketName(URI uri) throws IllegalArgumentException {
+        String path = uri.getPath();
+        while (0 < path.length() && '/' == path.charAt(0)) {
+            path = path.substring(1);
+        }
+        Matcher matcher = CTX_STORE_PATTERN.matcher(path);
+        if (false == matcher.matches()) {
+            throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
+        }
+        /*
+         * Remove underscore characters to be conform to bucket name restrictions
+         * http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
+         */
+        return matcher.group(1) + "ctxstore";
+    }
+
+    /**
+     * Extracts the filestore ID from the configured file store URI, i.e. the 'authority' part from the URI.
+     *
+     * @param uri The file store URI
+     * @return The filestore ID
+     * @throws IllegalArgumentException If no valid ID could be extracted
+     */
+    private static String extractFilestoreID(URI uri) throws IllegalArgumentException {
+        String authority = uri.getAuthority();
+        if (null == authority) {
+            throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
+        }
+        while (0 < authority.length() && '/' == authority.charAt(0)) {
+            authority = authority.substring(1);
+        }
+        if (0 == authority.length()) {
+            throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
+        }
+        return authority;
     }
 
 }
