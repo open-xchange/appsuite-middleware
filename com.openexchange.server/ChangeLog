@@ -1,3 +1,8 @@
+* 2013-10-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29072: Don't transform animated .gif images
+ - Fix for bug 29101: Proper 'javax.activation' import
+
 * 2013-10-01 - thorben.betten@open-xchange.com
 
  - Change for bug 29081: Adapted category of error code 'UWA_WIDGET-0004' to USER_INPUT to display meaningful error message to the user
