@@ -57,6 +57,8 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -70,10 +72,10 @@ import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
-import com.amazonaws.services.s3.model.DeleteObjectsResult;
-import com.amazonaws.services.s3.model.DeleteObjectsResult.DeletedObject;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
+import com.amazonaws.services.s3.model.MultiObjectDeleteException;
+import com.amazonaws.services.s3.model.MultiObjectDeleteException.DeleteError;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PartETag;
@@ -187,21 +189,22 @@ public class AWSS3FileStorage implements FileStorage {
 
     @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
-        Set<String> retval = new TreeSet<String>();
-        {
-            DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName);
-            List<KeyVersion> keys = new ArrayList<KeyVersion>();
-            for (String file : identifiers) {
-                KeyVersion keyVersion = new KeyVersion(file);
-                keys.add(keyVersion);
+        DeleteObjectsRequest deleteRequest = new DeleteObjectsRequest(bucketName).withKeys(identifiers);
+        try {
+            amazonS3.deleteObjects(deleteRequest);
+        } catch (MultiObjectDeleteException e) {
+            List<DeleteError> errors = e.getErrors();
+            if (null != errors && 0 < errors.size()) {
+                Set<String> notDeleted = new HashSet<String>();
+                for (DeleteError error : errors) {
+                    notDeleted.add(error.getKey());
+                }
+                return notDeleted;
             }
-            deleteRequest.setKeys(keys);
-            DeleteObjectsResult deleteResult = amazonS3.deleteObjects(deleteRequest);
-            for (DeletedObject object : deleteResult.getDeletedObjects()) {
-                retval.add(object.getKey());
-            }
+        } catch (AmazonClientException e) {
+            throw wrap(e);
         }
-        return retval;
+        return Collections.emptySet();
     }
 
     @Override
