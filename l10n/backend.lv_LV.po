@@ -5673,11 +5673,7 @@ msgstr "Sesijas informācija neatbilst nevienai servera sesijai"
 #. * "Obligatory key \"%1$s\" is missing from the Stanza"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
 msgid "Obligatory key \"%1$s\" is missing from the Stanza"
-<<<<<<< HEAD
-msgstr "Iztrūkstoša obligātā atslēga \"%1$s\""
-=======
 msgstr "Obligātā atslēga \"%1$s\" datu virknē nav atrasta"
->>>>>>> release-7.4.0
 
 #. * Could not find a builder for the specified element: . \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
