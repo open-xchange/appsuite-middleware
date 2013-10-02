@@ -120,6 +120,9 @@ public class ImageUtils {
                 }
                 if (first) {
                     if (((byte) 'G' != buf[0]) || ((byte) 'I' != buf[1]) || ((byte) 'F' != buf[2])) {
+                        if (null != newStreamRef && null != sink) {
+                            newStreamRef.set(new CombinedInputStream(sink.toByteArray(), in));
+                        }
                         return false;
                     }
                     first = false;
