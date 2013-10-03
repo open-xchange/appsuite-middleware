@@ -2322,21 +2322,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
-            throw new StorageException(sqle.toString(), sqle);
+            throw new StorageException(sqle.toString());
         } catch (final OXException e) {
-            log.error("Delete contact via groupware API error", e);
             final SQLException sqle = DBUtils.extractSqlException(e);
             if (null != sqle) {
-                throw new StorageException(sqle.toString(), sqle);
+                log.error("SQL Error", sqle);
+                throw new StorageException(sqle.toString());
             }
-            throw new StorageException(e.toString(), e);
+            log.error("Delete contact yielded groupware API error");
+            throw new StorageException(e.toString());
         } finally {
-            try {
-                if (stmt != null) {
+            if (stmt != null) {
+                try {
                     stmt.close();
+                } catch (final SQLException e) {
+                    log.error("SQL Error closing statement on ox write connection!", e);
                 }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing statement on ox write connection!", e);
             }
         }
     }
@@ -2356,7 +2357,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rs.close();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e.toString(), e);
+            throw new StorageException(e.toString());
         } finally {
             com.openexchange.tools.sql.DBUtils.closeSQLStuff(stmt);
         }
