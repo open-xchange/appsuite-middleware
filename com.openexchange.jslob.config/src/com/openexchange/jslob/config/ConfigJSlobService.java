@@ -57,7 +57,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +66,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -128,7 +128,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     private final Map<String, Map<String, AttributedProperty>> preferenceItems;
 
-    private final Map<String, Map<String, String>[]> configTreeEquivalents;
+    private final ConcurrentMap<String, Map<String, String>[]> configTreeEquivalents;
 
     private final int CONFIG2LOB = 0;
 
@@ -149,13 +149,14 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final File file = service.getFileByName("paths.perfMap");
         if (null == file) {
-            configTreeEquivalents = Collections.emptyMap();
+            configTreeEquivalents = new ConcurrentHashMap<String, Map<String,String>[]>(2);
         } else {
-            configTreeEquivalents = new HashMap<String, Map<String, String>[]>();
+            configTreeEquivalents = new ConcurrentHashMap<String, Map<String, String>[]>(48);
             readPerfMap(file, configTreeEquivalents);
         }
-
+        // Initialize shared JSlobs
         sharedJSlobs = new ConcurrentHashMap<String, SharedJSlobService>();
+        // Initialize service tracker
     }
 
     /**
@@ -168,7 +169,7 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @SuppressWarnings("unchecked")
-    private void readPerfMap(final File file, final Map<String, Map<String, String>[]> map) throws OXException {
+    private void readPerfMap(final File file, final ConcurrentMap<String, Map<String, String>[]> map) throws OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
@@ -193,7 +194,7 @@ public final class ConfigJSlobService implements JSlobService {
 
                         Map<String, String>[] maps = map.get(jslobName);
                         if (maps == null) {
-                            maps = new Map[] { new HashMap<String, String>(32), new HashMap<String, String>(32) };
+                            maps = new Map[] { new ConcurrentHashMap<String, String>(32), new ConcurrentHashMap<String, String>(32) };
                             map.put(jslobName, maps);
                         }
 
@@ -208,6 +209,70 @@ public final class ConfigJSlobService implements JSlobService {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         } finally {
             Streams.close(reader);
+        }
+    }
+
+    /**
+     * Adds specified config tree to jslob path mapping (if not already contained).
+     *
+     * @param configTreePath The config tree path
+     * @param jslobPath The associated jslob path
+     */
+    public void addConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
+        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+            return;
+        }
+        String path = jslobPath.trim();
+        String jslobName;
+        {
+            final int pathSep = path.indexOf("//");
+            if (pathSep < 0) {
+                jslobName = CORE;
+            } else {
+                jslobName = path.substring(0, pathSep);
+                path = path.substring(pathSep + 2);
+            }
+        }
+
+        Map<String, String>[] maps = configTreeEquivalents.get(jslobName);
+        if (maps == null) {
+            final Map<String, String>[] newmaps = new Map[] { new ConcurrentHashMap<String, String>(32), new ConcurrentHashMap<String, String>(32) };
+            maps = configTreeEquivalents.putIfAbsent(jslobName, newmaps);
+            if (null == maps) {
+                maps = newmaps;
+            }
+        }
+
+        maps[CONFIG2LOB].put(configTreePath.trim(), path);
+        maps[LOB2CONFIG].put(path, configTreePath.trim());
+    }
+
+    /**
+     * Removes specified config tree to jslob path mapping
+     *
+     * @param configTreePath The config tree path
+     * @param jslobPath The associated jslob path
+     */
+    public void removeConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
+        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+            return;
+        }
+        String path = jslobPath.trim();
+        String jslobName;
+        {
+            final int pathSep = path.indexOf("//");
+            if (pathSep < 0) {
+                jslobName = CORE;
+            } else {
+                jslobName = path.substring(0, pathSep);
+                path = path.substring(pathSep + 2);
+            }
+        }
+
+        final Map<String, String>[] maps = configTreeEquivalents.get(jslobName);
+        if (maps != null) {
+            maps[CONFIG2LOB].remove(configTreePath.trim());
+            maps[LOB2CONFIG].remove(path);
         }
     }
 
@@ -291,7 +356,7 @@ public final class ConfigJSlobService implements JSlobService {
             jSlob.setId(new JSlobId(SERVICE_ID, CORE, userId, contextId));
             addConfigTreeToJslob(session, jSlob);
         }
-        
+
         for (JSlob jSlob : ret) {
             String id = jSlob.getId().getId();
             for (String sharedId : sharedJSlobs.keySet()) {
@@ -341,7 +406,7 @@ public final class ConfigJSlobService implements JSlobService {
                 jsonJSlob = new DefaultJSlob(opt);
             }
         }
-        
+
         /*
          * Fill with config cascade settings
          */
@@ -354,7 +419,7 @@ public final class ConfigJSlobService implements JSlobService {
         }
 
         addConfigTreeToJslob(session, jsonJSlob);
-        
+
         // Search for shared jslobs and merge them if neccessary
         for (String sharedId : sharedJSlobs.keySet()) {
             if (sharedId.startsWith(id)) {
@@ -420,7 +485,7 @@ public final class ConfigJSlobService implements JSlobService {
 
             ret.add(jsonJSlob);
         }
-        
+
         for (JSlob jslob : ret) {
             String id = jslob.getId().getId();
             // Search for shared jslobs and merge them if neccessary

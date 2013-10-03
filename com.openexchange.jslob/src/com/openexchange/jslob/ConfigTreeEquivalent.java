@@ -47,49 +47,33 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+package com.openexchange.jslob;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link ConfigTreeEquivalent} - A config tree to Jslob mapping entry.
+ * <p>
+ * Implementations are supposed to be registered via OSGi.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.1
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public interface ConfigTreeEquivalent {
 
     /**
-     * Initializes a new {@link ConfigJSlobActivator}.
+     * Gets the config tree path; e.g. <code>"modules/mail/defaultaddress"</code>
+     * <p>
+     * <code>"modules/mail/defaultaddress &gt; io.ox/mail//defaultaddress"</code>
+     *
+     * @return The config tree path
      */
-    public ConfigJSlobActivator() {
-        super();
-    }
+    String getConfigTreePath();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        final ConfigJSlobService service = new ConfigJSlobService(this);
-        // Trackers
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        track(ConfigTreeEquivalent.class, new ConfigTreeEquivalentTracker(service, context));
-        openTrackers();
-        // Register service
-        registerService(JSlobService.class, service);
-    }
-
+    /**
+     * Gets the Jslob path; e.g. <code>"io.ox/mail//defaultaddress"</code>
+     * <p>
+     * <code>"modules/mail/defaultaddress &gt; io.ox/mail//defaultaddress"</code>
+     *
+     * @return The Jslob path
+     */
+    String getJslobPath();
 }

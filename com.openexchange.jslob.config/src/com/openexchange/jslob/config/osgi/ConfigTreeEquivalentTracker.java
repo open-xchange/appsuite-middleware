@@ -50,46 +50,51 @@
 package com.openexchange.jslob.config.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link ConfigTreeEquivalentTracker} - The tracker for registered {@link ConfigTreeEquivalent}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.1
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public final class ConfigTreeEquivalentTracker implements ServiceTrackerCustomizer<ConfigTreeEquivalent, ConfigTreeEquivalent> {
+
+    private final BundleContext context;
+    private final ConfigJSlobService configJSlobService;
 
     /**
-     * Initializes a new {@link ConfigJSlobActivator}.
+     * Initializes a new {@link ConfigTreeEquivalentTracker}.
      */
-    public ConfigJSlobActivator() {
+    public ConfigTreeEquivalentTracker(final ConfigJSlobService configJSlobService, final BundleContext context) {
         super();
+        this.configJSlobService = configJSlobService;
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
+    public ConfigTreeEquivalent addingService(final ServiceReference<ConfigTreeEquivalent> reference) {
+        final ConfigTreeEquivalent service = context.getService(reference);
+        configJSlobService.addConfigTreeEquivalent(service.getConfigTreePath(), service.getJslobPath());
+        return service;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        final ConfigJSlobService service = new ConfigJSlobService(this);
-        // Trackers
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        track(ConfigTreeEquivalent.class, new ConfigTreeEquivalentTracker(service, context));
-        openTrackers();
-        // Register service
-        registerService(JSlobService.class, service);
+    public void modifiedService(final ServiceReference<ConfigTreeEquivalent> reference, final ConfigTreeEquivalent service) {
+        // Nothing to do
+    }
+
+    @Override
+    public void removedService(final ServiceReference<ConfigTreeEquivalent> reference, final ConfigTreeEquivalent service) {
+        try {
+            configJSlobService.removeConfigTreeEquivalent(service.getConfigTreePath(), service.getJslobPath());
+        } finally {
+            context.ungetService(reference);
+        }
     }
 
 }

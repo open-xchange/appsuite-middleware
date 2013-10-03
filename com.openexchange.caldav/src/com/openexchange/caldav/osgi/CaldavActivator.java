@@ -73,6 +73,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
@@ -97,9 +98,7 @@ public class CaldavActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavActivator.class);
 
-	protected static final String[] PREFERENCE_PATH = new String[]{"modules", "caldav", "module"};
-
-    private volatile OSGiPropertyMixin mixin;
+	private volatile OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -159,9 +158,49 @@ public class CaldavActivator extends HousekeepingActivator {
 
 				@Override
 				public String[] getPath() {
-					return PREFERENCE_PATH;
+					return new String[]{"modules", "caldav", "module"};
 				}
 			});
+
+            /*-
+             * # CalDAV
+             * modules/caldav/active > io.ox/caldav//active
+             * modules/caldav/url > io.ox/caldav//url
+             */
+            registerService(ConfigTreeEquivalent.class, new ConfigTreeEquivalent() {
+
+                @Override
+                public String getConfigTreePath() {
+                    return "modules/caldav/active";
+                }
+
+                @Override
+                public String getJslobPath() {
+                    return "io.ox/caldav//active";
+                }
+
+                @Override
+                public String toString() {
+                    return "modules/caldav/active > io.ox/caldav//active";
+                }
+            });
+            registerService(ConfigTreeEquivalent.class, new ConfigTreeEquivalent() {
+
+                @Override
+                public String getConfigTreePath() {
+                    return "modules/caldav/url";
+                }
+
+                @Override
+                public String getJslobPath() {
+                    return "io.ox/caldav//active";
+                }
+
+                @Override
+                public String toString() {
+                    return "modules/caldav/url > io.ox/caldav//url";
+                }
+            });
 
             openTrackers();
         } catch (final Throwable t) {
