@@ -49,13 +49,14 @@
 
 package com.openexchange.groupware;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
 import junit.framework.TestCase;
@@ -227,7 +228,7 @@ public class CalendarTest extends TestCase {
         deleteit.setObjectID(cdao.getObjectID());
         final int fid = cdao.getParentFolderID();
         try {
-            csql.deleteAppointmentObject(deleteit, fid, new Date());
+            csql.deleteAppointmentObject(deleteit, fid, new Date(Long.MAX_VALUE));
         } catch(final Exception e) {
             e.printStackTrace();
         }
@@ -1039,6 +1040,10 @@ public class CalendarTest extends TestCase {
         fillDatesInDao(cdao);
 
         final CalendarDataObject cdao_conflict = cdao.clone();
+        TimeZone conflictTimeZone = TimeZone.getTimeZone(cdao_conflict.getTimezone());
+        int conflictOffset = conflictTimeZone.getOffset(cdao_conflict.getStartDate().getTime());
+        cdao_conflict.setStartDate(new Date(cdao_conflict.getStartDate().getTime() - conflictOffset));
+        cdao_conflict.setEndDate(new Date(cdao_conflict.getEndDate().getTime() - conflictOffset));
         cdao_conflict.setShownAs(Appointment.RESERVED);
         cdao_conflict.setTitle("testComplexConflictHandling - Step 2 - Insert");
 
@@ -1065,7 +1070,7 @@ public class CalendarTest extends TestCase {
         cdao_conflict.setShownAs(Appointment.TEMPORARY);
 
         conflicts = csql.updateAppointmentObject(cdao_conflict, fid, new Date());
-        assertTrue("Found conflicts ", conflicts != null);
+        assertNotNull("Found no conflicts ", conflicts);
         assertEquals("Check correct result size", 1, conflicts.length);
         assertEquals("Check conflict results", conflicts[0].getObjectID(), cdao.getObjectID());
 
@@ -1250,8 +1255,9 @@ public class CalendarTest extends TestCase {
         cdao.setTitle("testHasAppointmentsBetween - Normal app");
         cdao.setParentFolderID(fid);
         cdao.setIgnoreConflicts(true);
-        cdao.setIgnoreConflicts(true);
-        fillDatesInDao(cdao);
+        cdao.setStartDate(D("01.10.2013 08:00"));
+        cdao.setEndDate(D("01.10.2013 09:00"));
+        
 
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
@@ -1262,8 +1268,8 @@ public class CalendarTest extends TestCase {
         cdao2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao2.setParentFolderID(fid);
         cdao2.setTimezone(CalendarRecurringTests.TIMEZONE);
-        fillDatesInDao(cdao2);
-        cdao2.removeUntil();
+        cdao2.setStartDate(D("04.10.2013 08:00"));
+        cdao2.setEndDate(D("04.10.2013 09:00"));
         cdao2.setTitle("testHasAppointmentsBetween - Rec app");
         cdao2.setRecurrenceType(CalendarDataObject.WEEKLY);
         cdao2.setInterval(1);
@@ -1273,50 +1279,11 @@ public class CalendarTest extends TestCase {
         csql.insertAppointmentObject(cdao2);
         cdao2.getObjectID();
 
-        final CalendarDataObject calculation = new CalendarDataObject();
-        fillDatesInDao(calculation);
+        Date range_start = D("01.10.2013 00:00");
+        Date range_end = D("01.11.2013 00:00");
 
-        final Calendar c = Calendar.getInstance(TimeZone.getTimeZone(CalendarRecurringTests.TIMEZONE));
-        c.setTimeInMillis(calculation.getStartDate().getTime());
-
-        final int month = c.get(Calendar.MONTH);
-        final int year = c.get(Calendar.YEAR);
-
-        c.set(Calendar.DAY_OF_MONTH, 1);
-        c.set(Calendar.MONTH, month);
-        c.set(Calendar.YEAR, year);
-
-        final long range_start = new CalendarCollection().normalizeLong(c.getTimeInMillis());
-
-        final int calc_length = c.getMaximum(Calendar.DAY_OF_MONTH);
-
-        c.add(Calendar.DAY_OF_MONTH, calc_length);
-
-        final long range_end = new CalendarCollection().normalizeLong(c.getTimeInMillis());
-
-        final boolean check_array[] = new boolean[calc_length];
-
-        int pos = (int)((cdao.getStartDate().getTime()-range_start)/Constants.MILLI_DAY);
-        int len = (int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/Constants.MILLI_DAY);
-        for (int a = pos; a <= pos+len; a++) {
-            check_array[a] = true;
-        }
-
-        m = new CalendarCollection().calculateRecurring(cdao2, 0, 0, 0);
-        for (int a  = 0; a < m.size(); a++) {
-            final RecurringResultInterface rr = m.getRecurringResult(a);
-            pos = (int)((rr.getStart()-range_start)/Constants.MILLI_DAY);
-            len = (int)((rr.getEnd()-rr.getStart())/Constants.MILLI_DAY);
-            for (int b = pos; b <= pos+len; b++) {
-                if (b < check_array.length) {
-                    check_array[b] = true;
-                }
-            }
-        }
-
-
-        final boolean test_array[] = csql.hasAppointmentsBetween(new Date(range_start), new Date(range_end));
-
+        boolean[] check_array = new boolean[]{true, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false};
+        boolean test_array[] = csql.hasAppointmentsBetween(range_start, range_end);
 
         assertEquals("Check arrays (length)", check_array.length, test_array.length);
 

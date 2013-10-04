@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -622,7 +623,7 @@ public class CalendarRecurringTests extends TestCase {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
 
-        long s = System.currentTimeMillis();
+        long s = D("04.10.2013 08:00").getTime();
         long cals = s;
         final long calsmod = s%Constants.MILLI_DAY;
         cals = cals- calsmod;
@@ -637,9 +638,9 @@ public class CalendarRecurringTests extends TestCase {
         u = u - mod;
 
 
-        final Calendar start = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
+        final Calendar start = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         start.setTimeInMillis(saves);
-        final Calendar ende = Calendar.getInstance(TimeZone.getTimeZone(("Europe/Berlin")));
+        final Calendar ende = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         ende.setTimeInMillis(savee);
 
         final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
@@ -736,7 +737,7 @@ public class CalendarRecurringTests extends TestCase {
                 assertNull("Deleted exceptions should be null." , tcdao.getDeleteException());
                 assertEquals("Check correct recurrence position", 5, tcdao.getRecurrencePosition());
                 assertEquals("Recurrence date position is not correct.", recurrence_date_position, tcdao.getRecurrenceDatePosition());
-            } else {
+            } else if (tcdao.getObjectID() == object_id) {
                 final Date test_deleted_exceptions[] = tcdao.getDeleteException();
                 final Date test_changed_exceptions[] = tcdao.getChangeException();
                 //assertTrue("Test deleted exception is NULL" , test_deleted_exceptions == null); // TODO: Don't know what this check was for... makes no sense to my mind.
@@ -1838,7 +1839,7 @@ public class CalendarRecurringTests extends TestCase {
         final Context context = new ContextImpl(contextid);
         final CalendarDataObject cdao = new CalendarDataObject();
 
-        long s = System.currentTimeMillis();
+        long s = D("04.10.2013 08:00").getTime();
         long cals = s;
         final long calsmod = s%new CalendarCollection().MILLI_DAY;
         cals = cals- calsmod;
