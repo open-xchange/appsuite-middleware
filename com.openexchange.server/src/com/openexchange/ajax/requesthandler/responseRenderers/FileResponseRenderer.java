@@ -777,6 +777,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if (ImageUtils.isAnimatedGif(stream)) {
                     return fileHolder;
                 }
+                stream = file.getStream();
             } else {
                 final AtomicReference<InputStream> ref = new AtomicReference<InputStream>();
                 if (ImageUtils.isAnimatedGif(stream, ref)) {
