@@ -835,6 +835,12 @@ if ! ox_exists_property com.openexchange.ajax.login.randomToken $PFILE; then
     ox_set_property com.openexchange.ajax.login.randomToken false $PFILE
 fi
 
+# SoftwareChange_Request-1646
+PFILE=/opt/open-xchange/etc/configdb.properties
+if ! ox_exists_property com.openexchange.database.checkWriteCons $PFILE; then
+    ox_set_property com.openexchange.database.checkWriteCons false $PFILE
+fi
+
 # SoftwareChange_Request-1648
 PFILE=/opt/open-xchange/etc/server.properties
 if ! ox_exists_property com.openexchange.servlet.maxRateLenientModules $PFILE; then
