@@ -46,4 +46,11 @@ public class TestEventAdmin implements EventAdmin {
         }
         return (CommonEvent) events.get(events.size()-1).getProperty(CommonEvent.EVENT_KEY);
     }
+    
+    public Event getNewestAsEvent() {
+        if(events.isEmpty()) {
+            throw new IndexOutOfBoundsException("No newest element, I'm afraid");
+        }
+        return events.get(events.size()-1);
+    }
 }

@@ -48,22 +48,25 @@
  */
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import org.osgi.service.event.Event;
 import junit.framework.TestCase;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -76,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 
 /**
+ * TODO Is it still needed to run this downgrade Test?
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class InfostoreDowngradeTest extends TestCase {
@@ -85,7 +90,7 @@ public class InfostoreDowngradeTest extends TestCase {
     private int userId;
     private InfostoreFacade database;
     private ServerSession session;
-    private UserPermissionBits userConfig;
+    private UserPermissionBits permissionBits;
     private User user;
 
     private final List<DocumentMetadata> clean = new ArrayList<DocumentMetadata>();
@@ -95,16 +100,16 @@ public class InfostoreDowngradeTest extends TestCase {
         Init.startServer();
         AJAXConfig.init();
 
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME)));
         userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
         user = UserStorage.getInstance().getUser(userId, ctx);
-        userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
+        permissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
 
         final OXFolderAccess access = new OXFolderAccess(ctx);
         final FolderObject fo = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
         folderId = fo.getObjectID();
 
-        database = new InfostoreFacadeImpl(new DBPoolProvider());
+        database = new EventFiringInfostoreFacadeImpl(new DBPoolProvider());
         database.setTransactional(true);
 
         session = ServerSessionFactory.createServerSession(userId, ctx, "Blubb");
@@ -120,7 +125,7 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
     private void runDelete() {
-        final UserConfiguration config = new UserConfiguration(new HashSet<String>(), userId,userConfig.getGroups() , ctx);
+        final UserConfiguration config = new UserConfiguration(new HashSet<String>(), userId,permissionBits.getGroups() , ctx);
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(ctx);
@@ -152,18 +157,18 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
 
-    private void assertDeletedEvent(final int id) {
-        final CommonEvent event = TestEventAdmin.getInstance().getNewest();
-
-        assertEquals(CommonEvent.DELETE, event.getAction());
-
-        final DocumentMetadata dm = (DocumentMetadata) event.getActionObj();
-        assertEquals(id, dm.getId());
+    private void assertDeletedEvent(final int id) throws OXException{
+        final Event event = TestEventAdmin.getInstance().getNewestAsEvent();
+        assertNotNull(event);
+        assertEquals(FileStorageEventConstants.DELETE_TOPIC, event.getTopic());
+        StringBuilder sb = new StringBuilder();
+        String idString = sb.append(id).toString();
+        assertEquals(FileStorageEventHelper.extractObjectId(event),idString);
     }
 
     private void assertNotFound(final int id) {
         try {
-            database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
+            database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
             fail("The document still exists!");
         } catch (final OXException e) {
             assertEquals(e.getMessage(), 300, e.getCode());
