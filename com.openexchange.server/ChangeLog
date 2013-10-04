@@ -1,3 +1,7 @@
+* 2013-10-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29110: Apply proper defaults to user mail option bits when creating a user
+
 * 2013-10-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 29120: Introduced whiteboard pattern for config-tree to slob mappings

@@ -1500,6 +1500,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
                 }
 
+                /*-
+                 * Apply other default values
+                 *
+                 * ( taken from '{GIT_HOME}/frontend6/open-xchange-gui/js/config/config.js' )
+                 */
+                flags |= UserSettingMail.INT_DISPLAY_HTML_INLINE_CONTENT;
+                flags |= UserSettingMail.INT_SHOW_GRAPHIC_EMOTICONS;
+                flags |= UserSettingMail.INT_USE_COLOR_QUOTE;
+                flags |= UserSettingMail.INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER;
+                flags |= UserSettingMail.INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT;
+                flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_OWNER;
+                flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT;
+
                 stmt.setInt(8, flags);
                 stmt.setString(9, std_mail_folder_confirmed_spam);
                 stmt.setString(10, std_mail_folder_confirmed_ham);
