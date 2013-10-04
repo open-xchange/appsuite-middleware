@@ -251,16 +251,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // Delete filestore directory of the context
             LOG.debug("Starting filestore delete(cid=" + ctx.getId() + ") from disc!");
             boolean simpleDelete = null == gwCtx;
-            try {
-                if (!simpleDelete) {
+            if (!simpleDelete) {
+                try {
                     QuotaFileStorage.getInstance(storageURI, gwCtx).remove();
+                } catch (final OXException e) {
+                    simpleDelete = true;
+                    LOG.error("File storage implementation failed to remove the file storage. Continuing with hard delete of file storage.", e);
                 }
-            } catch (final OXException e) {
-                simpleDelete = true;
-                LOG.error("File storage implementation failed to remove the file storage. Continuing with hard delete of file storage.", e);
             }
             if (simpleDelete) {
-                FileUtils.deleteDirectory(new File(storageURI));
+                if ("file".equalsIgnoreCase(storageURI.getScheme())) {
+                    FileUtils.deleteDirectory(new File(storageURI));
+                } else {
+                    throw new StorageException("Can't hard-delete non-local file store at \"" + storageURI + "\"");
+                }
             }
             LOG.debug("Filestore delete(cid=" + ctx.getId() + ") from disc finished!");
             // Execute delete context from configdb AND the drop database command if this context is the last one
