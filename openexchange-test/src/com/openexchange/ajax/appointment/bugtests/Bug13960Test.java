@@ -130,6 +130,7 @@ public class Bug13960Test extends AbstractAJAXSession {
                 if (response.getArray()[row][idPos].equals(I(appointment.getObjectID()))) {
                     break;
                 }
+                row++;
             }
             JSONArray array = ((JSONArray) response.getData()).getJSONArray(row);
             int recurrenceIdPos = response.getColumnPos(Appointment.RECURRENCE_ID);
