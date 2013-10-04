@@ -17,9 +17,26 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+postFix() {
+    local version=${1%-*}
+    version=${version//[-.]/}
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1640
+    PFILE=/opt/open-xchange/etc/audit.properties
+    if ! ox_exists_property com.openexchange.audit.logging.FileAccessLogging.enabled $PFILE; then
+        ox_set_property com.openexchange.audit.logging.FileAccessLogging.enabled false $PFILE
+    fi
+}
 
 case "$1" in
     configure)
+        test -n "$2" && {
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+        }
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
