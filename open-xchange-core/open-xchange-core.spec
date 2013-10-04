@@ -829,6 +829,12 @@ if [ "$VALUE" == "WARNING" -o -z "$VALUE" ]; then
     ox_set_property org.jaudiotagger.level SEVERE $PFILE
 fi
 
+# SoftwareChange_Request-1643
+PFILE=/opt/open-xchange/etc/login.properties
+if ! ox_exists_property com.openexchange.ajax.login.randomToken $PFILE; then
+    ox_set_property com.openexchange.ajax.login.randomToken false $PFILE
+fi
+
 # SoftwareChange_Request-1648
 PFILE=/opt/open-xchange/etc/server.properties
 if ! ox_exists_property com.openexchange.servlet.maxRateLenientModules $PFILE; then
