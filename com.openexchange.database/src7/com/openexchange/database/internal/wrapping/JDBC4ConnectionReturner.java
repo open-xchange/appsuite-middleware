@@ -99,6 +99,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     private final ReplicationMonitor monitor;
 
     private boolean usedForUpdate = false;
+    private boolean updateCommitted = false;
 
     public JDBC4ConnectionReturner(final Pools pools, final ReplicationMonitor monitor, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
         super();
@@ -158,7 +159,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
                 }
             }
         }
-        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead, usedForUpdate);
+        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead, usedForUpdate ||ÊupdateCommitted);
     }
     
     private long getTransactionCount(final int contextId, Connection con) throws SQLException {
@@ -213,6 +214,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
                         LOG.error("Updating transaction for replication monitor failed for context " + contextId + ".");
                     }
                     usedForUpdate = false;
+                    updateCommitted = true;
                 } catch (SQLException e) {
                     delegate.rollback(save);
                     if (1146 == e.getErrorCode()) {

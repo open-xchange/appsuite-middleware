@@ -72,14 +72,12 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
-import com.openexchange.database.internal.wrapping.JDBC4PreparedStatementWrapper;
-import com.openexchange.database.internal.wrapping.JDBC4StatementWrapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 
 /**
  * {@link JDBC4ConnectionReturner}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class JDBC4ConnectionReturner implements Connection {
@@ -99,6 +97,7 @@ public class JDBC4ConnectionReturner implements Connection {
     private boolean usedAsRead;
 
     private boolean usedForUpdate = false;
+    private boolean updateCommitted = false;
 
     protected Connection delegate;
 
@@ -160,7 +159,7 @@ public class JDBC4ConnectionReturner implements Connection {
                 }
             }
         }
-        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead, usedForUpdate);
+        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead, usedForUpdate || updateCommitted);
     }
 
     private long getTransactionCount(final int contextId, Connection con) throws SQLException {
@@ -215,6 +214,7 @@ public class JDBC4ConnectionReturner implements Connection {
                         LOG.error("Updating transaction for replication monitor failed for context " + contextId + ".");
                     }
                     usedForUpdate = false;
+                    updateCommitted = true;
                 } catch (SQLException e) {
                     delegate.rollback(save);
                     if (1146 == e.getErrorCode()) {
@@ -525,7 +525,7 @@ public class JDBC4ConnectionReturner implements Connection {
 
     /**
      * Closes the ResultSet.
-     * 
+     *
      * @param result <code>null</code> or a ResultSet to close.
      */
     private static void closeSQLStuff(final ResultSet result) {
@@ -540,7 +540,7 @@ public class JDBC4ConnectionReturner implements Connection {
 
     /**
      * Closes the {@link Statement}.
-     * 
+     *
      * @param stmt <code>null</code> or a {@link Statement} to close.
      */
     private static void closeSQLStuff(final Statement stmt) {
@@ -555,7 +555,7 @@ public class JDBC4ConnectionReturner implements Connection {
 
     /**
      * Closes the ResultSet and the Statement.
-     * 
+     *
      * @param result <code>null</code> or a ResultSet to close.
      * @param stmt <code>null</code> or a Statement to close.
      */
