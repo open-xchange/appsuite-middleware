@@ -49,6 +49,7 @@
 
 package com.openexchange.capabilities.internal;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -343,15 +344,18 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     for (final String scope : configViews.getSearchPath()) {
                         final String permissions = view.property(property, String.class).precedence(scope).get();
                         if (permissions != null) {
-                            for (final String permissionModifier : P_SPLIT.split(permissions)) {
-                                final char firstChar = permissionModifier.charAt(0);
-                                if ('-' == firstChar) {
-                                    capabilities.remove(getCapability(permissionModifier.substring(1)));
-                                } else {
-                                    if ('+' == firstChar) {
-                                        capabilities.add(getCapability(permissionModifier.substring(1)));
+                            for (String permissionModifier : P_SPLIT.split(permissions)) {
+                                if (!isEmpty(permissionModifier)) {
+                                    permissionModifier = permissionModifier.trim();
+                                    final char firstChar = permissionModifier.charAt(0);
+                                    if ('-' == firstChar) {
+                                        capabilities.remove(getCapability(permissionModifier.substring(1)));
                                     } else {
-                                        capabilities.add(getCapability(permissionModifier));
+                                        if ('+' == firstChar) {
+                                            capabilities.add(getCapability(permissionModifier.substring(1)));
+                                        } else {
+                                            capabilities.add(getCapability(permissionModifier));
+                                        }
                                     }
                                 }
                             }
@@ -389,22 +393,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 final Set<String> removees = new HashSet<String>();
                 // Context-sensitive
                 for (final String sCap : getContextCaps(contextId)) {
-                    final char firstChar = sCap.charAt(0);
-                    if ('-' == firstChar) {
-                        final String val = toLowerCase(sCap.substring(1));
-                        set.remove(val);
-                        removees.add(val);
-                    } else {
-                        if ('+' == firstChar) {
-                            set.add(toLowerCase(sCap.substring(1)));
-                        } else {
-                            set.add(toLowerCase(sCap));
-                        }
-                    }
-                }
-                // User-sensitive
-                if (userId > 0) {
-                    for (final String sCap : getUserCaps(userId, contextId)) {
+                    if (!isEmpty(sCap)) {
                         final char firstChar = sCap.charAt(0);
                         if ('-' == firstChar) {
                             final String val = toLowerCase(sCap.substring(1));
@@ -412,13 +401,32 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                             removees.add(val);
                         } else {
                             if ('+' == firstChar) {
-                                final String cap = toLowerCase(sCap.substring(1));
-                                set.add(cap);
-                                removees.remove(cap);
+                                set.add(toLowerCase(sCap.substring(1)));
                             } else {
-                                final String cap = toLowerCase(sCap);
-                                set.add(cap);
-                                removees.remove(cap);
+                                set.add(toLowerCase(sCap));
+                            }
+                        }
+                    }
+                }
+                // User-sensitive
+                if (userId > 0) {
+                    for (final String sCap : getUserCaps(userId, contextId)) {
+                        if (!isEmpty(sCap)) {
+                            final char firstChar = sCap.charAt(0);
+                            if ('-' == firstChar) {
+                                final String val = toLowerCase(sCap.substring(1));
+                                set.remove(val);
+                                removees.add(val);
+                            } else {
+                                if ('+' == firstChar) {
+                                    final String cap = toLowerCase(sCap.substring(1));
+                                    set.add(cap);
+                                    removees.remove(cap);
+                                } else {
+                                    final String cap = toLowerCase(sCap);
+                                    set.add(cap);
+                                    removees.remove(cap);
+                                }
                             }
                         }
                     }
