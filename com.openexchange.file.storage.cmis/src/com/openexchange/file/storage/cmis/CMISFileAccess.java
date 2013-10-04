@@ -333,7 +333,10 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
+        if (version != CURRENT_VERSION) {
+            throw CMISExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+        }
         InputStream stream = null;
         try {
             CmisObject object;

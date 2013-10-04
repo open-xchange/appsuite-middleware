@@ -181,7 +181,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
+        if (version != CURRENT_VERSION) {
+            // can only copy the current revision
+            throw DropboxExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+        }
         final String id = source.getId();
         try {
             final String name = id.substring(id.lastIndexOf('/') + 1);

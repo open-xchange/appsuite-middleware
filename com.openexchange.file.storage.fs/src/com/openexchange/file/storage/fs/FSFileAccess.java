@@ -67,6 +67,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
@@ -78,7 +79,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link FSFileAccess}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FSFileAccess implements FileStorageFileAccess {
@@ -91,7 +92,7 @@ public class FSFileAccess implements FileStorageFileAccess {
 
     /**
      * Initializes a new {@link FSFileAccess}.
-     * 
+     *
      * @param file
      * @param session
      */
@@ -244,7 +245,11 @@ public class FSFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
+        if (version != CURRENT_VERSION) {
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("No versioning support");
+        }
+
         java.io.File file = toFile(source.getFolder(), source.getId());
 
         String name = file.getName();

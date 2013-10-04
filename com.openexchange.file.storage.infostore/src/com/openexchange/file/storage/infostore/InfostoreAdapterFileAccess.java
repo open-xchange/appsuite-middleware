@@ -536,11 +536,11 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFile, final List<File.Field> modifiedFields) throws OXException {
-        final File orig = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
+    public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFile, final List<File.Field> modifiedFields) throws OXException {
+        final File orig = getFileMetadata(source.getFolder(), source.getId(), version);
         InputStream in = newFile;
         if (in == null && orig.getFileName() != null) {
-            in = getDocument(source.getFolder(), source.getId(), CURRENT_VERSION);
+            in = getDocument(source.getFolder(), source.getId(), version);
         }
         if (update != null) {
             orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));

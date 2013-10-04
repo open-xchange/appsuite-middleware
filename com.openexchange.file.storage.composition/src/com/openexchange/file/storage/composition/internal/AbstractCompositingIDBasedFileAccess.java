@@ -863,7 +863,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
         if(source.getService().equals(dest.getService()) && source.getAccountId().equals(dest.getAccountId())) {
             final FileStorageFileAccess fileAccess = getFileAccess(source.getService(), source.getAccountId());
-            final IDTuple destAddress = fileAccess.copy(new IDTuple(source.getFolderId(), source.getFileId()), dest.getFolderId(), update, newData, fields);
+            final IDTuple destAddress = fileAccess.copy(
+                new IDTuple(source.getFolderId(), source.getFileId()), version, dest.getFolderId(), update, newData, fields);
             return new FileID(source.getService(), source.getAccountId(), destAddress.getFolder(), destAddress.getId()).toUniqueID();
         }
 
