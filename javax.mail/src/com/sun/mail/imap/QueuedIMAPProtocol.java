@@ -167,9 +167,6 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("QueuedIMAPProtocol.realLogout(): LOGOUT for " + toString());
         }
-
-        System.out.println("QueuedIMAPProtocol.realLogout(): LOGOUT for " + toString());
-
         super.logout();
     }
 
