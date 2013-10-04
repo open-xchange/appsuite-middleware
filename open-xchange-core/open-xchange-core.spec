@@ -835,6 +835,12 @@ if ! ox_exists_property com.openexchange.servlet.maxRateLenientModules $PFILE; t
     ox_set_property com.openexchange.servlet.maxRateLenientModules "rt, system" $PFILE
 fi
 
+# SoftwareChange_Request-1643
+PFILE=/opt/open-xchange/etc/login.properties
+if ! ox_exists_property com.openexchange.ajax.login.randomToken $PFILE; then
+    ox_set_property com.openexchange.ajax.login.randomToken false $PFILE
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
