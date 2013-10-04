@@ -10,7 +10,7 @@
 * 2013-10-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 29072: Don't transform animated .gif images
- - Fix for bug 29101: Proper 'javax.activation' import
+ - Fix for bug 29101: Added export of 'javax.activation' package to system fragment bundle
 
 * 2013-10-01 - thorben.betten@open-xchange.com
 
