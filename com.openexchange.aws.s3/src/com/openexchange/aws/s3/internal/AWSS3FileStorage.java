@@ -71,7 +71,6 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
@@ -269,15 +268,24 @@ public class AWSS3FileStorage implements FileStorage {
 
     @Override
     public void remove() throws OXException {
-        List<KeyVersion> allFiles = new ArrayList<KeyVersion>();
-        ObjectListing listing = amazonS3.listObjects(bucketName);
-        List<S3ObjectSummary> summaries = listing.getObjectSummaries();
-        for (S3ObjectSummary summary : summaries) {
-            allFiles.add(new KeyVersion(summary.getKey()));
+        try {
+            /*
+             * delete contained files
+             */
+            SortedSet<String> fileList = getFileList();
+            if (null != fileList && 0 < fileList.size()) {
+                String[] identifiers = fileList.toArray(new String[fileList.size()]);
+                amazonS3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(identifiers));
+            }
+            /*
+             * delete bucket
+             */
+            amazonS3.deleteBucket(bucketName);
+        } catch (OXException e) {
+            throw FileStorageCodes.NOT_ELIMINATED.create(e);
+        } catch (AmazonClientException e) {
+            throw FileStorageCodes.NOT_ELIMINATED.create(wrap(e));
         }
-        DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
-        deleteObjectsRequest.setKeys(allFiles);
-        amazonS3.deleteObjects(deleteObjectsRequest);
     }
 
     @Override
