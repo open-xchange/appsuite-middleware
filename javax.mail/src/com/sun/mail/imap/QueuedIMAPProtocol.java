@@ -77,6 +77,9 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
     /** The user name for debugging purpose */
     private String user;
 
+    /** The flag whether a decrement was performed or not */
+    private boolean decrementPerformed;
+
     /**
      * Constructor.
      * <p>
@@ -119,11 +122,25 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
 
         if (authenticate) {
             user = u;
-        } else {
+        }
+    }
+
+    @Override
+    public synchronized void disconnect() {
+        try {
+            super.disconnect();
+        } finally {
+            decrementNewCount();
+        }
+    }
+
+    private synchronized void decrementNewCount() {
+        if (!decrementPerformed) {
             // Has been disconnected
             queue.decrementNewCount();
+            decrementPerformed = true;
             if (logger.isLoggable(Level.FINE)) {
-                logger.fine("QueuedIMAPProtocol.authenticatedStatusChanging(): Decremented new-count for " + toString());
+                logger.fine("QueuedIMAPProtocol.disconnect(): Decremented new-count for " + toString() + "\n\t(total=" + queue.getNewCount() + ")");
             }
         }
     }
@@ -150,6 +167,9 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("QueuedIMAPProtocol.realLogout(): LOGOUT for " + toString());
         }
+
+        System.out.println("QueuedIMAPProtocol.realLogout(): LOGOUT for " + toString());
+
         super.logout();
     }
 
