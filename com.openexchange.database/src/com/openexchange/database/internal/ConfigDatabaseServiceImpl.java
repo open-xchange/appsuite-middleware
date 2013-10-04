@@ -57,7 +57,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -74,30 +73,17 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigDatabaseServiceImpl.class);
 
-    private static final AtomicReference<String> CONFIG_DB_SCHEMANAME_REF = new AtomicReference<String>();
-
-    /**
-     * Gets the name of the config database schema.
-     *
-     * @return The schema name or <code>null</code> if unknown
-     */
-    public static String getConfigDBSchemaName() {
-        String configDBSchemaName = CONFIG_DB_SCHEMANAME_REF.get();
-        return configDBSchemaName == null ? "configdb" : configDBSchemaName;
-    }
-
     // ------------------------------------------------------------------------------------------------ //
 
     private final Pools pools;
     private final ConfigDatabaseAssignmentService assignmentService;
     private final ReplicationMonitor monitor;
 
-    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor, String configDBSchemaName) {
+    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor) {
         super();
         this.assignmentService = assignmentService;
         this.pools = pools;
         this.monitor = monitor;
-        CONFIG_DB_SCHEMANAME_REF.set(configDBSchemaName);
     }
 
     private Connection get(final boolean write) throws OXException {

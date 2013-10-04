@@ -57,6 +57,7 @@ import java.util.concurrent.Executor;
 import org.junit.Test;
 import com.mysql.jdbc.Connection;
 import com.openexchange.database.internal.AssignmentImpl;
+import com.openexchange.database.internal.ConnectionState;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
 
@@ -74,11 +75,12 @@ public class UpdateFlagTest {
         PreparedStatement mockStmt = mock(PreparedStatement.class);
         when(mockCon.prepareStatement(anyString())).thenReturn(mockStmt);
         ReplicationMonitor mockMon = mock(ReplicationMonitor.class);
-        JDBC4ConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
+        VersionIndependentConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
         PreparedStatement stmt = con.prepareStatement("");
         stmt.executeUpdate();
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, false, true);
+
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
     }
 
     @Test
@@ -87,11 +89,11 @@ public class UpdateFlagTest {
         PreparedStatement mockStmt = mock(PreparedStatement.class);
         when(mockCon.prepareStatement(anyString())).thenReturn(mockStmt);
         ReplicationMonitor mockMon = mock(ReplicationMonitor.class);
-        JDBC4ConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
+        VersionIndependentConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
         PreparedStatement stmt = con.prepareStatement("");
         stmt.execute();
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, false, true);
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
     }
 
     @Test
@@ -100,11 +102,11 @@ public class UpdateFlagTest {
         PreparedStatement mockStmt = mock(PreparedStatement.class);
         when(mockCon.prepareStatement(anyString())).thenReturn(mockStmt);
         ReplicationMonitor mockMon = mock(ReplicationMonitor.class);
-        JDBC4ConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
+        VersionIndependentConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
         PreparedStatement stmt = con.prepareStatement("");
         stmt.executeQuery();
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, false, false);
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
     }
 
     @Test
@@ -113,11 +115,11 @@ public class UpdateFlagTest {
         Statement mockStmt = mock(Statement.class);
         when(mockCon.createStatement()).thenReturn(mockStmt);
         ReplicationMonitor mockMon = mock(ReplicationMonitor.class);
-        JDBC4ConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
+        VersionIndependentConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
         Statement stmt = con.createStatement();
         stmt.executeUpdate("");
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, false, true);
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
     }
 
     @Test
@@ -126,11 +128,11 @@ public class UpdateFlagTest {
         Statement mockStmt = mock(Statement.class);
         when(mockCon.createStatement()).thenReturn(mockStmt);
         ReplicationMonitor mockMon = mock(ReplicationMonitor.class);
-        JDBC4ConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
+        VersionIndependentConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
         Statement stmt = con.createStatement();
         stmt.execute("");
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, false, true);
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
     }
 
     @Test
@@ -139,11 +141,11 @@ public class UpdateFlagTest {
         Statement mockStmt = mock(Statement.class);
         when(mockCon.createStatement()).thenReturn(mockStmt);
         ReplicationMonitor mockMon = mock(ReplicationMonitor.class);
-        JDBC4ConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
+        VersionIndependentConnectionReturner con = new VersionIndependentConnectionReturner(null, mockMon, null, mockCon, true, true, false);
         Statement stmt = con.createStatement();
         stmt.executeQuery("");
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, false, false);
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
     }
 
     private static final class VersionIndependentConnectionReturner extends JDBC4ConnectionReturner {
@@ -175,6 +177,10 @@ public class UpdateFlagTest {
         public int getNetworkTimeout() throws SQLException {
             // TODO Auto-generated method stub
             return 0;
+        }
+
+        public ConnectionState getState() {
+            return state;
         }
 
     }

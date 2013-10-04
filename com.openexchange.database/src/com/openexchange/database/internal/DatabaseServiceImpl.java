@@ -280,7 +280,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     public void backForUpdateTask(final int contextId, final Connection con) {
         back(con);
     }
-    
+
     @Override
     public void backForUpdateTaskAfterReading(final int contextId, final Connection con) {
         backFromReading(con);

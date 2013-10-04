@@ -49,7 +49,6 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.ConfigDatabaseServiceImpl.getConfigDBSchemaName;
 import java.io.Serializable;
 import com.openexchange.database.Assignment;
 
@@ -118,6 +117,11 @@ public class AssignmentImpl implements Serializable, Assignment {
         return schema;
     }
 
+    @Override
+    public boolean isToConfigDB() {
+        return Constants.CONFIGDB_WRITE_ID == writePoolId;
+    }
+
     /**
      * Returns true if the transaction counter has been initialized
      * @return
@@ -135,10 +139,6 @@ public class AssignmentImpl implements Serializable, Assignment {
         transactionInitialized = true;
     }
 
-    @Override
-    public boolean isToConfigDB() {
-        return null == schema || schema.equals(getConfigDBSchemaName());
-    }
 
     @Override
     public int hashCode() {
