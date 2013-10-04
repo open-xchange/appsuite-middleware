@@ -278,7 +278,7 @@ public class QueuingIMAPStore extends IMAPStore {
     protected IMAPProtocol newIMAPProtocol(final String host, final int port, final String user, final String password) throws IOException, ProtocolException {
         try {
             final int permits = PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0);
-            if (permits <= 0) {
+            if (permits <= 0 || PropUtil.getBooleanSessionProperty(session, "mail.imap.forceAuthenticated", false)) {
                 // No connection restriction -- delegate to super implementation
                 return super.newIMAPProtocol(host, port, user, password);
             }
@@ -298,7 +298,7 @@ public class QueuingIMAPStore extends IMAPStore {
             // Create a new protocol instance
             protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q);
             if (logger.isLoggable(Level.FINE)) {
-                logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")\n");
+                logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
             }
             return protocol;
         } catch (final InterruptedException e) {
