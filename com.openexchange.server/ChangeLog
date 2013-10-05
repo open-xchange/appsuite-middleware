@@ -1,3 +1,7 @@
+* 2013-10-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29039: Handle DataTruncation exception and throw appropriate error
+
 * 2013-10-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 29110: Apply proper defaults to user mail option bits when creating a user

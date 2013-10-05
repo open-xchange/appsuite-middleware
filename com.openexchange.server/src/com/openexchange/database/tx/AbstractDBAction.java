@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import org.apache.commons.logging.Log;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -77,29 +78,40 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
 	    super();
 	}
 
-	protected int doUpdates(final UpdateBlock...updates) throws OXException {
-		Connection writeCon = null;
-		UpdateBlock current = null;
-		int counter = 0;
-		try {
-			writeCon = getProvider().getWriteConnection(getContext());
-			for(final UpdateBlock update : updates) {
-				current = update;
-				counter += current.performUpdate(writeCon);
-				current.close();
-			}
-		} catch (final SQLException e) {
-			throw new OXException(e);
-		} finally {
-			if(current != null) {
-				current.close();
-			}
-			if(writeCon != null) {
-				provider.releaseWriteConnection(getContext(), writeCon);
-			}
-		}
-		return counter;
-	}
+    /**
+     * Performs given update blocks.
+     *
+     * @param updates The update blocks
+     * @return The number of updated rows
+     * @throws OXException If an error occurs
+     */
+    protected int doUpdates(final UpdateBlock... updates) throws OXException {
+        Connection writeCon = null;
+        UpdateBlock current = null;
+        int counter = 0;
+        try {
+            writeCon = getProvider().getWriteConnection(getContext());
+            for (final UpdateBlock update : updates) {
+                current = update;
+                counter += current.performUpdate(writeCon);
+                current.close();
+            }
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (current != null) {
+                try {
+                    current.close();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+            if (writeCon != null) {
+                provider.releaseWriteConnection(getContext(), writeCon);
+            }
+        }
+        return counter;
+    }
 
     protected int doUpdates(final List<UpdateBlock> updates) throws OXException, OXException {
         return doUpdates(updates.toArray(new UpdateBlock[updates.size()]));

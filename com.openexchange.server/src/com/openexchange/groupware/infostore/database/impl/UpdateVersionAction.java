@@ -51,7 +51,9 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.sql.DataTruncation;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -73,7 +75,17 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
         {
             Metadata[] fields = getQueryCatalog().filterForVersion(getModified());
             fields = getQueryCatalog().filterWritable(fields);
-            counter = doUpdates(getQueryCatalog().getVersionUpdate(fields), fields, getDocuments());
+            try {
+                counter = doUpdates(getQueryCatalog().getVersionUpdate(fields), fields, getDocuments());
+            } catch (final OXException e) {
+                final Throwable cause = e.getCause();
+                if (!(cause instanceof DataTruncation)) {
+                    throw e;
+                }
+                final DataTruncation dt = (DataTruncation) cause;
+                // final String sfields[] = DBUtils.parseTruncatedFields(dt);
+                throw OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create(dt, new Object[0]);
+            }
         }
 
         setTimestamp(System.currentTimeMillis());
