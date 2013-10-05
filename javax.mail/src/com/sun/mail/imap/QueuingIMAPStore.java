@@ -152,9 +152,6 @@ public class QueuingIMAPStore extends IMAPStore {
     private static final ConcurrentMap<URLName, CountingQueue> queues = new ConcurrentHashMap<URLName, CountingQueue>(16);
 
     private static CountingQueue initQueue(final URLName url, final int permits, final MailLogger logger) {
-        if (permits <= 0) {
-            return null;
-        }
         CountingQueue q = queues.get(url);
         if (null == q) {
             final CountingQueue ns = new CountingQueue(permits);
@@ -277,17 +274,11 @@ public class QueuingIMAPStore extends IMAPStore {
     @Override
     protected IMAPProtocol newIMAPProtocol(final String host, final int port, final String user, final String password) throws IOException, ProtocolException {
         try {
-            final int permits = PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0);
-            if (permits <= 0 || PropUtil.getBooleanSessionProperty(session, "mail.imap.forceAuthenticated", false)) {
-                // No connection restriction -- delegate to super implementation
+            if (PropUtil.getBooleanSessionProperty(session, "mail.imap.forceAuthenticated", false)) {
+                // Forced -- delegate to super implementation
                 return super.newIMAPProtocol(host, port, user, password);
             }
-            final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), permits, logger);
-            if (null == q) {
-                // No connection restriction -- delegate to super implementation
-                return super.newIMAPProtocol(host, port, user, password);
-            }
-            // Queuing IMAP store enabled
+            final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0), logger);
             QueuedIMAPProtocol protocol = q.takeOrIncrement();
             if (null != protocol) {
                 if (logger.isLoggable(Level.FINE)) {
@@ -384,8 +375,8 @@ public class QueuingIMAPStore extends IMAPStore {
          */
         public CountingQueue(final int max) {
             super();
-            q = new PriorityQueue<QueuedIMAPProtocol>(max);
-            this.max = max;
+            q = new PriorityQueue<QueuedIMAPProtocol>(max < 1 ? 11 : max);
+            this.max = max <= 0 ? Integer.MAX_VALUE : max;
         }
 
         /**

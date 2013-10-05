@@ -56,7 +56,6 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.QueuingIMAPStore.CountingQueue;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.util.MailLogger;
-import com.sun.mail.util.PropUtil;
 
 /**
  * {@link QueuedIMAPProtocol}
@@ -64,9 +63,6 @@ import com.sun.mail.util.PropUtil;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<QueuedIMAPProtocol> {
-
-    /** The max. number of concurrently authenticated protocols */
-    private final int maxNumAuthenticated;
 
     /** The queue */
     private final CountingQueue queue;
@@ -94,7 +90,6 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
     public QueuedIMAPProtocol(final String name, final String host, final int port, final Properties props, final boolean isSSL, final MailLogger logger, final CountingQueue q) throws IOException, ProtocolException {
         super(name, host, port, props, isSSL, logger);
         this.queue = q;
-        this.maxNumAuthenticated = PropUtil.getIntProperty(props, "mail.imap.maxNumAuthenticated", 0);
     }
 
     @Override
@@ -115,11 +110,6 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
 
     @Override
     protected void authenticatedStatusChanging(final boolean authenticate, final String u, final String p) throws ProtocolException {
-        final int maxNumAuthenticated = this.maxNumAuthenticated;
-        if (maxNumAuthenticated <= 0) {
-            return;
-        }
-
         if (authenticate) {
             user = u;
         }
@@ -134,6 +124,9 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
         }
     }
 
+    /**
+     * Decrements associated queue's new-count.
+     */
     private synchronized void decrementNewCount() {
         if (!decrementPerformed) {
             // Has been disconnected

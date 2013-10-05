@@ -118,7 +118,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.QueuingIMAPStore;
+import com.sun.mail.imap.JavaIMAPStore;
 
 /**
  * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
@@ -543,8 +543,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            final javax.mail.Session imapSession =
-                setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps);
+            final javax.mail.Session imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, IMAPStore.class);
             /*
              * Check if debug should be enabled
              */
@@ -664,7 +663,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps);
+            {
+                final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz);
+            }
             /*
              * Check if debug should be enabled
              */
@@ -1237,12 +1239,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
-    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps) {
+    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass) {
         /*
          * Custom IMAP store
          */
-        // imapProps.put("mail.imap.class", JavaIMAPStore.class.getName());
-        imapProps.put("mail.imap.class", QueuingIMAPStore.class.getName());
+        imapProps.put("mail.imap.class", storeClass.getName());
         /*
          * Set timeouts
          */
@@ -1318,8 +1319,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Create new IMAP session from initialized properties
          */
         final javax.mail.Session imapSession = javax.mail.Session.getInstance(imapProps, null);
-        // imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", JavaIMAPStore.class.getName(), "Open-Xchange, Inc.", "7.2.2"));
-        imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", QueuingIMAPStore.class.getName(), "Open-Xchange, Inc.", "7.4.1"));
+        imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", storeClass.getName(), "Open-Xchange, Inc.", "7.4.1"));
         return imapSession;
     }
 

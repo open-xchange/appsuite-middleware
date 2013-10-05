@@ -49,12 +49,10 @@
 
 package com.sun.mail.imap;
 
-import java.io.IOException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -65,7 +63,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.util.PropUtil;
 
 /**
- * {@link JavaIMAPStore}
+ * {@link JavaIMAPStore} - Extends {@link IMAPStore} by improved support for Kerberos authentication.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -81,13 +79,13 @@ public class JavaIMAPStore extends IMAPStore {
     protected String[] saslMechanisms;
 
     /** The SASL realm */
-    protected String saslRealm;
+    protected String m_saslRealm;
 
     /** Authorization ID */
-    private String authorizationID;
+    private String m_authorizationID;
 
     /** Proxy auth user */
-    private String proxyAuthUser;
+    private String m_proxyAuthUser;
 
     /**
      * Initializes a new {@link JavaIMAPStore}.
@@ -119,17 +117,17 @@ public class JavaIMAPStore extends IMAPStore {
             // SASL realm
             s = session.getProperty("mail.imap.sasl.realm");
             if (s != null) {
-                saslRealm = s;
+                m_saslRealm = s;
             }
             // Check if an authorization ID has been specified
             s = session.getProperty("mail." + name + ".sasl.authorizationid");
             if (s != null) {
-                authorizationID = s;
+                m_authorizationID = s;
             }
             // Check if we should do a PROXYAUTH login
             s = session.getProperty("mail." + name + ".proxyauth.user");
             if (s != null) {
-                proxyAuthUser = s;
+                m_proxyAuthUser = s;
             }
         }
     }
@@ -144,48 +142,38 @@ public class JavaIMAPStore extends IMAPStore {
         this(session, url, "imap", false);
     }
 
-    /*-
-     * 
-    @Override
-    protected IMAPProtocol newIMAPProtocol(String host, int port, String user, String password) throws IOException, ProtocolException {
-        return new JavaIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger);
-    }
-    */
-
     @Override
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
         if (p.isAuthenticated()) {
             super.login(p, u, pw);
             return;
         }
-        /*
-         * Auth stuff
-         */
-        if (enableSASL && null != kerberosSubject) {
-            // Do Kerberos authentication
-            final String authzid;
-            if (authorizationID != null) {
-                authzid = authorizationID;
-            } else if (proxyAuthUser != null) {
-                authzid = proxyAuthUser;
-            } else {
-                authzid = null;
-            }
-            try {
-                Subject.doAs(kerberosSubject, new PrivilegedExceptionAction<Object>() {
-
-                    @Override
-                    public Object run() throws Exception {
-                        p.sasllogin(saslMechanisms, saslRealm, authzid, u, pw);
-                        return null;
-                    }
-                });
-            } catch (final PrivilegedActionException e) {
-                handlePrivilegedActionException(e);
-            }
-        } else {
+        // Check for regular or Kerberos authentication
+        if (!enableSASL || null == kerberosSubject) {
             // Do regular authentication
             super.login(p, u, pw);
+            return;
+        }
+        // Do Kerberos authentication
+        final String authzid;
+        if (m_authorizationID != null) {
+            authzid = m_authorizationID;
+        } else if (m_proxyAuthUser != null) {
+            authzid = m_proxyAuthUser;
+        } else {
+            authzid = null;
+        }
+        try {
+            Subject.doAs(kerberosSubject, new PrivilegedExceptionAction<Object>() {
+
+                @Override
+                public Object run() throws Exception {
+                    p.sasllogin(saslMechanisms, m_saslRealm, authzid, u, pw);
+                    return null;
+                }
+            });
+        } catch (final PrivilegedActionException e) {
+            handlePrivilegedActionException(e);
         }
     }
 

@@ -101,7 +101,8 @@ public final class IMAPStoreCache {
         }
         final ConfigurationService service = Services.getService(ConfigurationService.class);
         final boolean checkConnected = null == service ? false : service.getBoolProperty("com.openexchange.imap.checkConnected", false);
-        tmp = instance = new IMAPStoreCache(checkConnected);
+        final Container container = null == service ? Container.getDefault() : Container.containerFor(service.getProperty("com.openexchange.imap.storeContainerType", Container.getDefault().getId()));
+        tmp = instance = new IMAPStoreCache(checkConnected, container);
         tmp.init();
     }
 
@@ -110,11 +111,10 @@ public final class IMAPStoreCache {
      */
     public static void shutDownInstance() {
         final IMAPStoreCache tmp = instance;
-        if (null == tmp) {
-            return;
+        if (null != tmp) {
+            tmp.shutDown();
+            instance = null;
         }
-        tmp.shutDown();
-        instance = null;
     }
 
     /**
@@ -169,10 +169,6 @@ public final class IMAPStoreCache {
      * -------------------------------------- Member stuff --------------------------------------
      */
 
-    private static enum Container {
-        UNBOUNDED, BOUNDARY_AWARE, NON_CACHING;
-    }
-
     private final Container containerType;
     private final Protocol protocol;
     private final ConcurrentMap<Key, IMAPStoreContainer> map;
@@ -183,15 +179,25 @@ public final class IMAPStoreCache {
 
     /**
      * Initializes a new {@link IMAPStoreCache}.
+     * @param container
      */
-    private IMAPStoreCache(final boolean checkConnected) {
+    private IMAPStoreCache(final boolean checkConnected, final Container container) {
         super();
-        containerType = Container.NON_CACHING;
+        containerType = null == container ? Container.getDefault() : container;
         behavior = CallerRunsBehavior.getInstance();
         this.checkConnected = checkConnected;
         protocol = IMAPProvider.PROTOCOL_IMAP;
         map = new NonBlockingHashMap<Key, IMAPStoreContainer>();
         keys = new NonBlockingHashMap<IMAPStoreCache.User, Queue<Key>>();
+    }
+
+    /**
+     * Gets the class of the associated IMAP store.
+     *
+     * @return The IMAP store class
+     */
+    public Class<? extends IMAPStore> getStoreClass() {
+        return containerType.getStoreClass();
     }
 
     private void init() {
