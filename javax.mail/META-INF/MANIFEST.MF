@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.tools.ssl,
  com.sun.net,
  com.sun.net.ssl,
+ javax.activation;version="1.1.0",
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
