@@ -151,8 +151,9 @@ public final class ConfigJSlobService implements JSlobService {
         if (null == file) {
             configTreeEquivalents = new ConcurrentHashMap<String, Map<String,String>[]>(2);
         } else {
-            configTreeEquivalents = new ConcurrentHashMap<String, Map<String, String>[]>(48);
+            final ConcurrentMap<String, Map<String, String>[]> configTreeEquivalents = new ConcurrentHashMap<String, Map<String, String>[]>(48);
             readPerfMap(file, configTreeEquivalents);
+            this.configTreeEquivalents = configTreeEquivalents;
         }
         // Initialize shared JSlobs
         sharedJSlobs = new ConcurrentHashMap<String, SharedJSlobService>();
