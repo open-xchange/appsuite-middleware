@@ -101,7 +101,11 @@ public final class IMAPStoreCache {
         }
         final ConfigurationService service = Services.getService(ConfigurationService.class);
         final boolean checkConnected = null == service ? false : service.getBoolProperty("com.openexchange.imap.checkConnected", false);
-        final Container container = null == service ? Container.getDefault() : Container.containerFor(service.getProperty("com.openexchange.imap.storeContainerType", Container.getDefault().getId()));
+        Container container = null == service ? Container.getDefault() : Container.containerFor(service.getProperty("com.openexchange.imap.storeContainerType", Container.getDefault().getId()));
+        if (Container.UNBOUNDED.equals(container) && (null != service && service.getIntProperty("com.openexchange.imap.maxNumConnections", 0) > 0)) {
+            LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than zero. Using default container \"" + Container.getDefault().getId() + "\" instead.");
+            container = Container.getDefault();
+        }
         tmp = instance = new IMAPStoreCache(checkConnected, container);
         tmp.init();
     }
