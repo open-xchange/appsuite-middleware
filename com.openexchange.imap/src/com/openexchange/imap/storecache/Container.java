@@ -64,14 +64,23 @@ public enum Container {
 
     /**
      * An unbounded IMAP store container.
+     * <p>
+     * Acts as a temporary keep-alive cache for connected {@link IMAPStore} instances.<br>
+     * Does <b>not</b> consider <code>"com.openexchange.imap.maxNumConnections"</code> property at all.
      */
     UNBOUNDED("unbounded", JavaIMAPStore.class),
     /**
      * A bounded IMAP store container (default).
+     * <p>
+     * Extends {@link #UNBOUNDED} by allowing to connect new {@link IMAPStore} instances with respect to
+     * <code>"com.openexchange.imap.maxNumConnections"</code> property.
      */
     BOUNDARY_AWARE("boundary-aware", JavaIMAPStore.class),
     /**
      * A non-caching IMAP store container.
+     * <p>
+     * Delegates <code>"com.openexchange.imap.maxNumConnections"</code> setting to <code>'com.sun.mail.imap.QueuingIMAPStore'</code> that
+     * performs an exact limitation based on established socket connections.
      */
     NON_CACHING("non-caching", QueuingIMAPStore.class);
 
