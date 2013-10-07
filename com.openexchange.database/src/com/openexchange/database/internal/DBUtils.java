@@ -52,6 +52,7 @@ package com.openexchange.database.internal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
@@ -107,6 +108,18 @@ final class DBUtils {
         }
     }
 
+    static void rollback(Connection con, Savepoint savePoint) {
+        if (null == con || null == savePoint) {
+            return;
+        }
+        try {
+            if (!con.isClosed()) {
+                con.rollback(savePoint);
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
     static void autocommit(Connection con) {
         if (null == con) {
             return;
