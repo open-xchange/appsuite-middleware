@@ -1,6 +1,7 @@
 * 2013-10-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 29147: Detect possibly harmful HTML content in image files and force attachment download then
+ - Fix for bug 29161: Added missing 'javax.management' imports to MANIFEST.MF files
 
 * 2013-10-05 - thorben.betten@open-xchange.com
 
