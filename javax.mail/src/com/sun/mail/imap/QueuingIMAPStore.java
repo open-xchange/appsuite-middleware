@@ -70,9 +70,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import javax.mail.MessagingException;
@@ -169,20 +171,25 @@ public class QueuingIMAPStore extends IMAPStore {
                         if (logger.isLoggable(Level.FINE)) {
                             logger.fine("Cleaner run. Elements in queue " + tq.hashCode() + ": " + tq.size());
                         }
-                        final boolean wasEmpty = tq.closeElapsed(System.currentTimeMillis() - 4000);
-                        if (wasEmpty) {
-                            if (noneCount.incrementAndGet() >= 10) {
-                                // Seen this queue as empty for 10 times
-                                if (tqueues.remove(url, tq)) {
-                                    // Atomically removed queue
+                        final long minStamp = System.currentTimeMillis() - 4000;
+                        final Lock lock = tq.lock;
+                        lock.lock();
+                        try {
+                            boolean notInUse = tq.closeElapsed0(minStamp);
+                            if (notInUse) {
+                                if (noneCount.incrementAndGet() >= 10 && tqueues.remove(url, tq)) {
+                                    // Atomically removed queue, because seen this queue as "not in use" for 10 times
+                                    tq.deprecated.set(true);
                                     final ScheduledFuture<?> future = futureRef.getAndSet(null);
                                     if (null != future) {
                                         future.cancel(false);
                                     }
                                 }
+                            } else {
+                                noneCount.set(0);
                             }
-                        } else {
-                            noneCount.set(0);
+                        } finally {
+                            lock.unlock();
                         }
                     }
                 };
@@ -278,20 +285,26 @@ public class QueuingIMAPStore extends IMAPStore {
                 // Forced -- delegate to super implementation
                 return super.newIMAPProtocol(host, port, user, password);
             }
-            final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0), logger);
-            QueuedIMAPProtocol protocol = q.takeOrIncrement();
-            if (null != protocol) {
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.fine("QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString());
+            while (true) {
+                try {
+                    final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0), logger);
+                    QueuedIMAPProtocol protocol = q.takeOrIncrement();
+                    if (null != protocol) {
+                        if (logger.isLoggable(Level.FINE)) {
+                            logger.fine("QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString());
+                        }
+                        return protocol;
+                    }
+                    // Create a new protocol instance
+                    protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q);
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
+                    }
+                    return protocol;
+                } catch (final IllegalStateException e) {
+                    // Retry
                 }
-                return protocol;
             }
-            // Create a new protocol instance
-            protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q);
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
-            }
-            return protocol;
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
@@ -366,6 +379,7 @@ public class QueuingIMAPStore extends IMAPStore {
 
         final PriorityQueue<QueuedIMAPProtocol> q;
         final ReentrantLock lock = new ReentrantLock(true);
+        final AtomicBoolean deprecated = new AtomicBoolean();
         private final Condition notEmpty = lock.newCondition();
         private final int max;
         private int newCount;
@@ -395,29 +409,41 @@ public class QueuingIMAPStore extends IMAPStore {
         }
 
         /**
-         * Closes elapsed elements. Signals <code>true</code> if queue is empty at the time of invocation.
+         * Closes elapsed elements. Signals <code>true</code> if queue is not in use at the time of invocation.
          *
          * @param minStamp The minimum allowed time stamp
-         * @return <code>true</code> if nothing happened because queue was empty; otherwise <code>false</code>
+         * @return <code>true</code> if nothing happened because queue was not in use; otherwise <code>false</code>
          */
         public boolean closeElapsed(final long minStamp) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
-                if (q.isEmpty()) {
-                    return true;
-                }
-                QueuedIMAPProtocol x;
-                while (((x = q.peek()) != null) && (x.getAuthenticatedStamp() < minStamp)) {
-                    x = q.poll();
-                    assert x != null;
-                    // Perform LOGOUT on polled IMAP protocol
-                    safeLogout(x);
-                }
-                return false;
+                return closeElapsed0(minStamp);
             } finally {
                 lock.unlock();
             }
+        }
+
+        /**
+         * Closes elapsed elements. Signals <code>true</code> if queue is not in use at the time of invocation.
+         * <p>
+         * Lock <b>MUST</b> be acquired prior to invocation!
+         *
+         * @param minStamp The minimum allowed time stamp
+         * @return <code>true</code> if nothing happened because queue was not in use; otherwise <code>false</code>
+         */
+        boolean closeElapsed0(final long minStamp) {
+            if (q.isEmpty() && newCount <= 0) {
+                return true;
+            }
+            QueuedIMAPProtocol x;
+            while (((x = q.peek()) != null) && (x.getAuthenticatedStamp() < minStamp)) {
+                x = q.poll();
+                assert x != null;
+                // Perform LOGOUT on polled IMAP protocol
+                safeLogout(x);
+            }
+            return false;
         }
 
         private void safeLogout(final QueuedIMAPProtocol x) {
@@ -439,8 +465,12 @@ public class QueuingIMAPStore extends IMAPStore {
          * Takes or increments the new count. Waiting for available elements if none in queue and count is exceeded.
          *
          * @throws InterruptedException If interrupted while waiting
+         * @throws IllegalStateException If queue has been deprecated in the meantime
          */
         public QueuedIMAPProtocol takeOrIncrement() throws InterruptedException {
+            if (deprecated.get()) {
+                throw new IllegalStateException("Queue is deprecated");
+            }
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
