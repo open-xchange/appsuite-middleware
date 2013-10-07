@@ -290,7 +290,7 @@ public class QueuingIMAPStore extends IMAPStore {
                 try {
                     final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0), logger);
                     if (logger.isLoggable(Level.FINE)) {
-                        logger.fine("QueueingIMAPStore.newIMAPProtocol(): " + Thread.currentThread().getName() + " is trying to create/fetch from queue. Pending threads " + q.trackedThreads());
+                        logger.fine("QueueingIMAPStore.newIMAPProtocol(): " + Thread.currentThread().getName() + " is trying to create/fetch for user '" + user + "@" + host + "'. Pending threads " + q.trackedThreads());
                     }
                     QueuedIMAPProtocol protocol = q.takeOrIncrement();
                     if (null != protocol) {
