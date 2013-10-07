@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
@@ -376,7 +377,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // #################################################################
 
-            if (usrdata.getPrimaryEmail() != null) {
+            if (isEmpty(usrdata.getPrimaryEmail())) {
                 stmt = con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPrimaryEmail());
                 stmt.setInt(2, contextId);
@@ -385,7 +386,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getLanguage() != null) {
+            if (isEmpty(usrdata.getLanguage())) {
                 stmt = con.prepareStatement("UPDATE user SET preferredlanguage = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getLanguage());
                 stmt.setInt(2, contextId);
@@ -394,7 +395,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getTimezone() != null) {
+            if (!isEmpty(usrdata.getTimezone())) {
                 stmt = con.prepareStatement("UPDATE user SET timezone = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getTimezone());
                 stmt.setInt(2, contextId);
@@ -421,7 +422,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getImapServerString() == null && usrdata.isImapServerset()) {
+            if (isEmpty(usrdata.getImapServerString()) && usrdata.isImapServerset()) {
                 stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
@@ -439,7 +440,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getImapLogin() == null && usrdata.isImapLoginset()) {
+            if (isEmpty(usrdata.getImapLogin()) && usrdata.isImapLoginset()) {
                 stmt = con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
@@ -455,7 +456,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getSmtpServerString() == null && usrdata.isSmtpServerset()) {
+            if (isEmpty(usrdata.getSmtpServerString()) && usrdata.isSmtpServerset()) {
                 stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
@@ -473,7 +474,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getPassword() != null) {
+            if (isEmpty(usrdata.getPassword())) {
                 stmt = con.prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, cache.encryptPassword(usrdata));
                 stmt.setInt(2, contextId);
@@ -482,7 +483,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getPasswordMech() != null) {
+            if (isEmpty(usrdata.getPasswordMech())) {
                 stmt = con.prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPasswordMech());
                 stmt.setInt(2, contextId);

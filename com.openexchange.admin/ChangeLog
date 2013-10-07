@@ -1,3 +1,7 @@
+* 2013-10-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29160: Examine passed String via SOAP to be not empty (not null and length greater than 0)
+
 * 2013-09-16 - choeger@open-xchange.com
 
  - Fix for bug 28830: oxsysreport is collecting unneeded protected data
