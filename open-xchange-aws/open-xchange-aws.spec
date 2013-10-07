@@ -51,6 +51,8 @@ ox_update_permissions /opt/open-xchange/etc/aws.properties root:open-xchange 640
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Oct 07 2013 Markus Wagner <markus.wagner@open-xchange.com>
+prepare for 7.4.1
 * Tue Jul 16 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 prepare for 7.4.0
 * Mon Apr 15 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
