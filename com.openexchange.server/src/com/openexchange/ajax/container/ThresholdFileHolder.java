@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -326,6 +327,18 @@ public final class ThresholdFileHolder implements IFileHolder {
         }
     }
 
+    /**
+     * Gets the input stream for this file holder's content.
+     * <p>
+     * Closing the stream will also {@link #close() close} this file holder.
+     *
+     * @return The input stream
+     * @throws OXException If input stream cannot be returned
+     */
+    public InputStream getClosingStream() throws OXException {
+        return new ClosingInputStream(this);
+    }
+
     @Override
     public InputStream getStream() throws OXException {
         final ByteArrayOutputStream buf = this.buf;
@@ -446,5 +459,27 @@ public final class ThresholdFileHolder implements IFileHolder {
             }
         }
     } // End of class TransferringOutStream
+
+    private static final class ClosingInputStream extends FilterInputStream {
+
+        private final ThresholdFileHolder fileHolder;
+
+        /**
+         * Initializes a new {@link ClosingInputStream}.
+         */
+        protected ClosingInputStream(final ThresholdFileHolder fileHolder) throws OXException {
+            super(fileHolder.getStream());
+            this.fileHolder = fileHolder;
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                super.close();
+            } finally {
+                fileHolder.close();
+            }
+        }
+    }
 
 }
