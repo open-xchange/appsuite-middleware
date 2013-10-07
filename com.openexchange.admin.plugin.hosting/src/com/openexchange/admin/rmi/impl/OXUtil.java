@@ -122,18 +122,24 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("Store already exists");
         }
 
+        URI uri = null;
         try {
-            final File file = new File(new URI(fstore.getUrl()));
-            if (!file.exists()) {
-                throw new InvalidDataException("No such directory: \"" + fstore.getUrl() + "\"");
+            uri = new URI(fstore.getUrl());
+        } catch (URISyntaxException e) {
+            throw new InvalidDataException("Invalid filstore url: " + e.getMessage());
+        }
+        if ("file".equalsIgnoreCase(uri.getScheme())) {
+            try {
+                File file = new File(uri);
+                if (!file.exists()) {
+                    throw new InvalidDataException("No such directory: \"" + fstore.getUrl() + "\"");
+                }
+                if (!file.isDirectory()) {
+                    throw new InvalidDataException("No directory: \"" + fstore.getUrl() + "\"");
+                }
+            } catch (final IllegalArgumentException urex) {
+                throw new InvalidDataException("Invalid filstore url");
             }
-            if (!file.isDirectory()) {
-                throw new InvalidDataException("No directory: \"" + fstore.getUrl() + "\"");
-            }
-        } catch (final URISyntaxException urex) {
-            throw new InvalidDataException("Invalid filstore url");
-        } catch (final IllegalArgumentException urex) {
-            throw new InvalidDataException("Invalid filstore url");
         }
 
         final int response = oxutil.registerFilestore(fstore);
