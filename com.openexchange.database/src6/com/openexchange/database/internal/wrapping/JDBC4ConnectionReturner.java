@@ -66,12 +66,10 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.ConnectionState;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JDBC4ConnectionReturner}
@@ -80,18 +78,11 @@ import com.openexchange.log.LogFactory;
  */
 public class JDBC4ConnectionReturner implements Connection {
 
-    private final static Log LOG = LogFactory.getLog(JDBC4ConnectionReturner.class);
-
     private final Pools pools;
-
     private final ReplicationMonitor monitor;
-
     private final AssignmentImpl assign;
-
     private final boolean noTimeout;
-
     private final boolean write;
-
     protected final ConnectionState state;
 
     protected Connection delegate;
@@ -113,10 +104,9 @@ public class JDBC4ConnectionReturner implements Connection {
         if (write && !assign.isToConfigDB() && state.isUsedForUpdate()) {
             if (!delegate.getAutoCommit()) {
                 // For performance reasons we increase the replication counter within a possibly active transaction.
-                ReplicationMonitor.increaseInCurrentTransaction(assign, delegate, state);
+                monitor.increaseInCurrentTransaction(assign, delegate, state);
             }
         }
-
         delegate.commit();
     }
 
@@ -253,9 +243,7 @@ public class JDBC4ConnectionReturner implements Connection {
     @Override
     public PreparedStatement prepareStatement(final String sql, final int resultSetType, final int resultSetConcurrency, final int resultSetHoldability) throws SQLException {
         checkForAlreadyClosed();
-        return new JDBC4PreparedStatementWrapper(
-            delegate.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability),
-            this);
+        return new JDBC4PreparedStatementWrapper(delegate.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability), this);
     }
 
     @Override

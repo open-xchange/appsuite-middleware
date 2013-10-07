@@ -62,10 +62,8 @@ import java.sql.Statement;
  */
 public class JDBC4StatementWrapper implements Statement {
 
-    protected final JDBC4ConnectionReturner con;
-
     private final Statement delegate;
-
+    private final JDBC4ConnectionReturner con;
 
     /**
      * Initializes a new {@link JDBC4StatementWrapper}.
