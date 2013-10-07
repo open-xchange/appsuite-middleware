@@ -835,6 +835,12 @@ if ! ox_exists_property com.openexchange.ajax.login.randomToken $PFILE; then
     ox_set_property com.openexchange.ajax.login.randomToken false $PFILE
 fi
 
+# SoftwareChange_Request-1645
+PFILE=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.cookie.hash.salt $PFILE; then
+    ox_set_property com.openexchange.cookie.hash.salt replaceMe1234567890 $PFILE
+fi
+
 # SoftwareChange_Request-1646
 PFILE=/opt/open-xchange/etc/configdb.properties
 if ! ox_exists_property com.openexchange.database.checkWriteCons $PFILE; then
@@ -845,12 +851,6 @@ fi
 PFILE=/opt/open-xchange/etc/server.properties
 if ! ox_exists_property com.openexchange.servlet.maxRateLenientModules $PFILE; then
     ox_set_property com.openexchange.servlet.maxRateLenientModules "rt, system" $PFILE
-fi
-
-# SoftwareChange_Request-1643
-PFILE=/opt/open-xchange/etc/login.properties
-if ! ox_exists_property com.openexchange.ajax.login.randomToken $PFILE; then
-    ox_set_property com.openexchange.ajax.login.randomToken false $PFILE
 fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
