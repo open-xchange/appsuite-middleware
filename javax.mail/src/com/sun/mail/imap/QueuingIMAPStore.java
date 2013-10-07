@@ -181,7 +181,7 @@ public class QueuingIMAPStore extends IMAPStore {
                                         final QueuingIMAPStore.ThreadTrace trace = entry.getValue();
                                         if (trace.stamp < minStamp) {
                                             final long dur = System.currentTimeMillis() - trace.stamp;
-                                            q.getLogger().fine(formatThread(entry.getKey(), trace.protocol, dur, lineSeparator));
+                                            q.getLogger().fine(formatThread(entry.getKey(), trace.protocol, q, dur, lineSeparator));
                                         }
                                     }
                                 }
@@ -195,9 +195,10 @@ public class QueuingIMAPStore extends IMAPStore {
         }
     }
 
-    static String formatThread(final Thread thread, final QueuedIMAPProtocol protocol, final long dur, final String lineSeparator) {
+    static String formatThread(final Thread thread, final QueuedIMAPProtocol protocol, final QueuingIMAPStore.CountingQueue q, final long dur, final String lineSeparator) {
         final StringBuilder sBuilder = new StringBuilder(8192);
         sBuilder.append("Thread \"").append(thread.getName()).append("\" holds ").append(protocol).append(" for ").append(dur).append("msec.").append(lineSeparator);
+        sBuilder.append('(').append(q.getNewCount()).append(" in use for queue ").append(q.hashCode()).append(')').append(lineSeparator);
         final StackTraceElement[] trace = thread.getStackTrace();
         sBuilder.append("    at ").append(trace[0]);
         for (int i = 1; i < trace.length; i++) {
