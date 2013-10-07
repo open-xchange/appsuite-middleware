@@ -977,8 +977,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             // get src and dst path from filestores
             try {
                 final Filestore srcfilestore = oxu.getFilestore(srcStore_id);
-                final StringBuilder src = builduppath(ctxdir, new URI(srcfilestore.getUrl()));
-                final String dst = new URI(destFilestore.getUrl()).getPath();
+                URI sourceURI = new URI(srcfilestore.getUrl());
+                URI destURI = new URI(destFilestore.getUrl());
+                if (false == "file".equalsIgnoreCase(sourceURI.getScheme()) || false == "file".equalsIgnoreCase(destURI.getScheme())) {
+                    throw new StorageException("Only \"file\" filestores are currently supported.");
+                }
+                final StringBuilder src = builduppath(ctxdir, sourceURI);
+                final String dst = destURI.getPath();
                 final OXContextException contextException = new OXContextException("Unable to move filestore");
                 if (src == null) {
                     log.error("src is null");
