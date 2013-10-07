@@ -50,6 +50,7 @@
 package com.openexchange.file.storage;
 
 import java.net.MalformedURLException;
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 
@@ -75,7 +76,7 @@ public final class FileStorageUtility {
      * @return The Etag
      */
     public static String getETagFor(final File fileMetadata) {
-        return getETagFor(fileMetadata.getId(), fileMetadata.getVersion());
+        return getETagFor(fileMetadata.getId(), fileMetadata.getVersion(), fileMetadata.getLastModified());
     }
 
     /**
@@ -83,15 +84,20 @@ public final class FileStorageUtility {
      *
      * @param id The file identifier
      * @param version The optional version
+     * @param lastModified 
      * @return The Etag
      */
-    public static String getETagFor(final String id, final String version) {
+    public static String getETagFor(final String id, final String version, Date lastModified) {
         final StringAllocator sb = new StringAllocator("http://www.open-xchange.com/infostore");
         if (null != id) {
             sb.append('/').append(id);
         }
         if (null != version) {
             sb.append('/').append(version);
+        }
+        
+        if (null != lastModified) {
+            sb.append('/').append(lastModified.getTime());
         }
         return sb.toString();
     }

@@ -99,7 +99,7 @@ public class FileStorageEventHelper {
         }
         if (null != objectId) {
             ht.put(FileStorageEventConstants.OBJECT_ID, objectId);
-            ht.put(FileStorageEventConstants.E_TAG, FileStorageUtility.getETagFor(objectId, FileStorageFileAccess.CURRENT_VERSION));
+            ht.put(FileStorageEventConstants.E_TAG, FileStorageUtility.getETagFor(objectId, FileStorageFileAccess.CURRENT_VERSION, null));
         }
         if (null != folderId) {
             ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
