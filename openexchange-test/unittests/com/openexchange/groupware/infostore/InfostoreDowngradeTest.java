@@ -52,11 +52,14 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import org.osgi.service.event.Event;
 import junit.framework.TestCase;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -76,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 
 /**
+ * TODO Is it still needed to run this downgrade Test?
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class InfostoreDowngradeTest extends TestCase {
@@ -152,13 +157,13 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
 
-    private void assertDeletedEvent(final int id) {
-        final CommonEvent event = TestEventAdmin.getInstance().getNewest();
-
-        assertEquals(CommonEvent.DELETE, event.getAction());
-
-        final DocumentMetadata dm = (DocumentMetadata) event.getActionObj();
-        assertEquals(id, dm.getId());
+    private void assertDeletedEvent(final int id) throws OXException{
+        final Event event = TestEventAdmin.getInstance().getNewestAsEvent();
+        assertNotNull(event);
+        assertEquals(FileStorageEventConstants.DELETE_TOPIC, event.getTopic());
+        StringBuilder sb = new StringBuilder();
+        String idString = sb.append(id).toString();
+        assertEquals(FileStorageEventHelper.extractObjectId(event),idString);
     }
 
     private void assertNotFound(final int id) {
