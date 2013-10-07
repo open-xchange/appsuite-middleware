@@ -1,3 +1,7 @@
+* 2013-10-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29147: Detect possibly harmful HTML content in image files and force attachment download then
+
 * 2013-09-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 28770: Once again -- Removed &nbsp; entities from html2text converted plain text
