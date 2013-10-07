@@ -49,8 +49,6 @@ ox_update_permissions /opt/open-xchange/etc/aws.properties root:open-xchange 640
 %dir /opt/open-xchange/etc/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/awss3.properties
 %config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/setupautoscaling
 
 %changelog
 * Tue Jul 16 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
