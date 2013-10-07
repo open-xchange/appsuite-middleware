@@ -354,6 +354,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                             }
                         }
                     }
+                } else if (checkedDownload.isAttachment()) {
+                    // Force attachment download
+                    resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 } else if (delivery.equalsIgnoreCase(VIEW) && null != fileName) {
                     final StringAllocator sb = new StringAllocator(32);
                     sb.append("inline");
@@ -380,7 +383,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                  *   - it's primary type is not equal to contentTypeByFileName's primary type; e.g. both start with "text/"
                  */
                 String preferredContentType = checkedDownload.getContentType();
-                if (null != contentTypeByFileName) {
+                if (null != contentTypeByFileName && !checkedDownload.isAttachment()) {
                     if (preferredContentType.startsWith(SAVE_AS_TYPE) || !equalPrimaryTypes(preferredContentType, contentTypeByFileName)) {
                         try {
                             final ContentType tmp = new ContentType(preferredContentType);

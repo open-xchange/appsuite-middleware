@@ -1,3 +1,7 @@
+* 2013-10-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29147: Detect possibly harmful HTML content in image files and force attachment download then
+
 * 2013-10-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 29092: Deal with possible 'FLD-0003' error when collecting file storage root folders
