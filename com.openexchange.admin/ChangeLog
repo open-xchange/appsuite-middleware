@@ -1,6 +1,7 @@
 * 2013-10-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 29160: Examine passed String via SOAP to be not empty (not null and length greater than 0)
+ - Fix for bug 20582: Perform an ignore-case equality check for E-Mail addresses
 
 * 2013-09-16 - choeger@open-xchange.com
 
