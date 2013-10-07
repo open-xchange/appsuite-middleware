@@ -71,7 +71,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
@@ -242,7 +241,7 @@ public class QueuingIMAPStore extends IMAPStore {
                             if (notInUse) {
                                 if (noneCount.incrementAndGet() >= 10 && tqueues.remove(url, tq)) {
                                     // Atomically removed queue, because seen this queue as "not in use" for 10 times
-                                    tq.deprecated.set(true);
+                                    tq.deprecated = true;
                                     final ScheduledFuture<?> future = futureRef.getAndSet(null);
                                     if (null != future) {
                                         future.cancel(false);
@@ -462,11 +461,11 @@ public class QueuingIMAPStore extends IMAPStore {
 
         final PriorityQueue<QueuedIMAPProtocol> q;
         final ReentrantLock lock = new ReentrantLock(true);
-        final AtomicBoolean deprecated = new AtomicBoolean();
+        boolean deprecated = false;
         private final MailLogger logger;
         private final Condition notEmpty = lock.newCondition();
         private final int max;
-        private int newCount;
+        private int newCount = 0;
         private final ConcurrentMap<Thread, ThreadTrace> threads;
 
         /**
@@ -594,12 +593,12 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws IllegalStateException If queue has been deprecated in the meantime
          */
         public QueuedIMAPProtocol takeOrIncrement() throws InterruptedException {
-            if (deprecated.get()) {
-                throw new IllegalStateException("Queue is deprecated");
-            }
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
+                if (deprecated) {
+                    throw new IllegalStateException("Queue is deprecated");
+                }
                 QueuedIMAPProtocol x;
                 try {
                     while (((x = q.poll()) == null) && (newCount >= max)) {
