@@ -132,6 +132,7 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
             // Has been disconnected
             queue.decrementNewCount();
             decrementPerformed = true;
+            queue.removeTrackedThread();
             if (logger.isLoggable(Level.FINE)) {
                 logger.fine("QueuedIMAPProtocol.disconnect(): Decremented new-count for " + toString() + "\n\t(total=" + queue.getNewCount() + ")");
             }
@@ -149,6 +150,7 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
                 logger.fine("QueuedIMAPProtocol.logout(): Queue is full. LOGOUT for " + toString());
             }
         }
+        queue.removeTrackedThread();
     }
 
     /**

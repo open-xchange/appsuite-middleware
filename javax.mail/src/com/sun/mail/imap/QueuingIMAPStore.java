@@ -156,7 +156,8 @@ public class QueuingIMAPStore extends IMAPStore {
     private static CountingQueue initQueue(final URLName url, final int permits, final MailLogger logger) {
         CountingQueue q = queues.get(url);
         if (null == q) {
-            final CountingQueue ns = new CountingQueue(permits);
+            final boolean debug = logger.isLoggable(Level.FINE);
+            final CountingQueue ns = new CountingQueue(permits, debug);
             q = queues.putIfAbsent(url, ns);
             if (null == q) {
                 q = ns;
@@ -168,14 +169,14 @@ public class QueuingIMAPStore extends IMAPStore {
 
                     @Override
                     public void run() {
-                        if (logger.isLoggable(Level.FINE)) {
+                        if (debug) {
                             logger.fine("Cleaner run. Elements in queue " + tq.hashCode() + ": " + tq.size());
                         }
                         final long minStamp = System.currentTimeMillis() - 4000;
                         final Lock lock = tq.lock;
                         lock.lock();
                         try {
-                            boolean notInUse = tq.closeElapsed0(minStamp);
+                            final boolean notInUse = tq.closeElapsed0(minStamp);
                             if (notInUse) {
                                 if (noneCount.incrementAndGet() >= 10 && tqueues.remove(url, tq)) {
                                     // Atomically removed queue, because seen this queue as "not in use" for 10 times
@@ -195,7 +196,7 @@ public class QueuingIMAPStore extends IMAPStore {
                 };
                 final ScheduledFuture<?> future = executor().scheduleAtFixedRate(t, 3, 3, TimeUnit.SECONDS);
                 futureRef.set(future);
-                if (logger.isLoggable(Level.FINE)) {
+                if (debug) {
                     logger.fine("QueueingIMAPStore.initQueue(): New queue for \"" + url + "\": BlockingQueue@" + q.hashCode() + " " + q.toString());
                 }
             }
@@ -288,11 +289,15 @@ public class QueuingIMAPStore extends IMAPStore {
             while (true) {
                 try {
                     final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0), logger);
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.fine("QueueingIMAPStore.newIMAPProtocol(): " + Thread.currentThread().getName() + " is trying to create/fetch from queue. Pending threads " + q.trackedThreads());
+                    }
                     QueuedIMAPProtocol protocol = q.takeOrIncrement();
                     if (null != protocol) {
                         if (logger.isLoggable(Level.FINE)) {
                             logger.fine("QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString());
                         }
+                        q.addTrackedThread();
                         return protocol;
                     }
                     // Create a new protocol instance
@@ -300,6 +305,7 @@ public class QueuingIMAPStore extends IMAPStore {
                     if (logger.isLoggable(Level.FINE)) {
                         logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
                     }
+                    q.addTrackedThread();
                     return protocol;
                 } catch (final IllegalStateException e) {
                     // Retry
@@ -383,14 +389,60 @@ public class QueuingIMAPStore extends IMAPStore {
         private final Condition notEmpty = lock.newCondition();
         private final int max;
         private int newCount;
+        private final ConcurrentMap<Thread, Thread> threads;
 
         /**
          * Initializes a new {@link CountingQueue}.
          */
-        public CountingQueue(final int max) {
+        public CountingQueue(final int max, final boolean trackThreads) {
             super();
             q = new PriorityQueue<QueuedIMAPProtocol>(max < 1 ? 11 : max);
             this.max = max <= 0 ? Integer.MAX_VALUE : max;
+            threads = trackThreads ? new ConcurrentHashMap<Thread, Thread>(max < 1 ? 11 : max) : null;
+        }
+
+        /**
+         * Gets a formatted output for currently tracked threads
+         *
+         * @return The formatted output of currently tracked threads
+         */
+        public String trackedThreads() {
+            final ConcurrentMap<Thread, Thread> threads = this.threads;
+            final String lineSeparator = System.getProperty("line.separator");
+            if (null == threads || threads.isEmpty()) {
+                return lineSeparator + "None tracked";
+            }
+            final StringBuilder sBuilder = new StringBuilder(8192);
+            for (final Thread thread : threads.keySet()) {
+                sBuilder.append("Using Thread: ").append(thread.getName()).append(lineSeparator);
+                final StackTraceElement[] trace = thread.getStackTrace();
+                sBuilder.append("    at ").append(trace[0]);
+                for (int i = 1; i < trace.length; i++) {
+                    sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
+                }
+            }
+            return sBuilder.toString();
+        }
+
+        /**
+         * Adds invoking tracked thread.
+         */
+        public void addTrackedThread() {
+            final ConcurrentMap<Thread, Thread> threads = this.threads;
+            if (null != threads) {
+                final Thread thread = Thread.currentThread();
+                threads.putIfAbsent(thread, thread);
+            }
+        }
+
+        /**
+         * Removes invoking tracked thread.
+         */
+        public void removeTrackedThread() {
+            final ConcurrentMap<Thread, Thread> threads = this.threads;
+            if (null != threads) {
+                threads.remove(Thread.currentThread());
+            }
         }
 
         /**
@@ -852,6 +904,7 @@ public class QueuingIMAPStore extends IMAPStore {
          * allocated array of <tt>String</tt>:
          *
          * <pre>
+         *
          *
          *
          * String[] y = x.toArray(new String[0]);
