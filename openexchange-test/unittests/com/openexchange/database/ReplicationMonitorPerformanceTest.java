@@ -49,6 +49,7 @@
 
 package com.openexchange.database;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -200,7 +201,7 @@ public class ReplicationMonitorPerformanceTest {
         db.releaseWriteConnection(context, writeCon);
 
         for (Entry<Method, List<Long>> entry : timeMap.entrySet()) {
-            PrintWriter w = new PrintWriter("/home/steffen/rm_benchmarks/" + entry.getKey().getName() + ".csv");
+            PrintWriter w = new PrintWriter(System.getProperty("user.dir") + File.separatorChar + "rm_benchmarks" + File.separatorChar + entry.getKey().getName() + ".csv");
             w.println("time");
             for (Long time : entry.getValue()) {
                 w.println(time);
@@ -213,7 +214,7 @@ public class ReplicationMonitorPerformanceTest {
     private void writeGlobalStatus(Connection con, String filename) throws SQLException, FileNotFoundException {
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SHOW GLOBAL STATUS;");
-        PrintWriter w = new PrintWriter("/home/steffen/rm_benchmarks/" + filename + ".csv");
+        PrintWriter w = new PrintWriter(System.getProperty("user.dir") + File.separatorChar + "rm_benchmarks" + File.separatorChar + filename + ".csv");
         w.println("VARIABLE,VALUE");
         while (rs.next()) {
             w.println(rs.getObject(1).toString() + "," + rs.getObject(2).toString());
