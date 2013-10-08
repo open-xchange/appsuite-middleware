@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Amazon Web Services
 Bundle-SymbolicName: com.amazonaws
-Bundle-Version: 1.5.8
+Bundle-Version: 1.6.0.1
 Bundle-Vendor: Amazon Web Services, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- lib/aws-java-sdk-1.5.8.jar
+ lib/aws-java-sdk-1.6.0.1.jar
 Export-Package: com.amazonaws,
  com.amazonaws.auth,
  com.amazonaws.auth.policy,
