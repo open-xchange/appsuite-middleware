@@ -377,7 +377,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // #################################################################
 
-            if (isEmpty(usrdata.getPrimaryEmail())) {
+            if (!isEmpty(usrdata.getPrimaryEmail())) {
                 stmt = con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPrimaryEmail());
                 stmt.setInt(2, contextId);
@@ -386,7 +386,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (isEmpty(usrdata.getLanguage())) {
+            if (!isEmpty(usrdata.getLanguage())) {
                 stmt = con.prepareStatement("UPDATE user SET preferredlanguage = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getLanguage());
                 stmt.setInt(2, contextId);
@@ -429,7 +429,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-            } else if (usrdata.getImapServerString() != null) {
+            } else if (!isEmpty(usrdata.getImapServerString())) {
                 stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
@@ -447,7 +447,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-            } else if (usrdata.getImapLogin() != null) {
+            } else if (!isEmpty(usrdata.getImapLogin())) {
                 stmt = con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapLogin());
                 stmt.setInt(2, contextId);
@@ -463,7 +463,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-            } else if (usrdata.getSmtpServerString() != null) {
+            } else if (!isEmpty(usrdata.getSmtpServerString())) {
                 stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
@@ -474,7 +474,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (isEmpty(usrdata.getPassword())) {
+            if (!isEmpty(usrdata.getPassword())) {
                 stmt = con.prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, cache.encryptPassword(usrdata));
                 stmt.setInt(2, contextId);
@@ -483,7 +483,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (isEmpty(usrdata.getPasswordMech())) {
+            if (!isEmpty(usrdata.getPasswordMech())) {
                 stmt = con.prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPasswordMech());
                 stmt.setInt(2, contextId);
