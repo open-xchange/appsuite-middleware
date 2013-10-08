@@ -1,3 +1,7 @@
+* 2013-10-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28185: Added additional checks when saving distribution list members.  
+
 * 2013-10-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 29147: Detect possibly harmful HTML content in image files and force attachment download then
