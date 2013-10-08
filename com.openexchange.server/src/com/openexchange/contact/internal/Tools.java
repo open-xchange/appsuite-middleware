@@ -152,11 +152,11 @@ public final class Tools {
 	}
 
 	/**
-	 * Gets the contact storage.
+	 * Gets the contact storage responsible for a folder identified by the supplied ID, throwing an exception if there is none.
 	 *
-	 * @param session the session
-	 * @param folderId the folder ID
-	 * @return the contact storage
+	 * @param session The session
+	 * @param folderID The folder ID
+	 * @return The contact storage
 	 * @throws OXException
 	 */
 	public static ContactStorage getStorage(Session session, String folderID) throws OXException {

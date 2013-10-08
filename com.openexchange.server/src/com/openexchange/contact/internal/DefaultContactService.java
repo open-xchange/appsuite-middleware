@@ -230,7 +230,7 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(folderIDs, "folderIDs");
         return this.doGetContacts(session, folderIDs, fields, sortOptions);
     }
-    
+
     @Override
     public int countContacts(Session session, String folderId) throws OXException {
         Check.argNotNull(session, "session");
@@ -413,6 +413,21 @@ public abstract class DefaultContactService implements ContactService {
         return doSearchContactsWithBirthday(session, from, until, folderIDs, fields, sortOptions);
     }
 
+    @Override
+    public boolean isFolderEmpty(Session session, String folderID) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderID, "folderID");
+        return this.doCheckIfFolderIsEmpty(session, folderID);
+    }
+
+    @Override
+    public boolean containsForeignObjectInFolder(Session session, String folderID) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderID, "folderID");
+        return this.doCheckIfFolderContainsForeignObjects(session, folderID);
+    }
+
+
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */
@@ -459,7 +474,11 @@ public abstract class DefaultContactService implements ContactService {
 
     protected abstract SearchIterator<Contact> doGetContacts(Session session, List<String> folderIDs, ContactField[] fields,
         SortOptions sortOptions) throws OXException;
-    
+
     protected abstract int doCountContacts(Session session, String folderId) throws OXException;
+
+    protected abstract boolean doCheckIfFolderIsEmpty(Session session, String folderID) throws OXException;
+
+    protected abstract boolean doCheckIfFolderContainsForeignObjects(Session session, String folderID) throws OXException;
 
 }

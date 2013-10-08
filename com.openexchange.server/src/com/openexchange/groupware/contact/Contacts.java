@@ -120,8 +120,10 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * {@link Contacts}
  *
+ * @deprecated - replaced by {@link com.openexchange.groupware.contact.ContactService}
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
+@Deprecated
 public final class Contacts {
 
     private static final String PROP_SCALE_IMAGE_HEIGHT = "scale_image_height";

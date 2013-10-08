@@ -300,6 +300,14 @@ public class RdbContactStorage extends DefaultContactStorage {
         Connection connection = connectionHelper.getWritable();
         try {
             /*
+             * get a list of object IDs to delete
+             */
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE,
+                new ContactField[] { ContactField.OBJECT_ID }, null, null);
+            if (null == contacts || 0 == contacts.size()) {
+                return; // nothing to do
+            }
+            /*
              * (re-)check folder/permissions with this connection
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
@@ -307,14 +315,6 @@ public class RdbContactStorage extends DefaultContactStorage {
                 serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canDeleteOwnObjects()) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, contextID, serverSession.getUserId());
-            }
-            /*
-             * get a list of object IDs to delete
-             */
-            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE,
-                new ContactField[] { ContactField.OBJECT_ID }, null, null);
-            if (null == contacts || 0 == contacts.size()) {
-                return; // nothing to do
             }
             int[] objectIDs = getObjectIDs(contacts);
             /*

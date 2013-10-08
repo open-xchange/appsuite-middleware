@@ -63,10 +63,10 @@ import java.util.List;
 import java.util.Locale;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -1526,7 +1526,8 @@ public class OXFolderTools {
                     final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
                 case FolderObject.CONTACT:
-                    return !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session);
+                    ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                    return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));
                 case FolderObject.PROJECT:
                     // TODO:
                     break;
@@ -1551,7 +1552,8 @@ public class OXFolderTools {
                     final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return calSql.isFolderEmpty(userId, fo.getObjectID());
                 case FolderObject.CONTACT:
-                    return !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx);
+                    ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                    return contactService.isFolderEmpty(session, String.valueOf(fo.getObjectID()));
                 case FolderObject.PROJECT:
                     break;
                 case FolderObject.INFOSTORE:
