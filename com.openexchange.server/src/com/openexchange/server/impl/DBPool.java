@@ -104,6 +104,12 @@ public class DBPool  {
         return true;
     }
 
+    public static final void pushWriteAfterReading(Context ctx, Connection con) {
+        if (null != con) {
+            Database.backAfterReading(ctx, con);
+        }
+    }
+
     public static final void closeReaderSilent(final Connection con) {
         if (null != con) {
             Database.back(false, con);

@@ -537,7 +537,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             final CalendarOperation co = new CalendarOperation();
             final CalendarSqlImp cimp = CalendarSql.cimp;
             final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon, checkPermissions);
-            DBPool.pushWrite(ctx, writecon);
+            DBPool.pushWriteAfterReading(ctx, writecon);
             writecon = null;
 
             if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
