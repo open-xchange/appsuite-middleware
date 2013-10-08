@@ -214,11 +214,13 @@ public class ReplicationMonitor {
         if (write) {
             poolId = assign.getWritePoolId();
             if (!assign.isToConfigDB() && !state.isUsedAsRead()) {
+                // ConfigDB has no replication monitor and for master fallback connections the counter must not be incremented.
                 if (state.isUsedForUpdate()) {
                     // Data on the master has been changed without using a transaction, so we need to increment the counter here.
                     // If a transaction was used the JDBC Connection wrapper incremented the counter in the commit phase.
                     increaseTransactionCounter(assign, con);
                 } else {
+                    // Initialize counter as early as possible.
                     if (active && poolId != assign.getReadPoolId() && !assign.isTransactionInitialized()) {
                         try {
                             assign.setTransaction(readTransaction(con, assign.getContextId()));
@@ -226,6 +228,7 @@ public class ReplicationMonitor {
                             LOG.warn(e.getMessage(), e);
                         }
                     }
+                    // Warn if a master connection was only used for reading.
                     if (checkWriteCons && !state.isUsedAsRead() && !state.isUpdateCommitted()) {
                         Exception e = new Exception();
                         LOG.warn("A writable connection was used but no data has been manipulated.", e);
