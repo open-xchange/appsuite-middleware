@@ -86,6 +86,7 @@ import org.jsoup.Jsoup;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
@@ -312,12 +313,15 @@ public final class HtmlServiceImpl implements HtmlService {
             final StringBuilder sb = new StringBuilder(256);
             int lastMatch = 0;
             while (m.find()) {
-                final int startOpeningPos = m.start();
-                targetBuilder.append(content.substring(lastMatch, startOpeningPos));
-                sb.setLength(0);
-                appendLink(m.group(), sb);
-                targetBuilder.append("<!--").append(comment).append(' ').append(sb.toString()).append("-->");
-                lastMatch = m.end();
+                final String url = m.group();
+                if (HtmlServices.isNonJavaScriptURL(url)) {
+                    final int startOpeningPos = m.start();
+                    targetBuilder.append(content.substring(lastMatch, startOpeningPos));
+                    sb.setLength(0);
+                    appendLink(url, sb);
+                    targetBuilder.append("<!--").append(comment).append(' ').append(sb.toString()).append("-->");
+                    lastMatch = m.end();
+                }
             }
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
