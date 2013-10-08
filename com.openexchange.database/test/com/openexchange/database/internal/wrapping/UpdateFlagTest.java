@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.Executor;
+import org.junit.Assert;
 import org.junit.Test;
 import com.mysql.jdbc.Connection;
 import com.openexchange.database.internal.AssignmentImpl;
@@ -80,7 +81,11 @@ public class UpdateFlagTest {
         stmt.executeUpdate();
         con.close();
 
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
+        ConnectionState state = con.getState();
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, state);
+        Assert.assertTrue(state.isUsedForUpdate());
+        Assert.assertFalse(state.isUsedAsRead());
+        Assert.assertFalse(state.isUpdateCommitted());
     }
 
     @Test
@@ -93,7 +98,12 @@ public class UpdateFlagTest {
         PreparedStatement stmt = con.prepareStatement("");
         stmt.execute();
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
+
+        ConnectionState state = con.getState();
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, state);
+        Assert.assertTrue(state.isUsedForUpdate());
+        Assert.assertFalse(state.isUsedAsRead());
+        Assert.assertFalse(state.isUpdateCommitted());
     }
 
     @Test
@@ -106,7 +116,12 @@ public class UpdateFlagTest {
         PreparedStatement stmt = con.prepareStatement("");
         stmt.executeQuery();
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
+
+        ConnectionState state = con.getState();
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, state);
+        Assert.assertFalse(state.isUsedForUpdate());
+        Assert.assertFalse(state.isUsedAsRead());
+        Assert.assertFalse(state.isUpdateCommitted());
     }
 
     @Test
@@ -119,7 +134,12 @@ public class UpdateFlagTest {
         Statement stmt = con.createStatement();
         stmt.executeUpdate("");
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
+
+        ConnectionState state = con.getState();
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, state);
+        Assert.assertTrue(state.isUsedForUpdate());
+        Assert.assertFalse(state.isUsedAsRead());
+        Assert.assertFalse(state.isUpdateCommitted());
     }
 
     @Test
@@ -132,7 +152,12 @@ public class UpdateFlagTest {
         Statement stmt = con.createStatement();
         stmt.execute("");
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
+
+        ConnectionState state = con.getState();
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, state);
+        Assert.assertTrue(state.isUsedForUpdate());
+        Assert.assertFalse(state.isUsedAsRead());
+        Assert.assertFalse(state.isUpdateCommitted());
     }
 
     @Test
@@ -145,7 +170,12 @@ public class UpdateFlagTest {
         Statement stmt = con.createStatement();
         stmt.executeQuery("");
         con.close();
-        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, con.getState());
+
+        ConnectionState state = con.getState();
+        verify(mockMon).backAndIncrementTransaction(null, null, mockCon, true, true, state);
+        Assert.assertFalse(state.isUsedForUpdate());
+        Assert.assertFalse(state.isUsedAsRead());
+        Assert.assertFalse(state.isUpdateCommitted());
     }
 
     private static final class VersionIndependentConnectionReturner extends JDBC4ConnectionReturner {
