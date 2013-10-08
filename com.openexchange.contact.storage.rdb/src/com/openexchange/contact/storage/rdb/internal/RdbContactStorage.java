@@ -498,8 +498,25 @@ public class RdbContactStorage extends DefaultContactStorage {
 
     @Override
     public void updateReferences(Session session, Contact originalContact, Contact updatedContact) throws OXException {
+        /*
+         * Check if there are relevant changes
+         */
         if (originalContact.getMarkAsDistribtuionlist()) {
             return; // nothing to do in case of updated distribution lists
+        }
+        Contact differences = Mappers.CONTACT.getDifferences(originalContact, updatedContact);
+        ContactField[] assignedFields = Mappers.CONTACT.getAssignedFields(differences);
+        boolean relevantFieldChanged = false;
+        if (null != assignedFields && 0 < assignedFields.length) {
+            for (ContactField assignedField : assignedFields) {
+                if (Fields.DISTLIST_DATABASE_RELEVANT.contains(assignedField)) {
+                    relevantFieldChanged = true;
+                    break;
+                }
+            }
+        }
+        if (false == relevantFieldChanged) {
+            return; // no fields relevant for the distlist table changed
         }
         int contextID = session.getContextId();
         ConnectionHelper connectionHelper = new ConnectionHelper(session);
