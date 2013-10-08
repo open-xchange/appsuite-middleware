@@ -98,9 +98,10 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
         }
 
         // Try acquire a permit
+        final boolean debugEnabled = LOG.isDebugEnabled();
         final Limiter limiter = getLimiter(maxNumAuthenticated);
         if (limiter.acquire()) {
-            if (LOG.isDebugEnabled()) {
+            if (debugEnabled) {
                 LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- " + limiter);
             }
             return super.getStore(imapSession);
@@ -110,21 +111,21 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
         synchronized (limiter) {
             int count = maxRetryCount;
             while (count-- > 0 && !limiter.acquire()) {
-                if (LOG.isDebugEnabled()) {
+                if (debugEnabled) {
                     LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): W A I T I N G -- " + limiter);
                 }
                 limiter.wait(2000);
             }
             if (count <= 0) {
                 // Timed out -- So what...?
-                if (LOG.isDebugEnabled()) {
+                if (debugEnabled) {
                     LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): T I M E D   O U T -- " + limiter);
                 }
                 // /final String message = "Max. number of connections exceeded. Try again later.";
                 // /throw new MessagingException(message, new com.sun.mail.iap.ConnectQuotaExceededException(message));
             }
         }
-        if (LOG.isDebugEnabled()) {
+        if (debugEnabled) {
             LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- " + limiter);
         }
         return super.getStore(imapSession);
