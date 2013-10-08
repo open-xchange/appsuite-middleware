@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/GlobalOpMessages.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:common="http://4psa.com/Common.xsd/2.5.1" targetNamespace="http://4psa.com/GlobalOpMessages.xsd/2.5.1" elementFormDefault="qualified" id="GlobalOpMessages">
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:element name="LinkedOpRequest">
+		<xs:annotation>
+			<xs:documentation>Delete globalOp: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="operation" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="identifier" type="common:string"/>
+							<xs:element name="package" type="common:base64" minOccurs="0"/>
+							<xs:element name="finalOnFailure" type="common:boolean" minOccurs="0"/>
+							<xs:element name="appendOpResponse" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="identifier" type="common:string"/>
+										<xs:element name="responseMapping" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="responseParam" type="common:string">
+														<xs:annotation>
+															<xs:documentation>Response parameter label</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="requestParam" type="common:string" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Request parameter label</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="node" type="common:string" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Insert node at the following path, starting from request tag: //{Operation}Request/param...</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="LinkedOpResponse">
+		<xs:annotation>
+			<xs:documentation>Delete globalOp: response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="processedOp" type="common:integer" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Number of processed operations</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="operation" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="identifier" type="common:string" minOccurs="0"/>
+							<xs:element name="output" type="common:base64" minOccurs="0"/>
+							<xs:element name="result" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Operation result</xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="success"/>
+										<xs:enumeration value="failure"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

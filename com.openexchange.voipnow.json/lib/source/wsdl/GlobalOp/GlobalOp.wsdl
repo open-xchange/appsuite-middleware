@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<definitions xmlns:import7="http://4psa.com/HeaderData.xsd/2.5.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:import0="http://4psa.com/GlobalOpMessages.xsd/2.5.1" xmlns:tns="http://4psa.com/GlobalOp/2.5.1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://schemas.xmlsoap.org/soap/encoding/" name="GlobalOp" targetNamespace="http://4psa.com/GlobalOp/2.5.1">
+	<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new globalOps, delete the old ones, edit or query the desired globalOps.</documentation>
+	<types>
+		<xsd:schema>
+			<xsd:import schemaLocation="GlobalOpMessages.xsd" namespace="http://4psa.com/GlobalOpMessages.xsd/2.5.1"/>
+			<xsd:import schemaLocation="../HeaderData.xsd" namespace="http://4psa.com/HeaderData.xsd/2.5.1"/>
+		</xsd:schema>
+	</types>
+	<message name="linkedOpIn">
+		<part name="messagePart" element="import0:LinkedOpRequest"/>
+	</message>
+	<message name="linkedOpOut">
+		<part name="messagePart" element="import0:LinkedOpResponse"/>
+	</message>
+	<message name="linkedOpInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="linkedOpOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<portType name="GlobalOpInterface">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new globalOps, delete the old ones, edit or query the desired globalOps.</documentation>
+		<operation name="LinkedOp">
+			<input message="tns:linkedOpIn"/>
+			<output message="tns:linkedOpOut"/>
+		</operation>
+	</portType>
+	<binding name="GlobalOp" type="tns:GlobalOpInterface">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="LinkedOp">
+			<soap:operation soapAction="http://4psa.com/GlobalOp/2.5.1:linkedOpIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:linkedOpInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:linkedOpOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="GlobalOpPort">
+		<port name="GlobalOpPort" binding="tns:GlobalOp">
+			<soap:address location="https://192.168.32.222:443/soap2/globalop_agent.php"/>
+		</port>
+	</service>
+</definitions>

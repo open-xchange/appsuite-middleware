@@ -85,6 +85,7 @@ import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_PRI
 import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_PRIVATE_MOVE_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_USER_CONTACT_DELETE_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.OBJECT_HAS_CHANGED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.PFLAG_IN_PUBLIC_FOLDER_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.SQL_PROBLEM_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.TOO_FEW_ATTACHMENTS_MSG;
@@ -242,13 +243,13 @@ public enum ContactExceptionCodes implements LogLevelAwareOXExceptionCode {
     /** You are not allowed to modify contact %1$d in context %2$d. */
     NO_CHANGE_PERMISSION(NO_CHANGE_PERMISSION_MSG,
             Category.CATEGORY_PERMISSION_DENIED, 176),
-    /**
-     * An E-Mail address is mandatory for external distribution list members.
-     * Please add a valid E-Mail address.
-     */
-    EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS(
-            EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG,
-            Category.CATEGORY_USER_INPUT, 177),
+
+    /** An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address. */
+    EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS(EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG, Category.CATEGORY_USER_INPUT, 177),
+
+    /** The object identifier is mandatory for distribution list members referencing existing contacts. */
+    OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS(OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS_MSG, Category.CATEGORY_USER_INPUT, 178),
+
     /** Unable to load objects. Context %1$d User %2$d */
     LOAD_OBJECT_FAILED(LOAD_OBJECT_FAILED_MSG, Category.CATEGORY_ERROR, 252),
     /** User contacts can not be deleted. */

@@ -49,7 +49,6 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.DBUtils.autocommit;
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
@@ -58,6 +57,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.Assignment;
@@ -71,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ReplicationMonitor {
+public class ReplicationMonitor {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
 
@@ -214,11 +214,13 @@ public final class ReplicationMonitor {
         if (write) {
             poolId = assign.getWritePoolId();
             if (!assign.isToConfigDB() && !state.isUsedAsRead()) {
+                // ConfigDB has no replication monitor and for master fallback connections the counter must not be incremented.
                 if (state.isUsedForUpdate()) {
                     // Data on the master has been changed without using a transaction, so we need to increment the counter here.
                     // If a transaction was used the JDBC Connection wrapper incremented the counter in the commit phase.
                     increaseTransactionCounter(assign, con);
                 } else {
+                    // Initialize counter as early as possible.
                     if (active && poolId != assign.getReadPoolId() && !assign.isTransactionInitialized()) {
                         try {
                             assign.setTransaction(readTransaction(con, assign.getContextId()));
@@ -226,6 +228,7 @@ public final class ReplicationMonitor {
                             LOG.warn(e.getMessage(), e);
                         }
                     }
+                    // Warn if a master connection was only used for reading.
                     if (checkWriteCons && !state.isUsedAsRead() && !state.isUpdateCommitted()) {
                         Exception e = new Exception();
                         LOG.warn("A writable connection was used but no data has been manipulated.", e);
@@ -291,7 +294,7 @@ public final class ReplicationMonitor {
             stmt.execute();
             stmt.close();
             stmt = con.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
-            stmt.setInt(1, assign.getContextId());
+            stmt.setInt(1, contextId);
             result = stmt.executeQuery();
             if (result.next()) {
                 assign.setTransaction(result.getLong(1));
@@ -306,40 +309,25 @@ public final class ReplicationMonitor {
         }
     }
 
-    private static boolean compareAndSet(Connection con, int contextId, long expect, long update) throws OXException {
+    private static void increaseCounterWithLastInsertId(AssignmentImpl assign, Connection con) throws OXException {
         PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=? WHERE cid=? AND transaction=?");
-            stmt.setLong(1, update);
-            stmt.setInt(2, contextId);
-            stmt.setLong(3, expect);
-            return stmt.executeUpdate() == 1;
+            stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=LAST_INSERT_ID(transaction+1) WHERE cid=?", Statement.RETURN_GENERATED_KEYS);
+            stmt.setInt(1, assign.getContextId());
+            int changedRows = stmt.executeUpdate();
+            result = stmt.getGeneratedKeys();
+            if (1 == changedRows && result.next()) {
+                assign.setTransaction(result.getLong(1));
+                LOG.trace("Successfully updated replication counter with LAST_INSERT_ID() to value " + assign.getTransaction() + '.');
+            } else {
+                LOG.trace("Updating replication counter with compare and set failed.");
+            }
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(result, stmt);
         }
-    }
-
-    private static boolean increaseCounterWithCAS(AssignmentImpl assign, Connection con, int maxRetries) throws OXException {
-        int contextId = assign.getContextId();
-        long currentTransactionCounter;
-        long newTransactionCounter;
-        int tries = 0;
-        boolean success;
-        do {
-            tries++;
-            currentTransactionCounter = readTransaction(con, contextId);
-            newTransactionCounter = currentTransactionCounter + 1;
-            success = compareAndSet(con, contextId, currentTransactionCounter, newTransactionCounter);
-        } while (!success && tries <= maxRetries);
-        if (success) {
-            assign.setTransaction(newTransactionCounter);
-            LOG.trace("Successfully updated replication counter with compare and set within " + tries + " tries.");
-        } else {
-            LOG.trace("Updating replication counter with compare and set failed.");
-        }
-        return success;
     }
 
     private void incrementFetched(final Assignment assign, final boolean write) {
@@ -366,7 +354,7 @@ public final class ReplicationMonitor {
         return masterInsteadOfSlaveFetched.get();
     }
 
-    private void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
+    private static void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
             if (con.isClosed()) {
                 return;
@@ -377,31 +365,8 @@ public final class ReplicationMonitor {
             return;
         }
         try {
-            // First try the CAS-style increment ten times
-            if (!increaseCounterWithCAS(assign, con, 10)) {
-                // If that is not successful fall back to a transaction.
-                con.setAutoCommit(false);
-                try {
-                    increaseCounterInTransaction(assign, con);
-                    con.commit();
-                } catch (SQLException e) {
-                    rollback(con);
-                    throw e;
-                } finally {
-                    autocommit(con);
-                }
-            }
-        } catch (SQLException e) {
-            if (1146 == e.getErrorCode()) {
-                if (lastLogged + 300000 < System.currentTimeMillis()) {
-                    lastLogged = System.currentTimeMillis();
-                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(e1.getMessage(), e1);
-                }
-            } else {
-                final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                LOG.error(e1.getMessage(), e1);
-            }
+            // To be fast use MySQL LAST_INSERT_ID() method if counter could not be updated within a used transaction.
+            increaseCounterWithLastInsertId(assign, con);
         } catch (OXException e) {
             LOG.warn(e.getMessage(), e);
         }

@@ -49,6 +49,7 @@
 
 package com.sun.mail.imap;
 
+import java.io.IOException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
@@ -86,6 +87,9 @@ public class JavaIMAPStore extends IMAPStore {
 
     /** Proxy auth user */
     private String m_proxyAuthUser;
+
+    /** The flag whether to count */
+    private final boolean count;
 
     /**
      * Initializes a new {@link JavaIMAPStore}.
@@ -130,6 +134,8 @@ public class JavaIMAPStore extends IMAPStore {
                 m_proxyAuthUser = s;
             }
         }
+        // Whether to count or not
+        count = PropUtil.getBooleanSessionProperty(session, "mail.imap.count.enable", false);
     }
 
     /**
@@ -140,6 +146,14 @@ public class JavaIMAPStore extends IMAPStore {
      */
     public JavaIMAPStore(final Session session, final URLName url) {
         this(session, url, "imap", false);
+    }
+
+    @Override
+    protected IMAPProtocol newIMAPProtocol(String host, int port, String user, String password) throws IOException, ProtocolException {
+        if (count) {
+            return new CountingIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger);
+        }
+        return super.newIMAPProtocol(host, port, user, password);
     }
 
     @Override

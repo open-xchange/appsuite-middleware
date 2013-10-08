@@ -68,7 +68,6 @@ import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -542,10 +541,8 @@ public class OXFolderAccess {
                 }
                 return calSql.checkIfFolderContainsForeignObjects(userId, folder.getObjectID(), readCon);
             } else if (module == FolderObject.CONTACT) {
-                if (readCon == null) {
-                    return Contacts.containsForeignObjectInFolder(folder.getObjectID(), userId, session);
-                }
-                return Contacts.containsForeignObjectInFolder(folder.getObjectID(), userId, session, readCon);
+                ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                return contactService.containsForeignObjectInFolder(session, String.valueOf(folder.getObjectID()));
             } else if (module == FolderObject.PROJECT) {
                 return false;
             } else if (module == FolderObject.INFOSTORE) {
@@ -594,10 +591,8 @@ public class OXFolderAccess {
                     readCon);
             }
             case FolderObject.CONTACT: {
-                return readCon == null ? !Contacts.containsAnyObjectInFolder(folder.getObjectID(), ctx) : !Contacts.containsAnyObjectInFolder(
-                    folder.getObjectID(),
-                    readCon,
-                    ctx);
+                ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                return contactService.isFolderEmpty(session, String.valueOf(folder.getObjectID()));
             }
             case FolderObject.PROJECT:
                 return true;

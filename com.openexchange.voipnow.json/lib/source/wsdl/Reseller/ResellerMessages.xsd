@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/ResellerMessages.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:resellerData="http://4psa.com/ResellerData.xsd/2.5.1" xmlns:common="http://4psa.com/Common.xsd/2.5.1" xmlns:messagesInfo="http://4psa.com/ResellerMessagesInfo.xsd/2.5.1" targetNamespace="http://4psa.com/ResellerMessages.xsd/2.5.1" elementFormDefault="qualified" id="ResellerMessages">
+	<xs:import namespace="http://4psa.com/ResellerData.xsd/2.5.1" schemaLocation="ResellerData.xsd"/>
+	<xs:import namespace="http://4psa.com/ResellerMessagesInfo.xsd/2.5.1" schemaLocation="ResellerMessagesInfo.xsd"/>
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:element name="AddResellerRequest">
+		<xs:annotation>
+			<xs:documentation>Add reseller: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="resellerData:ResellerInfo">
+					<xs:sequence>
+						<xs:element name="templateID" type="common:positiveInteger" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Reseller template ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:choice>
+							<xs:element name="parentID" type="common:positiveInteger" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Owner ID</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="parentIdentifier" type="common:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Owner identifier</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:choice>
+						<xs:element name="verbose" type="common:boolean" default="0" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Response verbosity. Set 1 to  receive detailed information on newly created account</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="notifyOnly" type="xs:decimal" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Mask of 4 bits to setup notification preferences ARCE (ADMIN{0/1}, RESELLER{0/1}, CLIENT{0/1}, EXTENSION{0/1})</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="scope" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Scope identifier for the enrollment server. Scope:automation is reserved for VoipNow Automation</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="linkResourceID" type="common:integer" default="1" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Linkage resource identifier</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="linkUUID" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Remote linkage user identifier</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="dku" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Deployment keeping unit</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="accountFlag" default="noneditablelogin" minOccurs="0" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Account flag. Possible values: noneditablelogin</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="noneditablelogin"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AddResellerResponse">
+		<xs:annotation>
+			<xs:documentation>Add reseller: response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="messagesInfo:GetResellerDetailsResponseType">
+					<xs:sequence>
+						<xs:element name="result" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Operation result</xs:documentation>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="success"/>
+									<xs:enumeration value="partial"/>
+									<xs:enumeration value="failure"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="template" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Reseller template</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditResellerRequest">
+		<xs:annotation>
+			<xs:documentation>Edit reseller: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="resellerData:ResellerInfo">
+					<xs:choice>
+						<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Reseller ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="identifier" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Reseller identifier</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:choice>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EditResellerResponse">
+		<xs:annotation>
+			<xs:documentation>Edit reseller: response</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="common:updateObject">
+					<xs:sequence>
+						<xs:element name="identifier" type="common:string" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>User unique identifier</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SetResellerStatusRequest">
+		<xs:annotation>
+			<xs:documentation>Change reseller status:request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="status" type="common:boolean" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Reseller status</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="phoneStatus" default="1" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Reseller phone status. Default value:1.</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="1">
+								<xs:annotation>
+									<xs:documentation>Customer can dial out and receive calls</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="16">
+								<xs:annotation>
+									<xs:documentation>Customer can be called and can call internally</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="32">
+								<xs:annotation>
+									<xs:documentation>Customer can be called only</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="64">
+								<xs:annotation>
+									<xs:documentation>Customer can not use phone service</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="scope" type="common:string" default="automation" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Scope identifier for the enrollment server. Scope:automation is reserved for VoipNow Automation</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="ID" type="common:positiveInteger">
+						<xs:annotation>
+							<xs:documentation>Reseller ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="identifier" type="common:string">
+						<xs:annotation>
+							<xs:documentation>Reseller identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SetResellerStatusResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Change reseller status: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="SetResellerCpAccessRequest">
+		<xs:annotation>
+			<xs:documentation>Change reseller control panel access:request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="cpAccess" type="common:boolean">
+					<xs:annotation>
+						<xs:documentation>Reseller status</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="ID" type="common:positiveInteger">
+						<xs:annotation>
+							<xs:documentation>Reseller ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="identifier" type="common:string">
+						<xs:annotation>
+							<xs:documentation>Reseller identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SetResellerCpAccessResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Change reseller control panel access: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetResellersRequest">
+		<xs:annotation>
+			<xs:documentation>Get resellers: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:annotation>
+				<xs:documentation>Either of</xs:documentation>
+			</xs:annotation>
+			<xs:sequence>
+				<xs:element name="templateID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Client template id</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="serverID" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Set CTRLPANEL to filter only account added from 4PSA VoipNow control panel</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="filter" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Filter resellers list after name, company, email, login </xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="scope" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Scope identifier for the enrollment server. Scope:automation is reserved for VoipNow Automation</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:choice>
+					<xs:element name="parentID" type="common:positiveInteger" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Owner ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="parentIdentifier" type="common:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Owner identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetResellersResponse" type="messagesInfo:GetResellersResponseType">
+		<xs:annotation>
+			<xs:documentation>Get resellers: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetResellerDetailsRequest" nillable="true">
+		<xs:annotation>
+			<xs:documentation>Get details reseller data: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:annotation>
+				<xs:documentation>Either of</xs:documentation>
+			</xs:annotation>
+			<xs:choice>
+				<xs:element name="ID" type="common:positiveInteger" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Reseller ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="identifier" type="common:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Reseller identifier</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetResellerDetailsResponse" type="messagesInfo:GetResellerDetailsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get detailed reseller data: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DelResellerRequest">
+		<xs:annotation>
+			<xs:documentation>Delete reseller: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="ID" type="common:positiveInteger" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Reselles IDs</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="identifier" type="common:string" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Reseller identifiers</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelResellerResponse" type="common:delObject">
+		<xs:annotation>
+			<xs:documentation>Delete reseller: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="SetResellerPLRequest" type="resellerData:ResellerPLInfo">
+		<xs:annotation>
+			<xs:documentation>Update reseller preferences and limits: request</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="SetResellerPLResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Update reseller references and limits: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="UpdateResellerPLRequest" type="resellerData:UpdateResellerPLInfo">
+		<xs:annotation>
+			<xs:documentation>Update reseller preferences and limits: request</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="UpdateResellerPLResponse" type="common:updateObject">
+		<xs:annotation>
+			<xs:documentation>Update reseller references and limits: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="GetResellerPLRequest">
+		<xs:annotation>
+			<xs:documentation>Get reseller preferences and limits: request</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="ID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Reseller ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="identifier" type="common:string">
+					<xs:annotation>
+						<xs:documentation>Reseller identifier</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GetResellerPLResponse" type="messagesInfo:GetResellerPLResponseType">
+		<xs:annotation>
+			<xs:documentation>Get reseller preferences and limits: response</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+</xs:schema>

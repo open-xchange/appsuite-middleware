@@ -164,10 +164,10 @@ public interface ContactService {
      * @throws OXException
      */
     SearchIterator<Contact> getAllContacts(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException;
-    
+
     /**
      * Counts all contacts within the given folder.
-     * 
+     *
      * @param session the session
      * @param folderId ID of the folder to count in
      * @return the number of contacts
@@ -599,7 +599,6 @@ public interface ContactService {
      */
 	<O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
-
     /**
      * Searches for users.
      *
@@ -611,5 +610,26 @@ public interface ContactService {
      * @throws OXException
      */
     SearchIterator<Contact> searchUsers(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Gets a value indicating if the folder with the supplied identifier is empty.
+     *
+     * @param session The session
+     * @param folderID The ID of the folder to check
+     * @return <code>true</code> if the folder is empty, <code>false</code>, otherwise.
+     * @throws OXException
+     */
+    boolean isFolderEmpty(Session session, String folderID) throws OXException;
+
+    /**
+     * Gets a value indicating if the folder with the supplied identifier contains foreign objects, i.e. contacts that were not created
+     * by the current session's user.
+     *
+     * @param session The session
+     * @param folderID The ID of the folder to check
+     * @return <code>true</code> if the folder contains foreign objects, <code>false</code>, otherwise.
+     * @throws OXException
+     */
+    boolean containsForeignObjectInFolder(Session session, String folderID) throws OXException;
 
 }

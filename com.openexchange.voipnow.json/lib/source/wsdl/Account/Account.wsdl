@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<definitions xmlns:import7="http://4psa.com/HeaderData.xsd/2.5.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:import0="http://4psa.com/AccountMessages.xsd/2.5.1" xmlns:tns="http://4psa.com/Account/2.5.1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://schemas.xmlsoap.org/soap/encoding/" name="Account" targetNamespace="http://4psa.com/Account/2.5.1">
+	<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new accounts, delete the old ones, edit or query the desired accounts.</documentation>
+	<types>
+		<xsd:schema>
+			<xsd:import schemaLocation="AccountMessages.xsd" namespace="http://4psa.com/AccountMessages.xsd/2.5.1"/>
+			<xsd:import schemaLocation="../HeaderData.xsd" namespace="http://4psa.com/HeaderData.xsd/2.5.1"/>
+		</xsd:schema>
+	</types>
+	<message name="delAccountIn">
+		<part name="messagePart" element="import0:DelAccountRequest"/>
+	</message>
+	<message name="delAccountOut">
+		<part name="messagePart" element="import0:DelAccountResponse"/>
+	</message>
+	<message name="delAccountInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delAccountOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="linkAccountIn">
+		<part name="messagePart" element="import0:LinkAccountRequest"/>
+	</message>
+	<message name="linkAccountOut">
+		<part name="messagePart" element="import0:LinkAccountResponse"/>
+	</message>
+	<message name="linkAccountInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="linkAccountOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="setAccountStatusIn">
+		<part name="messagePart" element="import0:SetAccountStatusRequest"/>
+	</message>
+	<message name="setAccountStatusOut">
+		<part name="messagePart" element="import0:SetAccountStatusResponse"/>
+	</message>
+	<message name="setAccountStatusInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="setAccountStatusOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<portType name="AccountInterface">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new accounts, delete the old ones, edit or query the desired accounts.</documentation>
+		<operation name="DelAccount">
+			<input message="tns:delAccountIn"/>
+			<output message="tns:delAccountOut"/>
+		</operation>
+		<operation name="SetAccountStatus">
+			<input message="tns:setAccountStatusIn"/>
+			<output message="tns:setAccountStatusOut"/>
+		</operation>
+		<operation name="LinkAccount">
+			<input message="tns:linkAccountIn"/>
+			<output message="tns:linkAccountOut"/>
+		</operation>
+	</portType>
+	<binding name="Account" type="tns:AccountInterface">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="DelAccount">
+			<soap:operation soapAction="http://4psa.com/Account/2.5.1:delAccountIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delAccountInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delAccountOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="LinkAccount">
+			<soap:operation soapAction="http://4psa.com/Account/2.5.1:linkAccountIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:linkAccountInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:linkAccountOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="SetAccountStatus">
+			<soap:operation soapAction="http://4psa.com/Account/2.5.1:setAccountStatusIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setAccountStatusInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:setAccountStatusOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="AccountPort">
+		<port name="AccountPort" binding="tns:Account">
+			<soap:address location="https://192.168.32.222:443/soap2/account_agent.php"/>
+		</port>
+	</service>
+</definitions>

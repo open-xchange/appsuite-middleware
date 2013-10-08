@@ -300,6 +300,14 @@ public class RdbContactStorage extends DefaultContactStorage {
         Connection connection = connectionHelper.getWritable();
         try {
             /*
+             * get a list of object IDs to delete
+             */
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE,
+                new ContactField[] { ContactField.OBJECT_ID }, null, null);
+            if (null == contacts || 0 == contacts.size()) {
+                return; // nothing to do
+            }
+            /*
              * (re-)check folder/permissions with this connection
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
@@ -307,14 +315,6 @@ public class RdbContactStorage extends DefaultContactStorage {
                 serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canDeleteOwnObjects()) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, contextID, serverSession.getUserId());
-            }
-            /*
-             * get a list of object IDs to delete
-             */
-            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE,
-                new ContactField[] { ContactField.OBJECT_ID }, null, null);
-            if (null == contacts || 0 == contacts.size()) {
-                return; // nothing to do
             }
             int[] objectIDs = getObjectIDs(contacts);
             /*
@@ -498,15 +498,35 @@ public class RdbContactStorage extends DefaultContactStorage {
 
     @Override
     public void updateReferences(Session session, Contact originalContact, Contact updatedContact) throws OXException {
+        /*
+         * Check if there are relevant changes
+         */
+        if (originalContact.getMarkAsDistribtuionlist()) {
+            return; // nothing to do in case of updated distribution lists
+        }
+        Contact differences = Mappers.CONTACT.getDifferences(originalContact, updatedContact);
+        ContactField[] assignedFields = Mappers.CONTACT.getAssignedFields(differences);
+        boolean relevantFieldChanged = false;
+        if (null != assignedFields && 0 < assignedFields.length) {
+            for (ContactField assignedField : assignedFields) {
+                if (Fields.DISTLIST_DATABASE_RELEVANT.contains(assignedField)) {
+                    relevantFieldChanged = true;
+                    break;
+                }
+            }
+        }
+        if (false == relevantFieldChanged) {
+            return; // no fields relevant for the distlist table changed
+        }
         int contextID = session.getContextId();
         ConnectionHelper connectionHelper = new ConnectionHelper(session);
-        Connection connection = connectionHelper.getWritable();
         try {
         	/*
         	 * Check which existing member references are affected
         	 */
         	List<Integer> affectedDistributionLists = new ArrayList<Integer>();
-    		List<DistListMember> referencedMembers = executor.select(connection, Table.DISTLIST, contextID, originalContact.getObjectID(),
+    		List<DistListMember> referencedMembers = executor.select(
+    		    connectionHelper.getReadOnly(), Table.DISTLIST, contextID, originalContact.getObjectID(),
     		    originalContact.getParentFolderID(), DistListMemberField.values());
     		if (null != referencedMembers && 0 < referencedMembers.size()) {
     			for (DistListMember member : referencedMembers) {
@@ -515,7 +535,7 @@ public class RdbContactStorage extends DefaultContactStorage {
                         /*
                          * Update member, remember affected parent contact id of the list
                          */
-                        if (0 < executor.updateMember(connection, Table.DISTLIST, contextID, member, updatedFields)) {
+                        if (0 < executor.updateMember(connectionHelper.getWritable(), Table.DISTLIST, contextID, member, updatedFields)) {
                             affectedDistributionLists.add(Integer.valueOf(member.getParentContactID()));
                         }
     			    }
@@ -526,8 +546,8 @@ public class RdbContactStorage extends DefaultContactStorage {
         	 */
     		if (0 < affectedDistributionLists.size()) {
     			for (Integer distListID : affectedDistributionLists) {
-					executor.update(connection, Table.CONTACTS, contextID, distListID.intValue(), Long.MIN_VALUE, updatedContact,
-							new ContactField[] { ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY });
+					executor.update(connectionHelper.getWritable(), Table.CONTACTS, contextID, distListID.intValue(), Long.MIN_VALUE,
+					    updatedContact, new ContactField[] { ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY });
 				}
     		}
             /*
@@ -535,12 +555,12 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             connectionHelper.commit();
         } catch (DataTruncation e) {
-            DBUtils.rollback(connection);
-            throw Tools.getTruncationException(connection, e, updatedContact, Table.CONTACTS);
+            DBUtils.rollback(connectionHelper.getWritable());
+            throw Tools.getTruncationException(connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            connectionHelper.backWritable();
+            connectionHelper.back();
         }
     }
 

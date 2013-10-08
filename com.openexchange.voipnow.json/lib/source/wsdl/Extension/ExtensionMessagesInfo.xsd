@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="http://4psa.com/ExtensionMessagesInfo.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:common="http://4psa.com/Common.xsd/2.5.1" xmlns:extensionData="http://4psa.com/ExtensionData.xsd/2.5.1" targetNamespace="http://4psa.com/ExtensionMessagesInfo.xsd/2.5.1" elementFormDefault="qualified" id="ExtensionMessagesInfo">
+	<xs:import namespace="http://4psa.com/ExtensionData.xsd/2.5.1" schemaLocation="ExtensionData.xsd"/>
+	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
+	<xs:complexType name="GetExtensionResponseType">
+		<xs:annotation>
+			<xs:documentation>Get extension: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="extension" type="extensionData:ExtensionList" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Extension data on succes</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetExtensionDetailsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get detailed extension data: response type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="extensionData:ExtendedExtensionInfo">
+				<xs:sequence>
+					<xs:element name="extensionType" default="term" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Extension type</xs:documentation>
+						</xs:annotation>
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="term"/>
+								<xs:enumeration value="queue"/>
+								<xs:enumeration value="ivr"/>
+								<xs:enumeration value="voicecenter"/>
+								<xs:enumeration value="conference"/>
+								<xs:enumeration value="callback"/>
+								<xs:enumeration value="callcard"/>
+								<xs:enumeration value="intercom"/>
+								<xs:enumeration value="queuecenter"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="extensionNo" type="common:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Extension number</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="chargingPlanID" type="common:positiveInteger" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Charging plan ID</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="chargingPlanIdentifier" type="common:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Charging plan identifier</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="GetExtensionPLResponseType">
+		<xs:annotation>
+			<xs:documentation>Get extensions permissions and limits: response data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="extensionPL" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Extension permissions and limits data</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="extensionData:ExtensionPLInfo">
+							<xs:sequence minOccurs="0">
+								<xs:element name="shareVoicemail" minOccurs="0" maxOccurs="unbounded">
+									<xs:annotation>
+										<xs:documentation>Share voicemail messages with other users</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="groupID" type="common:positiveInteger"/>
+											<xs:element name="name" type="common:string"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="shareFaxes" minOccurs="0" maxOccurs="unbounded">
+									<xs:annotation>
+										<xs:documentation>Share fax messages with other users</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="groupID" type="common:positiveInteger"/>
+											<xs:element name="name" type="common:string"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="shareRecordings" minOccurs="0" maxOccurs="unbounded">
+									<xs:annotation>
+										<xs:documentation>Share recorded messages with other users</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="groupID" type="common:positiveInteger"/>
+											<xs:element name="name" type="common:string"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="shareCallHistory" minOccurs="0" maxOccurs="unbounded">
+									<xs:annotation>
+										<xs:documentation>Share call history with other users</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="groupID" type="common:positiveInteger"/>
+											<xs:element name="name" type="common:string"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetCardCodeResponseType">
+		<xs:annotation>
+			<xs:documentation>Get callign card codes: response data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Extension user ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="code" type="extensionData:CardCodeList" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Calling card codes</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ProvisionResponseType">
+		<xs:annotation>
+			<xs:documentation>Phone terminal provisioning: reponse data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="location" type="common:string" minOccurs="0"/>
+			<xs:element name="result" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Operation result</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="success"/>
+						<xs:enumeration value="partial"/>
+						<xs:enumeration value="failure"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetCallRulesInResponseType">
+		<xs:annotation>
+			<xs:documentation>Get extension incoming call rules: response data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:sequence>
+				<xs:element name="userID" type="common:positiveInteger">
+					<xs:annotation>
+						<xs:documentation>Extension user ID</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="rules" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Incoming call rules data on success</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="ruleID" type="common:positiveInteger">
+								<xs:annotation>
+									<xs:documentation>Incoming call rule ID</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="status" type="common:boolean" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Incoming call rule status</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:choice>
+								<xs:element name="busy" type="extensionData:CallRuleInfo">
+									<xs:annotation>
+										<xs:documentation>Play busy</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="congestion" type="extensionData:CallRuleInfo">
+									<xs:annotation>
+										<xs:documentation>Play congestion</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="hangup" type="extensionData:CallRuleInfo">
+									<xs:annotation>
+										<xs:documentation>Hangup calls</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="transfer">
+									<xs:annotation>
+										<xs:documentation>Transfer to numer or voicemail</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="extensionData:CallRuleInfo">
+												<xs:sequence>
+													<xs:choice>
+														<xs:element name="toNumbers" type="extensionData:CallRuleTransferInfo">
+															<xs:annotation>
+																<xs:documentation>Transfer to number</xs:documentation>
+															</xs:annotation>
+														</xs:element>
+														<xs:element name="toVoicemail" type="common:boolean">
+															<xs:annotation>
+																<xs:documentation>Transfer to voicemail</xs:documentation>
+															</xs:annotation>
+														</xs:element>
+													</xs:choice>
+													<xs:element name="callStatus" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Call status. 0 for Does not matter, 1 for Not Answered, 2 for Rejected, 3 for Busy</xs:documentation>
+														</xs:annotation>
+														<xs:simpleType>
+															<xs:restriction base="xs:integer">
+																<xs:enumeration value="0"/>
+																<xs:enumeration value="1"/>
+																<xs:enumeration value="2"/>
+																<xs:enumeration value="3"/>
+															</xs:restriction>
+														</xs:simpleType>
+													</xs:element>
+													<xs:element name="extensionStatus" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Extension status. 0 for Does not matter, 1 for Registered, -1 for Not Registered.</xs:documentation>
+														</xs:annotation>
+														<xs:simpleType>
+															<xs:restriction base="xs:integer">
+																<xs:enumeration value="0"/>
+																<xs:enumeration value="-1"/>
+																<xs:enumeration value="1"/>
+															</xs:restriction>
+														</xs:simpleType>
+													</xs:element>
+													<xs:element name="final" type="common:boolean" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Make this rule final</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="cascade">
+									<xs:annotation>
+										<xs:documentation>Cascade calls rule</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="extensionData:CallRuleInfo">
+												<xs:sequence>
+													<xs:element name="ring" type="common:integer">
+														<xs:annotation>
+															<xs:documentation>Time in seconds to call numbers until answer</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="final" type="common:boolean" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Make this rule final</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="toNumbers" maxOccurs="10">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="number" type="common:string">
+																	<xs:annotation>
+																		<xs:documentation>Number to call</xs:documentation>
+																	</xs:annotation>
+																</xs:element>
+																<xs:element name="ringAfter" type="common:integer">
+																	<xs:annotation>
+																		<xs:documentation>Call number after time interval in seconds</xs:documentation>
+																	</xs:annotation>
+																</xs:element>
+															</xs:sequence>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="authenticate">
+									<xs:annotation>
+										<xs:documentation>Authenticate rule</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="extensionData:CallRuleInfo">
+												<xs:sequence>
+													<xs:element name="password" type="common:password">
+														<xs:annotation>
+															<xs:documentation>Required password</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="soundID" type="common:positiveInteger" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Sound to play</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="final" type="common:boolean" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Make this rule final</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="setCallPriority">
+									<xs:annotation>
+										<xs:documentation>For queue extensions only</xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="extensionData:CallRuleInfo">
+												<xs:sequence>
+													<xs:element name="priority" type="common:integer">
+														<xs:annotation>
+															<xs:documentation>Priority of the call</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:choice>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetAvailableCallerIDResponseType">
+		<xs:annotation>
+			<xs:documentation>Get available Caller ID list for phone terminal extension: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="CallerID" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Available Caller-ID</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="extensionNo" type="common:string">
+							<xs:annotation>
+								<xs:documentation>Extension number</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="name" type="common:string">
+							<xs:annotation>
+								<xs:documentation>Contact name</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="phoneNo" type="common:string">
+							<xs:annotation>
+								<xs:documentation>Public phone number</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="CallerIDRef" type="common:positiveInteger">
+							<xs:annotation>
+								<xs:documentation>Caller-ID reference ID</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetCardCodeCreditResponseType">
+		<xs:annotation>
+			<xs:documentation>Get calling card recharges history: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="codeID" type="common:positiveInteger">
+				<xs:annotation>
+					<xs:documentation>Calling card code ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="recharge" type="extensionData:RechargeInfo" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Calling card code rechargement</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetCallerIDResponseType">
+		<xs:annotation>
+			<xs:documentation>Get authorized Caller ID: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="CallerID" type="extensionData:CallerIDList" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Authorized Caller ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="userID" type="common:positiveInteger" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Extension user ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetAuthCallerIDCreditResponseType">
+		<xs:annotation>
+			<xs:documentation>Get authorized Caller ID recharges history: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ID" type="common:positiveInteger">
+				<xs:annotation>
+					<xs:documentation>Caller-ID record ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="recharge" type="extensionData:RechargeInfo" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetVoicemailSettingsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get phone terminal voicemail settings: response type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="extensionData:Voicemail"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="GetConferenceSettingsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get phone terminal conference settings: response type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="extensionData:Conference"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="GetCallRecordingSettingsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get phone terminal call recording settings: response type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="extensionData:CallRecording"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="GetFaxCenterSettingsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get phone terminal fax centers settings: response type</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="extensionData:FaxCenter"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="GetQueueAgentsResponseType">
+		<xs:annotation>
+			<xs:documentation>Get queue agents list: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="localAgents" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Local agents data on succes</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="extensionData:Agent"/>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="remoteAgents" type="extensionData:RemoteAgent" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Remote agents data on success</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GetQueueMembershipResponseType">
+		<xs:annotation>
+			<xs:documentation>Get queues for phone terminal membership: response type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="member" type="extensionData:QueueMember" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Extension data on succes</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="notice" type="common:notice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

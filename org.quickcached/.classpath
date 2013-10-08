@@ -7,7 +7,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-pool.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/metouia.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/QSAdminGUI.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/QuickServer.jar" sourcepath="source/QuickServer-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/QuickServer.jar" sourcepath="lib/source/QuickServer-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/QuickServerClient.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/whirlycache-1.0.1.jar"/>

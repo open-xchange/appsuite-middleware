@@ -4,20 +4,20 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="unittests"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.1.jar"/>
-	<classpathentry kind="lib" path="lib/httpunit-1.7.jar" sourcepath="lib/src/httpunit-1.7-sources.zip"/>
+	<classpathentry kind="lib" path="lib/httpunit-1.7.jar" sourcepath="lib/source/httpunit-1.7-sources.zip"/>
 	<classpathentry kind="lib" path="lib/jchronic-0.2.3.jar"/>
-	<classpathentry kind="lib" path="lib/junit-4.11.jar" sourcepath="lib/src/junit-4.11-source.jar"/>
-	<classpathentry kind="lib" path="lib/junit-addons-1.4.jar" sourcepath="lib/src/junit-addons-1.4-src.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.11.jar" sourcepath="lib/source/junit-4.11-sources.jar"/>
+	<classpathentry kind="lib" path="lib/junit-addons-1.4.jar" sourcepath="lib/source/junit-addons-1.4-src.jar"/>
 	<classpathentry kind="lib" path="lib/junitperf-1.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/jvyaml.jar"/>
 	<classpathentry kind="lib" path="lib/nekohtml.jar"/>
-	<classpathentry kind="lib" path="lib/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/xercesImpl.jar" sourcepath="lib/source/xerces-2.9.0-source.zip"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
-	<classpathentry kind="lib" path="lib/jackrabbit-webdav-2.3.3.jar"/>
-	<classpathentry kind="lib" path="lib/cardme-0.4.0.jar" sourcepath="lib/src/cardme-src-0.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/jackrabbit-webdav-2.3.3.jar" sourcepath="lib/source/jackrabbit-webdav-2.3.3-sources.jar"/>
+	<classpathentry kind="lib" path="lib/cardme-0.4.0.jar" sourcepath="lib/source/cardme-src-0.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/js.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.1.jar" sourcepath="lib/src/httpcomponents-client-4.1-src.zip"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.1.jar" sourcepath="lib/src/httpcomponents-client-4.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.1.jar" sourcepath="lib/source/httpcomponents-client-4.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>

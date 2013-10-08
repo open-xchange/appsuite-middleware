@@ -1,0 +1,452 @@
+<?xml version="1.0"?>
+<definitions xmlns:import7="http://4psa.com/HeaderData.xsd/2.5.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:import0="http://4psa.com/BillingMessages.xsd/2.5.1" xmlns:tns="http://4psa.com/Billing/2.5.1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://4psa.com/BillingData.xsd/2.5.1" xmlns:ns2="http://4psa.com/BillingMessagesInfo.xsd/2.5.1" xmlns:ns3="http://4psa.com/Common.xsd/2.5.1" name="Billing" targetNamespace="http://4psa.com/Billing/2.5.1">
+	<types>
+		<xsd:schema>
+			<xsd:import schemaLocation="BillingMessages.xsd" namespace="http://4psa.com/BillingMessages.xsd/2.5.1"/>
+			<xsd:import schemaLocation="../HeaderData.xsd" namespace="http://4psa.com/HeaderData.xsd/2.5.1"/>
+		</xsd:schema>
+	</types>
+	<message name="delChargingPackageIn">
+		<part name="messagePart" element="import0:DelChargingPackageRequest"/>
+	</message>
+	<message name="delChargingPackageOut">
+		<part name="messagePart" element="import0:DelChargingPackageResponse"/>
+	</message>
+	<message name="delChargingPackageInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delChargingPackageOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getChargingPackagesIn">
+		<part name="messagePart" element="import0:GetChargingPackagesRequest"/>
+	</message>
+	<message name="getChargingPackagesOut">
+		<part name="messagePart" element="import0:GetChargingPackagesResponse"/>
+	</message>
+	<message name="getChargingPackagesInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getChargingPackagesOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editChargingPackageIn">
+		<part name="messagePart" element="import0:EditChargingPackageRequest"/>
+	</message>
+	<message name="editChargingPackageOut">
+		<part name="messagePart" element="import0:EditChargingPackageResponse"/>
+	</message>
+	<message name="editChargingPackageInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="editChargingPackageOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addChargingPackageIn">
+		<part name="messagePart" element="import0:AddChargingPackageRequest"/>
+	</message>
+	<message name="addChargingPackageOut">
+		<part name="messagePart" element="import0:AddChargingPackageResponse"/>
+	</message>
+	<message name="addChargingPackageInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addChargingPackageOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delDestinationExceptionIn">
+		<part name="messagePart" element="import0:DelDestinationExceptionRequest"/>
+	</message>
+	<message name="delDestinationExceptionOut">
+		<part name="messagePart" element="import0:DelDestinationExceptionResponse"/>
+	</message>
+	<message name="delDestinationExceptionInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delDestinationExceptionOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getDestinationExceptionsIn">
+		<part name="messagePart" element="import0:GetDestinationExceptionsRequest"/>
+	</message>
+	<message name="getDestinationExceptionsOut">
+		<part name="messagePart" element="import0:GetDestinationExceptionsResponse"/>
+	</message>
+	<message name="getDestinationExceptionsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getDestinationExceptionsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editDestinationExceptionIn">
+		<part name="messagePart" element="import0:EditDestinationExceptionRequest"/>
+	</message>
+	<message name="editDestinationExceptionOut">
+		<part name="messagePart" element="import0:EditDestinationExceptionResponse"/>
+	</message>
+	<message name="editDestinationExceptionInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+		<message name="editDestinationExceptionOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addDestinationExceptionIn">
+		<part name="messagePart" element="import0:AddDestinationExceptionRequest"/>
+	</message>
+	<message name="addDestinationExceptionOut">
+		<part name="messagePart" element="import0:AddDestinationExceptionResponse"/>
+	</message>
+	<message name="addDestinationExceptionInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+		<message name="addDestinationExceptionOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="addChargingPlanIn">
+		<part name="messagePart" element="import0:AddChargingPlanRequest"/>
+	</message>
+	<message name="addChargingPlanOut">
+		<part name="messagePart" element="import0:AddChargingPlanResponse"/>
+	</message>
+	<message name="addChargingPlanInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="addChargingPlanOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="editChargingPlanIn">
+		<part name="messagePart" element="import0:EditChargingPlanRequest"/>
+	</message>
+	<message name="editChargingPlanOut">
+		<part name="messagePart" element="import0:EditChargingPlanResponse"/>
+	</message>
+	<message name="editChargingPlanInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+		<message name="editChargingPlanOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getChargingPlansIn">
+		<part name="messagePart" element="import0:GetChargingPlansRequest"/>
+	</message>
+	<message name="getChargingPlansOut">
+		<part name="messagePart" element="import0:GetChargingPlansResponse"/>
+	</message>
+	<message name="getChargingPlansInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getChargingPlansOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getChargingPlanDetailsIn">
+		<part name="messagePart" element="import0:GetChargingPlanDetailsRequest"/>
+	</message>
+	<message name="getChargingPlanDetailsOut">
+		<part name="messagePart" element="import0:GetChargingPlanDetailsResponse"/>
+	</message>
+	<message name="getChargingPlanDetailsInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+		<message name="getChargingPlanDetailsOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delChargingPlanIn">
+		<part name="messagePart" element="import0:DelChargingPlanRequest"/>
+	</message>
+	<message name="delChargingPlanOut">
+		<part name="messagePart" element="import0:DelChargingPlanResponse"/>
+	</message>
+	<message name="delChargingPlanInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delChargingPlanOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="rechargeIn">
+		<part name="messagePart" element="import0:RechargeRequest"/>
+	</message>
+	<message name="rechargeOut">
+		<part name="messagePart" element="import0:RechargeResponse"/>
+	</message>
+	<message name="rechargeInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="rechargeOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="getRechargesIn">
+		<part name="messagePart" element="import0:GetRechargesRequest"/>
+	</message>
+	<message name="getRechargesOut">
+		<part name="messagePart" element="import0:GetRechargesResponse"/>
+	</message>
+	<message name="getRechargesInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="getRechargesOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<message name="delMonthlyLimitIn">
+		<part name="messagePart" element="import0:DelMonthlyLimitRequest"/>
+	</message>
+	<message name="delMonthlyLimitOut">
+		<part name="messagePart" element="import0:DelMonthlyLimitResponse"/>
+	</message>
+	<message name="delMonthlyLimitInHeader1">
+		<part name="headerPart" element="import7:userCredentials"/>
+	</message>
+	<message name="delMonthlyLimitOutHeader1">
+		<part name="headerPart" element="import7:serverInfo"/>
+	</message>
+	<portType name="BillingInterface">
+		<documentation xmlns="http://schemas.xmlsoap.org/wsdl/">You can add new charging plans, delete the old ones, edit or query the desired charging plans.</documentation>
+		<operation name="DelChargingPackage">
+			<input message="tns:delChargingPackageIn"/>
+			<output message="tns:delChargingPackageOut"/>
+		</operation>
+		<operation name="GetChargingPackages">
+			<input message="tns:getChargingPackagesIn"/>
+			<output message="tns:getChargingPackagesOut"/>
+		</operation>
+		<operation name="EditChargingPackage">
+			<input message="tns:editChargingPackageIn"/>
+			<output message="tns:editChargingPackageOut"/>
+		</operation>
+		<operation name="DelDestinationException">
+			<input message="tns:delDestinationExceptionIn"/>
+			<output message="tns:delDestinationExceptionOut"/>
+		</operation>
+		<operation name="GetDestinationExceptions">
+			<input message="tns:getDestinationExceptionsIn"/>
+			<output message="tns:getDestinationExceptionsOut"/>
+		</operation>
+		<operation name="EditDestinationException">
+			<input message="tns:editDestinationExceptionIn"/>
+			<output message="tns:editDestinationExceptionOut"/>
+		</operation>
+		<operation name="AddDestinationException">
+			<input message="tns:addDestinationExceptionIn"/>
+			<output message="tns:addDestinationExceptionOut"/>
+		</operation>
+		<operation name="AddChargingPackage">
+			<input message="tns:addChargingPackageIn"/>
+			<output message="tns:addChargingPackageOut"/>
+		</operation>
+		<operation name="AddChargingPlan">
+			<input message="tns:addChargingPlanIn"/>
+			<output message="tns:addChargingPlanOut"/>
+		</operation>
+		<operation name="EditChargingPlan">
+			<input message="tns:editChargingPlanIn"/>
+			<output message="tns:editChargingPlanOut"/>
+		</operation>
+		<operation name="GetChargingPlans">
+			<input message="tns:getChargingPlansIn"/>
+			<output message="tns:getChargingPlansOut"/>
+		</operation>
+		<operation name="GetChargingPlanDetails">
+			<input message="tns:getChargingPlanDetailsIn"/>
+			<output message="tns:getChargingPlanDetailsOut"/>
+		</operation>
+		<operation name="DelChargingPlan">
+			<input message="tns:delChargingPlanIn"/>
+			<output message="tns:delChargingPlanOut"/>
+		</operation>
+		<operation name="Recharge">
+			<input message="tns:rechargeIn"/>
+			<output message="tns:rechargeOut"/>
+		</operation>
+		<operation name="GetRecharges">
+			<input message="tns:getRechargesIn"/>
+			<output message="tns:getRechargesOut"/>
+		</operation>
+		<operation name="DelMonthlyLimit">
+			<input message="tns:delMonthlyLimitIn"/>
+			<output message="tns:delMonthlyLimitOut"/>
+		</operation>
+	</portType>
+	<binding name="Billing" type="tns:BillingInterface">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="DelChargingPackage">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:delChargingPackageIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delChargingPackageInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delChargingPackageOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetChargingPackages">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:getChargingPackagesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChargingPackagesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChargingPackagesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditChargingPackage">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:editChargingPackageIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editChargingPackageInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editChargingPackageOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelDestinationException">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:delDestinationExceptionIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delDestinationExceptionInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delDestinationExceptionOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetDestinationExceptions">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:getDestinationExceptionsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getDestinationExceptionsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getDestinationExceptionsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditDestinationException">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:editDestinationExceptionIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editDestinationExceptionInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editDestinationExceptionOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddDestinationException">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:addDestinationExceptionIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addDestinationExceptionInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addDestinationExceptionOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddChargingPackage">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:addChargingPackageIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addChargingPackageInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addChargingPackageOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="AddChargingPlan">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:addChargingPlanIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addChargingPlanInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:addChargingPlanOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="EditChargingPlan">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:editChargingPlanIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editChargingPlanInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:editChargingPlanOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetChargingPlans">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:getChargingPlansIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChargingPlansInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChargingPlansOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetChargingPlanDetails">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:getChargingPlanDetailsIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChargingPlanDetailsInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getChargingPlanDetailsOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelChargingPlan">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:delChargingPlanIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delChargingPlanInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delChargingPlanOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="Recharge">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:rechargeIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:rechargeInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:rechargeOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetRecharges">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:getRechargesIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getRechargesInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:getRechargesOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+		<operation name="DelMonthlyLimit">
+			<soap:operation soapAction="http://4psa.com/Billing/2.5.1:delMonthlyLimitIn" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delMonthlyLimitInHeader1" part="headerPart" use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<soap:header message="tns:delMonthlyLimitOutHeader1" part="headerPart" use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="BillingPort">
+		<port name="BillingPort" binding="tns:Billing">
+			<soap:address location="https://192.168.32.222:443/soap2/billing_agent.php"/>
+		</port>
+	</service>
+</definitions>

@@ -115,7 +115,6 @@ public class JDBC4ConnectionReturner implements Connection {
         if (null == delegate) {
             throw new SQLException("Connection is already closed.");
         }
-
         final Connection toReturn = delegate;
         delegate = null;
         monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, state);

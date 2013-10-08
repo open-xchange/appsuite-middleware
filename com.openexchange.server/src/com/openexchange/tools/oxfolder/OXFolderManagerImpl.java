@@ -89,7 +89,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -931,10 +930,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         } else if (module == FolderObject.CONTACT) {
-            return readCon == null ? !Contacts.containsAnyObjectInFolder(folderId, ctx) : !Contacts.containsAnyObjectInFolder(
-                folderId,
-                readCon,
-                ctx);
+            ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+            return contactService.isFolderEmpty(session, String.valueOf(folderId));
         } else if (module == FolderObject.INFOSTORE) {
             final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
             return db.isFolderEmpty(folderId, ctx);

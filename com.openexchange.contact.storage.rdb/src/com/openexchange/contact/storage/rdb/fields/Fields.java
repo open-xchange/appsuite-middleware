@@ -115,6 +115,12 @@ public final class Fields {
     public static final DistListMemberField[] DISTLIST_DATABASE_ARRAY =
         DISTLIST_DATABASE.toArray(new DistListMemberField[DISTLIST_DATABASE.size()]);
 
+    /**
+     * A set of all contact fields that are relevant for contacts referenced by the distribution list database table.
+     */
+    public static final EnumSet<ContactField> DISTLIST_DATABASE_RELEVANT = EnumSet.of(ContactField.OBJECT_ID, ContactField.FOLDER_ID,
+        ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,  ContactField.DISPLAY_NAME, ContactField.SUR_NAME,
+        ContactField.GIVEN_NAME);
 
     private Fields() {
         // prevent instantiation

@@ -84,7 +84,7 @@ public class PropertyHandler {
         if (null == configuration) {
             throw ConfigurationExceptionCodes.NO_CONFIGURATION_SERVICE_FOUND.create();
         }
-        // Copy because otherwise compiler complains... :-(
+        // Copy of same code from below because otherwise compiler complains... :-(
         final Class<? extends Object> clazz = prop.getClazz();
         final String completePropertyName = prop.getName();
         final String property = configuration.getProperty(completePropertyName);
@@ -95,6 +95,12 @@ public class PropertyHandler {
             } else if (Integer.class.equals(clazz)) {
                 try {
                     return (T) clazz.cast(Integer.valueOf(property));
+                } catch (final NumberFormatException e) {
+                    throw ConfigurationExceptionCodes.NO_INTEGER_VALUE.create(completePropertyName);
+                }
+            } else if (Long.class.equals(clazz)) {
+                try {
+                    return (T) clazz.cast(Long.valueOf(property));
                 } catch (final NumberFormatException e) {
                     throw ConfigurationExceptionCodes.NO_INTEGER_VALUE.create(completePropertyName);
                 }
@@ -140,6 +146,12 @@ public class PropertyHandler {
             } else if (Integer.class.equals(clazz)) {
                 try {
                     return (T) clazz.cast(Integer.valueOf(property));
+                } catch (final NumberFormatException e) {
+                    throw ConfigurationExceptionCodes.NO_INTEGER_VALUE.create(completePropertyName);
+                }
+            } else if (Long.class.equals(clazz)) {
+                try {
+                    return (T) clazz.cast(Long.valueOf(property));
                 } catch (final NumberFormatException e) {
                     throw ConfigurationExceptionCodes.NO_INTEGER_VALUE.create(completePropertyName);
                 }

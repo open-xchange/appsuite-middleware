@@ -418,4 +418,14 @@ public class SimContactService implements ContactService {
         return 0;
     }
 
+    @Override
+    public boolean isFolderEmpty(Session session, String folderID) throws OXException {
+        return false;
+    }
+
+    @Override
+    public boolean containsForeignObjectInFolder(Session session, String folderID) throws OXException {
+        return false;
+    }
+
 }

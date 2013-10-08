@@ -119,7 +119,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		Check.isContactFolder(folder, session);
 		Check.noPrivateInPublic(folder, contact, session);
 		Check.canWriteInGAB(storage, session, folderID, contact);
-		
+
 		/*
 		 * prepare create
 		 */
@@ -544,34 +544,42 @@ public class ContactServiceImpl extends DefaultContactService {
 
     @Override
     protected void doDeleteContacts(final Session session, final String folderID) throws OXException {
-        final int userID = session.getUserId();
-        final int contextID = session.getContextId();
-        final ContactStorage storage = Tools.getStorage(session, folderID);
+        int userID = session.getUserId();
+        int contextID = session.getContextId();
+        ContactStorage storage = Tools.getStorage(session, folderID);
         /*
          * check folder
          */
-        final FolderObject folder = Tools.getFolder(contextID, folderID);
+        FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
-        /*
-         * check general permissions
-         */
-        final EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
-        Check.canDeleteAll(permission, session, folderID);
         /*
          * check currently stored contacts
          */
-        final List<Contact> storedContacts = new ArrayList<Contact>();
+        boolean containsForeignContacts = false;
+        List<Contact> storedContacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
         try {
             searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID });
             if (null != searchIterator) {
                 while (searchIterator.hasNext()) {
-                    final Contact storedContact = searchIterator.next();
+                    Contact storedContact = searchIterator.next();
                     storedContacts.add(storedContact);
+                    containsForeignContacts |= userID != storedContact.getCreatedBy();
                 }
             }
         } finally {
             Tools.close(searchIterator);
+        }
+        /*
+         * check delete permissions as required
+         */
+        if (0 < storedContacts.size()) {
+            EffectivePermission permission = Tools.getPermission(contextID, folderID, userID);
+            if (containsForeignContacts) {
+                Check.canDeleteAll(permission, session, folderID);
+            } else {
+                Check.canDeleteOwn(permission, session, folderID);
+            }
         }
         /*
          * delete contacts from storage
@@ -992,6 +1000,47 @@ public class ContactServiceImpl extends DefaultContactService {
          */
         ContactStorage storage = Tools.getStorage(session, folderId);
         return storage.count(session, folderId, permission.canReadAllObjects());
+    }
+
+    @Override
+    protected boolean doCheckIfFolderIsEmpty(Session session, String folderID) throws OXException {
+        /*
+         * prepare search term for folder
+         */
+        ContactStorage storage = Tools.getStorage(session, folderID);
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
+        /*
+         * search using a limit of 1
+         */
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = storage.search(session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
+            return null == searchIterator || false == searchIterator.hasNext();
+        } finally {
+            Tools.close(searchIterator);
+        }
+    }
+
+    @Override
+    protected boolean doCheckIfFolderContainsForeignObjects(Session session, String folderID) throws OXException {
+        /*
+         * prepare search term for folder
+         */
+        ContactStorage storage = Tools.getStorage(session, folderID);
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.CREATED_BY, SingleOperation.NOT_EQUALS, Integer.valueOf(session.getUserId())));
+        /*
+         * search using a limit of 1
+         */
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = storage.search(session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
+            return null != searchIterator && searchIterator.hasNext();
+        } finally {
+            Tools.close(searchIterator);
+        }
     }
 
     /**

@@ -3,10 +3,10 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit-addons-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/smack-3.2.1.jar" sourcepath="lib/src/smack-3.2.1-src.jar"/>
-	<classpathentry kind="lib" path="lib/smackx-3.2.1.jar" sourcepath="lib/src/smack-3.2.1-src.jar"/>
+	<classpathentry kind="lib" path="lib/smack-3.2.1.jar" sourcepath="lib/source/smack-3.2.1-src.jar"/>
+	<classpathentry kind="lib" path="lib/smackx-3.2.1.jar" sourcepath="lib/source/smack-3.2.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/tinder-1.2.2.jar" sourcepath="lib/src/tinder-1.2.2-src.jar"/>
+	<classpathentry kind="lib" path="lib/tinder-1.2.2.jar" sourcepath="lib/source/tinder-1.2.2-src.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>

@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
+import static com.openexchange.html.HtmlServices.isNonJavaScriptURL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
@@ -57,7 +58,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,7 +82,6 @@ import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.html.tools.HTMLUtils;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
@@ -713,32 +712,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         }
-    }
-
-    private static final Set<String> NOT_ALLOWED = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("%3c", "%3e", "%22")));
-
-    private static boolean isNonJavaScriptURL(final String val) {
-        // http://www.raumausstatter-innung-schwalm-eder.de/index.php?eID=tx_cms_showpic&file=uploads%2Fpics%2F13-06-Raumausstatter-JHV.jpg&width=500m&height=500&bodyTag=%3Cbody%20bgColor%3D%22%23ffffff%22%3E&wrap=%3Ca%20href%3D%22javascript%3Aclose%28%29%3B%22%3E%20%7C%20%3C%2Fa%3E&md5=a0a07697cb8be1898b5e9ec79d249de2
-        if (null == val) {
-            return false;
-        }
-        String lc = toLowerCase(val.trim());
-        if (lc.startsWith("javascript:") || lc.startsWith("vbscript:")) {
-            return false;
-        }
-        if (lc.indexOf("%") < 0) {
-            return true;
-        }
-        for (final String notAllowed : NOT_ALLOWED) {
-            if (lc.indexOf(notAllowed) >= 0) {
-                return false;
-            }
-        }
-        lc = HTMLUtils.decodeUrl(val, null);
-        if (lc.startsWith("javascript:") || lc.startsWith("vbscript:")) {
-            return false;
-        }
-        return true;
     }
 
     @Override
