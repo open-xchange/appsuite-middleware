@@ -71,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ReplicationMonitor {
+public class ReplicationMonitor {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
 
