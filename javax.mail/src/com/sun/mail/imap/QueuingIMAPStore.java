@@ -81,6 +81,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.security.auth.Subject;
+import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.util.MailLogger;
@@ -286,6 +287,9 @@ public class QueuingIMAPStore extends IMAPStore {
     /** Proxy auth user */
     private String m_proxyAuthUser;
 
+    /** Whether to acquire a protocol instance timeout-aware or not */
+    private boolean timeout;
+
     /**
      * Initializes a new {@link QueuingIMAPStore}.
      *
@@ -354,22 +358,48 @@ public class QueuingIMAPStore extends IMAPStore {
                     if (logger.isLoggable(Level.FINE)) {
                         logger.fine("QueueingIMAPStore.newIMAPProtocol(): " + Thread.currentThread().getName() + " is trying to create/fetch for user '" + user + "@" + host + "'. Pending threads " + q.trackedThreads());
                     }
-                    QueuedIMAPProtocol protocol = q.takeOrIncrement();
-                    if (null != protocol) {
+                    // W/ or w/o timeout
+                    if (!timeout) {
+                        // No timeout
+                        QueuedIMAPProtocol protocol = q.takeOrIncrement();
+                        if (null != protocol) {
+                            if (logger.isLoggable(Level.FINE)) {
+                                logger.fine("QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString());
+                            }
+                            q.addTrackedThread(protocol);
+                            return protocol;
+                        }
+                        // Create a new protocol instance
+                        protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q);
                         if (logger.isLoggable(Level.FINE)) {
-                            logger.fine("QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString());
+                            logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
                         }
                         q.addTrackedThread(protocol);
                         return protocol;
                     }
-                    // Create a new protocol instance
-                    protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q);
-                    if (logger.isLoggable(Level.FINE)) {
-                        logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
+                    // Specify a timeout
+                    final Session session = this.session;
+                    final Callback<QueuedIMAPProtocol> callback = new Callback<QueuedIMAPProtocol>() {
+
+                        @Override
+                        public QueuedIMAPProtocol callback() throws IOException, ProtocolException {
+                            // Create a new protocol instance
+                            final QueuedIMAPProtocol protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q);
+                            if (logger.isLoggable(Level.FINE)) {
+                                logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
+                            }
+                            q.addTrackedThread(protocol);
+                            return protocol;
+                        }
+                    };
+                    // Wait for 5 seconds for a protocol to arrive/being disconnected
+                    QueuedIMAPProtocol protocol = q.takeOrIncrement(5, TimeUnit.SECONDS, callback);
+                    if (null == protocol) {
+                        // Timed out
+                        throw new ConnectQuotaExceededException();
                     }
-                    q.addTrackedThread(protocol);
                     return protocol;
-                } catch (final IllegalStateException e) {
+                } catch (final DeprecatedQueueException e) {
                     // Retry
                 }
             }
@@ -441,32 +471,17 @@ public class QueuingIMAPStore extends IMAPStore {
 
     // --------------------------------------------------------------------------------------------------------- //
 
-    static final class ThreadTrace {
-
-        final QueuedIMAPProtocol protocol;
-        final long stamp;
-
-        /**
-         * Initializes a new {@link ThreadTrace}.
-         */
-        ThreadTrace(final QueuedIMAPProtocol protocol, final long stamp) {
-            super();
-            this.protocol = protocol;
-            this.stamp = stamp;
-        }
-    }
-
     static final class CountingQueue extends AbstractQueue<QueuedIMAPProtocol> implements BlockingQueue<QueuedIMAPProtocol>, java.io.Serializable {
 
         private static final long serialVersionUID = 5595510919245408276L;
 
         final PriorityQueue<QueuedIMAPProtocol> q;
         final ReentrantLock lock = new ReentrantLock(true);
-        boolean deprecated = false;
+        boolean deprecated;
         private final MailLogger logger;
         private final Condition notEmpty = lock.newCondition();
         private final int max;
-        private int newCount = 0;
+        private int newCount;
         private final ConcurrentMap<Thread, ThreadTrace> threads;
 
         /**
@@ -474,6 +489,8 @@ public class QueuingIMAPStore extends IMAPStore {
          */
         public CountingQueue(final int max, final MailLogger logger, final boolean trackThreads) {
             super();
+            deprecated = false;
+            newCount = 0;
             this.logger = logger;
             q = new PriorityQueue<QueuedIMAPProtocol>(max < 1 ? 11 : max);
             this.max = max <= 0 ? Integer.MAX_VALUE : max;
@@ -590,15 +607,16 @@ public class QueuingIMAPStore extends IMAPStore {
         /**
          * Takes or increments the new count. Waiting for available elements if none in queue and count is exceeded.
          *
+         * @return Either <code>null</code> to signal a new instance is allowed to be created; or a connected {@link QueuedIMAPProtocol} instance fetched from queue
          * @throws InterruptedException If interrupted while waiting
-         * @throws IllegalStateException If queue has been deprecated in the meantime
+         * @throws DeprecatedQueueException If queue has been deprecated in the meantime
          */
         public QueuedIMAPProtocol takeOrIncrement() throws InterruptedException {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
                 if (deprecated) {
-                    throw new IllegalStateException("Queue is deprecated");
+                    throw new DeprecatedQueueException("Queue is deprecated");
                 }
                 QueuedIMAPProtocol x;
                 try {
@@ -616,6 +634,52 @@ public class QueuingIMAPStore extends IMAPStore {
                 // Increment new count
                 newCount++;
                 return null;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        /**
+         * Takes or increments the new count. Waiting for specified time for available elements if none in queue and count is exceeded.
+         *
+         * @return Either <code>null</code> to signal time has elapsed; or a connected {@link QueuedIMAPProtocol} instance either fetched from queue or yielded by call-back
+         * @throws InterruptedException If interrupted while waiting
+         * @throws ProtocolException If an IMAP protocol error occurs
+         * @throws IOException If an I/O error occurs
+         * @throws DeprecatedQueueException If queue has been deprecated in the meantime
+         */
+        public QueuedIMAPProtocol takeOrIncrement(final long timeout, final TimeUnit unit, final Callback<QueuedIMAPProtocol> callback) throws InterruptedException, IOException, ProtocolException {
+            long nanos = unit.toNanos(timeout);
+            final ReentrantLock lock = this.lock;
+            lock.lockInterruptibly();
+            try {
+                if (deprecated) {
+                    throw new DeprecatedQueueException("Queue is deprecated");
+                }
+                QueuedIMAPProtocol x;
+                try {
+                    while (((x = q.poll()) == null) && (newCount >= max) && (nanos > 0)) {
+                        nanos = notEmpty.awaitNanos(nanos);
+                    }
+                } catch (final InterruptedException ie) {
+                    notEmpty.signal(); // propagate to non-interrupted thread
+                    throw ie;
+                }
+                // Not-null polled one
+                if (null != x) {
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.fine("QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + x.toString());
+                    }
+                    addTrackedThread(x);
+                    return x;
+                }
+                // Wait time exceeded
+                if (nanos <= 0) {
+                    return null;
+                }
+                // Increment new count
+                newCount++;
+                return callback.callback();
             } finally {
                 lock.unlock();
             }
@@ -665,6 +729,9 @@ public class QueuingIMAPStore extends IMAPStore {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
+                if (deprecated) {
+                    throw new DeprecatedQueueException("Queue is deprecated");
+                }
                 final boolean ok = q.offer(e);
                 assert ok;
                 notEmpty.signal();
@@ -687,6 +754,9 @@ public class QueuingIMAPStore extends IMAPStore {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
+                if (deprecated) {
+                    throw new DeprecatedQueueException("Queue is deprecated");
+                }
                 if (q.contains(e)) {
                     return true;
                 }
@@ -733,6 +803,9 @@ public class QueuingIMAPStore extends IMAPStore {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
+                if (deprecated) {
+                    throw new DeprecatedQueueException("Queue is deprecated");
+                }
                 return q.poll();
             } finally {
                 lock.unlock();
@@ -744,6 +817,9 @@ public class QueuingIMAPStore extends IMAPStore {
             final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
+                if (deprecated) {
+                    throw new DeprecatedQueueException("Queue is deprecated");
+                }
                 try {
                     while (q.size() == 0) {
                         notEmpty.await();
@@ -766,6 +842,9 @@ public class QueuingIMAPStore extends IMAPStore {
             final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
+                if (deprecated) {
+                    throw new IllegalStateException("Queue is deprecated");
+                }
                 for (;;) {
                     final QueuedIMAPProtocol x = q.poll();
                     if (x != null) {
@@ -831,6 +910,9 @@ public class QueuingIMAPStore extends IMAPStore {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
+                if (deprecated) {
+                    throw new DeprecatedQueueException("Queue is deprecated");
+                }
                 return q.remove(o);
             } finally {
                 lock.unlock();
@@ -1083,5 +1165,75 @@ public class QueuingIMAPStore extends IMAPStore {
             }
         }
 
-    }
+    } // End of class CountingQueue
+
+    static final class ThreadTrace {
+
+        final QueuedIMAPProtocol protocol;
+        final long stamp;
+
+        /**
+         * Initializes a new {@link ThreadTrace}.
+         */
+        ThreadTrace(final QueuedIMAPProtocol protocol, final long stamp) {
+            super();
+            this.protocol = protocol;
+            this.stamp = stamp;
+        }
+    } // End of class ThreadTrace
+
+    static interface Callback<V> {
+
+        V callback() throws IOException, ProtocolException;
+    } // End of interface Callback
+
+    static class DeprecatedQueueException extends RuntimeException {
+
+        /**
+         * Constructs an DeprecatedQueueException with no detail message. A detail message is a String that describes this particular
+         * exception.
+         */
+        DeprecatedQueueException() {
+            super();
+        }
+
+        /**
+         * Constructs an DeprecatedQueueException with the specified detail message. A detail message is a String that describes this
+         * particular exception.
+         *
+         * @param s The String that contains a detailed message
+         */
+        DeprecatedQueueException(String s) {
+            super(s);
+        }
+
+        /**
+         * Constructs a new exception with the specified detail message and cause.
+         * <p>
+         * Note that the detail message associated with <code>cause</code> is <i>not</i> automatically incorporated in this exception's
+         * detail message.
+         *
+         * @param message The detail message (which is saved for later retrieval by the {@link Throwable#getMessage()} method).
+         * @param cause The cause (which is saved for later retrieval by the {@link Throwable#getCause()} method). (A <tt>null</tt> value is
+         *            permitted, and indicates that the cause is nonexistent or unknown.)
+         */
+        DeprecatedQueueException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        /**
+         * Constructs a new exception with the specified cause and a detail message of <tt>(cause==null ? null : cause.toString())</tt>
+         * (which typically contains the class and detail message of <tt>cause</tt>). This constructor is useful for exceptions that are
+         * little more than wrappers for other throwables (for example, {@link java.security.PrivilegedActionException}).
+         *
+         * @param cause The cause (which is saved for later retrieval by the {@link Throwable#getCause()} method). (A <tt>null</tt> value is
+         *            permitted, and indicates that the cause is nonexistent or unknown.)
+         */
+        DeprecatedQueueException(Throwable cause) {
+            super(cause);
+        }
+
+        static final long serialVersionUID = -1848914673093228596L;
+    } // End of class DeprecatedQueueException
+
 }
