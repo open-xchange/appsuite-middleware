@@ -497,9 +497,16 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
                 throw SessionExceptionCodes.WRONG_CLIENT_IP.create(session.getLocalIp(), null == actual ? "<unknown>" : actual);
             }
-            if (null != actual && (!doCheck || isWhitelistedClient(session, whitelist))) {
-                // change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
-                session.setLocalIp(actual);
+            if (null != actual) {
+                if (isWhitelistedClient(session, whitelist)) {
+                    // change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
+                    session.setLocalIp(actual);
+                } else if (!doCheck) {
+                    // Do not change session's IP address anymore in case of USM/EAS (Bug #29136)
+                    if (!isUsmEas(session.getClient())) {
+                        session.setLocalIp(actual);
+                    }
+                }
             }
             if (DEBUG && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
                 final StringBuilder sb = new StringBuilder(64);
@@ -512,6 +519,14 @@ public abstract class SessionServlet extends AJAXServlet {
                 LOG.debug(sb.toString());
             }
         }
+    }
+
+    private static boolean isUsmEas(final String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
+        }
+        final String uc = Strings.toUpperCase(clientId);
+        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
     /**

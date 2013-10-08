@@ -1,3 +1,7 @@
+* 2013-10-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29136: Do not change session's IP address in case IP-check is turned off and non-white-listed client
+
 * 2013-10-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28185: Added additional checks when saving distribution list members.  
