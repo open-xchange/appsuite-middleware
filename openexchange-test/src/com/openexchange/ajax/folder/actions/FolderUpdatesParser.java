@@ -27,6 +27,9 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
 
     @Override
     protected FolderUpdatesResponse createResponse(final Response response) throws JSONException {
+        /*
+         * Calling super.createResponse initiates the modified and deleted ids for the update response
+         */
         final FolderUpdatesResponse folderUpdateResponse = super.createResponse(response);
         final JSONArray rows = (JSONArray) response.getData();
         if (rows == null) {
@@ -37,7 +40,7 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
             final FolderObject folder = new FolderObject();
 
             if (arrayOrId instanceof String) {
-                folderUpdateResponse.addDeleted(Integer.valueOf((String) arrayOrId));
+                //Deleted folders are already parsed by the CommonUpdatesParser
                 continue;
             }
             if (!(arrayOrId instanceof JSONArray)) {

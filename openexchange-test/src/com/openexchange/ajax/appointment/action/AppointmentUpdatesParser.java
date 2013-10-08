@@ -49,21 +49,32 @@
 
 package com.openexchange.ajax.appointment.action;
 
+import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractColumnsParser;
+import com.openexchange.ajax.framework.CommonUpdatesParser;
 
 /**
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class UpdatesParser extends AbstractColumnsParser<UpdatesResponse> {
+public class AppointmentUpdatesParser extends CommonUpdatesParser<AppointmentUpdatesResponse> {
 
-    protected UpdatesParser(int[] columns) {
+    protected AppointmentUpdatesParser(int[] columns) {
         super(true, columns);
     }
 
+
     @Override
-    protected UpdatesResponse instantiateResponse(Response response) {
-        return new UpdatesResponse(response);
+    protected AppointmentUpdatesResponse createResponse(Response response) throws JSONException {
+        /*
+         * Calling super.createResponse initiates the modified and deleted ids for the update response
+         */
+        return super.createResponse(response);
+    }
+
+
+    @Override
+    protected AppointmentUpdatesResponse instantiateResponse(Response response) {
+        return new AppointmentUpdatesResponse(response);
     }
 }

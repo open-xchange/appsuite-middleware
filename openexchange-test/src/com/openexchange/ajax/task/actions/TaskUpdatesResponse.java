@@ -50,15 +50,9 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.ajax.framework.AbstractUpdatesResponse;
+import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -66,7 +60,7 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TaskUpdatesResponse extends AbstractUpdatesResponse {
+public class TaskUpdatesResponse extends CommonUpdatesResponse {
 
     private List<Task> tasks = new ArrayList<Task>();
 

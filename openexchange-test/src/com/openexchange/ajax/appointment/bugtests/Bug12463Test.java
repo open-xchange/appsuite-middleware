@@ -11,7 +11,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -133,7 +133,7 @@ public final class Bug12463Test extends AbstractAJAXSession {
                 Appointment.RECURRENCE_ID
             };
             UpdatesRequest updatesRequest = new UpdatesRequest(folderId, columns, lastModifiedOfOccurenceUpdate, true);
-            UpdatesResponse updatesResponse = client.execute(updatesRequest);
+            AppointmentUpdatesResponse updatesResponse = client.execute(updatesRequest);
             List<Appointment> appointments = updatesResponse.getAppointments(tz);
             for(Appointment current: appointments) {
                 if(current.getObjectID() != sequence.getObjectID() && current.getRecurrenceID() == sequence.getObjectID()) {

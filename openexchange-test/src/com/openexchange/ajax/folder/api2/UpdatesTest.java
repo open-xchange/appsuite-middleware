@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -58,8 +59,7 @@ import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -68,23 +68,14 @@ import com.openexchange.server.impl.OCLPermission;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UpdatesTest extends AbstractAJAXSession {
-
-    private AJAXClient client;
+public class UpdatesTest extends AbstractFolderTest {
 
     /**
      * Initializes a new {@link UpdatesTest}.
-     *
-     * @param name name of the test.
+     * @param name
      */
-    public UpdatesTest(final String name) {
+    public UpdatesTest(String name) {
         super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
     }
 
     public void testUpdates() throws Throwable {
@@ -153,6 +144,41 @@ public class UpdatesTest extends AbstractAJAXSession {
 
         assertNotNull(response);
         assertFalse("Error occurred: " + response.getResponse().getErrorMessage(), response.getResponse().hasError());
+    }
+    
+    public void testModifiedAndDeleted() throws Throwable {
+        // insert some
+        final int numberOfFolders = 8;
+        List<FolderObject> newFolders = createAndPersistSeveral("testFolder", numberOfFolders);
+
+        // update 2
+        List<FolderObject> updatedFolders = new ArrayList<FolderObject>(2);
+        List<Integer> expectUpdatedFolderIds = new ArrayList<Integer>(2);
+        updatedFolders.add(newFolders.get(0));
+        expectUpdatedFolderIds.add(newFolders.get(0).getObjectID());
+        updatedFolders.add(newFolders.get(1));
+        expectUpdatedFolderIds.add(newFolders.get(1).getObjectID());
+        updateFolders(updatedFolders);
+
+        // delete 2
+        List<FolderObject> deletedFolders = new ArrayList<FolderObject>(2);
+        List<Integer> expectDeletedFolderIds = new ArrayList<Integer>(2);
+        deletedFolders.add(newFolders.get(2));
+        expectDeletedFolderIds.add(newFolders.get(2).getObjectID());
+        deletedFolders.add(newFolders.get(3));
+        expectDeletedFolderIds.add(newFolders.get(3).getObjectID());
+        deleteFolders(deletedFolders);
+
+        // check modified with timestamp from last 
+        Date lastModified = newFolders.get(numberOfFolders-1).getLastModified();
+        int[] cols = new int[]{ FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME};
+        FolderUpdatesResponse modifiedFoldersResponse = listModifiedFolders(FolderObject.SYSTEM_ROOT_FOLDER_ID, cols, lastModified, Ignore.NONE);
+        assertTrue(modifiedFoldersResponse.getNewOrModifiedIds().containsAll(expectUpdatedFolderIds));
+        assertTrue(modifiedFoldersResponse.getDeletedIds().containsAll(expectDeletedFolderIds));
+
+        // cleanup: delete all remaining
+        newFolders.removeAll(deletedFolders);
+        deleteFolders(newFolders);
     }
 
 }

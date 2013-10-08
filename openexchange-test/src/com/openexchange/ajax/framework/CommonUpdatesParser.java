@@ -49,11 +49,16 @@
 
 package com.openexchange.ajax.framework;
 
+import java.util.HashSet;
+import java.util.Set;
+import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.container.DataObject;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends AbstractColumnsParser<T> {
 
@@ -72,4 +77,64 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
         // I don't quite get this.
         return (T) new CommonUpdatesResponse(response);
     }
+
+    @Override
+    protected T createResponse(final Response response) throws JSONException {
+        T updateResponse = super.createResponse(response);
+        initUpdatedIds(updateResponse);
+        return updateResponse;
+    }
+
+    /*
+     * Deleted Objects are represented as String ids on the toplevel of the response array
+     *
+     * New or modified Objects are represented as array on the toplevel of the response array
+     * [
+     *  31279,
+     *  35,
+     *  "UpdatedTask 4",
+     *  null,
+     *  null,
+     *  null,
+     *  null,
+     *  [
+     *    {
+     *      "type": 1,
+     *      "confirmation": 0,
+     *      "id": 5
+     *    }
+     *  ]
+     * ]
+     */
+    protected void initUpdatedIds(T updatesResponse) {
+        Object[][] responseData = updatesResponse.getArray();
+        int idPosition = updatesResponse.getColumnPos(DataObject.OBJECT_ID);
+        Set<Integer> newOrModifiedIds = new HashSet<Integer>(responseData.length);
+        Set<Integer> deletedIds = new HashSet<Integer>(responseData.length);
+        
+        for(Object[] objectArray : responseData) {
+            if(objectArray.length == 1) {
+                Object obj = objectArray[0];
+                int id;
+                if (obj instanceof String) {
+                    id = Integer.parseInt((String)obj);
+                } else {
+                    id = ((Integer)obj).intValue();
+                }
+                deletedIds.add(id);
+            } else {
+                Object obj = objectArray[idPosition];
+                int id;
+                if (obj instanceof String) {
+                    id = Integer.parseInt((String)obj);
+                } else {
+                    id = ((Integer)obj).intValue();
+                }
+                newOrModifiedIds.add(id);
+            }
+        }
+        updatesResponse.setNewOrModifiedIds(newOrModifiedIds);
+        updatesResponse.setDeletedIds(deletedIds);
+    }
+
 }

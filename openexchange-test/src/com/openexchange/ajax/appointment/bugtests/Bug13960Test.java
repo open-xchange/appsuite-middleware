@@ -63,7 +63,7 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -123,7 +123,7 @@ public class Bug13960Test extends AbstractAJAXSession {
         }
         {
             UpdatesRequest request = new UpdatesRequest(appointment.getParentFolderID(), COLUMNS, new Date(appointment.getLastModified().getTime() - 1), true);
-            UpdatesResponse response = client.execute(request);
+            AppointmentUpdatesResponse response = client.execute(request);
             int idPos = response.getColumnPos(Appointment.OBJECT_ID);
             int row = 0;
             while (row < response.getArray().length) {

@@ -56,7 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractUpdatesResponse;
+import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
@@ -64,9 +64,9 @@ import com.openexchange.groupware.container.Appointment;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class UpdatesResponse extends AbstractUpdatesResponse {
+public class AppointmentUpdatesResponse extends CommonUpdatesResponse {
 
-    protected UpdatesResponse(Response response) {
+    protected AppointmentUpdatesResponse(Response response) {
         super(response);
     }
 

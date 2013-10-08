@@ -115,13 +115,13 @@ public class Bug17027Test extends AbstractAJAXSession {
         assertTrue("Newly created folder not found.", found);
         assertFalse(
             "Newly created folder should not be contained in deleted list.",
-            response.getDeleted().contains(I(createdFolder.getObjectID())));
+            response.getDeletedIds().contains(I(createdFolder.getObjectID())));
         client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
         folderDeleted = true;
         response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, -1, COLUMNS, -1, null, before, Ignore.NONE));
         for (FolderObject folder : response.getFolders()) {
             assertFalse("By other user newly created private folder is returned in updates response.", createdFolder.getObjectID() == folder.getObjectID());
         }
-        assertTrue("Deleted list should contain deleted folder identifier.", response.getDeleted().contains(I(createdFolder.getObjectID())));
+        assertTrue("Deleted list should contain deleted folder identifier.", response.getDeletedIds().contains(I(createdFolder.getObjectID())));
     }
 }

@@ -58,7 +58,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractColumnsParser;
+import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -70,7 +70,7 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TaskUpdatesParser extends AbstractColumnsParser<TaskUpdatesResponse> {
+public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> {
 
     private final int[] columns;
 
@@ -84,6 +84,9 @@ public class TaskUpdatesParser extends AbstractColumnsParser<TaskUpdatesResponse
 
     @Override
     protected TaskUpdatesResponse createResponse(Response response) throws JSONException {
+        /*
+         * Calling super.createResponse initiates the modified and deleted ids for the update response
+         */
         TaskUpdatesResponse taskUpdatesResponse = super.createResponse(response);
         JSONArray rows = (JSONArray) response.getData();
         if (rows == null) {

@@ -50,16 +50,11 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
-import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
-import com.openexchange.ajax.contact.action.InsertResponse;
-import com.openexchange.ajax.framework.MultipleResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
 
 
 /**
@@ -107,7 +102,7 @@ public class UpdatesForModifiedAndDeletedTest extends AbstractAppointmentTest {
         // check modified with timestamp from last 
         Date lastModified = newAppointments.get(numberOfAppointments-1).getLastModified();
         int[] cols = new int[]{ Appointment.OBJECT_ID, Appointment.TITLE};
-        UpdatesResponse modifiedAppointmentsResponse = listModifiedAppointments(appointmentFolderId, cols, lastModified, Ignore.NONE, false);
+        AppointmentUpdatesResponse modifiedAppointmentsResponse = listModifiedAppointments(appointmentFolderId, cols, lastModified, Ignore.NONE, false);
         assertTrue(modifiedAppointmentsResponse.getNewOrModifiedIds().containsAll(expectUpdatedAppointmentIds));
         assertTrue(modifiedAppointmentsResponse.getDeletedIds().containsAll(expectDeletedAppointmentIds));
 

@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> {
+public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdatesResponse> {
 
     private final int folderId;
     private final int[] columns;
@@ -152,7 +152,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> 
     }
 
     @Override
-    public AbstractAJAXParser<UpdatesResponse> getParser() {
-        return new UpdatesParser(columns);
+    public AbstractAJAXParser<AppointmentUpdatesResponse> getParser() {
+        return new AppointmentUpdatesParser(columns);
     }
 }

@@ -59,7 +59,7 @@ import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -166,7 +166,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     }
 
     public void testShouldFindABlockForAPrivateAppointmentViaUpdates() throws Exception{
-        UpdatesResponse response = client2.execute(new UpdatesRequest(sharedFolder.getObjectID(),COLUMNS,new Date(privateAppointment.getLastModified().getTime() - 1),true, true));
+        AppointmentUpdatesResponse response = client2.execute(new UpdatesRequest(sharedFolder.getObjectID(),COLUMNS,new Date(privateAppointment.getLastModified().getTime() - 1),true, true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
         assertEquals("Should find two elements, a private and a public one", 2, objects.length);

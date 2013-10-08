@@ -62,7 +62,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -181,11 +181,11 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      */
     public List<Appointment> persistSeveral(List<Appointment> newAppointments) throws Exception {
         int numberOfAppointments = newAppointments.size();
-        List<InsertRequest> insertContactRequests = new ArrayList<InsertRequest>(numberOfAppointments);
+        List<InsertRequest> insertAppointmentRequests = new ArrayList<InsertRequest>(numberOfAppointments);
         for (Appointment appointment : newAppointments) {
-            insertContactRequests.add(new InsertRequest(appointment, timezone));
+            insertAppointmentRequests.add(new InsertRequest(appointment, timezone));
         }
-        MultipleRequest<AppointmentInsertResponse> multipleRequest = MultipleRequest.create(insertContactRequests.toArray(new InsertRequest[numberOfAppointments]));
+        MultipleRequest<AppointmentInsertResponse> multipleRequest = MultipleRequest.create(insertAppointmentRequests.toArray(new InsertRequest[numberOfAppointments]));
         MultipleResponse<AppointmentInsertResponse> multipleResponse = client.execute(multipleRequest);
         return updateAppointmentsWithTimeAndId(newAppointments, multipleResponse);
     }
@@ -274,9 +274,9 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      * @return The UpdatesResponse containg new, modified and deleted appointments
      * @throws Exception
      */
-    public UpdatesResponse listModifiedAppointments(final int inFolder, int[] cols, final Date lastModified, Ignore ignore, boolean showPrivate) throws Exception {
+    public AppointmentUpdatesResponse listModifiedAppointments(final int inFolder, int[] cols, final Date lastModified, Ignore ignore, boolean showPrivate) throws Exception {
         final UpdatesRequest request = new UpdatesRequest(inFolder, cols, lastModified, false, showPrivate, Ignore.NONE);
-        final UpdatesResponse response = client.execute(request);
+        final AppointmentUpdatesResponse response = client.execute(request);
         return response;
     }
 
