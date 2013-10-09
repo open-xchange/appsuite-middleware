@@ -4,6 +4,12 @@ open-xchange-halo (7.4.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Sep 2013 11:44:10 +0200
 
+open-xchange-halo (7.4.0-12) stable; urgency=low
+
+  * Build for patch 2013-10-07
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 09 Oct 2013 10:24:21 +0200
+
 open-xchange-halo (7.4.0-11) stable; urgency=low
 
   * Eleventh candidate for 7.4.0 release
@@ -90,7 +96,7 @@ open-xchange-halo (7.2.2-18) stable; urgency=low
 
 open-xchange-halo (7.2.2-18) stable; urgency=low
 
-  * Build for patch 2013-09-23
+  * Build for patch 2013-09-26
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Sep 2013 12:27:59 +0200
 

@@ -4,6 +4,12 @@ open-xchange-admin-user-copy (7.4.1-0) unstable; urgency=low
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 20 Sep 2013 11:43:31 +0200
 
+open-xchange-admin-user-copy (7.4.0-12) stable; urgency=low
+
+  * Build for patch 2013-10-07
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 09 Oct 2013 10:23:31 +0200
+
 open-xchange-admin-user-copy (7.4.0-11) stable; urgency=low
 
   * Eleventh candidate for 7.4.0 release
@@ -90,7 +96,7 @@ open-xchange-admin-user-copy (7.2.2-18) stable; urgency=low
 
 open-xchange-admin-user-copy (7.2.2-18) stable; urgency=low
 
-  * Build for patch 2013-09-23
+  * Build for patch 2013-09-26
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 26 Sep 2013 12:27:10 +0200
 
