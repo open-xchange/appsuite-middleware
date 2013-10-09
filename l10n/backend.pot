@@ -12532,6 +12532,11 @@ msgstr ""
 msgid "Property %1$s must be set if %2$s is set to %3$s"
 msgstr ""
 
+#. The class %1$s cannot be used as a property type at the moment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:78
+msgid "The %1$s cannot be used as a property type in the property %2$s"
+msgstr ""
+
 #. Missing main extension attribute for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:71
 msgid "Missing main extension attribute for user %1$s in context %2$s."
