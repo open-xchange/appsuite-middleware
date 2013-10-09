@@ -70,6 +70,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -137,6 +138,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public int getAttachment() {
         return getInt(Param.ATTACHMENT);
     }
+    
 
     @Override
     public AttachmentBase getAttachmentBase() {
@@ -601,6 +603,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 				// IGNORE;
 			}
         }
+    }
+
+    @Override
+    public Document getCachedDocument() {
+        return this.data.getProperty(DocumentAction.DOCUMENT);
     }
 
 

@@ -108,14 +108,6 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
     private java.io.File toFile(String folderId, String id) throws OXException {
         java.io.File file = new java.io.File(toDirectory(folderId), id);
 
-        if (!file.getParentFile().equals(new java.io.File(directory, folderId))) {
-            throw OXException.general(("No directory traversal, please"));
-        }
-
-        if (!file.getParentFile().getParentFile().equals(directory) && !file.getParentFile().equals(directory)) {
-            throw OXException.general(("No directory traversal, please"));
-        }
-
         return file;
     }
 
@@ -319,21 +311,16 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                 try {
                     return new FileInputStream(fsFile);
                 } catch (FileNotFoundException e) {
-                    // TODO
-                    return null;
+                    throw OXException.general("File not found: " + fsFile);
                 }
             }
             
         }.setSize(fsFile.length()).setMimeType(null).setEtag("fs://" + fsFile.getAbsolutePath() +"/" + fsFile.lastModified());
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageEfficientRetrieval#getDocumentAndMetadata(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
-    public Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag) {
-        // TODO Auto-generated method stub
-        return null;
+    public Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag) throws OXException {
+        return getDocumentAndMetadata(folderId, fileId, version);
     }
 
     @Override

@@ -79,7 +79,8 @@ public interface FileStorageEfficientRetrieval {
      * @param version The Version
      * @param clientETag the client etag to compare the current etag to. Only load the input stream if the client has a stale etag.
      * @return The Document or null
+     * @throws OXException 
      */
-    Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag);
+    Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag) throws OXException;
 
 }

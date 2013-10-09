@@ -86,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService {
 
-    private static final String DOCUMENT = "com.openexchange.file.storage.json.DocumentAction.DOCUMENT";
+    public static final String DOCUMENT = "com.openexchange.file.storage.json.DocumentAction.DOCUMENT";
 
     /**
      * Initializes a new {@link DocumentAction}.
@@ -103,7 +103,8 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final String id = request.getId();
         final String version = request.getVersion();
         
-        final Document document = fileAccess.getDocumentAndMetadata(id, version);
+        final Document document = (request.getCachedDocument() == null) ? fileAccess.getDocumentAndMetadata(id, version) : request.getCachedDocument();
+        
         if (document != null) {
             final FileHolder fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
 
@@ -156,11 +157,13 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         
         final Document document = fileAccess.getDocumentAndMetadata(id, version, clientETag);
         if (document != null) {
+            requestData.setProperty(DOCUMENT, document);
             String etag = document.getEtag();
             if (etag != null && etag.equals(clientETag)) {
                 return true;
+            } else {
+                return false;
             }
-            requestData.setProperty(DOCUMENT, document);
         }
         
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());

@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -177,4 +178,6 @@ public interface InfostoreRequest {
     boolean isForSpecificVersion();
 
     boolean extendedResponse() throws OXException;
+
+    public Document getCachedDocument();
 }
