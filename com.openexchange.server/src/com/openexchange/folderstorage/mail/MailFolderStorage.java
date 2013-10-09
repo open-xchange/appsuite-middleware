@@ -1606,7 +1606,7 @@ public final class MailFolderStorage implements FolderStorage {
      */
     protected static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
         if (null != mailAccess) {
-            mailAccess.close(true);
+            try { mailAccess.close(true); } catch (final Exception e) {/**/}
         }
     }
 
