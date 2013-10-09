@@ -52,6 +52,7 @@ package com.openexchange.file.storage.composition;
 import java.io.InputStream;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -124,7 +125,30 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     public InputStream getDocument(String id, String version) throws OXException;
+    
+    /**
+     * Tries to load the documents content and associated metadata. Returns null if the underlying implementation cannot satisfy this call
+     * @param id The id of the document
+     * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
+     * @return An InputStream Source and metadata or null if the underlying filestore does not implement this feature
+     * @throws OXException
+     */
+    public Document getDocumentAndMetadata(String id, String version) throws OXException;
 
+    /**
+     * Tries to load the documents content and associated metadata. Only retrieves
+     * the document if the given eTag does not match, otherwise returns a document instance with the 
+     * etag set and no input stream. Returns null if the underlying implementation cannot satisfy this call
+     * @param id The id of the document
+     * @param version The version of the document. Pass in CURRENT_VERSION for the current version of the document.
+     * @param clientEtag The eTag supplied by the client, only fill in the input stream if the 
+     *                     client etag does NOT match the current etag of the document. Still fill in the
+     *                     Document#getEtag field.
+     * @return An InputStream Source and metadata or null if the underlying filestore does not implement this feature
+     * @throws OXException
+     */
+    public Document getDocumentAndMetadata(String id, String version, String clientEtag) throws OXException;
+    
     /**
      * Save the file metadata and binary content
      * @param document The metadata to save

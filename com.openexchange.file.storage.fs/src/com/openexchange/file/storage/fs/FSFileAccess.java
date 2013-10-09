@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
@@ -70,6 +71,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -82,7 +84,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FSFileAccess implements FileStorageFileAccess {
+public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficientRetrieval {
 
     private final java.io.File directory;
 
@@ -300,6 +302,39 @@ public class FSFileAccess implements FileStorageFileAccess {
             throw OXException.general(e.getMessage());
         }
     }
+    
+    @Override
+    public Document getDocumentAndMetadata(String folderId, String fileId, String version) throws OXException {
+        java.io.File fsFile = toFile(folderId, fileId);
+        
+        
+        return toDocument(fsFile);
+    }
+
+    private Document toDocument(final java.io.File fsFile) {
+        return new Document() {
+
+            @Override
+            public InputStream getData() throws OXException {
+                try {
+                    return new FileInputStream(fsFile);
+                } catch (FileNotFoundException e) {
+                    // TODO
+                    return null;
+                }
+            }
+            
+        }.setSize(fsFile.length()).setMimeType(null).setEtag("fs://" + fsFile.getAbsolutePath() +"/" + fsFile.lastModified());
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.file.storage.FileStorageEfficientRetrieval#getDocumentAndMetadata(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
@@ -473,5 +508,6 @@ public class FSFileAccess implements FileStorageFileAccess {
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
     }
+
 
 }
