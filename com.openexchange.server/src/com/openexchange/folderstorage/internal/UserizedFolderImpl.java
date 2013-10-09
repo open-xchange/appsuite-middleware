@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
@@ -96,6 +97,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     private Date lastModified;
     private volatile Map<FolderField, FolderProperty> properties;
     private int[] totalAndUnread;
+    private volatile ConcurrentMap<String, Object> parameters;
 
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
@@ -115,7 +117,26 @@ public final class UserizedFolderImpl implements UserizedFolder {
         this.session = session;
         this.user = user;
         this.context = context;
+    }
 
+    /**
+     * Sets the parameters reference.
+     *
+     * @param parameters The parameters to set
+     */
+    @Override
+    public void setParameters(final ConcurrentMap<String, Object> parameters) {
+        this.parameters = parameters;
+    }
+
+    /**
+     * Gets the parameters reference.
+     *
+     * @return The parameters reference
+     */
+    @Override
+    public ConcurrentMap<String, Object> getParameters() {
+        return parameters;
     }
 
     @Override
@@ -377,7 +398,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     public int getTotal() {
         if (null == totalAndUnread) {
             if (folder instanceof FolderExtension) {
-                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread();
+                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread(parameters);
                 if (null != totalAndUnread) {
                     return totalAndUnread[0];
                 }
@@ -392,7 +413,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     public int getUnread() {
         if (null == totalAndUnread) {
             if (folder instanceof FolderExtension) {
-                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread();
+                totalAndUnread = ((FolderExtension) folder).getTotalAndUnread(parameters);
                 if (null != totalAndUnread) {
                     return totalAndUnread[1];
                 }

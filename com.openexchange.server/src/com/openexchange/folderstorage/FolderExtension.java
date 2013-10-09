@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.concurrent.ConcurrentMap;
+
 
 /**
  * {@link FolderExtension} - A {@link Folder folder} extension.
@@ -62,6 +64,6 @@ public interface FolderExtension extends Folder {
      *
      * @return The total and unread numbers or <code>null</code>
      */
-    int[] getTotalAndUnread();
+    int[] getTotalAndUnread(ConcurrentMap<String, Object> optParams);
 
 }

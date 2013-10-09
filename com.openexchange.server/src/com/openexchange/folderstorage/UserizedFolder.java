@@ -52,6 +52,7 @@ package com.openexchange.folderstorage;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -160,10 +161,25 @@ public interface UserizedFolder extends ParameterizedFolder {
      */
     @Override
     void setMeta(Map<String, Object> meta);
-    
+
     /**
      * @return the dynamic properties
      */
     @Override
     Map<String, Object> getMeta();
+
+    /**
+     * Sets the parameters reference.
+     *
+     * @param parameters The parameters to set
+     */
+    void setParameters(final ConcurrentMap<String, Object> parameters);
+
+    /**
+     * Gets the parameters reference.
+     *
+     * @return The parameters reference
+     */
+    ConcurrentMap<String, Object> getParameters();
+
 }

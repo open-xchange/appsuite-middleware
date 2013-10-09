@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
@@ -368,9 +369,9 @@ public final class OutlookFolder implements FolderExtension {
     }
 
     @Override
-    public int[] getTotalAndUnread() {
+    public int[] getTotalAndUnread(final ConcurrentMap<String, Object> optParams) {
         if (realFolder instanceof FolderExtension) {
-            return ((FolderExtension) realFolder).getTotalAndUnread();
+            return ((FolderExtension) realFolder).getTotalAndUnread(optParams);
         }
         return null;
     }

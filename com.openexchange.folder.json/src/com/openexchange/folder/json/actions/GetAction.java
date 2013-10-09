@@ -122,7 +122,7 @@ public final class GetAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, null);
+        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         /*
          * Return appropriate result
          */
