@@ -66,7 +66,8 @@ public enum ConfigurationExceptionCodes implements OXExceptionCode {
     NO_INTEGER_VALUE(ConfigurationExceptionMessages.NO_INTEGER_VALUE_MSG, CATEGORY_CONFIGURATION,2),
     REQUIRED_PROPERTY_NOT_SET(ConfigurationExceptionMessages.REQUIRED_PROPERTIY_NOT_SET_MSG, CATEGORY_CONFIGURATION, 3),
     CONDITION_NOT_SET(ConfigurationExceptionMessages.CONDITION_NOT_SET_MSG, CATEGORY_CONFIGURATION, 4),
-    MUST_BE_SET_TO(ConfigurationExceptionMessages.MUST_BE_SET_TO_MSG, CATEGORY_CONFIGURATION, 5);
+    MUST_BE_SET_TO(ConfigurationExceptionMessages.MUST_BE_SET_TO_MSG, CATEGORY_CONFIGURATION, 5),
+    UNKNOWN_TYPE_CLASS(ConfigurationExceptionMessages.UNKNOWN_TYPE_CLASS_MSG, CATEGORY_CONFIGURATION, 6);
 
     private final Category category;
 

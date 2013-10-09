@@ -165,7 +165,7 @@ public class PropertyHandler {
                     return null;
                 }
             } else {
-                return null;
+                throw ConfigurationExceptionCodes.UNKNOWN_TYPE_CLASS.create(clazz, completePropertyName);
             }
         } else {
             return null;
