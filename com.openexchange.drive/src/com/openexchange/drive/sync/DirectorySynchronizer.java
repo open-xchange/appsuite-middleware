@@ -171,6 +171,12 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  */
                 result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
                     DriveExceptionCodes.INVALID_PATH.create(comparison.getClientVersion().getPath()), true));
+            } else if (isIgnoredPath(comparison.getClientVersion().getPath())) {
+                /*
+                 * ignored path, indicate as error with quarantine flag
+                 */
+                result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
+                    DriveExceptionCodes.IGNORED_PATH.create(comparison.getClientVersion().getPath()), true));
             } else {
                 String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
                 if (mayCreate(parentPath)) {
@@ -310,6 +316,20 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
         }
         if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(path).matches()) {
             return true; // no invalid paths
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied path is ignored, i.e. it is excluded from synchronization by definition.
+     *
+     * @param path The path to check
+     * @return <code>true</code> if the path is considered to be ignored, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private static boolean isIgnoredPath(String path) throws OXException {
+        if (DriveConstants.TEMP_PATH.equalsIgnoreCase(path)) {
+            return true; // no temp path
         }
         return false;
     }

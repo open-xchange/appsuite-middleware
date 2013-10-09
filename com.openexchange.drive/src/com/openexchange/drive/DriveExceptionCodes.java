@@ -130,6 +130,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** The server is too busy at the moment - please try again later */
     SERVER_BUSY(DriveExceptionMessages.SERVER_BUSY_MSG, Category.CATEGORY_TRY_AGAIN, 23),
 
+    /** The directory path \"%1$s\" is ignored */
+    IGNORED_PATH(DriveExceptionMessages.IGNORED_PATH_MSG, Category.CATEGORY_USER_INPUT, 24),
+
     ;
 
     private static final String PREFIX = "DRV";
