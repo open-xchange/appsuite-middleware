@@ -716,11 +716,13 @@ public final class IMAPCommandsCollection {
      * Gets recent message count from given IMAP folder
      *
      * @param imapFolder The IMAP folder
+     * @return The total/unread message count
      * @return The recent message count
      * @throws MessagingException If determining counts fails
      */
-    public static int getRecent(final IMAPFolder imapFolder) throws MessagingException {
-        return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+    public static int getRecent(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+        return ((Integer) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
@@ -734,7 +736,7 @@ public final class IMAPCommandsCollection {
                  * Encode the mbox as per RFC2060
                  */
                 final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                args.writeString(BASE64MailboxEncoder.encode(fullName));
                 /*
                  * Item arguments
                  */
@@ -779,11 +781,13 @@ public final class IMAPCommandsCollection {
      * Gets total message count from given IMAP folder
      *
      * @param imapFolder The IMAP folder
+     * @return The total/unread message count
      * @return The total message count
      * @throws MessagingException If determining counts fails
      */
-    public static int getTotal(final IMAPFolder imapFolder) throws MessagingException {
-        return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+    public static int getTotal(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+        return ((Integer) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
@@ -797,7 +801,7 @@ public final class IMAPCommandsCollection {
                  * Encode the mbox as per RFC2060
                  */
                 final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                args.writeString(BASE64MailboxEncoder.encode(fullName));
                 /*
                  * Item arguments
                  */

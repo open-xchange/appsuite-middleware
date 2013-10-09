@@ -76,6 +76,7 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FLAGS;
@@ -382,7 +383,7 @@ public final class AllFetch {
                      * Check number of messages
                      */
                     try {
-                        if (IMAPCommandsCollection.getTotal(imapFolder) <= 0) {
+                        if (IMAPCommandsCollection.getTotal((IMAPStore) imapFolder.getStore(), imapFolder.getFullName()) <= 0) {
                             return new MailMessage[0];
                         }
                     } catch (final MessagingException e) {
