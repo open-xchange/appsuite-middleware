@@ -5,6 +5,8 @@
 * 2013-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 29189: Prefer String instead of InetSocketAddress for fast object handling
+ - Fix for bug 28718: Extended regular expression for improved look-up of <password> tags
+ - Fix for bug 26979: Configurable CSS parsing timeout
 
 * 2013-10-09 - tobias.friedrich@open-xchange.com
 
