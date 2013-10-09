@@ -120,6 +120,7 @@ final class DBUtils {
             LOG.error(e.getMessage(), e);
         }
     }
+
     static void autocommit(Connection con) {
         if (null == con) {
             return;
