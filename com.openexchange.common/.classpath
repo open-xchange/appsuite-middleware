@@ -25,7 +25,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/ical4j-zoneinfo-outlook-1.0.2.jar" sourcepath="lib/source/ical4j-zoneinfo-outlook-1.0.2-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-jms-api.jar" sourcepath="lib/source/jboss-jms-api-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core-0.7.2.jar" sourcepath="lib/source/apache-mime4j-core-0.7.2-sources.jar"/>
-	<classpathentry kind="lib" path="lib/apache-mime4j-dom-0.7.2.jar" sourcepath="lib/source/apache-mime4j-dom-0.7.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom-0.7.2.jar" sourcepath="lib/source/apache-mime4j-dom-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-storage-0.7.2.jar" sourcepath="lib/source/apache-mime4j-storage-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/automaton-1.11-8.jar" sourcepath="lib/source/automaton-1.11-8-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/gnu-rex.jar" sourcepath="lib/gnu-rex.jar"/>
