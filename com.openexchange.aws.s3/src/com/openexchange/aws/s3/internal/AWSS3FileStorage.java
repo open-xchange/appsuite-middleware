@@ -133,7 +133,7 @@ public class AWSS3FileStorage implements FileStorage {
             /*
              * fill first buffer from stream
              */
-            int read = digestStream.read(buffer, 0, UPLOAD_BUFFER_SIZE);
+            int read = fillBuffer(digestStream, buffer);
             if (read < UPLOAD_BUFFER_SIZE) {
                 /*
                  * whole file fits into buffer (this includes a zero byte file), upload directly
@@ -170,7 +170,7 @@ public class AWSS3FileStorage implements FileStorage {
                         } finally {
                             Streams.close(bais);
                         }
-                    } while (-1 != (read = digestStream.read(buffer, 0, UPLOAD_BUFFER_SIZE)));
+                    } while (-1 != (read = fillBuffer(digestStream, buffer)));
                     /*
                      * complete upload
                      */
@@ -319,7 +319,7 @@ public class AWSS3FileStorage implements FileStorage {
             try {
                 inputStream = getFile(name);
                 UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(tempKey).withUploadId(uploadID)
-                    .withInputStream(inputStream).withPartSize(offset).withPartNumber(1);
+                    .withInputStream(inputStream).withPartSize(offset).withPartNumber(1 + partETags.size());
                 partETags.add(amazonS3.uploadPart(request).getPartETag());
             } finally {
                 Streams.close(inputStream);
@@ -327,7 +327,33 @@ public class AWSS3FileStorage implements FileStorage {
             /*
              * append new data to multipart
              */
-            partETags.addAll(uploadMultiparted(file, tempKey, uploadID, 2));
+            DigestInputStream digestStream = null;
+            try {
+                byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
+                int read;
+                digestStream = new DigestInputStream(file, MessageDigest.getInstance("MD5"));
+                while (-1 != (read = fillBuffer(digestStream, buffer))) {
+                    byte[] digest = digestStream.getMessageDigest().digest();
+                    ByteArrayInputStream bais = null;
+                    try {
+                        bais = new ByteArrayInputStream(buffer, 0, read);
+                        UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(tempKey).withUploadId(uploadID)
+                            .withInputStream(bais).withPartSize(read).withPartNumber(1 + partETags.size()).withMD5Digest(Base64.encode(digest));
+                        partETags.add(amazonS3.uploadPart(request).getPartETag());
+                    } finally {
+                        Streams.close(bais);
+                    }
+                }
+            } catch (NoSuchAlgorithmException e) {
+                throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(digestStream);
+            }
+            /*
+             * complete upload
+             */
             amazonS3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, tempKey, uploadID, partETags));
             completed = true;
             /*
@@ -430,38 +456,37 @@ public class AWSS3FileStorage implements FileStorage {
         }
     }
 
-    private List<PartETag> uploadMultiparted(InputStream inputStream, String key, String uploadID, int currentPartNumber) throws OXException, AmazonClientException {
-        DigestInputStream digestStream = null;
-        try {
-            List<PartETag> partETags = new ArrayList<PartETag>();
-            byte[] buffer = new byte[UPLOAD_BUFFER_SIZE];
-            int read;
-            int partNumber = currentPartNumber;
-            digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
-            while (-1 != (read = digestStream.read(buffer, 0, UPLOAD_BUFFER_SIZE))) {
-                byte[] digest = digestStream.getMessageDigest().digest();
-                ByteArrayInputStream bais = null;
-                try {
-                    bais = new ByteArrayInputStream(buffer, 0, read);
-                    UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
-                        .withInputStream(bais).withPartSize(read).withPartNumber(partNumber++).withMD5Digest(Base64.encode(digest));
-                    partETags.add(amazonS3.uploadPart(request).getPartETag());
-                } finally {
-                    Streams.close(bais);
-                }
-            }
-            return partETags;
-        } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(digestStream);
-        }
-    }
-
+    /**
+     * Creates an unformatted string representation of a new random UUID.
+     *
+     * @return A new UID string, e.g. <code>067e61623b6f4ae2a1712470b63dff00 </code>.
+     */
     private static String newUid() {
         return UUIDs.getUnformattedString(UUID.randomUUID());
+    }
+
+    /**
+     * Reads up as many bytes as possible from the supplied input stream into the buffer. Repeated reads are made until either the buffer
+     * is filled completely, or the end of the stream is reached.
+     *
+     * @param inputStream the stream to read from
+     * @param buffer The buffer to fill
+     * @return The number of bytes read into the buffer, or <code>-1</code> if there is no more data because the end of the stream has
+     *         been reached.
+     * @throws IOException
+     */
+    private static int fillBuffer(InputStream inputStream, byte[] buffer) throws IOException {
+        int offset = 0;
+        boolean eof = false;
+        do {
+            int read = inputStream.read(buffer, offset, buffer.length - offset);
+            if (-1 == read) {
+                eof = true;
+            } else {
+                offset += read;
+            }
+        } while (offset < buffer.length && false == eof);
+        return eof && 0 == offset ? -1 : offset;
     }
 
 }
