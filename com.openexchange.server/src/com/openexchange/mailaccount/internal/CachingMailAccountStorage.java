@@ -49,8 +49,7 @@
 
 package com.openexchange.mailaccount.internal;
 
-import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
-import java.net.InetSocketAddress;
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -306,7 +305,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
+    public MailAccount[] resolveLogin(final String login, final String serverUrl, final int cid) throws OXException {
         final int[][] idsAndUsers = resolveFromCache(login, cid, new FromDelegate() {
             @Override
             public int[][] getFromDelegate(final String pattern, final int contextId) throws OXException {
@@ -316,7 +315,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
         for (final int[] idAndUser : idsAndUsers) {
             final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
-            if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
+            if (serverUrl.equals(toSocketAddrString(candidate.generateMailServerURL(), 143))) {
                 l.add(candidate);
             }
         }

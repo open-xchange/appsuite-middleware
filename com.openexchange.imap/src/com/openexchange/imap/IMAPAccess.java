@@ -1283,9 +1283,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             if (config.getIMAPProperties().isEnableTls()) {
                 try {
-                    final InetSocketAddress socketAddress = new InetSocketAddress(IDNA.toASCII(config.getServer()), config.getPort());
-                    final Map<String, String> capabilities =
-                        IMAPCapabilityAndGreetingCache.getCapabilities(socketAddress, false, config.getIMAPProperties());
+                    final String serverUrl = new StringAllocator(36).append(IDNA.toASCII(config.getServer())).append(':').append(config.getPort()).toString();
+                    final Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, false, config.getIMAPProperties());
                     if (null != capabilities) {
                         if (capabilities.containsKey("STARTTLS")) {
                             imapProps.put("mail.imap.starttls.enable", "true");

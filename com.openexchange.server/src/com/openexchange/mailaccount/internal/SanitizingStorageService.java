@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount.internal;
 
-import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
@@ -189,8 +188,8 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
-    public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
-        return storageService.resolveLogin(login, server, cid);
+    public MailAccount[] resolveLogin(final String login, final String serverUrl, final int cid) throws OXException {
+        return storageService.resolveLogin(login, serverUrl, cid);
     }
 
     @Override
