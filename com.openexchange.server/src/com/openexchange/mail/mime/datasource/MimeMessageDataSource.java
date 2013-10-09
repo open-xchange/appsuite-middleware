@@ -109,7 +109,7 @@ import com.openexchange.session.Session;
  * <p>
  * Converts a {@link MimeMessage} to a <a href="http://james.apache.org/mime4j/">mime4j</a> {@link Message} and writes it using
  * {@link MessageWriter}. This bypasses the need for JAF look-up.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeMessageDataSource implements DataSource, CleanUp {
@@ -173,7 +173,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
      * Initializes a new {@link MimeMessageDataSource}.
      * <p>
      * <b>Note</b>: {@link #cleanUp()}
-     * 
+     *
      * @param mimeMessage The source MIME message
      * @param optConfig The optional mail configuration (for improved error messages)
      * @param optSession The optional session (for improved error messages)
@@ -188,7 +188,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
      * Initializes a new {@link MimeMessageDataSource}.
      * <p>
      * <b>Note</b>: {@link #cleanUp()}
-     * 
+     *
      * @param mimeMessage The source MIME message
      * @param optConfig The optional mail configuration (for improved error messages)
      * @param optSession The optional session (for improved error messages)
@@ -257,7 +257,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
 
     /**
      * Output to given byte stream.
-     * 
+     *
      * @throws IOException If an error occurs while writing to the stream
      */
     public void writeTo(final OutputStream os) throws IOException {
@@ -266,11 +266,12 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
 
     // ----------------------------------------------------------------------------------------------------- //
 
+    /** Default implementation of {@link MessageWriter}. */
     private static final DefaultMessageWriter DEFAULT_MESSAGE_WRITER = new DefaultMessageWriter();
 
     /**
      * Output to given byte stream.
-     * 
+     *
      * @param message The message to write
      * @param os The output stream to wrote to
      * @throws IOException If an error occurs while writing to the stream
@@ -284,7 +285,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
 
     /**
      * Maps given MIME part to specified mime4j instance.
-     * 
+     *
      * @param mimeMessage The MIME message (source)
      * @param optConfig The mail configuration
      * @param optSession The user session
@@ -302,7 +303,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
 
     /**
      * Maps given MIME part to specified mime4j instance.
-     * 
+     *
      * @param mimePart The MIME part (source)
      * @param entity The mime4j instance (destination)
      * @param bodyFactory The body factory
