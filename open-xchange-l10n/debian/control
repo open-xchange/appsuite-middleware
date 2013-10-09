@@ -211,6 +211,14 @@ Replaces: open-xchange-lang-community-sv-sv (<< 6.21.0-0), open-xchange-l10n-sv-
 Conflicts: open-xchange-lang-community-sv-sv (<< 6.21.0-0), open-xchange-l10n-sv-sv (<< 7.4.0)
 Description: Package containing Open-Xchange backend localization for sv_SE
 
+Package: open-xchange-l10n-sv-sv
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-sv-se
+Section: oldlibs
+Description: transitional dummy package
+ This transitional package ensures that the content of the previous open-xchange-l10n-sv-sv package is removed from the system and the
+ successor open-xchange-l10n-sv-se is installed. This package can be safely removed after the upgrade process.
+
 Package: open-xchange-l10n-tr-tr
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)

@@ -1,3 +1,7 @@
+* 2013-10-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29195: Added transitional package for open-xchange-l10n-sv-sv to ensure proper upgrade to open-xchange-l10n-sv-se.
+
 * 2013-10-09 - dennis.sieben@open-xchange.com
 
  - Fix for bug 29200: Moved dry-run exit before the context deletion lines
