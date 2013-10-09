@@ -56,12 +56,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.parser.GroupParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.json.ResourceParser;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ResourceUpdatesResponse extends AbstractAJAXResponse {
 
@@ -69,34 +70,30 @@ public class ResourceUpdatesResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public List<Group> getModified() throws OXException, JSONException {
+    public List<Resource> getModified() throws OXException, JSONException {
         return getGroups("modified");
     }
 
-    public List<Group> getNew() throws OXException, JSONException {
+    public List<Resource> getNew() throws OXException, JSONException {
         return getGroups("new");
     }
 
-    public List<Group> getDeleted() throws OXException, JSONException {
+    public List<Resource> getDeleted() throws OXException, JSONException {
         return getGroups("deleted");
     }
 
-    protected List<Group> getGroups(String field) throws OXException, JSONException {
-        LinkedList<Group> groups = new LinkedList<Group>();
+    protected List<Resource> getGroups(String field) throws OXException, JSONException {
+        LinkedList<Resource> resources = new LinkedList<Resource>();
+
         JSONObject data = (JSONObject) getData();
-        if(data.isNull(field)) {
-            return new LinkedList<Group>();
+        if (!data.isNull(field)) {
+            JSONArray jsonResources = data.getJSONArray(field);
+            for (int i = 0, length = jsonResources.length(); i < length; i++) {
+                Resource resource = ResourceParser.parseResource(jsonResources.getJSONObject(i));
+                resources.add(resource);
+            }
         }
 
-        JSONArray grp = data.getJSONArray(field);
-
-        GroupParser parser = new GroupParser();
-
-        for (int i = 0, length = grp.length(); i < length; i++) {
-            Group temp = new Group();
-            parser.parse(temp, grp.getJSONObject(i));
-            groups.add(temp);
-        }
-        return groups;
+        return resources;
     }
 }
