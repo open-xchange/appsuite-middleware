@@ -381,11 +381,11 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
             return new MessageImpl();
         }
         try {
-            String name = new ContentType(sContentType).getNameParameter();
+            final String name = new ContentType(sContentType).getNameParameter();
             if (name != null && name.endsWith(".eml")) {
                 return new MessageImpl();
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
         }
         return new BodyPart();
 
@@ -445,7 +445,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         public void cleanUp() {
             final MessageImpl message = this.message;
             if (null != message) {
-                message.dispose();
+                try { message.dispose(); } catch (final Exception e) {/**/}
             }
             final StorageProvider tempStore = this.tempStore;
             if (null != tempStore) {
