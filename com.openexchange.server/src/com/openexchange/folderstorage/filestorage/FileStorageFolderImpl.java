@@ -61,9 +61,12 @@ import com.openexchange.file.storage.TypeAware;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
+import com.openexchange.folderstorage.filestorage.contentType.PublicContentType;
+import com.openexchange.folderstorage.filestorage.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
@@ -95,14 +98,46 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      */
     private static final String INFOSTORE_PUBLIC = Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
 
-    private boolean cacheable;
-
     /**
-     * Initializes an empty {@link FileStorageFolderImpl}.
+     * The mail folder content type.
      */
-    public FileStorageFolderImpl() {
-        super();
+    public static enum FileStorageDefaultFolderType {
+        NONE(FileStorageContentType.getInstance(), 0),
+        ROOT(SystemContentType.getInstance(), 0),
+        HOME_DIRECTORY(FileStorageContentType.getInstance(), 8), // FolderObject.FILE
+        PUBLIC_FOLDER(PublicContentType.getInstance(), 15),
+        TRASH(TrashContentType.getInstance(), 16);
+
+        private final ContentType contentType;
+        private final int type;
+
+        private FileStorageDefaultFolderType(final ContentType contentType, final int type) {
+            this.contentType = contentType;
+            this.type = type;
+        }
+
+        /**
+         * Gets the content type associated with this mail folder type.
+         *
+         * @return The content type
+         */
+        public ContentType getContentType() {
+            return contentType;
+        }
+
+        /**
+         * Gets the type.
+         *
+         * @return The type
+         */
+        public int getType() {
+            return type;
+        }
+
     }
+
+    private boolean cacheable;
+    private final FileStorageDefaultFolderType defaultFolderType;
 
     /**
      * The private folder identifier.
@@ -122,19 +157,28 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         name = fsFolder.getName();
         if (fsFolder.isRootFolder()) {
             parent = PRIVATE_FOLDER_ID;
+            defaultFolderType = FileStorageDefaultFolderType.NONE;
         } else {
             String parentId = null;
             if (fsFolder instanceof TypeAware) {
                 final FileStorageFolderType folderType = ((TypeAware) fsFolder).getType();
                 if (FileStorageFolderType.HOME_DIRECTORY.equals(folderType)) {
+                    defaultFolderType = FileStorageDefaultFolderType.HOME_DIRECTORY;
                     if (showPersonalBelowInfoStore(session, altNames)) {
                         parentId = INFOSTORE;
                     } else {
                         parentId = INFOSTORE_USER;
                     }
                 } else if (FileStorageFolderType.PUBLIC_FOLDER.equals(folderType)) {
+                    defaultFolderType = FileStorageDefaultFolderType.PUBLIC_FOLDER;
                     parentId = INFOSTORE_PUBLIC;
+                } else if (FileStorageFolderType.TRASH_FOLDER.equals(folderType)) {
+                    defaultFolderType = FileStorageDefaultFolderType.TRASH;
+                } else {
+                    defaultFolderType = FileStorageDefaultFolderType.NONE;
                 }
+            } else {
+                defaultFolderType = FileStorageDefaultFolderType.NONE;
             }
             parent = null != parentId ? parentId : fsFolder.getParentId();
         }
@@ -203,11 +247,6 @@ public final class FileStorageFolderImpl extends AbstractFolder {
     }
 
     @Override
-    public ContentType getContentType() {
-        return FileStorageContentType.getInstance();
-    }
-
-    @Override
     public Type getType() {
         return FileStorageType.getInstance();
     }
@@ -219,6 +258,21 @@ public final class FileStorageFolderImpl extends AbstractFolder {
 
     @Override
     public void setType(final Type type) {
+        // Nothing to do
+    }
+
+    @Override
+    public ContentType getContentType() {
+        return defaultFolderType.getContentType();
+    }
+
+    @Override
+    public int getDefaultType() {
+        return defaultFolderType.getType();
+    }
+
+    @Override
+    public void setDefaultType(final int defaultType) {
         // Nothing to do
     }
 

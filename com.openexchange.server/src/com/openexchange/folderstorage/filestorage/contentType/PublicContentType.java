@@ -47,31 +47,36 @@
  *
  */
 
-package com.openexchange.file.storage;
-
+package com.openexchange.folderstorage.filestorage.contentType;
 
 /**
- * {@link FileStorageFolderType} - Enumeration of known folder types.
+ * {@link PublicContentType} - The folder storage content type for trash file storage folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum FileStorageFolderType {
+public final class PublicContentType extends FileStorageContentType {
+
+    private static final PublicContentType instance = new PublicContentType();
 
     /**
-     * No special meaning associated with folder.
+     * Gets the {@link PublicContentType} instance.
+     *
+     * @return The {@link PublicContentType} instance
      */
-    NONE,
+    public static PublicContentType getInstance() {
+        return instance;
+    }
+
     /**
-     * Folder is current user's home directory.
+     * Initializes a new {@link PublicContentType}.
      */
-    HOME_DIRECTORY,
-    /**
-     * Folder is a public folder for current user.
-     */
-    PUBLIC_FOLDER,
-    /**
-     * Folder is a trash folder for current user.
-     */
-    TRASH_FOLDER,
-    ;
+    private PublicContentType() {
+        super();
+    }
+
+    @Override
+    public int getPriority() {
+        return 1;
+    }
+
 }
