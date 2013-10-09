@@ -113,8 +113,8 @@ public class AbstractFolderTest extends AbstractAJAXSession {
      * Create several simple folders whose type is chosen by rotating over calendar, contact and task.
      * 
      * @param name The prefix of the folder's name, final name will be name-module-{0..amount-1}
-     * @param amount The amount of appointments to create
-     * @return a list of created appointments
+     * @param amount The amount of folders to create
+     * @return a list of created folders
      */
     private List<FolderObject> createSeveral(final String name, final int amount) {
         List<FolderObject> newFolders = new ArrayList<FolderObject>(amount);
@@ -233,7 +233,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
     }
 
     /**
-     * Delete one or several appointments on the server.
+     * Delete one or several folders on the server.
      * 
      * @param folders The folders to delete
      */
@@ -247,7 +247,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
     /**
      * @param inFolder Folder id to use for the request
      * @param cols Columns to use for the request
-     * @param lastModified The timestamp of the last update of the requested appointments
+     * @param lastModified The timestamp of the last update of the requested folders
      * @param ignore what kind of updates to ignore
      * @return The UpdatesResponse containg new, modified and deleted folders
      * @throws Exception

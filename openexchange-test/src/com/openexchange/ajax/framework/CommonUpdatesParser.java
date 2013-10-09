@@ -111,30 +111,27 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
         int idPosition = updatesResponse.getColumnPos(DataObject.OBJECT_ID);
         Set<Integer> newOrModifiedIds = new HashSet<Integer>(responseData.length);
         Set<Integer> deletedIds = new HashSet<Integer>(responseData.length);
-        
-        for(Object[] objectArray : responseData) {
-            if(objectArray.length == 1) {
-                Object obj = objectArray[0];
-                int id;
-                if (obj instanceof String) {
-                    id = Integer.parseInt((String)obj);
+        if (idPosition > -1) {
+            for (Object[] objectArray : responseData) {
+                if (objectArray.length == 1) {
+                    deletedIds.add(getIdFromObject(objectArray[0]));
                 } else {
-                    id = ((Integer)obj).intValue();
+                    newOrModifiedIds.add(getIdFromObject(objectArray[idPosition]));
                 }
-                deletedIds.add(id);
-            } else {
-                Object obj = objectArray[idPosition];
-                int id;
-                if (obj instanceof String) {
-                    id = Integer.parseInt((String)obj);
-                } else {
-                    id = ((Integer)obj).intValue();
-                }
-                newOrModifiedIds.add(id);
             }
         }
         updatesResponse.setNewOrModifiedIds(newOrModifiedIds);
         updatesResponse.setDeletedIds(deletedIds);
+    }
+
+    private int getIdFromObject(Object object) {
+        int id = -1;
+        if (object instanceof String) {
+            id = Integer.parseInt((String) object);
+        } else {
+            id = ((Integer) object).intValue();
+        }
+        return id;
     }
 
 }
