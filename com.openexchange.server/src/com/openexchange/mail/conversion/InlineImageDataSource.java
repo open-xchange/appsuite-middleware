@@ -227,11 +227,7 @@ public final class InlineImageDataSource implements ImageDataSource {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
             }
             final String fileName = mailPart.getFileName();
-<<<<<<< HEAD
             if (!contentType.isMimeType(MimeTypes.MIME_IMAGE_ALL)) {
-=======
-            if (!contentType.startsWith("image/")) {
->>>>>>> origin/release-7.4.0
                 /*
                  * Either general purpose "application/octet-stream" or check by file name
                  */
