@@ -276,7 +276,13 @@ public class UploadHelper {
         file.setLastModified(null != modified && modified.before(now) ? modified : now);
         fields.add(Field.LAST_MODIFIED);
         if (session.isTraceEnabled()) {
-            session.trace(session.getStorage().toString() + ">> " + path + '/' + newVersion.getName());
+            String fullPath;
+            if (session.getRootFolderID().equals(file.getFolderId())) {
+                fullPath = DriveConstants.ROOT_PATH + file.getFileName();
+            } else {
+                fullPath = session.getStorage().getPath(file.getFolderId()) + '/' + file.getFileName();
+            }
+            session.trace(session.getStorage().toString() + ">> " + fullPath);
         }
         String checksum = saveDocumentAndChecksum(file, uploadStream, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, fields, false);
         return new AbstractMap.SimpleEntry<File, String>(file, checksum);
@@ -303,7 +309,13 @@ public class UploadHelper {
         uploadFile.setFileMIMEType(contentType);
         uploadFile.setFileSize(totalLength - offset);
         if (session.isTraceEnabled()) {
-            session.trace(session.getStorage().toString() + ">> " + path + '/' + newVersion.getName());
+            String fullPath;
+            if (session.getRootFolderID().equals(uploadFile.getFolderId())) {
+                fullPath = DriveConstants.ROOT_PATH + uploadFile.getFileName();
+            } else {
+                fullPath = session.getStorage().getPath(uploadFile.getFolderId()) + '/' + uploadFile.getFileName();
+            }
+            session.trace(session.getStorage().toString() + ">> " + fullPath);
         }
         if (0 == offset) {
             /*

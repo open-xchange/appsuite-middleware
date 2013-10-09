@@ -62,9 +62,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
+import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -85,6 +87,26 @@ public final class CSSMatcher {
 
     /** Perform CSS sanitizing with respect to nested blocks */
     private static final boolean CONSIDER_NESTED_BLOCKS = true;
+
+    private static volatile Integer cssParseTimeoutSec;
+    private static int cssParseTimeoutSec() {
+        Integer tmp = cssParseTimeoutSec;
+        if (null == tmp) {
+            synchronized (CSSMatcher.class) {
+                tmp = cssParseTimeoutSec;
+                if (null == tmp) {
+                    final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final int defaultValue = 4;
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.html.css.parse.timeout", defaultValue));
+                    cssParseTimeoutSec = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     /**
      * Initializes a new {@link CSSMatcher}
@@ -416,7 +438,7 @@ public final class CSSMatcher {
         // Submit to thread pool ...
         final Future<Boolean> f = threadPool.submit(task);
         // ... and await response
-        final int timeout = 7;
+        final int timeout = cssParseTimeoutSec();
         final TimeUnit timeUnit = TimeUnit.SECONDS;
         try {
             final boolean retval = f.get(timeout, timeUnit).booleanValue();

@@ -50,7 +50,7 @@
 package com.openexchange.mailaccount.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -59,7 +59,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.sql.Connection;
@@ -879,12 +878,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
+    public MailAccount[] resolveLogin(final String login, final String serverUrl, final int cid) throws OXException {
         final int[][] idsAndUsers = resolveLogin2IDs(login, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
         for (final int[] idAndUser : idsAndUsers) {
             final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
-            if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
+            if (serverUrl.equals(toSocketAddrString(candidate.generateMailServerURL(), 143))) {
                 l.add(candidate);
             }
         }

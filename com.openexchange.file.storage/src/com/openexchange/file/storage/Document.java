@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,72 @@
  *
  */
 
-package com.openexchange.soap.cxf.interceptor;
+package com.openexchange.file.storage;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.apache.cxf.interceptor.LoggingMessage;
+import java.io.InputStream;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link LoggingUtility} - Utility class for CXF logging.
+ * {@link Document}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class LoggingUtility {
-
-    /**
-     * Initializes a new {@link LoggingUtility}.
-     */
-    private LoggingUtility() {
-        super();
+public abstract class Document {
+    
+    private String name, mimeType, etag;
+    private long size;
+    
+    public Document() {
+        
     }
-
-    /** The regular expression to discover possible password elements */
-    private static final Pattern PATTERN_PASSWORD = Pattern.compile("(<\\s*password(?:>|\\s[^>]*>))[^<>]+(</\\s*password(?:>|\\s[^>]*>))");
-
-    /**
-     * Sanitizes possible user-sensitive data from given logging message.
-     *
-     * @param loggingMessage The logging message to sanitize
-     */
-    public static LoggingMessage sanitizeLoggingMessage(final LoggingMessage loggingMessage) {
-        if (null != loggingMessage) {
-            // Replace possible passwords in payload
-            final StringBuilder payload = loggingMessage.getPayload();
-            if (null != payload && payload.length() > 0) {
-                final StringBuffer sb = new StringBuffer(payload.length());
-                final Matcher m = PATTERN_PASSWORD.matcher(payload);
-                while (m.find()) {
-                    m.appendReplacement(sb, "$1XXXX$2");
-                }
-                m.appendTail(sb);
-                payload.setLength(0);
-                payload.append(sb);
-            }
-        }
-
-        return loggingMessage;
+    
+    public Document(Document other) {
+        this.name = other.getName();
+        this.mimeType = other.getMimeType();
+        this.etag = other.getEtag();
+        this.size = other.getSize();
     }
-
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getMimeType() {
+        return mimeType;
+    }
+    
+    public Document setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+        return this;
+    }
+    
+    public String getEtag() {
+        return etag;
+    }
+    
+    public Document setEtag(String etag) {
+        this.etag = etag;
+        return this;
+    }
+    
+    public long getSize() {
+        return size;
+    }
+    
+    public Document setSize(long size) {
+        this.size = size;
+        return this;
+    }
+    
+    
+    public abstract InputStream getData() throws OXException;
+    
+    
+    
+    
 }

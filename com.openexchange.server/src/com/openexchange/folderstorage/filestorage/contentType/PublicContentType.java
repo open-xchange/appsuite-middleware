@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,36 @@
  *
  */
 
-package com.openexchange.soap.cxf.interceptor;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.apache.cxf.interceptor.LoggingMessage;
+package com.openexchange.folderstorage.filestorage.contentType;
 
 /**
- * {@link LoggingUtility} - Utility class for CXF logging.
+ * {@link PublicContentType} - The folder storage content type for trash file storage folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class LoggingUtility {
+public final class PublicContentType extends FileStorageContentType {
+
+    private static final PublicContentType instance = new PublicContentType();
 
     /**
-     * Initializes a new {@link LoggingUtility}.
+     * Gets the {@link PublicContentType} instance.
+     *
+     * @return The {@link PublicContentType} instance
      */
-    private LoggingUtility() {
+    public static PublicContentType getInstance() {
+        return instance;
+    }
+
+    /**
+     * Initializes a new {@link PublicContentType}.
+     */
+    private PublicContentType() {
         super();
     }
 
-    /** The regular expression to discover possible password elements */
-    private static final Pattern PATTERN_PASSWORD = Pattern.compile("(<\\s*password(?:>|\\s[^>]*>))[^<>]+(</\\s*password(?:>|\\s[^>]*>))");
-
-    /**
-     * Sanitizes possible user-sensitive data from given logging message.
-     *
-     * @param loggingMessage The logging message to sanitize
-     */
-    public static LoggingMessage sanitizeLoggingMessage(final LoggingMessage loggingMessage) {
-        if (null != loggingMessage) {
-            // Replace possible passwords in payload
-            final StringBuilder payload = loggingMessage.getPayload();
-            if (null != payload && payload.length() > 0) {
-                final StringBuffer sb = new StringBuffer(payload.length());
-                final Matcher m = PATTERN_PASSWORD.matcher(payload);
-                while (m.find()) {
-                    m.appendReplacement(sb, "$1XXXX$2");
-                }
-                m.appendTail(sb);
-                payload.setLength(0);
-                payload.append(sb);
-            }
-        }
-
-        return loggingMessage;
+    @Override
+    public int getPriority() {
+        return 1;
     }
 
 }

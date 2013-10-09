@@ -49,6 +49,7 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.database.internal.DBUtils.autocommit;
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
@@ -57,7 +58,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.Assignment;
@@ -282,13 +282,14 @@ public class ReplicationMonitor {
         return retval;
     }
 
-    private static void increaseCounterInTransaction(AssignmentImpl assign, Connection con) throws SQLException {
+    private static void increaseCounter(AssignmentImpl assign, Connection con) throws SQLException {
         int contextId = assign.getContextId();
         PreparedStatement stmt = null;
         ResultSet result = null;
-        Savepoint save = null;
         try {
-            save = con.setSavepoint("replication monitor");
+            // Using Mysql specific functions like LAST_INSERT_ID() do not reveal any performance improvement compared to this transaction.
+            // UPDATE replicationMonitor SET transaction=LAST_INSERT_ID(transaction+1) WHERE cid=?
+            // There we stick with this simple transaction, UPDATE and SELECT statement for better compatibility.
             stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.execute();
@@ -301,32 +302,42 @@ public class ReplicationMonitor {
             } else {
                 LOG.error("Updating transaction for replication monitor failed for context " + contextId + ".");
             }
-        } catch (SQLException e) {
-            rollback(con, save);
-            throw e;
         } finally {
             closeSQLStuff(result, stmt);
         }
     }
 
-    private static void increaseCounterWithLastInsertId(AssignmentImpl assign, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
+    private static void increaseCounterExistingTransaction(AssignmentImpl assign, Connection con) throws SQLException {
+        Savepoint save = null;
         try {
-            stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=LAST_INSERT_ID(transaction+1) WHERE cid=?", Statement.RETURN_GENERATED_KEYS);
-            stmt.setInt(1, assign.getContextId());
-            int changedRows = stmt.executeUpdate();
-            result = stmt.getGeneratedKeys();
-            if (1 == changedRows && result.next()) {
-                assign.setTransaction(result.getLong(1));
-                LOG.trace("Successfully updated replication counter with LAST_INSERT_ID() to value " + assign.getTransaction() + '.');
-            } else {
-                LOG.trace("Updating replication counter with compare and set failed.");
-            }
+            save = con.setSavepoint("replication monitor");
+            increaseCounter(assign, con);
+            con.releaseSavepoint(save);
         } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            rollback(con, save);
+            throw e;
+        }
+    }
+
+    private void increateCounterSeparateTransaction(AssignmentImpl assign, Connection con) {
+        try {
+            con.setAutoCommit(false);
+            increaseCounter(assign, con);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            if (1146 == e.getErrorCode()) {
+                if (lastLogged + 300000 < System.currentTimeMillis()) {
+                    lastLogged = System.currentTimeMillis();
+                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    LOG.error(e1.getMessage(), e1);
+                }
+            } else {
+                final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                LOG.error(e1.getMessage(), e1);
+            }
         } finally {
-            closeSQLStuff(result, stmt);
+            autocommit(con);
         }
     }
 
@@ -354,7 +365,7 @@ public class ReplicationMonitor {
         return masterInsteadOfSlaveFetched.get();
     }
 
-    private static void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
+    private void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
             if (con.isClosed()) {
                 return;
@@ -364,12 +375,7 @@ public class ReplicationMonitor {
             LOG.error(e1.getMessage(), e1);
             return;
         }
-        try {
-            // To be fast use MySQL LAST_INSERT_ID() method if counter could not be updated within a used transaction.
-            increaseCounterWithLastInsertId(assign, con);
-        } catch (OXException e) {
-            LOG.warn(e.getMessage(), e);
-        }
+        increateCounterSeparateTransaction(assign, con);
     }
 
     public void increaseInCurrentTransaction(AssignmentImpl assign, Connection delegate, ConnectionState state) {
@@ -377,7 +383,7 @@ public class ReplicationMonitor {
             return;
         }
         try {
-            increaseCounterInTransaction(assign, delegate);
+            increaseCounterExistingTransaction(assign, delegate);
             state.setUsedForUpdate(false);
             state.setUpdateCommitted(true);
         } catch (SQLException e) {

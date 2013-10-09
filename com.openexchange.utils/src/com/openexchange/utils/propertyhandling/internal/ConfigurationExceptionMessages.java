@@ -73,4 +73,7 @@ public class ConfigurationExceptionMessages implements LocalizableStrings {
 
     // Property %1$s must be set if %2$s is set to %3$s
     public static final String MUST_BE_SET_TO_MSG = "Property %1$s must be set if %2$s is set to %3$s";
+
+    // The class %1$s cannot be used as a property type at the moment
+    public static final String UNKNOWN_TYPE_CLASS_MSG = "The %1$s cannot be used as a property type in the property %2$s";
 }

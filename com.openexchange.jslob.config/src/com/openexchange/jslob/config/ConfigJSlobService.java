@@ -978,7 +978,7 @@ public final class ConfigJSlobService implements JSlobService {
             // Add property's value
             final List<JSONPathElement> path = attributedProperty.path;
             Object value = asJSObject(view.get(attributedProperty.propertyName, String.class));
-
+            
             addValueByPath(path, value, jsonJSlob.getJsonObject());
 
             // Add the metadata as well as a separate JSON object

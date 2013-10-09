@@ -111,42 +111,45 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
     }
 
     @Override
-    protected void processServerChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+    protected int processServerChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         switch (comparison.getServerChange()) {
         case DELETED:
             /*
              * deleted on server, delete directory on client, too
              */
             result.addActionForClient(new RemoveDirectoryAction(comparison.getClientVersion(), comparison));
-            break;
+            return 1;
         case MODIFIED:
+            int nonTrivialChanges = 0;
             if (comparison.getServerVersion().getPath().equalsIgnoreCase(comparison.getClientVersion().getPath()) &&
                 false == comparison.getServerVersion().getPath().equals(comparison.getClientVersion().getPath())) {
                 /*
                  * renamed on server, let client edit the directory first
                  */
                 result.addActionForClient(new EditDirectoryAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison));
+                nonTrivialChanges++;
             }
             if (false == comparison.getServerVersion().getChecksum().equalsIgnoreCase(comparison.getClientVersion().getChecksum())) {
                 /*
                  * modified on server, let client synchronize the folder
                  */
                 result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+                nonTrivialChanges++;
             }
-            break;
+            return nonTrivialChanges;
         case NEW:
             /*
              * new on server, let client synchronize the folder
              */
             result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
-            break;
+            return 1;
         default:
-            break;
+            return 0;
         }
     }
 
     @Override
-    protected void processClientChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+    protected int processClientChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         switch (comparison.getClientChange()) {
         case DELETED:
             if (mayDelete(comparison.getServerVersion())) {
@@ -155,6 +158,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  */
                 result.addActionForServer(new RemoveDirectoryAction(comparison.getServerVersion(), comparison));
                 result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), null, comparison));
+                return 1;
             } else {
                 /*
                  * not allowed, let client synchronize the directory again, indicate as error without quarantine flag
@@ -162,8 +166,8 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
                 result.addActionForClient(new ErrorDirectoryAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
                     DriveExceptionCodes.NO_DELETE_DIRECTORY_PERMISSION.create(comparison.getServerVersion().getPath()), false));
+                return 2;
             }
-            break;
         case NEW:
             if (isInvalidPath(comparison.getClientVersion().getPath())) {
                 /*
@@ -171,12 +175,14 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  */
                 result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
                     DriveExceptionCodes.INVALID_PATH.create(comparison.getClientVersion().getPath()), true));
+                return 1;
             } else if (isIgnoredPath(comparison.getClientVersion().getPath())) {
                 /*
                  * ignored path, indicate as error with quarantine flag
                  */
                 result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
                     DriveExceptionCodes.IGNORED_PATH.create(comparison.getClientVersion().getPath()), true));
+                return 1;
             } else {
                 String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
                 if (mayCreate(parentPath)) {
@@ -184,42 +190,47 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                      * new on client, let client synchronize the directory
                      */
                     result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+                    return 1;
                 } else {
                     /*
                      * not allowed, indicate as error with quarantine flag
                      */
                     result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
                         DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true));
+                    return 1;
                 }
             }
-            break;
         case MODIFIED:
+            int nonTrivialChanges = 0;
             if (comparison.getClientVersion().getPath().equalsIgnoreCase(comparison.getServerVersion().getPath()) &&
                 false == comparison.getClientVersion().getPath().equals(comparison.getServerVersion().getPath())) {
                 /*
                  * renamed on client, let server edit the directory
                  */
                 result.addActionForServer(new EditDirectoryAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison));
+                nonTrivialChanges++;
             }
             if (false == comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum())) {
                 /*
                  * modified on client, let client synchronize the directory
                  */
                 result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+                nonTrivialChanges++;
             }
-            break;
+            return nonTrivialChanges;
         default:
-            break;
+            return 0;
         }
     }
 
     @Override
-    protected void processConflictingChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+    protected int processConflictingChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         if (Change.DELETED == comparison.getServerChange() && Change.DELETED == comparison.getClientChange()) {
             /*
              * both deleted, just let client remove it's metadata
              */
             result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), null, comparison));
+            return 0;
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) &&
             (Change.NEW == comparison.getServerChange() || Change.MODIFIED == comparison.getServerChange())) {
             /*
@@ -236,6 +247,9 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                      * first-time synchronization of identical, but non-empty directory, let client sync directory to acknowledge the contents
                      */
                     result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+                    return 1;
+                } else {
+                    return 0;
                 }
             } else {
                 if (comparison.getClientVersion().getPath().equalsIgnoreCase(comparison.getServerVersion().getPath()) &&
@@ -251,12 +265,14 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                      */
                     result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
                 }
+                return 1;
             }
         } else if (Change.DELETED == comparison.getClientChange() && (Change.MODIFIED == comparison.getServerChange() || Change.NEW == comparison.getServerChange())) {
             /*
              * delete-edit conflict, let client synchronize the directory
              */
             result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+            return 1;
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) && Change.DELETED == comparison.getServerChange()) {
             /*
              * edit-delete conflict, create on server, let client synchronize the directory
@@ -264,9 +280,11 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
             String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
             if (mayCreate(parentPath)) {
                 result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+                return 1;
             } else {
                 result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
                     DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true));
+                return 1;
             }
         } else {
             throw new UnsupportedOperationException("Not implemented: Server: " + comparison.getServerChange() + ", Client: " + comparison.getClientChange());

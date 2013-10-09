@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.entity2acl;
 
-import java.net.InetSocketAddress;
 import java.util.EnumSet;
 import java.util.Set;
 import com.openexchange.java.StringAllocator;
@@ -70,9 +69,8 @@ public enum IMAPServer {
     COURIER("Courier", CourierEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         @Override
-        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
-            return new Object[] {
-                Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
+        public Object[] getArguments(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] { Integer.valueOf(accountId), serverUrl, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
         }
     }, new GreetingMatcher() {
 
@@ -87,8 +85,8 @@ public enum IMAPServer {
     CYRUS("Cyrus", CyrusEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         @Override
-        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
-            return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
+        public Object[] getArguments(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] { Integer.valueOf(accountId), serverUrl, Integer.valueOf(sessionUser) };
         }
     }, new GreetingMatcher() {
 
@@ -103,9 +101,8 @@ public enum IMAPServer {
     DOVECOT("Dovecot", DovecotEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         @Override
-        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
-            return new Object[] {
-                Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
+        public Object[] getArguments(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] { Integer.valueOf(accountId), serverUrl, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
         }
     }, new GreetingMatcher() {
 
@@ -120,8 +117,8 @@ public enum IMAPServer {
     SUN_MESSAGING_SERVER("Sun", SUNMessagingServerEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         @Override
-        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
-            return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
+        public Object[] getArguments(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] { Integer.valueOf(accountId), serverUrl, Integer.valueOf(sessionUser) };
         }
     }, new GreetingMatcher() {
 
@@ -136,8 +133,8 @@ public enum IMAPServer {
     MDAEMON("MDaemon", MDaemonEntity2ACL.getInstance(), new ArgumentGenerator() {
 
         @Override
-        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
-            return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
+        public Object[] getArguments(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] { Integer.valueOf(accountId), serverUrl, Integer.valueOf(sessionUser) };
         }
     }, new GreetingMatcher() {
 
@@ -186,14 +183,14 @@ public enum IMAPServer {
      * Gets the needed arguments to reliably map an ACL entity to a system user and vice versa.
      *
      * @param accountId The account ID
-     * @param imapServerAddress The IMAP server address
+     * @param serverUrl The server URL; e.g. <code>"mail.company.org:143"</code>
      * @param sessionUser The session user ID
      * @param fullname The IMAP folder's full name
      * @param separator The IMAP folder's separator
      * @return The needed arguments to reliably map an ACL entity to a system user and vice versa
      */
-    public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
-        return argumentGenerator.getArguments(accountId, imapServerAddress, sessionUser, fullname, separator);
+    public Object[] getArguments(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator) {
+        return argumentGenerator.getArguments(accountId, serverUrl, sessionUser, fullname, separator);
     }
 
     /**
@@ -242,13 +239,13 @@ public enum IMAPServer {
          * Gets the arguments needed for a certain IMAP server to map ACL entity to a system user and vice versa.
          *
          * @param accountId The account ID
-         * @param imapServerAddress The IMAP server address
+         * @param serverUrl The IMAP server URL
          * @param sessionUser The session user ID
          * @param fullname The IMAP folder's full name
          * @param separator The IMAP folder's separator character
          * @return The arguments needed for a certain IMAP server to map ACL entity to a system user and vice versa
          */
-        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator);
+        public Object[] getArguments(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator);
     }
 
     private static abstract class GreetingMatcher {

@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount;
 
-import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
@@ -238,12 +237,12 @@ public interface MailAccountStorageService {
      * Gets the mail accounts of the users whose login matches specified login on specified server.
      *
      * @param login The login
-     * @param server The server's internet address
+     * @param serverUrl The server URL; e.g. <code>"mail.company.org:143"</code>
      * @param cid The context ID
      * @return The mail accounts of the users whose login matches specified login on specified server
      * @throws OXException If resolving the login fails
      */
-    public MailAccount[] resolveLogin(String login, InetSocketAddress server, int cid) throws OXException;
+    public MailAccount[] resolveLogin(String login, String serverUrl, int cid) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose primary email address matches specified email on specified server.

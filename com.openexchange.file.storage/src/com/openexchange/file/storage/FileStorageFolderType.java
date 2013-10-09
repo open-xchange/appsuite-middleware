@@ -69,5 +69,9 @@ public enum FileStorageFolderType {
      * Folder is a public folder for current user.
      */
     PUBLIC_FOLDER,
+    /**
+     * Folder is a trash folder for current user.
+     */
+    TRASH_FOLDER,
     ;
 }
