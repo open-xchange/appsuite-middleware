@@ -52,7 +52,14 @@ import com.openexchange.exception.OXException;
  */
 
 /**
- * {@link FileStorageEfficientRetrieval}
+ * Implementing the {@link FileStorageEfficientRetrieval} interface with the {@link FileStorageFileAccess} allows an implementation to bypass the
+ * file metadata lookup in certain scenarios. In order for an etag based caching to continue working, usually the file metadata has to be retrieved to 
+ * check and set an HTTP etag (essentially an arbitrary string). An etag is a token that changes when the file content changes. Clients detect a stale cache by supplying their etag, and expecting either
+ * a 304 (Not Modified) status code, when the cache is still relevant (and no file data) or a regular response with the file. Implementing this interface allows higher levels to bypass
+ * the metadata lookup by supplying the needed metadata along with a handle to retrieve the document. In parallel to the HTTP etag handling, two methods have to be implemented
+ * one that deals with accesses without an etag, one that deals with accesses with an etag. If an etag is supplied and matches the etag of the stored file, #getInputStream is never called.
+ * 
+ * If an underlying system implements a similar mechanism, this can be used to bypass metadata retrieval.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
