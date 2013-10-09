@@ -68,7 +68,7 @@ public final class LoggingUtility {
     }
 
     /** The regular expression to discover possible password elements */
-    private static final Pattern PATTERN_PASSWORD = Pattern.compile("(<[^<]*password>)[^<>]+(</[^<]*password>)");
+    private static final Pattern PATTERN_PASSWORD = Pattern.compile("(<\\s*password(?:>|\\s[^>]*>))[^<>]+(</\\s*password(?:>|\\s[^>]*>))");
 
     /**
      * Sanitizes possible user-sensitive data from given logging message.
