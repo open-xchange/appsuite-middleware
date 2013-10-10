@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -45,32 +45,27 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imap.properties
 
-    pfile=/opt/open-xchange/etc/imap.properties
+    PFILE=/opt/open-xchange/etc/imap.properties
 
     # SoftwareChange_Request-1142
-    if ! ox_exists_property com.openexchange.imap.umlautFilterThreshold $pfile; then
-        ox_set_property com.openexchange.imap.umlautFilterThreshold 50 $pfile
-    fi
+    ox_add_property com.openexchange.imap.umlautFilterThreshold 50 $PFILE
 
     # SoftwareChange_Request-1215
-    if ! ox_exists_property com.openexchange.imap.maxMailboxNameLength $pfile; then
-        ox_set_property com.openexchange.imap.maxMailboxNameLength 60 $pfile
-    fi
+    ox_add_property com.openexchange.imap.maxMailboxNameLength 60 $PFILE
 
     # SoftwareChange_Request-1470
-    if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile; then
-        ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile
+    if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $PFILE; then
+        ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $PFILE
     fi
 
     # SoftwareChange_Request-1566
-    if ! ox_exists_property com.openexchange.imap.invalidMailboxNameCharacters $pfile; then
-        ox_set_property com.openexchange.imap.invalidMailboxNameCharacters "" $pfile
-    fi
+    ox_add_property com.openexchange.imap.invalidMailboxNameCharacters "" $PFILE
 
     # SoftwareChange_Request-1586
-    if ! ox_exists_property com.openexchange.imap.allowFolderCaches $pfile; then
-        ox_set_property com.openexchange.imap.allowFolderCaches true $pfile
-    fi
+    ox_add_property com.openexchange.imap.allowFolderCaches true $PFILE
+
+    # SoftwareChange_Request-1668
+    ox_add_property com.openexchange.imap.storeContainerType boundary-aware $PFILE
 fi
 
 %clean
