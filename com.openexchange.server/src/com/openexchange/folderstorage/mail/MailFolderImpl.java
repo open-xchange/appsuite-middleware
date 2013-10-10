@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.mail;
 
+import static com.openexchange.folderstorage.mail.MailFolderStorage.closeMailAccess;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.hash.TIntIntHashMap;
 import java.util.Locale;
@@ -478,9 +479,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
             return super.getUnread();
         } finally {
-            if (null != mailAccess) {
-                mailAccess.close(true);
-            }
+            closeMailAccess(mailAccess);
         }
     }
 
@@ -511,9 +510,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
             return super.getTotal();
         } finally {
-            if (null != mailAccess) {
-                mailAccess.close(true);
-            }
+            closeMailAccess(mailAccess);
         }
     }
 
@@ -542,9 +539,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 }
                 return null;
             } finally {
-                if (null != mailAccess) {
-                    mailAccess.close(true);
-                }
+                closeMailAccess(mailAccess);
             }
         }
         // Look-up provided parameters
@@ -593,7 +588,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 mailAccess.connect(false);
             } else {
                 // Discard "new" instance
-                nu.close(true);
+                closeMailAccess(nu);
             }
         }
         return mailAccess;
