@@ -133,13 +133,21 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
     private synchronized void decrementNewCount() {
         if (!decrementPerformed) {
             // Has been disconnected
-            queue.decrementNewCount();
-            decrementPerformed = true;
-            queue.removeTrackedThread();
-            if (logger.isLoggable(Level.FINE) || LOG.isDebugEnabled()) {
-                final String msg = "QueuedIMAPProtocol.disconnect(): Decremented new-count for " + toString() + "\n\t(total=" + queue.getNewCount() + ")";
-                logger.fine(msg);
-                LOG.debug(msg);
+            final CountingQueue queue = this.queue;
+            if (null != queue) {
+                try {
+                    queue.decrementNewCount();
+                    queue.removeTrackedThread();
+                    if (logger.isLoggable(Level.FINE) || LOG.isDebugEnabled()) {
+                        final String msg = "QueuedIMAPProtocol.disconnect(): Decremented new-count for " + toString() + "\n\t(total=" + queue.getNewCount() + ")";
+                        logger.fine(msg);
+                        LOG.debug(msg);
+                    }
+                } catch (final Exception x) {
+                    // Ignore
+                } finally {
+                    decrementPerformed = true;
+                }
             }
         }
     }
