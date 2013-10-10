@@ -1331,7 +1331,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 				protocol.disconnect();
                         }
                     } else {
-			if (protocol != null)
+			if (opened && protocol != null)
 			    protocol.close();
 		    }
                 }
