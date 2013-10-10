@@ -303,40 +303,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     /**
-     * Updates the cached IMAP folder if message has changed.
-     *
-     * @param fullName The full name
-     */
-    public void updateCacheIfDiffer(final String fullName) {
-        final MailFolder mailFolder = FolderCache.optCachedFolder(fullName, this);
-        if (null != mailFolder) {
-            try {
-                IMAPFolderWorker.checkFailFast(imapStore, fullName);
-                final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session);
-                {
-                    if (!doesExist(entry)) {
-                        final IMAPFolder folder = checkForNamespaceFolder(fullName);
-                        if (null == folder) {
-                            FolderCache.removeCachedFolder(fullName, session, accountId);
-                            ListLsubCache.removeCachedEntry(fullName, accountId, session);
-                            return;
-                        }
-                    }
-                    if (mailFolder.getMessageCount() != IMAPCommandsCollection.getTotal(imapStore, fullName)) {
-                        FolderCache.updateCachedFolder(fullName, this);
-                    }
-                }
-            } catch (final MessagingException e) {
-                LOG.warn("Updating IMAP folder cache failed.", e);
-                FolderCache.removeCachedFolder(fullName, session, accountId);
-            } catch (final OXException e) {
-                LOG.warn("Updating IMAP folder cache failed.", e);
-                FolderCache.removeCachedFolder(fullName, session, accountId);
-            }
-        }
-    }
-
-    /**
      * Removes the IMAP folders denoted by specified set of full names.
      *
      * @param modifiedFullnames The full names of the folders which have been modified
