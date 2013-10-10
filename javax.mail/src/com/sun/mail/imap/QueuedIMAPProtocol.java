@@ -52,6 +52,7 @@ package com.sun.mail.imap;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
+import org.apache.commons.logging.Log;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.QueuingIMAPStore.CountingQueue;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -63,6 +64,8 @@ import com.sun.mail.util.MailLogger;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<QueuedIMAPProtocol> {
+
+    private static final Log LOG = QueuingIMAPStore.getLog();
 
     /** The queue */
     private final CountingQueue queue;
@@ -133,8 +136,10 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
             queue.decrementNewCount();
             decrementPerformed = true;
             queue.removeTrackedThread();
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("QueuedIMAPProtocol.disconnect(): Decremented new-count for " + toString() + "\n\t(total=" + queue.getNewCount() + ")");
+            if (logger.isLoggable(Level.FINE) || LOG.isDebugEnabled()) {
+                final String msg = "QueuedIMAPProtocol.disconnect(): Decremented new-count for " + toString() + "\n\t(total=" + queue.getNewCount() + ")";
+                logger.fine(msg);
+                LOG.debug(msg);
             }
         }
     }
@@ -146,8 +151,10 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
             clearHandlers();
         } else {
             super.logout();
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("QueuedIMAPProtocol.logout(): Queue is full. LOGOUT for " + toString());
+            if (logger.isLoggable(Level.FINE) || LOG.isDebugEnabled()) {
+                final String msg = "QueuedIMAPProtocol.logout(): Queue is full. LOGOUT for " + toString();
+                logger.fine(msg);
+                LOG.debug(msg);
             }
         }
         queue.removeTrackedThread();
@@ -159,8 +166,10 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
      * @see "RFC2060, section 6.1.3"
      */
     public synchronized void realLogout() throws ProtocolException {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("QueuedIMAPProtocol.realLogout(): LOGOUT for " + toString());
+        if (logger.isLoggable(Level.FINE) || LOG.isDebugEnabled()) {
+            final String msg = "QueuedIMAPProtocol.realLogout(): LOGOUT for " + toString();
+            logger.fine(msg);
+            LOG.debug(msg);
         }
         super.logout();
     }

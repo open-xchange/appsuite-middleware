@@ -81,6 +81,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.security.auth.Subject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -93,6 +95,18 @@ import com.sun.mail.util.PropUtil;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class QueuingIMAPStore extends IMAPStore {
+
+    /** The logger */
+    static final Log LOG = LogFactory.getLog(QueuingIMAPStore.class);
+
+    /**
+     * Gets the logger.
+     *
+     * @return The logger
+     */
+    public static Log getLog() {
+        return LOG;
+    }
 
     /** The global <code>ScheduledThreadPoolExecutor</code> instance */
     private static volatile ScheduledThreadPoolExecutor executor;
@@ -182,7 +196,9 @@ public class QueuingIMAPStore extends IMAPStore {
                                         final QueuingIMAPStore.ThreadTrace trace = entry.getValue();
                                         if (trace.stamp < minStamp) {
                                             final long dur = System.currentTimeMillis() - trace.stamp;
-                                            q.getLogger().fine(formatThread(entry.getKey(), trace.protocol, q, dur, lineSeparator));
+                                            final String msg = formatThread(entry.getKey(), trace.protocol, q, dur, lineSeparator);
+                                            q.getLogger().fine(msg);
+                                            LOG.debug(msg);
                                         }
                                     }
                                 }
@@ -216,7 +232,7 @@ public class QueuingIMAPStore extends IMAPStore {
     private static CountingQueue initQueue(final URLName url, final int permits, final MailLogger logger) {
         CountingQueue q = queues.get(url);
         if (null == q) {
-            final boolean debug = logger.isLoggable(Level.FINE);
+            final boolean debug = logger.isLoggable(Level.FINE) || LOG.isDebugEnabled();
             if (debug) {
                 initWatcher();
             }
@@ -233,7 +249,9 @@ public class QueuingIMAPStore extends IMAPStore {
                     @Override
                     public void run() {
                         if (debug) {
-                            logger.fine("Cleaner run. Elements in queue " + tq.hashCode() + ": " + tq.size());
+                            final String msg = "Cleaner run. Elements in queue " + tq.hashCode() + ": " + tq.size();
+                            logger.fine(msg);
+                            LOG.debug(msg);
                         }
                         final long minStamp = System.currentTimeMillis() - 4000;
                         final Lock lock = tq.lock;
@@ -260,7 +278,9 @@ public class QueuingIMAPStore extends IMAPStore {
                 final ScheduledFuture<?> future = executor().scheduleAtFixedRate(t, 3, 3, TimeUnit.SECONDS);
                 futureRef.set(future);
                 if (debug) {
-                    logger.fine("QueueingIMAPStore.initQueue(): New queue for \"" + url + "\": BlockingQueue@" + q.hashCode() + " " + q.toString());
+                    final String msg = "QueueingIMAPStore.initQueue(): New queue for \"" + url + "\": BlockingQueue@" + q.hashCode() + " " + q.toString();
+                    logger.fine(msg);
+                    LOG.debug(msg);
                 }
             }
         }
@@ -355,24 +375,31 @@ public class QueuingIMAPStore extends IMAPStore {
             while (true) {
                 try {
                     final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0), logger);
-                    if (logger.isLoggable(Level.FINE)) {
-                        logger.fine("QueueingIMAPStore.newIMAPProtocol(): " + Thread.currentThread().getName() + " is trying to create/fetch for user '" + user + "@" + host + "'. Pending threads " + q.trackedThreads());
+                    final boolean debug = logger.isLoggable(Level.FINE) || LOG.isDebugEnabled();
+                    if (debug) {
+                        final String msg = "QueueingIMAPStore.newIMAPProtocol(): " + Thread.currentThread().getName() + " is trying to create/fetch for user '" + user + "@" + host + "'. Pending threads " + q.trackedThreads();
+                        logger.fine(msg);
+                        LOG.debug(msg);
                     }
                     // W/ or w/o timeout
                     if (!timeout) {
                         // No timeout
                         QueuedIMAPProtocol protocol = q.takeOrIncrement();
                         if (null != protocol) {
-                            if (logger.isLoggable(Level.FINE)) {
-                                logger.fine("QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString());
+                            if (debug) {
+                                final String msg = "QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString();
+                                logger.fine(msg);
+                                LOG.debug(msg);
                             }
                             q.addTrackedThread(protocol);
                             return protocol;
                         }
                         // Create a new protocol instance
                         protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q);
-                        if (logger.isLoggable(Level.FINE)) {
-                            logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
+                        if (debug) {
+                            final String msg = "\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")";
+                            logger.fine(msg);
+                            LOG.debug(msg);
                         }
                         q.addTrackedThread(protocol);
                         return protocol;
@@ -385,8 +412,10 @@ public class QueuingIMAPStore extends IMAPStore {
                         public QueuedIMAPProtocol callback() throws IOException, ProtocolException {
                             // Create a new protocol instance
                             final QueuedIMAPProtocol protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q);
-                            if (logger.isLoggable(Level.FINE)) {
-                                logger.fine("\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")");
+                            if (debug) {
+                                final String msg = "\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")";
+                                logger.fine(msg);
+                                LOG.debug(msg);
                             }
                             q.addTrackedThread(protocol);
                             return protocol;
@@ -667,8 +696,10 @@ public class QueuingIMAPStore extends IMAPStore {
                 }
                 // Not-null polled one
                 if (null != x) {
-                    if (logger.isLoggable(Level.FINE)) {
-                        logger.fine("QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + x.toString());
+                    if (logger.isLoggable(Level.FINE) || LOG.isDebugEnabled()) {
+                        final String msg = "QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + x.toString();
+                        logger.fine(msg);
+                        LOG.debug(msg);
                     }
                     addTrackedThread(x);
                     return x;
