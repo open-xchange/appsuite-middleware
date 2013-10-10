@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-eas-provisioning-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,10 +55,12 @@ ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/eas-provisioning-sms.properties
 
 %changelog
+* Thu Oct 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First sprint increment for 7.4.0 release
 * Wed Oct 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-07
 * Thu Sep 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-09-23
+Build for patch 2013-09-26
 * Tue Sep 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eleventh candidate for 7.4.0 release
 * Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>

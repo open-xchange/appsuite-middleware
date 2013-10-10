@@ -1,3 +1,9 @@
+open-xchange-contact-storage-ldap (7.4.1-1) stable; urgency=low
+
+  * First sprint increment for 7.4.0 release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 10 Oct 2013 17:24:01 +0200
+
 open-xchange-contact-storage-ldap (7.4.1-0) unstable; urgency=low
 
   * prepare for 7.4.1 release
