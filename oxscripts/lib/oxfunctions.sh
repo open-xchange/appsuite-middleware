@@ -558,3 +558,19 @@ ox_kill_readerengine_instances() {
 
     rm -f /tmp/OSL_PIPE_*
 }
+
+# ox_add_property property value /path/to/file
+# verifies first that the property does not already exist in file and adds it then
+ox_add_property() {
+    local property="$1"
+    local value="$2"
+    local propfile="$3"
+    test -z "$property" && die "ox_add_property: missing property argument (arg 1)"
+    test -z "$propfile" && die "ox_add_property: missing propfile argument (arg 3)"
+    test -e "$propfile" || die "ox_add_property: $propfile does not exist"
+
+    if ! ox_exists_property "$property" "$propfile"
+    then
+        ox_set_property "$property" "$value" "$propfile"
+    fi
+}

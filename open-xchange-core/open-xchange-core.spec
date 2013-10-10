@@ -853,6 +853,9 @@ if ! ox_exists_property com.openexchange.servlet.maxRateLenientModules $PFILE; t
     ox_set_property com.openexchange.servlet.maxRateLenientModules "rt, system" $PFILE
 fi
 
+# SoftwareChange_Request-1667
+ox_add_property com.openexchange.html.css.parse.timeout 4 /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
