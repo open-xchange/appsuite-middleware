@@ -1,6 +1,7 @@
 * 2013-10-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29214: Fire filestorage events upon copy-operation within the same account
+ - Fix for bug 29222: Really delete collected files during batch action execution 
 
 * 2013-10-09 - marcus.klein@open-xchange.com
 

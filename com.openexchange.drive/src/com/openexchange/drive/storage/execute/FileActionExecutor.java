@@ -377,7 +377,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
         /*
          * execute delete operations
          */
-        if (0 < versionsToRemove.size()) {
+        if (0 < versionsToDelete.size()) {
             List<FileChecksum> checksumsToRemove = new ArrayList<FileChecksum>();
             List<String> ids = new ArrayList<String>();
             long sequenceNumber = 0;
