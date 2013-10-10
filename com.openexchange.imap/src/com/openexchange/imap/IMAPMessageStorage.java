@@ -200,6 +200,7 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
@@ -320,7 +321,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @param session The session providing needed user data
      * @throws OXException If initialization fails
      */
-    public IMAPMessageStorage(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
+    public IMAPMessageStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
         super(imapStore, imapAccess, session);
         imapFolderStorage = imapAccess.getFolderStorage();
     }

@@ -158,7 +158,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * Fields
      */
 
-    protected final AccessedIMAPStore imapStore;
+    protected final IMAPStore imapStore;
     protected final Session session;
     protected final int accountId;
     protected final Context ctx;
@@ -178,7 +178,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @param session The session providing needed user data
      * @throws OXException If context lading fails
      */
-    public IMAPFolderWorker(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
+    public IMAPFolderWorker(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;
@@ -423,7 +423,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         STR_FALSE)) && IMAPCommandsCollection.isReadOnly(imapFolder)) {
                         throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolderFullname);
                     }
-                    if (imapStore.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
+                    if (IMAPAccess.getImapAccess(imapStore).notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
                         IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session, true);
                     }
                     /*
@@ -435,7 +435,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             } // End of synchronized
         }
         final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
-        if (imapStore.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
+        if (IMAPAccess.getImapAccess(imapStore).notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
             IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session, true);
         }
         /*

@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.imap.ACLPermission;
-import com.openexchange.imap.AccessedIMAPStore;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
@@ -804,7 +803,7 @@ public final class IMAPFolderConverter {
         return (e.isPrefix("ACL") && (Entity2ACLExceptionCode.RESOLVE_USER_FAILED.getNumber() == code)) || (e.isPrefix("USR") && (LdapExceptionCode.USER_NOT_FOUND.getNumber() == code));
     }
 
-    private static boolean checkForNamespaceFolder(final String fullName, final AccessedIMAPStore imapStore, final Session session, final int accountId) throws MessagingException, OXException {
+    private static boolean checkForNamespaceFolder(final String fullName, final IMAPStore imapStore, final Session session, final int accountId) throws MessagingException, OXException {
         /*
          * Check for namespace folder
          */

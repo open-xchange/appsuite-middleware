@@ -161,20 +161,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static final char[] STR_MSEC = new char[] { 'm','s','e','c' };
 
-    private final AccessedIMAPStore imapStore;
-
+    private final IMAPStore imapStore;
     private final IMAPAccess imapAccess;
-
     private final int accountId;
-
     private final Session session;
-
     private final Context ctx;
-
     private final IMAPConfig imapConfig;
 
     private Character separator;
-
     private IMAPDefaultFolderChecker checker;
 
     /**
@@ -185,7 +179,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * @param session The session providing needed user data
      * @throws OXException If context loading fails
      */
-    public IMAPFolderStorage(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
+    public IMAPFolderStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session) throws OXException {
         super();
         this.imapStore = imapStore;
         this.imapAccess = imapAccess;

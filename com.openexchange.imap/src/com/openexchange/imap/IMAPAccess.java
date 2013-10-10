@@ -203,7 +203,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The IMAP store.
      */
-    private transient AccessedIMAPStore imapStore;
+    private transient IMAPStore imapStore;
 
     /**
      * The IMAP session.
@@ -317,7 +317,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      *
      * @return The IMAP store or <code>null</code> if this IMAP access is not connected
      */
-    public AccessedIMAPStore getIMAPStore() {
+    public IMAPStore getIMAPStore() {
         return imapStore;
     }
 
@@ -391,14 +391,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("Error while closing IMAP message storage.", e);
                 }
             }
-            final AccessedIMAPStore imapStore = this.imapStore;
+            final IMAPStore imapStore = this.imapStore;
             if (imapStore != null) {
                 if (useIMAPStoreCache()) {
                     final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
                     } else {
-                        imapStoreCache.returnIMAPStore(imapStore.dropAndGetImapStore(), accountId, server, port, login);
+                        imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login);
                     }
                 } else {
                     closeSafely(imapStore);
@@ -415,7 +415,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private void closeSafely(final AccessedIMAPStore imapStore) {
+    private void closeSafely(final IMAPStore imapStore) {
         try {
             imapStore.close();
         } catch (final MessagingException e) {
@@ -701,7 +701,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.clientIp = clientIp;
             maxCount = getMaxCount();
             try {
-                imapStore = new AccessedIMAPStore(this, connectIMAPStore(maxCount), imapSession);
+                imapSession.getProperties().put("mail.imap.imapAccess", this);
+                imapStore = connectIMAPStore(maxCount);
                 if (DEBUG) {
                     final String lineSeparator = System.getProperty("line.separator");
                     final StringAllocator sb = new StringAllocator(1024);
@@ -1053,6 +1054,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return imapSession;
     }
 
+    /**
+     * Whether to notify about recent messages. Notification is enabled if both conditions are met:<br>
+     * It's the primary account's IMAP store <b>AND</b> notify-recent has been enabled by configuration.
+     *
+     * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
+     */
+    public boolean notifyRecent() {
+        return MailAccount.DEFAULT_ID == accountId && getIMAPConfig().getIMAPProperties().notifyRecent();
+    }
+
     @Override
     protected void startup() throws OXException {
         initMaps();
@@ -1378,6 +1389,19 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 sb.append(lineSeparator);
             }
         }
+    }
+
+    /**
+     * Gets the {@link IMAPAccess} instance associated with given IMAP store.
+     * 
+     * @param store The IMAP store
+     * @return The associated {@link IMAPAccess} instance or <code>null</code>
+     */
+    public static IMAPAccess getImapAccess(final IMAPStore store) {
+        if (null == store) {
+            return null;
+        }
+        return (IMAPAccess) store.getServiceSession().getProperties().get("mail.imap.imapAccess");
     }
 
 }

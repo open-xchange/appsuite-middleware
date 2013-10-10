@@ -82,6 +82,7 @@ import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link SpecialUseDefaultFolderChecker} - The IMAP default folder checker.
@@ -103,7 +104,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
      * @param imapStore The (connected) IMAP store
      * @param imapConfig The IMAP configuration
      */
-    public SpecialUseDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final AccessedIMAPStore imapStore, final IMAPConfig imapConfig) {
+    public SpecialUseDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final IMAPStore imapStore, final IMAPConfig imapConfig) {
         super(accountId, session, ctx, imapStore, imapConfig);
     }
 
