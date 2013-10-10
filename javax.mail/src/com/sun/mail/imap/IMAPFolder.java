@@ -1292,50 +1292,47 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    if (!opened)
 		return;
 
-	    try {
-		waitIfIdle();
-		if (force) {
-		    logger.log(Level.FINE, "forcing folder {0} to close",
-								    fullName);
-		    if (protocol != null)
-			protocol.disconnect();
-                } else if (((IMAPStore)store).isConnectionPoolFull()) {
-		    // If the connection pool is full, logout the connection
-		    logger.fine(
-			"pool is full, not adding an Authenticated connection");
+        try {
+            waitIfIdle();
+            if (force) {
+                logger.log(Level.FINE, "forcing folder {0} to close", fullName);
+                if (protocol != null)
+                    protocol.disconnect();
+            } else if (((IMAPStore) store).isConnectionPoolFull()) {
+                // If the connection pool is full, logout the connection
+                logger.fine("pool is full, not adding an Authenticated connection");
 
-		    // If the expunge flag is set, close the folder first.
-		    if (expunge && protocol != null)
-			protocol.close();
+                // If the expunge flag is set, close the folder first.
+                if (expunge && protocol != null)
+                    protocol.close();
 
-		    if (protocol != null)
-			protocol.logout();
-                } else {
-		    // If the expunge flag is set or we're open read-only we
-		    // can just close the folder, otherwise open it read-only
-		    // before closing, or unselect it if supported.
-                    if (!expunge && mode == READ_WRITE) {
-                        try {
-			    if (protocol != null &&
-				    protocol.hasCapability("UNSELECT"))
-				protocol.unselect();
-			    else {
-				if (protocol != null) {
-				    MailboxInfo mi = protocol.examine(fullName);
-				    if (protocol != null) // XXX - unnecessary?
-					protocol.close();
-				}
-			    }
-                        } catch (ProtocolException pex2) {
-                            if (protocol != null)
-				protocol.disconnect();
+                if (protocol != null)
+                    protocol.logout();
+            } else {
+                // If the expunge flag is set or we're open read-only we
+                // can just close the folder, otherwise open it read-only
+                // before closing, or unselect it if supported.
+                if (!expunge && mode == READ_WRITE) {
+                    try {
+                        if (protocol != null && protocol.hasCapability("UNSELECT"))
+                            protocol.unselect();
+                        else {
+                            if (protocol != null) {
+                                MailboxInfo mi = protocol.examine(fullName);
+                                if (protocol != null) // XXX - unnecessary?
+                                    protocol.close();
+                            }
                         }
-                    } else {
-			if (opened && protocol != null)
-			    protocol.close();
-		    }
+                    } catch (ProtocolException pex2) {
+                        if (protocol != null)
+                            protocol.disconnect();
+                    }
+                } else {
+                    if (opened && protocol != null)
+                        protocol.close();
                 }
-	    } catch (ProtocolException pex) {
+            }
+        } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    } finally {
 		// cleanup if we haven't already
