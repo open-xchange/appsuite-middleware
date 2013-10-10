@@ -160,6 +160,8 @@ public class MailFolder implements Serializable, Cloneable {
     private boolean isPublic;
     private boolean b_public;
 
+    private boolean liveAccess;
+
     private final ConcurrentMap<String, Object> properties;
 
     /**
@@ -183,6 +185,27 @@ public class MailFolder implements Serializable, Cloneable {
         super();
         defaulFolderType = DefaultFolderType.NONE;
         properties = new ConcurrentHashMap<String, Object>(4);
+        liveAccess = true;
+    }
+
+    /**
+     * Sets the live-access flag.
+     *
+     * @param liveAccess The flag to set
+     */
+    public void setLiveAccess(boolean liveAccess) {
+        this.liveAccess = liveAccess;
+    }
+
+    /**
+     * Signals if mail folder is accessed in a on-the-fly fashion or if there is any kind of caching mechanism.
+     * <p>
+     * Default is <code>true</code>.
+     *
+     * @return <code>true</code> for on-the-fly access; otherwise <code>false</code>
+     */
+    public boolean liveAccess() {
+        return liveAccess;
     }
 
     /**
@@ -233,7 +256,7 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     @Override
-    public Object clone() {
+    public MailFolder clone() {
         try {
             final MailFolder clone = (MailFolder) super.clone();
             {

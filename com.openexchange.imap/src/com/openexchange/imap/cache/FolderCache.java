@@ -118,7 +118,7 @@ public final class FolderCache {
          * Check for folder
          */
         final MailFolder mailFolder = folderMap.get(fullName);
-        return (MailFolder) (null == mailFolder ? null : mailFolder.clone());
+        return null == mailFolder ? null : mailFolder.clone();
     }
 
     /**
@@ -227,6 +227,7 @@ public final class FolderCache {
                      */
                     return newFld;
                 }
+                newFld.setLiveAccess(false);
                 mailFolder = folderMap.putIfAbsent(fullName, newFld);
                 if (null == mailFolder) {
                     mailFolder = newFld;
@@ -234,11 +235,14 @@ public final class FolderCache {
             } catch (final MessagingException e) {
                 throw IMAPException.handleMessagingException(e, folderStorage.getImapConfig(), session, accountId, mapFor("fullName", fullName));
             }
+        } else {
+            // Fetched from cache
+            mailFolder.setLiveAccess(false);
         }
         /*
          * Return
          */
-        return (MailFolder) mailFolder.clone();
+        return (mailFolder.clone());
     }
 
     private static boolean isNotCacheable(final String fullName, final Session session, final int accountId, final IMAPStore imapStore) throws MessagingException {
