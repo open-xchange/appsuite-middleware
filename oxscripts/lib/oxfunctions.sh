@@ -53,16 +53,16 @@ JAVA_BIN=
 ox_set_JAVA_BIN() {
     JAVA_BIN=$(which java)
     if [ -z "$JAVA_BIN" ]; then
-	local jb=$JAVA_HOME/bin/java
-	if [ -x $jb ]; then
-	    JAVA_BIN=$jb
-	fi
+        local jb=$JAVA_HOME/bin/java
+        if [ -x $jb ]; then
+            JAVA_BIN=$jb
+        fi
     fi
     if [ -z "$JAVA_BIN" ]; then
-	local jb=$JRE_HOME/bin/java
-	if [ -x $jb ]; then
-	    JAVA_BIN=$jb
-	fi
+        local jb=$JRE_HOME/bin/java
+        if [ -x $jb ]; then
+            JAVA_BIN=$jb
+        fi
     fi
     test -x $JAVA_BIN || die "$0: unable to get path to java vm"
 }
@@ -80,11 +80,11 @@ ox_system_type() {
     elif [ -n "$isucs" ]; then
         ret=$(( $ret | $UCS))
     elif [ -f /etc/SuSE-release ]; then
-	ret=$(( $ret | $SUSE ))
-	ret=$(( $ret | $LSB ))
+        ret=$(( $ret | $SUSE ))
+        ret=$(( $ret | $LSB ))
     elif [ -f /etc/redhat-release ]; then
-	ret=$(( $ret | $REDHAT ))
-	ret=$(( $ret | $LSB ))
+        ret=$(( $ret | $REDHAT ))
+        ret=$(( $ret | $LSB ))
     fi
     return $ret
 }
@@ -106,17 +106,15 @@ ox_start_daemon() {
     ox_system_type
     local type=$?
     if [ $type -eq $DEBIAN -o $type -eq $UCS ]; then
-	start-stop-daemon $runasuser $runasgroup \
-	    --background --start --oknodo --startas $path \
-	    --make-pidfile --pidfile /var/run/${name}.pid
+        start-stop-daemon $runasuser $runasgroup --background --start --oknodo --startas $path --make-pidfile --pidfile /var/run/${name}.pid
     elif [ $(( $type & $LSB )) -eq $LSB ]; then
-	if [ -n "$user" ] && [ "$user" != "root" ]; then
-	    su -s /bin/bash $user -c $path > /dev/null 2>&1 & echo $! > /var/run/${name}.pid
-	else
-	    $path > /dev/null 2>&1 & echo $! > /var/run/${name}.pid
-	fi
+        if [ -n "$user" ] && [ "$user" != "root" ]; then
+            su -s /bin/bash $user -c $path > /dev/null 2>&1 & echo $! > /var/run/${name}.pid
+        else
+            $path > /dev/null 2>&1 & echo $! > /var/run/${name}.pid
+        fi
     else
-	die "Unable to handle unknown system type"
+        die "Unable to handle unknown system type"
     fi
 }
 
@@ -173,10 +171,10 @@ ox_daemon_status() {
     running=$(ps $PID | grep $PID)
     if [ -n "$running" ]; then
         # running
-	return 0
+        return 0
     else
         # not running
-	return 1
+        return 1
     fi
 }
 
@@ -336,15 +334,15 @@ while(<FILE>) {
     chomp;
     my $len=length($search);
     if( substr($_,0,$len) eq $search ) {
-	if( substr($_,$len,$len+1) !~ /^[\s=:]/ ) {
-	   next;
-	}
+        if( substr($_,$len,$len+1) !~ /^[\s=:]/ ) {
+           next;
+        }
         foreach my $dl ( "=", ":" ) {
            my $idx=index($_,$dl);
            if( $idx >= $len ) {
               $val=substr($_,$idx+1);
            }
-	   last if defined($val);
+           last if defined($val);
         }
         last;
     }
@@ -486,11 +484,11 @@ ox_update_config_init() {
     local bdir=$3
 
     test -z "$cini" && die \
-	"ox_update_config_init: missing config.ini argument (arg 1)"
+        "ox_update_config_init: missing config.ini argument (arg 1)"
     test -z "$cinitemplate" && die \
-	"ox_update_config_init: missing config.ini template argument (arg 2)"
+        "ox_update_config_init: missing config.ini template argument (arg 2)"
     test -z "$bdir" && die \
-	"ox_update_config_init: missing bundle.d argument (arg 3)"
+        "ox_update_config_init: missing bundle.d argument (arg 3)"
 
     test -d $bdir || die "$bdir is not a directory"
     test -f $cinitemplate || die "$cinitemplate does not exist"
@@ -500,15 +498,15 @@ ox_update_config_init() {
     local dirbundles=()
     local bpath=
     for bundle in $bdir/*.ini; do
-	read bpath < $bundle
-	dirbundles=( ${dirbundles[*]} "reference\:file\:${bpath}" )
+        read bpath < $bundle
+        dirbundles=( ${dirbundles[*]} "reference\:file\:${bpath}" )
     done
 
     if [ -f $cini ]; then
         # read all bundles listed in config.ini into an array
-	local configbundles=( $(sed -e \
-	    '/^osgi.bundles.*/Is;^osgi.bundles=\(.*\);\1;' \
-	    -n -e 's;,; ;gp' < $cini ) )
+        local configbundles=( $(sed -e \
+            '/^osgi.bundles.*/Is;^osgi.bundles=\(.*\);\1;' \
+            -n -e 's;,; ;gp' < $cini ) )
     fi
 
     cp $cinitemplate $cini
@@ -521,7 +519,7 @@ ox_save_backup() {
 
     local backup_name="${name}.old"
     if [ -e $name ]; then
-	mv $name $backup_name
+        mv $name $backup_name
     fi
 }
 
