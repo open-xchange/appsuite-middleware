@@ -1,3 +1,7 @@
+* 2013-10-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29214: Fire filestorage events upon copy-operation within the same account
+
 * 2013-10-09 - marcus.klein@open-xchange.com
 
  - Fix for bug 29195: Added transitional package for open-xchange-l10n-sv-sv to ensure proper upgrade to open-xchange-l10n-sv-se.
@@ -14,7 +18,7 @@
 
 * 2013-10-09 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 29166: Instruct client to move a folder "/.drive" to quarantine.  
+ - Fix for bug 29166: Instruct client to move a folder "/.drive" to quarantine
 
 * 2013-10-08 - thorben.betten@open-xchange.com
 
@@ -22,7 +26,7 @@
 
 * 2013-10-08 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 28185: Added additional checks when saving distribution list members.  
+ - Fix for bug 28185: Added additional checks when saving distribution list members
 
 * 2013-10-07 - thorben.betten@open-xchange.com
 

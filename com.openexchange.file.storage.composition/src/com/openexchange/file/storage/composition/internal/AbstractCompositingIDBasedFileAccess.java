@@ -71,11 +71,12 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -83,7 +84,6 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
-import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageService;
@@ -119,7 +119,7 @@ import com.openexchange.tx.TransactionException;
  */
 /**
  * {@link AbstractCompositingIDBasedFileAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider {
@@ -144,7 +144,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Sets the registry reference.
-     * 
+     *
      * @param streamHandlerRegistry The registry or <code>null</code>
      */
     public static void setHandlerRegistry(final FileStreamHandlerRegistry streamHandlerRegistry) {
@@ -153,7 +153,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Gets the registry reference.
-     * 
+     *
      * @return The registry or <code>null</code>
      */
     public static FileStreamHandlerRegistry getStreamHandlerRegistry() {
@@ -178,7 +178,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Initializes a new {@link AbstractCompositingIDBasedFileAccess}.
-     * 
+     *
      * @param session The associated session
      */
     protected AbstractCompositingIDBasedFileAccess(final Session session) {
@@ -323,12 +323,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 }
                 return inputStream;
             }
-            
+
         };
-        
+
         return clone;
     }
-    
+
     @Override
     public Document getDocumentAndMetadata(String id, final String version, String clientETag) throws OXException {
         Props properties = LogProperties.getLogProperties();
@@ -378,9 +378,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 }
                 return inputStream;
             }
-            
+
         };
-        
+
         return clone;
     }
 
@@ -682,7 +682,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
         /**
          * Invokes this delegation.
-         * 
+         *
          * @param access The file access
          * @return The resulting object
          * @throws OXException If operation fails
@@ -721,7 +721,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
         /**
          * Invokes this delegation while it is in transaction state
-         * 
+         *
          * @param access The file access
          * @return The resulting object
          * @throws OXException If operation fails
@@ -1049,7 +1049,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 update,
                 newData,
                 fields);
-            return new FileID(source.getService(), source.getAccountId(), destAddress.getFolder(), destAddress.getId()).toUniqueID();
+            FileID newID = new FileID(source.getService(), source.getAccountId(), destAddress.getFolder(), destAddress.getId());
+            postEvent(FileStorageEventHelper.buildCreateEvent(
+                session,
+                newID.getService(),
+                newID.getAccountId(),
+                dest.toUniqueID(),
+                newID.toUniqueID(),
+                null != update ? update.getFileName() : null));
+            return newID.toUniqueID();
         }
 
         if (fileMetadata == null) {
@@ -1230,7 +1238,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Posts specified event
-     * 
+     *
      * @param event The event
      */
     protected void postEvent(final Event event) {
@@ -1280,7 +1288,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Gets the file access.
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @return The file access
@@ -1307,7 +1315,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Gets the folder access.
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @return The folder access
@@ -1363,7 +1371,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Gets the special InfoStore service.
-     * 
+     *
      * @return The special InfoStore service
      * @throws OXException If special InfoStore cannot be returned
      */
