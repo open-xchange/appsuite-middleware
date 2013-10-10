@@ -94,7 +94,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: \"com.openexchange.drive.events\"");
         DriveEventServiceLookup.set(this);
         final DriveEventServiceImpl service = new DriveEventServiceImpl();
         registerService(DriveEventService.class, service);
@@ -147,7 +147,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: \"com.openexchange.drive.events\"");
         DriveEventServiceLookup.set(null);
         super.stopBundle();
     }
