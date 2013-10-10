@@ -67,6 +67,9 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
 
     private static final Log LOG = QueuingIMAPStore.getLog();
 
+    /** The associated queuing IMAP store */
+    protected volatile QueuingIMAPStore store;
+
     /** The queue */
     private final CountingQueue queue;
 
@@ -83,16 +86,11 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
      * Constructor.
      * <p>
      * Opens a connection to the given host at given port.
-     *
-     * @param host The host to connect to
-     * @param port The port number to connect to
-     * @param props The properties object used by this protocol
-     * @param logger The logger
-     * @param q
      */
-    public QueuedIMAPProtocol(final String name, final String host, final int port, final Properties props, final boolean isSSL, final MailLogger logger, final CountingQueue q) throws IOException, ProtocolException {
+    public QueuedIMAPProtocol(final String name, final String host, final int port, final Properties props, final boolean isSSL, final MailLogger logger, final CountingQueue q, final QueuingIMAPStore store) throws IOException, ProtocolException {
         super(name, host, port, props, isSSL, logger);
         this.queue = q;
+        this.store = store;
     }
 
     @Override
@@ -100,6 +98,18 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
         final long thisVal = this.stamp;
         final long anotherVal = other.stamp;
         return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+    }
+
+
+    /**
+     * Sets the associated store
+     *
+     * @param store The store
+     * @return This protocol with store applied
+     */
+    public QueuedIMAPProtocol setStore(final QueuingIMAPStore store) {
+        this.store = store;
+        return this;
     }
 
     /**
@@ -137,7 +147,7 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
             if (null != queue) {
                 queue.decrementNewCount();
                 decrementPerformed = true;
-                queue.removeTrackedThread();
+                queue.removeTrackingInfo(this);
                 if (logger.isLoggable(Level.FINE) || LOG.isDebugEnabled()) {
                     final String msg = "QueuedIMAPProtocol.disconnect(): Decremented new-count for " + toString() + "\n\t(total=" + queue.getNewCount() + ")";
                     logger.fine(msg);
@@ -160,7 +170,7 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
                 LOG.debug(msg);
             }
         }
-        queue.removeTrackedThread();
+        queue.removeTrackingInfo(this);
     }
 
     /**
