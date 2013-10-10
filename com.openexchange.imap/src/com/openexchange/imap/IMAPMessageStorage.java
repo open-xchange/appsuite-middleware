@@ -1315,7 +1315,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final MailFields mfs = new MailFields(mailFields);
                 if (MailSortField.RECEIVED_DATE.equals(effectiveSortField) && onlyLowCostFields(mfs)) {
                     final MailMessage[] mailMessages = performLowCostFetch(fullName, mfs, order, indexRange);
-                    imapFolderStorage.updateCacheIfDiffer(fullName, mailMessages.length);
+                    imapFolderStorage.updateCacheIfDiffer(imapFolder, mailMessages.length);
                     return mailMessages;
                 }
                 /*

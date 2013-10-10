@@ -279,16 +279,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     /**
      * Updates the cached IMAP folder if message has changed.
      *
-     * @param fullName The full name
+     * @param imapFolder The IMAP folder
      * @param total The message count
      * @return <code>true</code> if updated; otherwise <code>false</code>
      */
-    public boolean updateCacheIfDiffer(final String fullName, final int total) {
+    public boolean updateCacheIfDiffer(final IMAPFolder imapFolder, final int total) {
+        final String fullName = imapFolder.getFullName();
         final MailFolder mailFolder = FolderCache.optCachedFolder(fullName, this);
         if (null != mailFolder) {
             try {
-                if (mailFolder.getMessageCount() != total) {
-                    FolderCache.updateCachedFolder(fullName, this);
+                final int cachedTotal = mailFolder.getMessageCount();
+                if (cachedTotal >= 0 && cachedTotal != total) {
+                    FolderCache.updateCachedFolder(fullName, this, imapFolder);
                     return true;
                 }
             } catch (final OXException e) {
