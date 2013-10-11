@@ -165,8 +165,12 @@ public class InfostorePublicationServlet extends HttpServlet {
             }
 
         } catch (final Exception x) {
-            resp.getWriter().print(x.toString());
             LOG.error(x.getMessage(), x);
+            try {
+                resp.getWriter().print(x.toString());
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 
