@@ -113,6 +113,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
@@ -144,6 +145,8 @@ public final class MimeMessageConverter {
         MailField.BODY,
         MailField.FULL,
         MailField.ACCOUNT_NAME));
+
+    private static final String CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
 
     /**
      * {@link ExistenceChecker} - A checker to ensure existence of a certain field.
@@ -528,6 +531,73 @@ public final class MimeMessageConverter {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the multipart from passed message.
+     *
+     * @param message The message
+     * @return The appropriate multipart
+     * @throws OXException If content cannot be presented as a multipart
+     */
+    public static Multipart multipartFor(final MimeMessage message) throws OXException {
+        return multipartFor(message, getContentType(message));
+    }
+
+    /**
+     * Gets the multipart from passed message.
+     *
+     * @param message The message
+     * @param contentType The message's Content-Type
+     * @return The appropriate multipart
+     * @throws OXException If content cannot be presented as a multipart
+     */
+    public static Multipart multipartFor(final MimeMessage message, final ContentType contentType) throws OXException {
+        return multipartFor(message, contentType, true);
+    }
+
+    private static Multipart multipartFor(final MimeMessage message, final ContentType contentType, final boolean reparse) throws OXException {
+        try {
+            return multipartFor(message.getContent(), contentType);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final javax.mail.internet.ParseException e) {
+            if (!reparse) {
+                throw MimeMailException.handleMessagingException(e);
+            }
+            // Sanitize parameterized headers
+            try {
+                final String sContentType = message.getHeader(CONTENT_TYPE, null);
+                message.setHeader(CONTENT_TYPE, new ContentType(sContentType).toString(true));
+                MimeMessageConverter.saveChanges(message);
+            } catch (final Exception x) {
+                // Content-Type cannot be sanitized
+                com.openexchange.log.Log.loggerFor(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
+                throw MimeMailException.handleMessagingException(e);
+            }
+            return multipartFor(message, contentType, false);
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Gets the Content-Type for given part.
+     *
+     * @param part The part
+     * @return The parsed Content-Type
+     * @throws OXException If parsing fails
+     */
+    public static ContentType getContentType(final Part part) throws OXException {
+        try {
+            final String[] tmp = part.getHeader(CONTENT_TYPE);
+            return (tmp != null) && (tmp.length > 0) ? new ContentType(tmp[0]) : new ContentType(MimeTypes.MIME_DEFAULT);
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
         }
     }
 
@@ -1511,7 +1581,7 @@ public final class MimeMessageConverter {
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
                 ContentType ct = null;
                 try {
-                    final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+                    final String[] tmp = msg.getHeader(CONTENT_TYPE);
                     if (tmp != null && tmp.length > 0) {
                         ct = new ContentType(tmp[0]);
                     } else {
@@ -1885,7 +1955,7 @@ public final class MimeMessageConverter {
             mail.addCc(getAddressHeader(MessageHeaders.HDR_CC, mail));
             mail.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, mail));
             {
-                final String[] tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+                final String[] tmp = mail.getHeader(CONTENT_TYPE);
                 if ((tmp != null) && (tmp.length > 0)) {
                     mail.setContentType(tmp[0]);
                 } else {
@@ -2201,7 +2271,7 @@ public final class MimeMessageConverter {
              */
             setHeaders(part, mailPart);
             {
-                final String[] contentTypeHdr = mailPart.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+                final String[] contentTypeHdr = mailPart.getHeader(CONTENT_TYPE);
                 if (null != contentTypeHdr && contentTypeHdr.length > 0) {
                     mailPart.setContentType(unfold(contentTypeHdr[0]));
                 }

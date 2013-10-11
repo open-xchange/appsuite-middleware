@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.multipartFor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -220,7 +221,7 @@ public final class MimeStructureFixer {
             final AtomicReference<MimeMultipart> artificialRoot = new AtomicReference<MimeMultipart>();
             final LinkedList<MimeMultipart> mpStack = new LinkedList<MimeMultipart>();
             mpStack.add(newMultipart);
-            handlePart((Multipart) mimeMessage.getContent(), new AtomicReference<MimeMultipart>(newMultipart), artificialRoot, mpStack);
+            handlePart(multipartFor(mimeMessage, contentType), new AtomicReference<MimeMultipart>(newMultipart), artificialRoot, mpStack);
             // Check if a new root has been set
             final MimeMultipart artificialRootMimeMultipart = artificialRoot.get();
             if (null == artificialRootMimeMultipart) {

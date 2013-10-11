@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.multipartFor;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicReference;
@@ -180,7 +181,7 @@ public final class MimeSmilFixer {
             final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
             // Possible root multipart for unexpectedly found file attachments
             final AtomicReference<MimeMultipart> multipartRef = new AtomicReference<MimeMultipart>(new MimeMultipart(contentType.getSubType()));
-            handlePart((Multipart) mimeMessage.getContent(), multipartRef);
+            handlePart(multipartFor(mimeMessage, contentType), multipartRef);
             // Check if a new root has been set
             MessageUtility.setContent(multipartRef.get(), mimeMessage);
             // mimeMessage.setContent(newMultipart);
