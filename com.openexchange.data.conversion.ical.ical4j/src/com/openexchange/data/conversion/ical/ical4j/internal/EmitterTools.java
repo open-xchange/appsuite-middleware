@@ -210,7 +210,7 @@ public final class EmitterTools {
         try {
             userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(userId, ctx, con);
         } finally {
-            Database.back(ctx, true, con);
+            Database.backAfterReading(ctx, con);
         }
 
         if (null != userSettingMail && "defaultSenderAddress".equalsIgnoreCase(NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail"))) {
