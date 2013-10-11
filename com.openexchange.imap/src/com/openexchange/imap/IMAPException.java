@@ -1151,12 +1151,14 @@ public final class IMAPException extends OXException {
      * @return An appropriate instance of {@link OXException}
      */
     public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final Folder folder, final int accountId, final Map<String, Object> optProps) {
+        // Check for com.sun.mail.iap.ConnectQuotaExceededException
+        if (e.getNextException() instanceof ConnectQuotaExceededException) {
+            final String server = null == mailConfig ? "<unknown>" : mailConfig.getServer();
+            final String login = null == mailConfig ? "<unknown>" : mailConfig.getLogin();
+            return IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, e.getNextException(), server, login);
+        }
+        // Check for session
         if (null == session) {
-            if (e.getNextException() instanceof ConnectQuotaExceededException) {
-                final String server = null == mailConfig ? "<unknown>" : mailConfig.getServer();
-                final String login = null == mailConfig ? "<unknown>" : mailConfig.getLogin();
-                return IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, e.getNextException(), server, login);
-            }
             // Delegate to MIME handling
             return MimeMailException.handleMessagingException(e, mailConfig, session, folder);
         }
@@ -1190,11 +1192,6 @@ public final class IMAPException extends OXException {
                 }
                 return MailExceptionCode.FOLDER_NOT_FOUND.create(e, fullName);
             }
-        }
-        if (e.getNextException() instanceof ConnectQuotaExceededException) {
-            final String server = null == mailConfig ? "<unknown>" : mailConfig.getServer();
-            final String login = null == mailConfig ? "<unknown>" : mailConfig.getLogin();
-            return IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, e.getNextException(), server, login);
         }
         // Delegate to MIME handling
         return MimeMailException.handleMessagingException(e, mailConfig, session, folder);
