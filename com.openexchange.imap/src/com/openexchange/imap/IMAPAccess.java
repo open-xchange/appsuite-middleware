@@ -701,8 +701,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.clientIp = clientIp;
             maxCount = getMaxCount();
             try {
-                imapSession.getProperties().put("mail.imap.imapAccess", this);
                 imapStore = connectIMAPStore(maxCount);
+                imapStore.getServiceSession().getProperties().put("mail.imap.imapAccess", this);
                 if (DEBUG) {
                     final String lineSeparator = System.getProperty("line.separator");
                     final StringAllocator sb = new StringAllocator(1024);
