@@ -75,12 +75,12 @@ public class IndexFolderManager {
 
     public static boolean isIndexed(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable(contextId);
+        Connection con = dbService.getReadOnly(contextId);
         try {
             return isIndexed(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
-                dbService.backWritable(contextId, con);
+                dbService.backReadOnly(contextId, con);
             }
         }
     }
@@ -104,7 +104,7 @@ public class IndexFolderManager {
             } else {
                 isIndexed = false;
                 if (folder != null) {
-                    createFolderEntry(con, contextId, userId, module, account, folder);
+                    createFolderEntry(contextId, userId, module, account, folder);
                 }
             }
 
@@ -151,12 +151,12 @@ public class IndexFolderManager {
 
     public static boolean isLocked(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable(contextId);
+        Connection con = dbService.getReadOnly(contextId);
         try {
             return isLocked(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
-                dbService.backWritableAfterReading(contextId, con);
+                dbService.backReadOnly(contextId, con);
             }
         }
 
@@ -180,7 +180,7 @@ public class IndexFolderManager {
                 isLocked = rs.getBoolean(1);
             } else {
                 isLocked = false;
-                createFolderEntry(con, contextId, userId, module, account, folder);
+                createFolderEntry(contextId, userId, module, account, folder);
             }
 
             return isLocked;
@@ -291,6 +291,7 @@ public class IndexFolderManager {
                     return false;
                 }
             } else {
+                con.commit();
                 throw IndexExceptionCodes.MISSING_FOLDER_ENTRY.create(folder, account);
             }
         } catch (SQLException e) {
@@ -368,12 +369,12 @@ public class IndexFolderManager {
 
     public static long getTimestamp(int contextId, int userId, int module, String account, String folder) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable(contextId);
+        Connection con = dbService.getReadOnly(contextId);
         try {
             return getTimestamp(con, contextId, userId, module, account, folder);
         } finally {
             if (con != null) {
-                dbService.backWritableAfterReading(contextId, con);
+                dbService.backReadOnly(contextId, con);
             }
         }
     }
@@ -395,7 +396,7 @@ public class IndexFolderManager {
             if (rs.next()) {
                 timestamp = rs.getLong(1);
             } else {
-                createFolderEntry(con, contextId, userId, module, account, folder);
+                createFolderEntry(contextId, userId, module, account, folder);
                 return getTimestamp(con, contextId, userId, module, account, folder);
             }
 
