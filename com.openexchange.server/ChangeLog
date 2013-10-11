@@ -9,6 +9,7 @@
  - Fix for bug 29233: Push read-write connection back into pool while signaling that it has been used for reading only
  - Fix for bug 29230: Handle possible "ParsingFeedException" when reading RSS feed's XML content
  - Fix for bug 29246: Check MailFolder for not null when fetching from cache
+ - Fix for bug 29248: Recover from possibly mail-parsed multipart content
 
 * 2013-10-10 - tobias.friedrich@open-xchange.com
 
