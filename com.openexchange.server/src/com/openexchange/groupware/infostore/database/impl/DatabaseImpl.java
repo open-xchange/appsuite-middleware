@@ -457,7 +457,6 @@ public class DatabaseImpl extends DBService {
         } finally {
             close(stmt, result);
             finishDBTransaction();
-            releaseWriteConnection(ctx, writecon);
         }
         return retval;
     }
@@ -515,7 +514,6 @@ public class DatabaseImpl extends DBService {
         } finally {
             close(stmt, result);
             finishDBTransaction();
-            releaseWriteConnection(ctx, writecon);
         }
         return retval;
     }
@@ -604,7 +602,6 @@ public class DatabaseImpl extends DBService {
         } finally {
             close(stmt, null);
             finishDBTransaction();
-            releaseWriteConnection(ctx, writeCon);
         }
         return retval;
     }
