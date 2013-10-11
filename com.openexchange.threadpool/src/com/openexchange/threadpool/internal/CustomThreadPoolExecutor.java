@@ -1598,12 +1598,17 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 activeTaskWatcher.removeTask(customFutureTask.getNumber());
             }
             customFutureTask.getTask().afterExecute(throwable);
+        }
+        if (Thread.currentThread() instanceof CustomThread) {
+            CustomThread thread = (CustomThread) Thread.currentThread();
             /*
              * Restore original name
              */
-            ((CustomThread) Thread.currentThread()).restoreName();
-        } else if (r instanceof ScheduledFutureTask<?>) {
-            ((CustomThread) Thread.currentThread()).restoreName();
+            thread.restoreName();
+            ClassLoader otherClassLoader = thread.restoreClassLoader();
+            if (null != otherClassLoader) {
+                LOG.error("Detected a changed class loader on returned thread.", thread.getClassLoaderTrace());
+            }
         }
         activeCount.decrementAndGet();
     }
