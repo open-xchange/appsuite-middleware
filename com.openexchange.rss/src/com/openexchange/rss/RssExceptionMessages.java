@@ -49,26 +49,30 @@
 
 package com.openexchange.rss;
 
-import java.util.Comparator;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link FeedByDateSorter} - The comparator for {@code RssResult}s.
+ * {@link RssExceptionMessages} - Exception messages for RSS module that needs to be translated.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FeedByDateSorter implements Comparator<RssResult> {
+public final class RssExceptionMessages implements LocalizableStrings {
 
-    private final String order;
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
-    public FeedByDateSorter(String order) {
-        this.order = order;
-    }
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
-    @Override
-    public int compare(RssResult r1, RssResult r2) {
-        int res = r1.getDate().compareTo(r2.getDate());
-        if (order.equalsIgnoreCase("DESC")) {
-            res *= -1;
-        }
-        return res;
+    // Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
+    public static final String INVALID_RSS_MSG = "Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s";
+
+    /**
+     * Initializes a new {@link RssExceptionMessages}.
+     */
+    private RssExceptionMessages() {
+        super();
     }
 
 }
