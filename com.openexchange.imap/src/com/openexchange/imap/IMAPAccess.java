@@ -51,7 +51,6 @@ package com.openexchange.imap;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
@@ -393,6 +392,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             final IMAPStore imapStore = this.imapStore;
             if (imapStore != null) {
+                removeImapAccessFrom(imapStore);
                 if (useIMAPStoreCache()) {
                     final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
                     if (null == imapStoreCache) {
@@ -403,7 +403,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 } else {
                     closeSafely(imapStore);
                 }
-                // Drop in associated IMAPConfig instance
+                // Drop associated IMAPConfig instance
                 final IMAPConfig ic = getIMAPConfig();
                 if (null != ic) {
                     ic.dropImapStore();
@@ -1393,7 +1393,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets the {@link IMAPAccess} instance associated with given IMAP store.
-     * 
+     *
      * @param store The IMAP store
      * @return The associated {@link IMAPAccess} instance or <code>null</code>
      */
@@ -1402,6 +1402,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return null;
         }
         return (IMAPAccess) store.getServiceSession().getProperties().get("mail.imap.imapAccess");
+    }
+
+    private static void removeImapAccessFrom(final IMAPStore store) {
+        if (null != store) {
+            store.getServiceSession().getProperties().remove("mail.imap.imapAccess");
+        }
     }
 
 }

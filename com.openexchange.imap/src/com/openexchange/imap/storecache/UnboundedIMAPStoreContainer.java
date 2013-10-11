@@ -118,8 +118,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             }
         } else {
             imapStore = imapStoreWrapper.imapStore;
-            // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" +
-            // imapStore.hashCode());
+            // Should we set properties from passed session?
+            // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
+            // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
             if (DEBUG) {
                 LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
             }

@@ -648,6 +648,15 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Sets the client IP address to propagate
+     *
+     * @param propagateClientIpAddress The client IP address to propagate or <code>null</code> to discard
+     */
+    public void setPropagateClientIpAddress(String propagateClientIpAddress) {
+        this.propagateClientIpAddress = propagateClientIpAddress;
+    }
+
+    /**
      * Implementation of protocolConnect().  Will create a connection
      * to the server and authenticate the user using the mechanisms
      * specified by various properties. <p>
