@@ -62,7 +62,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.classloader.osgi.DynamicClassLoaderActivator;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
@@ -87,7 +86,6 @@ public final class GlobalActivator implements BundleActivator {
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
     private volatile ServiceRegistration<StringParser> parserRegistration;
     private volatile List<ServiceTracker<?,?>> trackers;
-    private volatile DynamicClassLoaderActivator dynamicClassLoaderActivator;
 
     /**
      * Initializes a new {@link GlobalActivator}
@@ -127,10 +125,6 @@ public final class GlobalActivator implements BundleActivator {
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
-
-            final DynamicClassLoaderActivator dynamicClassLoaderActivator = new DynamicClassLoaderActivator();
-            dynamicClassLoaderActivator.start(context);
-            this.dynamicClassLoaderActivator = dynamicClassLoaderActivator;
 
             LOG.info("Global bundle successfully started");
         } catch (final Exception e) {
@@ -220,11 +214,6 @@ public final class GlobalActivator implements BundleActivator {
     @Override
     public void stop(final BundleContext context) throws Exception {
         try {
-            final DynamicClassLoaderActivator dynamicClassLoaderActivator = this.dynamicClassLoaderActivator;
-            if (null != dynamicClassLoaderActivator) {
-                dynamicClassLoaderActivator.stop(context);
-                this.dynamicClassLoaderActivator = null;
-            }
             final List<ServiceTracker<?, ?>> trackers = this.trackers;
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
