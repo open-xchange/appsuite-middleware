@@ -331,7 +331,7 @@ public final class FolderCache {
         final FolderMap folderMap = entry.getValue();
         if (null != folderMap) {
             MailFolder mailFolder = folderMap.get(fullName);
-            if (mailFolder.getUnreadMessageCount() >= 0) {
+            if (null != mailFolder && mailFolder.getUnreadMessageCount() >= 0) {
                 synchronized (folderMap) {
                     mailFolder = folderMap.get(fullName);
                     if (null != mailFolder) {
