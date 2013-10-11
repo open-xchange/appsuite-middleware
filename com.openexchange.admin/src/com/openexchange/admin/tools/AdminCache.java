@@ -393,6 +393,13 @@ public class AdminCache {
         return this.pool.pushConnectionForContext(context_id, con);
     }
 
+    public boolean pushConnectionForContextAfterReading(final int context_id, final Connection con) throws PoolException {
+        if(con == null) {
+            return true;
+        }
+        return this.pool.pushConnectionForContextAfterReading(context_id, con);
+    }
+
     public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
         return this.pool.pushConnectionForContextNoTimeout(contextId, con);
     }
