@@ -62,7 +62,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
     private volatile String appendix;
     private volatile boolean changed;
     private volatile ClassLoader origClassLoader = null;
-    private volatile Throwable classLoaderTrace;
+    private volatile Throwable classLoaderTrace = null;
 
     /**
      * Initializes a new {@link CustomThread}.
@@ -195,9 +195,14 @@ public final class CustomThread extends Thread implements ThreadRenamer {
     @Override
     public void setContextClassLoader(ClassLoader cl) {
         ClassLoader tmp = getContextClassLoader();
-        if (!origClassLoader.equals(cl)) {
+        if (null == origClassLoader && !tmp.equals(cl)) {
+            // First putting another classloader into the threads context classloader.
             origClassLoader = tmp;
             classLoaderTrace = new Exception(cl.getClass().getName());
+        } else if (null != origClassLoader && origClassLoader.equals(cl)) {
+            // Original classloader is restored. So somebody temporarily changed context classloader, which is allowed.
+            origClassLoader = null;
+            classLoaderTrace = null;
         }
         super.setContextClassLoader(cl);
     }
@@ -208,6 +213,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
             retval = getContextClassLoader();
             super.setContextClassLoader(origClassLoader);
             origClassLoader = null;
+            classLoaderTrace = null;
         }
         return retval;
     }
