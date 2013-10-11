@@ -54,6 +54,7 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.openexchange.exception.Category;
@@ -503,8 +504,25 @@ public enum AwsS3ExceptionCode implements OXExceptionCode {
      * @return The wrapping error code
      */
     public static OXException wrap(final AmazonClientException e) {
+        return wrap(e, null);
+    }
+
+    /**
+     * Wraps given Amazon S3 exception with an appropriate error code.
+     *
+     * @param e The Amazon S3 exception
+     * @param key The key that was accessed by the previous operation
+     * @return The wrapping error code
+     */
+    public static OXException wrap(final AmazonClientException e, String key) {
         if (AmazonServiceException.class.isInstance(e)) {
             final AmazonServiceException serviceError = (AmazonServiceException) e;
+            /*
+             * Map to appropriate FileStorageCodes if possible
+             */
+            if (HttpServletResponse.SC_NOT_FOUND == serviceError.getStatusCode()) {
+                return FileStorageCodes.FILE_NOT_FOUND.create(e, key);
+            }
             // Get the error code
             final String errorCode = serviceError.getErrorCode();
             final AwsS3ExceptionCode code = AwsS3ExceptionCode.getCodeFor(errorCode);

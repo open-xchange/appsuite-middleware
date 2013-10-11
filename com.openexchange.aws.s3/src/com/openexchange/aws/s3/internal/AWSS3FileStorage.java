@@ -66,7 +66,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
@@ -203,7 +202,7 @@ public class AWSS3FileStorage implements FileStorage {
         try {
             return amazonS3.getObject(bucketName, name).getObjectContent();
         } catch (AmazonClientException e) {
-            throw wrap(e);
+            throw wrap(e, name);
         }
     }
 
@@ -242,7 +241,7 @@ public class AWSS3FileStorage implements FileStorage {
             amazonS3.deleteObject(bucketName, identifier);
             return true;
         } catch (AmazonClientException e) {
-            throw wrap(e);
+            throw wrap(e, identifier);
         }
     }
 
@@ -363,7 +362,7 @@ public class AWSS3FileStorage implements FileStorage {
             amazonS3.deleteObject(bucketName, tempKey);
             return getMetadata(name).getContentLength();
         } catch (AmazonClientException e) {
-            throw wrap(e);
+            throw wrap(e, name);
         } finally {
             if (false == completed) {
                 try {
@@ -400,7 +399,7 @@ public class AWSS3FileStorage implements FileStorage {
                 Streams.close(inputStream);
             }
         } catch (AmazonClientException e) {
-            throw wrap(e);
+            throw wrap(e, name);
         } finally {
             try {
                 amazonS3.deleteObject(bucketName, tempKey);
@@ -417,7 +416,7 @@ public class AWSS3FileStorage implements FileStorage {
         try {
             return amazonS3.getObject(request).getObjectContent();
         } catch (AmazonClientException e) {
-            throw wrap(e);
+            throw wrap(e, name);
         }
     }
 
@@ -432,7 +431,7 @@ public class AWSS3FileStorage implements FileStorage {
         try {
             return amazonS3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, key)).getUploadId();
         } catch (AmazonClientException e) {
-            throw wrap(e);
+            throw wrap(e, key);
         }
     }
 
@@ -446,13 +445,8 @@ public class AWSS3FileStorage implements FileStorage {
     private ObjectMetadata getMetadata(String key) throws OXException {
         try {
             return amazonS3.getObjectMetadata(bucketName, key);
-        } catch (AmazonServiceException e) {
-            if ("NoSuchKey".equals(e.getErrorCode())) {
-                throw FileStorageCodes.FILE_NOT_FOUND.create(e, key);
-            }
-            throw wrap(e);
         } catch (AmazonClientException e) {
-            throw wrap(e);
+            throw wrap(e, key);
         }
     }
 
