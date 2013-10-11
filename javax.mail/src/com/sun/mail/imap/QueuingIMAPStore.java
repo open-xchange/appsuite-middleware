@@ -666,7 +666,7 @@ public class QueuingIMAPStore extends IMAPStore {
                         // None available and not allowed to open further connections
                         if (stores.containsKey(store)) {
                             // Might wait for itself to release a connection -- outta here!
-                            // TODO: throw new com.sun.mail.iap.ConnectQuotaExceededException();
+                            throw new com.sun.mail.iap.ConnectQuotaExceededException("No connection available and not allowed to open further ones");
                         }
                         // Await until a connection is released
                         notEmpty.await();
