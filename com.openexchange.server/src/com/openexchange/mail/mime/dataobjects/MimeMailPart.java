@@ -61,6 +61,7 @@ import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -195,8 +196,10 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     /**
      * Constructor - Only applies specified part, but does not set any attributes.
+     *
+     * @throws OXException If setting part as content fails
      */
-    public MimeMailPart(final Part part) {
+    public MimeMailPart(final Part part) throws OXException {
         super();
         applyPart(part);
     }
@@ -241,14 +244,15 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * Sets this mail part's content.
      *
      * @param part The part
+     * @throws OXException If part cannot be applied to this MIME mail part
      */
-    public void setContent(final Part part) {
+    public void setContent(final Part part) throws OXException {
         applyPart(part);
     }
 
     private static final String MULTIPART = "multipart/";
 
-    private void applyPart(final Part part) {
+    private void applyPart(final Part part) throws OXException {
         this.part = part;
         if (null == part) {
             isMulti = false;
@@ -267,6 +271,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 tmp = getContentType().startsWith(MULTIPART);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
+            } catch (final MessageRemovedException e) {
+                // Message has been removed in the meantime
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
             } catch (final MessagingException e) {
                 LOG.error(e.getMessage(), e);
             }

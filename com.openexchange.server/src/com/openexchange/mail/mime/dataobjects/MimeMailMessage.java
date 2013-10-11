@@ -89,8 +89,10 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
 
     /**
      * Constructor - Only applies specified message, but does not set any attributes
+     *
+     * @throws OXException If setting message as content fails
      */
-    public MimeMailMessage(final MimeMessage msg) {
+    public MimeMailMessage(final MimeMessage msg) throws OXException {
         super();
         // TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
         mailPart = new MimeMailPart(msg);
@@ -143,8 +145,9 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      * Through providing a <code>null</code> reference the body is cleared from this mail.
      *
      * @param msg The MIME message or <code>null</code> to clear any body references
+     * @throws OXException If setting message as content fails
      */
-    public void setContent(final MimeMessage msg) {
+    public void setContent(final MimeMessage msg) throws OXException {
         // TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
         mailPart = msg == null ? new MimeMailPart((Part) null) : new MimeMailPart(msg);
     }
