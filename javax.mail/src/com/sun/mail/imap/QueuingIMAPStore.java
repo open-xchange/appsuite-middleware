@@ -58,7 +58,6 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -158,10 +157,10 @@ public class QueuingIMAPStore extends IMAPStore {
      * Shuts-down the executor.
      */
     public static void shutdown() {
-        final ScheduledFuture<?> tmp = watcherFuture;
+        final QueuedIMAPProtocolWatcher tmp = watcher;
         if (null != tmp) {
-            tmp.cancel(false);
-            watcherFuture = null;
+            tmp.shutdown();
+            watcher = null;
         }
         final ScheduledThreadPoolExecutor exec = executor;
         if (null != exec) {
@@ -172,56 +171,20 @@ public class QueuingIMAPStore extends IMAPStore {
 
     // ----------------------------------------------------------------------------------------------------------------------------- //
 
-    private static volatile ScheduledFuture<?> watcherFuture;
+    private static QueuedIMAPProtocolWatcher watcher;
 
     private static void initWatcher() {
-        ScheduledFuture<?> tmp = watcherFuture;
+        QueuedIMAPProtocolWatcher tmp = watcher;
         if (null == tmp) {
             synchronized (QueuingIMAPStore.class) {
-                tmp = watcherFuture;
+                tmp = watcher;
                 if (null == tmp) {
-                    final Runnable t = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            final long minStamp = System.currentTimeMillis() - 60000; // longer than a minute
-                            final String lineSeparator = System.getProperty("line.separator");
-                            final ConcurrentMap<URLName, CountingQueue> qs = queues;
-                            for (final QueuingIMAPStore.CountingQueue q : qs.values()) {
-                                // Examine CountingQueue's tracked threads
-                                final ConcurrentMap<Thread, ThreadTrace> trackedThreads = q.trackedThreads();
-                                if (null != trackedThreads) {
-                                    // Iterate threads
-                                    for (final Entry<Thread, QueuingIMAPStore.ThreadTrace> entry : trackedThreads.entrySet()) {
-                                        final QueuingIMAPStore.ThreadTrace trace = entry.getValue();
-                                        if (trace.stamp < minStamp) {
-                                            final long dur = System.currentTimeMillis() - trace.stamp;
-                                            final String msg = formatThread(entry.getKey(), trace.protocol, q, dur, lineSeparator);
-                                            q.getLogger().fine(msg);
-                                            LOG.debug(msg);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    };
-                    tmp = executor().scheduleAtFixedRate(t, 10, 10, TimeUnit.SECONDS);
-                    watcherFuture = tmp;
+                    tmp = new QueuedIMAPProtocolWatcher();
+                    tmp.initWatcher(queues, executor());
+                    watcher = tmp;
                 }
             }
         }
-    }
-
-    static String formatThread(final Thread thread, final QueuedIMAPProtocol protocol, final QueuingIMAPStore.CountingQueue q, final long dur, final String lineSeparator) {
-        final StringBuilder sBuilder = new StringBuilder(8192);
-        sBuilder.append("Thread \"").append(thread.getName()).append("\" holds ").append(protocol).append(" for ").append(dur).append("msec.").append(lineSeparator);
-        sBuilder.append('(').append(q.getNewCount()).append(" in use for queue ").append(q.hashCode()).append(')').append(lineSeparator);
-        final StackTraceElement[] trace = thread.getStackTrace();
-        sBuilder.append("    at ").append(trace[0]);
-        for (int i = 1; i < trace.length; i++) {
-            sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
-        }
-        return sBuilder.toString();
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------- //
@@ -232,10 +195,10 @@ public class QueuingIMAPStore extends IMAPStore {
     private static CountingQueue initQueue(final URLName url, final int permits, final MailLogger logger) {
         CountingQueue q = queues.get(url);
         if (null == q) {
+            // Initialize watcher -- if its log level is set to DEBUG/FINE
+            initWatcher();
+            // Go ahead
             final boolean debug = logger.isLoggable(Level.FINE) || LOG.isDebugEnabled();
-            if (debug) {
-                initWatcher();
-            }
             final CountingQueue ns = new CountingQueue(permits, logger, debug);
             q = queues.putIfAbsent(url, ns);
             if (null == q) {
@@ -647,6 +610,8 @@ public class QueuingIMAPStore extends IMAPStore {
 
         /**
          * Takes or increments the new count. Waiting for available elements if none in queue and count is exceeded.
+         * <p>
+         * Waits for default time of 5 seconds.
          *
          * @return Either <code>null</code> to signal a new instance is allowed to be created; or a connected {@link QueuedIMAPProtocol} instance fetched from queue
          * @throws InterruptedException If interrupted while waiting
@@ -654,22 +619,35 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws DeprecatedQueueException If queue has been deprecated in the meantime
          */
         public QueuedIMAPProtocol takeOrIncrement(final QueuingIMAPStore store) throws InterruptedException, ProtocolException {
+            return takeOrIncrement(store, 5, TimeUnit.SECONDS);
+        }
+
+        /**
+         * Takes or increments the new count. Waiting for available elements if none in queue and count is exceeded.
+         *
+         * @return Either <code>null</code> to signal a new instance is allowed to be created; or a connected {@link QueuedIMAPProtocol} instance fetched from queue
+         * @throws InterruptedException If interrupted while waiting
+         * @throws ConnectQuotaExceededException If no condition was met to await or create a connection
+         * @throws DeprecatedQueueException If queue has been deprecated in the meantime
+         */
+        public QueuedIMAPProtocol takeOrIncrement(final QueuingIMAPStore store, final long timeout, final TimeUnit unit) throws InterruptedException, ProtocolException {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
                 if (deprecated) {
                     throw new DeprecatedQueueException("Queue is deprecated");
                 }
+                long nanos = unit.toNanos(timeout);
                 QueuedIMAPProtocol x;
                 try {
-                    while (((x = q.poll()) == null) && (newCount >= max)) {
+                    while (((x = q.poll()) == null) && (newCount >= max) && (nanos > 0)) {
                         // None available and not allowed to open further connections
                         if (stores.containsKey(store)) {
                             // Might wait for itself to release a connection -- outta here!
                             throw new com.sun.mail.iap.ConnectQuotaExceededException("No connection available and not allowed to open further ones");
                         }
                         // Await until a connection is released
-                        notEmpty.await();
+                        nanos = notEmpty.awaitNanos(nanos);
                     }
                 } catch (final InterruptedException ie) {
                     notEmpty.signal(); // propagate to non-interrupted thread
@@ -678,6 +656,10 @@ public class QueuingIMAPStore extends IMAPStore {
                 // Not-null polled one
                 if (null != x) {
                     return x;
+                }
+                // Wait time exceeded
+                if ((nanos <= 0) || (newCount >= max)) {
+                    throw new com.sun.mail.iap.ConnectQuotaExceededException("No connection available and not allowed to open further ones");
                 }
                 // Increment new count
                 newCount++;
@@ -697,13 +679,13 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws DeprecatedQueueException If queue has been deprecated in the meantime
          */
         public QueuedIMAPProtocol takeOrIncrement(final long timeout, final TimeUnit unit, final Callback<QueuedIMAPProtocol> callback) throws InterruptedException, IOException, ProtocolException {
-            long nanos = unit.toNanos(timeout);
             final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
                 if (deprecated) {
                     throw new DeprecatedQueueException("Queue is deprecated");
                 }
+                long nanos = unit.toNanos(timeout);
                 QueuedIMAPProtocol x;
                 try {
                     while (((x = q.poll()) == null) && (newCount >= max) && (nanos > 0)) {
