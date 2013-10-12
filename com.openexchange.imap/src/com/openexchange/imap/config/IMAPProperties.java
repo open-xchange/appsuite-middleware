@@ -134,11 +134,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean allowFolderCaches;
 
+    private String sContainerType;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
     private IMAPProperties() {
         super();
+        sContainerType = "boundary-aware";
         enableTls = true;
         maxNumConnection = -1;
         newACLExtMap = new NonBlockingHashMap<String, Boolean>();
@@ -369,6 +372,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             }
         }
 
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.storeContainerType", "boundary-aware").trim();
+            sContainerType = tmp;
+            logBuilder.append("\tStore container type: ").append(sContainerType).append('\n');
+        }
+
         spamHandlerName = configuration.getProperty("com.openexchange.imap.spamHandler", SpamHandler.SPAM_HANDLER_FALLBACK).trim();
         logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
@@ -394,6 +403,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         entity2AclImpl = null;
         blockSize = 0;
         maxNumConnection = -1;
+        sContainerType = "boundary-aware";
         spamHandlerName = null;
         notifyRecent = false;
         notifyFrequencySeconds = 300;
@@ -571,5 +581,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean allowFolderCaches() {
         return allowFolderCaches;
+    }
+
+    /**
+     * Gets the container type.
+     *
+     * @return The container type
+     */
+    public String getsContainerType() {
+        return sContainerType;
     }
 }
