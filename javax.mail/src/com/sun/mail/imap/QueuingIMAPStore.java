@@ -120,7 +120,7 @@ public class QueuingIMAPStore extends IMAPStore {
                     final SecurityManager s = System.getSecurityManager();
                     final ThreadGroup group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
                     final AtomicInteger threadNumber = new AtomicInteger(1);
-                    final String namePrefix = "com.sun.mail.imap.Cleaner-";
+                    final String namePrefix = "com.sun.mail.imap.PeriodicRunner-";
                     final ThreadFactory factory = new ThreadFactory() {
 
                         @Override
