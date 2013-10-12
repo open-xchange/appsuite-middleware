@@ -423,7 +423,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         STR_FALSE)) && IMAPCommandsCollection.isReadOnly(imapFolder)) {
                         throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolderFullname);
                     }
-                    if (IMAPAccess.getImapAccess(imapStore).notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
+                    if (imapAccess.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
                         IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session, true);
                     }
                     /*
@@ -435,7 +435,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             } // End of synchronized
         }
         final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
-        if (IMAPAccess.getImapAccess(imapStore).notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
+        if (imapAccess.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
             IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session, true);
         }
         /*
