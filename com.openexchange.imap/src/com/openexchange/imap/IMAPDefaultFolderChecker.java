@@ -281,7 +281,7 @@ public class IMAPDefaultFolderChecker {
                         /*
                          * Get prefix for default folder names, NOT full names!
                          */
-                        String prefix = IMAPAccess.getImapAccess(imapStore).getFolderStorage().getDefaultFolderPrefix();
+                        String prefix = imapAccess.getFolderStorage().getDefaultFolderPrefix();
                         /*
                          * Check for mbox
                          */
@@ -472,7 +472,7 @@ public class IMAPDefaultFolderChecker {
             }
             setDefaultMailFolder(index, null, cache);
             e.setCategory(Category.CATEGORY_WARNING);
-            IMAPAccess.getImapAccess(imapStore).addWarnings(Collections.singleton(e));
+            imapAccess.addWarnings(Collections.singleton(e));
         } catch (final FolderClosedException e) {
             /*
              * Not possible to retry since connection is broken
@@ -503,7 +503,7 @@ public class IMAPDefaultFolderChecker {
             }
             setDefaultMailFolder(index, null, cache);
             final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
-            IMAPAccess.getImapAccess(imapStore).addWarnings(Collections.singleton(warning));
+            imapAccess.addWarnings(Collections.singleton(warning));
         }
         return null;
     }
