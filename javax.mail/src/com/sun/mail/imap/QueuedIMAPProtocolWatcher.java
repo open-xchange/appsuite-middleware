@@ -72,6 +72,7 @@ public final class QueuedIMAPProtocolWatcher {
     /** The logger */
     static final Log LOG = LogFactory.getLog(QueuedIMAPProtocolWatcher.class);
 
+    /** This watcher's scheduled future task */
     private volatile ScheduledFuture<?> watcherFuture;
 
     /**
