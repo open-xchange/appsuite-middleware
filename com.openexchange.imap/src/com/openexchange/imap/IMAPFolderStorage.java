@@ -312,9 +312,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (null == checker) {
             if (imapConfig.asMap().containsKey("SPECIAL-USE")) {
                 // Supports SPECIAL-USE capability
-                checker = new SpecialUseDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);
+                checker = new SpecialUseDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess);
             } else {
-                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);
+                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess);
             }
         }
         return checker;
