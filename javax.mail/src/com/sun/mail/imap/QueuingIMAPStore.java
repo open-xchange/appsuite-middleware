@@ -270,9 +270,6 @@ public class QueuingIMAPStore extends IMAPStore {
     /** Proxy auth user */
     private String m_proxyAuthUser;
 
-    /** Whether to acquire a protocol instance timeout-aware or not */
-    private boolean timeout;
-
     /**
      * Initializes a new {@link QueuingIMAPStore}.
      *
@@ -344,55 +341,25 @@ public class QueuingIMAPStore extends IMAPStore {
                         logger.fine(msg);
                         LOG.debug(msg);
                     }
-
-                    // W/ or w/o timeout
-                    if (!timeout) {
-                        // No timeout
-                        QueuedIMAPProtocol protocol = q.takeOrIncrement(this);
-                        if (null != protocol) {
-                            if (debug) {
-                                final String msg = "QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString();
-                                logger.fine(msg);
-                                LOG.debug(msg);
-                            }
-                            q.addTrackingInfo(protocol.setStore(this));
-                            return protocol;
-                        }
-                        // Create a new protocol instance
-                        protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q, this);
+                    // Acquire protocol
+                    QueuedIMAPProtocol protocol = q.takeOrIncrement(this);
+                    if (null != protocol) {
                         if (debug) {
-                            final String msg = "\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")";
+                            final String msg = "QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + protocol.toString();
                             logger.fine(msg);
                             LOG.debug(msg);
                         }
-                        q.addTrackingInfo(protocol);
+                        q.addTrackingInfo(protocol.setStore(this));
                         return protocol;
                     }
-
-                    // Specify a timeout
-                    final Session session = this.session;
-                    final QueuingIMAPStore store = this;
-                    final Callback<QueuedIMAPProtocol> callback = new Callback<QueuedIMAPProtocol>() {
-
-                        @Override
-                        public QueuedIMAPProtocol callback() throws IOException, ProtocolException {
-                            // Create a new protocol instance
-                            final QueuedIMAPProtocol protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q, store);
-                            if (debug) {
-                                final String msg = "\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")";
-                                logger.fine(msg);
-                                LOG.debug(msg);
-                            }
-                            q.addTrackingInfo(protocol);
-                            return protocol;
-                        }
-                    };
-                    // Wait for 5 seconds for a protocol to arrive/being disconnected
-                    QueuedIMAPProtocol protocol = q.takeOrIncrement(5, TimeUnit.SECONDS, callback);
-                    if (null == protocol) {
-                        // Timed out
-                        throw new ConnectQuotaExceededException();
+                    // Create a new protocol instance
+                    protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q, this);
+                    if (debug) {
+                        final String msg = "\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")";
+                        logger.fine(msg);
+                        LOG.debug(msg);
                     }
+                    q.addTrackingInfo(protocol);
                     return protocol;
                 } catch (final DeprecatedQueueException e) {
                     // Retry
@@ -664,54 +631,6 @@ public class QueuingIMAPStore extends IMAPStore {
                 // Increment new count
                 newCount++;
                 return null;
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        /**
-         * Takes or increments the new count. Waiting for specified time for available elements if none in queue and count is exceeded.
-         *
-         * @return Either <code>null</code> to signal time has elapsed; or a connected {@link QueuedIMAPProtocol} instance either fetched from queue or yielded by call-back
-         * @throws InterruptedException If interrupted while waiting
-         * @throws ProtocolException If an IMAP protocol error occurs
-         * @throws IOException If an I/O error occurs
-         * @throws DeprecatedQueueException If queue has been deprecated in the meantime
-         */
-        public QueuedIMAPProtocol takeOrIncrement(final long timeout, final TimeUnit unit, final Callback<QueuedIMAPProtocol> callback) throws InterruptedException, IOException, ProtocolException {
-            final ReentrantLock lock = this.lock;
-            lock.lockInterruptibly();
-            try {
-                if (deprecated) {
-                    throw new DeprecatedQueueException("Queue is deprecated");
-                }
-                long nanos = unit.toNanos(timeout);
-                QueuedIMAPProtocol x;
-                try {
-                    while (((x = q.poll()) == null) && (newCount >= max) && (nanos > 0)) {
-                        nanos = notEmpty.awaitNanos(nanos);
-                    }
-                } catch (final InterruptedException ie) {
-                    notEmpty.signal(); // propagate to non-interrupted thread
-                    throw ie;
-                }
-                // Not-null polled one
-                if (null != x) {
-                    if (logger.isLoggable(Level.FINE) || LOG.isDebugEnabled()) {
-                        final String msg = "QueueingIMAPStore.newIMAPProtocol(): Fetched from queue " + x.toString();
-                        logger.fine(msg);
-                        LOG.debug(msg);
-                    }
-                    addTrackingInfo(x);
-                    return x;
-                }
-                // Wait time exceeded
-                if (nanos <= 0) {
-                    return null;
-                }
-                // Increment new count
-                newCount++;
-                return callback.callback();
             } finally {
                 lock.unlock();
             }
@@ -1213,11 +1132,6 @@ public class QueuingIMAPStore extends IMAPStore {
             this.stamp = stamp;
         }
     } // End of class ThreadTrace
-
-    static interface Callback<V> {
-
-        V callback() throws IOException, ProtocolException;
-    } // End of interface Callback
 
     static class DeprecatedQueueException extends RuntimeException {
 
