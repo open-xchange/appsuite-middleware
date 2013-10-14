@@ -49,13 +49,14 @@
 
 package com.openexchange.drive.json.action;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
@@ -63,6 +64,8 @@ import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.DriveFieldMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -104,7 +107,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         if (requiresRootFolderID() && Strings.isEmpty(rootFolderID)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
         }
-        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID);
+        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID, extractHostData(requestData, session));
         /*
          * extract device name information if present
          */
@@ -133,7 +136,6 @@ public abstract class AbstractDriveAction implements AJAXActionService {
                     throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("columns");
                 }
             }
-            DriveFileField[] fields = DriveFieldMapper.getInstance().getFields(columnIDs);
             driveSession.setFields(Arrays.asList(DriveFieldMapper.getInstance().getFields(columnIDs)));
         }
         /*
@@ -141,6 +143,88 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          */
         return doPerform(requestData, driveSession);
     }
+
+    /**
+     * Extracts host data from the supplied request and session.
+     *
+     * @param requestData The AJAX request data
+     * @param session The session
+     * @return The extracted host data
+     */
+    private static HostData extractHostData(AJAXRequestData requestData, ServerSession session) {
+        // TODO: "always-on" osgi service to reliably getting host data?
+        /*
+         * try session parameter first
+         */
+        HostData hostData = (HostData)session.getParameter(HostnameService.PARAM_HOST_DATA);
+        if (null == hostData) {
+            /*
+             * build up hostdata from request
+             */
+            final boolean secure = requestData.isSecure();
+            final String route = requestData.getRoute();
+            final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
+            final String host = determineHost(requestData, session);
+            hostData = new HostData() {
+
+                @Override
+                public boolean isSecure() {
+                    return secure;
+                }
+
+                @Override
+                public String getRoute() {
+                    return route;
+                }
+
+                @Override
+                public int getPort() {
+                    return port;
+                }
+
+                @Override
+                public String getHost() {
+                    return host;
+                }
+            };
+        }
+        return hostData;
+    }
+
+    private static String determineHost(AJAXRequestData requestData, ServerSession session) {
+        String hostName = null;
+        /*
+         * Ask hostname service if available
+         */
+        HostnameService hostnameService = Services.getOptionalService(HostnameService.class);
+        if (null != hostnameService) {
+            hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+        }
+        /*
+         * Get hostname from request
+         */
+        if (Strings.isEmpty(hostName)) {
+            hostName = requestData.getHostname();
+        }
+        /*
+         * Get hostname from java
+         */
+        if (Strings.isEmpty(hostName)) {
+            try {
+                hostName = InetAddress.getLocalHost().getCanonicalHostName();
+            } catch (UnknownHostException e) {
+                // ignore
+            }
+        }
+        /*
+         * Fall back to localhost as last resort
+         */
+        if (Strings.isEmpty(hostName)) {
+            hostName = "localhost";
+        }
+        return requestData.getHostname();
+    }
+
 
     /**
      * Enables an unlimited body size by setting the maximum body size in the underlying {@link CountingHttpServletRequest} to

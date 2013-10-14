@@ -113,10 +113,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             }
         }
         /*
-         * handle any case-conflicting client versions
+         * handle any conflicting client versions
          */
-        if (null != mapper.getCaseConflictingClientVersions() && 0 < mapper.getCaseConflictingClientVersions().size()) {
-            for (FileVersion clientVersion : mapper.getCaseConflictingClientVersions()) {
+        if (null != mapper.getMappingProblems().getCaseConflictingClientVersions()) {
+            for (FileVersion clientVersion : mapper.getMappingProblems().getCaseConflictingClientVersions()) {
                 /*
                  * let client first rename it's file...
                  */
@@ -136,7 +136,17 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                         DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
                 }
             }
-
+        }
+        if (null != mapper.getMappingProblems().getUnicodeConflictingClientVersions()) {
+            for (FileVersion clientVersion : mapper.getMappingProblems().getUnicodeConflictingClientVersions()) {
+                /*
+                 * indicate as error with quarantine flag
+                 */
+                ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
+                twc.setClientVersion(clientVersion);
+                syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path,
+                    DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName()), true));
+            }
         }
         return syncResult;
     }

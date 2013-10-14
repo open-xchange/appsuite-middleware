@@ -197,7 +197,7 @@ public class UploadHelper {
                     fields.add(Field.LAST_MODIFIED);
 
                     if (null != originalVersion) {
-                        File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());
+                        File originalFile = session.getStorage().findFileByName(path, originalVersion.getName(), true);
                         if (null != originalFile && ChecksumProvider.matches(session, originalFile, originalVersion.getChecksum())) {
                             /*
                              * move upload file as new version for existing item

@@ -52,6 +52,7 @@ package com.openexchange.drive.comparison;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.internal.PathNormalizer;
 
 
 /**
@@ -116,7 +117,7 @@ public enum Change {
         } else {
             throw new UnsupportedOperationException("incompatible drive versions");
         }
-        return null == name1 ? null == name2 : name1.equals(name2);
+        return PathNormalizer.equals(name1, name2);
     }
 
     private static boolean equalsByChecksum(DriveVersion v1, DriveVersion v2) {

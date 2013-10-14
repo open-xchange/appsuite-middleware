@@ -53,6 +53,7 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.FileChecksum;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -70,6 +71,7 @@ public class ServerFileVersion implements FileVersion {
 
     private final File file;
     private final FileChecksum checksum;
+    private final String normalizedName;
 
     /**
      * Initializes a new {@link ServerFileVersion}.
@@ -81,6 +83,7 @@ public class ServerFileVersion implements FileVersion {
         super();
         this.checksum = checksum;
         this.file = file;
+        this.normalizedName = PathNormalizer.normalize(file.getFileName());
     }
 
     @Override
@@ -90,7 +93,7 @@ public class ServerFileVersion implements FileVersion {
 
     @Override
     public String getName() {
-        return file.getFileName();
+        return normalizedName;
     }
 
     /**
@@ -129,7 +132,7 @@ public class ServerFileVersion implements FileVersion {
         if (ServerFileVersion.class.isInstance(fileVersion)) {
             return (ServerFileVersion)fileVersion;
         }
-        File file = session.getStorage().findFileByName(path, fileVersion.getName());
+        File file = session.getStorage().findFileByName(path, fileVersion.getName(), true);
         if (null != file) {
             FileChecksum fileChecksum = ChecksumProvider.getChecksum(session, file);
             if (fileVersion.getChecksum().equals(fileChecksum.getChecksum())) {

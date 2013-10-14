@@ -84,6 +84,7 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String LONG_POLLING_NOT_AVAILABLE_MSG = "Push via long polling is not available";
     public static final String SERVER_BUSY_MSG = "The server is too busy at the moment - please try again later.";
     public static final String IGNORED_PATH_MSG = "The path \"%1$s\" is ignored";
+    public static final String CONFLICTING_FILENAME_MSG = "The file name \"%1$s\" is conflicting";
 
     /**
      * Prevent instantiation.

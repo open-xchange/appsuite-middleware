@@ -77,6 +77,7 @@ import com.openexchange.drive.actions.ErrorFileAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.DirectoryChecksum;
 import com.openexchange.drive.checksum.FileChecksum;
+import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
@@ -310,7 +311,7 @@ public class DriveServiceImpl implements DriveService {
              * check if created file still equals uploaded one
              */
             ServerFileVersion createdVersion = new ServerFileVersion(createdFile, fileChecksum);
-            if (newVersion.getName().equals(createdVersion.getName())) {
+            if (newVersion.getName().equals(createdFile.getFileName())) {
                 syncResult.addActionForClient(new AcknowledgeFileAction(driveSession, originalVersion, createdVersion, null, path));
             } else {
                 syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion, null, path));
@@ -365,8 +366,7 @@ public class DriveServiceImpl implements DriveService {
             for (FileVersion requestedVersion : fileVersions) {
                 ServerFileVersion matchingVersion = null;
                 for (ServerFileVersion serverFileVersion : serverFiles) {
-                    if (serverFileVersion.getName().equals(requestedVersion.getName()) &&
-                        serverFileVersion.getChecksum().equals(requestedVersion.getChecksum())) {
+                    if (Change.NONE.equals(Change.get(serverFileVersion, requestedVersion))) {
                         matchingVersion = serverFileVersion;
                         break;
                     }

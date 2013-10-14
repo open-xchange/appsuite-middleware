@@ -47,68 +47,51 @@
  *
  */
 
-package com.openexchange.drive;
+package com.openexchange.drive.internal;
 
-import java.util.List;
-import java.util.Locale;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.tools.session.ServerSession;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
+
 
 /**
- * {@link DriveSession}
+ * {@link PathNormalizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveSession {
+public class PathNormalizer {
 
     /**
-     * Gets the underlying server session.
+     * Normalizes a file- or directory path. The supplied string will be normalized according to the {@link Form#NFC} normalization from,
+     * i.e. canonical decomposition, followed by canonical composition.
      *
-     * @return The server session
+     * @param path The file- or directory path to normalize
+     * @return The normalized form
      */
-    ServerSession getServerSession();
+    public static String normalize(String path) {
+        return Normalizer.normalize(path, Form.NFC);
+    }
 
     /**
-     * Get the identifier of the referenced root folder on the server.
+     * Gets a value indicating whether the supplied file- or directory path is normalized according to the {@link Form#NFC} normalization
+     * from, i.e. canonical decomposition, followed by canonical composition.
      *
-     * @return The root folder ID.
+     * @param path The file- or directory path to check
+     * @return <code>true</code> if the path is normalized, <code>false</code>, otherwise
      */
-    String getRootFolderID();
+    public static boolean isNormalized(String path) {
+        return Normalizer.isNormalized(path, Form.NFC);
+    }
 
     /**
-     * Gets a friendly name identifying the client device from a user's point of view, e.g. "My Tablet PC".
+     * Gets a value indicating whether the supplied file- or directory path are considered equal when being in their {@link Form#NFC}
+     * normalization from, i.e. canonical decomposition, followed by canonical composition.
      *
-     * @return The devie name, or <code>null</code> if not defined
+     * @param path1 The first path to check
+     * @param path2 The second path to check
+     * @return <code>true</code> if both paths are equal, <code>false</code>, otherwise
      */
-    String getDeviceName();
-
-    /**
-     * Gets a value indicating whether the diagnostics trace is requested from the client or not.
-     *
-     * @return <code>Boolean.TRUE</code> if tracing is enabled, <code>null</code> or <code>Boolean.FALSE</code>, othwerwise.
-     */
-    Boolean isDiagnostics();
-
-    /**
-     * Gets the locale of the session's user.
-     *
-     * @return The locale
-     */
-    Locale getLocale();
-
-    /**
-     * Gets the host data of the underlying request.
-     *
-     * @return The hostname
-     */
-    HostData getHostData();
-
-    /**
-     * Gets the file metadata fields relevant for the client.
-     *
-     * @return The file metadata fields, or <code>null</code> if not specified
-     */
-    List<DriveFileField> getFields();
+    public static boolean equals(String path1, String path2) {
+        return null == path1 ? null == path2 : normalize(path1).equals(normalize(path2));
+    }
 
 }
-

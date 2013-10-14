@@ -61,6 +61,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
@@ -254,7 +255,7 @@ public class ChecksumProvider {
                         trace.append(' ' + file.getFileName()).append(" - Stored, valid: ").append(fileChecksum).append('\n');
                     }
                 }
-                md5.update(file.getFileName().getBytes(Charsets.UTF_8));
+                md5.update(PathNormalizer.normalize(file.getFileName()).getBytes(Charsets.UTF_8));
                 md5.update(fileChecksum.getChecksum().getBytes(Charsets.UTF_8));
             }
             if (0 < calculatedChecksums.size()) {
@@ -346,8 +347,8 @@ public class ChecksumProvider {
 
         @Override
         public int compare(File o1, File o2) {
-            byte[] fileName1 = o1.getFileName().getBytes(Charsets.UTF_8);
-            byte[] fileName2 = o2.getFileName().getBytes(Charsets.UTF_8);
+            byte[] fileName1 = PathNormalizer.normalize(o1.getFileName()).getBytes(Charsets.UTF_8);
+            byte[] fileName2 = PathNormalizer.normalize(o2.getFileName()).getBytes(Charsets.UTF_8);
             int minLength = Math.min(fileName1.length, fileName2.length);
             for (int i = 0; i < minLength; i++) {
                 int result = (fileName1[i] & 0xFF) - (fileName2[i] & 0xFF);

@@ -54,6 +54,7 @@ import java.util.Locale;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -68,6 +69,7 @@ public class DefaultDriveSession implements DriveSession {
     private String deviceName;
     private Boolean diagnostics;
     private List<DriveFileField> fields;
+    private final HostData hostData;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
@@ -75,10 +77,11 @@ public class DefaultDriveSession implements DriveSession {
      * @param session The session
      * @param rootFolderID The root folder ID
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID) {
+    public DefaultDriveSession(ServerSession session, String rootFolderID, HostData hostData) {
         super();
         this.session = session;
         this.rootFolderID = rootFolderID;
+        this.hostData = hostData;
     }
 
     /**
@@ -138,6 +141,11 @@ public class DefaultDriveSession implements DriveSession {
             }
         }
         return null != locale ? locale : Locale.US;
+    }
+
+    @Override
+    public HostData getHostData() {
+        return hostData;
     }
 
     @Override

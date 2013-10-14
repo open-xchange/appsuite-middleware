@@ -55,6 +55,7 @@ import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.DirectoryChecksum;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 
@@ -69,11 +70,13 @@ import com.openexchange.exception.OXException;
 public class ServerDirectoryVersion implements DirectoryVersion {
 
     private final String path;
+    private final String normalizedPath;
     private final DirectoryChecksum checksum;
 
     public ServerDirectoryVersion(String path, DirectoryChecksum checksum) {
         super();
         this.path = path;
+        this.normalizedPath = PathNormalizer.normalize(path);
         this.checksum = checksum;
     }
 
@@ -84,7 +87,7 @@ public class ServerDirectoryVersion implements DirectoryVersion {
 
     @Override
     public String getPath() {
-        return path;
+        return normalizedPath;
     }
 
     /**

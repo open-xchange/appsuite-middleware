@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,66 +49,24 @@
 
 package com.openexchange.drive;
 
-import java.util.List;
-import java.util.Locale;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DriveSession}
+ * {@link DriveStrings}
+ *
+ * Translatable strings for the 'drive' module.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveSession {
+public final class DriveStrings implements LocalizableStrings {
+
+    /** e.g. "Uploaded with OX Drive (Ottos Laptop)" */
+    public static final String VERSION_COMMENT = "Uploaded with %1$s (%2$s)";
 
     /**
-     * Gets the underlying server session.
-     *
-     * @return The server session
+     * Prevent instantiation.
      */
-    ServerSession getServerSession();
-
-    /**
-     * Get the identifier of the referenced root folder on the server.
-     *
-     * @return The root folder ID.
-     */
-    String getRootFolderID();
-
-    /**
-     * Gets a friendly name identifying the client device from a user's point of view, e.g. "My Tablet PC".
-     *
-     * @return The devie name, or <code>null</code> if not defined
-     */
-    String getDeviceName();
-
-    /**
-     * Gets a value indicating whether the diagnostics trace is requested from the client or not.
-     *
-     * @return <code>Boolean.TRUE</code> if tracing is enabled, <code>null</code> or <code>Boolean.FALSE</code>, othwerwise.
-     */
-    Boolean isDiagnostics();
-
-    /**
-     * Gets the locale of the session's user.
-     *
-     * @return The locale
-     */
-    Locale getLocale();
-
-    /**
-     * Gets the host data of the underlying request.
-     *
-     * @return The hostname
-     */
-    HostData getHostData();
-
-    /**
-     * Gets the file metadata fields relevant for the client.
-     *
-     * @return The file metadata fields, or <code>null</code> if not specified
-     */
-    List<DriveFileField> getFields();
-
+    private DriveStrings() {
+        super();
+    }
 }
-

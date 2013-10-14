@@ -73,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -168,6 +169,24 @@ public class SyncSession {
      */
     public String getDeviceName() {
         return session.getDeviceName();
+    }
+
+    /**
+     * Gets the underlying drive session.
+     *
+     * @return The drive session.
+     */
+    public DriveSession getDriveSession() {
+        return session;
+    }
+
+    /**
+     * Gets the host data of the session.
+     *
+     * @return The host data
+     */
+    public HostData getHostData() {
+        return session.getHostData();
     }
 
     public DirectLinkGenerator getLinkGenerator() {

@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.comparison;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -59,6 +58,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
@@ -74,8 +74,8 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
     private final Collection<? extends T> originalVersions;
     private final Collection<? extends T> clientVersions;
     private final Collection<? extends T> serverVersions;
-    private Collection<T> caseConflictingClientVersions;
     private final SortedMap<String, ThreeWayComparison<T>> map;
+    private final MappingProblems<T> mappingProblems;
 
     /**
      * Initializes a new {@link VersionMapper} using collections of original-, client- and server versions.
@@ -87,28 +87,33 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
     public VersionMapper(Collection<? extends T> originalVersions, Collection<? extends T> clientVersions, Collection<? extends T> serverVersions) {
         super();
         this.map = new TreeMap<String, ThreeWayComparison<T>>(String.CASE_INSENSITIVE_ORDER);
+        this.mappingProblems = new MappingProblems<T>();
         if (null == originalVersions) {
             this.originalVersions = Collections.emptyList();
         } else {
             this.originalVersions = originalVersions;
-            for (T fileVersion : originalVersions) {
-                getOrCreate(getKey(fileVersion)).setOriginalVersion(fileVersion);
+            for (T originalVersion : originalVersions) {
+                String normalizedKey = PathNormalizer.normalize(getKey(originalVersion));
+                getOrCreate(normalizedKey).setOriginalVersion(originalVersion);
             }
         }
         if (null == clientVersions) {
             this.clientVersions = Collections.emptyList();
         } else {
             this.clientVersions = clientVersions;
-            for (T fileVersion : clientVersions) {
-                ThreeWayComparison<T> comparison = getOrCreate(getKey(fileVersion));
-                if (null != comparison.getClientVersion()) {
-                    // case conflict, handle separately
-                    if (null == caseConflictingClientVersions) {
-                        caseConflictingClientVersions = new ArrayList<T>();
-                    }
-                    caseConflictingClientVersions.add(fileVersion);
+            for (T clientVersion : clientVersions) {
+                String key = getKey(clientVersion);
+                String normalizedKey = PathNormalizer.normalize(key);
+                ThreeWayComparison<T> comparison = getOrCreate(normalizedKey);
+                T existingVersion = comparison.getClientVersion();
+                if (null != existingVersion) {
+                    /*
+                     * case / normalization conflict - choose version to use
+                     */
+                    String existingKey = getKey(existingVersion);
+                    comparison.setClientVersion(mappingProblems.chooseClientVersion(existingVersion, existingKey, clientVersion, key));
                 } else {
-                    comparison.setClientVersion(fileVersion);
+                    comparison.setClientVersion(clientVersion);
                 }
             }
         }
@@ -116,8 +121,20 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
             this.serverVersions = Collections.emptyList();
         } else {
             this.serverVersions = serverVersions;
-            for (T fileVersion : serverVersions) {
-                getOrCreate(getKey(fileVersion)).setServerVersion(fileVersion);
+            for (T serverVersion : serverVersions) {
+                String key = getKey(serverVersion);
+                String normalizedKey = PathNormalizer.normalize(key);
+                ThreeWayComparison<T> comparison = getOrCreate(normalizedKey);
+                T existingVersion = comparison.getServerVersion();
+                if (null != existingVersion) {
+                    /*
+                     * case / normalization conflict - choose version to use
+                     */
+                    String existingKey = getKey(existingVersion);
+                    comparison.setServerVersion(mappingProblems.chooseServerVersion(existingVersion, existingKey, serverVersion, key));
+                } else {
+                    comparison.setServerVersion(serverVersion);
+                }
             }
         }
     }
@@ -174,13 +191,12 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
     }
 
     /**
-     * Gets any client versions that are causing a case conflict, i.e. versions that were already reported with the same name, yet
-     * different case.
+     * Gets any client- and server-versions that were causing a conflict, i.e. versions that would have been mapped to an already used key.
      *
-     * @return The case conflicting versions, or <code>null</code> if none present
+     * @return The mapping problems
      */
-    public Collection<? extends T> getCaseConflictingClientVersions() {
-        return caseConflictingClientVersions;
+    public MappingProblems<? extends T> getMappingProblems() {
+        return mappingProblems;
     }
 
     /**
@@ -198,6 +214,13 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
             map.put(key, comparison);
         }
         return comparison;
+    }
+
+    private void check(String s) {
+
+
+//        Normalizer.isNormalized(src, form)
+
     }
 
     @Override
@@ -222,15 +245,8 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
             stringAllocator.append(Change.NONE == comparison.getServerChange() ? "  " : ' ' + comparison.getServerChange().toString().substring(0, 1));
             stringAllocator.append('\n');
         }
-
-        if (null != caseConflictingClientVersions && 0 < caseConflictingClientVersions.size()) {
-            stringAllocator.append("\nCase conflicting client versions:\n");
-            for (T version : caseConflictingClientVersions) {
-                stringAllocator.append("  ").append(getKey(version)).append(" | ").append(version.getChecksum()).append('\n');
-            }
-        }
+        stringAllocator.append(mappingProblems);
         return stringAllocator.toString();
     }
-
 
 }
