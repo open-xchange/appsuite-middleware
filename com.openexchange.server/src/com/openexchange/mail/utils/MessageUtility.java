@@ -605,6 +605,34 @@ public final class MessageUtility {
         return charset;
     }
 
+    /**
+     * Checks if passed character encoding experienced some special handling when reading text content.
+     * <ul>
+     * <li>Big5</li>
+     * <li>GB18030</li>
+     * <li>GB2312</li>
+     * <li>Shift-Jis</li>
+     * </ul>
+     *
+     * @param charset The character encoding to check
+     * @return <code>true</code> if passed character encoding experienced some special handling; otherwise <code>false</code>
+     */
+    public static boolean isSpecialCharset(final String charset) {
+        if (isBig5(charset)) {
+            return true;
+        }
+        if ("GB18030".equalsIgnoreCase(charset)) {
+            return true;
+        }
+        if (isGB2312(charset)) {
+            return true;
+        }
+        if (isShiftJis(charset)) {
+            return true;
+        }
+        return false;
+    }
+
     private static final Pattern PATTERN_BIG5 = Pattern.compile("[-_]+");
 
     private static final String BIG5 = "big5";
