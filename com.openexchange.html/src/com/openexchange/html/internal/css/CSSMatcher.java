@@ -67,6 +67,7 @@ import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -317,6 +318,27 @@ public final class CSSMatcher {
         return checkCSS(cssBuilder, styleMap, cssPrefix, false);
     }
 
+    private static final int MAX_ALLOWED_CSS_SELECTOR_SIZE = 2048;
+
+    /**
+     * Checks if CSS content shall be further parsed or not.
+     *
+     * @param off The offset
+     * @param css The CSS content
+     * @return <code>true</code> to continue parsing; otherwise <code>false</code> to stop
+     */
+    protected static boolean continueParsing(final int off, final String css) {
+        final int pos = css.indexOf('{', off);
+        if (pos < 0) {
+            return false;
+        }
+        final int diff = pos - off;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Next '{' is " + diff + " characters away -- " + (diff <= 2048 ? "Continue" : "Abort"));
+        }
+        return diff <= MAX_ALLOWED_CSS_SELECTOR_SIZE;
+    }
+
     /**
      * Checks the CSS provided by given <code>Stringer</code>.
      *
@@ -352,9 +374,10 @@ public final class CSSMatcher {
                 final Thread thread = Thread.currentThread();
                 // Block-wise sanitizing
                 if (CONSIDER_NESTED_BLOCKS) {
+                    boolean examined = true;
                     int off = 0;
                     Matcher m;
-                    while (!thread.isInterrupted() && off < length && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(css.substring(off))).find()) {
+                    while ((off < length) && (examined = continueParsing(off, css)) && (examined = !thread.isInterrupted()) && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css.substring(off)))).find()) {
                         final int end = m.end() + off;
                         int index = end;
                         int level = 1;
@@ -369,8 +392,13 @@ public final class CSSMatcher {
                         // Check prefix part
                         final int start = m.start() + off;
                         cssElemsBuffer.append(css.substring(off, start));
-                        modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
-                        final String prefix = cssElemsBuffer.toString();
+                        final String prefix;
+                        if (cssElemsBuffer.length() > 0) {
+                            modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                            prefix = cssElemsBuffer.toString();
+                        } else {
+                            prefix = "";
+                        }
                         cssElemsBuffer.setLength(0);
                         // Check block part
                         cssElemsBuffer.append(css.substring(end, index - 1));
@@ -384,9 +412,11 @@ public final class CSSMatcher {
                         cssBld.append(block);
                         off = index;
                     }
-                    cssElemsBuffer.append(css.substring(off, css.length()));
+                    if (examined) {
+                        cssElemsBuffer.append(css.substring(off, css.length()));
+                    }
                 } else {
-                    final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+                    final Matcher m = PATTERN_STYLE_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
                     cssBld.setLength(0);
                     int lastPos = 0;
                     while (!thread.isInterrupted() && m.find()) {
@@ -439,7 +469,7 @@ public final class CSSMatcher {
         // Submit to thread pool ...
         final Future<Boolean> f = threadPool.submit(task);
         // ... and await response
-        final int timeout = cssParseTimeoutSec();
+        final int timeout = Integer.MAX_VALUE; // TODO: cssParseTimeoutSec();
         final TimeUnit timeUnit = TimeUnit.SECONDS;
         try {
             final boolean retval = f.get(timeout, timeUnit).booleanValue();
@@ -635,7 +665,7 @@ public final class CSSMatcher {
         try {
             final int cssLength = css.length();
             final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
-            final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
+            final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             if (!m.find()) {
                 return false;
             }
@@ -701,7 +731,7 @@ public final class CSSMatcher {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
             final String css = CRLF.matcher(cssBuilder.toString()).replaceAll(" ");
-            final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
+            final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             final Thread thread = Thread.currentThread();
             cssBuilder.setLength(0);
@@ -746,7 +776,7 @@ public final class CSSMatcher {
         final MatcherReplacer mr;
         {
             final String s = cssBuilder.toString();
-            rgb = PATTERN_COLOR_RGB.matcher(s);
+            rgb = PATTERN_COLOR_RGB.matcher(InterruptibleCharSequence.valueOf(s));
             mr = new MatcherReplacer(rgb, s);
         }
         cssBuilder.setLength(0);
@@ -764,7 +794,7 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("data") < 0) {
             return false;
         }
-        final Matcher m = PATTERN_INLINE_DATA.matcher(cssBuilder.toString());
+        final Matcher m = PATTERN_INLINE_DATA.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
         final StringBuffer sb = new StringBuffer(cssBuilder.length());
         final Thread thread = Thread.currentThread();
         while (!thread.isInterrupted() && m.find()) {
@@ -786,7 +816,7 @@ public final class CSSMatcher {
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     static boolean checkCSSElements(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
-        if (null == styleMap) {
+        if ((null == styleMap) || (cssBuilder.length() <= 0)) {
             return false;
         }
         boolean modified = false;
@@ -799,7 +829,7 @@ public final class CSSMatcher {
         final MatcherReplacer mr;
         {
             final String str = cssBuilder.toString();
-            m = PATTERN_STYLE_LINE.matcher(str);
+            m = PATTERN_STYLE_LINE.matcher(InterruptibleCharSequence.valueOf(str));
             mr = new MatcherReplacer(m, str);
         }
         cssBuilder.setLength(0);

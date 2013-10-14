@@ -2,6 +2,7 @@
 
  - Fix for bug 29263: Fixed property constant from "com.openexchange. cookie.forceHTTPS" to "com.openexchange.forceHTTPS"
  - Fix for bug 29262: Read Jolokia configuration only if enabled via "com.openexchange.jolokia.start" property
+ - Fix for bug 26979: Interrupt-aware CharSequence to stop excessive computations in Java regex plus size limitation for CSS selectors (not more than 2KB)
 
 * 2013-10-11 - marc.arens@open-xchange.com
 
