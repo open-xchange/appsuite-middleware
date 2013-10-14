@@ -1540,11 +1540,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             final int limit = max <= 0 ? -1 : (messageCount <= max ? -1 : (int) max);
             final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
-            if (mergeWithSent) {
-                sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
-                sentFolder.open(READ_ONLY);
-                // addOpenedFolder(sentFolder);
-            }
             /*
              * Sort messages by thread reference
              */
@@ -1576,29 +1571,58 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Do list append
                  */
-                Future<List<MailMessage>> messagesFromSentFolder = null;
-                if (mergeWithSent) {
-                    final IMAPFolder zentFolder = sentFolder;
-                    final FetchProfile clonedFetchProfile = cloneFetchProfile(fetchProfile);
-                    messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
+                final List<Conversation> conversations;
+                boolean concurrent = false;
+                if (body || concurrent) {
+                    Future<List<MailMessage>> messagesFromSentFolder = null;
+                    if (mergeWithSent) {
+                        sentFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
+                        sentFolder.open(READ_ONLY);
+                        final IMAPFolder zentFolder = sentFolder;
+                        final FetchProfile clonedFetchProfile = cloneFetchProfile(fetchProfile);
+                        messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
 
-                        @Override
-                        public List<MailMessage> call() throws Exception {
-                            return Conversations.messagesFor(zentFolder, limit, clonedFetchProfile, byEnvelope);
+                            @Override
+                            public List<MailMessage> call() throws Exception {
+                                return Conversations.messagesFor(zentFolder, limit, clonedFetchProfile, byEnvelope);
+                            }
+                        });
+                    }
+                    // Retrieve from actual folder
+                    conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
+                    // Retrieve from sent folder
+                    if (null != messagesFromSentFolder) {
+                        final List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
+                        closeSafe(sentFolder);
+                        sentFolder = null;
+                        for (final Conversation conversation : conversations) {
+                            for (final MailMessage sentMessage : sentMessages) {
+                                if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                    conversation.addMessage(sentMessage);
+                                }
+                            }
                         }
-                    });
-                }
-                // Retrieve from actual folder
-                final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
-                // Retrieve from sent folder
-                if (null != messagesFromSentFolder) {
-                    final List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
-                    closeSafe(sentFolder);
-                    sentFolder = null;
-                    for (final Conversation conversation : conversations) {
-                        for (final MailMessage sentMessage : sentMessages) {
-                            if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                                conversation.addMessage(sentMessage);
+                    }
+                } else {
+                    // Retrieve from actual folder
+                    conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
+                    // Retrieve from sent folder
+                    if (mergeWithSent) {
+                        try {
+                            imapFolder = setAndOpenFolder(imapFolder, sentFullName, READ_ONLY);
+                        } catch (final MessagingException e) {
+                            final Exception next = e.getNextException();
+                            if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                                throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+                            }
+                            throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+                        }
+                        final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, limit, fetchProfile, byEnvelope);
+                        for (final Conversation conversation : conversations) {
+                            for (final MailMessage sentMessage : sentMessages) {
+                                if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                    conversation.addMessage(sentMessage);
+                                }
                             }
                         }
                     }
