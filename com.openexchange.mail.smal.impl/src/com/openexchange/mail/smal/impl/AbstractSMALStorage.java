@@ -63,8 +63,6 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.smal.impl.index.AccountBlacklist;
@@ -127,7 +125,7 @@ public abstract class AbstractSMALStorage {
     /**
      * The delegate mail access.
      */
-    protected final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
+    protected final SmalMailAccess smalMailAccess;
 
     /**
      * The processor strategy to use.
@@ -154,13 +152,13 @@ public abstract class AbstractSMALStorage {
     /**
      * Initializes a new {@link AbstractSMALStorage}.
      */
-    protected AbstractSMALStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) {
+    protected AbstractSMALStorage(final Session session, final int accountId, final SmalMailAccess smalMailAccess) {
         super();
         this.session = session;
         userId = session.getUserId();
         contextId = session.getContextId();
         this.accountId = accountId;
-        this.delegateMailAccess = delegateMailAccess;
+        this.smalMailAccess = smalMailAccess;
         processorStrategy = DefaultProcessorStrategy.getInstance();
         // FIXME: revert
         processor = new DoNothingProcessor(processorStrategy);
@@ -174,7 +172,7 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If an error occurs
      */
     protected boolean isBlacklisted() throws OXException {
-        return accountId != 0 && AccountBlacklist.isServerBlacklisted(delegateMailAccess.getMailConfig().getServer());
+        return accountId != 0 && AccountBlacklist.isServerBlacklisted(smalMailAccess.getDelegateMailAccess().getMailConfig().getServer());
 //        if (null == blacklisted) {
 //            final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
 //            final Object param = sessionCache.getParameter(accountId, "com.openexchange.mail.smal.isBlacklisted");
@@ -252,7 +250,7 @@ public abstract class AbstractSMALStorage {
      * @throws InterruptedException If interrupted
      */
     protected void processFolder(final String fullName) throws OXException, InterruptedException {
-        final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
+        final IMailFolderStorage folderStorage = smalMailAccess.getDelegateMailAccess().getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
             processor.processFolderAsync(
@@ -275,7 +273,7 @@ public abstract class AbstractSMALStorage {
      * @throws InterruptedException If interrupted
      */
     protected void processFolder(final MailFolder mailFolder) throws OXException, InterruptedException {
-        processor.processFolderAsync(mailFolder, delegateMailAccess, Collections.<String, Object> emptyMap());
+        processor.processFolderAsync(mailFolder, smalMailAccess.getDelegateMailAccess(), Collections.<String, Object> emptyMap());
     }
 
     /**
@@ -317,7 +315,7 @@ public abstract class AbstractSMALStorage {
             return;
         }
 
-        MailConfig mailConfig = delegateMailAccess.getMailConfig();
+        MailConfig mailConfig = smalMailAccess.getDelegateMailAccess().getMailConfig();
         Builder builder = MailJobInfo.newBuilder(MailFolderJob.class)
             .login(mailConfig.getLogin())
             .accountId(accountId)

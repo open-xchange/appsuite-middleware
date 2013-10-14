@@ -74,7 +74,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SmalMailAccess.class));
 
-    private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
+    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
 
     private boolean connected;
 
@@ -96,10 +96,32 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
         if (null == session) {
             delegateMailAccess = null;
         } else {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> dma =
-                SmalMailAccessCache.getInstance().removeMailAccess(session, accountId);
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> dma = SmalMailAccessCache.getInstance().removeMailAccess(session, accountId);
             delegateMailAccess = null == dma ? newDelegate(session, accountId) : dma;
         }
+    }
+
+    /**
+     * Gets the connected delegate mail access.
+     *
+     * @return The connected mail access
+     * @throws OXException If delegate mail access cannot be returned
+     */
+    protected MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getDelegateMailAccess() throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = this.delegateMailAccess;
+        if (null == delegateMailAccess) {
+            if (null != session) {
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> dma = SmalMailAccessCache.getInstance().removeMailAccess(session, accountId);
+                delegateMailAccess = null == dma ? newDelegate(session, accountId) : dma;
+                if (connected) {
+                    delegateMailAccess.connect(false);
+                }
+            }
+            this.delegateMailAccess = delegateMailAccess;
+        } else if (connected && !delegateMailAccess.isConnectedUnsafe()) {
+            delegateMailAccess.connect(false);
+        }
+        return delegateMailAccess;
     }
 
     private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newDelegate(final Session session, final int accountId) throws OXException {
@@ -281,7 +303,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
             throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == folderStorage) {
-            folderStorage = new SmalFolderStorage(session, accountId, delegateMailAccess);
+            folderStorage = new SmalFolderStorage(session, accountId, this);
         }
         return folderStorage;
     }
@@ -292,7 +314,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
             throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == messageStorage) {
-            messageStorage = new SmalMessageStorage(session, accountId, delegateMailAccess);
+            messageStorage = new SmalMessageStorage(session, accountId, this);
         }
         return messageStorage;
     }
