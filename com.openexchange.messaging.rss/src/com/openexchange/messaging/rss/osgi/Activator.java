@@ -49,13 +49,15 @@
 
 package com.openexchange.messaging.rss.osgi;
 
+import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.html.HtmlService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link Activator}
@@ -79,6 +81,7 @@ public class Activator extends HousekeepingActivator {
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
             openTrackers();
             registerService(MessagingService.class, new RSSMessagingService(), null);
+            HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
             throw x;
