@@ -1124,8 +1124,7 @@ public final class MailFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             mailAccess = MailAccess.getInstance(session, argument.getAccountId());
-            final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
-            mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
+            mailAccess.connect(false);
             final boolean exists = mailAccess.getFolderStorage().exists(fullname);
             addWarnings(mailAccess, storageParameters);
             return exists;
