@@ -1608,6 +1608,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
                     // Retrieve from sent folder
                     if (mergeWithSent) {
+                        // Switch folder
                         try {
                             imapFolder = setAndOpenFolder(imapFolder, sentFullName, READ_ONLY);
                         } catch (final MessagingException e) {
