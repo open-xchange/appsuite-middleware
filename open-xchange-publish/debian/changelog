@@ -10,6 +10,12 @@ open-xchange-publish (7.4.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Sep 2013 11:44:34 +0200
 
+open-xchange-publish (7.4.0-13) stable; urgency=low
+
+  * Build for patch 2013-10-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 09 Oct 2013 16:20:26 +0200
+
 open-xchange-publish (7.4.0-12) stable; urgency=low
 
   * Build for patch 2013-10-07

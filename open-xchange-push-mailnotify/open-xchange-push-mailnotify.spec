@@ -55,6 +55,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_m
 * Thu Oct 10 2013 Carsten Hoeger <choeger@open-xchange.com>
 First sprint increment for 7.4.0 release
 * Wed Oct 09 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-10-09
+* Wed Oct 09 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-07
 * Thu Sep 26 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-09-26

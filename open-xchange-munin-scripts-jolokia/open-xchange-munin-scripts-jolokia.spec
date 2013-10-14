@@ -69,6 +69,8 @@ exit 0
 * Thu Oct 10 2013 Felix Marx <felix.marx@open-xchange.com>
 First sprint increment for 7.4.0 release
 * Wed Oct 09 2013 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2013-10-09
+* Wed Oct 09 2013 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2013-10-07
 * Tue Sep 24 2013 Felix Marx <felix.marx@open-xchange.com>
 Eleventh candidate for 7.4.0 release
