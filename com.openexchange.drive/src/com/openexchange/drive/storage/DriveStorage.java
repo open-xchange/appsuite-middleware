@@ -532,25 +532,29 @@ public class DriveStorage {
         return findFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
     }
 
-    private File findFileByName(String path, final String name, List<Field> fields, boolean normalizeFileNames) throws OXException {
-        File file = Filter.find(getFilesIterator(getFolderID(path), name, fields), new FileNameFilter() {
+    private File findFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
+        List<File> files = Filter.apply(getFilesIterator(getFolderID(path), name, fields), new FileNameFilter() {
 
             @Override
             protected boolean accept(String fileName) throws OXException {
-                return name.equals(fileName);
+                return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
             }
         });
-        if (null == file && normalizeFileNames) {
-            final String normalizedName = PathNormalizer.normalize(name);
-            file = Filter.find(getFilesIterator(getFolderID(path), null, fields), new FileNameFilter() {
-
-                @Override
-                protected boolean accept(String fileName) throws OXException {
-                    return normalizedName.equals(PathNormalizer.normalize(fileName));
+        if (1 == files.size()) {
+            return files.get(0);
+        } else if (1 < files.size()) {
+            File normalizedFile = null;
+            for (File file : files) {
+                if (name.equals(file.getFileName())) {
+                    return file;
                 }
-            });
+                if (PathNormalizer.isNormalized(file.getFileName())) {
+                    normalizedFile = file;
+                }
+            }
+            return null != normalizedFile ? normalizedFile : files.get(0);
         }
-        return file;
+        return null;
     }
 
     public String getPath(String folderID) throws OXException {
