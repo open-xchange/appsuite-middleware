@@ -578,7 +578,7 @@ public class QueuingIMAPStore extends IMAPStore {
         /**
          * Takes or increments the new count. Waiting for available elements if none in queue and count is exceeded.
          * <p>
-         * Waits for default time of 5 seconds.
+         * Waits for default time of 20 seconds.
          *
          * @return Either <code>null</code> to signal a new instance is allowed to be created; or a connected {@link QueuedIMAPProtocol} instance fetched from queue
          * @throws InterruptedException If interrupted while waiting
@@ -586,7 +586,7 @@ public class QueuingIMAPStore extends IMAPStore {
          * @throws DeprecatedQueueException If queue has been deprecated in the meantime
          */
         public QueuedIMAPProtocol takeOrIncrement(final QueuingIMAPStore store) throws InterruptedException, ProtocolException {
-            return takeOrIncrement(store, 5, TimeUnit.SECONDS);
+            return takeOrIncrement(store, 20, TimeUnit.SECONDS);
         }
 
         /**
