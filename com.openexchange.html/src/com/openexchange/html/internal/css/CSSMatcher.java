@@ -349,11 +349,12 @@ public final class CSSMatcher {
                 final int length = css.length();
                 cssBld.setLength(0);
                 final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
+                final Thread thread = Thread.currentThread();
                 // Block-wise sanitizing
                 if (CONSIDER_NESTED_BLOCKS) {
                     int off = 0;
                     Matcher m;
-                    while (off < length && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(css.substring(off))).find()) {
+                    while (!thread.isInterrupted() && off < length && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(css.substring(off))).find()) {
                         final int end = m.end() + off;
                         int index = end;
                         int level = 1;
@@ -388,7 +389,7 @@ public final class CSSMatcher {
                     final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
                     cssBld.setLength(0);
                     int lastPos = 0;
-                    while (m.find()) {
+                    while (!thread.isInterrupted() && m.find()) {
                         // Check prefix part
                         cssElemsBuffer.append(css.substring(lastPos, m.start()));
                         modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
@@ -638,6 +639,7 @@ public final class CSSMatcher {
             if (!m.find()) {
                 return false;
             }
+            final Thread thread = Thread.currentThread();
             cssBuilder.setLength(0);
             int lastPos = 0;
             do {
@@ -660,7 +662,7 @@ public final class CSSMatcher {
                 cssBuilder.append(prefix);
                 cssBuilder.append(cssElemsBuffer);
                 cssElemsBuffer.setLength(0);
-            } while (lastPos < cssLength && m.find(lastPos));
+            } while (!thread.isInterrupted() && (lastPos < cssLength) && m.find(lastPos));
             if (lastPos < cssLength) {
                 cssElemsBuffer.append(css.substring(lastPos, cssLength));
             }
@@ -701,9 +703,10 @@ public final class CSSMatcher {
             final String css = CRLF.matcher(cssBuilder.toString()).replaceAll(" ");
             final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
             final MatcherReplacer mr = new MatcherReplacer(m, css);
+            final Thread thread = Thread.currentThread();
             cssBuilder.setLength(0);
             int lastPos = 0;
-            while (m.find()) {
+            while (!thread.isInterrupted() && m.find()) {
                 {
                     int i = m.end();
                     for (char c; (c = css.charAt(i++)) != '}';) {
@@ -747,7 +750,8 @@ public final class CSSMatcher {
             mr = new MatcherReplacer(rgb, s);
         }
         cssBuilder.setLength(0);
-        while (rgb.find()) {
+        final Thread thread = Thread.currentThread();
+        while (!thread.isInterrupted() && rgb.find()) {
             mr.appendLiteralReplacement(cssBuilder, rgb.group().replaceAll("\\s+", ""));
         }
         mr.appendTail(cssBuilder);
@@ -762,7 +766,8 @@ public final class CSSMatcher {
         }
         final Matcher m = PATTERN_INLINE_DATA.matcher(cssBuilder.toString());
         final StringBuffer sb = new StringBuffer(cssBuilder.length());
-        while (m.find()) {
+        final Thread thread = Thread.currentThread();
+        while (!thread.isInterrupted() && m.find()) {
             m.appendReplacement(sb, "");
         }
         m.appendTail(sb);
@@ -799,7 +804,8 @@ public final class CSSMatcher {
         }
         cssBuilder.setLength(0);
         final StringBuilder elemBuilder = new StringBuilder(128);
-        while (m.find()) {
+        final Thread thread = Thread.currentThread();
+        while (!thread.isInterrupted() && m.find()) {
             final String elementName = m.group(1);
             if (null != elementName) {
                 if (styleMap.containsKey(toLowerCase(elementName))) {

@@ -51,6 +51,7 @@ package com.openexchange.html.internal.jericho;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,8 +69,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -97,21 +98,21 @@ public final class JerichoParser {
         /**
          * Initializes a new {@link ParsingDeniedException}.
          */
-        ParsingDeniedException(String message, Throwable cause) {
+        ParsingDeniedException(final String message, final Throwable cause) {
             super(message, cause);
         }
 
         /**
          * Initializes a new {@link ParsingDeniedException}.
          */
-        ParsingDeniedException(String message) {
+        ParsingDeniedException(final String message) {
             super(message);
         }
 
         /**
          * Initializes a new {@link ParsingDeniedException}.
          */
-        ParsingDeniedException(Throwable cause) {
+        ParsingDeniedException(final Throwable cause) {
             super(cause);
         }
 
@@ -202,8 +203,10 @@ public final class JerichoParser {
         try {
             streamedSource = checkBody(html);
             streamedSource.setLogger(null);
+            final Thread thread = Thread.currentThread();
             int lastSegmentEnd = 0;
-            for (final Segment segment : streamedSource) {
+            for (final Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+                final Segment segment = iter.next();
                 if (segment.getEnd() <= lastSegmentEnd) {
                     /*
                      * If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the
@@ -306,12 +309,14 @@ public final class JerichoParser {
              */
             if (contains('<', segment)) {
                 final Matcher m = FIX_START_TAG.matcher(segment);
-                if (m.find() && isEmpty(m.group(2))) {
+                if (m.find() && Strings.isEmpty(m.group(2))) {
                     /*
                      * Re-parse start tag
                      */
                     final StreamedSource nestedSource = new StreamedSource(new StringAllocator(m.group(1)).append('>').toString());
-                    for (final Segment nestedSegment : nestedSource) {
+                    final Thread thread = Thread.currentThread();
+                    for (final Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+                        final Segment nestedSegment = iter.next();
                         handleSegment(handler, nestedSegment);
                     }
                 } else {
@@ -364,19 +369,6 @@ public final class JerichoParser {
             }
         }
         return false;
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }
