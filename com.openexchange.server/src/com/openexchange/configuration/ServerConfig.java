@@ -513,7 +513,7 @@ public final class ServerConfig {
         /**
          * Whether to force secure flag for Cookies
          */
-        COOKIE_FORCE_HTTPS("com.openexchange.cookie.forceHTTPS", Boolean.FALSE.toString()),
+        COOKIE_FORCE_HTTPS("com.openexchange.forceHTTPS", Boolean.FALSE.toString()),
         /**
          * Whether to force HTTPS protocol.
          */
