@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 13
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -872,6 +872,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Wed Oct 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-09
 * Wed Oct 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-07
 * Tue Sep 24 2013 Marcus Klein <marcus.klein@open-xchange.com>

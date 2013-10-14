@@ -507,8 +507,8 @@ public final class MimeReply {
                 }
                 {
                     final String cs = retvalContentType.getCharsetParameter();
-                    if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs)) {
-                        // Missing or non-unicode charset
+                    if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
+                        // Select default charset
                         retvalContentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                 }
