@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.api2.MailInterfaceMonitor;
@@ -78,7 +79,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailServletInterface {
+public abstract class MailServletInterface implements Closeable {
 
     /**
      * The constant for quota storage resource
@@ -426,6 +427,11 @@ public abstract class MailServletInterface {
      * Returns an instance of <code>SearchIterator</code> containing all antecessor folders on path to mailbox's default folder
      */
     public abstract SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws OXException;
+
+    @Override
+    public void close() {
+        try { close(true); } catch (final Exception x) { /**/ }
+    }
 
     /**
      * Closes the interface and releases all resources
