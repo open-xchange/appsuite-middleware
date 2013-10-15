@@ -49,9 +49,9 @@
 
 package com.openexchange.drive.storage;
 
-import static com.openexchange.drive.storage.DriveConstants.PATH_SEPARATOR;
-import static com.openexchange.drive.storage.DriveConstants.ROOT_PATH;
-import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
+import static com.openexchange.drive.DriveConstants.PATH_SEPARATOR;
+import static com.openexchange.drive.DriveConstants.ROOT_PATH;
+import static com.openexchange.drive.DriveConstants.TEMP_PATH;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveStrings;
 import com.openexchange.drive.internal.DriveServiceLookup;

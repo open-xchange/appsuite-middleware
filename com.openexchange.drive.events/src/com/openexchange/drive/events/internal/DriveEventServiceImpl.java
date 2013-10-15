@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.internal;
 
+import static com.openexchange.file.storage.FileStorageEventConstants.FILE_NAME;
 import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_ID;
 import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_PATH;
 import static com.openexchange.file.storage.FileStorageEventConstants.PARENT_FOLDER_ID;
@@ -63,11 +64,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -107,7 +110,6 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             @Override
             public void run() {
                 try {
-//                    LOG.debug("Checking for buffered events...");
                     Iterator<FolderBuffer> iterator = folderBuffers.values().iterator();
                     while (iterator.hasNext()) {
                         FolderBuffer buffer = iterator.next();
@@ -123,23 +125,27 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         }, publisherDelay, publisherDelay);
     }
 
+    /**
+     * Stops distributing events by canceling the periodic publisher.
+     */
     public void stop() {
         if (null != periodicPublisher) {
             periodicPublisher.cancel();
         }
     }
 
+    /**
+     * Notifies all registered publishers about the supplied drive event.
+     *
+     * @param event The event to distribute
+     */
     public void notifyPublishers(DriveEvent event) {
         LOG.debug("Publishing: " + event);
         for (DriveEventPublisher publisher : publishers) {
             if (event.isRemote() && publisher.isLocalOnly()) {
-
+                // skip
             } else {
                 publisher.publish(event);
-
-            }
-
-            if (false == event.isRemote() || false == publisher.isLocalOnly()) {
             }
         }
     }
@@ -175,6 +181,11 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         /*
          * extract properties
          */
+        String fileName = (String)event.getProperty(FILE_NAME);
+        if (false == Strings.isEmpty(fileName) && fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
+            LOG.trace("Skipping event processing for temporary file: " + fileName);
+            return;
+        }
         Session session = (Session)event.getProperty(SESSION);
         Integer contextID = Integer.valueOf(session.getContextId());
         String folderID = (String)(event.containsProperty(PARENT_FOLDER_ID) ?

@@ -51,7 +51,7 @@ package com.openexchange.drive.internal;
 
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.java.StringAllocator;
 
 /**

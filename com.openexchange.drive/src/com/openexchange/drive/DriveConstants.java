@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.storage;
+package com.openexchange.drive;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;

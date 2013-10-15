@@ -49,13 +49,14 @@
 
 package com.openexchange.drive.internal;
 
-import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
+import static com.openexchange.drive.DriveConstants.TEMP_PATH;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
@@ -66,7 +67,6 @@ import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;

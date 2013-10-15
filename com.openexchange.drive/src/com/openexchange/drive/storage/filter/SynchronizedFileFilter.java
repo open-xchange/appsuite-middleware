@@ -49,7 +49,7 @@
 
 package com.openexchange.drive.storage.filter;
 
-import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
