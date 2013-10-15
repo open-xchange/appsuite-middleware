@@ -60,6 +60,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
@@ -145,6 +146,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
             /*
              * Dropping
              */
+            ExceptionUtils.handleThrowable(t);
             LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
             put = false;
         }
@@ -207,6 +209,13 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
             delegateMailAccess.connect(false);
         }
         return delegateMailAccess;
+    }
+
+    /**
+     * Closes delegate mail access.
+     */
+    protected void closetDelegateMailAccess() {
+        closeUnwrappedInstance(delegateMailAccess);
     }
 
     @Override

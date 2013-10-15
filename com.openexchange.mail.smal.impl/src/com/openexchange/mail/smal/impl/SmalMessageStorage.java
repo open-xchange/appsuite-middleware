@@ -189,15 +189,13 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = smalMailAccess.getDelegateMailAccess();
-        final IMailMessageStorage messageStorage = delegateMailAccess.getMessageStorage();
         final IndexFacadeService indexFacade = getIndexFacadeService();
         if (searchTerm == null || indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
-            return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            return smalMailAccess.getDelegateMailAccess().getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
 
         // Close for the time accessing the index
-        SmalMailAccess.closeUnwrappedInstance(delegateMailAccess);
+        smalMailAccess.closetDelegateMailAccess();
         // Access index
         IndexAccess<MailMessage> indexAccess = null;
         try {
