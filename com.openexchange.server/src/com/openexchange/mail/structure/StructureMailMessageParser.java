@@ -428,7 +428,7 @@ public final class StructureMailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(mpId);
             }
-            if (/*rootLevelMultipart && */isMultipartSigned(lcct)) {
+            if (/*rootLevelMultipart && */isMultipartSigned(contentType)) {
                 /*
                  * Determine the part which is considered to be the message' text according to
                  */
@@ -959,12 +959,51 @@ public final class StructureMailMessageParser {
 
     /**
      * Checks if content type matches <code>multipart/signed</code> content type.
+     * <p>
+     * See <a href="http://tools.ietf.org/html/rfc5751#section-3.9">http://tools.ietf.org/html/rfc5751#section-3.9</a>.<br>
+     *
+     * <pre>
+     * <b>3.9.  Identifying an S/MIME Message</b>
+     *
+     *    Because S/MIME takes into account interoperation in non-MIME
+     *    environments, several different mechanisms are employed to carry the
+     *    type information, and it becomes a bit difficult to identify S/MIME
+     *    messages.  The following table lists criteria for determining whether
+     *    or not a message is an S/MIME message.  A message is considered an
+     *    S/MIME message if it matches any of the criteria listed below.
+     *
+     *    The file suffix in the table below comes from the "name" parameter in
+     *    the Content-Type header field, or the "filename" parameter on the
+     *    Content-Disposition header field.  These parameters that give the
+     *    file suffix are not listed below as part of the parameter section.
+     *
+     *    Media type:  application/pkcs7-mime
+     *    parameters:  any
+     *    file suffix: any
+     *
+     *    Media type:  multipart/signed
+     *    parameters:  protocol="application/pkcs7-signature"
+     *    file suffix: any
+     *
+     *    Media type:  application/octet-stream
+     *    parameters:  any
+     *    file suffix: p7m, p7s, p7c, p7z
+     * </pre>
      *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/signed</code>; otherwise <code>false</code>
      */
-    private static boolean isMultipartSigned(final String contentType) {
-        return contentType.startsWith(PRIMARY_MULTI_SIGNED, 0);
+    private static boolean isMultipartSigned(final ContentType contentType) {
+        if (contentType.startsWith("application/pkcs7-mime")) {
+            return true;
+        }
+        if (contentType.startsWith("multipart/signed")) {
+            final String protocol = LocaleTools.toLowerCase(contentType.getParameter("protocol"));
+            if (null != protocol && ("application/pkcs7-signature".equals(protocol) || "application/x-pkcs7-signature".equals(protocol))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static final String PRIMARY_RFC822 = "message/rfc822";

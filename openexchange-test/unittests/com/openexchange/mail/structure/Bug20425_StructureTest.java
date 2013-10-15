@@ -63,7 +63,7 @@ import com.openexchange.tools.io.IOUtils;
 
 /**
  * {@link Bug20425_StructureTest} - Test for output of structured JSON mail object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Bug20425_StructureTest extends AbstractMailTest {
@@ -79,7 +79,7 @@ public class Bug20425_StructureTest extends AbstractMailTest {
 
     /**
      * Initializes a new {@link Bug20425_StructureTest}.
-     * 
+     *
      * @param name The test name
      */
     public Bug20425_StructureTest(final String name) {
@@ -111,7 +111,7 @@ public class Bug20425_StructureTest extends AbstractMailTest {
 
             // System.out.println(jsonMailObject.toString(2));
 
-            assertFalse("Detected a body object, but shouldn't be there.", jsonMailObject.hasAndNotNull("body"));
+            assertTrue("Missing a body object.", jsonMailObject.hasAndNotNull("body"));
 
             assertTrue("Missing S/MIME body text.", jsonMailObject.hasAndNotNull("smime_body_text"));
             assertTrue("Missing S/MIME body data.", jsonMailObject.hasAndNotNull("smime_body_data"));

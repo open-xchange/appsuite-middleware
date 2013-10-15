@@ -52,6 +52,7 @@ package com.openexchange.mail.structure;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import javax.mail.internet.MimeMessage;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -182,6 +183,19 @@ public class Bug29227_StructureTest extends AbstractMailTest {
 
             final JSONObject jsonMailObject = handler.getJSONMailObject();
             assertNotNull("Structured JSON mail object is null.", jsonMailObject);
+
+            final JSONArray bodies = jsonMailObject.optJSONArray("body");
+            assertNotNull("Structured JSON mail object has no body party.", bodies);
+
+            assertEquals("Unexpected number of body parts", 2, bodies.length());
+
+            final JSONObject signed = bodies.optJSONObject(0);
+            assertNotNull("Missing multipart/signed part.", signed);
+
+            final JSONArray signedBodies = signed.optJSONArray("body");
+            assertNotNull("SignedJSON mail object has no body party.", signedBodies);
+
+            assertEquals("Unexpected number of signed body parts", 2, signedBodies.length());
 
             // System.out.println(jsonMailObject.toString(2));
 

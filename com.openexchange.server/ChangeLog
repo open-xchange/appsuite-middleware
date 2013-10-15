@@ -1,6 +1,10 @@
-* 2013-10-14 - martin.herfurth@open-xchange.com
+* 2013-10-15 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29268: Missing alarm value "0" for list requests.
+
+* 2013-10-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29227: Extended check for S/MIME messages according to rfc5751; section-3.9
 
 * 2013-10-14 - thorben.betten@open-xchange.com
 

@@ -126,6 +126,11 @@ public final class MailAPITestSuite extends TestSuite {
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug18846StructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug18981StructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug19471StructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug20425_StructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug22735_StructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug23037_StructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug26317_StructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug29227_StructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.SMIMEStructureTest.class);
 		return mailSuite;
 	}
