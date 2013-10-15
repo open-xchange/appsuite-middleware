@@ -63,11 +63,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 
@@ -146,10 +146,12 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
-            try {
-                cache.pushConnectionForContext(cid, con);
-            } catch (PoolException e) {
-                LOG.error(e.getMessage(), e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(cid, con);
+                } catch (PoolException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
         for (Context context : contexts.values()) {
