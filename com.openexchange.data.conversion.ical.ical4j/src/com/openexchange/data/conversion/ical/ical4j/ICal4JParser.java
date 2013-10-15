@@ -474,8 +474,9 @@ public class ICal4JParser implements ICalParser {
             	workaroundFor17963(
             	workaroundFor20453(
             	workaroundFor27706And28942(
+            	workaroundFor29282(
             	removeAnnoyingWhitespaces(chunk.toString()
-                )))))))))
+                ))))))))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader);
         } catch (final IOException e) {
@@ -510,6 +511,10 @@ public class ICal4JParser implements ICalParser {
 		return input
 			.replaceAll("DTEND;\\s*\n", "")
 			;
+	}
+
+	private String workaroundFor29282(final String input) {
+	    return input.replaceAll("0000([0-9]{4}T[0-9]{6}Z)", "1970$1");
 	}
 
 	private String workaroundFor27706And28942(final String input) {
