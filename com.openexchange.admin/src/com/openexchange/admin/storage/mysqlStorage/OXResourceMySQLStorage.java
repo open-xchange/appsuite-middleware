@@ -423,40 +423,38 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_list.setInt(2, resource.getId());
             final ResultSet rs = prep_list.executeQuery();
 
-            if (rs.next()) {
-                final int id = rs.getInt("id");
-                final String ident = rs.getString("identifier");
-                final String mail = rs.getString("mail");
-                final String disp = rs.getString("displayName");
-                final Boolean aval = rs.getBoolean("available");
-                final String desc = rs.getString("description");
-
-                final Resource retval = (Resource) resource.clone();
-
-                retval.setId(id);
-                if (null != mail) {
-                    retval.setEmail(mail);
-                }
-                if (null != disp) {
-                    retval.setDisplayname(disp);
-                }
-
-                if (null != ident) {
-                    retval.setName(ident);
-                }
-
-                if (null != desc) {
-                    retval.setDescription(desc);
-                }
-
-                if (null != aval) {
-                    retval.setAvailable(aval);
-                }
-                return retval;
-
-            }else{
+            if (!rs.next()) {
                throw new StorageException("No such resource");
             }
+            final int id = rs.getInt("id");
+            final String ident = rs.getString("identifier");
+            final String mail = rs.getString("mail");
+            final String disp = rs.getString("displayName");
+            final Boolean aval = rs.getBoolean("available");
+            final String desc = rs.getString("description");
+
+            final Resource retval = (Resource) resource.clone();
+
+            retval.setId(id);
+            if (null != mail) {
+                retval.setEmail(mail);
+            }
+            if (null != disp) {
+                retval.setDisplayname(disp);
+            }
+
+            if (null != ident) {
+                retval.setName(ident);
+            }
+
+            if (null != desc) {
+                retval.setDescription(desc);
+            }
+
+            if (null != aval) {
+                retval.setAvailable(aval);
+            }
+            return retval;
 
         } catch (final SQLException e) {
             log.error("SQL Error", e);
@@ -479,10 +477,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 log.error("Error closing prepared statement!", e);
             }
 
-            try {
-                cache.pushConnectionForContext(context_id, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox read connection to pool!", e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(context_id, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox read connection to pool!", e);
+                }
             }
         }
     }
@@ -563,10 +563,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             } catch (final SQLException ex) {
                 log.error("Error closing PreparedStatement", ex);
             }
-            try {
-                cache.pushConnectionForContext(context_id, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox read connection to pool!", e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(context_id, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox read connection to pool!", e);
+                }
             }
         }
     }

@@ -121,6 +121,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         try {
             // Check cache first
             final ResourceCache previewCache = ResourceCaches.getResourceCache();
+
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !isEmpty(eTag);
@@ -147,33 +148,36 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     return;
                 }
             }
-            // No cached preview available
-            final Object resultObject = result.getResultObject();
-            if (!(resultObject instanceof IFileHolder)) {
-                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+
+            // No cached preview available -- get the preview document from appropriate 'PreviewService'
+            final PreviewDocument previewDocument;
+            {
+                final Object resultObject = result.getResultObject();
+                if (!(resultObject instanceof IFileHolder)) {
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                }
+                final IFileHolder fileHolder = (IFileHolder) resultObject;
+                final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+                final DataProperties dataProperties = new DataProperties(7);
+                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
+                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+                dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
+                dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
+                dataProperties.put("PreviewWidth", requestData.getParameter("width"));
+                dataProperties.put("PreviewHeight", requestData.getParameter("height"));
+                previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, 1);
             }
-            final IFileHolder fileHolder = (IFileHolder) resultObject;
 
-            final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-
-            final DataProperties dataProperties = new DataProperties(7);
-            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
-            dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
-            dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-            dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-            dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
-            dataProperties.put("PreviewWidth", requestData.getParameter("width"));
-            dataProperties.put("PreviewHeight", requestData.getParameter("height"));
-            final PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, 1);
-
+            // Check thumbnail stream
             requestData.setFormat("file");
-
             InputStream thumbnail = previewDocument.getThumbnail();
             if (null == thumbnail) {
                 // No thumbnail available
                 throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
             }
 
+            // Prepare response
             if(previewDocument.getClass().getName().equals("com.openexchange.documentpreview.OfficePreviewDocument")) {
                 requestData.putParameter("transformationNeeded", "false");
             }

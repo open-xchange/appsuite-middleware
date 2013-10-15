@@ -466,6 +466,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
             return true; // no invalid filenames
         }
+        if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < fileName.length()) {
+            return true; // no too long filenames
+        }
         return false;
     }
 

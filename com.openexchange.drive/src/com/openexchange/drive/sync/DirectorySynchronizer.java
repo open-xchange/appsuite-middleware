@@ -65,6 +65,7 @@ import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.java.Strings;
@@ -358,6 +359,11 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
         }
         if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(path).matches()) {
             return true; // no invalid paths
+        }
+        for (String pathSegment : DriveStorage.split(path)) {
+            if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < pathSegment.length()) {
+                return true; // no too long paths
+            }
         }
         return false;
     }

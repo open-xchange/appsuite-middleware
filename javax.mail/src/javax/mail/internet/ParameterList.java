@@ -224,6 +224,7 @@ public class ParameterList {
 	this();
 
 	HeaderTokenizer h = new HeaderTokenizer(s, HeaderTokenizer.MIME);
+	String prevValue = null;
 	for (;;) {
 	    HeaderTokenizer.Token tk = h.next();
 	    int type = tk.getType();
@@ -232,9 +233,13 @@ public class ParameterList {
 	    if (type == HeaderTokenizer.Token.EOF) // done
 		break;
 
-	    if ((char)type == ';') {
+	    if ((char)type == ';' || (null != prevValue && prevValue.startsWith(";"))) {
 		// expect parameter name
-		tk = h.next();
+	    if (null != prevValue && prevValue.startsWith(";")) {
+	        prevValue = null;
+	    } else {
+	        tk = h.next();
+	    }
 		// tolerate trailing semicolon, even though it violates the spec
 		if (tk.getType() == HeaderTokenizer.Token.EOF)
 		    break;
@@ -246,9 +251,13 @@ public class ParameterList {
 
 		// expect '='
 		tk = h.next();
-		if ((char)tk.getType() != '=')
-		    throw new ParseException("Expected '=', " +
-					    "got \"" + tk.getValue() + "\"");
+		if ((char)tk.getType() != '=') {
+	          // empty parameter; e.g. "; charset"
+            prevValue = tk.getValue();
+            continue;
+		    // throw new ParseException("Expected '=', " +
+			//		    "got \"" + tk.getValue() + "\"");
+		}
 
 		// expect parameter value
 		if (windowshack &&
@@ -261,9 +270,13 @@ public class ParameterList {
 		type = tk.getType();
 		// parameter value must be a MIME Atom or Quoted String
 		if (type != HeaderTokenizer.Token.ATOM &&
-		    type != HeaderTokenizer.Token.QUOTEDSTRING)
-		    throw new ParseException("Expected parameter value, " +
-					    "got \"" + tk.getValue() + "\"");
+		    type != HeaderTokenizer.Token.QUOTEDSTRING) {
+		    // empty parameter; e.g. "; charset="
+		    prevValue = tk.getValue();
+		    continue;
+		    //throw new ParseException("Expected parameter value, " +
+			//		    "got \"" + tk.getValue() + "\"");
+		}
 
 		value = tk.getValue();
 		lastName = name;
@@ -278,6 +291,7 @@ public class ParameterList {
 		// This may not be correct but it shouldn't matter too much.
 		// Note: AppleMail encodes filenames with non-ascii characters 
 		// correctly, so we don't need to worry about the name* subkeys.
+        prevValue = null;
 		if (type == HeaderTokenizer.Token.ATOM && lastName != null &&
 			    ((applehack &&
 				(lastName.equals("name") ||

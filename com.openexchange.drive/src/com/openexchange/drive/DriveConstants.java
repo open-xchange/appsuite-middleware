@@ -116,6 +116,12 @@ public class DriveConstants {
     public static final long OPTIMISTIC_UPLOAD_SIZE_THRESHOLD = 64 * 1024; // 64K
 
     /**
+     * The maximum allowed length of any synchronized path segment, i.e. the parts in a path separated by the {@link #PATH_SEPARATOR}
+     * character.
+     */
+    public static final int MAX_PATH_SEGMENT_LENGTH = 255;
+
+    /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.
      */
     public static final ThreadLocal<SimpleDateFormat> LOG_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {

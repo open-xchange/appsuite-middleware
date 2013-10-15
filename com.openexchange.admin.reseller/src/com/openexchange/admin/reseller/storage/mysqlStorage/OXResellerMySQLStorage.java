@@ -891,7 +891,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
                 prep2.close();
                 rs2.close();
-                cache.pushConnectionForContext(cid, oxcon);
+                cache.pushConnectionForContextAfterReading(cid, oxcon);
                 // set to null to prevent double pushback in finally
                 oxcon = null;
             }
@@ -905,7 +905,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            cache.closeContextSqlStuff(oxcon, cid);
+            cache.closeContextSqlStuff(oxcon, cid, true);
             cache.closeConfigDBSqlStuff(null, prep, rs);
             cache.closeConfigDBSqlStuff(null, prep2, rs2);
         }
@@ -936,7 +936,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 }
                 prep2.close();
                 rs2.close();
-                cache.pushConnectionForContext(cid, oxcon);
+                cache.pushConnectionForContextAfterReading(cid, oxcon);
                 // set to null to prevent double pushback in finally
                 oxcon = null;
             }
@@ -950,7 +950,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error(e.getMessage(), e);
             throw e;
         } finally {
-            cache.closeContextSqlStuff(oxcon, cid);
+            cache.closeContextSqlStuff(oxcon, cid, true);
             cache.closeConfigDBSqlStuff(null, prep, rs);
             cache.closeConfigDBSqlStuff(null, prep2, rs2);
         }

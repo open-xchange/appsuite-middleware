@@ -915,7 +915,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 } finally {
                     Databases.closeSQLStuff(rs2, stmt2);
-                    cache.pushConnectionForContext(context_id, oxdb_read);
+                    cache.pushConnectionForContextAfterReading(context_id, oxdb_read);
+                    oxdb_read = null;
                 }
 
                 quota_used /= Math.pow(2, 20);
