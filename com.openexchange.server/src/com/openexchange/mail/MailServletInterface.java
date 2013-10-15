@@ -118,6 +118,21 @@ public abstract class MailServletInterface implements Closeable {
      */
     public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
 
+    // ----------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link MailServletInterface}.
+     */
+    protected MailServletInterface() {
+        super();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
+    }
+
     /**
      * Gets a mail's ID by specified "Message-Id" header.
      *
