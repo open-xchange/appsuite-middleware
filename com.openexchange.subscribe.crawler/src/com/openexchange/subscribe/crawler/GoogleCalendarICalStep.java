@@ -55,11 +55,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
@@ -69,6 +69,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
@@ -93,13 +94,13 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
     @Override
     public void execute(WebClient webClient) {
-        ArrayList<CalendarDataObject> tempEvents = new ArrayList<CalendarDataObject>();
-        ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
+        List<CalendarDataObject> tempEvents = new ArrayList<CalendarDataObject>();
+        List<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
         try {
             Page page = webClient.getPage(url);
             byte[] bytes = page.getWebResponse().getContentAsBytes();
             // Unzip
-            int BUFFER = 1024;
+            int buflen = 1024;
             // BufferedOutputStream dest = null;
             ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(bis));
@@ -108,11 +109,11 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
             while ((entry = zis.getNextEntry()) != null) {
                 LOG.info("Extracting: " + entry);
                 int count;
-                byte data[] = new byte[BUFFER];
+                byte data[] = new byte[buflen];
                 // write the files to the disk
                 ByteArrayOutputStream dest = new ByteArrayOutputStream();
                 // dest = new BufferedOutputStream(fos, BUFFER);
-                while ((count = zis.read(data, 0, BUFFER)) != -1) {
+                while ((count = zis.read(data, 0, buflen)) != -1) {
                     dest.write(data, 0, count);
                 }
                 dest.flush();
@@ -120,7 +121,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
                 String iCalFile = dest.toString("UTF-8");
 
                 if (iCalParser != null) {
-                    tempEvents = (ArrayList<CalendarDataObject>) iCalParser.parseAppointments(
+                    tempEvents = iCalParser.parseAppointments(
                         iCalFile,
                         TimeZone.getDefault(),
                         new ContextImpl(23),

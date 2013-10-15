@@ -281,7 +281,8 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                         final InputStream in = request.getResponseStream();
                         final ByteArrayOutputStream out = new ByteArrayOutputStream();
                         final byte[] buffer = new byte[4096];
-                        for (int read = 0; (read = in.read(buffer)) > 0; out.write(buffer, 0, read)) {
+                        for (int read = 0; (read = in.read(buffer)) > 0;) {
+                            out.write(buffer, 0, read);
                         }
                         contact.setImage1(out.toByteArray());
                         contact.setImageContentType("image/jpeg");

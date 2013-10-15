@@ -55,6 +55,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -84,10 +85,6 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
 
     private String username, password;
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.subscribe.crawler.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
-     */
     @Override
     public void execute(final WebClient webClient) throws OXException {
         // Create a CalenderService and authenticate
@@ -96,7 +93,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
             myService.setUserCredentials(username, password);
             final URL feedUrl = new URL("http://www.google.com/calendar/feeds/" + username + "/private/full");
             final CalendarEventFeed myFeed = myService.getFeed(feedUrl, CalendarEventFeed.class);
-            final ArrayList events = new ArrayList<CalendarDataObject>();
+            final List<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
 
             for (int i = 0; i < myFeed.getEntries().size(); i++) {
                 final CalendarEventEntry googleEvent = myFeed.getEntries().get(i);
@@ -119,7 +116,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
 
             output = new CalendarDataObject[events.size()];
             for (int i = 0; i < events.size() && i < output.length; i++) {
-                output[i] = (CalendarDataObject) events.get(i);
+                output[i] = events.get(i);
             }
             executedSuccessfully = true;
 
