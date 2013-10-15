@@ -195,7 +195,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         }
 
         // Close for the time accessing the index
-        smalMailAccess.closetDelegateMailAccess();
+        smalMailAccess.closeDelegateMailAccess();
         // Access index
         IndexAccess<MailMessage> indexAccess = null;
         try {

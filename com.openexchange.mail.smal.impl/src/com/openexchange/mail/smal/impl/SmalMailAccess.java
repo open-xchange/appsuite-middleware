@@ -214,7 +214,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
     /**
      * Closes delegate mail access.
      */
-    protected void closetDelegateMailAccess() {
+    protected void closeDelegateMailAccess() {
         closeUnwrappedInstance(delegateMailAccess);
     }
 
@@ -254,10 +254,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
 
     @Override
     public void releaseResources() {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = delegateMailAccess;
-        if (mailAccess != null) {
-            mailAccess.invokeReleaseResources();
-        }
+        // Not needed here
     }
 
     @Override
