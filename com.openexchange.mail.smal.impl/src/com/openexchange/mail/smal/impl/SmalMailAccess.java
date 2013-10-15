@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.smal.impl;
 
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
@@ -71,58 +72,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
 
     private static final long serialVersionUID = 3887048765113161340L;
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SmalMailAccess.class));
-
-    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
-
-    private boolean connected;
-
-    private MailLogicTools logicTools;
-
-    private SmalMessageStorage messageStorage;
-
-    private SmalFolderStorage folderStorage;
-
-    /**
-     * Initializes a new {@link SmalMailAccess}.
-     *
-     * @param session The session
-     * @param accountId The account identifier
-     * @throws OXException If initialization fails
-     */
-    public SmalMailAccess(final Session session, final int accountId) throws OXException {
-        super(session, accountId);
-        if (null == session) {
-            delegateMailAccess = null;
-        } else {
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> dma = SmalMailAccessCache.getInstance().removeMailAccess(session, accountId);
-            delegateMailAccess = null == dma ? newDelegate(session, accountId) : dma;
-        }
-    }
-
-    /**
-     * Gets the connected delegate mail access.
-     *
-     * @return The connected mail access
-     * @throws OXException If delegate mail access cannot be returned
-     */
-    protected MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getDelegateMailAccess() throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = this.delegateMailAccess;
-        if (null == delegateMailAccess) {
-            if (null != session) {
-                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> dma = SmalMailAccessCache.getInstance().removeMailAccess(session, accountId);
-                delegateMailAccess = null == dma ? newDelegate(session, accountId) : dma;
-                if (connected) {
-                    delegateMailAccess.connect(false);
-                }
-            }
-            this.delegateMailAccess = delegateMailAccess;
-        } else if (connected && !delegateMailAccess.isConnectedUnsafe()) {
-            delegateMailAccess.connect(false);
-        }
-        return delegateMailAccess;
-    }
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalMailAccess.class);
 
     private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newDelegate(final Session session, final int accountId) throws OXException {
         return SmalMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
@@ -178,60 +128,6 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
         return mailProvider.createNewMailAccess(session, accountId);
     }
 
-    @Override
-    public boolean isTrackable() {
-        return false;
-    }
-
-    @Override
-    public boolean isCacheable() {
-        /*
-         * Return false to let closeInternal() being called
-         */
-        return false;
-    }
-
-    @Override
-    protected MailConfig createNewMailConfig() {
-        /*
-         * Invoked in getMailConfig(), but overridden here
-         */
-        return null;
-    }
-
-    @Override
-    protected IMailProperties createNewMailProperties() throws OXException {
-        /*
-         * Invoked in getMailConfig(), but overridden here
-         */
-        return null;
-    }
-
-    @Override
-    protected boolean checkMailServerPort() {
-        return false;
-    }
-
-    @Override
-    public void releaseResources() {
-        delegateMailAccess.invokeReleaseResources();
-    }
-
-    @Override
-    protected void connectInternal() throws OXException {
-        connected = true;
-        /*
-         * In any case invoke delegate's connect() method to let it be properly initialized: using thread, adding to watcher, etc.
-         */
-        delegateMailAccess.connect(false);
-    }
-
-    @Override
-    protected void closeInternal() {
-        closeUnwrappedInstance(delegateMailAccess);
-        connected = false;
-    }
-
     /**
      * Closes specified unwrapped mail access.
      */
@@ -272,19 +168,125 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
         mailAccess.close(false);
     }
 
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess;
+    private MailLogicTools logicTools;
+    private SmalMessageStorage messageStorage;
+    private SmalFolderStorage folderStorage;
+    private boolean connected;
+
+    /**
+     * Initializes a new {@link SmalMailAccess}.
+     *
+     * @param session The session
+     * @param accountId The account identifier
+     */
+    public SmalMailAccess(final Session session, final int accountId) {
+        super(session, accountId);
+    }
+
+    /**
+     * Gets the connected delegate mail access.
+     *
+     * @return The connected mail access
+     * @throws OXException If delegate mail access cannot be returned
+     */
+    protected MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getDelegateMailAccess() throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = this.delegateMailAccess;
+        if (null == delegateMailAccess) {
+            if (null != session) {
+                final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> dma = SmalMailAccessCache.getInstance().removeMailAccess(session, accountId);
+                delegateMailAccess = null == dma ? newDelegate(session, accountId) : dma;
+                if (connected) {
+                    delegateMailAccess.connect(false);
+                }
+            }
+            this.delegateMailAccess = delegateMailAccess;
+        } else if (connected && !delegateMailAccess.isConnectedUnsafe()) {
+            delegateMailAccess.connect(false);
+        }
+        return delegateMailAccess;
+    }
+
     @Override
-    public void setWaiting(boolean waiting) {
-        delegateMailAccess.setWaiting(waiting);
+    public boolean isTrackable() {
+        return false;
+    }
+
+    @Override
+    public boolean isCacheable() {
+        /*
+         * Return false to let closeInternal() being called
+         */
+        return false;
+    }
+
+    @Override
+    protected MailConfig createNewMailConfig() {
+        /*
+         * Invoked in getMailConfig(), but overridden here
+         */
+        return null;
+    }
+
+    @Override
+    protected IMailProperties createNewMailProperties() throws OXException {
+        /*
+         * Invoked in getMailConfig(), but overridden here
+         */
+        return null;
+    }
+
+    @Override
+    protected boolean checkMailServerPort() {
+        return false;
+    }
+
+    @Override
+    public void releaseResources() {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = delegateMailAccess;
+        if (mailAccess != null) {
+            mailAccess.invokeReleaseResources();
+        }
+    }
+
+    @Override
+    protected void connectInternal() throws OXException {
+        connected = true;
+    }
+
+    @Override
+    protected void closeInternal() {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = delegateMailAccess;
+        if (mailAccess != null) {
+            closeUnwrappedInstance(mailAccess);
+        }
+        connected = false;
+    }
+
+    @Override
+    public void setWaiting(final boolean waiting) {
+        try {
+            getDelegateMailAccess().setWaiting(waiting);
+        } catch (final OXException e) {
+            LOG.error("Error invoking setWaiting()", e);
+        }
     }
 
     @Override
     public boolean isWaiting() {
-        return delegateMailAccess.isWaiting();
+        try {
+            return getDelegateMailAccess().isWaiting();
+        } catch (final OXException e) {
+            LOG.error("Error invoking isWaiting()", e);
+            return false;
+        }
     }
 
     @Override
     public MailConfig getMailConfig() throws OXException {
-        return delegateMailAccess.getMailConfig();
+        return getDelegateMailAccess().getMailConfig();
     }
 
     @Override
@@ -294,7 +296,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
 
     @Override
     public boolean ping() throws OXException {
-        return delegateMailAccess.ping();
+        return getDelegateMailAccess().ping();
     }
 
     @Override
