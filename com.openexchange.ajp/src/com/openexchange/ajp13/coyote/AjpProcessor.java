@@ -1592,6 +1592,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             }
             properties.put(LogProperties.Name.AJP_REQUEST_IP, request.getRemoteAddr());
             properties.put(LogProperties.Name.AJP_SERVER_NAME, serverName);
+            final String userAgent = request.getHeader("User-Agent");
+            properties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
         }
         /*
          * Set proper JSESSIONID cookie and pre-create associated HTTP session

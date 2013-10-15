@@ -369,12 +369,12 @@ public class DispatcherServlet extends SessionServlet {
                 Tools.setETag(requestData.getETag(), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, httpResponse);
                 return;
             }
-            
+
             if (NOT_FOUND.equals(result.getType())) {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             };
-            
+
             if (DIRECT.equals(result.getType())) {
                 // No further processing
                 return;

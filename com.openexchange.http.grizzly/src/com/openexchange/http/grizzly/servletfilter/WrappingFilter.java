@@ -173,6 +173,8 @@ public class WrappingFilter implements Filter {
             // Names, addresses
             logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
             logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
+            final String userAgent = httpServletRequest.getHeader("User-Agent");
+            logProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
 
             // AJAX action
             final String action = request.getParameter("action");
