@@ -469,7 +469,7 @@ public final class CSSMatcher {
         // Submit to thread pool ...
         final Future<Boolean> f = threadPool.submit(task);
         // ... and await response
-        final int timeout = Integer.MAX_VALUE; // TODO: cssParseTimeoutSec();
+        final int timeout = cssParseTimeoutSec();
         final TimeUnit timeUnit = TimeUnit.SECONDS;
         try {
             final boolean retval = f.get(timeout, timeUnit).booleanValue();
