@@ -1,3 +1,7 @@
+* 2013-10-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 29268: Missing alarm value "0" for list requests.
+
 * 2013-10-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 29263: Fixed property constant from "com.openexchange. cookie.forceHTTPS" to "com.openexchange.forceHTTPS"

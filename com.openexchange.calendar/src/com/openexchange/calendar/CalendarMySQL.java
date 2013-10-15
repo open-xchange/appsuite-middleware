@@ -2459,7 +2459,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
 
             final int alarm = member.alarm;
-            if (alarm > 0) {
+            if (alarm > -1) {
                 up.setAlarmMinutes(alarm);
                 if (up.getIdentifier() == uid && up.getAlarmMinutes() >= 0) {
                     for (final CalendarDataObject cdao : cdaos) {
