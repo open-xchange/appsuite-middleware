@@ -438,10 +438,12 @@ public final class CSSMatcher {
                     }
                     cssElemsBuffer.append(css.substring(lastPos, css.length()));
                 }
-                modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
-                final String tail = cssElemsBuffer.toString();
-                cssElemsBuffer.setLength(0);
-                cssBld.append(tail);
+                if (cssElemsBuffer.length() > 0) {
+                    modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                    final String tail = cssElemsBuffer.toString();
+                    cssElemsBuffer.setLength(0);
+                    cssBld.append(tail);
+                }
                 return Boolean.valueOf(modified);
             }
         };
