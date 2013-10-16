@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.snippet.json.osgi;
+package com.openexchange.java;
 
 import java.util.AbstractQueue;
 import java.util.Collection;

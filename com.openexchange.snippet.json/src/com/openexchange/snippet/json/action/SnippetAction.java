@@ -94,7 +94,7 @@ public abstract class SnippetAction implements AJAXActionService {
     /**
      * The service listing.
      */
-    protected final ServiceListing<SnippetService> snippetServices;
+    private final ServiceListing<SnippetService> snippetServices;
 
     /**
      * Registered actions.
