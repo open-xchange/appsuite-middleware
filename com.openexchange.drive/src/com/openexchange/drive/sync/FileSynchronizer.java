@@ -217,7 +217,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
                     ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
-                return 1;
+                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
+                    path, DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), false));
+                return 2;
             }
         case MODIFIED:
             if (mayModify(comparison.getServerVersion())) {
