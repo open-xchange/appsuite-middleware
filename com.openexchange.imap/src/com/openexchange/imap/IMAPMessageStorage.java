@@ -621,6 +621,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (imapConfig.asMap().containsKey("UIDPLUS")) {
                 final TLongObjectHashMap<MailMessage> fetchedMsgs =
                     fetchValidWithFallbackFor(
+                        fullName,
                         uids,
                         uids.length,
                         getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
@@ -637,6 +638,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final TLongIntMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
                 final TLongObjectMap<MailMessage> fetchedMsgs =
                     fetchValidWithFallbackFor(
+                        fullName,
                         seqNumsMap.values(),
                         seqNumsMap.size(),
                         getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
@@ -670,7 +672,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum) throws OXException {
+    private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(final String fullName, final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum) throws OXException {
         final String key = new com.openexchange.java.StringAllocator(16).append(accountId).append(".imap.fetch.modifier").toString();
         final FetchProfile fp = fetchProfile;
         int retry = 0;
@@ -679,9 +681,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final FetchProfileModifier modifier = (FetchProfileModifier) session.getParameter(key);
                 if (null == modifier) {
                     // session.setParameter(key, FetchIMAPCommand.DEFAULT_PROFILE_MODIFIER);
-                    return fetchValidFor(array, len, fp, isRev1, seqnum, false);
+                    return fetchValidFor(fullName, array, len, fp, isRev1, seqnum, false);
                 }
-                return fetchValidFor(array, len, modifier.modify(fp), isRev1, seqnum, modifier.byContentTypeHeader());
+                return fetchValidFor(fullName, array, len, modifier.modify(fp), isRev1, seqnum, modifier.byContentTypeHeader());
             } catch (final FolderClosedException e) {
                 throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", imapFolder.getFullName()));
             } catch (final StoreClosedException e) {
@@ -742,7 +744,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, OXException {
+    private TLongObjectHashMap<MailMessage> fetchValidFor(final String fullName, final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, OXException {
+        if (null == imapFolder || !imapFolder.isOpen()) {
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+        }
         final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
         // final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false,
         // false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
