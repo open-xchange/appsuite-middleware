@@ -66,6 +66,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtStanzaStorage.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtIDMapping.properties
+%config(noreplace) /opt/open-xchange/etc/realtime.properties
 
 %changelog
 * Thu Oct 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
