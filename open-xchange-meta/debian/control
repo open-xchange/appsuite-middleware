@@ -79,6 +79,13 @@ Provides: open-xchange-meta-gui
 Depends: ${all-lang-ui-ox6}, open-xchange-gui, open-xchange-gui-wizard-plugin-gui
 Description: The Open-Xchange Meta package for the OX6 UI
 
+Package: open-xchange-meta-ui-ox6-compat
+Architecture: all
+Provides: open-xchange-meta-gui
+Depends: open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-gui-l10n-de-de, open-xchange-gui-l10n-en-us, open-xchange-gui-l10n-fr-fr, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-fr-fr
+Description: The Open-Xchange Meta package for the OX6 UI compatible to the old 6.20 meta-gui
+
+
 Package: open-xchange-meta-ui-appsuite
 Architecture: all
 Provides: open-xchange-meta-gui

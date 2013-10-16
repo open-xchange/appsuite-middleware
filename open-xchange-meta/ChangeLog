@@ -1,3 +1,8 @@
+* 2013-10-16 - choeger@open-xchange.com
+
+ - Bugfix #29300 - open-xchange-meta-ui-ox6 package requires all languages
+   introducing open-xchange-meta-ui-ox6-compat behaving like the old 6.20 version
+
 * 2013-06-10 - choeger@open-xchange.com
 
  - Bugfix #27036 - missing language de-de in open-xchange-meta-oxucs
