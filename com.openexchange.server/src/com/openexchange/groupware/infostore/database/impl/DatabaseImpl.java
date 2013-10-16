@@ -1394,7 +1394,7 @@ public class DatabaseImpl extends DBService {
                 dmi.setFilestoreLocation(result.getString(i + 1));
                 break setObjectColumns;
             case INFOSTORE_DOCUMENT_file_size:
-                dmi.setFileSize(result.getInt(i + 1));
+                dmi.setFileSize(result.getLong(i + 1));
                 break setObjectColumns;
             case INFOSTORE_DOCUMENT_file_mimetype:
                 dmi.setFileMIMEType(result.getString(i + 1));

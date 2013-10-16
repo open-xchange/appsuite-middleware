@@ -567,7 +567,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                     retval.setId(result.getInt(i + 1));
                     break FillDocumentMetadata;
                 case Metadata.FILE_SIZE:
-                    retval.setFileSize(result.getInt(i + 1));
+                    retval.setFileSize(result.getLong(i + 1));
                     break FillDocumentMetadata;
                 case Metadata.FILE_MIMETYPE:
                     retval.setFileMIMEType(result.getString(i + 1));
