@@ -193,7 +193,7 @@ public class HashCalculator {
     public String getUserAgentHash(final HttpServletRequest req, final String userAgent) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update((null == userAgent ? parseUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
+            md.update((null == userAgent ? getUserAgent(req) : userAgent).getBytes(Charsets.UTF_8));
             final String salt = this.salt;
             if (null != salt) {
                 md.update(salt.getBytes());
