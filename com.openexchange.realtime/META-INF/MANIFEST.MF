@@ -8,6 +8,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.base,
  com.google.common.collect,
+ com.openexchange.config,
  com.openexchange.context,
  com.openexchange.conversion.simple,
  com.openexchange.exception,
