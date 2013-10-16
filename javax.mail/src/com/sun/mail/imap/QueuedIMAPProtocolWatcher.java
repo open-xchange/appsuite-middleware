@@ -72,14 +72,29 @@ public final class QueuedIMAPProtocolWatcher {
     /** The logger */
     static final Log LOG = LogFactory.getLog(QueuedIMAPProtocolWatcher.class);
 
+    /**
+     * Checks if watcher has been enabled.
+     *
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    static boolean isEnabled() {
+        return LOG.isDebugEnabled();
+    }
+
+    // ------------------------------------------------------------------------------------ //
+
     /** This watcher's scheduled future task */
     private volatile ScheduledFuture<?> watcherFuture;
+
+    /** The line separator */
+    final String lineSeparator;
 
     /**
      * Initializes a new {@link QueuedIMAPProtocolWatcher}.
      */
     public QueuedIMAPProtocolWatcher() {
         super();
+        lineSeparator = System.getProperty("line.separator");
     }
 
     /**
@@ -100,7 +115,7 @@ public final class QueuedIMAPProtocolWatcher {
      * @param executor The executor to schedule periodic task
      */
     public void initWatcher(final ConcurrentMap<URLName, CountingQueue> queues, final ScheduledThreadPoolExecutor executor) {
-        if (!LOG.isDebugEnabled()) {
+        if (!isEnabled()) {
             LOG.info(QueuedIMAPProtocolWatcher.class.getSimpleName() + " not initialized since configured log level does not imply DEBUG log level.");
             return;
         }
@@ -113,9 +128,9 @@ public final class QueuedIMAPProtocolWatcher {
 
                         @Override
                         public void run() {
-                            final long minStamp = System.currentTimeMillis() - 60000; // longer than a minute
-                            final String lineSeparator = System.getProperty("line.separator");
+                            final long minStamp = System.currentTimeMillis() - 30000; // longer than 30 seconds
                             final ConcurrentMap<URLName, CountingQueue> qs = queues;
+                            final String sep = lineSeparator;
                             for (final QueuingIMAPStore.CountingQueue q : qs.values()) {
                                 // Examine CountingQueue's tracked threads
                                 final ConcurrentMap<Thread, ThreadTrace> trackedThreads = q.trackedThreads();
@@ -125,7 +140,7 @@ public final class QueuedIMAPProtocolWatcher {
                                         final QueuingIMAPStore.ThreadTrace trace = entry.getValue();
                                         if (trace.stamp < minStamp) {
                                             final long dur = System.currentTimeMillis() - trace.stamp;
-                                            final String msg = formatThread(entry.getKey(), trace.protocol, q, dur, lineSeparator);
+                                            final String msg = formatThread(entry.getKey(), trace.protocol, q, dur, sep);
                                             q.getLogger().fine(msg);
                                             LOG.debug(msg);
                                         }
@@ -134,7 +149,7 @@ public final class QueuedIMAPProtocolWatcher {
                             }
                         }
                     };
-                    tmp = executor.scheduleAtFixedRate(t, 10, 10, TimeUnit.SECONDS);
+                    tmp = executor.scheduleWithFixedDelay(t, 10, 10, TimeUnit.SECONDS);
                     watcherFuture = tmp;
                     LOG.info(QueuedIMAPProtocolWatcher.class.getSimpleName() + " successfully initialized.");
                 }
