@@ -256,6 +256,8 @@ public interface Session {
      * Sets the parameter. Any existing parameters bound to specified name are replaced with given value.
      * <p>
      * A <code>null</code> value removes the parameter.
+     * <p>
+     * <code>Note</code>: Parameters will not be considered on remote distribution.
      *
      * @param name The parameter name
      * @param value The parameter value
