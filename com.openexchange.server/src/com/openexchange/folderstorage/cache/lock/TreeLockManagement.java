@@ -49,10 +49,13 @@
 
 package com.openexchange.folderstorage.cache.lock;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
@@ -142,6 +145,9 @@ public final class TreeLockManagement {
      * @return The read-write lock
      */
     public ReadWriteLock getFor(final String treeId, final int userId, final int contextId) {
+        return EMPTY_READ_WRITE_LOCK;
+        /*-
+         *
         ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> userMap = map.get(Integer.valueOf(contextId));
         if (null == userMap) {
             final ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> newUserMap = new ConcurrentHashMap<Integer, ConcurrentMap<String,ReadWriteLock>>(32);
@@ -167,6 +173,8 @@ public final class TreeLockManagement {
             }
         }
         return readWriteLock;
+         *
+         */
     }
 
     /**
@@ -177,6 +185,9 @@ public final class TreeLockManagement {
      * @return The lock or <code>null</code> if absent
      */
     public ReadWriteLock optFor(final String treeId, final Session session) {
+        return EMPTY_READ_WRITE_LOCK;
+        /*-
+         *
         ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> userMap = map.get(Integer.valueOf(session.getContextId()));
         if (null == userMap) {
             return null;
@@ -186,6 +197,94 @@ public final class TreeLockManagement {
             return null;
         }
         return lockMap.get(treeId);
+         *
+         */
     }
+
+    // ----------------------------------------------------------------------------------------------- //
+
+    static final Lock EMPTY_LOCK = new Lock() {
+
+        @Override
+        public void unlock() {
+            // Nothing to do
+        }
+
+        @Override
+        public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public boolean tryLock() {
+            return true;
+        }
+
+        @Override
+        public Condition newCondition() {
+            return EMPTY_CONDITION;
+        }
+
+        @Override
+        public void lockInterruptibly() throws InterruptedException {
+            // Nothing to do
+        }
+
+        @Override
+        public void lock() {
+            // Nothing to do
+        }
+    };
+
+    static final Condition EMPTY_CONDITION = new Condition() {
+
+        @Override
+        public void signalAll() {
+            // Nothing to do
+        }
+
+        @Override
+        public void signal() {
+            // Nothing to do
+        }
+
+        @Override
+        public boolean awaitUntil(Date deadline) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public void awaitUninterruptibly() {
+            // Nothing to do
+        }
+
+        @Override
+        public long awaitNanos(long nanosTimeout) throws InterruptedException {
+            return 0;
+        }
+
+        @Override
+        public boolean await(long time, TimeUnit unit) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public void await() throws InterruptedException {
+            // Nothing to do
+        }
+    };
+
+    private static final ReadWriteLock EMPTY_READ_WRITE_LOCK = new ReadWriteLock() {
+
+        @Override
+        public Lock writeLock() {
+            return EMPTY_LOCK;
+        }
+
+        @Override
+        public Lock readLock() {
+            return EMPTY_LOCK;
+        }
+    };
 
 }

@@ -1829,12 +1829,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException e) {
                 log.error("SQL Error closing statement!", e);
             }
-            try {
-                if (read_ox_con != null) {
-                    cache.pushConnectionForContext(context_id, read_ox_con);
+            if (read_ox_con != null) {
+                try {
+                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox read connection to pool!", exp);
             }
         }
     }

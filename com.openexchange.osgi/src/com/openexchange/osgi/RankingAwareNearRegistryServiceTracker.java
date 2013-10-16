@@ -49,10 +49,10 @@
 
 package com.openexchange.osgi;
 
+import static com.openexchange.osgi.util.RankedService.getRanking;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.java.SortableConcurrentList;
@@ -98,7 +98,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
         final S service = context.getService(reference);
         final int ranking = getRanking(reference);
         final RankedService<S> rankedService = new RankedService<S>(service, ranking);
-        if (services.add(rankedService)) {
+        if (services.add(rankedService)) { // Append to the end of the list
             services.sort();
             return service;
         }
@@ -111,21 +111,6 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
         services.remove(new RankedService<S>(service, getRanking(reference)));
         services.sort();
         context.ungetService(reference);
-    }
-
-    private static <S> int getRanking(final ServiceReference<S> reference) {
-        int ranking = 0;
-        {
-            final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
-            if (null != oRanking) {
-                try {
-                    ranking = Integer.parseInt(oRanking.toString().trim());
-                } catch (final NumberFormatException e) {
-                    ranking = 0;
-                }
-            }
-        }
-        return ranking;
     }
 
 }

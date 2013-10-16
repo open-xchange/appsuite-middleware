@@ -252,6 +252,21 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-ui-ox6-compat
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for the OX6 UI compatible to the old 6.20 meta-gui
+Provides:	open-xchange-meta-gui
+Requires:	open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-gui-l10n-de-de, open-xchange-gui-l10n-en-us, open-xchange-gui-l10n-fr-fr, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-fr-fr
+
+
+%description -n open-xchange-meta-ui-ox6-compat
+The Open-Xchange Meta package for the OX6 UI compatible to the old 6.20 meta-gui
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-ui-appsuite
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for the OX App Suite UI
@@ -339,6 +354,10 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-meta-ui-ox6
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-ui-ox6-compat
 %defattr(-,root,root)
 %doc README.TXT
 

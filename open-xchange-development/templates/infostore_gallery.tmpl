@@ -1,181 +1,585 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-<title>Photo album</title>
-<meta name="description" content="">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-html {
-  height: 100%;
-}
-body {
-  background-color: #222;
-  color: white;
-  font-family: "Helvetica Neue", Helvtica, Arial, sans-serif;
-  font-size: 40px;
-  line-height: 1.2em;
-  padding: 0;
-  margin: 0;
-  height: 100%;
-}
-a, a:visited {
-  color: #fc0;
-  outline: 0;
-}
-h1 {
-  font-size: 1em;
-  font-weight: 200;
-  line-height: 1.2em;
-  color: #555;
-  padding: 1em 0 1em 0.5em;
-  margin: 0;
-}
-h1 b {
-  font-weight: 200;
-  color: #777;
-}
-section {
-  font-size: 0.9em;
-  padding: 0 0 3em 0;
-}
-nav {
-  text-align: center;
-  color: #555;
-  padding: 100px 0 100px 0;
-  height: 20px;
-}
-.caption {
-  text-align: right;
-  color: #333;
-  line-height: 1em;
-  padding: 1em 0.5em 0 0.5em;
-  border-top: 1px solid #111;
-  margin: 0em 0 1em 0;
-}
-.media {
-  margin: 0 auto 0 auto;
-  -webkit-box-shadow: 0px 2px 25px 0px #000;
-  -moz-box-shadow: 0px 2px 25px 0px #000;
-  box-shadow: 0px 2px 25px 0px #000;
-  background-color: #111;
-  display: block;
-  outline: 0;
-  max-width: 800px;
-}
-video.media {
-  height: 350px;
-}
-.download {
-  font-size: 13px;
-  line-height: 3em;
-  text-align: center;
-}
-footer {
-  background-color: #000;
-  margin-top: 3em;
-  padding: 2em 20% 2em 20%;
-  color: #555;
-  text-align: center;
-  font-size: 13px;
-  line-height: 15px;
-}
-
-@media (max-width: 480px) { body { font-size: 25px; } .media { } }
-@media (min-width: 480px) and (max-width: 600px) { body { font-size: 25px; } .media { } }
-@media (min-width: 600px) and (max-width: 800px) { .media { } }
-@media (min-width: 1400px) { body { font-size: 50px; } .media { } }
-
-</style>
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<script>
-var busy = "/ox7/apps/themes/login/busy.gif";
-var items = [], filename;
-<#list infostore as infoitem>
-<#if !infoitem.fileName!?starts_with("_") && !infoitem.fileName!?starts_with(".") >
-filename = "${infoitem.fileName!''?html}";
-if (/(png|jpe?g|gif)$/i.test(filename)) {
-  items.push({
-    src: "${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}",
-    mime: "${infoitem.fileMIMEType?html}"
-  });
-}
-</#if>
-</#list>
-</script>
-
-</head>
-<body>
-
-<header>
-<h1>Photo album</h1>
-</header>
-<article></article>
-<nav></nav>
-<footer>${privacy}</footer>
-
-<script>
-
-var offset = 0, STEP = 2, scrollHeigth, height, limit;
-
-function drawNext() {
-    var tmp, i, $i, o, sec;
-    if (items.length > offset) {
-        tmp = items.slice(offset, offset + STEP);
-        for (i = 0, $i = tmp.length; i < $i; i++) {
-            o = tmp[i];
-            sec = $('<section>');
-            sec.append(
-                $('<div>').addClass('caption').text((i + offset + 1) + '/' + items.length)
-            );
-            if ((/^video\//i).test(o.mime)) {
-                sec.append(
-                    $('<video>', { controls: "controls", preload: "metadata", tabindex: "1" }).addClass("media")
-                    .append($('<source>', { src: o.src })),
-                    $('<div>').addClass('download').append($('<a>', { href: o.src }).text('Download video'))
-                );
-            } else {
-                sec.append(
-                    $('<img>', { alt: '', src: o.src + '&width=800&height=600&scaleType=contain', tabindex: "1" }).addClass("media")
-                );
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+        <title>Foto gallery</title>
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+        <style type="text/css">
+            html, body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                color: #fff;
             }
-            $('article').append(sec);
-        }
-        fnResize();
-        offset += STEP;
-    } else {
-        // remove busy GIF
-        $('nav').remove();
-    }
-}
+            body {
+                font-family: "Helvetica Neue", Helvtica, Arial, sans-serif;
+                background-color: #222 !important;
+            }
+            header {
+                color: #fff;
+                text-align: center;
+            }
+            #content-container {
+                display: inline-block;
+                width: 100%;
+            }
+            #content {
+                margin: 2% auto 0;
+            }
+            .thumbnail-image {
+                width: 200px;
+                height: 200px;
+                display: inline-block;
+                margin: 1px;
+                background-position: center center;
+                -webkit-background-size: cover;
+                -moz-background-size: cover;
+                -o-background-size: cover;
+                background-size: cover;
+                float: left;
+                cursor: pointer;
+            }
+            .thumbnail-image:hover {
+                border: solid 5px rgba(0, 0, 0, 0.5);
+                background-origin: border-box;
+            }
+            .carousel-container {
+                background-color: #222;
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+            }
+            #carousel-display {
+                position: fixed;
+                top: 42px;
+                bottom: 0;
+                left: 0;
+                right: 0;
+            }
+            .item {
+                height: 100%;
+            }
+            .image-container {
+                width: 100%;
+                height: 100%;
+            }
+            .display-image {
+                position: absolute;
+                margin: auto;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                max-width: 100%;
+                max-height: 100%;
+                -webkit-box-shadow: 0px 0px 20px -5px #000;
+                -moz-box-shadow: 0px 0px 20px -5px #000;
+                box-shadow: 0px 0px 20px -5px #000;
+                pointer-events: none;
+            }
+            .carousel-inner {
+                height: 100%;
+            }
+            .back-container {
+                position: fixed;
+                left: 0;
+                right: 0;
+                top: 0;
+                height: 42px;
+                text-align: left;
+                vertical-align: middle;
+                padding: 5px;
+            }
+            .load-more {
+                clear: both;
+                padding: 5px;
+            }
+            .button a{
+                display: inline-block;
+                background: #333;
+                padding: 6px 12px;
+                margin: 0px;
+                color: #fff;
+                -moz-border-radius: 4px;
+                -webkit-border-radius: 4px;
+                border-radius: 4px;
+                text-decoration: none;
+            }
+            .button a:hover {
+                background: #666;
+                color: #fff;
+                text-decoration: none;
+            }
+            .carousel-caption {
+                padding-bottom: 0;
+            }
+            .carousel-caption h3 {
+                padding-bottom: 0;
+                font-size: 20px;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+            }
+            @media (max-width: 1024px),(max-device-width: 1024px) {
+                .thumbnail-image {
+                    width: 168px;
+                    height: 168px;
+                }
+            }
+            @media (max-width: 568px),(max-device-width: 568px) {
+                .thumbnail-image {
+                    width: 102px;
+                    height: 102px;
+                }
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script>
+            var list = [
+            <#list infostore as item>
+                <#--Check, that the file is not hidden-->
+                <#if item.fileName?? && !item.fileName!?starts_with('_') && !item.fileName!?starts_with('.') >
+                    <#--Check for the correct file type-->
+                    <#if (item.fileName!?last_index_of('.') >= 0) && item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?matches('(gif|bmp|tiff|jpe?g|png)')>
+                        {url: '${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, item)!?html}',
+                        name: '${item.fileName!?substring(0, item.fileName!?last_index_of('.'))}'}<#if item_has_next>,</#if>
+                    </#if>
+                </#if>
+            </#list>
+            ];
 
-function fnScroll() {
-    var y = $(this).scrollTop();
-    if (y >= limit) {
-        $(this).off('scroll', fnScroll);
-        drawNext();
-        $(this).on('scroll', fnScroll);
-    }
-}
+            $(document).ready(function() {
+                thumbnails = new Thumbnails()
 
-function fnResize() {
-    STEP = Math.ceil($('body').height() / 500 * 2);
-    height = $('body').height();
-    limit = $('nav').offset().top - (height / 2 >> 0);
-}
+                carousel = new Carousel();
+            });
 
-$(document).ready(function () {
-    $('nav').append($('<img>', { src: busy, alt: '', id: 'busy' }));
-    fnResize();
-    drawNext();
-    $(window)
-        .on('scroll', fnScroll)
-        .on('resize orientationchange', fnResize);
-});
+            window.onresize = function () {
+                //when the window is resized, it must be checked, if the number of thunbnails changed
+                thumbnails.update();
+            };
 
-</script>
+            /**
+             * Creates a carousel objects, which is responsible for drawing the popup and includes the slideshow
+             * with images and titles.
+             */
+            var Carousel = function () {
+                var carouselContainer,
+                    carousel,
+                    itemContainer,
+                    content;
 
-</body>
+                /**
+                 * Ensures, that the image at the given index and the image to the left and to the
+                 * right are loaded.
+                 * @param {integer} The index of the middle image to load.
+                 */
+                function ensureImages(index) {
+                    ensureImage(index);
+
+                    ensureImage(index + 1);
+
+                    ensureImage(index - 1);
+                }
+
+                /**
+                 * @param {integer} Ensures, that the image at the give index is loaded.
+                 */
+                function ensureImage(index) {
+                    if(index < 0) {
+                        index += list.length;
+                    } else if(index >= list.length) {
+                        index -= list.length;
+                    }
+
+                    var child = itemContainer.children()[index];
+
+                    if($(child).find('img').length === 0) {
+                        $(child).append(
+                            $('<img>').attr({src: getURL(index)}).addClass('display-image'),
+                            $('<div>').addClass('carousel-caption').append(
+                                $('<h3>').text(list[index].name)
+                            )
+                        )
+                    }
+                }
+
+                /**
+                 * Makes a url with requested width and height.
+                 * @param {integer} The index in the list
+                 */
+                function getURL(index) {
+                    return list[index].url + '&width=' + window.innerWidth + '&height=' + (window.innerHeight - 42) + '&scaleType=contain';
+                }
+
+                /**
+                 * Opens the popup for displaying the images in a slideshow at the given index.
+                 * @param {integer} The desired index
+                 */
+                function openPopup(index) {
+                    content = $('body').children();
+                    scrollPosition = $('body').scrollTop();
+
+                    $('body').css({overflow: 'hidden'})
+
+                    ensureImages(index);
+                    $('body').append(carouselContainer.css({display: 'none'}).fadeIn(400, function () {
+                        thumbnails.detach();
+                    }));
+                    carousel.carousel(index);
+                }
+
+                /**
+                 * Closes the popup layer with the slideshow and fades into the previous content.
+                 */
+                function closePopup() {
+                    thumbnails.attach();
+                    carouselContainer.fadeOut(400, function () {carouselContainer.detach();});
+
+                    $('body').css({overflow: ''});
+                    thumbnails.update();
+
+                    setTimeout(function () {$('body').scrollTop(scrollPosition);}, 10);
+                }
+
+                /**
+                 * This function inits the carousel and add the specific elements to the DOM.
+                 * This function must be called while creating a Carousel object.
+                 */
+                function initCarousel() {
+                    itemContainer = $('<div>').addClass('carousel-inner');
+
+                    carousel = $('<div>').attr({
+                        id: 'carousel-display',
+                        'class': 'carousel slide'
+                    }).append(
+                        itemContainer,
+                        $('<a>').addClass('left carousel-control')
+                            .attr({href: '#carousel-display', 'data-slide': 'prev'})
+                            .append($('<span>').addClass('icon-prev'))
+                            .click(function (e) {
+                                var index = carousel.find('.active').data('index');
+                                ensureImages(index - 1);
+                            })
+                            .on('swiperight', function () {
+                                carousel.carousel('prev');
+                                var index = carousel.find('.active').data('index');
+                                ensureImages(index - 1);
+                            }),
+                        $('<a>').addClass('right carousel-control')
+                            .attr({href: '#carousel-display', 'data-slide': 'next'})
+                            .append($('<span>').addClass('icon-next'))
+                            .click(function (e) {
+                                var index = carousel.find('.active').data('index');
+                                ensureImages(index + 1);
+                            })
+                            .on('swipeleft', function () {
+                                carousel.carousel('next');
+
+                                var index = carousel.find('.active').data('index');
+                                ensureImages(index + 1);
+                            })
+                    );
+
+                    carouselContainer = $('<div>').addClass('carousel-container').append(
+                        carousel,
+                        $('<div>').addClass('back-container button').append(
+                            $('<a>').attr({href: '#'}).text('Back')
+                                .click(function () {
+                                    closePopup();
+                                })
+                        )
+                    );
+
+                    carousel.carousel({interval: false});
+
+                    initSlides();
+                }
+
+                /**
+                 * Initializes the slides of the slideshow. These slides are empty until
+                 * the ensureImage function appends images and captions to the slides.
+                 */
+                function initSlides() {
+                    var i;
+
+                    for(i = 0; i < list.length; i++) {
+                        itemContainer.append($('<div>')
+                            .data('index', i)
+                            .addClass('item')
+                        );
+                    }
+
+                    itemContainer.children().first().addClass('active');
+
+                    itemContainer
+                    .on('swipeleft', function () {
+                        carousel.carousel('next');
+
+                        var index = carousel.find('.active').data('index');
+                        ensureImages(index + 1);
+                    })
+                    .on('swiperight', function () {
+                        carousel.carousel('prev');
+                        var index = carousel.find('.active').data('index');
+                        ensureImages(index - 1);
+                    });
+                }
+
+                //call init once on creation
+                initCarousel();
+
+                return { open: openPopup };
+            }
+
+            /**
+             * Creates a thumnail object, which is responsible for creating, displaying and updating the
+             * thumbnails of the application.
+             * @constructor
+             */
+            var Thumbnails = function () {
+                var thumbnailContainer = $('#content'),
+                    imageCache = [],
+                    lastMetrics,
+                    numSites = 1;
+
+                /**
+                 * @param {integer} The index within the list of the image to be displayed.
+                 * @return {object} A jquery object containing a div with a backgroundimage.
+                 */
+                function createThumbnail (index) {
+                    return $('<div>').css({'background-image': 'url("' + getURL(index) + '")'})
+                        .addClass('thumbnail-image')
+                        .data('index', index)
+                        .click(function (e) {
+                            carousel.open(parseInt($(this).data('index')));
+                        });
+                }
+
+                /**
+                 * Makes a url with requested width and height.
+                 * @param {integer} The index in the list
+                 */
+                function getURL(index) {
+                    return list[index].url + '&width=150&height=150&scaleType=cover';
+                }
+
+                /**
+                 * @return {object} An object containing information about the size of a preview tile.
+                 */
+                function getTileMetrics() {
+                    var opt = {},
+                        container = $('#content-container'),
+                        width,
+                        height,
+                        detach = false;
+
+                    if(list.length === 0) {
+                        return;
+                    }
+
+                    if(!imageCache.length > 0 || !imageCache[0].outerWidth(true) > 0) {
+                        if(imageCache.length === 0) {
+                            var thumbnail = createThumbnail(0);
+
+                            imageCache.push(thumbnail);
+                            thumbnailContainer.append(thumbnail);
+                        } else {
+                            thumbnailContainer.append(imageCache[0]);
+                        }
+
+                        detach = true;
+                    }
+
+                    opt.imgWidth = imageCache[0].outerWidth(true);
+                    opt.imgHeight = imageCache[0].outerHeight(true);
+
+                    if(detach) {
+                        thumbnailContainer.children().detach();
+                    }
+
+                    opt.numRows = Math.floor(container.width() / opt.imgWidth);
+                    opt.numColumns = Math.floor(window.innerHeight / opt.imgHeight) * numSites;
+
+                    return opt;
+                }
+
+                /**
+                 * This function appends the image thumbnails to the div with the class 'content'.
+                 * @param {object} The object with the tile metrics
+                 */
+                function appendImages (metrics) {
+                    var counter = 0;
+
+                    outerLoop: for(i = 0; i < metrics.numRows; i++) {
+                        for(j = 0; j < metrics.numColumns; j++) {
+                            if(counter >= list.length) {
+                                break outerLoop;
+                            } else {
+                                if(counter < imageCache.length) {
+                                    thumbnailContainer.append(imageCache[counter]);
+                                } else {
+                                    var thumbnail = createThumbnail(counter);
+
+                                    imageCache.push(thumbnail);
+                                    thumbnailContainer.append(thumbnail);
+                                }
+
+                                counter++;
+                            }
+                        }
+                    }
+
+                    thumbnailContainer.css({width: (metrics.numRows * metrics.imgWidth) + 'px'});
+
+                    //if the list contains more items, append one more
+                    if(counter < list.length) {
+                        appendMoreButton();
+                    }
+                }
+
+                /**
+                 * This function appends a more link to the image preview to load more images.
+                 */
+                function appendMoreButton () {
+                    thumbnailContainer.append($('<div>')
+                        .attr({style: 'text-align: center'})
+                        .addClass('load-more button')
+                        .append(
+                            $('<a>').attr({href: '#'})
+                                .text('More')
+                                .click(function (e) {
+                                    e.preventDefault();
+
+                                    numSites++;
+                                    update();
+                                })
+                        )
+                    );
+                }
+
+                /**
+                 * Adds a banner to the page, which states, that the page does not
+                 * contain any images.
+                 */
+                function appendEmptyPage (){
+                    thumbnailContainer.append(
+                        $('<h1>').text('There are no images in this folder. ')
+                    ).css({'text-align': 'center'});
+                }
+
+                /**
+                 * This function is called, when something in the view changes. It is checked, if the
+                 * number of displayed tiles changed. If not, this function does nothing.
+                 */
+                function update () {
+                    var counter = 0,
+                        metrics = getTileMetrics(),
+                        i, j;
+
+                    //check, if we do have some images in the list
+                    if(list.length === 0) {
+                        appendEmptyPage();
+                        return;
+                    }
+
+                    //check, if the size really changed
+                    if(lastMetrics && lastMetrics.numRows == metrics.numRows && lastMetrics.numColumns == metrics.numColumns) {
+                        return;
+                    }
+                    lastMetrics = metrics;
+
+                    //clear the old image container
+                    thumbnailContainer.children().detach();
+
+                    //append the new content
+                    appendImages(metrics);
+                }
+
+                /**
+                 * This function attaches the thumbnails to the body
+                 */
+                function attach () {
+                    thumbnailContainer.css({display: ''});
+                }
+
+                /**
+                 * This function removes the thumbnail container
+                 */
+                function detach () {
+                    thumbnailContainer.css({display: 'none'});
+                }
+
+                //call update once on creation
+                update();
+
+                return {update: update, attach: attach, detach: detach};
+            }
+        </script>
+    </head>
+    <body>
+        <header>
+        </header>
+        <div id="content-container">
+            <div id="content">
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+        <script type="text/javascript">
+            /*!
+             * Bootstrap v3.0.0
+             *
+             * Copyright 2013 Twitter, Inc
+             * Licensed under the Apache License v2.0
+             * http://www.apache.org/licenses/LICENSE-2.0
+             *
+             * Designed and built with all the love in the world @twitter by @mdo and @fat.
+             */
+            +function(a){"use strict";var b=function(b,c){this.$element=a(b),this.$indicators=this.$element.find(".carousel-indicators"),this.options=c,this.paused=this.sliding=this.interval=this.$active=this.$items=null,this.options.pause=="hover"&&this.$element.on("mouseenter",a.proxy(this.pause,this)).on("mouseleave",a.proxy(this.cycle,this))};b.DEFAULTS={interval:5e3,pause:"hover",wrap:!0},b.prototype.cycle=function(b){return b||(this.paused=!1),this.interval&&clearInterval(this.interval),this.options.interval&&!this.paused&&(this.interval=setInterval(a.proxy(this.next,this),this.options.interval)),this},b.prototype.getActiveIndex=function(){return this.$active=this.$element.find(".item.active"),this.$items=this.$active.parent().children(),this.$items.index(this.$active)},b.prototype.to=function(b){var c=this,d=this.getActiveIndex();if(b>this.$items.length-1||b<0)return;return this.sliding?this.$element.one("slid",function(){c.to(b)}):d==b?this.pause().cycle():this.slide(b>d?"next":"prev",a(this.$items[b]))},b.prototype.pause=function(b){return b||(this.paused=!0),this.$element.find(".next, .prev").length&&a.support.transition.end&&(this.$element.trigger(a.support.transition.end),this.cycle(!0)),this.interval=clearInterval(this.interval),this},b.prototype.next=function(){if(this.sliding)return;return this.slide("next")},b.prototype.prev=function(){if(this.sliding)return;return this.slide("prev")},b.prototype.slide=function(b,c){var d=this.$element.find(".item.active"),e=c||d[b](),f=this.interval,g=b=="next"?"left":"right",h=b=="next"?"first":"last",i=this;if(!e.length){if(!this.options.wrap)return;e=this.$element.find(".item")[h]()}this.sliding=!0,f&&this.pause();var j=a.Event("slide.bs.carousel",{relatedTarget:e[0],direction:g});if(e.hasClass("active"))return;this.$indicators.length&&(this.$indicators.find(".active").removeClass("active"),this.$element.one("slid",function(){var b=a(i.$indicators.children()[i.getActiveIndex()]);b&&b.addClass("active")}));if(a.support.transition&&this.$element.hasClass("slide")){this.$element.trigger(j);if(j.isDefaultPrevented())return;e.addClass(b),e[0].offsetWidth,d.addClass(g),e.addClass(g),d.one(a.support.transition.end,function(){e.removeClass([b,g].join(" ")).addClass("active"),d.removeClass(["active",g].join(" ")),i.sliding=!1,setTimeout(function(){i.$element.trigger("slid")},0)}).emulateTransitionEnd(600)}else{this.$element.trigger(j);if(j.isDefaultPrevented())return;d.removeClass("active"),e.addClass("active"),this.sliding=!1,this.$element.trigger("slid")}return f&&this.cycle(),this};var c=a.fn.carousel;a.fn.carousel=function(c){return this.each(function(){var d=a(this),e=d.data("bs.carousel"),f=a.extend({},b.DEFAULTS,d.data(),typeof c=="object"&&c),g=typeof c=="string"?c:f.slide;e||d.data("bs.carousel",e=new b(this,f)),typeof c=="number"?e.to(c):g?e[g]():f.interval&&e.pause().cycle()})},a.fn.carousel.Constructor=b,a.fn.carousel.noConflict=function(){return a.fn.carousel=c,this},a(document).on("click.bs.carousel.data-api","[data-slide], [data-slide-to]",function(b){var c=a(this),d,e=a(c.attr("data-target")||(d=c.attr("href"))&&d.replace(/.*(?=#[^\s]+$)/,"")),f=a.extend({},e.data(),c.data()),g=c.attr("data-slide-to");g&&(f.interval=!1),e.carousel(f),(g=c.attr("data-slide-to"))&&e.data("bs.carousel").to(g),b.preventDefault()}),a(window).on("load",function(){a('[data-ride="carousel"]').each(function(){var b=a(this);b.carousel(b.data())})})}(window.jQuery),+function(a){function b(){var a=document.createElement("bootstrap"),b={WebkitTransition:"webkitTransitionEnd",MozTransition:"transitionend",OTransition:"oTransitionEnd otransitionend",transition:"transitionend"};for(var c in b)if(a.style[c]!==undefined)return{end:b[c]}}"use strict",a.fn.emulateTransitionEnd=function(b){var c=!1,d=this;a(this).one(a.support.transition.end,function(){c=!0});var e=function(){c||a(d).trigger(a.support.transition.end)};return setTimeout(e,b),this},a(function(){a.support.transition=b()})}(window.jQuery)
+        </script>
+        <script type="text/javascript">
+            /*
+            * jQuery Mobile v1.3.2
+            * http://jquerymobile.com
+            *
+            * Copyright 2010, 2013 jQuery Foundation, Inc. and other contributors
+            * Released under the MIT license.
+            * http://jquery.org/license
+            */
+            (function(p,e,r){"function"===typeof define&&define.amd?define(["jquery"],function(v){r(v,p,e);return v.mobile}):r(p.jQuery,p,e)})(this,document,function(p,e,r,v){p.extend(p.support,{orientation:"orientation"in e&&"onorientationchange"in e});(function(a){a.event.special.throttledresize={setup:function(){a(this).bind("resize",e)},teardown:function(){a(this).unbind("resize",e)}};var e=function(){g=(new Date).getTime();h=g-m;250<=h?(m=g,a(this).trigger("throttledresize")):(q&&clearTimeout(q),q=setTimeout(e,
+                250-h))},m=0,q,g,h})(p);(function(a,e){function m(){var a=h();a!==b&&(b=a,q.trigger(g))}var q=a(e),g="orientationchange",h,b,d,c,l={0:!0,180:!0};a.support.orientation&&(d=e.innerWidth||q.width(),c=e.innerHeight||q.height(),d=d>c&&50<d-c,c=l[e.orientation],d&&c||!d&&!c)&&(l={"-90":!0,90:!0});a.event.special.orientationchange=a.extend({},a.event.special.orientationchange,{setup:function(){if(a.support.orientation&&!a.event.special.orientationchange.disabled)return!1;b=h();q.bind("throttledresize",m)},
+                teardown:function(){if(a.support.orientation&&!a.event.special.orientationchange.disabled)return!1;q.unbind("throttledresize",m)},add:function(a){var f=a.handler;a.handler=function(a){a.orientation=h();return f.apply(this,arguments)}}});a.event.special.orientationchange.orientation=h=function(){var b=!0,b=r.documentElement;return(b=a.support.orientation?l[e.orientation]:b&&1.1>b.clientWidth/b.clientHeight)?"portrait":"landscape"};a.fn[g]=function(a){return a?this.bind(g,a):this.trigger(g)};a.attrFn&&
+                (a.attrFn[g]=!0)})(p,this);(function(a,e,m,q){function g(a){for(;a&&"undefined"!==typeof a.originalEvent;)a=a.originalEvent;return a}function h(b){for(var f={},c,d;b;){c=a.data(b,w);for(d in c)c[d]&&(f[d]=f.hasVirtualBinding=!0);b=b.parentNode}return f}function b(){t&&(clearTimeout(t),t=0);t=setTimeout(function(){x=t=0;z.length=0;C=!1;y=!0},a.vmouse.resetTimerDuration)}function d(b,f,c){var d,l;if(!(l=c&&c[b])){if(c=!c)a:{for(c=f.target;c;){if((l=a.data(c,w))&&(!b||l[b]))break a;c=c.parentNode}c=
+                null}l=c}if(l){d=f;c=d.type;var k,n;d=a.Event(d);d.type=b;b=d.originalEvent;l=a.event.props;-1<c.search(/^(mouse|click)/)&&(l=v);if(b)for(n=l.length,k;n;)k=l[--n],d[k]=b[k];-1<c.search(/mouse(down|up)|click/)&&!d.which&&(d.which=1);if(-1!==c.search(/^touch/)&&(k=g(b),c=k.touches,k=k.changedTouches,b=c&&c.length?c[0]:k&&k.length?k[0]:q))for(c=0,l=G.length;c<l;c++)k=G[c],d[k]=b[k];a(f.target).trigger(d)}return d}function c(c){var b=a.data(c.target,p);C||x&&x===b||!(b=d("v"+c.type,c))||(b.isDefaultPrevented()&&
+                c.preventDefault(),b.isPropagationStopped()&&c.stopPropagation(),b.isImmediatePropagationStopped()&&c.stopImmediatePropagation())}function l(c){var b=g(c).touches,f;b&&1===b.length&&(f=c.target,b=h(f),b.hasVirtualBinding&&(x=K++,a.data(f,p,x),t&&(clearTimeout(t),t=0),u=y=!1,f=g(c).touches[0],H=f.pageX,I=f.pageY,d("vmouseover",c,b),d("vmousedown",c,b)))}function F(a){y||(u||d("vmousecancel",a,h(a.target)),u=!0,b())}function f(c){if(!y){var f=g(c).touches[0],k=u,l=a.vmouse.moveDistanceThreshold,n=h(c.target);
+                (u=u||Math.abs(f.pageX-H)>l||Math.abs(f.pageY-I)>l)&&!k&&d("vmousecancel",c,n);d("vmousemove",c,n);b()}}function k(a){if(!y){y=!0;var c=h(a.target),f;d("vmouseup",a,c);u||(f=d("vclick",a,c))&&f.isDefaultPrevented()&&(f=g(a).changedTouches[0],z.push({touchID:x,x:f.clientX,y:f.clientY}),C=!0);d("vmouseout",a,c);u=!1;b()}}function n(c){c=a.data(c,w);var b;if(c)for(b in c)if(c[b])return!0;return!1}function J(){}function r(b){var d=b.substr(1);return{setup:function(e,g){n(this)||a.data(this,w,{});a.data(this,
+                w)[b]=!0;s[b]=(s[b]||0)+1;1===s[b]&&A.bind(d,c);a(this).bind(d,J);D&&(s.touchstart=(s.touchstart||0)+1,1===s.touchstart&&A.bind("touchstart",l).bind("touchend",k).bind("touchmove",f).bind("scroll",F))},teardown:function(e,g){--s[b];s[b]||A.unbind(d,c);D&&(--s.touchstart,s.touchstart||A.unbind("touchstart",l).unbind("touchmove",f).unbind("touchend",k).unbind("scroll",F));var m=a(this),h=a.data(this,w);h&&(h[b]=!1);m.unbind(d,J);n(this)||m.removeData(w)}}}var w="virtualMouseBindings",p="virtualTouchID";
+                e="vmouseover vmousedown vmousemove vmouseup vclick vmouseout vmousecancel".split(" ");var G="clientX clientY pageX pageY screenX screenY".split(" "),v=a.event.props.concat(a.event.mouseHooks?a.event.mouseHooks.props:[]),s={},t=0,H=0,I=0,u=!1,z=[],C=!1,y=!1,D="addEventListener"in m,A=a(m),K=1,x=0,E;a.vmouse={moveDistanceThreshold:10,clickDistanceThreshold:10,resetTimerDuration:1500};for(var B=0;B<e.length;B++)a.event.special[e[B]]=r(e[B]);D&&m.addEventListener("click",function(c){var b=z.length,f=
+                c.target,d,k,l,n,e;if(b)for(d=c.clientX,k=c.clientY,E=a.vmouse.clickDistanceThreshold,l=f;l;){for(n=0;n<b;n++)if(e=z[n],l===f&&Math.abs(e.x-d)<E&&Math.abs(e.y-k)<E||a.data(l,p)===e.touchID){c.preventDefault();c.stopPropagation();return}l=l.parentNode}},!0)})(p,e,r);p.mobile={};(function(a,e){var m={touch:"ontouchend"in r};a.mobile.support=a.mobile.support||{};a.extend(a.support,m);a.extend(a.mobile.support,m)})(p);(function(a,e,m){function q(c,b,d){var f=d.type;d.type=b;a.event.dispatch.call(c,d);
+                d.type=f}var g=a(r);a.each("touchstart touchmove touchend tap taphold swipe swipeleft swiperight scrollstart scrollstop".split(" "),function(c,b){a.fn[b]=function(a){return a?this.bind(b,a):this.trigger(b)};a.attrFn&&(a.attrFn[b]=!0)});var h=(e=a.mobile.support.touch)?"touchstart":"mousedown",b=e?"touchend":"mouseup",d=e?"touchmove":"mousemove";a.event.special.scrollstart={enabled:!0,setup:function(){function c(a,c){d=c;q(b,d?"scrollstart":"scrollstop",a)}var b=this,d,f;a(b).bind("touchmove scroll",
+                function(b){a.event.special.scrollstart.enabled&&(d||c(b,!0),clearTimeout(f),f=setTimeout(function(){c(b,!1)},50))})}};a.event.special.tap={tapholdThreshold:750,setup:function(){var b=this,d=a(b);d.bind("vmousedown",function(e){function f(){clearTimeout(h)}function k(){f();d.unbind("vclick",n).unbind("vmouseup",f);g.unbind("vmousecancel",k)}function n(a){k();m===a.target&&q(b,"tap",a)}if(e.which&&1!==e.which)return!1;var m=e.target,h;d.bind("vmouseup",f).bind("vclick",n);g.bind("vmousecancel",k);
+                h=setTimeout(function(){q(b,"taphold",a.Event("taphold",{target:m}))},a.event.special.tap.tapholdThreshold)})}};a.event.special.swipe={scrollSupressionThreshold:30,durationThreshold:1E3,horizontalDistanceThreshold:30,verticalDistanceThreshold:75,start:function(b){var d=b.originalEvent.touches?b.originalEvent.touches[0]:b;return{time:(new Date).getTime(),coords:[d.pageX,d.pageY],origin:a(b.target)}},stop:function(a){a=a.originalEvent.touches?a.originalEvent.touches[0]:a;return{time:(new Date).getTime(),
+                coords:[a.pageX,a.pageY]}},handleSwipe:function(b,d){d.time-b.time<a.event.special.swipe.durationThreshold&&Math.abs(b.coords[0]-d.coords[0])>a.event.special.swipe.horizontalDistanceThreshold&&Math.abs(b.coords[1]-d.coords[1])<a.event.special.swipe.verticalDistanceThreshold&&b.origin.trigger("swipe").trigger(b.coords[0]>d.coords[0]?"swipeleft":"swiperight")},setup:function(){var c=a(this);c.bind(h,function(e){function g(b){f&&(k=a.event.special.swipe.stop(b),Math.abs(f.coords[0]-k.coords[0])>a.event.special.swipe.scrollSupressionThreshold&&
+                b.preventDefault())}var f=a.event.special.swipe.start(e),k;c.bind(d,g).one(b,function(){c.unbind(d,g);f&&k&&a.event.special.swipe.handleSwipe(f,k);f=k=m})})}};a.each({scrollstop:"scrollstart",taphold:"tap",swipeleft:"swipe",swiperight:"swipe"},function(b,d){a.event.special[b]={setup:function(){a(this).bind(d,a.noop)}}})})(p,this);(function(a,e,m){var q={};a.mobile=a.extend(a.mobile,{version:"1.3.2",ns:"",subPageUrlKey:"ui-page",activePageClass:"ui-page-active",activeBtnClass:"ui-btn-active",focusClass:"ui-focus",
+                ajaxEnabled:!0,hashListeningEnabled:!0,linkBindingEnabled:!0,defaultPageTransition:"fade",maxTransitionWidth:!1,minScrollBack:250,touchOverflowEnabled:!1,defaultDialogTransition:"pop",pageLoadErrorMessage:"Error Loading Page",pageLoadErrorMessageTheme:"e",phonegapNavigationEnabled:!1,autoInitializePage:!0,pushStateEnabled:!0,ignoreContentEnabled:!1,orientationChangeEnabled:!0,buttonMarkup:{hoverDelay:200},window:a(e),document:a(r),keyCode:{ALT:18,BACKSPACE:8,CAPS_LOCK:20,COMMA:188,COMMAND:91,COMMAND_LEFT:91,
+                COMMAND_RIGHT:93,CONTROL:17,DELETE:46,DOWN:40,END:35,ENTER:13,ESCAPE:27,HOME:36,INSERT:45,LEFT:37,MENU:93,NUMPAD_ADD:107,NUMPAD_DECIMAL:110,NUMPAD_DIVIDE:111,NUMPAD_ENTER:108,NUMPAD_MULTIPLY:106,NUMPAD_SUBTRACT:109,PAGE_DOWN:34,PAGE_UP:33,PERIOD:190,RIGHT:39,SHIFT:16,SPACE:32,TAB:9,UP:38,WINDOWS:91},behaviors:{},silentScroll:function(b){"number"!==a.type(b)&&(b=a.mobile.defaultHomeScroll);a.event.special.scrollstart.enabled=!1;setTimeout(function(){e.scrollTo(0,b);a.mobile.document.trigger("silentscroll",
+                {x:0,y:b})},20);setTimeout(function(){a.event.special.scrollstart.enabled=!0},150)},nsNormalizeDict:q,nsNormalize:function(b){if(b)return q[b]||(q[b]=a.camelCase(a.mobile.ns+b))},getInheritedTheme:function(a,d){for(var c=a[0],e="",g=/ui-(bar|body|overlay)-([a-z])\b/,f,k;c&&!((f=c.className||"")&&(k=g.exec(f))&&(e=k[2]));)c=c.parentNode;return e||d||"a"},closestPageData:function(a){return a.closest(':jqmData(role="page"), :jqmData(role="dialog")').data("mobile-page")},enhanceable:function(a){return this.haveParents(a,
+                "enhance")},hijackable:function(a){return this.haveParents(a,"ajax")},haveParents:function(b,d){if(!a.mobile.ignoreContentEnabled)return b;for(var c=b.length,e=a(),g,f,k,n=0;n<c;n++){f=b.eq(n);k=!1;for(g=b[n];g;){if("false"===(g.getAttribute?g.getAttribute("data-"+a.mobile.ns+d):"")){k=!0;break}g=g.parentNode}k||(e=e.add(f))}return e},getScreenHeight:function(){return e.innerHeight||a.mobile.window.height()}},a.mobile);a.fn.jqmData=function(b,d){var c;"undefined"!==typeof b&&(b&&(b=a.mobile.nsNormalize(b)),
+                c=2>arguments.length||d===m?this.data(b):this.data(b,d));return c};a.jqmData=function(b,d,c){var e;"undefined"!==typeof d&&(e=a.data(b,d?a.mobile.nsNormalize(d):d,c));return e};a.fn.jqmRemoveData=function(b){return this.removeData(a.mobile.nsNormalize(b))};a.jqmRemoveData=function(b,d){return a.removeData(b,a.mobile.nsNormalize(d))};a.fn.removeWithDependents=function(){a.removeWithDependents(this)};a.removeWithDependents=function(b){b=a(b);(b.jqmData("dependents")||a()).remove();b.remove()};a.fn.addDependents=
+                function(b){a.addDependents(a(this),b)};a.addDependents=function(b,d){var c=a(b).jqmData("dependents")||a();a(b).jqmData("dependents",a.merge(c,d))};a.fn.getEncodedText=function(){return a("<div/>").text(a(this).text()).html()};a.fn.jqmEnhanceable=function(){return a.mobile.enhanceable(this)};a.fn.jqmHijackable=function(){return a.mobile.hijackable(this)};var g=a.find,h=/:jqmData\(([^)]*)\)/g;a.find=function(b,d,c,e){b=b.replace(h,"[data-"+(a.mobile.ns||"")+"$1]");return g.call(this,b,d,c,e)};a.extend(a.find,
+                g);a.find.matches=function(b,d){return a.find(b,null,null,d)};a.find.matchesSelector=function(b,d){return 0<a.find(d,null,null,[b]).length}})(p,this);(function(a,p){e.matchMedia=e.matchMedia||function(a,e){var g,h=a.documentElement,b=h.firstElementChild||h.firstChild,d=a.createElement("body"),c=a.createElement("div");c.id="mq-test-1";c.style.cssText="position:absolute;top:-100em";d.style.background="none";d.appendChild(c);return function(a){c.innerHTML='&shy;<style media="'+a+'"> #mq-test-1 { width: 42px; }</style>';
+                h.insertBefore(d,b);g=42===c.offsetWidth;h.removeChild(d);return{matches:g,media:a}}}(r);a.mobile.media=function(a){return e.matchMedia(a).matches}})(p);(function(a,p){function m(a){var c=a.charAt(0).toUpperCase()+a.substr(1);a=(a+" "+b.join(c+" ")+c).split(" ");for(var d in a)if(h[a[d]]!==p)return!0}function q(a,c,d){var e=r.createElement("div");d=d?d:b;for(var g,l=0;l<d.length;l++){var h=d[l],m=void 0;m=""===h?"":"-"+h.charAt(0).toLowerCase()+h.substr(1)+"-";m=m+a+": "+c+";";h=h.charAt(0).toUpperCase()+
+                h.substr(1);h+=""===h?a:a.charAt(0).toUpperCase()+a.substr(1);e.setAttribute("style",m);e.style[h]&&(g=!0)}return!!g}var g=a("<body>").prependTo("html"),h=g[0].style,b=["Webkit","Moz","O"],d="palmGetResource"in e,c=e.opera,l=e.operamini&&"[object OperaMini]"==={}.toString.call(e.operamini),v=e.blackberry&&!m("-webkit-transform");a.extend(a.mobile,{browser:{}});a.mobile.browser.oldIE=function(){var a=3,b=r.createElement("div"),c=b.all||[];do b.innerHTML="\x3c!--[if gt IE "+ ++a+"]><br><![endif]--\x3e";
+                while(c[0]);return 4<a?a:!a}();a.extend(a.support,{cssTransitions:"WebKitTransitionEvent"in e||q("transition","height 100ms linear",["Webkit","Moz",""])&&!a.mobile.browser.oldIE&&!c,pushState:"pushState"in history&&"replaceState"in history&&!(0<=e.navigator.userAgent.indexOf("Firefox")&&e.top!==e)&&-1===e.navigator.userAgent.search(/CriOS/),mediaquery:a.mobile.media("only all"),cssPseudoElement:!!m("content"),touchOverflow:!!m("overflowScrolling"),cssTransform3d:function(){var c=a.mobile.media("(-"+
+                b.join("-transform-3d),(-")+"-transform-3d),(transform-3d)");if(c)return!!c;var d=r.createElement("div"),n={MozTransform:"-moz-transform",transform:"transform"};g.append(d);for(var h in n)d.style[h]!==p&&(d.style[h]="translate3d( 100px, 1px, 1px )",c=e.getComputedStyle(d).getPropertyValue(n[h]));return!!c&&"none"!==c}(),boxShadow:!!m("boxShadow")&&!v,fixedPosition:function(){var a=navigator.userAgent,b=navigator.platform,c=a.match(/AppleWebKit\/([0-9]+)/),c=!!c&&c[1],d=a.match(/Fennec\/([0-9]+)/),
+                d=!!d&&d[1],g=a.match(/Opera Mobi\/([0-9]+)/),h=!!g&&g[1];return(-1<b.indexOf("iPhone")||-1<b.indexOf("iPad")||-1<b.indexOf("iPod"))&&c&&534>c||e.operamini&&"[object OperaMini]"==={}.toString.call(e.operamini)||g&&7458>h||-1<a.indexOf("Android")&&c&&533>c||d&&6>d||"palmGetResource"in e&&c&&534>c||-1<a.indexOf("MeeGo")&&-1<a.indexOf("NokiaBrowser/8.5.0")?!1:!0}(),scrollTop:("pageXOffset"in e||"scrollTop"in r.documentElement||"scrollTop"in g[0])&&!d&&!l,dynamicBaseTag:function(){var b=location.protocol+
+                "//"+location.host+location.pathname+"ui-dir/",c=a("head base"),d=null,e="",h;c.length?e=c.attr("href"):c=d=a("<base>",{href:b}).appendTo("head");h=a("<a href='testurl' />").prependTo(g)[0].href;c[0].href=e||location.pathname;d&&d.remove();return 0===h.indexOf(b)}(),cssPointerEvents:function(){var a=r.createElement("x"),b=r.documentElement,c=e.getComputedStyle;if(!("pointerEvents"in a.style))return!1;a.style.pointerEvents="auto";a.style.pointerEvents="x";b.appendChild(a);c=c&&"auto"===c(a,"").pointerEvents;
+                b.removeChild(a);return!!c}(),boundingRect:"undefined"!==typeof r.createElement("div").getBoundingClientRect});g.remove();d=function(){var a=e.navigator.userAgent;return-1<a.indexOf("Nokia")&&(-1<a.indexOf("Symbian/3")||-1<a.indexOf("Series60/5"))&&-1<a.indexOf("AppleWebKit")&&a.match(/(BrowserNG|NokiaBrowser)\/7\.[0-3]/)}();a.mobile.gradeA=function(){return(a.support.mediaquery||a.mobile.browser.oldIE&&7<=a.mobile.browser.oldIE)&&(a.support.boundingRect||null!==a.fn.jquery.match(/1\.[0-7+]\.[0-9+]?/))};
+                a.mobile.ajaxBlacklist=e.blackberry&&!e.WebKitPoint||l||d;d&&a(function(){a("head link[rel='stylesheet']").attr("rel","alternate stylesheet").attr("rel","stylesheet")});a.support.boxShadow||a("html").addClass("ui-mobile-nosupport-boxshadow")})(p)});
+        </script>
+    </body>
 </html>

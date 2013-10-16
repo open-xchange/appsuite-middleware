@@ -304,6 +304,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      */
     private final Thread watcherThread;
 
+    private final ClassLoader defaultClassLoader;
+
     /**
      * The task for consuming from delayed work queue.
      */
@@ -821,9 +823,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             try {
                 Runnable task = firstTask;
                 firstTask = null;
-                while ((null != task) || (null != (task = getTaskCustom()))) {
-                    runTask(task);
-                    task = null; // unnecessary but can help GC
+                if (thread instanceof CustomThread) {
+                    while ((null != task) || (null != (task = getTaskCustom()))) {
+                        runTask(task);
+                        task = null; // unnecessary but can help GC
+                    }
                 }
             } catch (final InterruptedException ie) {
                 // fall through
@@ -1447,6 +1451,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         activeTaskWatcher = new ActiveTaskWatcher();
         watcherThread = new Thread(activeTaskWatcher, "ActiveTaskWatcher");
         watcherThread.start();
+        defaultClassLoader = Thread.currentThread().getContextClassLoader();
         /*
          * Monitor threads
          */
@@ -1599,16 +1604,21 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
             customFutureTask.getTask().afterExecute(throwable);
         }
-        if (Thread.currentThread() instanceof CustomThread) {
-            CustomThread thread = (CustomThread) Thread.currentThread();
+        Thread currentThread = Thread.currentThread();
+        if (currentThread instanceof CustomThread) {
+            CustomThread thread = (CustomThread) currentThread;
             /*
              * Restore original name
              */
             thread.restoreName();
-            ClassLoader otherClassLoader = thread.restoreClassLoader();
-            if (null != otherClassLoader) {
-                LOG.error("Detected a changed class loader on returned thread.", thread.getClassLoaderTrace());
+            Throwable classLoaderTrace = thread.restoreClassLoader();
+            if (null != classLoaderTrace) {
+                LOG.error("Detected a changed class loader on returned thread.", classLoaderTrace);
             }
+        } else if (!defaultClassLoader.equals(currentThread.getContextClassLoader())) {
+            ClassLoader wrongClassLoader = currentThread.getContextClassLoader();
+            LOG.error("Detected " + wrongClassLoader.getClass().getName() + " as TCCL in returned non CustomThread: " + currentThread.getClass().getName());
+            currentThread.setContextClassLoader(defaultClassLoader);
         }
         activeCount.decrementAndGet();
     }

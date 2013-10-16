@@ -147,6 +147,8 @@ public class QueuingIMAPStore extends IMAPStore {
                         }
                     }, 60000, 60000, TimeUnit.MILLISECONDS);
                     executor = exec;
+                    // Initialize watcher, too
+                    initWatcher(exec);
                 }
             }
         }
@@ -173,18 +175,10 @@ public class QueuingIMAPStore extends IMAPStore {
 
     private static QueuedIMAPProtocolWatcher watcher;
 
-    private static void initWatcher() {
-        QueuedIMAPProtocolWatcher tmp = watcher;
-        if (null == tmp) {
-            synchronized (QueuingIMAPStore.class) {
-                tmp = watcher;
-                if (null == tmp) {
-                    tmp = new QueuedIMAPProtocolWatcher();
-                    tmp.initWatcher(queues, executor());
-                    watcher = tmp;
-                }
-            }
-        }
+    private static void initWatcher(final ScheduledThreadPoolExecutor executor) {
+        QueuedIMAPProtocolWatcher tmp = new QueuedIMAPProtocolWatcher();
+        tmp.initWatcher(queues, executor);
+        watcher = tmp;
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------- //
@@ -195,14 +189,11 @@ public class QueuingIMAPStore extends IMAPStore {
     private static CountingQueue initQueue(final URLName url, final int permits, final MailLogger logger) {
         CountingQueue q = queues.get(url);
         if (null == q) {
-            // Initialize watcher -- if its log level is set to DEBUG/FINE
-            initWatcher();
-            // Go ahead
-            final boolean debug = logger.isLoggable(Level.FINE) || LOG.isDebugEnabled();
-            final CountingQueue ns = new CountingQueue(permits, logger, debug);
+            final CountingQueue ns = new CountingQueue(permits, logger, QueuedIMAPProtocolWatcher.isEnabled());
             q = queues.putIfAbsent(url, ns);
             if (null == q) {
                 q = ns;
+                final boolean debug = logger.isLoggable(Level.FINE) || LOG.isDebugEnabled();
                 final CountingQueue tq = q;
                 final ConcurrentMap<URLName, CountingQueue> tqueues = queues;
                 final AtomicInteger noneCount = new AtomicInteger();
@@ -238,7 +229,7 @@ public class QueuingIMAPStore extends IMAPStore {
                         }
                     }
                 };
-                final ScheduledFuture<?> future = executor().scheduleAtFixedRate(t, 3, 3, TimeUnit.SECONDS);
+                final ScheduledFuture<?> future = executor().scheduleWithFixedDelay(t, 3, 3, TimeUnit.SECONDS);
                 futureRef.set(future);
                 if (debug) {
                     final String msg = "QueueingIMAPStore.initQueue(): New queue for \"" + url + "\": BlockingQueue@" + q.hashCode() + " " + q.toString();
@@ -489,8 +480,7 @@ public class QueuingIMAPStore extends IMAPStore {
             stores.putIfAbsent(store, store);
             final ConcurrentMap<Thread, ThreadTrace> threads = this.threads;
             if (null != threads) {
-                final Thread thread = Thread.currentThread();
-                threads.putIfAbsent(thread, new ThreadTrace(protocol, System.currentTimeMillis()));
+                threads.putIfAbsent(Thread.currentThread(), new ThreadTrace(protocol, System.currentTimeMillis()));
             }
         }
 

@@ -207,18 +207,14 @@ public final class CustomThread extends Thread implements ThreadRenamer {
         super.setContextClassLoader(cl);
     }
 
-    public ClassLoader restoreClassLoader() {
-        ClassLoader retval = null;
+    public Throwable restoreClassLoader() {
+        Throwable retval = null;
         if (null != origClassLoader) {
-            retval = getContextClassLoader();
+            retval = classLoaderTrace;
             super.setContextClassLoader(origClassLoader);
             origClassLoader = null;
             classLoaderTrace = null;
         }
         return retval;
-    }
-
-    public Throwable getClassLoaderTrace() {
-        return classLoaderTrace;
     }
 }

@@ -202,9 +202,9 @@ public class DirectLinkGenerator {
                     .replaceAll("\\[height\\]", String.valueOf(height))
                 ;
             }
-            if (mimeType.matches(
+            if ((mimeType.matches(
                 "(?i)^application\\/.*(ms-word|ms-excel|ms-powerpoint|msword|msexcel|mspowerpoint|openxmlformats|opendocument|pdf|rtf).*$")
-                && hasDocumentPreview()) {
+                || mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) && hasDocumentPreview()) {
                 return getProperty("com.openexchange.drive.imageLinkDocumentFile", "[protocol]://[hostname]/[dispatcherPrefix]/files?action=" +
                     "document&format=preview_image&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
                     "&width=[width]&height=[height]")

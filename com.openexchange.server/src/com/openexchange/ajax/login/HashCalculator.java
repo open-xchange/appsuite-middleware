@@ -70,7 +70,14 @@ import com.openexchange.tools.encoding.Base64;
 public class HashCalculator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashCalculator.class));
+
+    private static final String USER_AGENT = LoginFields.USER_AGENT;
+    private static final String CLIENT_PARAM = LoginFields.CLIENT_PARAM;
+
     private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
+
+    // -------------------------------    SINGLETON    ------------------------------------------------ //
+
     private static final HashCalculator SINGLETON = new HashCalculator();
 
     /**
@@ -82,7 +89,7 @@ public class HashCalculator {
         return SINGLETON;
     }
 
-    // -------------------------------------------------------------------------------------------- //
+    // -------------------------------    MEMBER STUFF    -------------------------------------------- //
 
     private volatile String[] fields;
     private volatile String salt;
@@ -128,7 +135,7 @@ public class HashCalculator {
     public String getHash(final HttpServletRequest req, final String userAgent, final String client) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update((null == userAgent ? parseUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
+            md.update((null == userAgent ? parseClientUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
             }
@@ -163,13 +170,13 @@ public class HashCalculator {
     }
 
     /**
-     * Gets the client identifier associated with specified request.
+     * Gets the <code>"client"</code> request parameter or <code>"default"</code> if absent.
      *
      * @param req The HTTP Servlet request
-     * @return The client identifier or <code>"default"</code> if none available
+     * @return The client identifier or <code>"default"</code> if absent
      */
     public static String getClient(final HttpServletRequest req) {
-        final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
+        final String parameter = req.getParameter(CLIENT_PARAM);
         return isEmpty(parameter) ? "default" : parameter;
     }
 
@@ -193,7 +200,7 @@ public class HashCalculator {
     public String getUserAgentHash(final HttpServletRequest req, final String userAgent) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update((null == userAgent ? parseUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
+            md.update((null == userAgent ? getUserAgent(req) : userAgent).getBytes(Charsets.UTF_8));
             final String salt = this.salt;
             if (null != salt) {
                 md.update(salt.getBytes());
@@ -205,11 +212,24 @@ public class HashCalculator {
         return "";
     }
 
-    private static String parseUserAgent(final HttpServletRequest req, final String defaultValue) {
-        final String parameter = req.getParameter(LoginFields.USER_AGENT);
+    /**
+     * Gets the <code>"clientUserAgent"</code> request parameter or given <code>defaultValue</code> if absent.
+     *
+     * @param req The request
+     * @param defaultValue The default value
+     * @return The <code>"clientUserAgent"</code> request parameter or given <code>defaultValue</code> if absent
+     */
+    private static String parseClientUserAgent(final HttpServletRequest req, final String defaultValue) {
+        final String parameter = req.getParameter(USER_AGENT);
         return isEmpty(parameter) ? defaultValue : parameter;
     }
 
+    /**
+     *  Gets the <code>"User-Agent"</code> request header or an empty String if absent.
+     *
+     * @param req The request
+     * @return The <code>"User-Agent"</code> request header or an empty String if absent
+     */
     private static String getUserAgent(final HttpServletRequest req) {
         final String header = req.getHeader(Header.USER_AGENT);
         if (header == null) {

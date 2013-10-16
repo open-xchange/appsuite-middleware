@@ -60,7 +60,7 @@ import java.util.List;
 public interface ServiceListing<S> {
 
     /**
-     * Gets the service list
+     * Gets the service list.
      *
      * @return The service list
      */
