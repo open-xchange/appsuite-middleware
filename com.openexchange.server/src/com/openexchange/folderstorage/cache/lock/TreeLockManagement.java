@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.cache.lock;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -221,7 +222,7 @@ public final class TreeLockManagement {
 
         @Override
         public Condition newCondition() {
-            return null;
+            return EMPTY_CONDITION;
         }
 
         @Override
@@ -231,6 +232,44 @@ public final class TreeLockManagement {
 
         @Override
         public void lock() {
+            // Nothing to do
+        }
+    };
+
+    static final Condition EMPTY_CONDITION = new Condition() {
+
+        @Override
+        public void signalAll() {
+            // Nothing to do
+        }
+
+        @Override
+        public void signal() {
+            // Nothing to do
+        }
+
+        @Override
+        public boolean awaitUntil(Date deadline) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public void awaitUninterruptibly() {
+            // Nothing to do
+        }
+
+        @Override
+        public long awaitNanos(long nanosTimeout) throws InterruptedException {
+            return 0;
+        }
+
+        @Override
+        public boolean await(long time, TimeUnit unit) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public void await() throws InterruptedException {
             // Nothing to do
         }
     };
