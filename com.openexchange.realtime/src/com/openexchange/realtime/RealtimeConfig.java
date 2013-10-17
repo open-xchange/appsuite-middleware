@@ -54,30 +54,35 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentSet;
+import com.openexchange.management.ManagementAware;
+import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.management.RealtimeConfigMBean;
+import com.openexchange.realtime.management.RealtimeConfigManagement;
 import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
 import com.openexchange.server.Initialization;
-
 
 /**
  * {@link RealtimeConfig} Collects and exposes configuration parameters needed by the realtime stack.
  * 
  * @author <a href="mailto:marc .arens@open-xchange.com">Marc Arens</a>
  */
-public class RealtimeConfig implements Initialization {
+public class RealtimeConfig implements Initialization, ManagementAware<RealtimeConfigMBean> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RealtimeConfig.class);
 
     private static final RealtimeConfig instance = new RealtimeConfig();
 
     private final AtomicBoolean started = new AtomicBoolean();
-    
+
     private HashMap<String, ChangeListener> changeListeners = new HashMap<String, ChangeListener>(2);
 
     private static final String isTraceAllUsersEnabledPropertyName = "com.openexchange.realtime.isTraceAllUsersEnabled";
@@ -86,8 +91,13 @@ public class RealtimeConfig implements Initialization {
 
     private boolean isTraceAllUsersEnabled = false;
 
-    private Set<String> usersToTrace = Collections.emptySet();
+    private Set<String> usersToTrace = new ConcurrentSet<String>();
 
+    ManagementObject<RealtimeConfigMBean> managementObject;
+
+    private RealtimeConfig() {
+        managementObject = new RealtimeConfigManagement(this);
+    }
 
     public static RealtimeConfig getInstance() {
         return instance;
@@ -111,22 +121,44 @@ public class RealtimeConfig implements Initialization {
         return isTraceAllUsersEnabled;
     }
 
-    /**
-     * Sets the isTraceAllUsersEnabled
-     * 
-     * @param isTraceAllUsersEnabled The isTraceAllUsersEnabled to set
-     */
-    public void setTraceAllUsersEnabled(boolean isTraceAllUsersEnabled) {
-        this.isTraceAllUsersEnabled = isTraceAllUsersEnabled;
+    public void setTraceAllUsersEnabled(boolean enabled) {
+        isTraceAllUsersEnabled = enabled;
     }
 
     /**
      * Gets the usersToTrace
      * 
-     * @return The usersToTrace
+     * @return Returns an unmodifiable view of the users to trace
      */
     public Set<String> getUsersToTrace() {
-        return usersToTrace;
+        return Collections.unmodifiableSet(usersToTrace);
+    }
+
+    /**
+     * Set the users to trace
+     * @param users The users to trace
+     */
+    public void setUsersToTrace(Set<String> users) {
+        usersToTrace = new ConcurrentSkipListSet<String>(users);
+
+    }
+
+    /**
+     * Add a user from the users that should add tracers to sent Stanzas
+     * @param user The users that should be removed
+     * @return True if the user was added, else false
+     */
+    public boolean addUserToTrace(String user) {
+        return usersToTrace.add(user);
+    }
+
+    /**
+     * Remove a user from the users that should add tracers to sent Stanzas
+     * @param user The users that should be removed
+     * @return True if the user was removed, else false
+     */
+    public boolean removeUserToTrace(String user) {
+        return usersToTrace.remove(user);
     }
 
     @Override
@@ -168,23 +200,23 @@ public class RealtimeConfig implements Initialization {
         }
 
         ChangeListener isTraceAllUsersEnabledChangeListener = new ChangeListener() {
+
             @Override
             void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService) {
-                realtimeConfig.isTraceAllUsersEnabled = configService.getBoolProperty(
-                    isTraceAllUsersEnabledPropertyName,
-                    false);
+                realtimeConfig.setTraceAllUsersEnabled(configService.getBoolProperty(isTraceAllUsersEnabledPropertyName, false));
             }
         };
         changeListeners.put(isTraceAllUsersEnabledPropertyName, isTraceAllUsersEnabledChangeListener);
-        isTraceAllUsersEnabled = configService.getBoolProperty(isTraceAllUsersEnabledPropertyName, false, isTraceAllUsersEnabledChangeListener);
+        isTraceAllUsersEnabled = configService.getBoolProperty(
+            isTraceAllUsersEnabledPropertyName,
+            false,
+            isTraceAllUsersEnabledChangeListener);
 
         ChangeListener usersToTraceChangeListener = new ChangeListener() {
+
             @Override
             void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService) {
-                realtimeConfig.usersToTrace = new HashSet<String>(configService.getProperty(
-                    usersToTracePropertyName,
-                    "",
-                    ","));
+                realtimeConfig.setUsersToTrace(new HashSet<String>(configService.getProperty(usersToTracePropertyName, "", ",")));
             }
         };
         changeListeners.put(usersToTracePropertyName, usersToTraceChangeListener);
@@ -193,7 +225,7 @@ public class RealtimeConfig implements Initialization {
 
     /**
      * {@link ChangeListener} that reacts on property changes.
-     *
+     * 
      * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
      */
     private abstract class ChangeListener implements PropertyListener {
@@ -220,4 +252,10 @@ public class RealtimeConfig implements Initialization {
         abstract void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService);
 
     }
+
+    @Override
+    public ManagementObject<RealtimeConfigMBean> getManagementObject() {
+        return managementObject;
+    }
+
 }

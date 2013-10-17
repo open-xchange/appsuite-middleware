@@ -49,8 +49,9 @@
 
 package com.openexchange.realtime.json.actions;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.json.JSONObject;
@@ -91,16 +92,25 @@ public class EnrolAction extends RTAction {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Enroling ID: " + constructedId);
         }
+        List<JSONObject> stanzas = new ArrayList<JSONObject>();
+        
         String userAtContext = constructedId.getUser() + "@" + constructedId.getContext();
         RealtimeConfig realtimeConfig = RealtimeConfig.getInstance();
         if(realtimeConfig.isTraceAllUsersEnabled() || realtimeConfig.getUsersToTrace().contains(userAtContext)) {
-            enrolActionResults.put(RESULT, stanzaToJSON(new TracingDemand(constructedId, constructedId, true)));
+            JSONObject tracingDemandJSON = stanzaToJSON(new TracingDemand(constructedId, constructedId, true));
+            stanzas.add(tracingDemandJSON);
+        } else {
+            JSONObject tracingDemandJSON = stanzaToJSON(new TracingDemand(constructedId, constructedId, false));
+            stanzas.add(tracingDemandJSON);
         }
+
         stateManager.retrieveState(constructedId);
         NextSequence nextSequence = new NextSequence(constructedId, constructedId, 0);
-        JSONObject answerJSON = stanzaToJSON(nextSequence);
-        enrolActionResults.put(STANZAS, Collections.singletonList(answerJSON));
-
+        JSONObject nextSequenceJSON = stanzaToJSON(nextSequence);
+        stanzas.add(nextSequenceJSON);
+        
+        enrolActionResults.put(STANZAS, stanzas);
+        
         ResourceDirectory resourceDirectory = JSONServiceRegistry.getInstance().getService(ResourceDirectory.class);
         try {
             resourceDirectory.set(constructedId, new DefaultResource());

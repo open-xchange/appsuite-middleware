@@ -58,12 +58,15 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.management.ManagementObject;
+import com.openexchange.management.ManagementService;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTProtocol;
+import com.openexchange.realtime.management.StanzaSequenceGateMBean;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
@@ -84,22 +87,60 @@ public class RTJSONHandler implements StanzaSender {
 
     protected final StateManager stateManager = new StateManager();
 
-    protected final RTProtocol protocol = RTProtocolImpl.getInstance();
+    protected final RTProtocol protocol;
 
-    protected final StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
+    protected final StanzaSequenceGate gate;
 
-        @Override
-        public void handleInternal(Stanza stanza, ID recipient) throws OXException {
-                handleIncoming(stanza);
-        }
-    };
-
-    JSONProtocolHandler protocolHandler = new JSONProtocolHandler(protocol, gate);
+    JSONProtocolHandler protocolHandler;
 
     public RTJSONHandler() {
         super();
+        protocol = RTProtocolImpl.getInstance();
+        gate = new StanzaSequenceGate(RTJSONHandler.class.getSimpleName()) {
 
+            @Override
+            public void handleInternal(Stanza stanza, ID recipient) throws OXException {
+                    handleIncoming(stanza);
+            }
+        };
+        protocolHandler = new JSONProtocolHandler(protocol, gate);
         startCleanupTimer();
+    }
+
+    /**
+     * Register the StanzaSequenceGateMBean
+     */
+    public void registerGateManagement() {
+        ManagementService managementService = JSONServiceRegistry.getInstance().getService(ManagementService.class);
+        if(managementService == null) {
+            RealtimeException missingServiceException = RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ManagementService.class);
+            LOG.error("Unable to register management object.", missingServiceException);
+        } else {
+            ManagementObject<StanzaSequenceGateMBean> managementObject = gate.getManagementObject();
+            try {
+                managementService.registerMBean(managementObject.getObjectName(), managementObject);
+            } catch (OXException e) {
+                LOG.error("Unable to register management object.", e);
+            }
+        }
+    }
+    
+    /**
+     * Deregister the StanzaSequenceGateMBean 
+     */
+    public void unregisterGateManagement() {
+        ManagementService managementService = JSONServiceRegistry.getInstance().getService(ManagementService.class);
+        if(managementService == null) {
+            RealtimeException missingServiceException = RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ManagementService.class);
+            LOG.error("Unable to deregister management object.", missingServiceException);
+        } else {
+            ManagementObject<StanzaSequenceGateMBean> managementObject = gate.getManagementObject();
+            try {
+                managementService.unregisterMBean(managementObject.getObjectName());
+            } catch (OXException e) {
+                LOG.error("Unable to deregister management object.", e);
+            }
+        }
     }
 
 //    @Override

@@ -55,6 +55,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.management.ManagementService;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -85,18 +86,23 @@ import com.openexchange.timer.TimerService;
 
 public class RTJSONActivator extends AJAXModuleActivator {
 
+    private RealtimeActions realtimeActions;
+    private RTJSONHandler handler;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, SessiondService.class, MessageDispatcher.class, SimpleConverter.class,
-            ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class, ThreadPoolService.class };
+            ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class,
+            ThreadPoolService.class, ManagementService.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
         JSONServiceRegistry.SERVICES.set(this);
 
-        RTJSONHandler handler = new RTJSONHandler();
+        handler = new RTJSONHandler();
+        handler.registerGateManagement();
         registerService(Channel.class, new JSONChannel(handler));
 
         /*
@@ -125,15 +131,16 @@ public class RTJSONActivator extends AJAXModuleActivator {
         converter.declarePreferredFormat(Presence.MESSAGE_PATH, String.class.getSimpleName());
         converter.declarePreferredFormat(Presence.PRIORITY_PATH, Byte.class.getSimpleName());
         converter.declarePreferredFormat(Stanza.ERROR_PATH, RealtimeException.class.getSimpleName());
-        
-        registerModule(new RealtimeActions(this, handler.getStateManager(), handler.getProtocolHandler()), "rt");
+        realtimeActions = new RealtimeActions(this, handler.getStateManager(), handler.getProtocolHandler());
+        registerModule(realtimeActions, "rt");
 
         getService(CapabilityService.class).declareCapability("rt");
-
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        unregisterService(realtimeActions);
+        handler.unregisterGateManagement();
         JSONServiceRegistry.SERVICES.set(null);
         super.stop(context);
     }

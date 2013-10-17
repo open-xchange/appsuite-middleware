@@ -58,8 +58,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
+import com.openexchange.management.ManagementAware;
+import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.management.StanzaSequenceGateMBean;
+import com.openexchange.realtime.management.StanzaSequenceGateManagement;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
@@ -72,7 +76,7 @@ import com.openexchange.realtime.packet.Stanza;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class StanzaSequenceGate {
+public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequenceGateMBean> {
 
     private static org.apache.commons.logging.Log LOG = Log.loggerFor(StanzaSequenceGate.class);
 
@@ -85,10 +89,18 @@ public abstract class StanzaSequenceGate {
     protected ConcurrentHashMap<ID, List<StanzaWithCustomAction>> inboxes = new ConcurrentHashMap<ID, List<StanzaWithCustomAction>>();
 
     private final String name;
+    private final StanzaSequenceGateManagement managementObject;
 
     public StanzaSequenceGate(String name) {
         this.name = name;
+        this.managementObject = new StanzaSequenceGateManagement(name);
     }
+
+    @Override
+    public ManagementObject<StanzaSequenceGateMBean> getManagementObject() {
+        return managementObject;
+    }
+
 
     /**
      * Ensures a correct order of sequence numbers of incoming Stanzas.
