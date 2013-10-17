@@ -56,8 +56,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import org.apache.commons.logging.Log;
@@ -125,153 +127,158 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         List<Integer> own = new ArrayList<Integer>();
 
         boolean addQuery = false;
-        Connection con = null;
-        boolean keepConnection = false;
-        try {
-        	con = getReadConnection(ctx);
-	        {
-	        	final int userId = user.getId();
-	            if (folderId == NOT_SET || folderId == NO_FOLDER) {
-	                final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-	                    userId,
-	                    user.getGroups(),
-	                    userPermissions.getAccessibleModules(),
-	                    FolderObject.INFOSTORE,
-	                    ctx, con)).asQueue();
-	                for (final FolderObject folder : queue) {
+        {
+            Connection con = getReadConnection(ctx);
+            try {
+            	final int userId = user.getId();
+                if (folderId == NOT_SET || folderId == NO_FOLDER) {
+                    final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                        userId,
+                        user.getGroups(),
+                        userPermissions.getAccessibleModules(),
+                        FolderObject.INFOSTORE,
+                        ctx, con)).asQueue();
+                    for (final FolderObject folder : queue) {
                         final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userPermissions);
                         if (perm.canReadAllObjects()) {
                             all.add(Integer.valueOf(folder.getObjectID()));
                         } else if (perm.canReadOwnObjects()) {
                             own.add(Integer.valueOf(folder.getObjectID()));
                         }
-	                }
-	            } else {
-	                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
-	                if (perm.canReadAllObjects()) {
+                    }
+                } else {
+                    final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
+                    if (perm.canReadAllObjects()) {
                         all.add(Integer.valueOf(folderId));
                     } else if (perm.canReadOwnObjects()) {
                         own.add(Integer.valueOf(folderId));
                     } else {
                         return SearchIteratorAdapter.emptyIterator();
                     }
-	            }
-	            if (all.isEmpty() && own.isEmpty()) {
-	                return SearchIteratorAdapter.emptyIterator();
-	            }
-	            all = Collections.unmodifiableList(all);
-	            own = Collections.unmodifiableList(own);
-	        }
+                }
+                if (all.isEmpty() && own.isEmpty()) {
+                    return SearchIteratorAdapter.emptyIterator();
+                }
+                all = Collections.unmodifiableList(all);
+                own = Collections.unmodifiableList(own);
+            } finally {
+                releaseReadConnection(ctx, con);
+                con = null;
+            }
+        }
 
-	        final StringAllocator SQL_QUERY = new StringAllocator(512);
-	        SQL_QUERY.append(getResultFieldsSelect(cols));
-	        SQL_QUERY.append(
-	            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
-	            ctx.getContextId());
-	        boolean needOr = false;
+        final StringAllocator SQL_QUERY = new StringAllocator(512);
+        SQL_QUERY.append(getResultFieldsSelect(cols));
+        SQL_QUERY.append(
+            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
+            ctx.getContextId());
+        boolean needOr = false;
 
-	        if (!all.isEmpty()) {
-	            SQL_QUERY.append(" AND ((infostore.folder_id IN (").append(join(all)).append("))");
-	            needOr = true;
-	        }
+        if (!all.isEmpty()) {
+            SQL_QUERY.append(" AND ((infostore.folder_id IN (").append(join(all)).append("))");
+            needOr = true;
+        }
 
-	        if (!own.isEmpty()) {
-	            if (needOr) {
-	                SQL_QUERY.append(" OR ");
-	            } else {
-	                SQL_QUERY.append(" AND (");
-	            }
-	            SQL_QUERY.append("(infostore.created_by = ").append(user.getId()).append(" AND infostore.folder_id in (").append(join(own)).append(
-	                ")))");
-	        } else {
-	            SQL_QUERY.append(')');
-	        }
-	        if (query.length() > 0 && !"*".equals(query)) {
-	            checkPatternLength(query);
-	            final boolean containsWildcard = query.indexOf('*') >= 0 || 0 <= query.indexOf('?');
-	            addQuery = true;
+        if (!own.isEmpty()) {
+            if (needOr) {
+                SQL_QUERY.append(" OR ");
+            } else {
+                SQL_QUERY.append(" AND (");
+            }
+            SQL_QUERY.append("(infostore.created_by = ").append(user.getId()).append(" AND infostore.folder_id in (").append(join(own)).append(
+                ")))");
+        } else {
+            SQL_QUERY.append(')');
+        }
+        if (query.length() > 0 && !"*".equals(query)) {
+            checkPatternLength(query);
+            final boolean containsWildcard = query.indexOf('*') >= 0 || 0 <= query.indexOf('?');
+            addQuery = true;
 
-	            query = query.replaceAll("\\\\", "\\\\\\\\");
-	            query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
-	            query = query.replace('*', '%');
-	            query = query.replace('?', '_');
-	            query = query.replaceAll("'", "\\\\'"); // Escape \ twice, due to regexp parser in replaceAll
+            query = query.replaceAll("\\\\", "\\\\\\\\");
+            query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
+            query = query.replace('*', '%');
+            query = query.replace('?', '_');
+            query = query.replaceAll("'", "\\\\'"); // Escape \ twice, due to regexp parser in replaceAll
 
-	            if (!containsWildcard) {
-	                query = "%" + query + "%";
-	            }
+            if (!containsWildcard) {
+                query = "%" + query + "%";
+            }
 
-	            final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
-	            for (final String currentField : SEARCH_FIELDS) {
-	                if (SQL_QUERY_OBJECTS.length() > 0) {
-	                    SQL_QUERY_OBJECTS.append(" OR ");
-	                }
+            final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
+            for (final String currentField : SEARCH_FIELDS) {
+                if (SQL_QUERY_OBJECTS.length() > 0) {
+                    SQL_QUERY_OBJECTS.append(" OR ");
+                }
 
-	                SQL_QUERY_OBJECTS.append(currentField);
-	                SQL_QUERY_OBJECTS.append(" LIKE (?)");
-	            }
-	            if (SQL_QUERY_OBJECTS.length() > 0) {
-	                SQL_QUERY.append(" AND (");
-	                SQL_QUERY.append(SQL_QUERY_OBJECTS);
-	                SQL_QUERY.append(") ");
-	            }
-	        }
+                SQL_QUERY_OBJECTS.append(currentField);
+                SQL_QUERY_OBJECTS.append(" LIKE (?)");
+            }
+            if (SQL_QUERY_OBJECTS.length() > 0) {
+                SQL_QUERY.append(" AND (");
+                SQL_QUERY.append(SQL_QUERY_OBJECTS);
+                SQL_QUERY.append(") ");
+            }
+        }
 
-	        if (sortedBy != null && dir != NOT_SET) {
-	            final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
-	            if ((orderColumn != null) && (orderColumn[0] != null)) {
-	                if (dir == DESC) {
-	                    SQL_QUERY.append(" ORDER BY ");
-	                    SQL_QUERY.append(orderColumn[0]);
-	                    SQL_QUERY.append(" DESC");
-	                } else if (dir == ASC) {
-	                    SQL_QUERY.append(" ORDER BY ");
-	                    SQL_QUERY.append(orderColumn[0]);
-	                    SQL_QUERY.append(" ASC");
-	                }
-	            }
-	        }
+        if (sortedBy != null && dir != NOT_SET) {
+            final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
+            if ((orderColumn != null) && (orderColumn[0] != null)) {
+                if (dir == DESC) {
+                    SQL_QUERY.append(" ORDER BY ");
+                    SQL_QUERY.append(orderColumn[0]);
+                    SQL_QUERY.append(" DESC");
+                } else if (dir == ASC) {
+                    SQL_QUERY.append(" ORDER BY ");
+                    SQL_QUERY.append(orderColumn[0]);
+                    SQL_QUERY.append(" ASC");
+                }
+            }
+        }
 
-	        if ((start != NOT_SET) && (end != NOT_SET)) {
-	            if (end >= start) {
-	                SQL_QUERY.append(" LIMIT ");
-	                SQL_QUERY.append(start);
-	                SQL_QUERY.append(", ");
-	                SQL_QUERY.append(((end + 1) - start));
-	            }
-	        } else {
-	            if (start != NOT_SET) {
-	                SQL_QUERY.append(" LIMIT ");
-	                SQL_QUERY.append(start);
-	                SQL_QUERY.append(",200");
-	            }
-	            if (end != NOT_SET) {
-	                SQL_QUERY.append(" LIMIT ");
-	                SQL_QUERY.append(end + 1);
-	            }
-	        }
+        if ((start != NOT_SET) && (end != NOT_SET)) {
+            if (end >= start) {
+                SQL_QUERY.append(" LIMIT ");
+                SQL_QUERY.append(start);
+                SQL_QUERY.append(", ");
+                SQL_QUERY.append(((end + 1) - start));
+            }
+        } else {
+            if (start != NOT_SET) {
+                SQL_QUERY.append(" LIMIT ");
+                SQL_QUERY.append(start);
+                SQL_QUERY.append(",200");
+            }
+            if (end != NOT_SET) {
+                SQL_QUERY.append(" LIMIT ");
+                SQL_QUERY.append(end + 1);
+            }
+        }
 
-	        PreparedStatement stmt = null;
-	        try {
-	            stmt = con.prepareStatement(SQL_QUERY.toString());
-	            if(addQuery) {
-	                for(int i = 0; i < SEARCH_FIELDS.length; i++) {
-	                    stmt.setString(i+1, query);
-	                }
-	            }
-	            keepConnection = true;
-	            return new InfostoreSearchIterator(stmt.executeQuery(), this, cols, ctx, con, stmt);
-	        } catch (final SQLException e) {
-	            LOG.error(e.getMessage(), e);
-	            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
-	        } catch (final OXException e) {
-	            LOG.error(e.getMessage(), e);
-	            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-	        }
-        } finally {
-        	if (con != null && !keepConnection) {
-        		releaseReadConnection(ctx, con);
-        	}
+        {
+            Connection con = getReadConnection(ctx);
+            boolean keepConnection = false;
+            PreparedStatement stmt = null;
+            try {
+                stmt = con.prepareStatement(SQL_QUERY.toString());
+                if (addQuery) {
+                    for (int i = 0; i < SEARCH_FIELDS.length; i++) {
+                        stmt.setString(i + 1, query);
+                    }
+                }
+                keepConnection = true;
+                return new InfostoreSearchIterator(stmt.executeQuery(), this, cols, ctx, con, stmt);
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+                throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+                throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
+            } finally {
+                if (con != null && !keepConnection) {
+                    releaseReadConnection(ctx, con);
+                }
+            }
         }
     }
 
@@ -411,23 +418,20 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
-        private DocumentMetadata next;
-
+        private Statement stmt;
+        private Connection readCon;
         private ResultSet rs;
 
+        private DocumentMetadata next;
+
         private final Metadata[] columns;
-
         private final SearchEngineImpl s;
-
         private final Context ctx;
-
-        private Connection readCon;
-
-        private Statement stmt;
-
         private final List<OXException> warnings;
+        private final SearchIterator<DocumentMetadata> delegate;
 
         public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws OXException {
+            super();
             this.warnings = new ArrayList<OXException>(2);
             this.rs = rs;
             this.s = s;
@@ -435,24 +439,59 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             this.ctx = ctx;
             this.readCon = readCon;
             this.stmt = stmt;
+            SearchIterator<DocumentMetadata> delegate = null;
             try {
                 if (rs.next()) {
-                    next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+                    // Preload?
+                    if (false && Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) { // Metadata.CONTENT_LITERAL is mapped to description in fillDocumentMetadata()
+                        next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+                    } else {
+                        final List<DocumentMetadata> list = new LinkedList<DocumentMetadata>();
+
+                        boolean goahead = true;
+                        DocumentMetadata current = null;
+
+                        while (goahead) {
+                            current = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+                            NextObject: while (current == null) {
+                                if (rs.next()) {
+                                    current = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+                                } else {
+                                    break NextObject;
+                                }
+                            }
+                            if (current == null) {
+                                goahead = false;
+                            } else {
+                                list.add(current);
+                                goahead = rs.next();
+                            }
+                            if (!goahead) {
+                                close();
+                            }
+                        }
+
+                        delegate = new SearchIteratorAdapter<DocumentMetadata>(list.iterator(), list.size());
+                    }
                 } else {
                     close();
                 }
             } catch (final Exception e) {
                 throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.INFOSTORE);
             }
+            this.delegate = delegate;
         }
 
         @Override
         public boolean hasNext() throws OXException {
-            return next != null;
+            return null == delegate ? next != null : delegate.hasNext();
         }
 
         @Override
         public DocumentMetadata next() throws OXException, OXException {
+            if (null != delegate) {
+                return delegate.next();
+            }
             try {
                 DocumentMetadata retval = null;
                 retval = next;
@@ -506,6 +545,9 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
         @Override
         public int size() {
+            if (null != delegate) {
+                return delegate.size();
+            }
             return -1;
         }
 
@@ -515,16 +557,26 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
         @Override
         public void addWarning(final OXException warning) {
-            warnings.add(warning);
+            if (null == delegate) {
+                warnings.add(warning);
+            } else {
+                delegate.addWarning(warning);
+            }
         }
 
         @Override
         public OXException[] getWarnings() {
+            if (null != delegate) {
+                return delegate.getWarnings();
+            }
             return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
         @Override
         public boolean hasWarnings() {
+            if (null != delegate) {
+                return delegate.hasWarnings();
+            }
             return !warnings.isEmpty();
         }
 
@@ -555,7 +607,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                     retval.setVersion(result.getInt(i + 1));
                     break FillDocumentMetadata;
                 case Metadata.CONTENT:
-                    retval.setDescription(result.getString(i + 1));
+                    retval.setDescription(result.getString(i + 1)); // Really?
                     break FillDocumentMetadata;
                 case Metadata.FILENAME:
                     retval.setFileName(result.getString(i + 1));

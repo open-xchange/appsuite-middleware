@@ -63,7 +63,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -277,13 +276,7 @@ public class TempCleaner implements Runnable {
                     if (null != notDeleted && notDeleted.contains(file.getId())) {
                         continue;
                     }
-                    FileID fileID = new FileID(file.getId());
-                    FolderID folderID = new FolderID(file.getFolderId());
-                    if (null == fileID.getFolderId()) {
-                        // TODO: check
-                        fileID.setFolderId(folderID.getFolderId());
-                    }
-                    checksumStore.removeFileChecksums(fileID);
+                    checksumStore.removeFileChecksums(IDUtil.getFileID(file));
                 }
             }
         } catch (Throwable t) {

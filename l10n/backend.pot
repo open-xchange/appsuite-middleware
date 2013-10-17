@@ -3168,15 +3168,15 @@ msgstr ""
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
 msgid ""
-"An error occurred inside the Open-Xchange server which prevented it from "
-"fulfilling the request."
+"An error occurred inside the server which prevented it from fulfilling the "
+"request."
 msgstr ""
 
 #. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
 msgid ""
-"A temporary error occurred inside the Open-Xchange server which prevented it "
-"from fulfilling the request.. Please try again later."
+"A temporary error occurred inside the server which prevented it from "
+"fulfilling the request.. Please try again later."
 msgstr ""
 
 #. The general message for a conflicting update operation.
@@ -11564,15 +11564,16 @@ msgstr ""
 msgid "Unsupported format: %1$s"
 msgstr ""
 
-#. Missing cookie: %1$s
+#. Missing cookie: %1$s. Please re-login.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
-msgid "Missing cookie: %1$s"
+msgid "Missing cookie: %1$s. Please re-login."
 msgstr ""
 
-#. Cookie "%1$s" cannot be found because requests do not have any cookies.
+#. Cookie "%1$s" cannot be found because requests do not have any cookies. Please re-login.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
 msgid ""
-"Cookie \"%1$s\" cannot be found because requests do not have any cookies."
+"Cookie \"%1$s\" cannot be found because requests do not have any cookies. "
+"Please re-login."
 msgstr ""
 
 #. *

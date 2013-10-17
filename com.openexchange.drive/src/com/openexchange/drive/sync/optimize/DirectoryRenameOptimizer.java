@@ -79,6 +79,9 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
     public IntermediateSyncResult<DirectoryVersion> optimize(SyncSession session, IntermediateSyncResult<DirectoryVersion> result) {
         IntermediateSyncResult<DirectoryVersion> unoptimizedResult = result;
         IntermediateSyncResult<DirectoryVersion> optimizedResult = null;
+        /*
+         * detect renames
+         */
         int optimizationCount = 0;
         boolean hasChanged;
         do {
@@ -86,6 +89,16 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
             hasChanged = false == optimizedResult.equals(unoptimizedResult);
             unoptimizedResult = optimizedResult;
         } while (hasChanged && ++optimizationCount < 100);
+        /*
+         * remove redundant rename actions if needed
+         */
+        if (0 < optimizationCount) {
+            List<AbstractAction<DirectoryVersion>> actionsForClient = optimizedResult.getActionsForClient();
+            actionsForClient.removeAll(getRedundantRenames(filterByAction(actionsForClient, Action.EDIT)));
+            List<AbstractAction<DirectoryVersion>> actionsForServer = optimizedResult.getActionsForServer();
+            actionsForServer.removeAll(getRedundantRenames(filterByAction(actionsForServer, Action.EDIT)));
+            optimizedResult = new IntermediateSyncResult<DirectoryVersion>(actionsForServer, actionsForClient);
+        }
         return optimizedResult;
     }
 
@@ -108,7 +121,6 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
     private IntermediateSyncResult<DirectoryVersion> optimizeClientRenames(IntermediateSyncResult<DirectoryVersion> result) {
         List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
         List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
-        List<AbstractAction<DirectoryVersion>> renameActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>();
         /*
          * Move of subfolder at client: check for client ACKNOWLEDGE / client SYNC / server REMOVE of identical version
          */
@@ -144,7 +156,6 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                             optimizedActionsForClient.add(new AcknowledgeDirectoryAction(clientAction.getVersion(), clientSync.getVersion(), null));
                             EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(serverAction.getVersion(), clientSync.getVersion(), null);
                             optimizedActionsForServer.add(renameDirectoryAction);
-                            renameActionsForServer.add(renameDirectoryAction);
                             /*
                              * restore any nested removes that are no longer valid after rename
                              */
@@ -154,12 +165,6 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                     }
                 }
             }
-        }
-        /*
-         * remove redundant rename actions
-         */
-        if (0 < renameActionsForServer.size()) {
-            optimizedActionsForServer.removeAll(getRedundantRenames(renameActionsForServer));
         }
         /*
          * return new sync results
@@ -184,7 +189,6 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
     private IntermediateSyncResult<DirectoryVersion> optimizeServerRenames(IntermediateSyncResult<DirectoryVersion> result) {
         List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
         List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
-        List<AbstractAction<DirectoryVersion>> renameActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>();
         /*
          * Move of subfolder at server: check for client REMOVE / client SYNC of identical version
          */
@@ -209,7 +213,6 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                     optimizedActionsForClient.remove(clientSync);
                     EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(clientAction.getVersion(), clientSync.getVersion(), null);
                     optimizedActionsForClient.add(renameDirectoryAction);
-                    renameActionsForClient.add(renameDirectoryAction);
                     /*
                      * restore any nested removes that are no longer valid after rename
                      */
@@ -217,13 +220,6 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                     continue;
                 }
             }
-        }
-        /*
-         * remove redundant rename actions
-         */
-        if (0 < renameActionsForClient.size()) {
-            // TODO check if necessary
-            optimizedActionsForServer.removeAll(getRedundantRenames(renameActionsForClient));
         }
         /*
          * return new sync results

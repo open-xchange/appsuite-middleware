@@ -828,6 +828,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                         runTask(task);
                         task = null; // unnecessary but can help GC
                     }
+                } else {
+                    LOG.error("Worker found a non CustomThread executing tasks: " + thread.getClass().getName());
                 }
             } catch (final InterruptedException ie) {
                 // fall through
