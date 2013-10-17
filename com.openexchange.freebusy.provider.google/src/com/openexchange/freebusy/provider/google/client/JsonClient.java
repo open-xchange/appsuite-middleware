@@ -232,7 +232,7 @@ public class JsonClient {
                     stringBuilder.append("(Code: ").append(error.getString("code")).append(") ");
                 }
                 if (error.hasAndNotNull("errors")) {
-                    JSONArray errors = error.getJSONArray("error");
+                    JSONArray errors = error.getJSONArray("errors");
                     for (int i = 0; i < errors.length(); i++) {
                         stringBuilder.append("; ");
                         JSONObject errorObject = errors.getJSONObject(i);
@@ -240,10 +240,10 @@ public class JsonClient {
                             stringBuilder.append(errorObject.getString("message")).append(' ');
                         }
                         if (errorObject.hasAndNotNull("domain")) {
-                            stringBuilder.append("(Domain: ").append(error.getString("domain")).append(") ");
+                            stringBuilder.append("(Domain: ").append(errorObject.getString("domain")).append(") ");
                         }
                         if (errorObject.hasAndNotNull("reason")) {
-                            stringBuilder.append("(Reason: ").append(error.getString("reason")).append(") ");
+                            stringBuilder.append("(Reason: ").append(errorObject.getString("reason")).append(") ");
                         }
                     }
                 }
