@@ -1,3 +1,9 @@
+open-xchange-eas-provisioning (7.2.2-21) stable; urgency=low
+
+  * Build for patch 2013-10-11
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 15 Oct 2013 11:59:00 +0200
+
 open-xchange-eas-provisioning (7.2.2-20) stable; urgency=low
 
   * Build for patch 2013-10-21
