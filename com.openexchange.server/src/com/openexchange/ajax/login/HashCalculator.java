@@ -198,18 +198,8 @@ public class HashCalculator {
      * @return The calculated hash string
      */
     public String getUserAgentHash(final HttpServletRequest req, final String userAgent) {
-        try {
-            final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update((null == userAgent ? getUserAgent(req) : userAgent).getBytes(Charsets.UTF_8));
-            final String salt = this.salt;
-            if (null != salt) {
-                md.update(salt.getBytes());
-            }
-            return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
-        } catch (final NoSuchAlgorithmException e) {
-            LOG.fatal(e.getMessage(), e);
-        }
-        return "";
+        final String sha256 = com.openexchange.tools.HashUtility.getSha256(null == userAgent ? getUserAgent(req) : userAgent, "hex");
+        return null == sha256 ? "" : sha256;
     }
 
     /**
