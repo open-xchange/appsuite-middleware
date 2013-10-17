@@ -3168,15 +3168,15 @@ msgstr ""
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
 msgid ""
-"An error occurred inside the Open-Xchange server which prevented it from "
-"fulfilling the request."
+"An error occurred inside the server which prevented it from fulfilling the "
+"request."
 msgstr ""
 
 #. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
 msgid ""
-"A temporary error occurred inside the Open-Xchange server which prevented it "
-"from fulfilling the request.. Please try again later."
+"A temporary error occurred inside the server which prevented it from "
+"fulfilling the request.. Please try again later."
 msgstr ""
 
 #. The general message for a conflicting update operation.
