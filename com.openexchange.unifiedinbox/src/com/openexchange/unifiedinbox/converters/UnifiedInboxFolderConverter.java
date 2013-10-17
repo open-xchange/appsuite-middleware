@@ -205,33 +205,29 @@ public final class UnifiedInboxFolderConverter {
         return tmp;
     }
 
-    public static void setOwnPermission(final MailFolder mailFolder, final int userId) {
-        final MailPermission ownPermission = new DefaultMailPermission();
-        ownPermission.setEntity(userId);
-        ownPermission.setGroupPermission(false);
+    public static void setPermissions(final MailFolder mailFolder, final int userId) {
+        final int fp = mailFolder.getOwnPermission().getFolderPermission();
         {
+            final MailPermission ownPermission = new DefaultMailPermission();
+            ownPermission.setEntity(userId);
+            ownPermission.setGroupPermission(false);
             // Grant not more than OCLPermission.CREATE_OBJECTS_IN_FOLDER
-            final int fp = mailFolder.getOwnPermission().getFolderPermission();
             ownPermission.setFolderPermission(fp > OCLPermission.CREATE_OBJECTS_IN_FOLDER ? OCLPermission.CREATE_OBJECTS_IN_FOLDER : fp);
+            ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
+            ownPermission.setFolderAdmin(false);
+            mailFolder.setOwnPermission(ownPermission);
         }
-        ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
-        ownPermission.setFolderAdmin(false);
-        mailFolder.setOwnPermission(ownPermission);
-    }
-
-    public static void setPermissions(final MailFolder mailFolder) {
-        final MailPermission permission = new DefaultMailPermission();
-        permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
-        permission.setGroupPermission(true);
         {
+            final MailPermission permission = new DefaultMailPermission();
+            permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+            permission.setGroupPermission(true);
             // Grant not more than OCLPermission.CREATE_OBJECTS_IN_FOLDER
-            final int fp = mailFolder.getOwnPermission().getFolderPermission();
             permission.setFolderPermission(fp > OCLPermission.CREATE_OBJECTS_IN_FOLDER ? OCLPermission.CREATE_OBJECTS_IN_FOLDER : fp);
+            permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
+            permission.setFolderAdmin(false);
+            mailFolder.removePermissions();
+            mailFolder.addPermission(permission);
         }
-        permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
-        permission.setFolderAdmin(false);
-        mailFolder.removePermissions();
-        mailFolder.addPermission(permission);
     }
 
     private static boolean setMessageCounts(final int unifiedInboxAccountId, final Session session, final MailFolder tmp) throws UnifiedInboxException, OXException {
