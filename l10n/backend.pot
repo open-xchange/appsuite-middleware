@@ -11564,15 +11564,16 @@ msgstr ""
 msgid "Unsupported format: %1$s"
 msgstr ""
 
-#. Missing cookie: %1$s
+#. Missing cookie: %1$s. Please re-login.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
-msgid "Missing cookie: %1$s"
+msgid "Missing cookie: %1$s. Please re-login."
 msgstr ""
 
-#. Cookie "%1$s" cannot be found because requests do not have any cookies.
+#. Cookie "%1$s" cannot be found because requests do not have any cookies. Please re-login.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
 msgid ""
-"Cookie \"%1$s\" cannot be found because requests do not have any cookies."
+"Cookie \"%1$s\" cannot be found because requests do not have any cookies. "
+"Please re-login."
 msgstr ""
 
 #. *
