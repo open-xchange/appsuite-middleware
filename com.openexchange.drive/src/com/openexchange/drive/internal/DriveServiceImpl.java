@@ -97,7 +97,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.StringAllocator;
 
@@ -298,15 +297,9 @@ public class DriveServiceImpl implements DriveService {
             /*
              * store checksum, invalidate parent directory checksum
              */
-            FileID fileID = new FileID(createdFile.getId());
-            FolderID folderID = new FolderID(createdFile.getFolderId());
-            if (null == fileID.getFolderId()) {
-                // TODO: check
-                fileID.setFolderId(folderID.getFolderId());
-            }
             FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(
-                fileID, createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
-            driveSession.getChecksumStore().removeDirectoryChecksum(folderID);
+                IDUtil.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
+            driveSession.getChecksumStore().removeDirectoryChecksum(new FolderID(createdFile.getFolderId()));
             /*
              * check if created file still equals uploaded one
              */

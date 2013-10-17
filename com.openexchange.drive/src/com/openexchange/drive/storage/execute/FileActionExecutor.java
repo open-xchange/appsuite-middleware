@@ -64,6 +64,7 @@ import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.internal.IDUtil;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -138,13 +139,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                     versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
                 if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                     // moved successfully, update checksum
-                    FileID fileID = new FileID(removedFile.getId());
-                    FolderID folderID = new FolderID(removedFile.getFolderId());
-                    if (null == fileID.getFolderId()) {
-                        // TODO: check
-                        fileID.setFolderId(folderID.getFolderId());
-                    }
-                    fileChecksum.setFileID(fileID);
+                    fileChecksum.setFileID(IDUtil.getFileID(removedFile));
                     fileChecksum.setVersion(removedFile.getVersion());
                     fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
                     session.getChecksumStore().updateFileChecksum(fileChecksum);
@@ -167,13 +162,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                 metadata.setVersionComment(session.getStorage().getVersionComment());
                 InputStream data = new UnsynchronizedByteArrayInputStream(new byte[0]);
                 File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata, data);
-                FileID fileID = new FileID(createdFile.getId());
-                FolderID folderID = new FolderID(createdFile.getFolderId());
-                if (null == fileID.getFolderId()) {
-                    // TODO: check
-                    fileID.setFolderId(folderID.getFolderId());
-                }
-                session.getChecksumStore().insertFileChecksum(fileID, createdFile.getVersion(),
+                session.getChecksumStore().insertFileChecksum(IDUtil.getFileID(createdFile), createdFile.getVersion(),
                     createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5);
                 return;
             }
@@ -352,13 +341,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                     versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
                 if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                     // moved successfully, update checksum
-                    FileID fileID = new FileID(removedFile.getId());
-                    FolderID folderID = new FolderID(removedFile.getFolderId());
-                    if (null == fileID.getFolderId()) {
-                        // TODO: check
-                        fileID.setFolderId(folderID.getFolderId());
-                    }
-                    fileChecksum.setFileID(fileID);
+                    fileChecksum.setFileID(IDUtil.getFileID(removedFile));
                     fileChecksum.setVersion(removedFile.getVersion());
                     fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
                     checksumsToUpdate.add(fileChecksum);

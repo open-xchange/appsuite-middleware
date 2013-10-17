@@ -62,11 +62,11 @@ import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.internal.IDUtil;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -91,13 +91,8 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static FileChecksum getChecksum(SyncSession session, File file) throws OXException {
-        FileID fileID = new FileID(file.getId());
-        FolderID folderID = new FolderID(file.getFolderId());
-        if (null == fileID.getFolderId()) {
-            // TODO: check
-            fileID.setFolderId(folderID.getFolderId());
-        }
-        FileChecksum fileChecksum = session.getChecksumStore().getFileChecksum(fileID, file.getVersion(), file.getSequenceNumber());
+        FileChecksum fileChecksum = session.getChecksumStore().getFileChecksum(
+            IDUtil.getFileID(file), file.getVersion(), file.getSequenceNumber());
         if (null == fileChecksum) {
             fileChecksum = session.getChecksumStore().insertFileChecksum(calculateFileChecksum(session, file));
         }
@@ -275,14 +270,8 @@ public class ChecksumProvider {
         if (null == md5) {
             throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
         }
-        FileID fileID = new FileID(file.getId());
-        FolderID folderID = new FolderID(file.getFolderId());
-        if (null == fileID.getFolderId()) {
-            // TODO: check
-            fileID.setFolderId(folderID.getFolderId());
-        }
         FileChecksum fileChecksum = new FileChecksum();
-        fileChecksum.setFileID(fileID);
+        fileChecksum.setFileID(IDUtil.getFileID(file));
         fileChecksum.setSequenceNumber(file.getSequenceNumber());
         fileChecksum.setVersion(file.getVersion());
         fileChecksum.setChecksum(md5);
