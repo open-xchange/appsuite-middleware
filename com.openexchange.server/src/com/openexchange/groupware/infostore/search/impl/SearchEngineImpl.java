@@ -438,7 +438,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             try {
                 if (rs.next()) {
                     // Preload?
-                    if (Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) {
+                    if (false && Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) { // Metadata.CONTENT_LITERAL is mapped to description in fillDocumentMetadata()
                         next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
                     } else {
                         final List<DocumentMetadata> list = new LinkedList<DocumentMetadata>();
