@@ -1376,6 +1376,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
+     * Check this folder's <code>opened</code> flag.
+     */
+    public synchronized boolean checkOpen() {
+        return opened;
+    }
+
+    /**
      * Return the permanent flags supported by the server.
      */
     public synchronized Flags getPermanentFlags() {
