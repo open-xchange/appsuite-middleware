@@ -1,3 +1,7 @@
+* 2013-10-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21673: Signal appropriate permission for Unified Mail folders
+
 * 2013-10-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 29293: Adapted JavaDoc to current behavior on session remote distribution
