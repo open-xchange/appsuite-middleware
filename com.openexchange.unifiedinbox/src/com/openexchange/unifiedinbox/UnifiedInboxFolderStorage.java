@@ -667,8 +667,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 mailFolder.setSubscribedSubfolders(false);
                 mailFolder.setDefaultFolder(false);
                 mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
-                UnifiedInboxFolderConverter.setPermissions(mailFolder);
-                UnifiedInboxFolderConverter.setOwnPermission(mailFolder, session.getUserId());
+                UnifiedInboxFolderConverter.setPermissions(mailFolder, session.getUserId());
                 return mailFolder;
             } finally {
                 if (null != mailAccess) {
@@ -869,8 +868,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             parentFullname,
                             mailAccount.getId(),
                             null));
-                        UnifiedInboxFolderConverter.setPermissions(mailFolder);
-                        UnifiedInboxFolderConverter.setOwnPermission(mailFolder, s.getUserId());
+                        UnifiedInboxFolderConverter.setPermissions(mailFolder, s.getUserId());
                         mailFolder.setSubfolders(false);
                         mailFolder.setSubscribedSubfolders(false);
                         mailFolder.setName(mailAccount.getName());

@@ -1,3 +1,9 @@
+* 2013-10-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21673: Signal appropriate permission for Unified Mail folders
+ - Fix for bug 29288: Preload document meta data
+ - Fix for bug 29322: Changed wording of error messages to not contain "Open-Xchange" due to branding/theming reasons
+
 * 2013-10-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 29293: Adapted JavaDoc to current behavior on session remote distribution
@@ -41,6 +47,10 @@
 
  - Fix for bug 29214: Fire filestorage events upon copy-operation within the same account
  - Fix for bug 29222: Really delete collected files during batch action execution 
+
+* 2013-10-10 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 29315: Avoid bad where condition
 
 * 2013-10-09 - marcus.klein@open-xchange.com
 

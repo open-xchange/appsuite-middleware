@@ -47,47 +47,41 @@
  *
  */
 
-package com.openexchange.exception;
+package com.openexchange.realtime.json.protocol;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 
 /**
- * {@link OXExceptionStrings}
+ * {@link TracingDemand} Message to signal a tracing demand to the client.
+ * Clients should react to this demand by adding unique tracers to the Stanzas from then on if the payload is true, they should stop the
+ * tracing if the payload of the demand is false.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public final class OXExceptionStrings implements LocalizableStrings {
+public class TracingDemand extends Message {
 
-    // Text displayed to user if there is no message.
-    public static final String DEFAULT_MESSAGE = "[Not available]";
-
-    // The default message displayed to user.
-    public static final String MESSAGE = "An error occurred inside the server which prevented it from fulfilling the request.";
-
-    // The default message displayed to user when a re-try is recommended
-    public static final String MESSAGE_RETRY = "A temporary error occurred inside the server which prevented it from fulfilling the request.. Please try again later.";
-
-    // The general message for a conflicting update operation.
-    public static final String MESSAGE_CONFLICT = "The object has been changed in the meantime.";
-
-    // The general message for a missing object.
-    public static final String MESSAGE_NOT_FOUND = "Object not found. %1$s";
-
-    // The general message if a user has no access to a certain module (e.g. calendar)
-    public static final String MESSAGE_PERMISSION_MODULE = "No permission for module: %1$s.";
-
-    // The general message if a user has no permission to access a certain folder.
-    public static final String MESSAGE_PERMISSION_FOLDER = "No folder permission.";
-
-    // The general message for a missing field.
-    public static final String MESSAGE_MISSING_FIELD = "Missing field: %s";
+    private static final long serialVersionUID = 4667637217628097912L;
 
     /**
-     * Initializes a new {@link OXExceptionStrings}.
+     * 
+     * Initializes a new {@link TracingDemand}.
+     * @param from the sender
+     * @param to the recipient
+     * @param enabled true if the client should start injecting tracing ids into it's stanzas, false if it should stop
      */
-    public OXExceptionStrings() {
+    public TracingDemand(ID from, ID to, boolean enabled) {
         super();
+        setTo(to);
+        setFrom(from);
+        addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+            enabled,
+            "json",
+            "ox",
+            "tracingDemand").build()));
     }
 
 }

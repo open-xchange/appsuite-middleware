@@ -47,47 +47,33 @@
  *
  */
 
-package com.openexchange.exception;
+package com.openexchange.config.internal.filewatcher;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.File;
+import com.openexchange.config.internal.FileProcessor;
 
 
 /**
- * {@link OXExceptionStrings}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link ProcessingFileListener} Reprocess files on change. 
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public final class OXExceptionStrings implements LocalizableStrings {
+public class ProcessingFileListener implements FileListener {
 
-    // Text displayed to user if there is no message.
-    public static final String DEFAULT_MESSAGE = "[Not available]";
+    FileProcessor processor;
 
-    // The default message displayed to user.
-    public static final String MESSAGE = "An error occurred inside the server which prevented it from fulfilling the request.";
-
-    // The default message displayed to user when a re-try is recommended
-    public static final String MESSAGE_RETRY = "A temporary error occurred inside the server which prevented it from fulfilling the request.. Please try again later.";
-
-    // The general message for a conflicting update operation.
-    public static final String MESSAGE_CONFLICT = "The object has been changed in the meantime.";
-
-    // The general message for a missing object.
-    public static final String MESSAGE_NOT_FOUND = "Object not found. %1$s";
-
-    // The general message if a user has no access to a certain module (e.g. calendar)
-    public static final String MESSAGE_PERMISSION_MODULE = "No permission for module: %1$s.";
-
-    // The general message if a user has no permission to access a certain folder.
-    public static final String MESSAGE_PERMISSION_FOLDER = "No folder permission.";
-
-    // The general message for a missing field.
-    public static final String MESSAGE_MISSING_FIELD = "Missing field: %s";
-
-    /**
-     * Initializes a new {@link OXExceptionStrings}.
-     */
-    public OXExceptionStrings() {
+    public ProcessingFileListener(File file, FileProcessor processor) {
         super();
+        this.processor = processor;
+    }
+
+    @Override
+    public void onChange(File file) {
+        processor.processFile(file);
+    }
+
+    @Override
+    public void onDelete() {
     }
 
 }

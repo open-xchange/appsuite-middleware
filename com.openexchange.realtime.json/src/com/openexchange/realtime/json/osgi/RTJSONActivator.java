@@ -60,7 +60,6 @@ import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.handle.StanzaQueueService;
-import com.openexchange.realtime.json.JSONConfig;
 import com.openexchange.realtime.json.actions.RealtimeActions;
 import com.openexchange.realtime.json.impl.JSONChannel;
 import com.openexchange.realtime.json.impl.RTJSONHandler;
@@ -96,8 +95,6 @@ public class RTJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         JSONServiceRegistry.SERVICES.set(this);
-        JSONConfig atmosphereConfig = JSONConfig.getInstance();
-        atmosphereConfig.start();
 
         RTJSONHandler handler = new RTJSONHandler();
         registerService(Channel.class, new JSONChannel(handler));

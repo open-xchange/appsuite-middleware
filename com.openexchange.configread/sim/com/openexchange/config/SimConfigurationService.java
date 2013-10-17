@@ -53,6 +53,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.exception.OXException;
@@ -183,5 +184,25 @@ public class SimConfigurationService implements ConfigurationService {
     public Map<String, Object> getYamlInFolder(String dirName) {
         // Nothing to do
         return null;
+    }
+
+    @Override
+    public boolean getBoolProperty(String name, boolean defaultValue, PropertyListener propertyListener) {
+        return false;
+    }
+
+    @Override
+    public int getIntProperty(String name, int defaultValue, PropertyListener propertyListener) {
+        return 0;
+    }
+
+    @Override
+    public List<String> getProperty(String name, String defaultValue, String separator) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator) {
+        return Collections.emptyList();
     }
 }

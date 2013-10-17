@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.RealtimeConfig;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -64,6 +65,7 @@ import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.NextSequence;
+import com.openexchange.realtime.json.protocol.TracingDemand;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
@@ -88,6 +90,11 @@ public class EnrolAction extends RTAction {
         ID constructedId = constructID(requestData, session);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Enroling ID: " + constructedId);
+        }
+        String userAtContext = constructedId.getUser() + "@" + constructedId.getContext();
+        RealtimeConfig realtimeConfig = RealtimeConfig.getInstance();
+        if(realtimeConfig.isTraceAllUsersEnabled() || realtimeConfig.getUsersToTrace().contains(userAtContext)) {
+            enrolActionResults.put(RESULT, stanzaToJSON(new TracingDemand(constructedId, constructedId, true)));
         }
         stateManager.retrieveState(constructedId);
         NextSequence nextSequence = new NextSequence(constructedId, constructedId, 0);
