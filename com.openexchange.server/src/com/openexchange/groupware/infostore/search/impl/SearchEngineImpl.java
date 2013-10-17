@@ -56,8 +56,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import org.apache.commons.logging.Log;
@@ -411,23 +413,20 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
-        private DocumentMetadata next;
-
+        private Statement stmt;
+        private Connection readCon;
         private ResultSet rs;
 
+        private DocumentMetadata next;
+
         private final Metadata[] columns;
-
         private final SearchEngineImpl s;
-
         private final Context ctx;
-
-        private Connection readCon;
-
-        private Statement stmt;
-
         private final List<OXException> warnings;
+        private final SearchIterator<DocumentMetadata> delegate;
 
         public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws OXException {
+            super();
             this.warnings = new ArrayList<OXException>(2);
             this.rs = rs;
             this.s = s;
@@ -435,24 +434,59 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             this.ctx = ctx;
             this.readCon = readCon;
             this.stmt = stmt;
+            SearchIterator<DocumentMetadata> delegate = null;
             try {
                 if (rs.next()) {
-                    next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+                    // Preload?
+                    if (Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) {
+                        next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+                    } else {
+                        final List<DocumentMetadata> list = new LinkedList<DocumentMetadata>();
+
+                        boolean goahead = true;
+                        DocumentMetadata current = null;
+
+                        while (goahead) {
+                            current = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+                            NextObject: while (current == null) {
+                                if (rs.next()) {
+                                    current = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
+                                } else {
+                                    break NextObject;
+                                }
+                            }
+                            if (current == null) {
+                                goahead = false;
+                            } else {
+                                list.add(current);
+                                goahead = rs.next();
+                            }
+                            if (!goahead) {
+                                close();
+                            }
+                        }
+
+                        delegate = new SearchIteratorAdapter<DocumentMetadata>(list.iterator(), list.size());
+                    }
                 } else {
                     close();
                 }
             } catch (final Exception e) {
                 throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.INFOSTORE);
             }
+            this.delegate = delegate;
         }
 
         @Override
         public boolean hasNext() throws OXException {
-            return next != null;
+            return null == delegate ? next != null : delegate.hasNext();
         }
 
         @Override
         public DocumentMetadata next() throws OXException, OXException {
+            if (null != delegate) {
+                return delegate.next();
+            }
             try {
                 DocumentMetadata retval = null;
                 retval = next;
@@ -506,6 +540,9 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
         @Override
         public int size() {
+            if (null != delegate) {
+                return delegate.size();
+            }
             return -1;
         }
 
@@ -515,16 +552,26 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
         @Override
         public void addWarning(final OXException warning) {
-            warnings.add(warning);
+            if (null == delegate) {
+                warnings.add(warning);
+            } else {
+                delegate.addWarning(warning);
+            }
         }
 
         @Override
         public OXException[] getWarnings() {
+            if (null != delegate) {
+                return delegate.getWarnings();
+            }
             return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
         @Override
         public boolean hasWarnings() {
+            if (null != delegate) {
+                return delegate.hasWarnings();
+            }
             return !warnings.isEmpty();
         }
 
@@ -555,7 +602,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                     retval.setVersion(result.getInt(i + 1));
                     break FillDocumentMetadata;
                 case Metadata.CONTENT:
-                    retval.setDescription(result.getString(i + 1));
+                    retval.setDescription(result.getString(i + 1)); // Really?
                     break FillDocumentMetadata;
                 case Metadata.FILENAME:
                     retval.setFileName(result.getString(i + 1));

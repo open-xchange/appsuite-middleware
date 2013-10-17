@@ -1,6 +1,7 @@
 * 2013-10-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 21673: Signal appropriate permission for Unified Mail folders
+ - Fix for bug 29288: Preload document meta data
 
 * 2013-10-16 - thorben.betten@open-xchange.com
 
