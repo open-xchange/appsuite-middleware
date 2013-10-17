@@ -100,15 +100,27 @@ open-xchange-parallels (7.4.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:29:52 +0200
 
+open-xchange-parallels (7.2.2-21) stable; urgency=low
+
+  * Build for patch 2013-10-11
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 15 Oct 2013 11:59:40 +0200
+
+open-xchange-parallels (7.2.2-20) stable; urgency=low
+
+  * Build for patch 2013-10-21
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 14 Oct 2013 11:04:08 +0200
+
+open-xchange-parallels (7.2.2-19) stable; urgency=low
+
+  * Build for patch 2013-10-15
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 14 Oct 2013 10:21:32 +0200
+
 open-xchange-parallels (7.2.2-18) stable; urgency=low
 
-  * Build for patch 2013-09-26
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 17 Sep 2013 10:28:01 +0200
-
-open-xchange-parallels (7.2.2-18) stable; urgency=low
-
-  * Build for patch 2013-09-26
+  * Build for patch 2013-09-23
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 26 Sep 2013 12:28:19 +0200
 

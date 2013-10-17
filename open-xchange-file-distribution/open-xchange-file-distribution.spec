@@ -50,6 +50,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Tue Oct 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-11
+* Mon Oct 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-21
+* Mon Oct 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-15
 * Thu Oct 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First sprint increment for 7.4.0 release
 * Wed Oct 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -58,6 +64,8 @@ Build for patch 2013-10-09
 Build for patch 2013-10-07
 * Thu Sep 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-26
+* Thu Sep 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-23
 * Tue Sep 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eleventh candidate for 7.4.0 release
 * Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
