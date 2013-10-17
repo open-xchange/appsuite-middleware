@@ -150,19 +150,21 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
             LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
             put = false;
         }
-        try {
-            /*
-             * Cache connection if desired/possible anymore
-             */
-            if (put && mailAccess.isCacheable() && SmalMailAccessCache.getInstance().putMailAccess(mailAccess.getSession(), mailAccess.getAccountId(), mailAccess)) {
+        if (put && mailAccess.isCacheable()) {
+            try {
                 /*
-                 * Successfully cached: return
+                 * Cache connection if desired/possible anymore
                  */
-                MailAccessWatcher.removeMailAccess(mailAccess);
-                return;
+                if (SmalMailAccessCache.getInstance().putMailAccess(mailAccess.getSession(), mailAccess.getAccountId(), mailAccess)) {
+                    /*
+                     * Successfully cached: return
+                     */
+                    MailAccessWatcher.removeMailAccess(mailAccess);
+                    return;
+                }
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
             }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
         }
         /*
          * Couldn't be put into cache

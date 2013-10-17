@@ -706,18 +706,20 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 put = false;
             }
             // resetFields();
-            try {
-                /*
-                 * Cache connection if desired/possible anymore
-                 */
-                if (put && isCacheable() && getMailAccessCache().putMailAccess(session, accountId, this)) {
+            if (put && isCacheable()) {
+                try {
                     /*
-                     * Successfully cached: return
+                     * Cache connection if desired/possible anymore
                      */
-                    return;
+                    if (getMailAccessCache().putMailAccess(session, accountId, this)) {
+                        /*
+                         * Successfully cached: return
+                         */
+                        return;
+                    }
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
             }
             /*
              * Close mail connection
