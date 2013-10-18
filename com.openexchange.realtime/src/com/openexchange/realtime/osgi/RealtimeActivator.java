@@ -54,17 +54,13 @@ import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.management.ManagementObject;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.RealtimeConfig;
-import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.management.RealtimeConfigMBean;
+import com.openexchange.realtime.management.ManagementHouseKeeper;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
@@ -83,8 +79,6 @@ import com.openexchange.user.UserService;
  */
 public class RealtimeActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(RealtimeActivator.class);
-    
     private SyntheticChannel synth; 
     private RealtimeConfig realtimeConfig;
 
@@ -99,14 +93,7 @@ public class RealtimeActivator extends HousekeepingActivator {
         
         realtimeConfig = RealtimeConfig.getInstance();
         realtimeConfig.start();
-        ManagementService managementService = getService(ManagementService.class);
-        if(managementService == null) {
-            RealtimeException missingServiceException = RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ManagementService.class);
-            LOG.error(missingServiceException.getMessage(), missingServiceException);
-        } else {
-            ManagementObject<RealtimeConfigMBean> managementObject = realtimeConfig.getManagementObject();
-            managementService.registerMBean(managementObject.getObjectName(), managementObject);
-        }
+        ManagementHouseKeeper.getInstance().addManagementObject(realtimeConfig.getManagementObject());
 
         synth = new SyntheticChannel(this);
 
@@ -136,24 +123,18 @@ public class RealtimeActivator extends HousekeepingActivator {
         
         registerService(Channel.class, new DevNullChannel());
         
+        //Expose all ManagementObjects for this bundle
+        ManagementHouseKeeper.getInstance().exposeManagementObjects();
         openTrackers();
     }
     
     @Override
     protected void stopBundle() throws Exception {
         synth.shutdown();
-        ManagementService managementService = getService(ManagementService.class);
-        if(managementService == null) {
-            RealtimeException missingServiceException = RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ManagementService.class);
-            LOG.error("Unable to deregister management object.", missingServiceException);
-        } else {
-            ManagementObject<RealtimeConfigMBean> managementObject = realtimeConfig.getManagementObject();
-            try {
-                managementService.unregisterMBean(managementObject.getObjectName());
-            } catch (OXException e) {
-                LOG.error("Unable to deregister management object.", e);
-            }
-        }
+        //Conceal all ManagementObjects for this bundle and remove them from the housekeeper
+        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
+        managementHouseKeeper.cleanup();
+        
         realtimeConfig.stop();
     }
 

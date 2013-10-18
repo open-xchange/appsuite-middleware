@@ -17,6 +17,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.realtime.packet,
  com.openexchange.realtime.util,
  com.openexchange.server,
+ javax.management,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event

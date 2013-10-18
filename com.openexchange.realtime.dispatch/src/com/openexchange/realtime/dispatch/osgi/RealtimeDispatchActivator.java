@@ -54,11 +54,13 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.impl.LocalMessageDispatcherImpl;
+import com.openexchange.realtime.dispatch.management.ManagementHouseKeeper;
 
 public class RealtimeDispatchActivator extends HousekeepingActivator {
 
@@ -66,7 +68,7 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { EventAdmin.class };
+        return new Class[] { ManagementService.class, EventAdmin.class };
     }
 
     /*
@@ -89,7 +91,7 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
                 }
             }
         });
-        
+
         RealtimeServiceRegistry.SERVICES.set(this);
 
         final LocalMessageDispatcher dispatcher = new LocalMessageDispatcherImpl();
@@ -109,12 +111,14 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
             }
         });
 
+        ManagementHouseKeeper.getInstance().exposeManagementObjects();
         openTrackers();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        ManagementHouseKeeper.getInstance().cleanup();
         RealtimeServiceRegistry.SERVICES.set(null);
     }
 
