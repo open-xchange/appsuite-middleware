@@ -60,6 +60,7 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.dispatch.management.ManagementHouseKeeper;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -76,41 +77,46 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
 
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
+    
+    private final StanzaSequenceGate gate;
+    
+    public LocalMessageDispatcherImpl() {
+        gate = new StanzaSequenceGate(LocalMessageDispatcher.class.getSimpleName()) {
 
-    private final StanzaSequenceGate gate = new StanzaSequenceGate("LocalMessageDispatcher") {
-
-        @Override
-        public void handleInternal(Stanza stanza, ID recipient) throws OXException {
-            String protocol = recipient.getProtocol();
-            Channel channel = channels.get(protocol);
-            if (channel == null) {
-                stanza.trace("Didn't find channel for protocol: " + protocol);
-                throw DispatchExceptionCode.UNKNOWN_CHANNEL.create(protocol);
-            } else {
-                if (channel.isConnected(recipient)) {
-                    try {
-                        stanza.trace("Send to " + recipient.toString());
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Sending Stanza: " + stanza + " to " + recipient.toString());
-                        }
-                        channel.send(stanza, recipient);
-                    } catch (OXException e) {
-                        if (RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.equals(e)) {
-                            throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
-                        } else {
-                            throw e;
-                        }
-                    } catch (RuntimeException e) {
-                        stanza.trace(e.toString(), e);
-                        throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    }
+            @Override
+            public void handleInternal(Stanza stanza, ID recipient) throws OXException {
+                String protocol = recipient.getProtocol();
+                Channel channel = channels.get(protocol);
+                if (channel == null) {
+                    stanza.trace("Didn't find channel for protocol: " + protocol);
+                    throw DispatchExceptionCode.UNKNOWN_CHANNEL.create(protocol);
                 } else {
-                    LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()));
-                    throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
+                    if (channel.isConnected(recipient)) {
+                        try {
+                            stanza.trace("Send to " + recipient.toString());
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Sending Stanza: " + stanza + " to " + recipient.toString());
+                            }
+                            channel.send(stanza, recipient);
+                        } catch (OXException e) {
+                            if (RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.equals(e)) {
+                                throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
+                            } else {
+                                throw e;
+                            }
+                        } catch (RuntimeException e) {
+                            stanza.trace(e.toString(), e);
+                            throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        }
+                    } else {
+                        LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()));
+                        throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
+                    }
                 }
             }
-        }
-    };
+        };
+        ManagementHouseKeeper.getInstance().addManagementObject(gate.getManagementObject());
+    }
 
     @Override
     public Map<ID, OXException> send(Stanza stanza, Set<ID> recipients) throws OXException {

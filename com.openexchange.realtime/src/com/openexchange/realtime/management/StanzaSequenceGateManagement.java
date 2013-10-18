@@ -49,11 +49,12 @@
 
 package com.openexchange.realtime.management;
 
+import java.util.List;
+import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementObject;
-import com.openexchange.realtime.RealtimeConfig;
 
 
 /**
@@ -63,7 +64,13 @@ import com.openexchange.realtime.RealtimeConfig;
  */
 public class StanzaSequenceGateManagement extends ManagementObject<StanzaSequenceGateMBean> implements StanzaSequenceGateMBean {
 
+    private ObjectName objectName = null;
     private final String name;
+    private int bufferSize;
+    private long numberOfInboxes;
+    private Map<String, List<Long>> inboxes;
+    private Map<String, Long> sequenceNumbers;
+    
     /**
      * Initializes a new {@link RealtimeConfigManagement}.
      * @param mbeanInterface
@@ -80,16 +87,68 @@ public class StanzaSequenceGateManagement extends ManagementObject<StanzaSequenc
 
     @Override
     public ObjectName getObjectName() {
-        ObjectName objectName = null;
-        String gateName = "StanzaSequenceGate-"+name;
-        try {
-            objectName = new ObjectName("com.openexchange.realtime", "name", gateName);
-        } catch (MalformedObjectNameException e) {
-            //can't happen: valid domain and no missing parameters
-        } catch (NullPointerException e) {
-            //can't happen: valid domain and no missing parameters
+        if (objectName == null) {
+            String gateName = "StanzaSequenceGate-" + name;
+            try {
+                objectName = new ObjectName("com.openexchange.realtime", "name", gateName);
+            } catch (MalformedObjectNameException e) {
+                // can't happen: valid domain and no missing parameters
+            } catch (NullPointerException e) {
+                // can't happen: valid domain and no missing parameters
+            }
         }
         return objectName;
+    }
+
+    @Override
+    public int getBufferSize() {
+        return bufferSize;
+    }
+
+    /**
+     * Set the buffersize configured for this {@ link StanzaSequenceGate}
+     * @param bufferSize The buffersize configured for this the number of inboxes handled by this {@ link StanzaSequenceGate}
+     */
+    public void setBufferSize(int bufferSize) {
+        this.bufferSize=bufferSize;
+        
+    }
+
+    @Override
+    public long getNumberOfInboxes() {
+        return numberOfInboxes;
+    }
+
+    /**
+     * Set the number of inboxes handled by this {@ link StanzaSequenceGate}
+     * @param numberOfInboxes The number of inboxes handled by this {@ link StanzaSequenceGate}
+     */
+    public void setNumberOfInboxes(long numberOfInboxes) {
+        this.numberOfInboxes = numberOfInboxes;
+    }
+
+    @Override
+    public Map<String, List<Long>> getInboxes() {
+        return inboxes;
+    }
+
+    /**
+     * @param unmodifiableMap
+     */
+    public void setInboxes(Map<String, List<Long>> inboxes) {
+        this.inboxes = inboxes;
+    }
+
+    @Override
+    public Map<String, Long> getSequenceNumbers() {
+        return sequenceNumbers;
+    }
+
+    /**
+     * @param sequenceNumbers
+     */
+    public void setSequenceNumbers(Map<String, Long> sequenceNumbers) {
+        this.sequenceNumbers = sequenceNumbers;
     }
 
 }

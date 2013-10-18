@@ -52,8 +52,10 @@ package com.openexchange.realtime.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.exception.OXException;
@@ -94,6 +96,12 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
     public StanzaSequenceGate(String name) {
         this.name = name;
         this.managementObject = new StanzaSequenceGateManagement(name);
+        initManagementObject(managementObject);
+    }
+
+    private void initManagementObject(StanzaSequenceGateManagement managementObject) {
+        managementObject.setBufferSize(BUFFER_SIZE);
+        managementObject.setNumberOfInboxes(inboxes.size());
     }
 
     @Override
@@ -202,6 +210,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Best case, Threshold: " + threshold.get());
                 }
+                notifyManagementSequenceNumbers();
                 stanza.trace("Passing gate " + name);
                 if (customAction != null) {
                     customAction.handle(stanza, recipient);
@@ -218,6 +227,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
                 /* Drain Stanzas accumulated while waiting for the missing SequenceNumber */
                 List<StanzaWithCustomAction> stanzas = inboxes.remove(stanza.getSequencePrincipal());
+                notifyManagementInboxes();
                 if (stanzas == null || stanzas.isEmpty()) {
                     return true;
                 }
@@ -258,6 +268,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                     inbox = Collections.synchronizedList(new ArrayList<StanzaWithCustomAction>());
                     List<StanzaWithCustomAction> oldList = inboxes.putIfAbsent(stanza.getSequencePrincipal(), inbox);
                     inbox = (oldList != null) ? oldList : inbox;
+                    notifyManagementNumberOfInboxes();
                 }
 
                 if (inbox.size() < BUFFER_SIZE) {
@@ -283,6 +294,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                             LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
                         }
                         inbox.add(new StanzaWithCustomAction(stanza, customAction));
+                        notifyManagementInboxes();
                         return true;
                     } else {
                         stanza.trace("Not in sequence but already enqueued, discarding.");
@@ -319,6 +331,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 list.clear();
             }
             sequenceNumbers.put(constructedId, new AtomicLong(newSequence));
+            notifyManagementSequenceNumbers();
         } finally {
             constructedId.unlock("gate");
         }
@@ -328,6 +341,8 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
     public void freeRessourcesFor(ID sequencePrincipal) {
         sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
+        notifyManagementSequenceNumbers();
+        notifyManagementInboxes();
     }
 
     /**
@@ -354,6 +369,27 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
             this.sequenceNumber=stanza.getSequenceNumber();
         }
 
+    }
+    
+    // Management calls
+    //======================================================================================================================================
+    
+    private void notifyManagementNumberOfInboxes() {
+        managementObject.setNumberOfInboxes(inboxes.size());
+    }
+    
+    private void notifyManagementSequenceNumbers() {
+        HashMap<String, Long> basicSequenceNumbers = new HashMap<String, Long>(sequenceNumbers.size());
+        for (Entry<ID, AtomicLong> entry : sequenceNumbers.entrySet()) {
+            basicSequenceNumbers.put(entry.getKey().toString(), entry.getValue().get());
+        }
+        managementObject.setSequenceNumbers(basicSequenceNumbers);
+    }
+
+    private void notifyManagementInboxes() {
+        notifyManagementNumberOfInboxes();
+//        ID, List<Long>
+//        managementObject.setInboxes(Collections.unmodifiableMap(inboxes);
     }
 
 }

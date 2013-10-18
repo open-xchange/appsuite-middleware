@@ -49,6 +49,9 @@
 
 package com.openexchange.realtime.management;
 
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * {@link StanzaSequenceGateMBean}
@@ -56,5 +59,30 @@ package com.openexchange.realtime.management;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface StanzaSequenceGateMBean {
+    
+    /**
+     * Get the buffersize configured for this {@ link StanzaSequenceGate}
+     * @return the buffersize configured for this the number of inboxes handled by this {@ link StanzaSequenceGate}
+     */
+    int getBufferSize();
+    
+    /**
+     * Get the number of inboxes handled by this {@ link StanzaSequenceGate} 
+     * @return the number of inboxes handled by this {@ link StanzaSequenceGate}
+     */
+    long getNumberOfInboxes();
+    
+    /**
+     * Gets the inboxes
+     *
+     * @return The inboxes
+     */
+    Map<String, List<Long>> getInboxes();
 
+    /**
+     * Gets the sequenceNumbers
+     *
+     * @return The sequenceNumbers
+     */
+    Map<String, Long> getSequenceNumbers();
 }

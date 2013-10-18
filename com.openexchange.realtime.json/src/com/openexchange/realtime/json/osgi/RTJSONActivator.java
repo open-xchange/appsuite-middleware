@@ -76,6 +76,7 @@ import com.openexchange.realtime.json.payload.converter.primitive.JSONToStringCo
 import com.openexchange.realtime.json.payload.converter.primitive.StringToJSONConverter;
 import com.openexchange.realtime.json.presence.converter.JSONToPresenceStateConverter;
 import com.openexchange.realtime.json.presence.converter.PresenceStateToJSONConverter;
+import com.openexchange.realtime.json.management.ManagementHouseKeeper;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.packet.Stanza;
@@ -102,7 +103,6 @@ public class RTJSONActivator extends AJAXModuleActivator {
         JSONServiceRegistry.SERVICES.set(this);
 
         handler = new RTJSONHandler();
-        handler.registerGateManagement();
         registerService(Channel.class, new JSONChannel(handler));
 
         /*
@@ -135,12 +135,13 @@ public class RTJSONActivator extends AJAXModuleActivator {
         registerModule(realtimeActions, "rt");
 
         getService(CapabilityService.class).declareCapability("rt");
+        ManagementHouseKeeper.getInstance().exposeManagementObjects();
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        ManagementHouseKeeper.getInstance().cleanup();
         unregisterService(realtimeActions);
-        handler.unregisterGateManagement();
         JSONServiceRegistry.SERVICES.set(null);
         super.stop(context);
     }
