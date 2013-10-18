@@ -1,3 +1,7 @@
+* 2013-10-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 28958: Create and handle counter mails for external organizer.
+
 * 2013-10-17 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29133: Special series pattern lead to reset of confirmation status.

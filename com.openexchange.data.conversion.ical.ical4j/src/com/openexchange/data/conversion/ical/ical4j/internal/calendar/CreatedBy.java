@@ -86,10 +86,13 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
             String address;
             if (calendar.getOrganizerId() > 0) {
                 address = EmitterTools.getFrom(calendar.getOrganizerId(), ctx);
+            } else if (calendar.getOrganizer() != null && !calendar.getOrganizer().trim().equals("")) {
+                address = calendar.getOrganizer();
             } else if (calendar.getCreatedBy() > 0) {
                 address = EmitterTools.getFrom(calendar.getCreatedBy(), ctx);
             } else {
-                address = calendar.getOrganizer();
+                warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, "Unable to determine organizer."));
+                return;
             }
             address = IDNA.toACE(address);
             organizer.setValue("mailto:" + address);
