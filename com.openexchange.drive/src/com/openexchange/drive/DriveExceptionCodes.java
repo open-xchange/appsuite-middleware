@@ -136,6 +136,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** The file name \"%1$s\" is conflicting */
     CONFLICTING_FILENAME(DriveExceptionMessages.CONFLICTING_FILENAME_MSG, Category.CATEGORY_USER_INPUT, 25),
 
+    /** The directory \"%1$s\" with checksum \"%2$s\" caused repeated synchronization problems */
+    REPEATED_SYNC_PROBLEMS_MSG(DriveExceptionMessages.REPEATED_SYNC_PROBLEMS_MSG, Category.CATEGORY_USER_INPUT, 26),
+
     ;
 
     private static final String PREFIX = "DRV";
