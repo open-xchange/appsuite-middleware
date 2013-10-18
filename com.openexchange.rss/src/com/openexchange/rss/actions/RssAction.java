@@ -73,6 +73,7 @@ import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.preprocessors.RssPreprocessor;
 import com.openexchange.rss.preprocessors.SanitizingPreprocessor;
+import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -80,7 +81,6 @@ import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.fetcher.FetcherException;
 import com.sun.syndication.fetcher.impl.HashMapFeedInfoCache;
-import com.sun.syndication.fetcher.impl.HttpURLFeedFetcher;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.ParsingFeedException;
 
@@ -91,7 +91,7 @@ public class RssAction implements AJAXActionService {
 
 	private static final Log LOG = com.openexchange.log.Log.loggerFor(RssAction.class);
 
-	private final HttpURLFeedFetcher fetcher;
+	private final TimoutHttpURLFeedFetcher fetcher;
 	private final HashMapFeedInfoCache feedCache;
 
 	/**
@@ -99,7 +99,7 @@ public class RssAction implements AJAXActionService {
 	 */
 	public RssAction () {
 		feedCache = new HashMapFeedInfoCache();
-		fetcher = new HttpURLFeedFetcher(feedCache);
+		fetcher = new TimoutHttpURLFeedFetcher(10000, 30000, feedCache);
 	}
 
 	@Override
