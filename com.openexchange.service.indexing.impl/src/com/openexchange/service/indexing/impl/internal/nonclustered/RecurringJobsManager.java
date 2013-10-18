@@ -62,6 +62,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+// FIXME: We have to deal with an absent hazelcast service. E.g. during shutdown...
 public class RecurringJobsManager {
 
     static final String JOB_MAP = "recurringJobs-2";
