@@ -2208,6 +2208,12 @@ msgstr ""
 msgid "The file name \"%1$s\" is conflicting"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
+msgid ""
+"The directory \"%1$s\" with checksum \"%2$s\" caused repeated "
+"synchronization problems"
+msgstr ""
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"

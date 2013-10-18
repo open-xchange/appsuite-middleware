@@ -52,11 +52,13 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import org.osgi.service.event.Event;
 import junit.framework.TestCase;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -152,13 +154,11 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
 
-    private void assertDeletedEvent(final int id) {
-        final CommonEvent event = TestEventAdmin.getInstance().getNewest();
-
-        assertEquals(CommonEvent.DELETE, event.getAction());
-
-        final DocumentMetadata dm = (DocumentMetadata) event.getActionObj();
-        assertEquals(id, dm.getId());
+    private void assertDeletedEvent(final int id) throws OXException {
+        List<Event> events = TestEventAdmin.getInstance().getEvents();
+        assertEquals(1, events.size());
+        assertTrue(FileStorageEventHelper.isDeleteEvent(events.get(0)));
+        assertEquals(String.valueOf(id), FileStorageEventHelper.extractObjectId(events.get(0)));
     }
 
     private void assertNotFound(final int id) {

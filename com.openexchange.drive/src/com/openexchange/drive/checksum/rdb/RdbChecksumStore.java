@@ -516,7 +516,7 @@ public class RdbChecksumStore implements ChecksumStore {
     private static int deleteFileChecksumsInFolders(Connection connection, int cid, FolderID[] folderIDs) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.DELETE_DIRECTORY_CHECKSUMS_STMT(folderIDs));
+            stmt = connection.prepareStatement(SQL.DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(folderIDs));
             stmt.setInt(1, cid);
             return SQL.logExecuteUpdate(stmt);
         } finally {

@@ -60,7 +60,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.api.MailProvider;
-import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
@@ -138,35 +137,25 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
         }
         boolean put = true;
         try {
-            /*
-             * Release all used, non-cachable resources
-             */
+            // Release all used, non-cachable resources
             mailAccess.invokeReleaseResources();
-        } catch (final Throwable t) {
-            /*
-             * Dropping
-             */
-            ExceptionUtils.handleThrowable(t);
-            LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
+        } catch (final Exception e) {
+            LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", e);
             put = false;
         }
-        try {
-            /*
-             * Cache connection if desired/possible anymore
-             */
-            if (put && mailAccess.isCacheable() && SmalMailAccessCache.getInstance().putMailAccess(mailAccess.getSession(), mailAccess.getAccountId(), mailAccess)) {
-                /*
-                 * Successfully cached: return
-                 */
-                MailAccessWatcher.removeMailAccess(mailAccess);
-                return;
+        if (put && mailAccess.isCacheable()) {
+            try {
+                // Cache connection if desired/possible anymore
+                if (SmalMailAccessCache.getInstance().putMailAccess(mailAccess.getSession(), mailAccess.getAccountId(), mailAccess)) {
+                    // Successfully cached: return
+                    MailAccessWatcher.removeMailAccess(mailAccess);
+                    return;
+                }
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
             }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
         }
-        /*
-         * Couldn't be put into cache
-         */
+        // Couldn't be put into cache
         mailAccess.close(false);
     }
 

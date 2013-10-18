@@ -694,39 +694,28 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
             boolean put = put2Cache;
             try {
-                /*
-                 * Release all used, non-cachable resources
-                 */
+                // Release all used, non-cachable resources
                 releaseResources();
-            } catch (final Throwable t) {
-                /*
-                 * Dropping
-                 */
-                LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
+            } catch (final Exception e) {
+                LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", e);
                 put = false;
             }
             // resetFields();
-            try {
-                /*
-                 * Cache connection if desired/possible anymore
-                 */
-                if (put && isCacheable() && getMailAccessCache().putMailAccess(session, accountId, this)) {
-                    /*
-                     * Successfully cached: return
-                     */
-                    return;
+            if (put && isCacheable()) {
+                try {
+                    // Cache connection if desired/possible anymore
+                    if (getMailAccessCache().putMailAccess(session, accountId, this)) {
+                        // Successfully cached: return
+                        return;
+                    }
+                } catch (final Exception e) {
+                    LOG.error(e.getMessage(), e);
                 }
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
             }
-            /*
-             * Close mail connection
-             */
+            // Close mail connection
             closeInternal();
         } finally {
-            /*
-             * Remove from watcher no matter if cached or closed
-             */
+            // Remove from watcher no matter if cached or closed
             if (tracked) {
                 MailAccessWatcher.removeMailAccess(this);
                 tracked = false;

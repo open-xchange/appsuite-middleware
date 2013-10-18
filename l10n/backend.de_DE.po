@@ -54,7 +54,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2013-10-09 10:12+0200\n"
+"PO-Revision-Date: 2013-10-18 14:07+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -177,6 +177,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push/src/com/openexchange/push/PushExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:76
@@ -234,6 +235,7 @@ msgstr "Es trat ein Fehler auf: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:117
@@ -341,8 +343,7 @@ msgid ""
 "header"
 msgstr ""
 "Sie haben die durch das HTTP-Header-Feld 'Content-Length' spezifizierte "
-"Anzahl von "
-"Bytes nicht angegeben."
+"Anzahl von Bytes nicht angegeben."
 
 #. POST requires exactly one file upload per request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:113
@@ -403,7 +404,6 @@ msgstr "Die Aktion ist für den derzeitigen Status des Objekts nicht gültig."
 
 #. One or more of the specified parts could not be found. The part might not have been uploaded, or the specified entity tag might not have matched the part's entity tag.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:146
-#, fuzzy
 msgid ""
 "One or more of the specified parts could not be found. The part might not "
 "have been uploaded, or the specified entity tag might not have matched the "
@@ -415,7 +415,6 @@ msgstr ""
 
 #. The list of parts was not in ascending order.Parts list must specified in order by part number.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:149
-#, fuzzy
 msgid ""
 "The list of parts was not in ascending order.Parts list must specified in "
 "order by part number."
@@ -430,7 +429,6 @@ msgstr "Jeglicher Zugriff auf dieses Objekt wurde deaktiviert."
 
 #. The content of the form does not meet the conditions specified in the policy document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:155
-#, fuzzy
 msgid ""
 "The content of the form does not meet the conditions specified in the policy "
 "document."
@@ -440,7 +438,6 @@ msgstr ""
 
 #. The requested range cannot be satisfied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:158
-#, fuzzy
 msgid "The requested range cannot be satisfied."
 msgstr "Der angeforderte Bereich kann nicht erfüllt werden."
 
@@ -500,7 +497,6 @@ msgstr ""
 
 #. The body of your POST request is not well-formed multipart/form-data.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:188
-#, fuzzy
 msgid "The body of your POST request is not well-formed multipart/form-data."
 msgstr ""
 "Der Body Ihrer POST-Anfrage besteht nicht aus wohlgeformten Multipart/Form-"
@@ -521,7 +517,6 @@ msgstr "Ihre Anfrage war zu groß."
 
 #. Your POST request fields preceding the upload file were too large.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:197
-#, fuzzy
 msgid "Your POST request fields preceding the upload file were too large."
 msgstr ""
 "Die dem Datei-Upload vorangegangenen POST-Anfrage-Felder waren zu groß."
@@ -565,7 +560,6 @@ msgstr "In der gesendeten Anfrage fehlt der benötigte Header."
 
 #. There is no such thing as a logging status sub-resource for a key.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:221
-#, fuzzy
 msgid "There is no such thing as a logging status sub-resource for a key."
 msgstr ""
 "Es gibt keinen Protokollierungsstatus 'sub-resource' für einen Schlüssel."
@@ -597,7 +591,6 @@ msgstr ""
 
 #. Indicates that the version ID specified in the request does not match an existing version.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:236
-#, fuzzy
 msgid ""
 "Indicates that the version ID specified in the request does not match an "
 "existing version."
@@ -2378,6 +2371,27 @@ msgstr "Push via Long polling ist nicht verfügbar."
 msgid "The server is too busy at the moment - please try again later."
 msgstr "Der Server ist derzeit ausgelastet. Bitte später erneut versuchen."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:86
+msgid "The path \"%1$s\" is ignored"
+msgstr "Der Pfad \"%1$s\" wird ignoriert."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:87
+msgid "The file name \"%1$s\" is conflicting"
+msgstr "Konflikt für den Dateinamen \"%1$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
+msgid ""
+"The directory \"%1$s\" with checksum \"%2$s\" caused repeated "
+"synchronization problems"
+msgstr ""
+"Das Verzeichnis \"%1$s\" mit der Prüfsumme \"%2$s\" hat "
+"wiederholt Synchronisationsprobleme verursacht."
+
+#. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
+msgid "Uploaded with %1$s (%2$s)"
+msgstr "Hochgeladen mit %1$s (%2$s)"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Es trat ein Fehler für folgende Aktion auf: %1$s"
@@ -3393,19 +3407,19 @@ msgstr "[Nicht verfügbar]"
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
 msgid ""
-"An error occurred inside the Open-Xchange server which prevented it from "
-"fulfilling the request."
+"An error occurred inside the server which prevented it from fulfilling the "
+"request."
 msgstr ""
-"Auf dem Open-Xchange Server trat ein vorübergehender Fehler auf. Die Anfrage "
+"Auf dem Server trat ein vorübergehender Fehler auf. Die Anfrage "
 "konnte nicht verarbeitet werden. "
 
 #. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
 msgid ""
-"A temporary error occurred inside the Open-Xchange server which prevented it "
-"from fulfilling the request.. Please try again later."
+"A temporary error occurred inside the server which prevented it from "
+"fulfilling the request.. Please try again later."
 msgstr ""
-"Auf dem Open-Xchange Server trat ein vorübergehender Fehler auf. Die Anfrage "
+"Auf dem Server trat ein vorübergehender Fehler auf. Die Anfrage "
 "konnte nicht verarbeitet werden. Bitte versuchen Sie es später erneut."
 
 #. The general message for a conflicting update operation.
@@ -6467,6 +6481,14 @@ msgstr "Der RMI-Dienst konnte nicht gestartet werden."
 msgid "Could not create RMI registry."
 msgstr "RMI Registry konnte nicht erstellt werden"
 
+#. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:69
+msgid ""
+"Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s"
+msgstr ""
+"Ungültige RSS-URL -- Kein oder kein wohlgeformter XML-Inhalt von folgender "
+"URL bereitgestellt: %1$s"
+
 #. Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:69
 msgid ""
@@ -7837,7 +7859,6 @@ msgstr ""
 "angegeben werden. Bitte fügen Sie eine gültige E-Mail-Adresse hinzu. "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:129
-#, fuzzy
 msgid ""
 "The object identifier is mandatory for distribution list members referencing "
 "existing contacts."
@@ -13009,17 +13030,19 @@ msgstr "Es trat ein HTTP-Fehler auf. Status %1$s. Nachricht %2$s."
 msgid "Unsupported format: %1$s"
 msgstr "Nicht unterstütztes Format: %1$s"
 
-#. Missing cookie: %1$s
+#. Missing cookie: %1$s. Please re-login.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
-msgid "Missing cookie: %1$s"
-msgstr "Fehlendes Cookie: %1$s"
+msgid "Missing cookie: %1$s. Please re-login."
+msgstr "Fehlendes Cookie: %1$s. Bitte melden Sie sich erneut an."
 
-#. Cookie "%1$s" cannot be found because requests do not have any cookies.
+#. Cookie "%1$s" cannot be found because requests do not have any cookies. Please re-login.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
 msgid ""
-"Cookie \"%1$s\" cannot be found because requests do not have any cookies."
+"Cookie \"%1$s\" cannot be found because requests do not have any cookies. "
+"Please re-login."
 msgstr ""
-"Cookie \"%1$s\" konnte nicht gefunden werden. Anfragen haben keine Cookies."
+"Cookie \"%1$s\" konnte nicht gefunden werden. Anfragen haben keine Cookies. "
+"Bitte melden Sie sich erneut an."
 
 #. *
 #. * Exception while writing JSON.
@@ -14070,6 +14093,13 @@ msgstr ""
 msgid "Property %1$s must be set if %2$s is set to %3$s"
 msgstr ""
 "Die Eigenschaft %1$s muss gesetzt werden, wenn %2$s auf %3$s gesetzt ist."
+
+#. The class %1$s cannot be used as a property type at the moment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:78
+msgid "The %1$s cannot be used as a property type in the property %2$s"
+msgstr ""
+"Die Klasse %1$s kann in der Eigenschaft %2$s nicht als Eigenschaftstyp "
+"verwendet werden."
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:71

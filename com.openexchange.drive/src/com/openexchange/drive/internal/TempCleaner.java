@@ -251,7 +251,7 @@ public class TempCleaner implements Runnable {
                     checksumStore.removeFileChecksumsInFolder(id);
                     checksumStore.removeDirectoryChecksum(id);
                 }
-            } else {
+            } else if (0 < foldersToDelete.size() || 0 < filesToDelete.size()) {
                 /*
                  * cleanup selected files and folders, invalidate checksums
                  */
@@ -265,18 +265,20 @@ public class TempCleaner implements Runnable {
                     checksumStore.removeFileChecksumsInFolder(id);
                     checksumStore.removeDirectoryChecksum(id);
                 }
-                List<String> ids = new ArrayList<String>();
-                long sequenceNumber = 0;
-                for (File file : filesToDelete) {
-                    ids.add(file.getId());
-                    sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
-                }
-                List<String> notDeleted = fileAccess.removeDocument(ids, sequenceNumber);
-                for (File file : filesToDelete) {
-                    if (null != notDeleted && notDeleted.contains(file.getId())) {
-                        continue;
+                if (0 < filesToDelete.size()) {
+                    List<String> ids = new ArrayList<String>(filesToDelete.size());
+                    long sequenceNumber = 0;
+                    for (File file : filesToDelete) {
+                        ids.add(file.getId());
+                        sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
                     }
-                    checksumStore.removeFileChecksums(IDUtil.getFileID(file));
+                    List<String> notDeleted = fileAccess.removeDocument(ids, sequenceNumber);
+                    for (File file : filesToDelete) {
+                        if (null != notDeleted && notDeleted.contains(file.getId())) {
+                            continue;
+                        }
+                        checksumStore.removeFileChecksums(IDUtil.getFileID(file));
+                    }
                 }
             }
         } catch (Throwable t) {

@@ -745,7 +745,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private TLongObjectHashMap<MailMessage> fetchValidFor(final String fullName, final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, OXException {
-        if (null == imapFolder || !imapFolder.isOpen()) {
+        if (null == imapFolder || !imapFolder.checkOpen()) {
             try {
                 imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
             } catch (final MessagingException e) {
