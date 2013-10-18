@@ -1,3 +1,7 @@
+* 2013-10-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 28958: Create and handle counter mails for external organizer.
+
 * 2013-10-10 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29315: Avoid bad where condition

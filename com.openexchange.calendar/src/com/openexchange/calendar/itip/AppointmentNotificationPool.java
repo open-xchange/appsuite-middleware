@@ -123,7 +123,8 @@ public class AppointmentNotificationPool implements
 		try {
 			lock.lock();
 
-			for(QueueItem item: allItems()) {
+			Collection<QueueItem> allItems = allItems();
+            for(QueueItem item: allItems) {
 				tick(item.getContextId(), item.getAppointmentId(), false);
 			}
 		} catch (Throwable t) {
@@ -394,6 +395,7 @@ public class AppointmentNotificationPool implements
 				}
 				notifyInternalParticipantsAboutDetailChangesAsIndividualUsers();
 				notifyExternalParticipantsAboutOverallChangesAsOrganizer();
+				proposeChangesToExternalOrganizer();
 				return HandlingSuggestion.DONE;
 			} else {
 				if (!force && getInterval() < Math.min(detailChangeInterval, stateChangeInterval) && getIntervalToStartDate() > priorityInterval) {
@@ -402,10 +404,10 @@ public class AppointmentNotificationPool implements
 				notifyInternalParticipantsAboutDetailChangesAsIndividualUsers();
 				notifyInternalParticipantsAboutStateChanges();
 				notifyExternalParticipantsAboutOverallChangesAsOrganizer();
+                proposeChangesToExternalOrganizer();
 				return HandlingSuggestion.DONE;
 			}
 		}
-
 
 		private void notifyAllParticipantsAboutOverallChanges() throws OXException {
 			ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
@@ -618,6 +620,22 @@ public class AppointmentNotificationPool implements
 			}
 		}
 
+        private void proposeChangesToExternalOrganizer() throws OXException {
+            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
+            if (moreThanOneUserActed()) {
+                generator.noActor();
+            }
+            List<NotificationParticipant> recipients = generator.getRecipients();
+            for (NotificationParticipant participant : recipients) {
+                if (!participant.isExternal() || !participant.hasRole(ITipRole.ORGANIZER)) {
+                    continue;
+                }
+                NotificationMail mail = generator.generateUpdateMailFor(participant);
+                if (mail != null && mail.getStateType() != State.Type.NEW) {
+                    notificationMailer.sendMail(mail, session);
+                }
+            }
+        }
 
 		private void notifyExternalParticipantsAboutOverallChangesAsOrganizer() throws OXException {
 			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
