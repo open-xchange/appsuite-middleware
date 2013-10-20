@@ -50,6 +50,7 @@
 package com.openexchange.oauth.httpclient;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import com.openexchange.exception.OXException;
@@ -68,6 +69,8 @@ public class OAuthHTTPRequest implements HTTPRequest {
 
 	@Override
 	public HTTPResponse execute() throws OXException {
+	    delegate.setConnectTimeout(5, TimeUnit.SECONDS);
+	    delegate.setReadTimeout(15, TimeUnit.SECONDS);
 		final Response response = delegate.send();
 		return new HttpOauthResponse(response);
 	}
