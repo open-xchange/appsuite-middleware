@@ -116,6 +116,8 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
             } else {
                 final URL url = new URL(arg);
                 final URLConnection connection = url.openConnection();
+                connection.setConnectTimeout(2500);
+                connection.setReadTimeout(2500);
                 is = new BufferedInputStream(connection.getInputStream());
             }
             final String mimeType = detectDocumentType(is);

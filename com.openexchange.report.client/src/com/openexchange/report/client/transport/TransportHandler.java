@@ -125,6 +125,8 @@ public class TransportHandler {
             tfo.close();
         } else {
             final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://" + REPORT_SERVER_URL + "/").openConnection();
+            httpsURLConnection.setConnectTimeout(2500);
+            httpsURLConnection.setReadTimeout(2500);
             httpsURLConnection.setUseCaches(false);
             httpsURLConnection.setDoOutput(true);
             httpsURLConnection.setDoInput(true);
@@ -155,7 +157,7 @@ public class TransportHandler {
                 System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
             }
             in.close();
-        }        
+        }
     }
 
     private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {

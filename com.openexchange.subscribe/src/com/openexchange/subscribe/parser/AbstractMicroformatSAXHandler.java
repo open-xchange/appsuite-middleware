@@ -112,6 +112,8 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
 
         try {
             URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(2500);
+            connection.setReadTimeout(2500);
             buffy = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
             String line = buffy.readLine();
             while (line != null){
