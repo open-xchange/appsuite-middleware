@@ -192,13 +192,24 @@ public class LoginServlet extends AJAXServlet {
         SESSION, SECRET;
     }
 
-    final AtomicReference<LoginConfiguration> confReference;
+    /** The atomic reference for login configuration */
+    private static final AtomicReference<LoginConfiguration> CONF_REFERENCE = new AtomicReference<LoginConfiguration>();
+
+    /**
+     * The currently active login configuration.
+     *
+     * @return The login configuration
+     */
+    public static LoginConfiguration getLoginConfiguration() {
+        return CONF_REFERENCE.get();
+    }
+
+    // ------------------------------------------------------------------------------------ //
 
     private final Map<String, LoginRequestHandler> handlerMap;
 
     public LoginServlet() {
         super();
-        confReference = new AtomicReference<LoginConfiguration>();
         handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16);
         handlerMap.put(ACTION_STORE, new LoginRequestHandler() {
 
@@ -243,7 +254,7 @@ public class LoginServlet extends AJAXServlet {
                 try {
                     final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                     if (session != null) {
-                        final LoginConfiguration conf = confReference.get();
+                        final LoginConfiguration conf = CONF_REFERENCE.get();
                         SessionServlet.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
                         final String secret = SessionServlet.extractSecret(
                             conf.getHashSource(),
@@ -271,7 +282,7 @@ public class LoginServlet extends AJAXServlet {
 
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-                final LoginConfiguration conf = confReference.get();
+                final LoginConfiguration conf = CONF_REFERENCE.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -392,7 +403,7 @@ public class LoginServlet extends AJAXServlet {
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
                     session = sessiondService.getSession(sessionId);
-                    final LoginConfiguration conf = confReference.get();
+                    final LoginConfiguration conf = CONF_REFERENCE.get();
                     if (session != null) {
                         SessionServlet.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
                         final String secret = SessionServlet.extractSecret(
@@ -440,7 +451,7 @@ public class LoginServlet extends AJAXServlet {
 
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-                final LoginConfiguration conf = confReference.get();
+                final LoginConfiguration conf = CONF_REFERENCE.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -602,7 +613,7 @@ public class LoginServlet extends AJAXServlet {
             disableTrimLogin,
             formLoginWithoutAuthId,
             isRandomTokenEnabled);
-        confReference.set(conf);
+        CONF_REFERENCE.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
         handlerMap.put(ACTION_TOKENS, new Tokens(conf));
@@ -661,7 +672,7 @@ public class LoginServlet extends AJAXServlet {
      * Writes or rewrites a cookie
      */
     private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws OXException, JSONException, IOException {
-        final LoginConfiguration conf = confReference.get();
+        final LoginConfiguration conf = CONF_REFERENCE.get();
         if (!conf.isSessiondAutoLogin() && CookieType.SESSION == type) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create("store");
         }
@@ -730,7 +741,7 @@ public class LoginServlet extends AJAXServlet {
      */
     protected void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
         final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
-        configureCookie(cookie, secure, serverName, confReference.get());
+        configureCookie(cookie, secure, serverName, CONF_REFERENCE.get());
         resp.addCookie(cookie);
     }
 
@@ -755,9 +766,9 @@ public class LoginServlet extends AJAXServlet {
 
     private String parseClient(final HttpServletRequest req) {
         try {
-            return LoginTools.parseClient(req, false, confReference.get().getDefaultClient());
+            return LoginTools.parseClient(req, false, CONF_REFERENCE.get().getDefaultClient());
         } catch (final OXException e) {
-            return confReference.get().getDefaultClient();
+            return CONF_REFERENCE.get().getDefaultClient();
         }
     }
 
@@ -803,7 +814,7 @@ public class LoginServlet extends AJAXServlet {
         if (!Authorization.checkForAuthorizationHeader(auth)) {
             throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create();
         }
-        final LoginConfiguration conf = confReference.get();
+        final LoginConfiguration conf = CONF_REFERENCE.get();
         if (Authorization.checkForBasicAuthorization(auth)) {
             creds = Authorization.decode(auth);
             version = conf.getClientVersion();
