@@ -69,7 +69,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DistributedFileManagementImpl implements DistributedFileManagement {
 
-    private static final int TIMEOUT = 10000;
+    private static final int READ_TIMEOUT = 10000;
+    private static final int CONNECT_TIMEOUT = 3000;
 
     private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
@@ -125,6 +126,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
                 URL remoteUrl = new URL("http://" + url + "/" + id);
                 HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
                 con.setRequestMethod("POST");
+                con.setConnectTimeout(CONNECT_TIMEOUT);
                 con.connect();
             } catch (IOException e) {
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
@@ -145,6 +147,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
                 URL remoteUrl = new URL("http://" + url + "/" + id);
                 HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
                 con.setRequestMethod("DELETE");
+                con.setConnectTimeout(CONNECT_TIMEOUT);
                 con.connect();
             } catch (IOException e) {
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
@@ -168,7 +171,8 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         URL remoteUrl = new URL(url);
         HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
         con.setRequestMethod("GET");
-        con.setReadTimeout(TIMEOUT);
+        con.setConnectTimeout(CONNECT_TIMEOUT);
+        con.setReadTimeout(READ_TIMEOUT);
         con.connect();
 
         boolean close = true;
