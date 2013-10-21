@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,73 +49,36 @@
 
 package com.openexchange.threadpool.internal;
 
-import com.openexchange.threadpool.ThreadRenamer;
+import java.util.concurrent.ThreadFactory;
+import com.openexchange.log.LogProperties;
 
 /**
- * {@link CustomThread} - Enhances {@link Thread} class by a setter/getter method for a thread's original name.
+ * Thread factory creating the single master thread that is then used in a single thread executor service to create new threads for the
+ * thread pool.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * This is necessary the ensure that threads for the thread pool are always created with the correct OSGi thread context class loader. See
+ * bug 26072 for threads in the thread pool created with the wrong thread context class loader.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class CustomThread extends Thread implements ThreadRenamer {
+final class MasterThreadFactory implements ThreadFactory {
 
-    private volatile String originalName;
-    private volatile String appendix;
-    private volatile boolean changed;
+    private final String namePrefix;
 
-    /**
-     * Initializes a new {@link CustomThread}.
-     *
-     * @param target The object whose run method is called
-     * @param name The name of the new thread which is also used as original name
-     */
-    public CustomThread(final Runnable target, final String name) {
-        super(target, name);
-        applyName(name);
-    }
-
-    private void applyName(final String name) {
-        originalName = name;
-        final int pos = originalName.indexOf('-');
-        if (pos > 0) {
-            appendix = name.substring(pos);
-        } else {
-            appendix = null;
-        }
-    }
-
-    /**
-     * Gets the original name.
-     *
-     * @return The original name
-     */
-    public String getOriginalName() {
-        return originalName;
-    }
-
-    /**
-     * Restores the original name.
-     */
-    public void restoreName() {
-        if (!changed) {
-            return;
-        }
-        setName(originalName);
+    MasterThreadFactory(String namePrefix) {
+        super();
+        this.namePrefix = namePrefix;
     }
 
     @Override
-    public void rename(final String newName) {
-        setName(newName);
-        changed = true;
+    public Thread newThread(Runnable r) {
+        return newCustomThread(r, namePrefix + "ThreadCreator");
     }
 
-    @Override
-    public void renamePrefix(final String newPrefix) {
-        if (null == appendix) {
-            setName(newPrefix);
-        } else {
-            setName(new com.openexchange.java.StringAllocator(16).append(newPrefix).append(appendix).toString());
-        }
-        changed = true;
+    public static CustomThread newCustomThread(Runnable runnable, String threadName) {
+        CustomThread retval = new CustomThread(runnable, threadName);
+        retval.setUncaughtExceptionHandler(new CustomUncaughtExceptionhandler());
+        LogProperties.cloneLogProperties(retval);
+        return retval;
     }
-
 }

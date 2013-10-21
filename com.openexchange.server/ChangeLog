@@ -6,6 +6,11 @@
 
  - Fix for bug 29412: Escape HTML content prior to writing to output writer
 
+* 2013-10-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26072: Using a master thread in a single thread executor service to create new threads for the thread pool. This ensures that
+   new threads for the thread pool inherit the correct thread context classloader.
+
 * 2013-10-10 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29315: Avoid bad where condition
