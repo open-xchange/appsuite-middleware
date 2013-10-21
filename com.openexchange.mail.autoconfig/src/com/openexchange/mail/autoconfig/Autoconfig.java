@@ -50,169 +50,187 @@
 package com.openexchange.mail.autoconfig;
 
 /**
- * {@link Autoconfig}
+ * {@link Autoconfig} - Represents an auto-configuration.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Autoconfig {
+public class Autoconfig implements Comparable<Autoconfig> {
 
     private String mailServer;
-
     private String transportServer;
-
     private String mailProtocol;
-
     private String transportProtocol;
-
     private int mailPort;
-
     private int transportPort;
-
     private boolean mailSecure;
-
     private boolean transportSecure;
-
     private String username;
+    private final int ranking;
 
     /**
-     * Gets the mailServer
+     * Initializes a new ranked {@link Autoconfig}.
+     */
+    public Autoconfig(final int ranking) {
+        super();
+        this.ranking = ranking;
+    }
+
+    /**
+     * Gets the ranking
      *
-     * @return The mailServer
+     * @return The ranking
+     */
+    public int getRanking() {
+        return ranking;
+    }
+
+    @Override
+    public int compareTo(final Autoconfig o) {
+        final int thisRank = getRanking();
+        final int otherRank = o.getRanking();
+        return (thisRank < otherRank ? -1 : (thisRank == otherRank ? 0 : 1));
+    }
+
+    /**
+     * Gets the mail server
+     *
+     * @return The mail server
      */
     public String getMailServer() {
         return mailServer;
     }
 
     /**
-     * Sets the mailServer
+     * Sets the mail server
      *
-     * @param mailServer The mailServer to set
+     * @param mailServer The mail server to set
      */
     public void setMailServer(String mailServer) {
         this.mailServer = mailServer;
     }
 
     /**
-     * Gets the transportServer
+     * Gets the transport server
      *
-     * @return The transportServer
+     * @return The transport server
      */
     public String getTransportServer() {
         return transportServer;
     }
 
     /**
-     * Sets the transportServer
+     * Sets the transport server
      *
-     * @param transportServer The transportServer to set
+     * @param transportServer The transport server to set
      */
     public void setTransportServer(String transportServer) {
         this.transportServer = transportServer;
     }
 
     /**
-     * Gets the mailProtocol
+     * Gets the mail protocol
      *
-     * @return The mailProtocol
+     * @return The mail protocol
      */
     public String getMailProtocol() {
         return mailProtocol;
     }
 
     /**
-     * Sets the mailProtocol
+     * Sets the mail protocol
      *
-     * @param mailProtocol The mailProtocol to set
+     * @param mailProtocol The mail protocol to set
      */
     public void setMailProtocol(String mailProtocol) {
         this.mailProtocol = mailProtocol;
     }
 
     /**
-     * Gets the transportProtocol
+     * Gets the transport protocol
      *
-     * @return The transportProtocol
+     * @return The transport protocol
      */
     public String getTransportProtocol() {
         return transportProtocol;
     }
 
     /**
-     * Sets the transportProtocol
+     * Sets the transport protocol
      *
-     * @param transportProtocol The transportProtocol to set
+     * @param transportProtocol The transport protocol to set
      */
     public void setTransportProtocol(String transportProtocol) {
         this.transportProtocol = transportProtocol;
     }
 
     /**
-     * Gets the mailPort
+     * Gets the mail port
      *
-     * @return The mailPort
+     * @return The mail port
      */
     public int getMailPort() {
         return mailPort;
     }
 
     /**
-     * Sets the mailPort
+     * Sets the mail port
      *
-     * @param mailPort The mailPort to set
+     * @param mailPort The mail port to set
      */
     public void setMailPort(int mailPort) {
         this.mailPort = mailPort;
     }
 
     /**
-     * Gets the transportPort
+     * Gets the transport port
      *
-     * @return The transportPort
+     * @return The transport port
      */
     public int getTransportPort() {
         return transportPort;
     }
 
     /**
-     * Sets the transportPort
+     * Sets the transport port
      *
-     * @param transportPort The transportPort to set
+     * @param transportPort The transport port to set
      */
     public void setTransportPort(int transportPort) {
         this.transportPort = transportPort;
     }
 
     /**
-     * Gets the mailSecure
+     * Gets the mail secure flag
      *
-     * @return The mailSecure
+     * @return The mail secure flag
      */
     public boolean isMailSecure() {
         return mailSecure;
     }
 
     /**
-     * Sets the mailSecure
+     * Sets the mail secure flag
      *
-     * @param mailSecure The mailSecure to set
+     * @param mailSecure The mail secure flag to set
      */
     public void setMailSecure(boolean mailSecure) {
         this.mailSecure = mailSecure;
     }
 
     /**
-     * Gets the transportSecure
+     * Gets the transport secure flag
      *
-     * @return The transportSecure
+     * @return The transport secure flag
      */
     public boolean isTransportSecure() {
         return transportSecure;
     }
 
     /**
-     * Sets the transportSecure
+     * Sets the transport secure flag
      *
-     * @param transportSecure The transportSecure to set
+     * @param transportSecure The transport secure flag to set
      */
     public void setTransportSecure(boolean transportSecure) {
         this.transportSecure = transportSecure;
