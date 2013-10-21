@@ -52,11 +52,10 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import org.osgi.service.event.Event;
 import junit.framework.TestCase;
+import org.osgi.service.event.Event;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
-import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.Init;
@@ -66,7 +65,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -88,7 +86,6 @@ public class InfostoreDowngradeTest extends TestCase {
     private InfostoreFacade database;
     private ServerSession session;
     private UserPermissionBits userConfig;
-    private User user;
 
     private final List<DocumentMetadata> clean = new ArrayList<DocumentMetadata>();
 
@@ -97,9 +94,8 @@ public class InfostoreDowngradeTest extends TestCase {
         Init.startServer();
         AJAXConfig.init();
 
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("premium"));
         userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
-        user = UserStorage.getInstance().getUser(userId, ctx);
         userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
 
         final OXFolderAccess access = new OXFolderAccess(ctx);
@@ -155,10 +151,9 @@ public class InfostoreDowngradeTest extends TestCase {
 
 
     private void assertDeletedEvent(final int id) throws OXException {
-        List<Event> events = TestEventAdmin.getInstance().getEvents();
-        assertEquals(1, events.size());
-        assertTrue(FileStorageEventHelper.isDeleteEvent(events.get(0)));
-        assertEquals(String.valueOf(id), FileStorageEventHelper.extractObjectId(events.get(0)));
+        Event event = TestEventAdmin.getInstance().getNewestEvent();
+        assertTrue(FileStorageEventHelper.isDeleteEvent(event));
+        assertEquals(String.valueOf(id), FileStorageEventHelper.extractObjectId(event));
     }
 
     private void assertNotFound(final int id) {
