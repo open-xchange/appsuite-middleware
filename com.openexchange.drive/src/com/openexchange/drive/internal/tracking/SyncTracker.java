@@ -68,7 +68,6 @@ import com.openexchange.drive.actions.SyncDirectoriesAction;
 import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.DirectoryChecksum;
-import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.sync.IntermediateSyncResult;
@@ -306,26 +305,36 @@ public class SyncTracker {
         return directoryVersions.values();
     }
 
+    /**
+     * Creates a directory version representing the supplied path. If possible, the directory version uses the server's checksum,
+     * if not, it falls back to a placeholder checksum.
+     *
+     * @param session The sync session
+     * @param path The path
+     * @return A directory checksum to be used in error actions
+     */
     private static DirectoryVersion getDirectoryVersion(SyncSession session, final String path) {
+        /*
+         * try to use current server checksum if possible, use empty checksum as fallback
+         */
+        String checksum = null;
         try {
             FileStorageFolder folder = session.getStorage().optFolder(path, false);
             if (null != folder) {
                 List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, Arrays.asList(new String[] { folder.getId() }));
                 if (null != checksums && 1 == checksums.size()) {
-                    return new ServerDirectoryVersion(path, checksums.get(0));
+                    checksum = checksums.get(0).getChecksum();
                 }
             }
         } catch (OXException e) {
             LOG.warn("Error getting directory version", e);
         }
-        /*
-         * fallback to simple directory version
-         */
+        final String directoryChecksum = null == checksum ? DriveConstants.EMPTY_MD5 : checksum;
         return new DirectoryVersion() {
 
             @Override
             public String getChecksum() {
-                return DriveConstants.EMPTY_MD5;
+                return directoryChecksum;
             }
 
             @Override
