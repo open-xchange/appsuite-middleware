@@ -9,7 +9,7 @@
 
 * 2013-10-18 - marc.arens@open-xchange.com
 
- - Fix for bug 29175 - Alllow enabling of rt tracing via backend property
+ - Fix for bug 29175 - Allow enabling of rt tracing via backend property
 
 * 2013-10-18 - martin.herfurth@open-xchange.com
 
