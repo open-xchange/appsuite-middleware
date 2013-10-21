@@ -68,7 +68,8 @@ public class LoggingOutInterceptor extends org.apache.cxf.interceptor.LoggingOut
 
     @Override
     protected String formatLoggingMessage(final LoggingMessage loggingMessage) {
-        return super.formatLoggingMessage(LoggingUtility.sanitizeLoggingMessage(loggingMessage));
+        // return super.formatLoggingMessage(com.openexchange.soap.cxf.interceptor.LoggingUtility.sanitizeLoggingMessage(loggingMessage));
+        return super.formatLoggingMessage(loggingMessage);
     }
 
 }
