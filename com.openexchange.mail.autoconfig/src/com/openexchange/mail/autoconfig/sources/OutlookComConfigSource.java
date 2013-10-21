@@ -79,8 +79,14 @@ public class OutlookComConfigSource extends StaticConfigSource {
     }
 
     @Override
+    public int getRanking() {
+        // Signal less privilege
+        return -10;
+    }
+
+    @Override
     protected Autoconfig getStaticAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
-        final Autoconfig autoconfig = new Autoconfig();
+        final Autoconfig autoconfig = new Autoconfig(getRanking());
         // IMAP
         autoconfig.setMailPort(993);
         autoconfig.setMailProtocol("imap");

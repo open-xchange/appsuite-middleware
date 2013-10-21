@@ -83,7 +83,7 @@ public class Database extends AbstractConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
-        Autoconfig autoconfig = new Autoconfig();
+        Autoconfig autoconfig = new Autoconfig(getRanking());
 
         DatabaseService database = services.getService(DatabaseService.class);
         Connection connection = database.getReadOnly(context);
@@ -176,7 +176,7 @@ public class Database extends AbstractConfigSource {
     }
 
     private void getStore(Connection con, Autoconfig autoconfig, String emailLocalPart, String emailDomain, String password) throws SQLException, URISyntaxException {
-        Autoconfig tempConfig = new Autoconfig();
+        Autoconfig tempConfig = new Autoconfig(getRanking());
 
         String select = "SELECT DISTINCT url, login, primary_addr FROM user_mail_account WHERE primary_addr LIKE ?";
 

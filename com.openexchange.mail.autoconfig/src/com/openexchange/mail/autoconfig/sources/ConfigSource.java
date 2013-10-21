@@ -72,6 +72,15 @@ public interface ConfigSource {
      * @return An {@code Autoconfig} instance or <code>null</code> if generation fails.
      * @throws OXException If operation fails for any reason
      */
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
+    Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
+
+    /**
+     * Gets the ranking for this {@code ConfigSource} instance.
+     * <p>
+     * Default is <code>0</code> (zero).
+     *
+     * @return The ranking
+     */
+    int getRanking();
 
 }

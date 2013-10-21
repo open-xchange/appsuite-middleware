@@ -309,7 +309,7 @@ public final class AllAction extends AppointmentAction {
             final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
             final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
 
-            if (leftHandLimit > 0 || rightHandLimit > 0) {
+            if (leftHandLimit >= 0 || rightHandLimit > 0) {
                 final int size = appointmentList.size();
                 final int fromIndex = leftHandLimit > 0 ? leftHandLimit : 0;
                 final int toIndex = rightHandLimit > 0 ? (rightHandLimit > size ? size : rightHandLimit) : size;
