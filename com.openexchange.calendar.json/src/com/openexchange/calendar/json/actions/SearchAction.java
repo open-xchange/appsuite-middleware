@@ -50,6 +50,7 @@
 package com.openexchange.calendar.json.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
@@ -72,6 +73,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -124,7 +126,7 @@ public final class SearchAction extends AppointmentAction {
 
         try {
             final CalendarCollectionService recColl = getService(CalendarCollectionService.class);
-            final List<Appointment> appointmentList = new ArrayList<Appointment>();
+            List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
 
@@ -154,6 +156,30 @@ public final class SearchAction extends AppointmentAction {
                 if (appointment.getLastModified() != null && timestamp.before(appointment.getLastModified())) {
                     timestamp = appointment.getLastModified();
                 }
+            }
+
+            final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+            final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
+
+            if (leftHandLimit >= 0 || rightHandLimit > 0) {
+                final int size = appointmentList.size();
+                final int fromIndex = leftHandLimit > 0 ? leftHandLimit : 0;
+                final int toIndex = rightHandLimit > 0 ? (rightHandLimit > size ? size : rightHandLimit) : size;
+                if ((fromIndex) > size) {
+                    appointmentList = Collections.<Appointment> emptyList();
+                } else if (fromIndex >= toIndex) {
+                    appointmentList = Collections.<Appointment> emptyList();
+                } else {
+                    /*
+                     * Check if end index is out of range
+                     */
+                    if (toIndex < size) {
+                        appointmentList = appointmentList.subList(fromIndex, toIndex);
+                    } else if (fromIndex > 0) {
+                        appointmentList = appointmentList.subList(fromIndex, size);
+                    }
+                }
+                appointmentList = new PropertizedList<Appointment>(appointmentList).setProperty("more", Integer.valueOf(size));
             }
 
             return new AJAXRequestResult(appointmentList, timestamp, "appointment");
