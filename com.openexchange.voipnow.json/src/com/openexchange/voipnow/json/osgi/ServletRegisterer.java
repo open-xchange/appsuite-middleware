@@ -63,7 +63,7 @@ import com.openexchange.voipnow.json.servlet.VoipNowServlet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ServletRegisterer implements ServiceTrackerCustomizer {
+public final class ServletRegisterer implements ServiceTrackerCustomizer<HttpService,HttpService> {
 
     /**
      * The final bundle context reference.
@@ -81,8 +81,8 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final HttpService service = (HttpService) context.getService(reference);
+    public HttpService addingService(final ServiceReference<HttpService> reference) {
+        final HttpService service = context.getService(reference);
         try {
             service.registerServlet(VoipNowActivator.PREFIX.get().getPrefix() + com.openexchange.voipnow.json.Constants.SERVLET_PATH_APPENDIX, new VoipNowServlet(), null, null);
             return service;
@@ -96,17 +96,17 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<HttpService> reference, final HttpService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
         if (null == service) {
             return;
         }
         try {
-            final HttpService httpService = (HttpService) service;
+            final HttpService httpService = service;
             httpService.unregister(VoipNowActivator.PREFIX.get().getPrefix() + com.openexchange.voipnow.json.Constants.SERVLET_PATH_APPENDIX);
         } finally {
             context.ungetService(reference);
