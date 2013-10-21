@@ -1,3 +1,8 @@
+* 2013-10-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26072: Using a master thread in a single thread executor service to create new threads for the thread pool. This ensures that
+   new threads for the thread pool inherit the correct thread context classloader.
+
 * 2013-10-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 29294: Examine first read byte prior to pushing it back to stream
@@ -40,11 +45,6 @@
 * 2013-10-11 - marc.arens@open-xchange.com
 
  - Fix for bug 29235: Move logger call above ServletResponse.getWriter which might fail and swallow error infos
-
-* 2013-10-11 - marcus.klein@open-xchange.com
-
- - Partial fix for bug 26072: Detect changed context class loader in thread pool and restore the original one. Writing error into log file
-   when context class loader is changed.
 
 * 2013-10-11 - thorben.betten@open-xchange.com
 

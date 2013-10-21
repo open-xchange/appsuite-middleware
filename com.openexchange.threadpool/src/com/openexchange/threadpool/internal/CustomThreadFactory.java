@@ -49,8 +49,13 @@
 
 package com.openexchange.threadpool.internal;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.log.LogProperties;
+import org.apache.commons.logging.Log;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link CustomThreadFactory} - A thread factory taking a custom name prefix for created threads.
@@ -59,13 +64,11 @@ import com.openexchange.log.LogProperties;
  */
 public final class CustomThreadFactory implements java.util.concurrent.ThreadFactory {
 
-    // private final ThreadGroup group;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomThreadFactory.class);
 
     private final AtomicInteger threadNumber;
-
     private final String namePrefix;
-
-    private final int len;
+    private final ExecutorService threadCreatorService;
 
     /**
      * Initializes a new {@link CustomThreadFactory}.
@@ -76,11 +79,11 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
         super();
         threadNumber = new AtomicInteger();
         this.namePrefix = namePrefix;
-        len = namePrefix.length() + 7;
+        threadCreatorService = Executors.newSingleThreadExecutor(new MasterThreadFactory(namePrefix));
     }
 
     @Override
-    public Thread newThread(final Runnable r) {
+    public CustomThread newThread(Runnable r) {
         /*
          * Ensure a positive thread number
          */
@@ -99,20 +102,30 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
                 threadNum = threadNumber.incrementAndGet();
             }
         }
-        /*
-         * Create thread
-         */
-        final CustomThread t = new CustomThread(r, getThreadName(threadNum, new com.openexchange.java.StringAllocator(len).append(namePrefix)));
-        t.setUncaughtExceptionHandler(new CustomUncaughtExceptionhandler());
-        LogProperties.cloneLogProperties(t);
-        return t;
-    }
-
-    private static String getThreadName(final int threadNumber, final com.openexchange.java.StringAllocator sb) {
-        for (int i = threadNumber; i < 1000000; i *= 10) {
-            sb.append('0');
+        try {
+            return createThreadWithMaster(r, threadNum);
+        } catch (InterruptedException e) {
+            LOG.error("Single thread pool for creating threads was interrupted.", e);
+            return null;
+        } catch (ExecutionException e) {
+            LOG.error("Single thread pool for creating threads catched an exception while creating one.", e);
+            return null;
         }
-        return sb.append(threadNumber).toString();
     }
 
+    private static String getThreadName(int threadNumber, String namePrefix) {
+        StringAllocator retval = new StringAllocator(namePrefix.length() + 7);
+        retval.append(namePrefix);
+        for (int i = threadNumber; i < 1000000; i *= 10) {
+            retval.append('0');
+        }
+        retval.append(threadNumber);
+        return retval.toString();
+    }
+
+    private CustomThread createThreadWithMaster(Runnable r, int threadNum) throws InterruptedException, ExecutionException {
+        ThreadCreateCallable callable = new ThreadCreateCallable(r, getThreadName(threadNum, namePrefix));
+        Future<CustomThread> future = threadCreatorService.submit(callable);
+        return future.get();
+    }
 }
