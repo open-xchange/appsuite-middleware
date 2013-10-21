@@ -1,3 +1,7 @@
+* 2013-10-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29294: Examine first read byte prior to pushing it back to stream
+
 * 2013-10-18 - martin.herfurth@open-xchange.com
 
  - Fix for bug 28958: Create and handle counter mails for external organizer.
