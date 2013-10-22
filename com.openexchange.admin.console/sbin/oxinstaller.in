@@ -100,12 +100,6 @@ TMPDIR_PATH=/var/spool/open-xchange/uploads
 TMPDIR_PATH_LONG=tmpdir-path
 AJP_JVM_ROUTE=APP1
 AJP_JVM_ROUTE_LONG=jkroute
-UDPDISCOVERYADDR=224.0.0.1
-UDPDISCOVERYADDR_LONG=cache-udp-disc-addr
-UDPDISCOVERYPORT=6780
-UDPDISCOVERYPORT_LONG=cache-udp-disc-port
-GWCACHEPORT=57462
-GWCACHEPORT_LONG=admin-cache-port
 MAXSESSION=0
 MAXSESSION_LONG=maxSession
 SESSIONDEFAULTLIFETIME=3600000
@@ -146,7 +140,7 @@ NETWORK_LISTENER_HOST_LONG=network-listener-host
 AJP_BIND_ADDR_LONG=ajp-bind-port
 
 MUSTOPTS="SERVER_NAME CONFIGDB_PASS OXOBJECT_LINK_HOSTNAME SERVER_MEMORY OXCLUSTERNAME"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$LOGIN_SOURCE_LONG:,$MAIL_SERVER_SOURCE_LONG:,$TRANSPORT_SERVER_SOURCE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$GWCACHEPORT_LONG:,$MAXSESSION_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG,$NO_LICENSE_LONG,$ADD_LICENSE_LONG:,$OXCLUSTERNAME_LONG:,$NETWORK_LISTENER_HOST_LONG:,$AJP_BIND_ADDR_LONG:'
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$LOGIN_SOURCE_LONG:,$MAIL_SERVER_SOURCE_LONG:,$TRANSPORT_SERVER_SOURCE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$MAXSESSION_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG,$NO_LICENSE_LONG,$ADD_LICENSE_LONG:,$OXCLUSTERNAME_LONG:,$NETWORK_LISTENER_HOST_LONG:,$AJP_BIND_ADDR_LONG:'
 
 usage() {
     echo
@@ -203,21 +197,6 @@ v_comment() {
 	echo
 	echo skipping configuration of $i in $3
     fi
-}
-
-v_cache_hosting(){
-    local propfile="$1"
-    local cachename="$2"
-    local cport="$3"
-
-    v_comment jcs.auxiliary.${cachename}.attributes.TcpServers add $propfile
-    v_comment jcs.auxiliary.${cachename}.attributes.UdpDiscoveryEnabled remove $propfile
-    v_comment jcs.auxiliary.${cachename}.attributes.UdpDiscoveryAddr remove $propfile
-    v_comment jcs.auxiliary.${cachename}.attributes.UdpDiscoveryPort remove $propfile
-    v_comment jcs.auxiliary.${cachename}.attributes.TcpListenerPort remove $propfile
-    v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryEnabled true $propfile
-    v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryAddr $UDPDISCOVERYADDR $propfile 
-    v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryPort $cport $propfile
 }
 
 handleIPv6() {
@@ -286,9 +265,6 @@ setup()
 
     v_setprop com.openexchange.sessiond.maxSession "$MAXSESSION" ${CONFDIR}/sessiond.properties
     v_setprop com.openexchange.sessiond.sessionDefaultLifeTime "$SESSIONDEFAULTLIFETIME" ${CONFDIR}/sessiond.properties
-
-    v_cache_hosting ${CONFDIR}/cache.ccf LTCP $UDPDISCOVERYPORT
-    v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $GWCACHEPORT ${CONFDIR}/cache.ccf
 
     v_setprop com.openexchange.hazelcast.group.name $OXCLUSTERNAME ${CONFDIR}/hazelcast.properties
 
@@ -431,18 +407,6 @@ while true; do
           ;;
 	--$URL_LONG)
           URL=$2
-          shift 2
-          ;;
-	--$UDPDISCOVERYADDR_LONG)
-          UDPDISCOVERYADDR=$2
-          shift 2
-          ;;
-	--$UDPDISCOVERYPORT_LONG)
-          UDPDISCOVERYPORT=$2
-          shift 2
-          ;;
-	--$GWCACHEPORT_LONG)
-          GWCACHEPORT=$2
           shift 2
           ;;
 	--$MAXSESSION_LONG)
