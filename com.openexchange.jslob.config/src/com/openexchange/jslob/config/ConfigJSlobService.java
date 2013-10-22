@@ -170,7 +170,7 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @SuppressWarnings("unchecked")
-    private void readPerfMap(final File file, final ConcurrentMap<String, Map<String, String>[]> map) throws OXException {
+    private void readPerfMap(final File file, final ConcurrentMap<String, Map<String, String>[]> configTreeEquivalents) throws OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
@@ -193,10 +193,10 @@ public final class ConfigJSlobService implements JSlobService {
                             }
                         }
 
-                        Map<String, String>[] maps = map.get(jslobName);
+                        Map<String, String>[] maps = configTreeEquivalents.get(jslobName);
                         if (maps == null) {
                             maps = new Map[] { new ConcurrentHashMap<String, String>(32), new ConcurrentHashMap<String, String>(32) };
-                            map.put(jslobName, maps);
+                            configTreeEquivalents.put(jslobName, maps);
                         }
 
                         maps[CONFIG2LOB].put(configTreePath, jslobPath);
