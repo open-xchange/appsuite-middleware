@@ -1,3 +1,7 @@
+* 2013-10-22 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29391: Extended the sizes of the 'filename', 'title' and 'file_size' columns in the 'infostore_document' table
+
 * 2013-10-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 26072: Using a master thread in a single thread executor service to create new threads for the thread pool. This ensures that
