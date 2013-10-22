@@ -368,9 +368,9 @@ public class Executor {
         calendar.setTime(until);
         int untilYear = calendar.get(Calendar.YEAR);
         String columnLabel = Mappers.CONTACT.get(dateField).getColumnLabel();
-        stringBuilder.append(" AND DATE_FORMAT(").append(columnLabel).append(",'%m-%d %T')>=DATE_FORMAT(?,'%m-%d %T') ")
+        stringBuilder.append(" AND (DATE_FORMAT(").append(columnLabel).append(",'%m-%d %T')>=DATE_FORMAT(?,'%m-%d %T') ")
             .append(untilYear == fromYear ? "AND" : "OR")
-            .append(" DATE_FORMAT(").append(columnLabel).append(",'%m-%d %T')<DATE_FORMAT(?,'%m-%d %T')");
+            .append(" DATE_FORMAT(").append(columnLabel).append(",'%m-%d %T')<DATE_FORMAT(?,'%m-%d %T'))");
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
             if (0 < sortOptions.getLimit()) {
