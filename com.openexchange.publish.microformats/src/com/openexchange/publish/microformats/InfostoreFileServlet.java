@@ -51,6 +51,7 @@ package com.openexchange.publish.microformats;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,6 +72,7 @@ import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
@@ -123,7 +125,10 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             final Publication publication = infostorePublisher.getPublication(ctx, args.get(SITE));
             if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                resp.getWriter().println("Don't know site " + args.get(SITE));
+                final PrintWriter writer = resp.getWriter();
+                final HtmlService htmlService = MicroformatServlet.htmlService;
+                writer.println("Unknown site " + (null == htmlService ? "" : htmlService.htmlFormat(args.get(SITE))));
+                writer.flush();
                 return;
             }
             if (!checkProtected(publication, args, resp)) {
