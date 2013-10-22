@@ -421,21 +421,17 @@ public final class ConfigJSlobService implements JSlobService {
 
         addConfigTreeToJslob(session, jsonJSlob);
 
-        // Search for shared jslobs and merge them if neccessary
-        for (String sharedId : sharedJSlobs.keySet()) {
+        // Search for shared jslobs and merge them if necessary
+        final Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
+        for (final Entry<String, SharedJSlobService> entry : sharedJSlobs.entrySet()) {
+            final String sharedId = entry.getKey();
             if (sharedId.startsWith(id)) {
-                JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
-                String newId = sharedId.substring(id.length() + 1, sharedId.length());
-                JSONObject jsonObject = jsonJSlob.getJsonObject();
-                JSONObject sharedObject = sharedJSlob.getJsonObject();
-                for (String key : sharedObject.keySet()) {
-                    if (sharedObject.hasAndNotNull(key)) {
-                        try {
-                            jsonObject.put(newId, sharedObject);
-                        } catch (JSONException e) {
-                            // should not happen
-                        }
-                    }
+                try {
+                    JSlob sharedJSlob = entry.getValue().getJSlob(session);
+                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                    jsonJSlob.getJsonObject().put(newId, sharedJSlob.getJsonObject());
+                } catch (JSONException e) {
+                    // should not happen
                 }
             }
         }
@@ -978,7 +974,7 @@ public final class ConfigJSlobService implements JSlobService {
             // Add property's value
             final List<JSONPathElement> path = attributedProperty.path;
             Object value = asJSObject(view.get(attributedProperty.propertyName, String.class));
-            
+
             addValueByPath(path, value, jsonJSlob.getJsonObject());
 
             // Add the metadata as well as a separate JSON object
