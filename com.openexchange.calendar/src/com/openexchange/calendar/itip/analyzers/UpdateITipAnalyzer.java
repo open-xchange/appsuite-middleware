@@ -272,8 +272,13 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private boolean isOutdated(CalendarDataObject update, CalendarDataObject original) {
-        if (original.containsSequence() && update.containsSequence() && original.getSequence() > update.getSequence()) {
-            return true;
+        if (original.containsSequence() && update.containsSequence()) {
+            if (original.getSequence() > update.getSequence()) {
+                return true;
+            }
+            if (original.getSequence() < update.getSequence()) {
+                return false;
+            }
         }
         Date originalLastTouched = null;
         if (original.containsLastModified()) {
