@@ -1,3 +1,7 @@
+* 2013-10-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29410: Strictly handle with stream-based access to file data, no temporary storing/conversion to byte array
+
 * 2013-10-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29391: Extended the sizes of the 'filename', 'title' and 'file_size' columns in the 'infostore_document' table
