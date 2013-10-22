@@ -10,6 +10,12 @@ open-xchange-dav (7.4.1-0) unstable; urgency=low
 
  -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 20 Sep 2013 11:43:55 +0200
 
+open-xchange-dav (7.4.0-14) stable; urgency=low
+
+  * Build for patch 2013-10-21
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 21 Oct 2013 13:19:46 +0200
+
 open-xchange-dav (7.4.0-13) stable; urgency=low
 
   * Build for patch 2013-10-09

@@ -94,7 +94,7 @@ public class InfostoreDowngradeTest extends TestCase {
         Init.startServer();
         AJAXConfig.init();
 
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("premium"));
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
         userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
 

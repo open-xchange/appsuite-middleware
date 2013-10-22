@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,32 @@
  *
  */
 
-/**
- *
- */
+package com.openexchange.jslob.config;
 
-package com.openexchange.proxy.servlet.osgi;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.ServletException;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.log.LogFactory;
-import com.openexchange.proxy.servlet.Constants;
-import com.openexchange.proxy.servlet.ProxyServlet;
 
 /**
- * {@link ServletRegisterer}
+ * {@link ConfigTreeEquivalent} - A bi-directional map for config tree to JSlob mappings and vice versa.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServletRegisterer implements ServiceTrackerCustomizer<HttpService,HttpService> {
+public final class ConfigTreeEquivalent {
 
-    private final BundleContext context;
+    /** The config tree to JSlob mappings */
+    public final Map<String, String> config2lob;
+
+    /** The JSlob to config tree mappings */
+    public final Map<String, String> lob2config;
 
     /**
-     * Initializes a new {@link ServletRegisterer}.
-     *
-     * @param context The bundle context
+     * Initializes a new {@link ConfigTreeEquivalent}.
      */
-    public ServletRegisterer(final BundleContext context) {
+    public ConfigTreeEquivalent() {
         super();
-        this.context = context;
+        config2lob = new ConcurrentHashMap<String, String>(32);
+        lob2config = new ConcurrentHashMap<String, String>(32);
     }
 
-    @Override
-    public HttpService addingService(final ServiceReference<HttpService> reference) {
-        final HttpService service = context.getService(reference);
-        tryRegistering(service);
-        return service;
-    }
-
-    private static void tryRegistering(final HttpService httpService) {
-        if (httpService == null) {
-            return;
-        }
-        try {
-            httpService.registerServlet(Constants.PATH, new ProxyServlet(), null, null);
-        } catch (final ServletException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
-        } catch (final NamespaceException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
-        }
-
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<HttpService> reference, final HttpService service) {
-        // Nope
-    }
-
-    @Override
-    public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
-        service.unregister(Constants.PATH);
-        context.ungetService(reference);
-    }
 }

@@ -66,7 +66,7 @@ import com.openexchange.sso.servlet.SSOServlet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
+public final class SSOServletRegisterer implements ServiceTrackerCustomizer<HttpService,HttpService> {
 
     private final BundleContext context;
 
@@ -81,8 +81,8 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final HttpService service = (HttpService) context.getService(reference);
+    public HttpService addingService(final ServiceReference<HttpService> reference) {
+        final HttpService service = context.getService(reference);
         try {
             service.registerServlet(SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX, new SSOServlet(), null, null);
         } catch (final ServletException e) {
@@ -94,13 +94,13 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<HttpService> reference, final HttpService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        final HttpService httpService = (HttpService) service;
+    public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
+        final HttpService httpService = service;
         httpService.unregister(SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX);
         context.ungetService(reference);
     }
