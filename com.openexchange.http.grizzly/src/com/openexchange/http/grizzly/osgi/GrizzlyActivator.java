@@ -141,8 +141,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
             }
 
-            TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
-            networkListener.setTransport(configuredTcpNioTransport);
+            // Set the transport
+            {
+                TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
+                networkListener.setTransport(configuredTcpNioTransport);
+            }
 
             if (grizzlyConfig.isJMXEnabled()) {
                 grizzly.getServerConfiguration().setJmxEnabled(true);
@@ -219,6 +222,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
         }
         TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
+        builder.setKeepAlive(true).setTcpNoDelay(true).setServerSocketSoTimeout(-1);
         final TCPNIOTransport transport = builder.build();
         ExecutorService executor = GrizzlOXExecutorService.createInstance();
         transport.setWorkerThreadPool(executor);
