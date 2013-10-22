@@ -118,7 +118,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static volatile ContactService contacts;
 
-    private static volatile HtmlService htmlService;
+    public static volatile HtmlService htmlService;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {
@@ -183,7 +183,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 final PrintWriter writer = resp.getWriter();
-                writer.println("Don't know site " + args.get(SITE));
+                final HtmlService htmlService = MicroformatServlet.htmlService;
+                writer.println("Unknown site " + (null == htmlService ? "" : htmlService.htmlFormat(args.get(SITE))));
                 writer.flush();
                 return;
             }
