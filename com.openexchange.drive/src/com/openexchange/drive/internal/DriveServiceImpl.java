@@ -289,6 +289,11 @@ public class DriveServiceImpl implements DriveService {
                      */
                     syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, quotaException, true));
                 }
+            } else if ("IFO-0100".equals(e.getErrorCode())) {
+                /*
+                 * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
+                 */
+                syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, e, true));
             } else {
                 throw e;
             }

@@ -697,6 +697,9 @@ public final class InternalList {
         // Adds default values to the 'del_oxfolder_tree', and 'virtualBackupTree' tables.
         list.add(new com.openexchange.groupware.update.tasks.FolderDefaultValuesForDelTablesTasks());
 
+        // Extends the sizes of the 'filename', 'title' and 'file_size' columns in the 'infostore_document' table
+        list.add(new com.openexchange.groupware.update.tasks.InfostoreExtendFilenameTitleAndFilesizeTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

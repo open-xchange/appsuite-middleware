@@ -52,7 +52,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import static com.openexchange.java.Streams.close;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -119,6 +118,10 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /** The default in-memory threshold of 1MB. */
+    private static final int DEFAULT_IN_MEMORY_THRESHOLD = 1024 * 1024; // 1MB
+    private static final int INITIAL_CAPACITY = 8192;
 
     private static final int BUFLEN = 2048;
 
@@ -310,13 +313,15 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if (null == fileContentType || SAVE_AS_TYPE.equals(fileContentType)) {
                         if (null == contentTypeByFileName) {
                             // Let Tika detect the Content-Type
-                            final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
+                            ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
+                            closeables.add(temp);
+                            temp.write(documentData);
                             // We know for sure
-                            fileLength = baos.size();
-                            documentData = Streams.asInputStream(baos);
-                            cts = tika.detect(Streams.asInputStream(baos));
+                            fileLength = temp.getLength();
+                            documentData = temp.getClosingStream();
+                            cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
-                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray(), true) ? "text/html" : cts;
+                                cts = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : cts;
                             }
                         } else {
                             cts = contentTypeByFileName;
@@ -324,16 +329,15 @@ public class FileResponseRenderer implements ResponseRenderer {
                     } else {
                         if ((null != contentTypeByFileName) && !equalPrimaryTypes(fileContentType, contentTypeByFileName)) {
                             // Differing Content-Types sources
-                            final ThresholdFileHolder temp = new ThresholdFileHolder();
+                            final ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
                             closeables.add(temp);
                             temp.write(documentData);
                             // We know for sure
                             fileLength = temp.getLength();
-                            documentData = temp.getStream();
+                            documentData = temp.getClosingStream();
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
-                                final byte[] bytes = Streams.stream2bytes(temp.getStream());
-                                cts = HTMLDetector.containsHTMLTags(bytes, true) ? "text/html" : cts;
+                                cts = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : cts;
                             }
                         } else {
                             cts = fileContentType;
@@ -415,14 +419,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
                     } else {
                         // Specified Content-Type does NOT match file's real MIME type
-                        final ThresholdFileHolder temp = new ThresholdFileHolder();
+                        final ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
                         closeables.add(temp);
                         temp.write(documentData);
-                        documentData = temp.getStream();
+                        documentData = temp.getClosingStream();
                         preferredContentType = detectMimeType(temp.getStream());
                         if ("text/plain".equals(preferredContentType)) {
-                            final byte[] bytes = Streams.stream2bytes(temp.getStream());
-                            preferredContentType = HTMLDetector.containsHTMLTags(bytes, true) ? "text/html" : preferredContentType;
+                            preferredContentType = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : preferredContentType;
                         }
                         // One more time...
                         if (equalPrimaryTypes(preferredContentType, contentType)) {
