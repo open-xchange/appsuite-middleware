@@ -310,15 +310,19 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
             return delegate.store(id, t);
         }
 
+        // Explicitly invalidate cache entry
+        final String groupName = groupName(id);
+        cache.removeFromGroup(id.getId(), groupName);
+
         // Delay store operation
-        if (delayedStoreOps.offer(new DelayedStoreOp(id.getId(), groupName(id), id, false))) {
+        if (delayedStoreOps.offer(new DelayedStoreOp(id.getId(), groupName, id, false))) {
             // Added to delay queue -- put current to cache
-            cache.putInGroup(id.getId(), groupName(id), t.setId(id), false);
+            cache.putInGroup(id.getId(), groupName, t.setId(id), false);
             return true;
         }
         // Not possible to add to delay queue
         final boolean storeResult = delegate.store(id, t);
-        cache.putInGroup(id.getId(), groupName(id), t.setId(id), !storeResult);
+        cache.putInGroup(id.getId(), groupName, t.setId(id), !storeResult);
         return storeResult;
     }
 
