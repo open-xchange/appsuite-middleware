@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
@@ -64,6 +65,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
@@ -259,34 +261,31 @@ public final class DownloadUtility {
                  */
                 final BrowserDetector browserDetector = new BrowserDetector(userAgent);
                 final boolean msieOnWindows = (browserDetector.isMSIE() && browserDetector.isWindows());
-                if (msieOnWindows && 8F > browserDetector.getBrowserVersion()) {
+                {
                     /*-
-                     * Image content requested by Internet Explorer < v8
+                     * Image content requested
                      *
-                     * Get first 256 bytes
+                     * Get image bytes
                      */
-                    byte[] sequence = new byte[256];
-                    {
-                        final int nRead = in.read(sequence, 0, sequence.length);
-                        if (nRead < sequence.length) {
-                            final byte[] tmp = sequence;
-                            sequence = new byte[nRead];
-                            System.arraycopy(tmp, 0, sequence, 0, nRead);
-                        }
-                    }
+                    final ThresholdFileHolder tmp = new ThresholdFileHolder();
+                    tmp.write(in);
                     /*
                      * Check consistency of content-type, file extension and magic bytes
                      */
                     String preparedFileName = getSaveAsFileName(fileName, msieOnWindows, sContentType);
-                    final String fileExtension = getFileExtension(fn);
-                    if (null == fileExtension) {
+                    String fileExtension = getFileExtension(fn);
+                    if (Strings.isEmpty(fileExtension)) {
                         /*
                          * Check for HTML since no corresponding file extension is known
                          */
-                        if (HTMLDetector.containsHTMLTags(sequence, true)) {
-                            return asAttachment(inputStream, preparedFileName, sz);
+                        if (HTMLDetector.containsHTMLTags(tmp.toByteArray())) {
+                            return asAttachment(tmp.getClosingStream(), preparedFileName, tmp.getLength());
                         }
                     } else {
+                        if ('.' == fileExtension.charAt(0)) {
+                            // ".png" --> "png"
+                            fileExtension = fileExtension.substring(1);
+                        }
                         final Set<String> extensions = new HashSet<String>(MimeType2ExtMap.getFileExtensions(contentType.getBaseType()));
                         if (extensions.isEmpty() || (extensions.size() == 1 && extensions.contains("dat"))) {
                             /*
@@ -297,8 +296,8 @@ public final class DownloadUtility {
                                 /*
                                  * No content type known
                                  */
-                                if (HTMLDetector.containsHTMLTags(sequence, true)) {
-                                    return asAttachment(inputStream, preparedFileName, sz);
+                                if (HTMLDetector.containsHTMLTags(tmp.toByteArray())) {
+                                    return asAttachment(tmp.getClosingStream(), preparedFileName, tmp.getLength());
                                 }
                             } else {
                                 final int pos = ct.indexOf('/');
@@ -312,13 +311,13 @@ public final class DownloadUtility {
                             fn = addFileExtension(fileExtension, extensions.iterator().next());
                             preparedFileName = getSaveAsFileName(fn, msieOnWindows, contentType.getBaseType());
                         }
-                        final String detectedCT = ImageTypeDetector.getMimeType(sequence);
+                        final String detectedCT = ImageTypeDetector.getMimeType(tmp.toByteArray());
                         if (MIME_APPL_OCTET.equals(detectedCT)) {
                             /*
                              * Unknown magic bytes. Check for HTML.
                              */
-                            if (HTMLDetector.containsHTMLTags(sequence, true)) {
-                                return asAttachment(inputStream, preparedFileName, sz);
+                            if (HTMLDetector.containsHTMLTags(tmp.toByteArray())) {
+                                return asAttachment(tmp.getClosingStream(), preparedFileName, tmp.getLength());
                             }
                         } else if (!contentType.isMimeType(detectedCT)) {
                             /*
@@ -330,7 +329,7 @@ public final class DownloadUtility {
                     /*
                      * New combined input stream (with original size)
                      */
-                    in = new CombinedInputStream(sequence, in);
+                    in = tmp.getClosingStream();
                 }
             } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)), true)) {
                 /*
@@ -663,6 +662,15 @@ public final class DownloadUtility {
          */
         public String getContentDisposition() {
             return contentDisposition;
+        }
+
+        /**
+         * Checks if Content-Disposition indicates an attachment.
+         *
+         * @return <code>true</code> if attachment; otherwise <code>false</code>
+         */
+        public boolean isAttachment() {
+            return null != contentDisposition && Strings.toLowerCase(contentDisposition).startsWith("attachment");
         }
 
         /**

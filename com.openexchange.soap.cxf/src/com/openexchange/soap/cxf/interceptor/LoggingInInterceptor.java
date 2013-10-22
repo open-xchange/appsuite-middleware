@@ -49,6 +49,7 @@
 
 package com.openexchange.soap.cxf.interceptor;
 
+import java.util.logging.Logger;
 import org.apache.cxf.interceptor.LoggingMessage;
 
 /**
@@ -68,7 +69,19 @@ public class LoggingInInterceptor extends org.apache.cxf.interceptor.LoggingInIn
 
     @Override
     protected String formatLoggingMessage(final LoggingMessage loggingMessage) {
-        return super.formatLoggingMessage(LoggingUtility.sanitizeLoggingMessage(loggingMessage));
+        // Do not process message
+        // return super.formatLoggingMessage(com.openexchange.soap.cxf.interceptor.LoggingUtility.sanitizeLoggingMessage(loggingMessage));
+        return super.formatLoggingMessage(loggingMessage);
+    }
+
+    @Override
+    protected String transform(String originalLogString) {
+        return super.transform(originalLogString);
+    }
+
+    @Override
+    protected void log(Logger logger, String message) {
+        super.log(logger, message);
     }
 
 }

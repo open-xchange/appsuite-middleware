@@ -68,26 +68,43 @@ public final class LoggingUtility {
     }
 
     /** The regular expression to discover possible password elements */
-    private static final Pattern PATTERN_PASSWORD = Pattern.compile("(<[^<]*password>)[^<>]+(</[^<]*password>)");
+    private static final Pattern PATTERN_PASSWORD = Pattern.compile("(<.*?password.*?>)[^<>]+(</.*?password.*?>)");
 
     /**
-     * Sanitizes possible user-sensitive data from given logging message.
+     * Sanitizes possible user-sensitive data from given message.
+     *
+     * @param message The message to sanitize
+     * @return The sanitized message
+     */
+    public static String sanitizeMessage(final String message) {
+        if (null != message) {
+            // Replace possible passwords in message
+            final StringBuffer sb = new StringBuffer(message.length());
+            final Matcher m = PATTERN_PASSWORD.matcher(message);
+            while (m.find()) {
+                m.appendReplacement(sb, "$1XXXX$2");
+            }
+            m.appendTail(sb);
+            return sb.toString();
+        }
+
+        return message;
+    }
+
+    /**
+     * Sanitizes possible user-sensitive data from given logging message's payload.
      *
      * @param loggingMessage The logging message to sanitize
+     * @return The sanitized logging message
      */
     public static LoggingMessage sanitizeLoggingMessage(final LoggingMessage loggingMessage) {
         if (null != loggingMessage) {
             // Replace possible passwords in payload
             final StringBuilder payload = loggingMessage.getPayload();
             if (null != payload && payload.length() > 0) {
-                final StringBuffer sb = new StringBuffer(payload.length());
-                final Matcher m = PATTERN_PASSWORD.matcher(payload);
-                while (m.find()) {
-                    m.appendReplacement(sb, "$1XXXX$2");
-                }
-                m.appendTail(sb);
+                final String sanitizedPayload = sanitizeMessage(payload.toString());
                 payload.setLength(0);
-                payload.append(sb);
+                payload.append(sanitizedPayload);
             }
         }
 
