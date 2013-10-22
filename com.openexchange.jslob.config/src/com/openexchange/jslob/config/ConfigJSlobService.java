@@ -394,9 +394,8 @@ public final class ConfigJSlobService implements JSlobService {
     public JSlob get(final String id, final Session session) throws OXException {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
-        /*
-         * Get from storage
-         */
+
+        // Get from storage
         final DefaultJSlob jsonJSlob;
         {
             final JSlob opt = getStorage().opt(new JSlobId(SERVICE_ID, id, userId, contextId));
@@ -408,9 +407,7 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
 
-        /*
-         * Fill with config cascade settings
-         */
+        // Append config cascade settings
         final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
         if (null != attributes) {
             final ConfigView view = getConfigViewFactory().getView(userId, contextId);
@@ -419,6 +416,7 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
 
+        // Append config tree settings
         addConfigTreeToJslob(session, jsonJSlob);
 
         // Search for shared jslobs and merge them if necessary
