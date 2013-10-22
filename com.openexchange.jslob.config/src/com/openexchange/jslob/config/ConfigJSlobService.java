@@ -128,11 +128,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     private final Map<String, Map<String, AttributedProperty>> preferenceItems;
 
-    private final ConcurrentMap<String, Map<String, String>[]> configTreeEquivalents;
-
-    private final int CONFIG2LOB = 0;
-
-    private final int LOB2CONFIG = 1;
+    private final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents;
 
     private final Map<String, SharedJSlobService> sharedJSlobs;
 
@@ -149,9 +145,9 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final File file = service.getFileByName("paths.perfMap");
         if (null == file) {
-            configTreeEquivalents = new ConcurrentHashMap<String, Map<String,String>[]>(2);
+            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2);
         } else {
-            final ConcurrentMap<String, Map<String, String>[]> configTreeEquivalents = new ConcurrentHashMap<String, Map<String, String>[]>(48);
+            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48);
             readPerfMap(file, configTreeEquivalents);
             this.configTreeEquivalents = configTreeEquivalents;
         }
@@ -169,8 +165,7 @@ public final class ConfigJSlobService implements JSlobService {
         return services;
     }
 
-    @SuppressWarnings("unchecked")
-    private void readPerfMap(final File file, final ConcurrentMap<String, Map<String, String>[]> configTreeEquivalents) throws OXException {
+    private void readPerfMap(final File file, final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents) throws OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
@@ -193,14 +188,14 @@ public final class ConfigJSlobService implements JSlobService {
                             }
                         }
 
-                        Map<String, String>[] maps = configTreeEquivalents.get(jslobName);
-                        if (maps == null) {
-                            maps = new Map[] { new ConcurrentHashMap<String, String>(32), new ConcurrentHashMap<String, String>(32) };
-                            configTreeEquivalents.put(jslobName, maps);
+                        ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
+                        if (equiv == null) {
+                            equiv = new ConfigTreeEquivalent();
+                            configTreeEquivalents.put(jslobName, equiv);
                         }
 
-                        maps[CONFIG2LOB].put(configTreePath, jslobPath);
-                        maps[LOB2CONFIG].put(jslobPath, configTreePath);
+                        equiv.config2lob.put(configTreePath, jslobPath);
+                        equiv.lob2config.put(jslobPath, configTreePath);
                     }
                 }
             }
@@ -235,17 +230,17 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
 
-        Map<String, String>[] maps = configTreeEquivalents.get(jslobName);
-        if (maps == null) {
-            final Map<String, String>[] newmaps = new Map[] { new ConcurrentHashMap<String, String>(32), new ConcurrentHashMap<String, String>(32) };
-            maps = configTreeEquivalents.putIfAbsent(jslobName, newmaps);
-            if (null == maps) {
-                maps = newmaps;
+        ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
+        if (equiv == null) {
+            final ConfigTreeEquivalent newEquiv = new ConfigTreeEquivalent();
+            equiv = configTreeEquivalents.putIfAbsent(jslobName, newEquiv);
+            if (null == equiv) {
+                equiv = newEquiv;
             }
         }
 
-        maps[CONFIG2LOB].put(configTreePath.trim(), path);
-        maps[LOB2CONFIG].put(path, configTreePath.trim());
+        equiv.config2lob.put(configTreePath.trim(), path);
+        equiv.lob2config.put(path, configTreePath.trim());
     }
 
     /**
@@ -270,10 +265,10 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
 
-        final Map<String, String>[] maps = configTreeEquivalents.get(jslobName);
-        if (maps != null) {
-            maps[CONFIG2LOB].remove(configTreePath.trim());
-            maps[LOB2CONFIG].remove(path);
+        final ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
+        if (equiv != null) {
+            equiv.config2lob.remove(configTreePath.trim());
+            equiv.lob2config.remove(path);
         }
     }
 
@@ -525,14 +520,14 @@ public final class ConfigJSlobService implements JSlobService {
      */
     private void addConfigTreeToJslob(final Session session, final DefaultJSlob jsLob) throws OXException {
         try {
-            final Map<String, String>[] maps = configTreeEquivalents.get(jsLob.getId().getId());
-            if (maps == null) {
+            final ConfigTreeEquivalent equiv = configTreeEquivalents.get(jsLob.getId().getId());
+            if (equiv == null) {
                 return;
             }
             final SettingStorage stor = SettingStorage.getInstance(session);
             final ConfigTree configTree = ConfigTree.getInstance();
 
-            final Set<Entry<String, String>> entrySet = maps[CONFIG2LOB].entrySet();
+            final Set<Entry<String, String>> entrySet = equiv.config2lob.entrySet();
             final JSONObject jObject = new JSONObject(entrySet.size());
             for (final Map.Entry<String, String> mapping : entrySet) {
                 final String configTreePath = mapping.getKey();
@@ -630,11 +625,11 @@ public final class ConfigJSlobService implements JSlobService {
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
             // Config Tree Values first
 
-            final Map<String, String>[] configTreeEquivMaps = configTreeEquivalents.get(id);
-            if (configTreeEquivMaps != null) {
+            final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+            if (equiv != null) {
                 final SettingStorage stor = SettingStorage.getInstance(session);
                 final ConfigTree configTree = ConfigTree.getInstance();
-                final Map<String, String> attribute2ConfigTreeMap = configTreeEquivMaps[LOB2CONFIG];
+                final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
 
                 for (final Entry<String, Object> entry : jObject.entrySet()) {
                     String path = attribute2ConfigTreeMap.get(entry.getKey());
@@ -802,10 +797,10 @@ public final class ConfigJSlobService implements JSlobService {
 
             if (path.size() == 1) {
                 // Only first level elements can be config tree equivalents
-                final Map<String, String>[] configTreeEquivMaps = configTreeEquivalents.get(id);
-                if (configTreeEquivMaps != null) {
+                final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+                if (equiv != null) {
 
-                    final String configTreePath = configTreeEquivMaps[LOB2CONFIG].get(path.get(0).getName());
+                    final String configTreePath = equiv.lob2config.get(path.get(0).getName());
                     final Object value = jsonUpdate.getValue();
                     if (null != value) {
                         final SettingStorage stor = SettingStorage.getInstance(session);
