@@ -66,6 +66,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Mon Oct 21 2013 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2013-10-21
 * Thu Oct 10 2013 Felix Marx <felix.marx@open-xchange.com>
 First sprint increment for 7.4.0 release
 * Wed Oct 09 2013 Felix Marx <felix.marx@open-xchange.com>

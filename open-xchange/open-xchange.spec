@@ -60,6 +60,8 @@ ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
 /sbin/rcopen-xchange
 
 %changelog
+* Mon Oct 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-21
 * Tue Oct 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-11
 * Mon Oct 14 2013 Marcus Klein <marcus.klein@open-xchange.com>

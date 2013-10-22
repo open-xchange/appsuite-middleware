@@ -60,10 +60,6 @@
  - Fix for bug 29214: Fire filestorage events upon copy-operation within the same account
  - Fix for bug 29222: Really delete collected files during batch action execution 
 
-* 2013-10-10 - martin.herfurth@open-xchange.com
-
- - Fix for bug 29315: Avoid bad where condition
-
 * 2013-10-09 - marcus.klein@open-xchange.com
 
  - Fix for bug 29195: Added transitional package for open-xchange-l10n-sv-sv to ensure proper upgrade to open-xchange-l10n-sv-se.
@@ -112,6 +108,11 @@
 
  - Fix for bug 29072: Don't transform animated .gif images
  - Fix for bug 29101: Added export of 'javax.activation' package to system fragment bundle
+=======
+* 2013-10-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29147: Detect possibly harmful HTML content in image files and force attachment download then
+>>>>>>> hotfix-1673
 
 * 2013-10-01 - thorben.betten@open-xchange.com
 
