@@ -1,6 +1,7 @@
 * 2013-10-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 29410: Strictly handle with stream-based access to file data, no temporary storing/conversion to byte array
+ - Fix for bug 29412: Escape HTML content prior to writing to output writer
 
 * 2013-10-22 - tobias.friedrich@open-xchange.com
 
