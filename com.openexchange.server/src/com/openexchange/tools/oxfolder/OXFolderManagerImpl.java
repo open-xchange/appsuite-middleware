@@ -115,6 +115,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnInsert;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnRemove;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -205,13 +206,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXException {
         super();
         this.session = session;
-        try {
+        if (session instanceof ServerSession) {
+            final ServerSession serverSession = (ServerSession) session;
+            ctx = serverSession.getContext();
+            userConfig = serverSession.getUserConfiguration();
+            user = serverSession.getUser();
+        } else {
             ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw e;
+            userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+            user = UserStorage.getStorageUser(session.getUserId(), ctx);
         }
-        userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
-        user = UserStorage.getStorageUser(session.getUserId(), ctx);
         this.readCon = readCon;
         this.writeCon = writeCon;
         this.oxfolderAccess = oxfolderAccess;

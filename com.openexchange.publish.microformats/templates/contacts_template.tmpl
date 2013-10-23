@@ -1,0 +1,616 @@
+<#macro display content type label="">
+    <#if content != "">
+        <#if label != "">
+                        <div class="display-value">
+                            <label>${label}</label>
+                            <span class="${type}">${content?html}</span>
+                        </div>
+        <#else>
+                        <span class="display-value ${type}">${content?html}</span>
+        </#if>
+    </#if>
+</#macro>
+
+<#macro display_name contact>
+    <#if contact.givenName?? || contact.surName?? || contact.middleName??>
+                        <div class="fn n">
+                            <@display content=contact.title!"" type="title ox_title" />
+                            <@display content=contact.givenName!"" type="given-name ox_firstName" />
+                            <@display content=contact.middleName!"" type="additional-name ox_secondName" />
+                            <@display content=contact.surName!"" type="family-name ox_lastName" />
+                            <@display content=contact.suffix!"" type="honorific-suffix ox_suffix"/>
+                        </div>
+    </#if>
+</#macro>
+
+<#macro display_subtitle contact>
+    <#if contact.company?has_content >
+                        <@display content=contact.company type="subtitle"/>
+    <#elseif contact.email1?has_content >
+                        <@display content=contact.email1 type="subtitle"/>
+    </#if>
+</#macro>
+
+<#macro display_personal contact>
+    <#if contact.birthday?has_content ||
+        contact.title?has_content ||
+        contact.nickname?has_content >
+                    <div class="value-container">
+                        <legend class="container-heading">Personal</legend>
+                        <@display content=contact.birthday?string("yyyy-MM-dd") type="bday ox_birthday" label="Birthday" />
+                        <@display content=contact.title!"" type="title" label="Title" />
+                        <@display content=contact.nickname!"" type="nickname ox_nickname" label="Nickname" />
+                    </div>
+    </#if>
+</#macro>
+
+<#macro display_job contact>
+    <#if contact.position?has_content ||
+        contact.department?has_content ||
+        contact.company?has_content ||
+        contact.roomNumber?has_content ||
+        contact.profession?has_content>
+                    <div class="value-container">
+                        <legend class="container-heading">Job</legend>
+                        <@display content=contact.profession!"" type="profession ox_profession" label="Profession" />
+                        <@display content=contact.position!"" type="role ox_position" label="Position" />
+                        <@display content=contact.department!"" type="department ox_department" label="Department" />
+                        <@display content=contact.company!"" type="org ox_company" label="Company" />
+                        <@display content=contact.roomNumber!"" type="room_number ox_roomNumber" label="Room Number" />
+                    </div>
+    </#if>
+</#macro>
+
+<#macro display_mail content type label ox_type="" >
+    <#if content != "">
+                        <div class="display-value email">
+                            <span class="type">${type}</span>
+                            <label>${label}</label>
+                            <a href="mailto:${content?html}" class="value"><span class="${ox_type}">${content?html}</span></a>
+                        </div>
+    </#if>
+</#macro>
+
+<#macro display_mail_and_messaging contact>
+    <#if contact.email1?has_content ||
+        contact.email2?has_content ||
+        contact.email3?has_content ||
+        contact.instantMessenger1?has_content ||
+        contact.instantMessenger2?has_content >
+                    <div class="value-container">
+                        <legend class="container-heading">Mail and Messaging</legend>
+                        <@display_mail content=contact.email1!""        type="work"     label="Email" ox_type="ox_email1" />
+                        <@display_mail content=contact.email2!""        type="home"     label="Email" ox_type="ox_email2" />
+                        <@display_mail content=contact.email3!""        type="other"    label="Email" ox_type="ox_email3" />
+                        <@display content=contact.instantMessenger1!""  type="instant_messenger1 ox_instantMessenger1" label="IM"/>
+                        <@display content=contact.instantMessenger2!""  type="instant_messenger2 ox_instantMessenger2" label="IM"/>
+                    </div>
+    </#if>
+</#macro>
+
+<#macro display_phone content type label ox_type="" >
+    <#if content != "">
+                        <div class="display-value tel">
+                            <span class="type">${type}</span>
+                            <label>${label}</label>
+                            <a href="tel:${content?html}" class="value"><span class="${ox_type}">${content?html}</span></a>
+                        </div>
+    </#if>
+</#macro>
+
+<#macro display_phone_numbers contact>
+    <#if contact.cellularPhone1?has_content ||
+        contact.cellularPhone2?has_content ||
+        contact.telephoneBusiness1?has_content ||
+        contact.telephoneBusiness2?has_content ||
+        contact.telephoneHome1?has_content ||
+        contact.telephoneHome2?has_content ||
+        contact.telephoneOther?has_content ||
+        contact.faxHome?has_content ||
+        contact.faxBusiness?has_content ||
+        contact.faxOther?has_content >
+                    <div class="value-container">
+                        <legend class="container-heading">Phone numbers</legend>
+                        <@display_phone content=contact.cellularPhone1!""       type="cell"         ox_type="ox_cellular_phone1"    label="Mobile"  />
+                        <@display_phone content=contact.cellularPhone2!""       type="cell2"        ox_type="ox_cellular_phone2"    label="Mobile"  />
+                        <@display_phone content=contact.telephoneBusiness1!""   type="work"         ox_type="ox_phoneBusiness1"     label="Phone (business)" />
+                        <@display_phone content=contact.telephoneBusiness2!""   type="work2"        ox_type="ox_phoneBusiness2"     label="Phone (business)" />
+                        <@display_phone content=contact.telephoneHome1!""       type="home"         ox_type="ox_phonePrivate1"      label="Phone (private)" />
+                        <@display_phone content=contact.telephoneHome2!""       type="home2"        ox_type="ox_phonePrivate2"      label="Phone (private)" />
+                        <@display_phone content=contact.telephoneOther!""       type="other"        ox_type="ox_phoneOther"         label="Phone (other)" />
+                        <@display_phone content=contact.faxHome!""              type="fax"          ox_type="ox_faxHome"            label="Fax (private)" />
+                        <@display_phone content=contact.faxBusiness!""          type="fax_work"     ox_type="ox_faxBusiness"        label="Fax (business)" />
+                        <@display_phone content=contact.faxOther!""             type="fax_other"    ox_type="ox_faxOther"           label="Fax (other)" />
+                    </div>
+    </#if>
+</#macro>
+
+<#macro display_home_adr contact>
+            <#if contact.cityHome?has_content || contact.stateHome?has_content || contact.countryHome?has_content >
+                    <div class="value-container adr">
+                        <div class="type">home</div>
+                        <legend class="container-heading">Home Address</legend>
+                        <@display type="street-address ox_streetPrivate" content=contact.streetHome!"" />
+                        <@display type="postal-code ox_postalCodePrivate" content=contact.postalCodeHome!"" />
+                        <@display type="locality ox_cityPrivate" content=contact.cityHome!"" />
+                        <@display type="region ox_statePrivate" content=contact.stateHome!"" />
+                        <@display type="country-name ox_countryPrivate" content=contact.countryHome!"" />
+                    </div>
+            </#if>
+</#macro>
+
+<#macro display_work_adr contact>
+            <#if contact.cityBusiness?has_content || contact.stateBusiness?has_content || contact.countryBusiness?has_content >
+                    <div class="value-container adr">
+                        <div class="type">work</div>
+                        <div class="container-heading">Business Address</div>
+                        <@display type="street-address ox_streetBusiness" content=contact.streetBusiness!"" />
+                        <@display type="postal-code ox_postalCodeBusiness" content=contact.postalCodeBusiness!"" />
+                        <@display type="locality ox_cityBusiness" content=contact.cityBusiness!"" />
+                        <@display type="region ox_stateBusiness" content=contact.stateBusiness!"" />
+                        <@display type="country-name ox_countryBusiness" content=contact.countryBusiness!"" />
+                    </div>
+            </#if>
+</#macro>
+
+<#macro display_other_adr contact>
+            <#if contact.cityOther?has_content || contact.stateOther?has_content || contact.countryOther?has_content >
+                    <div class="value-container adr">
+                        <div class="type">ox_other</div>
+                        <div class="container-heading">Other Address</div>
+                        <@display type="street-address ox_streetOther" content=contact.streetOther!"" />
+                        <@display type="postal-code ox_postalCodeOther" content=contact.postalCodeOther!"" />
+                        <@display type="locality ox_cityOther" content=contact.cityOther!"" />
+                        <@display type="region ox_stateOther" content=contact.stateOther!"" />
+                        <@display type="country-name ox_countryOther" content=contact.countryOther!"" />
+                    </div>
+            </#if>
+</#macro>
+
+<#macro imageMicroformatted contact>
+    <#if contact.containsImage1()>
+                    <div class="foto-container" style="background-image: url(${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)});">
+                        <img class="photo ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}"  alt="" />
+                    </div>
+    <#else>
+                    <div class="foto-container">
+                    </div>
+    </#if>
+</#macro>
+
+<!DOCTYPE html>
+<html>
+    <head>
+     <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+        <title>Contacts</title>
+        <style type="text/css">
+            html, body {
+                width: 100%;
+                margin: 0px;
+                font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+                font-size: 16px;
+                word-wrap: break-word;
+            }
+            body {
+                padding: 30px 0;
+            }
+            a {
+                color: inherit;
+                text-decoration: none;
+                display: block;
+            }
+            .contact-container {
+                margin: 3px;
+            }
+            .vcard {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 2px 2px 2px 10px;
+                background-color: #fff;
+                clear: both;
+                overflow: hidden;
+                position: relative;
+                list-style: none;
+                outline: none;
+            }
+            .vcard:focus {
+                background-color: #F3F3F3;
+            }
+            .expanded:hover {
+                background-color: #fff;
+            }
+            .card-header {
+                overflow: overlay;
+                padding-right: 28px;
+                outline: none;
+            }
+            .card-header:focus {
+                background-color: #F3F3F3;
+            }
+            .card-header:hover {
+                background-color: #F3F3F3;
+                cursor: pointer;
+            }
+            .card-header-container {
+                padding: 3px;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+                padding-top: 5px;
+                margin-left: 70px;
+                overflow: hidden;
+            }
+            .expand-image {
+                position: absolute;
+                top: 11px;
+                right: 10px;
+                width: 17px;
+                height: 17px;
+                background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAKCAYAAABv7tTEAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QoWDg0lqYIyswAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAACcSURBVCjPY2CgBCRuvZ+cuPV+MtFyiVvvJzN0nPnP0HHmP7okNjkmBgYGxhtvfwTBFM2//HYOTDJx6/3k+ZffzoHJwdQxQvkCJguurTnz4pszTIGBGOeRC6++28D4JhJce88kaIUwMDB8YERyCYZGbBqQbcKpEV0DLiBgsuDaHoaOM/9NFlzbw8DAIEBsDAgEr7/TTIoGGGDDJQEALihVnYnQK9AAAAAASUVORK5CYII=);
+                background-size: contain;
+                background-repeat: no-repeat no-repeat;
+                background-position: center center;
+                pointer-events: none;
+            }
+            .uparrow {
+                background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAKCAYAAABv7tTEAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QoWDgwXeE5ScgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAACoSURBVCjPY2CgFqg++ITfdcXN+dUHn/Bjk2fCpmHNzfcHdz/4nLDm5vuD2DQyYtNw891PfZiYuhD7xRB1QftWe5mPGJqwacClkQmXBjEulhcw9s13P/WRncqETYOFFPeOV3kGgRZS3DvQNTIwMDAwtdrLfBXmZHmMrOFEnGYhAwPDiRNxmoXIGpHVMTAwMGhYLLq+3WLR9e0MDAwaaF7CJ8eggU0QmxwAFqll3fr8k80AAAAASUVORK5CYII=);
+            }
+            .subtitle {
+                color: #777;
+            }
+            .foto-container {
+                float: left;
+                padding: 0px;
+                margin: 3px;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+                width: 48px;
+                height: 48px;
+                background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEwAAABMCAMAAADwSaEZAAADAFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADlNekOAAAAGnRSTlMAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGXTAuKUAAAF3SURBVHja7dfbboMwDABQ4lxwKJra/f8/bqoEgRCSatrDLk3SOkTVLvAGhlMcbEOb5qdu7FZctIoDNN6vdnZhC8a0Vp92rTGhGJNP6tsRe14y5/NMDE/i6nRcXRGGR4hkgs4VYPIE0XVprU9dAkmsT4Sgb8gYIj2SxHR6MTUV45h5MpyIqVz9KSIms8VMTbMpqHQgl0zBRaykoR+CFW07tmN/BgsPwwIRW3OYI2K5r4BkMIVNmTzDRE1zTGPDSp31VojUTZ/p3xqzjGvzS0HRhiVeFUtRBzDy22GfGjv2v7Fko4tes2gzCe49rQGV7jJ3YKb4v5ToryPijYTsNK33YKC1vGN9VmPcLUx0yO9cbj8PSw5TnSY9vnmwIY6xViO5GqyZ/DXGOlRFxbUY479i0KEsrlVnRv+BwaHb1gl+HPw7xg6H7U3lhyG8tcdRVmnM5dVx/iwrdXk78x6rDaAAWG8CIVQcaACsHsbqYvvbacd+HWbrWfYC7RBfUnvRbzQAAAAASUVORK5CYII=);
+                border-radius: 50% 50%;
+                background-position: center center;
+                background-size: cover;
+            }
+            .photo {
+                max-width: 70px;
+                max-height: 70px;
+                margin: auto;
+                padding: 2px;
+                display: none;
+            }
+            .fn {
+                color: #333;
+            }
+            .org {
+                color: #777;
+            }
+            .value-container {
+                margin-left: 74px;
+            }
+            .value-container a {
+                display: inline;
+            }
+            .adr span {
+                display: block;
+            }
+            .display-value {
+                font-size: 14px;
+            }
+            .title, .given-name, .additional-name, .family-name, .honorific-suffix {
+                font-size: 18px;
+            }
+            .family-name {
+                font-weight: bold;
+            }
+            .display-value label {
+               color: #979494;;
+            }
+            .display-value span {
+                margin-left: 4px;
+                font-size: 14px;
+            }
+            .container-heading {
+                font-size: 16px;
+                font-weight: 100;
+                color: #333;
+                margin-top: 17px;
+                margin-bottom: 4px;
+                padding: 0;
+            }
+            .card-body {
+                display: none;
+                clear: both;
+                overflow: overlay;
+                padding-bottom: 28px;
+            }
+            .type {
+                display: none;
+            }
+            .email a {
+                color: #08c;
+                text-decoration: none;
+            }
+            .email a:hover {
+                text-decoration: underline;
+            }
+            .tel a {
+                color: #08c;
+                text-decoration: none;
+            }
+            .tel a:hover {
+                text-decoration: underline;
+            }
+            .scrollbar-container {
+                width: 100%;
+                text-align: center;
+                padding: 10px;
+                position: fixed;
+                top: 0px;
+                overflow: hidden;
+                background-color: #fff;
+            }
+            .scrollbar {
+                font-size: 18px;
+                margin: 0 auto;
+                margin-bottom: -22px;
+                padding: 2px 2px 0 2px;
+                text-align: justify;
+                max-width: 800px;
+            }
+            .item {
+                display: inline-block;
+                list-style: none;
+                color: #ccc;
+                padding: 2px 5px;
+                margin: -2px -5px;
+                line-height: 18px;
+                height: 18px;
+                text-align: center;
+            }
+            .scrollbar-item {
+                color: #333;
+            }
+            .scrollbar-item:hover {
+                background-color: rgba(0, 0, 0, 0.11);
+                cursor: pointer;
+            }
+            .horizontal-scrollbar {
+                padding: 0px;
+            }
+            .seperation-letter {
+                max-width: 502px;
+                margin: 0 auto;
+                background-color: #fff;
+                clear: both;
+                overflow: hidden;
+                position: relative;
+                padding-left: 57px;
+                padding-top: 28px;
+                padding-bottom: 10px;
+                color: #08c;
+                font-size: 32px;
+                list-style: none;
+            }
+            .new-line {
+                padding-left: 100%;
+            }
+            @media (max-width: 1024px),(max-device-width: 1024px) {
+
+            }
+            @media (max-width: 480px),(max-device-width: 480px) {
+                .vcard {
+                    padding: 0;
+                }
+                .container-heading {
+                    width: 190px;
+                }
+                .value-content {
+                    margin-left: 95px;
+                }
+                .value-label {
+                    margin-left: 0;
+                }
+                .expand-link {
+                    left: 85px;
+                }
+                .value-container {
+                    margin-left: 30px;
+                }
+                .card-header-container {
+                    margin-left: 73px;
+                }
+                .seperation-letter {
+                    padding-left: 78px;
+                }
+                .foto-container {
+                    margin-left: 15px;
+                }
+                .scrollbar-container {
+                    display: none;
+                }
+                body {
+                    padding: 5px 0 20px 0;
+                }
+            }
+        </style>
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                initLinks();
+
+                setupListener();
+
+                sortByLastName();
+
+                formateNames();
+
+                injectNavigationBar();
+            });
+
+            $(document).on('keyup', function (e) {
+                var c= String.fromCharCode(event.keyCode);
+                var isWordcharacter = c.match(/\w/);
+
+                if(isWordcharacter) {
+                    selected(c);
+                }
+            });
+
+            function initLinks() {
+                var links = $('.expand-image'),
+                    i;
+
+                links.each(function (index, value) {
+                    var link = $(value),
+                        cardBody = link.parent().find('.card-body').children();
+
+                    if(cardBody.length === 0) {
+                        link.remove();
+                    }
+                });
+
+                $('.card-header').click(function (e) {
+                    e.preventDefault();
+                });
+            }
+
+            function setupListener() {
+                $('.card-header').click(function () {
+                    var nextBody = $(this).parent().children('.card-body'),
+                        link = $(this).parent().children('.expand-image');
+
+                    if(nextBody.children().length > 0) {
+                        toggleContent(nextBody, link);
+                    }
+                });
+            }
+
+            function toggleContent(content, link) {
+                if(content.css('display') === 'block') {
+                    content.slideUp(200, function () {
+                        content.parent().removeClass('expanded');
+                        link.removeClass('uparrow');
+                    });
+                } else {
+                    content.parent().addClass('expanded');
+                    content.slideDown(200, function () {
+                        link.addClass('uparrow');
+                    });
+                }
+            }
+
+            function sortByLastName() {
+                $('.vcard').tsort({attr: 'data-lastname'});
+            }
+
+            function formateNames() {
+                $('.fn').each(function(index, elem) {
+                    refactorTitle($(elem).find('.title'));
+                });
+            }
+
+            function refactorTitle(elem) {
+                if(!(/^(prof\.?|dr\.?|habil\.?|dipl\.?| )*$/i).test(elem.text())) {
+                    elem.remove();
+                }
+            }
+
+            function injectNavigationBar() {
+                injectScrollbar();
+            }
+
+            function injectScrollbar() {
+                var cards = $('.vcard'),
+                    bar = $('.scrollbar'),
+                    contactContainer = $('.contact-container');
+
+                if(cards.length < 50) {
+                    bar.remove();
+                    return;
+                }
+
+                contactContainer.addClass('horizontal-scrollbar')
+
+                for(var i = 0; i < 26; i++) {
+                    bar.append(
+                        $('<li>').addClass('item')
+                            .text(String.fromCharCode(65 + i)),
+                        ' '
+                    );
+                }
+
+                bar.append(
+                    $('<li>').addClass('item new-line')
+                );
+
+                var set = $('[data-lastname]'),
+                    buttons = bar.children();
+                set.each(function (index, value) {
+                    var elem = $(value),
+                        button = $(buttons[parseInt(elem.attr('data-lastname').toUpperCase().charCodeAt(0) - 65)]);
+
+                    if(!button.hasClass('scrollbar-item')) {
+                        $('<li>').addClass('seperation-letter letter-' + elem.attr('data-lastname').toUpperCase().charAt(0))
+                            .text(elem.attr('data-lastname').toUpperCase().charAt(0))
+                            .insertBefore(elem);
+                        button.addClass('scrollbar-item')
+                            .click(function () {
+                                selected($(this).text().charAt(0));
+                            });
+                    }
+                });
+            }
+
+            function selected(character) {
+                var selector = $('.letter-' + character).first(),
+                    offset = parseInt($('body').css('padding-top'));
+
+                if(selector.offset() !== undefined) {
+                    window.scrollTo(0, selector.offset().top - offset);
+                }
+
+                selector.next().find('a').first().focus();
+            }
+        </script>
+    </head>
+    <body>
+        <ul class="contact-container">
+            <#list contacts as contact>
+            <li class="vcard ox_contact"  id="contact_${contacts?seq_index_of(contact)}" data-lastname="${contact.surName}">
+                <div class="expand-image"></div>
+                <a href="#" class="card-header" role="button">
+                    <@imageMicroformatted contact=contact />
+                    <div class="card-header-container">
+                        <@display_name contact=contact />
+                        <@display_subtitle contact=contact />
+                    </div>
+                </a>
+                <div class="card-body">
+                    <@display_job contact=contact />
+                    <@display_personal contact=contact />
+                    <@display_mail_and_messaging contact=contact />
+                    <@display_phone_numbers contact=contact />
+                    <@display_home_adr contact=contact />
+                    <@display_work_adr contact=contact />
+                    <@display_other_adr contact=contact />
+                </div>
+            </li>
+            </#list>
+        </ul>
+        <div class="scrollbar-container">
+            <ul class="scrollbar"></ul>
+        </div>
+        <script>
+            /*! TinySort 1.5.6
+            * Copyright (c) 2008-2013 Ron Valstar http://tinysort.sjeiti.com/
+            * License:
+            *     MIT: http://www.opensource.org/licenses/mit-license.php
+            *     GPL: http://www.gnu.org/licenses/gpl.html
+            */
+            !function(a,b){"use strict";function c(a){return a&&a.toLowerCase?a.toLowerCase():a}function d(a,b){for(var c=0,d=a.length;d>c;c++)if(a[c]==b)return!e;return e}var e=!1,f=null,g=parseFloat,h=Math.min,i=/(-?\d+\.?\d*)$/g,j=/(\d+\.?\d*)$/g,k=[],l=[],m=function(a){return"string"==typeof a},n=function(a,b){for(var c,d=a.length,e=d;e--;)c=d-e-1,b(a[c],c)},o=Array.prototype.indexOf||function(a){var b=this.length,c=Number(arguments[1])||0;for(c=0>c?Math.ceil(c):Math.floor(c),0>c&&(c+=b);b>c;c++)if(c in this&&this[c]===a)return c;return-1};a.tinysort={id:"TinySort",version:"1.5.6",copyright:"Copyright (c) 2008-2013 Ron Valstar",uri:"http://tinysort.sjeiti.com/",licensed:{MIT:"http://www.opensource.org/licenses/mit-license.php",GPL:"http://www.gnu.org/licenses/gpl.html"},plugin:function(){var a=function(a,b){k.push(a),l.push(b)};return a.indexOf=o,a}(),defaults:{order:"asc",attr:f,data:f,useVal:e,place:"start",returns:e,cases:e,forceStrings:e,ignoreDashes:e,sortFunction:f}},a.fn.extend({tinysort:function(){var p,q,r,s,t=this,u=[],v=[],w=[],x=[],y=0,z=[],A=[],B=function(a){n(k,function(b){b.call(b,a)})},C=function(a,b){return"string"==typeof b&&(a.cases||(b=c(b)),b=b.replace(/^\s*(.*?)\s*$/i,"$1")),b},D=function(a,b){var c=0;for(0!==y&&(y=0);0===c&&s>y;){var d=x[y],f=d.oSettings,h=f.ignoreDashes?j:i;if(B(f),f.sortFunction)c=f.sortFunction(a,b);else if("rand"==f.order)c=Math.random()<.5?1:-1;else{var k=e,o=C(f,a.s[y]),p=C(f,b.s[y]);if(!f.forceStrings){var q=m(o)?o&&o.match(h):e,r=m(p)?p&&p.match(h):e;if(q&&r){var t=o.substr(0,o.length-q[0].length),u=p.substr(0,p.length-r[0].length);t==u&&(k=!e,o=g(q[0]),p=g(r[0]))}}c=d.iAsc*(p>o?-1:o>p?1:0)}n(l,function(a){c=a.call(a,k,o,p,c)}),0===c&&y++}return c};for(p=0,r=arguments.length;r>p;p++){var E=arguments[p];m(E)?z.push(E)-1>A.length&&(A.length=z.length-1):A.push(E)>z.length&&(z.length=A.length)}for(z.length>A.length&&(A.length=z.length),s=z.length,0===s&&(s=z.length=1,A.push({})),p=0,r=s;r>p;p++){var F=z[p],G=a.extend({},a.tinysort.defaults,A[p]),H=!(!F||""===F),I=H&&":"===F[0];x.push({sFind:F,oSettings:G,bFind:H,bAttr:!(G.attr===f||""===G.attr),bData:G.data!==f,bFilter:I,$Filter:I?t.filter(F):t,fnSort:G.sortFunction,iAsc:"asc"==G.order?1:-1})}return t.each(function(c,d){var e,f=a(d),g=f.parent().get(0),h=[];for(q=0;s>q;q++){var i=x[q],j=i.bFind?i.bFilter?i.$Filter.filter(d):f.find(i.sFind):f;h.push(i.bData?j.data(i.oSettings.data):i.bAttr?j.attr(i.oSettings.attr):i.oSettings.useVal?j.val():j.text()),e===b&&(e=j)}var k=o.call(w,g);0>k&&(k=w.push(g)-1,v[k]={s:[],n:[]}),e.length>0?v[k].s.push({s:h,e:f,n:c}):v[k].n.push({e:f,n:c})}),n(v,function(a){a.s.sort(D)}),n(v,function(a){var b=a.s,c=a.n,f=b.length,g=c.length,i=f+g,j=[],k=i,l=[0,0];switch(G.place){case"first":n(b,function(a){k=h(k,a.n)});break;case"org":n(b,function(a){j.push(a.n)});break;case"end":k=g;break;default:k=0}for(p=0;i>p;p++){var m=d(j,p)?!e:p>=k&&k+f>p,o=m?0:1,q=(m?b:c)[l[o]].e;q.parent().append(q),(m||!G.returns)&&u.push(q.get(0)),l[o]++}}),t.length=0,Array.prototype.push.apply(t,u),t}}),a.fn.TinySort=a.fn.Tinysort=a.fn.tsort=a.fn.tinysort}(jQuery);
+        </script>
+    </body>
+</html>
