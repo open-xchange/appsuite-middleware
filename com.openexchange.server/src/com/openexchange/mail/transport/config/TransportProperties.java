@@ -99,6 +99,8 @@ public final class TransportProperties implements ITransportProperties {
 
     private Locale externalRecipientsLocale;
 
+    private boolean removeMimeVersionInSubParts;
+
     /**
      * Initializes a new {@link TransportProperties}
      */
@@ -144,6 +146,7 @@ public final class TransportProperties implements ITransportProperties {
         provideLinksInAttachment = false;
         publishedDocumentTimeToLive = 604800000L;
         externalRecipientsLocale = null;
+        removeMimeVersionInSubParts = false;
     }
 
     private void loadProperties0() {
@@ -243,6 +246,12 @@ public final class TransportProperties implements ITransportProperties {
             }
         }
 
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.transport.removeMimeVersionInSubParts", "false").trim();
+            removeMimeVersionInSubParts = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tRemove \"MIME-Version\" header in sub-parts: ").append(removeMimeVersionInSubParts).append('\n');
+        }
+
         logBuilder.append("Global transport properties successfully loaded!");
         if (LOG.isInfoEnabled()) {
             LOG.info(logBuilder.toString());
@@ -252,6 +261,15 @@ public final class TransportProperties implements ITransportProperties {
     @Override
     public int getReferencedPartLimit() {
         return referencedPartLimit;
+    }
+
+    /**
+     * Checks whether to remove <i>"MIME-Version"</i> header from sub-parts.
+     *
+     * @return <code>true</code> to remove <i>"MIME-Version"</i> header from sub-parts; otherwise <code>false</code>
+     */
+    public boolean isRemoveMimeVersionInSubParts() {
+        return removeMimeVersionInSubParts;
     }
 
     /**

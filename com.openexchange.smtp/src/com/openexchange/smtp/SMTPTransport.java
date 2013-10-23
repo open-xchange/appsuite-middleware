@@ -75,6 +75,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Provider;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -123,6 +124,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
@@ -313,15 +315,15 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private long getMaxMailSize() throws OXException {
-        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        final ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
 
         if (factory != null) {
-            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-            ConfigProperty<Long> property = view.property("com.openexchange.mail.maxMailSize", Long.class);
+            final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+            final ConfigProperty<Long> property = view.property("com.openexchange.mail.maxMailSize", Long.class);
 
             if (property.isDefined()) {
-                Long l = property.get();
-                long maxMailSize = null == l ? -1 : l.longValue();
+                final Long l = property.get();
+                final long maxMailSize = null == l ? -1 : l.longValue();
                 if (maxMailSize > 0) {
                     return maxMailSize;
                 }
@@ -690,7 +692,7 @@ public final class SMTPTransport extends MailTransport {
             MimeMessage mimeMessage = null;
             if (composedMail instanceof ContentAware) {
                 try {
-                    Object content = composedMail.getContent();
+                    final Object content = composedMail.getContent();
                     if (content instanceof MimeMessage) {
                         mimeMessage = (MimeMessage) content;
                     }
@@ -840,7 +842,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void transport(final MimeMessage smtpMessage, final Address[] recipients, Transport transport, final SMTPConfig smtpConfig) throws OXException {
+    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         prepareAddresses(recipients);
         try {
             transport.sendMessage(smtpMessage, recipients);
@@ -1090,6 +1092,61 @@ public final class SMTPTransport extends MailTransport {
             hostName = getHostName();
         }
         MimeMessageConverter.saveChanges(mimeMessage, hostName);
+        // Check whether to remove MIME-Version headers from sub-parts
+        if (TransportProperties.getInstance().isRemoveMimeVersionInSubParts()) {
+            /*-
+             *  Note that the MIME-Version header field is required at the top level
+             *  of a message.  It is not required for each body part of a multipart
+             *  entity.  It is required for the embedded headers of a body of type
+             *  "message/rfc822" or "message/partial" if and only if the embedded
+             *  message is itself claimed to be MIME-conformant.
+             */
+            try {
+                checkMimeVersionHeader(mimeMessage);
+            } catch (final Exception e) {
+                LOG.warn("Could not check for proper usage of \"MIME-Version\" header according to RFC2045.", e);
+            }
+        }
+    }
+
+    private void checkMimeVersionHeader(final MimeMessage mimeMessage) throws MessagingException, IOException {
+        final String header = mimeMessage.getHeader("Content-Type", null);
+        if (null != header && toLowerCase(header).startsWith("multipart/")) {
+            final Multipart multipart = (Multipart) mimeMessage.getContent();
+            final int count = multipart.getCount();
+            for (int i = 0; i < count; i++) {
+                checkMimeVersionHeader(multipart.getBodyPart(i));
+            }
+        }
+    }
+
+    private void checkMimeVersionHeader(final Part part) throws MessagingException, IOException {
+        final String[] header = part.getHeader("Content-Type");
+        if (null != header && header.length > 0 && null != header[0]) {
+            final String cts = toLowerCase(header[0]);
+            if (cts.startsWith("multipart/")) {
+                final Multipart multipart = (Multipart) part.getContent();
+                final int count = multipart.getCount();
+                for (int i = 0; i < count; i++) {
+                    checkMimeVersionHeader(multipart.getBodyPart(i));
+                }
+            } else if (cts.startsWith("message/rfc822") || cts.startsWith("message/partial")) {
+                part.setHeader("MIME-Version", "1.0");
+                Object content;
+                try {
+                    content = part.getContent();
+                } catch (Exception e) {
+                    content = null;
+                }
+                if (content instanceof MimeMessage) {
+                    checkMimeVersionHeader((MimeMessage) content);
+                }
+            } else {
+                part.removeHeader("MIME-Version");
+            }
+        } else {
+            part.removeHeader("MIME-Version");
+        }
     }
 
     private static String getHostName() {
