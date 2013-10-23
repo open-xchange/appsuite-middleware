@@ -302,6 +302,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(SAVE_AS_TYPE);
                 length = file.getLength();
+                setContentLengthHeader(length, resp);
             } else {
                 // Determine what Content-Type is indicated by file name
                 String contentTypeByFileName = getContentTypeByFileName(fileName);
@@ -381,12 +382,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                  * Set Content-Length if possible
                  */
                 length = checkedDownload.getSize();
-                if (length > 0) {
-                    resp.setHeader("Accept-Ranges", "bytes");
-                    resp.setHeader("Content-Length", Long.toString(length));
-                } else {
-                    resp.setHeader("Accept-Ranges", "none");
-                }
+                setContentLengthHeader(length, resp);
                 /*-
                  * Determine preferred Content-Type
                  *
@@ -645,6 +641,15 @@ public class FileResponseRenderer implements ResponseRenderer {
         } finally {
             close(file, documentData);
             close(closeables);
+        }
+    }
+
+    private void setContentLengthHeader(final long length, final HttpServletResponse resp) {
+        if (length > 0) {
+            resp.setHeader("Accept-Ranges", "bytes");
+            resp.setHeader("Content-Length", Long.toString(length));
+        } else {
+            resp.setHeader("Accept-Ranges", "none");
         }
     }
 
