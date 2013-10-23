@@ -125,6 +125,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     public boolean updateToken(int contextID, String serviceID, String oldToken, String newToken) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
+            deleteSubscription(connection, contextID, serviceID, oldToken);
             return 0 < updateToken(connection, contextID, serviceID, oldToken, newToken);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
