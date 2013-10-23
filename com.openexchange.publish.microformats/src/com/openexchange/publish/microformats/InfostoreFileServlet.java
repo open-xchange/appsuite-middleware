@@ -144,7 +144,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 final PrintWriter writer = resp.getWriter();
                 final HtmlService htmlService = MicroformatServlet.htmlService;
-                writer.println("Unknown site " + (null == htmlService ? "" : htmlService.htmlFormat(args.get(SITE))));
+                writer.println("Unknown site " + (null == htmlService ? "" : htmlService.encodeForHTML(args.get(SITE))));
                 writer.flush();
                 return;
             }
