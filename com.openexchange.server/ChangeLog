@@ -3,6 +3,7 @@
  - Fix for bug 29356: Introduced property "com.openexchange.mail.transport.removeMimeVersionInSubParts" to 'transport.properties' to specify
                       whether to remove superfluous "MIME-Version" header from multipart sub-parts on message transport
  - Fix for bug 29353: Synchronize create/update operations on database folders
+ - Fix for bug 29436: Accept '*' characters in Content-Type token
 
 * 2013-10-22 - thorben.betten@open-xchange.com
 

@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -266,7 +267,7 @@ public class ContentType extends ParameterizedHeader {
     // private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([[\\p{L}\\p{ASCII}]&&[^/;\\s\"]]+)(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))?\"?)|(?:/([[\\p{L}\\p{ASCII}]&&[^;\\s\"]]+))");
     private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{L}_0-9-]+)(?:/([\\p{L}_0-9-]+))?\"?)|(?:/([\\p{L}_0-9-]+))");
 
-    private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.+]*");
+    private static final Pattern PATTERN_TOKEN = Pattern.compile("[\\p{L}_0-9-.+*]*");
 
     private static boolean isInvalidToken(final String token) {
         if (null == token) {
@@ -429,7 +430,7 @@ public class ContentType extends ParameterizedHeader {
                     while ((fc = pt.charAt(0)) == '"' || fc == '\'') {
                         pt = pt.substring(1);
                     }
-                    if (pt.toLowerCase(Locale.US).startsWith("content-type:")) {
+                    if (Strings.toLowerCase(pt).startsWith("content-type:")) {
                         pt = pt.substring(13);
                         if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
                             pt = pt.substring(1);
