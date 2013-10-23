@@ -5,6 +5,7 @@
  - Fix for bug 29353: Synchronize create/update operations on database folders
  - Fix for bug 29436: Accept '*' characters in Content-Type token
  - Fix for bug 29434: Set "Content-Length" header if exact length is known
+ - Fix for bug 29400: Check last-accessed time stamp prior to issuing a 102 (Processing) response
 
 * 2013-10-22 - thorben.betten@open-xchange.com
 
