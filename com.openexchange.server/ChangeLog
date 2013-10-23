@@ -4,6 +4,7 @@
                       whether to remove superfluous "MIME-Version" header from multipart sub-parts on message transport
  - Fix for bug 29353: Synchronize create/update operations on database folders
  - Fix for bug 29436: Accept '*' characters in Content-Type token
+ - Fix for bug 29434: Set "Content-Length" header if exact length is known
 
 * 2013-10-22 - thorben.betten@open-xchange.com
 
