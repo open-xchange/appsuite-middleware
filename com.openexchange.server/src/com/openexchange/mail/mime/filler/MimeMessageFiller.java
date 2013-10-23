@@ -169,6 +169,10 @@ public class MimeMessageFiller {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageFiller.class));
 
+    private static final String HDR_ORGANIZATION = MessageHeaders.HDR_ORGANIZATION;
+    private static final String HDR_X_MAILER = MessageHeaders.HDR_X_MAILER;
+    private static final String HDR_MIME_VERSION = MessageHeaders.HDR_MIME_VERSION;
+
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final String PREFIX_PART = "part";
@@ -303,7 +307,7 @@ public class MimeMessageFiller {
         /*
          * Set mailer
          */
-        mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
+        mimeMessage.setHeader(HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
         /*
          * Set organization to context-admin's company field setting
          */
@@ -316,7 +320,7 @@ public class MimeMessageFiller {
                         MimeUtility.fold(
                             14,
                             MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
-                    mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
+                    mimeMessage.setHeader(HDR_ORGANIZATION, encoded);
                 }
             } catch (final Exception e) {
                 if (DEBUG) { // Include stack trace as well
@@ -383,7 +387,7 @@ public class MimeMessageFiller {
 
     private static final String[] SUPPRESS_HEADERS = {
         MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION,
-        MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_X_MAILER };
+        MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, HDR_X_MAILER };
 
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
@@ -1044,7 +1048,7 @@ public class MimeMessageFiller {
                         ct.setNameParameter(fileName);
                     }
                     vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
-                    vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
+                    vcardPart.setHeader(HDR_MIME_VERSION, VERSION_1_0);
                     if (fileName != null) {
                         final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                         cd.setFilenameParameter(fileName);
@@ -1145,13 +1149,13 @@ public class MimeMessageFiller {
                 }
                 mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 // mimeMessage.setContent(mailText, contentType.toString());
-                mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
+                mimeMessage.setHeader(HDR_MIME_VERSION, VERSION_1_0);
                 mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
                 mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mail.getContent().toString(), contentType)));
                 // msgBodyPart.setContent(mail.getContent(), contentType.toString());
-                msgBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
+                msgBodyPart.setHeader(HDR_MIME_VERSION, VERSION_1_0);
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 primaryMultipart.addBodyPart(msgBodyPart);
             }
@@ -1614,7 +1618,7 @@ public class MimeMessageFiller {
         // text.setText(performLineFolding(getConverter().convertWithQuotes(
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
-        text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
+        text.setHeader(HDR_MIME_VERSION, VERSION_1_0);
         text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset)));
         return text;
     }
@@ -1641,7 +1645,7 @@ public class MimeMessageFiller {
                 html.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
                 // html.setContent(wellFormedHTMLContent, contentType);
             }
-            html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
+            html.setHeader(HDR_MIME_VERSION, VERSION_1_0);
             html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
             return html;
         } catch (final UnsupportedEncodingException e) {
