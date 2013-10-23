@@ -61,7 +61,7 @@ import org.glassfish.grizzly.Buffer;
 public class StampingNIOOutputStreamImpl extends NIOOutputStreamImpl {
 
     protected volatile long lastAccessed = -1L;
-    protected volatile boolean flushedOrClosed = false;
+    protected volatile boolean closed = false;
 
     /**
      * Initializes a new {@link StampingNIOOutputStreamImpl}.
@@ -89,15 +89,9 @@ public class StampingNIOOutputStreamImpl extends NIOOutputStreamImpl {
     }
 
     @Override
-    public void flush() throws IOException {
-        super.flush();
-        flushedOrClosed = true;
-    }
-
-    @Override
     public void close() throws IOException {
         super.close();
-        flushedOrClosed = true;
+        closed = true;
     }
 
     @Override
@@ -108,7 +102,7 @@ public class StampingNIOOutputStreamImpl extends NIOOutputStreamImpl {
 
     @Override
     public void recycle() {
-        flushedOrClosed = false;
+        closed = false;
         lastAccessed = -1L;
         super.recycle();
     }

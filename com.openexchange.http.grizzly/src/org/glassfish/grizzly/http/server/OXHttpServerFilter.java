@@ -387,33 +387,35 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                             final WatchInfo watchInfo = cm.get(ctx);
                             if (null != watchInfo && (watchInfo.handlerResponse instanceof OXResponse)) {
                                 final StampingNIOOutputStreamImpl stamped = (StampingNIOOutputStreamImpl) ((OXResponse) watchInfo.handlerResponse).createOutputStream();
-                                final long lastAccessed = stamped.lastAccessed;
-                                if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) > 90000) {
-                                    final MemoryManager memoryManager = ctx.getMemoryManager();
-                                    if (Ping.PROCESSING == ping) {
-                                        final Buffer encodedBuffer = memoryManager.allocate(128);
-                                        put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 102 Processing"));
-                                        put(memoryManager, encodedBuffer, crlfBytes);
-                                        put(memoryManager, encodedBuffer, crlfBytes);
-                                        encodedBuffer.trim();
-                                        encodedBuffer.allowBufferDispose(true);
-                                        ctx.write(encodedBuffer, true);
-                                    } else if (Ping.CONTINUE == ping) {
-                                        final Buffer encodedBuffer = memoryManager.allocate(128);
-                                        put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 100 Continue"));
-                                        put(memoryManager, encodedBuffer, crlfBytes);
-                                        put(memoryManager, encodedBuffer, crlfBytes);
-                                        encodedBuffer.trim();
-                                        encodedBuffer.allowBufferDispose(true);
-                                        ctx.write(encodedBuffer, true);
-                                    } else {
-                                        final Buffer buffer = memoryManager.allocate(128);
-                                        put(memoryManager, buffer, Charsets.toAsciiBytes(" "));
-                                        buffer.trim();
-                                        buffer.allowBufferDispose(true);
-                                        final OutputBuffer outputBuffer = handlerResponse.getOutputBuffer();
-                                        outputBuffer.writeBuffer(buffer);
-                                        outputBuffer.flush();
+                                if (!stamped.closed) {
+                                    final long lastAccessed = stamped.lastAccessed;
+                                    if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) > 90000) {
+                                        final MemoryManager memoryManager = ctx.getMemoryManager();
+                                        if (Ping.PROCESSING == ping) {
+                                            final Buffer encodedBuffer = memoryManager.allocate(128);
+                                            put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 102 Processing"));
+                                            put(memoryManager, encodedBuffer, crlfBytes);
+                                            put(memoryManager, encodedBuffer, crlfBytes);
+                                            encodedBuffer.trim();
+                                            encodedBuffer.allowBufferDispose(true);
+                                            ctx.write(encodedBuffer, true);
+                                        } else if (Ping.CONTINUE == ping) {
+                                            final Buffer encodedBuffer = memoryManager.allocate(128);
+                                            put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 100 Continue"));
+                                            put(memoryManager, encodedBuffer, crlfBytes);
+                                            put(memoryManager, encodedBuffer, crlfBytes);
+                                            encodedBuffer.trim();
+                                            encodedBuffer.allowBufferDispose(true);
+                                            ctx.write(encodedBuffer, true);
+                                        } else {
+                                            final Buffer buffer = memoryManager.allocate(128);
+                                            put(memoryManager, buffer, Charsets.toAsciiBytes(" "));
+                                            buffer.trim();
+                                            buffer.allowBufferDispose(true);
+                                            final OutputBuffer outputBuffer = handlerResponse.getOutputBuffer();
+                                            outputBuffer.writeBuffer(buffer);
+                                            outputBuffer.flush();
+                                        }
                                     }
                                 }
                             } else {
