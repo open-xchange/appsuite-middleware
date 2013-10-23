@@ -50,12 +50,13 @@
 package org.glassfish.grizzly.http.server;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Locale;
 import org.glassfish.grizzly.http.Cookie;
-import org.glassfish.grizzly.http.server.Response;
+import org.glassfish.grizzly.http.server.io.NIOOutputStream;
 import org.glassfish.grizzly.http.util.CharChunk;
 import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.http.util.HttpRequestURIDecoder;
@@ -70,7 +71,88 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
  */
 public class OXResponse extends Response {
 
+    /** The Grizzly configuration */
     GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
+
+    /**
+     * The associated output stream.
+     */
+    private volatile StampingNIOOutputStreamImpl stampingOutputStream;
+
+    /**
+     * Initializes a new {@link OXResponse}.
+     */
+    public OXResponse() {
+        super();
+    }
+
+    @Override
+    protected void recycle() {
+        super.recycle();
+        stampingOutputStream.recycle();
+    }
+
+    /**
+     * Create and return a ServletOutputStream to write the content
+     * associated with this Response.
+     */
+    @Override
+    public NIOOutputStream createOutputStream() {
+        StampingNIOOutputStreamImpl tmp = stampingOutputStream;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = stampingOutputStream;
+                if (null == tmp) {
+                    tmp = new StampingNIOOutputStreamImpl();
+                    stampingOutputStream = tmp;
+                }
+            }
+        }
+        tmp.setOutputBuffer(outputBuffer);
+        return tmp;
+    }
+
+    /**
+     * <p>
+     * Return the {@link NIOOutputStream} associated with this {@link Response}.
+     * This {@link NIOOutputStream} will write content in a non-blocking manner.
+     * </p>
+     *
+    * @throws IllegalStateException if {@link #getWriter()} or {@link #getNIOWriter()}
+     *  were already invoked.
+     */
+    @Override
+    public NIOOutputStream getNIOOutputStream() {
+        return getStampedOutputStream0(false);
+    }
+
+    /**
+     * <p>
+     * Return the {@link OutputStream} associated with this {@link Response}.
+     * This {@link OutputStream} will write content in a blocking manner.
+     * </p>
+     *
+     * @return the {@link NIOOutputStream} associated with this {@link Response}.
+     *
+     * @throws IllegalStateException if {@link #getWriter()} or {@link #getNIOWriter()}
+     *  were already invoked.
+     */
+    @Override
+    public OutputStream getOutputStream() {
+        return getStampedOutputStream0(true);
+    }
+
+    private NIOOutputStream getStampedOutputStream0(final boolean blocking) {
+        if (usingWriter) {
+            throw new IllegalStateException("Illegal attempt to call getOutputStream() after getWriter() has already been called.");
+        }
+
+        usingOutputStream = true;
+        outputBuffer.setAsyncEnabled(!blocking);
+        stampingOutputStream.setOutputBuffer(outputBuffer);
+        return stampingOutputStream;
+
+    }
 
     /**
      * Do OX specific cookie handling before adding the cookie via {@link Response#addCookie(Cookie)}.
