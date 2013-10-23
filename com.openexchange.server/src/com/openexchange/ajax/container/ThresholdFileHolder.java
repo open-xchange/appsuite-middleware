@@ -294,6 +294,43 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Writes the complete contents of this file holder to the specified output stream argument, as if by calling the output stream's write
+     * method using <code>out.write(buf, 0, count)</code>.
+     *
+     * @param out the output stream to which to write the data.
+     * @throws OXException If an I/O error occurs.
+     */
+    public void writeTo(OutputStream out) throws OXException {
+        final ByteArrayOutputStream buf = this.buf;
+        if (null == buf) {
+            final File tempFile = this.tempFile;
+            if (null == tempFile) {
+                final IOException e = new IOException("Already closed.");
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+            InputStream in = null;
+            try {
+                in = new FileInputStream(tempFile);
+                final int buflen = 0xFFFF; // 64KB
+                final byte[] buffer = new byte[buflen];
+                for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
+                    out.write(buffer, 0, len);
+                }
+            } catch (final IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(in);
+            }
+        } else {
+            try {
+                buf.writeTo(out);
+            } catch (final IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Gets this file holder content as a byte array.
      *
      * @return The byte array
