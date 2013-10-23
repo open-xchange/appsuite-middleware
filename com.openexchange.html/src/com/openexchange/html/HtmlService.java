@@ -260,4 +260,32 @@ public interface HtmlService {
      */
     Character getHTMLEntity(String entity);
 
+    /**
+     * Encode data for use in HTML using HTML entity encoding
+     * <p>
+     * Note that the following characters:
+     * 00-08, 0B-0C, 0E-1F, and 7F-9F
+     * <p>cannot be used in HTML.
+     *
+     * @see <a href="http://en.wikipedia.org/wiki/Character_encodings_in_HTML">HTML Encodings [wikipedia.org]</a>
+     * @see <a href="http://www.w3.org/TR/html4/sgml/sgmldecl.html">SGML Specification [w3.org]</a>
+     * @see <a href="http://www.w3.org/TR/REC-xml/#charsets">XML Specification [w3.org]</a>
+     *
+     * @param input
+     *      the text to encode for HTML
+     *
+     * @return input encoded for HTML
+     */
+    String encodeForHTML(String input);
+
+    /**
+     * Encode data for use in HTML attributes.
+     *
+     * @param input
+     *      the text to encode for an HTML attribute
+     *
+     * @return input encoded for use as an HTML attribute
+     */
+    String encodeForHTMLAttribute(String input);
+
 }
