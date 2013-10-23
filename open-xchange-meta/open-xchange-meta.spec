@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -418,7 +418,11 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Oct 23 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.4.1 release
 * Mon Oct 21 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-10-21
+* Thu Oct 17 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-21
 * Tue Oct 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-11
@@ -433,8 +437,6 @@ Build for patch 2013-10-09
 * Wed Oct 09 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-07
 * Thu Sep 26 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-09-26
-* Thu Sep 26 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-09-23
 * Tue Sep 24 2013 Carsten Hoeger <choeger@open-xchange.com>
 Eleventh candidate for 7.4.0 release
@@ -442,8 +444,6 @@ Eleventh candidate for 7.4.0 release
 prepare for 7.4.1 release
 * Fri Sep 20 2013 Carsten Hoeger <choeger@open-xchange.com>
 Tenth candidate for 7.4.0 release
-* Tue Sep 17 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-09-26
 * Thu Sep 12 2013 Carsten Hoeger <choeger@open-xchange.com>
 Ninth candidate for 7.4.0 release
 * Wed Sep 11 2013 Carsten Hoeger <choeger@open-xchange.com>

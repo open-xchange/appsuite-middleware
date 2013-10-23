@@ -47,40 +47,45 @@
  *
  */
 
-package com.openexchange.drive.sync.optimize;
+package com.openexchange.drive.sync;
 
 import com.openexchange.drive.DirectoryVersion;
-import com.openexchange.drive.comparison.VersionMapper;
-
 
 /**
- * {@link DirectoryActionOptimizer}
+ * {@link SimpleDirectoryVersion}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DirectoryActionOptimizer extends AbstractActionOptimizer<DirectoryVersion> {
+public class SimpleDirectoryVersion implements DirectoryVersion {
+
+    private final String path;
+    private final String checksum;
 
     /**
-     * Initializes a new {@link DirectoryActionOptimizer}.
+     * Initializes a new {@link SimpleDirectoryVersion}.
      *
-     * @param mapper The file version mapper
+     * @param path The path
+     * @param checksum The checksum
      */
-    public DirectoryActionOptimizer(VersionMapper<DirectoryVersion> mapper) {
-        super(mapper);
+    public SimpleDirectoryVersion(String path, String checksum) {
+        super();
+        this.path = path;
+        this.checksum = checksum;
     }
 
-    protected static boolean matchesByPathAndChecksum(DirectoryVersion v1, DirectoryVersion v2) {
-        return matchesByPath(v1, v2) && matchesByChecksum(v1, v2);
+    @Override
+    public String getChecksum() {
+        return checksum;
     }
 
-    protected static boolean matchesByPath(DirectoryVersion v1, DirectoryVersion v2) {
-        if (null == v1) {
-            return null == v2;
-        } else if (null == v2) {
-            return null == v1;
-        } else {
-            return null == v1.getPath() ? null == v2.getPath() : v1.getPath().equals(v2.getPath());
-        }
+    @Override
+    public String getPath() {
+        return path;
+    }
+
+    @Override
+    public String toString() {
+        return getPath() + " | " + getChecksum();
     }
 
 }
