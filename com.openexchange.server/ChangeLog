@@ -1,3 +1,9 @@
+* 2013-10-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29356: Introduced property "com.openexchange.mail.transport.removeMimeVersionInSubParts" to 'transport.properties' to specify
+                      whether to remove superfluous "MIME-Version" header from multipart sub-parts on message transport
+ - Fix for bug 29353: Synchronize create/update operations on database folders
+
 * 2013-10-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 29410: Strictly handle with stream-based access to file data, no temporary storing/conversion to byte array
