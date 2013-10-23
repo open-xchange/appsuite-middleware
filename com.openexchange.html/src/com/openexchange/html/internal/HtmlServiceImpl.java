@@ -83,6 +83,7 @@ import org.htmlcleaner.Serializer;
 import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
+import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
@@ -122,6 +123,9 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String TAG_S_HEAD = "<head>";
 
+    private final static char[]     IMMUNE_HTML = { ',', '.', '-', '_', ' ' };
+    private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_' };
+
     /*-
      * Member stuff
      */
@@ -130,6 +134,7 @@ public final class HtmlServiceImpl implements HtmlService {
     private final Map<String, Character> htmlEntityMap;
     private final Tika tika;
     private final String lineSeparator;
+    private final HTMLEntityCodec htmlCodec;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -144,6 +149,7 @@ public final class HtmlServiceImpl implements HtmlService {
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
+        htmlCodec = new HTMLEntityCodec();
     }
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -470,6 +476,22 @@ public final class HtmlServiceImpl implements HtmlService {
         HtmlParser.parse(htmlContent, handler);
         modified[0] |= handler.isImageURLFound();
         return handler.getHTML();
+    }
+
+    @Override
+    public String encodeForHTML(final String input) {
+        if (input == null) {
+            return null;
+        }
+        return htmlCodec.encode(IMMUNE_HTML, input);
+    }
+
+    @Override
+    public String encodeForHTMLAttribute(final String input) {
+        if (input == null) {
+            return null;
+        }
+        return htmlCodec.encode(IMMUNE_HTMLATTR, input);
     }
 
     @Override
@@ -1241,7 +1263,7 @@ public final class HtmlServiceImpl implements HtmlService {
     private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     @Override
-    public String documentizeContent(String htmlContent, String charset) {
+    public String documentizeContent(final String htmlContent, final String charset) {
         if (null == htmlContent) {
             return htmlContent;
         }
