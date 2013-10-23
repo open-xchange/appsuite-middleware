@@ -71,6 +71,7 @@ import com.openexchange.drive.checksum.DirectoryChecksum;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.sync.IntermediateSyncResult;
+import com.openexchange.drive.sync.SimpleDirectoryVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.StringAllocator;
@@ -286,13 +287,6 @@ public class SyncTracker {
         return Collections.frequency(getResultHistory(), new HistoryEntry(result, null));
     }
 
-    /**
-     * Clears the result history
-     */
-    private void clearHistory() {
-        getResultHistory().clear();
-    }
-
     private static Collection<DirectoryVersion> getAffectedDirectoryVersions(SyncSession session, RepeatedSequence<HistoryEntry> cycle) {
         Map<String, DirectoryVersion> directoryVersions = new HashMap<String, DirectoryVersion>();
         List<HistoryEntry> sequence = cycle.getSequence();
@@ -315,33 +309,23 @@ public class SyncTracker {
      */
     private static DirectoryVersion getDirectoryVersion(SyncSession session, final String path) {
         /*
-         * try to use current server checksum if possible, use empty checksum as fallback
+         * try to use current server checksum if possible
          */
-        String checksum = null;
         try {
             FileStorageFolder folder = session.getStorage().optFolder(path, false);
             if (null != folder) {
                 List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, Arrays.asList(new String[] { folder.getId() }));
                 if (null != checksums && 1 == checksums.size()) {
-                    checksum = checksums.get(0).getChecksum();
+                    return new SimpleDirectoryVersion(path, checksums.get(0).getChecksum());
                 }
             }
         } catch (OXException e) {
             LOG.warn("Error getting directory version", e);
         }
-        final String directoryChecksum = null == checksum ? DriveConstants.EMPTY_MD5 : checksum;
-        return new DirectoryVersion() {
-
-            @Override
-            public String getChecksum() {
-                return directoryChecksum;
-            }
-
-            @Override
-            public String getPath() {
-                return path;
-            }
-        };
+        /*
+         * use empty checksum as fallback
+         */
+        return new SimpleDirectoryVersion(path, DriveConstants.EMPTY_MD5);
     }
 
     private static void trace(SyncSession session, RepeatedSequence<HistoryEntry> cycle) {
