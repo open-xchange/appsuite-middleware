@@ -152,6 +152,8 @@ public class DriveServiceImpl implements DriveService {
                     delay(delay);
                     continue;
                 }
+                driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + ")");
+                LOG.debug("Got exception during execution of server actions (" + e.getMessage() + ")", e);
                 throw e;
             }
             /*
