@@ -228,7 +228,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                         tempFile = TmpFileFileHolder.newTempFile();
                         this.tempFile = tempFile;
                         out = new FileOutputStream(tempFile);
-                        out.write(baos.toByteArray());
+                        baos.writeTo(out);
                         baos = null;
                         buf = null;
                     }
