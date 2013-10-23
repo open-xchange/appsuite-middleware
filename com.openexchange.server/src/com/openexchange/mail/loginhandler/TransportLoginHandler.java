@@ -85,8 +85,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class TransportLoginHandler implements LoginHandlerService {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportLoginHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportLoginHandler.class));
 
     /**
      * Initializes a new {@link TransportLoginHandler}.
@@ -95,10 +94,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         super();
     }
 
-    private static final List<Field> FIELDS = Collections.unmodifiableList(new ArrayList<Field>(Arrays.asList(
-        Field.ID,
-        Field.CREATED,
-        Field.CREATED_BY)));
+    private static final List<Field> FIELDS = Collections.unmodifiableList(new ArrayList<Field>(Arrays.asList(Field.ID, Field.CREATED, Field.CREATED_BY)));
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
@@ -109,15 +105,13 @@ public final class TransportLoginHandler implements LoginHandlerService {
             final Context ctx = login.getContext();
             final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
             final UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
-            if (TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore() && new OXFolderAccess(ctx).getFolderObject(
-                FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID).getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
+            if (TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore() && new OXFolderAccess(ctx).getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID).getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
                 String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
                 if ("i18n-defined".equals(name)) {
                     name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
                 }
                 final int folderId;
-                final int lookUpFolder =
-                    OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
+                final int lookUpFolder = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
                 if (-1 == lookUpFolder) {
                     synchronized (TransportLoginHandler.class) {
                         folderId = createIfAbsent(serverSession, ctx, name);
@@ -132,8 +126,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
                 if (!TransportProperties.getInstance().publishedDocumentsExpire()) {
                     return;
                 }
-                final IDBasedFileAccess fileAccess =
-                    ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
+                final IDBasedFileAccess fileAccess = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
                 final long now = System.currentTimeMillis();
                 final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now);
                 if (!toRemove.isEmpty()) {
@@ -197,8 +190,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
     }
 
     private int createIfAbsent(final Session session, final Context ctx, final String name) throws SQLException, OXException {
-        final int lookUpFolder =
-            OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
+        final int lookUpFolder = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
         if (-1 == lookUpFolder) {
             /*
              * Create folder
