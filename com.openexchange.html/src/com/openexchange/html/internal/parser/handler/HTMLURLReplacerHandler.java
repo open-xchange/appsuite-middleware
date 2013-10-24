@@ -162,7 +162,7 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
     }
 
     private static final String VAL_START = "=\"";
-    private static final char[] CANDIDATES = { '\'', '"', '<', '>'};
+    private static final char[] CANDIDATES = { '\'', '"', '<', '>', '%'};
 
     /**
      * Adds tag occurring in white list to HTML result.
@@ -199,29 +199,28 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
 
     // Bugfix 28337
     private Iterable<Entry<String, String>> sortAttributes(String tag, Set<Entry<String, String>> entrySet) {
-        if (tag.equalsIgnoreCase("meta")) {
-            List<Entry<String, String>> attributes = new ArrayList<Entry<String, String>>(entrySet);
-            Collections.sort(attributes, new Comparator<Entry<String, String>>() {
-
-                @Override
-                public int compare(Entry<String, String> e1, Entry<String, String> e2) {
-                    if (e1.getKey().equals(e2.getKey())) {
-                        return 0;
-                    }
-                    if (e1.getKey().equalsIgnoreCase("http-equiv")) {
-                        return -1;
-                    }
-                    if (e2.getKey().equals("http-equiv")) {
-                        return 1;
-                    }
-                    return 0;
-                }
-
-            });
-            return attributes;
-        } else {
+        if (!tag.equalsIgnoreCase("meta")) {
             return entrySet;
         }
+        List<Entry<String, String>> attributes = new ArrayList<Entry<String, String>>(entrySet);
+        Collections.sort(attributes, new Comparator<Entry<String, String>>() {
+
+            @Override
+            public int compare(Entry<String, String> e1, Entry<String, String> e2) {
+                if (e1.getKey().equals(e2.getKey())) {
+                    return 0;
+                }
+                if (e1.getKey().equalsIgnoreCase("http-equiv")) {
+                    return -1;
+                }
+                if (e2.getKey().equals("http-equiv")) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
+        return attributes;
     }
 
     private static void replaceURL(final String url, final StringBuilder builder) {
