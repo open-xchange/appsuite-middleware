@@ -107,7 +107,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.mail.structure.Base64JSONString;
+import com.openexchange.mail.structure.StructureJSONBinary;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -758,7 +758,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static void fillBase64JSONString(final InputStream inputStream, final JSONObject bodyObject, final boolean streaming) throws OXException {
         try {
             if (streaming) {
-                bodyObject.put(DATA, new Base64JSONString(inputStream));
+                bodyObject.put(DATA, new StructureJSONBinary(inputStream));
             } else {
                 final byte[] bytes;
                 {
