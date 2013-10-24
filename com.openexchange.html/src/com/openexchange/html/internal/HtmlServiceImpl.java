@@ -57,6 +57,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -125,6 +126,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String TAG_S_HEAD = "<head>";
 
+    private final static char[]     IMMUNE_EMPTY = new char[0];
     private final static char[]     IMMUNE_HTML = { ',', '.', '-', '_', ' ' };
     private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_' };
 
@@ -481,6 +483,24 @@ public final class HtmlServiceImpl implements HtmlService {
         HtmlParser.parse(htmlContent, handler);
         modified[0] |= handler.isImageURLFound();
         return handler.getHTML();
+    }
+
+    @Override
+    public String encodeForHTML(final char[] candidates, final String input) {
+        if (input == null) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder(input.length() << 1);
+        Arrays.sort(candidates);
+        for (int i = 0; i < input.length(); i++) {
+            final char c = input.charAt(i);
+            if (Arrays.binarySearch(candidates, c) >= 0) {
+                sb.append(htmlCodec.encodeCharacter(IMMUNE_EMPTY, Character.valueOf(c)));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     @Override

@@ -162,6 +162,7 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
     }
 
     private static final String VAL_START = "=\"";
+    private static final char[] CANDIDATES = { '\'', '"', '<', '>'};
 
     /**
      * Adds tag occurring in white list to HTML result.
@@ -173,7 +174,9 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
     private void addStartTag(final String tag, final Map<String, String> a, final boolean simple) {
         attrBuilder.setLength(0);
         for (final Entry<String, String> e : sortAttributes(tag, a.entrySet())) {
+            final String name = e.getKey();
             final String val = e.getValue();
+            // Check for URLs
             final Matcher m = PATTERN_URL_SOLE.matcher(val);
             if (m.matches()) {
                 urlBuilder.setLength(0);
@@ -181,9 +184,9 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
                 //replaceURL(urlDecode(m.group()), urlBuilder);
                 replaceURL(m.group(), urlBuilder);
                 urlBuilder.append(val.substring(m.end()));
-                attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(urlBuilder.toString()).append('"');
+                attrBuilder.append(' ').append(name).append(VAL_START).append(urlBuilder.toString()).append('"');
             } else {
-                attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(htmlService.htmlFormat(val, false)).append('"');
+                attrBuilder.append(' ').append(name).append(VAL_START).append(htmlService.encodeForHTML(CANDIDATES, val)).append('"');
             }
         }
         htmlBuilder.append('<').append(tag).append(attrBuilder.toString());
@@ -193,7 +196,7 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
         }
         htmlBuilder.append('>');
     }
-    
+
     // Bugfix 28337
     private Iterable<Entry<String, String>> sortAttributes(String tag, Set<Entry<String, String>> entrySet) {
         if (tag.equalsIgnoreCase("meta")) {
@@ -213,7 +216,7 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
                     }
                     return 0;
                 }
-                
+
             });
             return attributes;
         } else {
