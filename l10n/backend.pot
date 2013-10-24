@@ -2219,6 +2219,12 @@ msgstr ""
 msgid "Uploaded with %1$s (%2$s)"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:66
+msgid ""
+"The client application you're using is outdated and no longer supported. "
+"Please upgrade to a newer version."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr ""

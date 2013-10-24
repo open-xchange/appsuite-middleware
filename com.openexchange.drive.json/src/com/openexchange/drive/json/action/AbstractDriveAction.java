@@ -107,7 +107,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         if (requiresRootFolderID() && Strings.isEmpty(rootFolderID)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
         }
-        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID, extractHostData(requestData, session));
+        int apiVersion = requestData.containsParameter("apiVersion") ? requestData.getParameter("apiVersion", Integer.class).intValue() : 0;
+        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID, extractHostData(requestData, session), apiVersion);
         /*
          * extract device name information if present
          */

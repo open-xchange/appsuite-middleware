@@ -96,7 +96,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
                 twc.setClientVersion(clientVersion);
                 syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc,
-                    DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath()), true));
+                    DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath()), true, false));
             }
         }
         if (null != mapper.getMappingProblems().getUnicodeConflictingClientVersions()) {
@@ -107,7 +107,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
                 twc.setClientVersion(clientVersion);
                 syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc,
-                    DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath()), true));
+                    DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath()), true, false));
             }
         }
         return syncResult;
@@ -182,7 +182,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  */
                 result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
                 result.addActionForClient(new ErrorDirectoryAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
-                    DriveExceptionCodes.NO_DELETE_DIRECTORY_PERMISSION.create(comparison.getServerVersion().getPath()), false));
+                    DriveExceptionCodes.NO_DELETE_DIRECTORY_PERMISSION.create(comparison.getServerVersion().getPath()), false, false));
                 return 2;
             }
         case NEW:
@@ -191,14 +191,14 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  * invalid path, indicate as error with quarantine flag
                  */
                 result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
-                    DriveExceptionCodes.INVALID_PATH.create(comparison.getClientVersion().getPath()), true));
+                    DriveExceptionCodes.INVALID_PATH.create(comparison.getClientVersion().getPath()), true, false));
                 return 1;
             } else if (isIgnoredPath(comparison.getClientVersion().getPath())) {
                 /*
                  * ignored path, indicate as error with quarantine flag
                  */
                 result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
-                    DriveExceptionCodes.IGNORED_PATH.create(comparison.getClientVersion().getPath()), true));
+                    DriveExceptionCodes.IGNORED_PATH.create(comparison.getClientVersion().getPath()), true, false));
                 return 1;
             } else {
                 String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
@@ -213,7 +213,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                      * not allowed, indicate as error with quarantine flag
                      */
                     result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
-                        DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true));
+                        DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true, false));
                     return 1;
                 }
             }
@@ -308,7 +308,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 return 1;
             } else {
                 result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
-                    DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true));
+                    DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true, false));
                 return 1;
             }
         } else {

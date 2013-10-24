@@ -808,6 +808,50 @@ public final class CSSMatcher {
         return true;
     }
 
+    private static final Pattern PATTERN_HTML_ENTITIES = Pattern.compile("&([^;\\W]+);");
+
+    /**
+     * Replaces possible HTML entities with their Unicode representation.<br>
+     * "<i>color:&amp;nbsp;#0000ff;</i>"&nbsp;-&gt;&nbsp; "<i>color:&nbsp;#0000ff;</i>"
+     *
+     * @param cssBuilder A {@link StringBuilder} containing CSS content
+     * @return The replaced CSS content
+     */
+    public static String replaceHtmlEntities(final String css) {
+        if (null == css || css.indexOf('&') < 0) {
+            return css;
+        }
+        final Matcher m = PATTERN_HTML_ENTITIES.matcher(InterruptibleCharSequence.valueOf(css));
+        if (!m.find()) {
+            return css;
+        }
+        final StringBuffer sb = new StringBuffer(css.length());
+        final Map<String, Character> entityToCharacterMap = HtmlEntityUtility.getEntityToCharacterMap();
+        do {
+            final Character character = entityToCharacterMap.get(Strings.toLowerCase(m.group(1)));
+            if (null != character) {
+                m.appendReplacement(sb, Matcher.quoteReplacement(character.toString()));
+            }
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    /**
+     * Replaces possible HTML entities with their Unicode representation.<br>
+     * "<i>color:&amp;nbsp;#0000ff;</i>"&nbsp;-&gt;&nbsp; "<i>color:&nbsp;#0000ff;</i>"
+     *
+     * @param cssBuilder A {@link StringBuilder} containing CSS content
+     */
+    public static void replaceHtmlEntities(final Stringer cssBuilder) {
+        if (cssBuilder.indexOf("&") < 0) {
+            return;
+        }
+        final String repl = replaceHtmlEntities(cssBuilder.toString());
+        cssBuilder.setLength(0);
+        cssBuilder.append(repl);
+    }
+
     /**
      * Iterates over CSS elements contained in specified string argument and checks each element and its value against given style map
      *
@@ -823,6 +867,7 @@ public final class CSSMatcher {
         }
         boolean modified = false;
         correctRGBFunc(cssBuilder);
+        // replaceHtmlEntities(cssBuilder);
         modified = dropInlineData(cssBuilder);
         /*
          * Feed matcher with buffer's content and reset

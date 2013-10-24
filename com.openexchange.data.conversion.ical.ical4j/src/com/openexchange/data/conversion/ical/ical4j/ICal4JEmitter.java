@@ -236,6 +236,7 @@ public class ICal4JEmitter implements ICalEmitter {
         return new ICal4jItem(event);
     }
 
+    @SuppressWarnings("unchecked")
     protected void addVTimeZone(ZoneInfo zoneInfo, Calendar calendar, Appointment appointment) {
         if (appointment.getTimezone() != null && !appointment.getTimezone().trim().equals("")) {
             String tzid = appointment.getTimezone().trim();
@@ -248,7 +249,7 @@ public class ICal4JEmitter implements ICalEmitter {
             TimeZone timeZone = new EmitterTools(zoneInfo).getTimeZoneRegistry().getTimeZone(tzid);
             if (null != timeZone) {
                 VTimeZone vTimeZone = timeZone.getVTimeZone();
-                calendar.getComponents().add(vTimeZone);
+                calendar.getComponents().add(0, vTimeZone);
             }
         }
     }

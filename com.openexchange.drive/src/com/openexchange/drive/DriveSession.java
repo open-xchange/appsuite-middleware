@@ -110,5 +110,11 @@ public interface DriveSession {
      */
     List<DriveFileField> getFields();
 
-}
+    /**
+     * Gets the API version targeted by the client
+     *
+     * @return The API version, or <code>0</code> if using the initial version
+     */
+    int getApiVersion();
 
+}
