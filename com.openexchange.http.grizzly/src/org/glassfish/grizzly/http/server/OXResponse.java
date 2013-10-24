@@ -77,7 +77,7 @@ public class OXResponse extends Response {
     /**
      * The associated output stream.
      */
-    private volatile StampingNIOOutputStreamImpl stampingOutputStream;
+    private final StampingNIOOutputStreamImpl stampingOutputStream = new StampingNIOOutputStreamImpl();
 
     /**
      * Initializes a new {@link OXResponse}.
@@ -99,15 +99,6 @@ public class OXResponse extends Response {
     @Override
     public NIOOutputStream createOutputStream() {
         StampingNIOOutputStreamImpl tmp = stampingOutputStream;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = stampingOutputStream;
-                if (null == tmp) {
-                    tmp = new StampingNIOOutputStreamImpl();
-                    stampingOutputStream = tmp;
-                }
-            }
-        }
         tmp.setOutputBuffer(outputBuffer);
         return tmp;
     }
