@@ -59,7 +59,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
@@ -76,6 +75,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.groupware.notify.State;
 import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 
@@ -123,7 +123,8 @@ public class AppointmentNotificationPool implements
 		try {
 			lock.lock();
 
-			for(QueueItem item: allItems()) {
+			Collection<QueueItem> allItems = allItems();
+            for(QueueItem item: allItems) {
 				tick(item.getContextId(), item.getAppointmentId(), false);
 			}
 		} catch (Throwable t) {
@@ -394,6 +395,7 @@ public class AppointmentNotificationPool implements
 				}
 				notifyInternalParticipantsAboutDetailChangesAsIndividualUsers();
 				notifyExternalParticipantsAboutOverallChangesAsOrganizer();
+				proposeChangesToExternalOrganizer();
 				return HandlingSuggestion.DONE;
 			} else {
 				if (!force && getInterval() < Math.min(detailChangeInterval, stateChangeInterval) && getIntervalToStartDate() > priorityInterval) {
@@ -402,10 +404,10 @@ public class AppointmentNotificationPool implements
 				notifyInternalParticipantsAboutDetailChangesAsIndividualUsers();
 				notifyInternalParticipantsAboutStateChanges();
 				notifyExternalParticipantsAboutOverallChangesAsOrganizer();
+                proposeChangesToExternalOrganizer();
 				return HandlingSuggestion.DONE;
 			}
 		}
-
 
 		private void notifyAllParticipantsAboutOverallChanges() throws OXException {
 			ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
@@ -618,6 +620,22 @@ public class AppointmentNotificationPool implements
 			}
 		}
 
+        private void proposeChangesToExternalOrganizer() throws OXException {
+            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
+            if (moreThanOneUserActed()) {
+                generator.noActor();
+            }
+            List<NotificationParticipant> recipients = generator.getRecipients();
+            for (NotificationParticipant participant : recipients) {
+                if (!participant.isExternal() || !participant.hasRole(ITipRole.ORGANIZER)) {
+                    continue;
+                }
+                NotificationMail mail = generator.generateUpdateMailFor(participant);
+                if (mail != null && mail.getStateType() != State.Type.NEW) {
+                    notificationMailer.sendMail(mail, session);
+                }
+            }
+        }
 
 		private void notifyExternalParticipantsAboutOverallChangesAsOrganizer() throws OXException {
 			ITipMailGenerator generator = generatorFactory.create(original, mostRecent,
