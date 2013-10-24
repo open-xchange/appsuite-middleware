@@ -7502,6 +7502,11 @@ msgstr ""
 msgid "Dear Sir or Madam"
 msgstr ""
 
+#. The name for "Unified Mail" root folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:174
+msgid "Unified mil"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
 "A new appointment was created by [created_by].\n"

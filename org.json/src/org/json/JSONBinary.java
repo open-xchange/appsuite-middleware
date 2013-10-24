@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,30 @@
  *
  */
 
-package com.openexchange.templating;
+package org.json;
 
-import java.io.Writer;
-import com.openexchange.exception.OXException;
-import freemarker.core.Environment;
-import freemarker.template.TemplateExceptionHandler;
+import java.io.InputStream;
 
 
 /**
- * {@link TemplateExceptionHandlerWrapper}
+ * {@link JSONBinary} - Allows to stream binary data to JSON.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TemplateExceptionHandlerWrapper implements TemplateExceptionHandler {
-
-    private final OXTemplateExceptionHandler exceptionHandler;
-
-    public TemplateExceptionHandlerWrapper(final OXTemplateExceptionHandler exceptionHandler) {
-        super();
-        this.exceptionHandler = exceptionHandler;
-    }
+public interface JSONBinary {
 
     /**
-     * {@inheritDoc}
+     * Gets the binary content.
+     *
+     * @return The binary content
      */
-    @Override
-    public void handleTemplateException(final freemarker.template.TemplateException te, final Environment env, final Writer out) throws freemarker.template.TemplateException {
-        final OXException exception = TemplateErrorMessage.UnderlyingException.create(te);
+    InputStream getBinary();
 
-        try {
-            exceptionHandler.handleTemplateException(exception, out);
-        } catch (final OXException e) {
-            throw new freemarker.template.TemplateException(e, env);
-        }
-    }
+    /**
+     * Gets the binary content's length or <code>-1</code> if unknown.
+     *
+     * @return The binary content's length or <code>-1</code> if unknown
+     */
+    long length();
 
 }

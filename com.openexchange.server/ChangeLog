@@ -1,6 +1,12 @@
+* 2013-10-24 - steffen.templin@open-xchange.com
+
+ - Fix for Bug 29437: Don't try to write JSON string if the underlying file is empty
+
 * 2013-10-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 29229: No excessive HTML-escaping when inserting HTML attribute values
+ - Fix for bug 29429: Use Java's naming for charset "cp932" that is "MS932"
+ - Fix for bug 29469: Use translatable name for Unified Mail's root folder
 
 * 2013-10-24 - martin.herfurth@open-xchange.com
 

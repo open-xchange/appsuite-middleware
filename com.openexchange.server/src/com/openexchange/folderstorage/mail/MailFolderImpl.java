@@ -203,7 +203,13 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         id = MailFolderUtility.prepareFullname(accountId, fullName);
         final String folderName = mailFolder.getName();
         name = folderName;
-        localizedName = ("INBOX".equals(fullName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.INBOX) : folderName);
+        if ("INBOX".equals(fullName)) {
+            localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.INBOX);
+        } else if (mailFolder.isRootFolder() && isUnifiedMail(mailFolder)) {
+            localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.UNIFIED_MAIL);
+        } else {
+            localizedName = folderName;
+        }
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         parent =
             mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(

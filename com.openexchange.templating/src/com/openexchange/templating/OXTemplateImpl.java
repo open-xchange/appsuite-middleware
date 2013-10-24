@@ -64,16 +64,32 @@ import freemarker.template.Template;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class OXTemplateImpl implements OXTemplate{
-    
+
     public static ServiceLookup services = null;
-    
+
 	private static final Log LOG = com.openexchange.log.Log.loggerFor(OXTemplateImpl.class);
 
+	private final Map<String, String> properties = new HashMap<String, String>();
+	private final OXTemplateExceptionHandler exceptionHandler;
     private Template template;
     private TemplateLevel level = TemplateLevel.USER;
     private boolean trusted;
-    private final Map<String, String> properties = new HashMap<String, String>();
-    
+
+
+    /**
+     * Initializes a new {@link OXTemplateImpl}.
+     */
+    public OXTemplateImpl() {
+        this(OXTemplateExceptionHandler.RETHROW_HANDLER);
+    }
+
+    public OXTemplateImpl(final OXTemplateExceptionHandler exceptionHandler) {
+        super();
+        if (exceptionHandler == null) {
+            throw new IllegalStateException("ExceptionHandler must be set!");
+        }
+        this.exceptionHandler = exceptionHandler;
+    }
 
     public Template getTemplate() {
         return template;
@@ -88,7 +104,7 @@ public class OXTemplateImpl implements OXTemplate{
         try {
             template.process(rootObject, writer);
         } catch (final freemarker.template.TemplateException e) {
-            throw TemplateErrorMessage.UnderlyingException.create(e, e.getMessage());
+            exceptionHandler.handleTemplateException(TemplateErrorMessage.UnderlyingException.create(e, e.getMessage()), writer);
         } catch (final IOException e) {
             final OXException x = TemplateErrorMessage.IOException.create(e);
             LOG.error(x.getMessage(), x);
@@ -104,11 +120,11 @@ public class OXTemplateImpl implements OXTemplate{
     public void setLevel(final TemplateLevel level) {
         this.level = level;
     }
-    
+
     public void setTrusted(boolean trusted) {
         this.trusted = trusted;
     }
-    
+
     @Override
     public boolean isTrusted() {
         return trusted;

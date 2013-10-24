@@ -99,30 +99,6 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailPart.class));
 
-    /** An input stream that just returns EOF. */
-    private static final InputStream EMPTY_INPUT_STREAM = new InputStream() {
-
-        @Override
-        public int available() {
-            return 0;
-        }
-
-        @Override
-        public int read() {
-            return -1;
-        }
-
-        @Override
-        public int read(final byte[] b, final int off, final int len) throws IOException {
-            return -1;
-        }
-
-        @Override
-        public int read(final byte[] b) throws IOException {
-            return -1;
-        }
-    };
-
     /**
      * The max. in-memory size in bytes.
      */
@@ -415,7 +391,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 final PushbackInputStream in = new PushbackInputStream(part.getInputStream());
                 final int read = in.read();
                 if (read < 0) {
-                    return EMPTY_INPUT_STREAM;
+                    return Streams.EMPTY_INPUT_STREAM;
                 }
                 in.unread(read);
                 return in;

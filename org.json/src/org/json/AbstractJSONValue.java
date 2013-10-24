@@ -50,6 +50,7 @@
 package org.json;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
@@ -293,6 +294,17 @@ abstract class AbstractJSONValue implements JSONValue {
             jGenerator.writeNull();
         } else if (v instanceof AbstractJSONValue) {
             ((AbstractJSONValue) v).writeTo(jGenerator);
+        } else if (v instanceof JSONBinary) {
+            InputStream binary = null;
+            try {
+                final JSONBinary jsonBinary = (JSONBinary) v;
+                binary = jsonBinary.getBinary();
+                jGenerator.writeBinary(binary, (int) jsonBinary.length());
+            } catch (final Exception e) {
+                throw new JSONException(e);
+            } finally {
+                close(binary);
+            }
         } else if (v instanceof JSONString) {
             try {
                 final String s = ((JSONString) v).toJSONString();
