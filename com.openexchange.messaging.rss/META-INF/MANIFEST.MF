@@ -77,4 +77,5 @@ Bundle-ClassPath: lib/htmlcleaner-2.2.jar,
 Export-Package: com.sun.syndication.feed.synd,
  com.sun.syndication.fetcher,
  com.sun.syndication.fetcher.impl,
- com.sun.syndication.io
+ com.sun.syndication.io,
+ org.jdom
