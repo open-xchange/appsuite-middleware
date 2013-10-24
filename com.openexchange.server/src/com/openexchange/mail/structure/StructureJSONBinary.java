@@ -60,7 +60,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
- * {@link StructureJSONBinary} - A {@link JSONBinary JSON string} for one-time-retrieval of an input stream's base64-encoded bytes.
+ * {@link StructureJSONBinary} - A {@link JSONBinary JSON binary} for one-time-retrieval of an input stream's base64-encoded bytes.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
