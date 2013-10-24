@@ -72,6 +72,15 @@ public final class AttachmentRequest extends AbstractMailRequest {
 			super(failOnError);
 		}
 
+		@Override
+		public AttachmentResponse parse(String body) throws JSONException {
+		    if (body.length() == 0) {
+		        Response response = new Response();
+		        return new AttachmentResponse(response);
+		    }
+		    return super.parse(body);
+		}
+
 		/**
 		 * {@inheritDoc}
 		 */

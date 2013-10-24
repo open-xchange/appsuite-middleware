@@ -258,11 +258,16 @@ public class GetResponse extends AbstractAJAXResponse {
                     final int offset = timeZone.getOffset(date.getTime());
                     mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
                 }
-                if (jsonObj.has(MailJSONField.RECEIVED_DATE.getKey())
-                        && !jsonObj.isNull(MailJSONField.RECEIVED_DATE.getKey())) {
-                    final Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
+                if (jsonObj.has(MailJSONField.RECEIVED_DATE.getKey()) && !jsonObj.isNull(MailJSONField.RECEIVED_DATE.getKey())) {
+                    Object object = jsonObj.get(MailJSONField.RECEIVED_DATE.getKey());
+                    final Date date;
+                    if (object instanceof JSONObject) {
+                        date = new Date(((JSONObject)object).getLong("utc"));
+                    } else {
+                        date = new Date((Long)object);
+                    }
                     final int offset = timeZone.getOffset(date.getTime());
-                    mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
+                    mail.setReceivedDate(new Date(date.getTime() - offset));
                 }
             }
             /*

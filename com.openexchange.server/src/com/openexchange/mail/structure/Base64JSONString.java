@@ -119,11 +119,13 @@ public final class Base64JSONString implements JSONString {
 
     @Override
     public String toJSONString() {
-        final StringAllocator sb = new StringAllocator(2048);
+        if (tfh.getCount() <= 0) {
+            return "";
+        }
 
+        final StringAllocator sb = new StringAllocator(2048);
         final int cbuflen = 2048;
         final char[] cbuf = new char[cbuflen];
-
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(tfh.getStream(), com.openexchange.java.Charsets.UTF_8));
