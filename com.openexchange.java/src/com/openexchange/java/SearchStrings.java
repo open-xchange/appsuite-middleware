@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.sql;
+package com.openexchange.java;
 
 /**
  * Provides methodes for dealing with search string or search patterns.
@@ -67,6 +67,16 @@ public final class SearchStrings {
      * @return The length without wild-card characters
      */
     public static int lengthWithoutWildcards(String pattern) {
-        return com.openexchange.java.SearchStrings.lengthWithoutWildcards(pattern);
+        StringBuilder sb = new StringBuilder(pattern);
+        int i = 0;
+        while (i < sb.length()) {
+            final char toTest = sb.charAt(i);
+            if (toTest == ' ' || toTest == '*' || toTest == '%' || toTest == '?') {
+                sb.deleteCharAt(i);
+            } else {
+                i++;
+            }
+        }
+        return sb.length();
     }
 }

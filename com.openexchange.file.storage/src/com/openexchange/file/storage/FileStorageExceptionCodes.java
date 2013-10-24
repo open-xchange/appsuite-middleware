@@ -174,6 +174,10 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
      * Authentication failed for login %1$s to server %2$s (service: %3$s).
      */
     LOGIN_FAILED(FileStorageExceptionMessages.LOGIN_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 30),
+    /**
+     * In order to accomplish the search, %1$d or more characters are required.
+     */
+    PATTERN_NEEDS_MORE_CHARACTERS(FileStorageExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602)
 
     ;
 
