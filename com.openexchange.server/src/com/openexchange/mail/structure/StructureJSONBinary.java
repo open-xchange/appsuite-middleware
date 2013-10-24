@@ -49,7 +49,9 @@
 
 package com.openexchange.mail.structure;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.logging.Log;
 import org.json.JSONBinary;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -76,6 +78,29 @@ public final class StructureJSONBinary implements JSONBinary {
      */
     public StructureJSONBinary(final InputStream in) throws OXException {
         this(in, false);
+    }
+
+    @Override
+    public String toString() {
+        try {
+            InputStream in = this.in;
+            if (null == in) {
+                in = tfh.getStream();
+            }
+            ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
+            Base64OutputStream base64Out = new Base64OutputStream(bout, true, -1, null);
+            final int blen = 2048;
+            final byte[] buf = new byte[blen];
+            for (int read; (read = in.read(buf, 0, blen)) > 0;) {
+                base64Out.write(buf, 0, read);
+            }
+            base64Out.flush();
+            base64Out.close();
+            return bout.toString("US-ASCII");
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            return "";
+        }
     }
 
     /**
