@@ -170,4 +170,8 @@ public class MailStrings implements LocalizableStrings {
     public static final String DEFAULT_ARCHIVE = "Archive"
         .intern();
 
+    // The name for "Unified Mail" root folder
+    public static final String UNIFIED_MAIL = "Unified mil"
+        .intern();
+
 }
