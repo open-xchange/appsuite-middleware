@@ -139,6 +139,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** The directory \"%1$s\" with checksum \"%2$s\" caused repeated synchronization problems */
     REPEATED_SYNC_PROBLEMS_MSG(DriveExceptionMessages.REPEATED_SYNC_PROBLEMS_MSG, Category.CATEGORY_USER_INPUT, 26),
 
+    /** The client application you're using is outdated and no longer supported - please upgrade to a newer version */
+    CLIENT_OUTDATED(DriveExceptionMessages.CLIENT_OUTDATED_MSG, Category.CATEGORY_ERROR, 27),
+
     ;
 
     private static final String PREFIX = "DRV";
