@@ -91,7 +91,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -149,7 +148,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 final PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
                 final int read = in.read();
                 if (read < 0) {
-                    return MimeMailPart.EMPTY_INPUT_STREAM;
+                    return Streams.EMPTY_INPUT_STREAM;
                 }
                 in.unread(read);
                 return in;

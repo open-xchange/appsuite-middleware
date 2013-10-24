@@ -301,6 +301,9 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @throws OXException If an I/O error occurs.
      */
     public void writeTo(OutputStream out) throws OXException {
+        if (count <= 0) {
+            return;
+        }
         final ByteArrayOutputStream buf = this.buf;
         if (null == buf) {
             final File tempFile = this.tempFile;
@@ -337,6 +340,9 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @throws OXException If byte array cannot be returned for any reason
      */
     public byte[] toByteArray() throws OXException {
+        if (count <= 0) {
+            return new byte[0];
+        }
         final ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
             return buf.toByteArray();
@@ -378,6 +384,9 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     @Override
     public InputStream getStream() throws OXException {
+        if (count <= 0) {
+            return Streams.EMPTY_INPUT_STREAM;
+        }
         final ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
             return Streams.asInputStream(buf);
@@ -396,6 +405,9 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     @Override
     public long getLength() {
+        if (count <= 0) {
+            return 0;
+        }
         final ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
             return buf.size();
