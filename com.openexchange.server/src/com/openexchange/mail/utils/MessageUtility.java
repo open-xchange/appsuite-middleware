@@ -422,7 +422,7 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName(charset));
+            String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
@@ -501,7 +501,7 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName(charset));
+            String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
@@ -672,7 +672,7 @@ public final class MessageUtility {
         return GB2312.equals(toLowerCase(charset));
     }
 
-    private static final Set<String> SHIFT_JIS = new HashSet<String>(Arrays.asList("shift_jis", "shift-jis", "sjis"));
+    private static final Set<String> SHIFT_JIS = new HashSet<String>(Arrays.asList("shift_jis", "shift-jis", "sjis", "cp932"));
 
     /**
      * Checks if specified charset name can be considered as <i>Shift-JIS</i>.
