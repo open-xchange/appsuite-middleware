@@ -61,7 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class AttachmentRequest extends AbstractMailRequest {
+public final class AttachmentRequest extends AbstractMailRequest<AttachmentResponse> {
 
 	class AttachmentParser extends AbstractAJAXParser<AttachmentResponse> {
 
@@ -167,7 +167,7 @@ public final class AttachmentRequest extends AbstractMailRequest {
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
 	@Override
-    public AbstractAJAXParser<?> getParser() {
+    public AttachmentParser getParser() {
 		return new AttachmentParser(failOnError);
 	}
 
