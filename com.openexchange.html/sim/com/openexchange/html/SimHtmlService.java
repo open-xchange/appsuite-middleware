@@ -189,7 +189,7 @@ public class SimHtmlService implements HtmlService {
 
     @Override
     public String encodeForHTML(char[] candidates, String input) {
-        return htmlService.encodeForHTML(candidates, input)
+        return htmlService.encodeForHTML(candidates, input);
     }
 
 }
