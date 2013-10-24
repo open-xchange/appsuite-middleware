@@ -121,7 +121,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     }
 
     @Override
-    public SearchIterator<DocumentMetadata> search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
+    public SearchIterator<DocumentMetadata> search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
 
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
@@ -190,19 +190,20 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         } else {
             SQL_QUERY.append(')');
         }
-        if (query.length() > 0 && !"*".equals(query)) {
-            checkPatternLength(query);
-            final boolean containsWildcard = query.indexOf('*') >= 0 || 0 <= query.indexOf('?');
+        String q = query;
+        if (q.length() > 0 && !"*".equals(q)) {
+            checkPatternLength(q);
+            final boolean containsWildcard = q.indexOf('*') >= 0 || 0 <= q.indexOf('?');
             addQuery = true;
 
-            query = query.replaceAll("\\\\", "\\\\\\\\");
-            query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
-            query = query.replace('*', '%');
-            query = query.replace('?', '_');
-            query = query.replaceAll("'", "\\\\'"); // Escape \ twice, due to regexp parser in replaceAll
+            q = q.replaceAll("\\\\", "\\\\\\\\");
+            q = q.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
+            q = q.replace('*', '%');
+            q = q.replace('?', '_');
+            q = q.replaceAll("'", "\\\\'"); // Escape \ twice, due to regexp parser in replaceAll
 
             if (!containsWildcard) {
-                query = "%" + query + "%";
+                q = "%" + q + "%";
             }
 
             final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
@@ -263,11 +264,13 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 stmt = con.prepareStatement(SQL_QUERY.toString());
                 if (addQuery) {
                     for (int i = 0; i < SEARCH_FIELDS.length; i++) {
-                        stmt.setString(i + 1, query);
+                        stmt.setString(i + 1, q);
                     }
                 }
+                final InfostoreSearchIterator iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, ctx, con, stmt);
+                // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
                 keepConnection = true;
-                return new InfostoreSearchIterator(stmt.executeQuery(), this, cols, ctx, con, stmt);
+                return iter;
             } catch (final SQLException e) {
                 LOG.error(e.getMessage(), e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
@@ -464,6 +467,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                                 goahead = false;
                             } else {
                                 list.add(current);
+                                current = null;
                                 goahead = rs.next();
                             }
                             if (!goahead) {
