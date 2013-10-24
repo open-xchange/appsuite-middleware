@@ -127,42 +127,35 @@ public enum ContactExceptionCodes implements LogLevelAwareOXExceptionCode {
      * You are not allowed to store this contact in a non-contact folder: folder
      * id %1$d in context %2$d with user %3$d
      */
-    NON_CONTACT_FOLDER(NON_CONTACT_FOLDER_MSG,
-            Category.CATEGORY_PERMISSION_DENIED, 103),
+    NON_CONTACT_FOLDER(NON_CONTACT_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 103),
     /**
-     * You do not have CATEGORY_PERMISSION_DENIED to access objects in this
+     * You do not have the permission to access objects in this
      * folder %1$d in context %2$d with user %3$d
      */
-    NO_ACCESS_PERMISSION(NO_ACCESS_PERMISSION_MSG,
-            Category.CATEGORY_PERMISSION_DENIED, 104),
+    NO_ACCESS_PERMISSION(NO_ACCESS_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 104),
     /** Got a -1 ID from IDGenerator */
     ID_GENERATION_FAILED(ID_GENERATION_FAILED_MSG, Category.CATEGORY_ERROR, 107),
     /** Unable to scale image down. */
-    IMAGE_DOWNSCALE_FAILED(IMAGE_DOWNSCALE_FAILED_MSG, Category.CATEGORY_ERROR,
-            108),
+    IMAGE_DOWNSCALE_FAILED(IMAGE_DOWNSCALE_FAILED_MSG, Category.CATEGORY_ERROR, 108),
     /** Invalid SQL Query. */
     SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 109),
     /** Invalid SQL Query: %s */
-    AGGREGATING_CONTACTS_NOT_ENABLED(FEATURE_DISABLED_MSG,
-            Category.CATEGORY_SERVICE_DOWN, 110),
+    AGGREGATING_CONTACTS_NOT_ENABLED(FEATURE_DISABLED_MSG, Category.CATEGORY_SERVICE_DOWN, 110),
     /**
      * You do not have CATEGORY_PERMISSION_DENIED to create objects in this
      * folder %1$d in context %2$d with user %3$d
      */
-    NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG,
-            Category.CATEGORY_PERMISSION_DENIED, 112),
+    NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 112),
     /**
      * Unable to synchronize the old contact with the new changes: Context %1$d
      * Object %2$d
      */
-    LOAD_OLD_CONTACT_FAILED(LOAD_OLD_CONTACT_FAILED_MSG,
-            Category.CATEGORY_ERROR, 116),
+    LOAD_OLD_CONTACT_FAILED(LOAD_OLD_CONTACT_FAILED_MSG, Category.CATEGORY_ERROR, 116),
     /**
      * You are not allowed to mark this contact as private contact: Context %1$d
      * Object %2$d
      */
-    MARK_PRIVATE_NOT_ALLOWED(MARK_PRIVATE_NOT_ALLOWED_MSG,
-            Category.CATEGORY_PERMISSION_DENIED, 118),
+    MARK_PRIVATE_NOT_ALLOWED(MARK_PRIVATE_NOT_ALLOWED_MSG, Category.CATEGORY_PERMISSION_DENIED, 118),
     /**
      * Edit Conflict. Your change cannot be completed because somebody else has
      * made a conflicting change to the same item. Please refresh or synchronize
