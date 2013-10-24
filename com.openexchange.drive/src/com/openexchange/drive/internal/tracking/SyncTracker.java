@@ -59,9 +59,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveConstants;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.actions.ErrorDirectoryAction;
 import com.openexchange.drive.actions.SyncDirectoriesAction;
 import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
@@ -94,7 +96,7 @@ public class SyncTracker {
     /**
      * The maximum number of tries to send reset-actions before blacklisting affected folders.
      */
-    private static final int MAX_RESET_ATTEMPTS = 2;
+    private static final int MAX_RESET_ATTEMPTS = 3;
 
     /**
      * The sequence when the synchronization is idle, i.e. client and server are in-sync.
@@ -166,19 +168,17 @@ public class SyncTracker {
                     session.trace("Cycle still detected after first attempt to reset directory checksums " +
                         "-resetting affected server checksums as well...");
                     resetServerChecksums(session, affectedDirectoryVersions);
-
-// TODO: doesn't work, since server sends SYNC for those directories on next attempt
-//                } else if (MAX_RESET_ATTEMPTS <= resetAttempts) {
-//                    /*
-//                     * gave client enough chances to reset his directory checksums, now put affected folders into quarantine for self protection
-//                     */
-//                    session.trace("Already tried to reset checksums " + resetAttempts +
-//                        " times - adding 'qurantine' action for affected directories to interrupt further processing.");
-//                    optimizedActionsForClient.clear();
-//                    for (DirectoryVersion directoryVersion : affectedDirectoryVersions) {
-//                        optimizedActionsForClient.add(new ErrorDirectoryAction(null, directoryVersion, null,
-//                            DriveExceptionCodes.REPEATED_SYNC_PROBLEMS_MSG.create(directoryVersion.getPath(), directoryVersion.getChecksum()), true));
-//                    }
+                } else if (MAX_RESET_ATTEMPTS <= resetAttempts) {
+                    /*
+                     * gave client enough chances to reset his directory checksums, request client to stop for self protection
+                     */
+                    session.trace("Already tried to reset checksums " + resetAttempts +
+                        " times - adding 'qurantine' action for affected directories to interrupt further processing.");
+                    optimizedActionsForClient.clear();
+                    for (DirectoryVersion directoryVersion : affectedDirectoryVersions) {
+                        optimizedActionsForClient.add(new ErrorDirectoryAction(null, directoryVersion, null,
+                            DriveExceptionCodes.REPEATED_SYNC_PROBLEMS_MSG.create(directoryVersion.getPath(), directoryVersion.getChecksum()), false, true));
+                    }
                 }
             } else {
                 /*
