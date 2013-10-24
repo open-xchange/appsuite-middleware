@@ -163,7 +163,7 @@ public class DefaultDriveSession implements DriveSession {
     @Override
     public String toString() {
         return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
-            session.getContextId() + ", deviceName=" + deviceName + ", diagnostics=" + diagnostics + "]";
+            session.getContextId() + ", deviceName=" + deviceName + ", apiVersion=" + apiVersion + ", diagnostics=" + diagnostics + "]";
     }
 
 }
