@@ -198,7 +198,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         if (cache == null) {
             return getFallback().getUserPermissionBits(userId, ctx);
         }
-        return get(cache, ctx, new int[] { userId })[0];
+        return get(cache, ctx, userId);
     }
 
     @Override
@@ -263,17 +263,38 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         removeUserPermissionBits(userId, ctx);
     }
 
-    private UserPermissionBits[] get(Cache cache, Context ctx, int[] userIds) throws OXException {
+    private UserPermissionBits get(final Cache cache, final Context ctx, final int userId) throws OXException {
+        final CacheKey key = getKey(userId, ctx, cache);
+        final Object object = cache.get(key);
+        if (object != null) {
+            return ((UserPermissionBits) object).clone();
+        }
+
+        return load(cache, ctx, userId);
+    }
+
+    private UserPermissionBits load(final Cache cache, final Context ctx, final int userId) throws OXException {
+        final UserPermissionBits perm = delegateStorage.getUserPermissionBits(userId, ctx);
+        cacheWriteLock.lock();
+        try {
+            cache.put(getKey(userId, ctx, cache), perm.clone(), false);
+        } finally {
+            cacheWriteLock.unlock();
+        }
+
+        return perm;
+    }
+
+    private UserPermissionBits[] get(final Cache cache, final Context ctx, final int[] userIds) throws OXException {
         if (userIds.length == 0) {
             return new UserPermissionBits[0];
         }
 
-        TIntObjectMap<UserPermissionBits> map = new TIntObjectHashMap<UserPermissionBits>(userIds.length);
-        TIntList toLoad = new TIntArrayList(userIds.length);
-
-        for (int id : userIds) {
-            CacheKey key = getKey(id, ctx, cache);
-            Object object = cache.get(key);
+        final TIntObjectMap<UserPermissionBits> map = new TIntObjectHashMap<UserPermissionBits>(userIds.length);
+        final TIntList toLoad = new TIntArrayList(userIds.length);
+        for (final int id : userIds) {
+            final CacheKey key = getKey(id, ctx, cache);
+            final Object object = cache.get(key);
             if (object == null) {
                 toLoad.add(id);
             } else {
@@ -282,32 +303,28 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         }
 
         if (!toLoad.isEmpty()) {
-            for (UserPermissionBits perms : load(cache, ctx, toLoad)) {
+            for (final UserPermissionBits perms : load(cache, ctx, toLoad)) {
                 map.put(perms.getUserId(), perms);
             }
         }
 
-        UserPermissionBits[] retval = new UserPermissionBits[userIds.length];
-
+        final UserPermissionBits[] retval = new UserPermissionBits[userIds.length];
         for (int i = 0; i < userIds.length; i++) {
             retval[i] = map.get(userIds[i]);
         }
-
         return retval;
-
     }
 
-    private UserPermissionBits[] load(Cache cache, Context ctx, TIntList userIds) throws OXException {
-        UserPermissionBits[] perms = delegateStorage.getUserPermissionBits(ctx, userIds.toArray());
+    private UserPermissionBits[] load(final Cache cache, final Context ctx, final TIntList userIds) throws OXException {
+        final UserPermissionBits[] perms = delegateStorage.getUserPermissionBits(ctx, userIds.toArray());
         cacheWriteLock.lock();
         try {
-            for (UserPermissionBits userPermissionBits : perms) {
+            for (final UserPermissionBits userPermissionBits : perms) {
                 cache.put(getKey(userPermissionBits.getUserId(), ctx, cache), userPermissionBits.clone(), false);
             }
         } finally {
             cacheWriteLock.unlock();
         }
-
         return perms;
     }
 
