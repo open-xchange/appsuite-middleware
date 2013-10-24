@@ -64,8 +64,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -80,7 +78,6 @@ import java.util.Locale;
 import java.util.Queue;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -527,22 +524,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     }
                 }
                 createMe.setPermissions(permissions);
-            }
-            // Serialize access attempts
-            {
-                final int parentFolderID = createMe.getParentFolderID();
-                PreparedStatement stmt = null;
-                ResultSet rs = null;
-                try {
-                    stmt = con.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fuid = ? FOR UPDATE");
-                    stmt.setInt(1, session.getContextId());
-                    stmt.setInt(2, parentFolderID);
-                    rs = stmt.executeQuery();
-                } catch (final SQLException e) {
-                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    Databases.closeSQLStuff(rs, stmt);
-                }
             }
             // Create
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
@@ -1658,21 +1639,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     oclPermissions[i] = oclPerm;
                 }
                 updateMe.setPermissionsAsArray(oclPermissions);
-            }
-            // Serialize access attempts
-            {
-                PreparedStatement stmt = null;
-                ResultSet rs = null;
-                try {
-                    stmt = con.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fuid = ? FOR UPDATE");
-                    stmt.setInt(1, session.getContextId());
-                    stmt.setInt(2, folderId);
-                    rs = stmt.executeQuery();
-                } catch (final SQLException e) {
-                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    Databases.closeSQLStuff(rs, stmt);
-                }
             }
             // Do update
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);

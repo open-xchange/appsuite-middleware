@@ -82,6 +82,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailServletInterface;
@@ -273,15 +274,37 @@ public class Multiple extends SessionServlet {
     }
 
     private static boolean indicatesSerial(JSONObject dataObject) throws JSONException {
-        String module = dataObject.getString(MODULE);
-        if (module.equals(MODULE_MAIL)) {
+        final String module = Strings.toLowerCase(dataObject.getString(MODULE));
+
+        // Check for mail
+        if (MODULE_MAIL.equals(module)) {
             return true;
         }
 
-        if (module.equals(MODULE_CALENDAR) && dataObject.hasAndNotNull(ACTION) && dataObject.getString(ACTION).equals(ACTION_DELETE)) {
-            return true;
+        // Check for appointment delete
+        if (MODULE_CALENDAR.equals(module)) {
+            if (ACTION_DELETE.equals(Strings.toLowerCase(dataObject.optString(ACTION, null)))) {
+                return true;
+            }
+            return false;
         }
 
+        // Check for folder modification operation
+        if ((MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module))) {
+            final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
+            if (ACTION_DELETE.equals(action)) {
+                return true;
+            }
+            if (ACTION_NEW.equals(action)) {
+                return true;
+            }
+            if (ACTION_UPDATE.equals(action)) {
+                return true;
+            }
+            return false;
+        }
+
+        // No action that needs serial execution
         return false;
     }
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -75,8 +74,6 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "start", optional = true, description = "The start index (inclusive) in the ordered search, that is requested."),
     @Parameter(name = "end", optional = true, description = "The last index (inclusive) from the ordered search, that is requested.") }, requestBody = "An Object as described in Search contacts.", responseDescription = "")
 public class SearchAction extends AbstractFileAction {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SearchAction.class);
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {

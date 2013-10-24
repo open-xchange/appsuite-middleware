@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.file.storage.composition.internal.IDManglingFileCustomizer.fixIDs;
+import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -69,6 +70,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.Document;
@@ -1086,6 +1088,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public SearchIterator<File> search(final String query, final List<Field> columns, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        // Check pattern
+        checkPatternLength(query);
+
+        // Proceed
         final List<Field> cols = addIDColumns(columns);
         if (FileStorageFileAccess.ALL_FOLDERS != folderId) {
             final FolderID id = new FolderID(folderId);
@@ -1440,6 +1446,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         }
         accessesToClose.get().clear();
         super.finish();
+    }
+
+    private static void checkPatternLength(final String pattern) throws OXException {
+        final ConfigurationService configurationService = Services.optService(ConfigurationService.class);
+        final int minimumSearchCharacters = null == configurationService ? 0 : configurationService.getIntProperty("com.openexchange.MinimumSearchCharacters", 0);
+        if (minimumSearchCharacters <= 0) {
+            return;
+        }
+        if (null != pattern && com.openexchange.java.SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
+            throw FileStorageExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumSearchCharacters));
+        }
     }
 
 }

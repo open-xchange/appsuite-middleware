@@ -172,7 +172,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
 
     public AJAXRequestResult success(final long sequenceNumber) {
-        return new AJAXRequestResult(true, new Date(sequenceNumber));
+        return new AJAXRequestResult(Boolean.TRUE, new Date(sequenceNumber));
     }
 
     @Override
@@ -208,17 +208,17 @@ public abstract class AbstractFileAction implements AJAXActionService {
 
 
     protected void failure(final AJAXInfostoreRequest req, final Throwable throwable) throws OXException{
-
+        // Nothing to do
     }
 
 
     protected void success(final AJAXInfostoreRequest req, final AJAXRequestResult result) throws OXException{
-
+        // Nothing to do
     }
 
 
     protected void before(final AJAXInfostoreRequest req) throws OXException {
-
+        // Nothing to do
     }
 
 }
