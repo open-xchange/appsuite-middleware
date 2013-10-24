@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
+import static com.openexchange.html.HtmlServices.isNonJavaScriptURL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
@@ -61,7 +62,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -96,6 +96,8 @@ import com.openexchange.log.LogFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FilterJerichoHandler implements JerichoHandler {
+
+    private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_', '/', ';', '=', ' ' };
 
     private static final Set<String> NUM_ATTRIBS = new HashSet<String>(0);
 
@@ -182,6 +184,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private final StringBuilder attrBuilder;
 
+    private final HtmlServiceImpl htmlService;
+
     private boolean body;
 
     private boolean isCss;
@@ -215,8 +219,9 @@ public final class FilterJerichoHandler implements JerichoHandler {
     /**
      * Initializes a new {@link FilterJerichoHandler}.
      */
-    public FilterJerichoHandler(final int capacity) {
+    public FilterJerichoHandler(final int capacity, final HtmlServiceImpl htmlService) {
         super();
+        this.htmlService = htmlService;
         urlBuilder = new StringBuilder(256);
         cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
@@ -231,8 +236,9 @@ public final class FilterJerichoHandler implements JerichoHandler {
     /**
      * Initializes a new {@link FilterJerichoHandler}.
      */
-    public FilterJerichoHandler(final int capacity, final String mapStr) {
+    public FilterJerichoHandler(final int capacity, final String mapStr, final HtmlServiceImpl htmlService) {
         super();
+        this.htmlService = htmlService;
         urlBuilder = new StringBuilder(256);
         cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
@@ -508,14 +514,22 @@ public final class FilterJerichoHandler implements JerichoHandler {
         attrBuilder.setLength(0);
         final String tagName = startTag.getName();
         final Attributes attributes = startTag.getAttributes();
-        if (simple && HTMLElementName.META.equals(tagName) && (null != attributes.get("http-equiv")) && allowedAttributes.containsKey("http-equiv")) {
+        if (simple && HTMLElementName.META.equals(tagName) && null != attributes.get("http-equiv") && allowedAttributes.containsKey("http-equiv")) {
             /*
              * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
              */
             for (final Attribute attribute : attributes) {
-                attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(attribute.getValue()).append('"');
+                final String val = attribute.getValue();
+                if (isNonJavaScriptURL(val, "url=")) {
+                    attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
+                } else {
+                    attrBuilder.setLength(0);
+                    break;
+                }
             }
-            htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+            if (attrBuilder.length() > 0) {
+                htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+            }
             return;
         }
         /*
@@ -712,14 +726,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         }
-    }
-
-    private static boolean isNonJavaScriptURL(final String val) {
-        if (null == val) {
-            return false;
-        }
-        final String lc = val.trim().toLowerCase(Locale.US);
-        return !lc.startsWith("javascript:") && !lc.startsWith("vbscript:");
     }
 
     @Override

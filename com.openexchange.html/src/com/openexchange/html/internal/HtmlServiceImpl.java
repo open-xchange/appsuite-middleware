@@ -494,6 +494,20 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlCodec.encode(IMMUNE_HTMLATTR, input);
     }
 
+    /**
+     * Encode a String so that it can be safely used in a specific context.
+     *
+     * @param immune
+     * @param input the String to encode
+     * @return the encoded String
+     */
+    public String encodeForHTMLAttribute(final char[] immune, final String input) {
+        if (input == null) {
+            return null;
+        }
+        return htmlCodec.encode(immune, input);
+    }
+
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
         try {
@@ -516,7 +530,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     definition = null == confName ? null : getConfiguration().getText(confName);
                 }
                 // Handle HTML content
-                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
+                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
                 JerichoParser.getInstance().parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
