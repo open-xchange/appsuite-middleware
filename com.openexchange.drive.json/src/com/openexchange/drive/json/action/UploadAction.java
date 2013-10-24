@@ -66,6 +66,7 @@ import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
@@ -113,9 +114,12 @@ public class UploadAction extends AbstractDriveAction {
         if (requestData.containsParameter("offset")) {
             offset = requestData.getParameter("offset", Long.class).longValue();
         }
-        String contentType = "application/octet-stream";
+        String contentType = null;
         if (requestData.containsParameter("contentType")) {
             contentType = requestData.getParameter("contentType");
+        }
+        if (Strings.isEmpty(contentType)) {
+            contentType = MimeType2ExtMap.getContentType(newName); // as fallback
         }
         Date created = null;
         if (requestData.containsParameter("created")) {
