@@ -66,6 +66,7 @@ public class DefaultDriveSession implements DriveSession {
 
     private final String rootFolderID;
     private final ServerSession session;
+    private final int apiVersion;
     private String deviceName;
     private Boolean diagnostics;
     private List<DriveFileField> fields;
@@ -77,11 +78,12 @@ public class DefaultDriveSession implements DriveSession {
      * @param session The session
      * @param rootFolderID The root folder ID
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID, HostData hostData) {
+    public DefaultDriveSession(ServerSession session, String rootFolderID, HostData hostData, int apiVersion) {
         super();
         this.session = session;
         this.rootFolderID = rootFolderID;
         this.hostData = hostData;
+        this.apiVersion = apiVersion;
     }
 
     /**
@@ -151,6 +153,11 @@ public class DefaultDriveSession implements DriveSession {
     @Override
     public List<DriveFileField> getFields() {
         return fields;
+    }
+
+    @Override
+    public int getApiVersion() {
+        return apiVersion;
     }
 
     @Override

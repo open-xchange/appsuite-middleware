@@ -63,10 +63,13 @@ public final class DriveStrings implements LocalizableStrings {
     /** e.g. "Uploaded with OX Drive (Ottos Laptop)" */
     public static final String VERSION_COMMENT = "Uploaded with %1$s (%2$s)";
 
+    public static final String CLIENT_OUTDATED = "The client application you're using is outdated and no longer supported. Please upgrade to a newer version.";
+
     /**
      * Prevent instantiation.
      */
     private DriveStrings() {
         super();
     }
+
 }
