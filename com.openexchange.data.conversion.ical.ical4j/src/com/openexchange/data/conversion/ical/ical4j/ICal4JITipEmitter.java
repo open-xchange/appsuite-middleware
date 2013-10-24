@@ -114,7 +114,11 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
         addVTimeZone(mode.getZoneInfo(), calendar, appt);
 
         Method method = getICalMethod(message.getMethod());
-        replaceMethod(calendar, method);
+        if (method != null) {
+            Property oldMethod = calendar.getProperty("METHOD");
+            calendar.getProperties().remove(oldMethod);
+            calendar.getProperties().add(method);
+        }
 
         return calendar.toString();
     }
@@ -146,7 +150,7 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
     @Override
     protected void initCalendar(final Calendar calendar) {
         super.initCalendar(calendar);
-        replaceMethod(calendar, Method.REQUEST); // default to REQUEST for iTIP
+        calendar.getProperties().add(Method.REQUEST); // default to REQUEST for iTIP
     }
 
 }

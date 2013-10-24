@@ -345,16 +345,4 @@ public class ICal4JEmitter implements ICalEmitter {
         }
         return ((ICal4jSession) session).getAndIncreaseIndex();
     }
-
-    protected void replaceMethod(Calendar calendar, Method newMethod) {
-        if (newMethod != null) {
-            
-            Property oldMethod = calendar.getProperty("METHOD");
-            while (oldMethod != null) {
-                calendar.getProperties().remove(oldMethod);
-                oldMethod = calendar.getProperty("METHOD");
-            }
-            calendar.getProperties().add(newMethod);
-        }
-    }
 }
