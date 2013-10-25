@@ -58,6 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.IPTools;
+import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 
 /**
@@ -119,6 +120,9 @@ public class GrizzlyConfig implements Initialization {
 
     /** Make the cookie accessible only via http methods. This prevents Javascript access to the cookie / cross site scripting */
     private boolean isCookieHttpOnly = true;
+
+    /** The the value for the <code>Content-Security-Policy</code> header<br>Please refer to <a href="http://www.html5rocks.com/en/tutorials/security/content-security-policy/">An Introduction to Content Security Policy</a>*/
+    private String contentSecurityPolicy = null;
 
     /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
     private String defaultEncoding = "UTF-8";
@@ -195,6 +199,11 @@ public class GrizzlyConfig implements Initialization {
         this.cookieMaxInactivityInterval = configService.getIntProperty("com.openexchange.servlet.maxInactiveInterval", 1800);
         this.isForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
+        {
+            String csp = configService.getProperty("com.openexchange.servlet.contentSecurityPolicy", "").trim();
+            csp = Strings.unquote(csp);
+            this.contentSecurityPolicy = csp.trim();
+        }
         this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
         this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
         String proxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
@@ -339,6 +348,17 @@ public class GrizzlyConfig implements Initialization {
      */
     public boolean isCookieHttpOnly() {
         return instance.isCookieHttpOnly;
+    }
+
+    /**
+     * Gets the <code>Content-Security-Policy</code> header.
+     * <p>
+     * Please refer to <a href="http://www.html5rocks.com/en/tutorials/security/content-security-policy/">An Introduction to Content Security Policy</a>
+     *
+     * @return The <code>Content-Security-Policy</code> header; default value is <code>null</code>/empty string.
+     */
+    public String getContentSecurityPolicy() {
+        return instance.contentSecurityPolicy;
     }
 
     /**

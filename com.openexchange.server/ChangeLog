@@ -1,3 +1,7 @@
+* 2013-10-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29484: Copy binary stream to support repetitive access to data if mail needs to be processed (e.g. "special" Apple Mailer structure)
+
 * 2013-10-24 - steffen.templin@open-xchange.com
 
  - Fix for Bug 29437: Don't try to write JSON string if the underlying file is empty

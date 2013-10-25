@@ -77,30 +77,7 @@ public final class StructureJSONBinary implements JSONBinary {
      * @throws OXException If initialization fails
      */
     public StructureJSONBinary(final InputStream in) throws OXException {
-        this(in, false);
-    }
-
-    @Override
-    public String toString() {
-        try {
-            InputStream in = this.in;
-            if (null == in) {
-                in = tfh.getStream();
-            }
-            ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
-            Base64OutputStream base64Out = new Base64OutputStream(bout, true, -1, null);
-            final int blen = 2048;
-            final byte[] buf = new byte[blen];
-            for (int read; (read = in.read(buf, 0, blen)) > 0;) {
-                base64Out.write(buf, 0, read);
-            }
-            base64Out.flush();
-            base64Out.close();
-            return bout.toString("US-ASCII");
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            return "";
-        }
+        this(in, true);
     }
 
     /**
@@ -131,6 +108,29 @@ public final class StructureJSONBinary implements JSONBinary {
             // Just assign stream
             tfh = null;
             this.in = in;
+        }
+    }
+
+    @Override
+    public String toString() {
+        try {
+            InputStream in = this.in;
+            if (null == in) {
+                in = tfh.getStream();
+            }
+            ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
+            Base64OutputStream base64Out = new Base64OutputStream(bout, true, -1, null);
+            final int blen = 2048;
+            final byte[] buf = new byte[blen];
+            for (int read; (read = in.read(buf, 0, blen)) > 0;) {
+                base64Out.write(buf, 0, read);
+            }
+            base64Out.flush();
+            base64Out.close();
+            return bout.toString("US-ASCII");
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            return "";
         }
     }
 
