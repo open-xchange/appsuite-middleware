@@ -2603,7 +2603,7 @@ public class IMAPProtocol extends Protocol {
      * used in processIdleResponse() to determine if the response
      * is the matching end tag.
      */
-    private volatile String idleTag;
+    protected volatile String idleTag;
 
     /**
      * IDLE Command. <p>

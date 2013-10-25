@@ -100,6 +100,14 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
         return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
     }
 
+    /**
+     * Checks if this protocol is currently IDLE.
+     *
+     * @return <code>true</code> if IDLE; otherwise <code>false</code>
+     */
+    public boolean isIdle() {
+        return null != idleTag;
+    }
 
     /**
      * Sets the associated store

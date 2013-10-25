@@ -138,7 +138,7 @@ public final class QueuedIMAPProtocolWatcher {
                                     // Iterate threads
                                     for (final Entry<Thread, QueuingIMAPStore.ThreadTrace> entry : trackedThreads.entrySet()) {
                                         final QueuingIMAPStore.ThreadTrace trace = entry.getValue();
-                                        if (trace.stamp < minStamp) {
+                                        if (!trace.protocol.isIdle() && trace.stamp < minStamp) {
                                             final long dur = System.currentTimeMillis() - trace.stamp;
                                             final String msg = formatThread(entry.getKey(), trace.protocol, q, dur, sep);
                                             q.getLogger().fine(msg);
