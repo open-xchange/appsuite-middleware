@@ -7,6 +7,7 @@
  - Fix for bug 29229: No excessive HTML-escaping when inserting HTML attribute values
  - Fix for bug 29429: Use Java's naming for charset "cp932" that is "MS932"
  - Fix for bug 29469: Use translatable name for Unified Mail's root folder
+ - Fix for bug 29350: Check for global address book with respect to user configuration
 
 * 2013-10-24 - martin.herfurth@open-xchange.com
 

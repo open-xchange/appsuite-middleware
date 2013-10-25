@@ -80,13 +80,30 @@ public final class HtmlServices {
      * @return <code>true</code> if safe; otherwise <code>false</code>
      */
     public static boolean isNonJavaScriptURL(final String val) {
-        // http://www.raumausstatter-innung-schwalm-eder.de/index.php?eID=tx_cms_showpic&file=uploads%2Fpics%2F13-06-Raumausstatter-JHV.jpg&width=500m&height=500&bodyTag=%3Cbody%20bgColor%3D%22%23ffffff%22%3E&wrap=%3Ca%20href%3D%22javascript%3Aclose%28%29%3B%22%3E%20%7C%20%3C%2Fa%3E&md5=a0a07697cb8be1898b5e9ec79d249de2
+        return isNonJavaScriptURL(val, new String[0]);
+    }
+
+    /**
+     * Checks if specified URL String is safe or not.
+     *
+     * @param val The URL String to check
+     * @param more More tokens to look for
+     * @return <code>true</code> if safe; otherwise <code>false</code>
+     */
+    public static boolean isNonJavaScriptURL(final String val, final String... more) {
         if (null == val) {
             return false;
         }
         String lc = toLowerCase(val.trim());
-        if (lc.startsWith("javascript:") || lc.startsWith("vbscript:")) {
+        if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0) {
             return false;
+        }
+        if (null != more && more.length > 0) {
+            for (final String token : more) {
+                if (lc.indexOf(toLowerCase(token)) >= 0) {
+                    return false;
+                }
+            }
         }
         if (lc.indexOf("%") < 0) {
             return true;
@@ -97,8 +114,15 @@ public final class HtmlServices {
             }
         }
         lc = HTMLUtils.decodeUrl(val, null);
-        if (lc.startsWith("javascript:") || lc.startsWith("vbscript:")) {
+        if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0) {
             return false;
+        }
+        if (null != more && more.length > 0) {
+            for (final String token : more) {
+                if (lc.indexOf(toLowerCase(token)) >= 0) {
+                    return false;
+                }
+            }
         }
         return true;
     }

@@ -174,7 +174,6 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
     private void addStartTag(final String tag, final Map<String, String> a, final boolean simple) {
         attrBuilder.setLength(0);
         for (final Entry<String, String> e : sortAttributes(tag, a.entrySet())) {
-            final String name = e.getKey();
             final String val = e.getValue();
             // Check for URLs
             final Matcher m = PATTERN_URL_SOLE.matcher(val);
@@ -184,9 +183,9 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
                 //replaceURL(urlDecode(m.group()), urlBuilder);
                 replaceURL(m.group(), urlBuilder);
                 urlBuilder.append(val.substring(m.end()));
-                attrBuilder.append(' ').append(name).append(VAL_START).append(urlBuilder.toString()).append('"');
+                attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(urlBuilder.toString()).append('"');
             } else {
-                attrBuilder.append(' ').append(name).append(VAL_START).append(htmlService.encodeForHTML(CANDIDATES, val)).append('"');
+                attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(htmlService.encodeForHTML(CANDIDATES, val)).append('"');
             }
         }
         htmlBuilder.append('<').append(tag).append(attrBuilder.toString());
