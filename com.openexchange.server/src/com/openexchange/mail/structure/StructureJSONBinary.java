@@ -77,7 +77,7 @@ public final class StructureJSONBinary implements JSONBinary {
      * @throws OXException If initialization fails
      */
     public StructureJSONBinary(final InputStream in) throws OXException {
-        this(in, true);
+        this(in, false);
     }
 
     /**
