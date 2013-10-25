@@ -96,6 +96,7 @@ import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
@@ -2060,6 +2061,17 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 if (null != echoValue) {
                     response.setHeader(echoHeaderName, urlEncode(echoValue));
                 }
+            }
+        }
+        /*-
+         * Check for Content-Security-Policy header
+         */
+        {
+            final String contentSecurityPolicy = AJPv13Config.getContentSecurityPolicy();
+            if (!Strings.isEmpty(contentSecurityPolicy)) {
+                response.setHeader("Content-Security-Policy", contentSecurityPolicy);
+                response.setHeader("X-WebKit-CSP", contentSecurityPolicy);
+                response.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
             }
         }
         /*

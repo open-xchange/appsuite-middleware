@@ -123,6 +123,8 @@ public final class AJPv13Config implements Initialization {
 
     private boolean isConsiderXForwards;
 
+    private String contentSecurityPolicy;
+
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
@@ -161,6 +163,7 @@ public final class AJPv13Config implements Initialization {
         forHeader = "X-Forwarded-For";
         protocolHeader = "X-Forwarded-Proto";
         isConsiderXForwards = false;
+        contentSecurityPolicy = null;
     }
 
     private void init() throws OXException {
@@ -233,6 +236,12 @@ public final class AJPv13Config implements Initialization {
             this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
 
             this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
+
+            {
+                String csp = configService.getProperty("com.openexchange.servlet.contentSecurityPolicy", "").trim();
+                csp = Strings.unquote(csp);
+                this.contentSecurityPolicy = csp.trim();
+            }
 
             logInfo(nonExisting ? " (non-existing)" : " (exists)");
 
@@ -383,6 +392,17 @@ public final class AJPv13Config implements Initialization {
      */
     public static InetAddress getAJPBindAddress() {
         return instance.ajpBindAddr;
+    }
+
+    /**
+     * Gets the <code>Content-Security-Policy</code> header.
+     * <p>
+     * Please refer to <a href="http://www.html5rocks.com/en/tutorials/security/content-security-policy/">An Introduction to Content Security Policy</a>
+     *
+     * @return The header value or null/empty string
+     */
+    public static String getContentSecurityPolicy() {
+        return instance.contentSecurityPolicy;
     }
 
     /**

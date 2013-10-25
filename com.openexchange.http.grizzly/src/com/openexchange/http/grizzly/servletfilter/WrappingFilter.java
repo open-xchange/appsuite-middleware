@@ -65,6 +65,7 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
+import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
@@ -99,6 +100,8 @@ public class WrappingFilter implements Filter {
 
     private String echoHeader;
 
+    private String contentSecurityPolicy = null;
+
     @Override
     public void init(FilterConfig filterConfig) {
         GrizzlyConfig config = GrizzlyConfig.getInstance();
@@ -110,6 +113,7 @@ public class WrappingFilter implements Filter {
         this.httpsPort = config.getHttpsProtoPort();
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeader = config.getEchoHeader();
+        this.contentSecurityPolicy = config.getContentSecurityPolicy();
     }
 
     @Override
@@ -123,6 +127,16 @@ public class WrappingFilter implements Filter {
         String echoHeaderValue = httpServletRequest.getHeader(echoHeader);
         if (echoHeaderValue != null) {
             httpServletResponse.setHeader(echoHeader, echoHeaderValue);
+        }
+
+        // Set Content-Security-Policy header
+        {
+            final String contentSecurityPolicy = this.contentSecurityPolicy;
+            if (!Strings.isEmpty(contentSecurityPolicy)) {
+                httpServletResponse.setHeader("Content-Security-Policy", contentSecurityPolicy);
+                httpServletResponse.setHeader("X-WebKit-CSP", contentSecurityPolicy);
+                httpServletResponse.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
+            }
         }
 
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly
