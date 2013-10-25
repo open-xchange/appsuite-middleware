@@ -173,7 +173,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OutlookFolderStorage implements FolderStorage {
 
-    private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
+    static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
     /**
      * The constant for InfoStore's file storage service.
