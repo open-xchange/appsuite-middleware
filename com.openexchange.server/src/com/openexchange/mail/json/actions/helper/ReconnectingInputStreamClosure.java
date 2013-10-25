@@ -55,6 +55,7 @@ import java.io.PushbackInputStream;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -101,6 +102,9 @@ public final class ReconnectingInputStreamClosure implements IFileHolder.InputSt
             final PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
             // Check if readable...
             final int check = in.read();
+            if (check < 0) {
+                return Streams.EMPTY_INPUT_STREAM;
+            }
             // ... then push back to stream
             in.unread(check);
             return in;
