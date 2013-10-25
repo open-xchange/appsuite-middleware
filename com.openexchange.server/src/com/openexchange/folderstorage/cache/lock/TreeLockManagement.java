@@ -80,6 +80,8 @@ public final class TreeLockManagement {
         return INSTANCE;
     }
 
+    // ----------------------------------------------------------------------------------------------------------- //
+
     private final ConcurrentMap<Integer, ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>>> map;
 
     /**

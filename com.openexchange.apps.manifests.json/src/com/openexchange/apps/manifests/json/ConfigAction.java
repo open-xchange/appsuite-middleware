@@ -138,14 +138,18 @@ public class ConfigAction implements AJAXActionService {
 
     @SuppressWarnings("unchecked")
     protected JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
-
+        // Get configured brands/server configurations
         Map<String, Object> serverConfigs = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config.yml");
 
+        // The resulting brand/server configuration
         Map<String, Object> serverConfig = new HashMap<String, Object>();
 
-        Map<String, Object> defaults = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
-        if (defaults != null) {
-            serverConfig.putAll((Map<String, Object>) defaults.get("default"));
+        // Check for default brands/server configurations
+        {
+            Map<String, Object> defaults = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
+            if (defaults != null) {
+                serverConfig.putAll((Map<String, Object>) defaults.get("default"));
+            }
         }
 
         // Find other applicable configurations
@@ -157,6 +161,7 @@ public class ConfigAction implements AJAXActionService {
             }
         }
 
+        // Return its JSON representation
         return (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
     }
 
