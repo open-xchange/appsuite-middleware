@@ -62,6 +62,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -131,9 +133,12 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                 for (int i = 0; i < len; i++) {
                     final JSONObject tuple = jsonArray.getJSONObject(i);
                     // Identifier
-                    final String id = tuple.getString(AJAXServlet.PARAMETER_ID);
+                    final String id = tuple.getString(DataFields.ID);
                     // Folder
-                    final String folderId = tuple.optString(AJAXServlet.PARAMETER_FOLDERID);
+                    String folderId = tuple.optString(FolderChildFields.FOLDER_ID, null);
+                    if (null == folderId) {
+                        folderId = tuple.optString(AJAXServlet.PARAMETER_FOLDERID, null);
+                    }
                     final IdFolderPair pair = new IdFolderPair(id, folderId);
                     pairs.add(pair);
                 }
