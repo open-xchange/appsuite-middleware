@@ -51,6 +51,7 @@ package com.openexchange.mail.json.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -139,6 +140,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
             }
         }
         // Do it...
+        Collections.sort(pairs);
         return performMultipleFolder(req, pairs);
     }
 
@@ -222,7 +224,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
         return new AJAXRequestResult(thresholdFileHolder, "file");
     }
 
-    private final class IdFolderPair {
+    private final class IdFolderPair implements Comparable<IdFolderPair> {
 
         final String identifier;
         final String folderId;
@@ -233,5 +235,28 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
             this.folderId = folderId;
         }
 
+        @Override
+        public int compareTo(IdFolderPair o) {
+            int retval = folderId.compareTo(o.folderId);
+            if (0 == retval) {
+                retval = identifier.compareTo(o.identifier);
+            }
+            return retval;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("[");
+            if (identifier != null) {
+                builder.append("identifier=").append(identifier).append(", ");
+            }
+            if (folderId != null) {
+                builder.append("folderId=").append(folderId);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
     }
+
 }
