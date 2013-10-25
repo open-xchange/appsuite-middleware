@@ -173,6 +173,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OutlookFolderStorage implements FolderStorage {
 
+    private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
+
     /**
      * The constant for InfoStore's file storage service.
      */
@@ -207,12 +209,12 @@ public final class OutlookFolderStorage implements FolderStorage {
     static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OutlookFolderStorage.class));
 
     /**
-     * The prepared fullname.
+     * The prepared full name.
      */
     static final String PREPARED_FULLNAME_INBOX = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
 
     /**
-     * The prepared fullname.
+     * The prepared full name.
      */
     static final String PREPARED_FULLNAME_DEFAULT = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
 
@@ -2113,27 +2115,33 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (accounts.isEmpty()) {
                     accountSubfolderIDs = Collections.emptyList();
                 } else {
+                    final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", parameters);
                     accountSubfolderIDs = new ArrayList<String>(accounts.size());
-                    for (final MailAccount mailAccount : accounts) {
-                        if (!mailAccount.isDefaultAccount()) {
-                            if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                                /*
-                                 * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
-                                 */
-                                final UnifiedInboxManagement uim = OutlookServiceRegistry.getServiceRegistry().getService(
-                                    UnifiedInboxManagement.class);
-                                try {
-                                    if (null != uim && uim.isEnabled(user.getId(), contextId)) {
-                                        accountSubfolderIDs.add(MailFolderUtility.prepareFullname(
-                                            mailAccount.getId(),
-                                            MailFolder.DEFAULT_FOLDER_ID));
-                                        unifiedMailIndex = accountSubfolderIDs.size() - 1;
-                                    }
-                                } catch (final OXException e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
-                            } else {
+                    if (suppressUnifiedMail) {
+                        for (final MailAccount mailAccount : accounts) {
+                            if (!mailAccount.isDefaultAccount() && !PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                                 accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                            }
+                        }
+                    } else {
+                        for (final MailAccount mailAccount : accounts) {
+                            if (!mailAccount.isDefaultAccount()) {
+                                if (PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                                    /*
+                                     * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
+                                     */
+                                    final UnifiedInboxManagement uim = OutlookServiceRegistry.getServiceRegistry().getService(UnifiedInboxManagement.class);
+                                    try {
+                                        if (null != uim && uim.isEnabled(user.getId(), contextId)) {
+                                            accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                                            unifiedMailIndex = accountSubfolderIDs.size() - 1;
+                                        }
+                                    } catch (final OXException e) {
+                                        LOG.error(e.getMessage(), e);
+                                    }
+                                } else {
+                                    accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                                }
                             }
                         }
                     }
@@ -2560,12 +2568,12 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         @Override
         public int compare(final MailAccount o1, final MailAccount o2) {
-            if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
-                if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+            if (PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
+                if (PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                     return 0;
                 }
                 return -1;
-            } else if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+            } else if (PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                 return 1;
             }
             if (o1.isDefaultAccount()) {

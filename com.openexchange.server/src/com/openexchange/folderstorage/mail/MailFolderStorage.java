@@ -256,8 +256,9 @@ public final class MailFolderStorage implements FolderStorage {
                         /*
                          * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                          */
+                        final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
                         final UnifiedInboxManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedInboxManagement.class);
-                        if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                        if (suppressUnifiedMail || null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                             accountList.remove(0);
                         } else {
                             // Add Unified Mail root folder at first position
@@ -924,9 +925,14 @@ public final class MailFolderStorage implements FolderStorage {
                     /*
                      * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                      */
-                    final UnifiedInboxManagement uim = serviceRegistry.getService(UnifiedInboxManagement.class);
-                    if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                    final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
+                    if (suppressUnifiedMail) {
                         accounts.remove(0);
+                    } else {
+                        final UnifiedInboxManagement uim = serviceRegistry.getService(UnifiedInboxManagement.class);
+                        if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                            accounts.remove(0);
+                        }
                     }
                 }
                 final int size = accounts.size();
