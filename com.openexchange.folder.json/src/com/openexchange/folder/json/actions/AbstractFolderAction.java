@@ -113,6 +113,18 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     protected abstract AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException;
 
     /**
+     * Checks if <i>Unified Mail</i> shall be suppressed for specified request.
+     *
+     * @param request The request data
+     * @param session The associated session
+     * @return <code>true</code> to suppress <i>Unified Mail</i>; otherwise <code>false</code>
+     */
+    protected static Boolean isSuppressUnifiedMail(final AJAXRequestData request, final ServerSession session) {
+        // final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
+        return Boolean.valueOf(false);
+    }
+
+    /**
      * Gets the default tree identifier to use if request does not provide any.
      *
      * @return The default tree identifier
