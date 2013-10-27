@@ -220,9 +220,12 @@ public class CalendarDataObject extends Appointment {
         return null;
     }
 
-    public final void setExceptions(final String change_exceptions) {
-        if (change_exceptions != null) {
-            super.setChangeExceptions(getCalendarCollectionService().convertString2Dates(change_exceptions));
+    public final void setExceptions(final String changeExceptions) {
+        if (changeExceptions != null) {
+            final CalendarCollectionService collectionService = getCalendarCollectionService();
+            if (null != collectionService) {
+                super.setChangeExceptions(collectionService.convertString2Dates(changeExceptions));
+            }
         } else {
             setChangeExceptions((Date[])null);
         }
