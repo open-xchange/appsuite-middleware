@@ -105,6 +105,7 @@ import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -548,6 +549,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                             session,
                             user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
                     }
+                }
+            }
+            {
+                if (fo.getObjectID() == getPublishedMailAttachmentsFolder(session)) {
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
+                        session,
+                        user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
                 }
             }
         }
@@ -2075,6 +2083,14 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             super(cause);
         }
 
+    }
+
+    private static int getPublishedMailAttachmentsFolder(final Session session) {
+        if (null == session) {
+            return -1;
+        }
+        final Integer i = (Integer) session.getParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID());
+        return null == i ? -1 : i.intValue();
     }
 
 }

@@ -50,6 +50,8 @@
 package com.openexchange.index.solr.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -84,6 +86,25 @@ public final class Services {
      */
     public static ServiceLookup getServiceLookup() {
         return REF.get();
+    }
+
+    /**
+     * Requires the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException If service cannot be returned
+     */
+    public static <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+        }
+        final S service = serviceLookup.getService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+        }
+        return service;
     }
 
     /**
