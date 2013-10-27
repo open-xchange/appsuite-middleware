@@ -47,26 +47,35 @@
  *
  */
 
-package com.openexchange.realtime.management;
+package com.openexchange.realtime.hazelcast.management;
 
-import com.openexchange.management.AbstractManagementHouseKeeper;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link ManagementHouseKeeper}
- * 
+ * {@link HazelcastResourceDirectoryMBean}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ManagementHouseKeeper extends AbstractManagementHouseKeeper {
-
-    private static ManagementHouseKeeper instance = new ManagementHouseKeeper();
+public interface HazelcastResourceDirectoryMBean {
 
     /**
-     * Return the instance of the ManagementHouseKeeper singleton
+     * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premium/random.
      * 
-     * @return the instance of the ManagementHouseKeeper singleton
+     * @return the map used for mapping general IDs to full IDs.
+     * @throws OXException if the HazelcastInstance is missing. 
      */
-    public static ManagementHouseKeeper getInstance() {
-        return instance;
-    }
+    public Map<String, Collection<String>> getIDMapping() throws OXException;
+
+    /**
+     * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap.
+     * 
+     * @return the map used for mapping full IDs to ResourceMaps.
+     * @throws OXException if the map couldn't be fetched from hazelcast
+     */
+    public Map<String, Map<String, Serializable>> getResourceMapping() throws OXException;
+
 }

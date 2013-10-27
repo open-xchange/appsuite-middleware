@@ -90,10 +90,12 @@ public class RealtimeActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         RealtimeServiceRegistry.SERVICES.set(this);
+        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
+        managementHouseKeeper.initialize(this);
         
         realtimeConfig = RealtimeConfig.getInstance();
         realtimeConfig.start();
-        ManagementHouseKeeper.getInstance().addManagementObject(realtimeConfig.getManagementObject());
+        managementHouseKeeper.addManagementObject(realtimeConfig.getManagementObject());
 
         synth = new SyntheticChannel(this);
 
@@ -124,7 +126,7 @@ public class RealtimeActivator extends HousekeepingActivator {
         registerService(Channel.class, new DevNullChannel());
         
         //Expose all ManagementObjects for this bundle
-        ManagementHouseKeeper.getInstance().exposeManagementObjects();
+        managementHouseKeeper.exposeManagementObjects();
         openTrackers();
     }
     
@@ -132,9 +134,7 @@ public class RealtimeActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         synth.shutdown();
         //Conceal all ManagementObjects for this bundle and remove them from the housekeeper
-        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
-        managementHouseKeeper.cleanup();
-        
+        ManagementHouseKeeper.getInstance().cleanup();
         realtimeConfig.stop();
     }
 

@@ -49,16 +49,7 @@
 
 package com.openexchange.realtime.json.management;
 
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.management.ObjectName;
-import com.openexchange.exception.OXException;
-import com.openexchange.management.ManagementObject;
-import com.openexchange.management.ManagementService;
-import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
+import com.openexchange.management.AbstractManagementHouseKeeper;
 
 
 /**
@@ -66,105 +57,16 @@ import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ManagementHouseKeeper {
+public class ManagementHouseKeeper extends AbstractManagementHouseKeeper {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ManagementHouseKeeper.class);
-    
-    private static final ManagementHouseKeeper instance = new ManagementHouseKeeper();
-
-    private final AtomicBoolean exposed = new AtomicBoolean();
-
-    private ConcurrentHashMap<ObjectName, ManagementObject<?>> managementObjects;
+    private static ManagementHouseKeeper instance = new ManagementHouseKeeper();
 
     /**
-     * Initializes a new {@link ManagementHouseKeeper}.
-     * @param managementObjects
-     */
-    private ManagementHouseKeeper() {
-        super();
-        managementObjects = new ConcurrentHashMap<ObjectName, ManagementObject<?>>();
-    }
-
-    /**
-     * Return the instance of the ManagementHouseKeeper singleton 
+     * Return the instance of the ManagementHouseKeeper singleton
+     * 
      * @return the instance of the ManagementHouseKeeper singleton
      */
     public static ManagementHouseKeeper getInstance() {
         return instance;
     }
-
-    /**
-     * Add a new ManagementObject to the Housekeeper 
-     * @param managementObject The object to add
-     * @return true if the object was successfully added, false if an Object with the same name already exists.
-     */
-    public boolean addManagementObject(ManagementObject<?> managementObject) {
-        ManagementObject<?> previous = managementObjects.putIfAbsent(managementObject.getObjectName(), managementObject);
-        return previous == null;
-    }
-
-    /**
-     * Add a new ManagementObject to the Housekeeper 
-     * @param managementObject The object to add
-     * @return true if the object was successfully added, false if an Object with the same name already exists.
-     */
-    public boolean removeManagementObject(ObjectName objectName) {
-        ManagementObject<?> managementObject = managementObjects.remove(objectName);
-        return managementObject != null;
-    }
-
-    /**
-     * Expose all known {@link ManagementObject}s
-     * @throws OXException 
-     */
-    public void exposeManagementObjects() throws OXException {
-        if(exposed.compareAndSet(false, true)) {
-            ManagementService managementService = getManagementService();
-            for (Entry<ObjectName, ManagementObject<?>> entry : managementObjects.entrySet()) {
-                managementService.registerMBean(entry.getKey(), entry.getValue());
-            }
-        } else {
-            LOG.info("ManagmentObjects are already exposed.");
-        }
-    }
-
-    /**
-     * Expose all known {@link ManagementObject}s
-     * @throws OXException 
-     */
-    public void concealManagementObjects() throws OXException {
-        if(exposed.compareAndSet(true, false)) {
-            ManagementService managementService = getManagementService();
-            for (ObjectName objectName : managementObjects.keySet()) {
-                managementService.unregisterMBean(objectName);
-            }
-        } else {
-            LOG.error("No ManagamentObjects have been exposed, yet.");
-        }
-    }
-
-    
-    /**
-     * Get an instance of the ManagementService
-     * @return an instance of the ManagementService
-     * @throws RealtimeException if the service can't be found
-     */
-    private ManagementService getManagementService() throws RealtimeException {
-        JSONServiceRegistry realtimeServiceRegistry = JSONServiceRegistry.getInstance();
-        ManagementService managementService = realtimeServiceRegistry.getService(ManagementService.class);
-        if(managementService == null) {
-            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ManagementService.class);
-        }
-        return managementService;
-    }
-
-    /**
-     * Conceal all {@link ManagementObjects} and remove them from the Housekeeper
-     * 
-     */
-    public void cleanup() throws OXException {
-        concealManagementObjects();
-        managementObjects.clear();
-    }
-
 }

@@ -101,6 +101,8 @@ public class RTJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         JSONServiceRegistry.SERVICES.set(this);
+        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
+        managementHouseKeeper.initialize(this);
 
         handler = new RTJSONHandler();
         registerService(Channel.class, new JSONChannel(handler));
@@ -135,7 +137,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
         registerModule(realtimeActions, "rt");
 
         getService(CapabilityService.class).declareCapability("rt");
-        ManagementHouseKeeper.getInstance().exposeManagementObjects();
+        managementHouseKeeper.exposeManagementObjects();
     }
 
     @Override

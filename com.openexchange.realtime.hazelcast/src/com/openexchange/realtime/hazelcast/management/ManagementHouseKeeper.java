@@ -47,10 +47,9 @@
  *
  */
 
-package com.openexchange.realtime.management;
+package com.openexchange.realtime.hazelcast.management;
 
 import com.openexchange.management.AbstractManagementHouseKeeper;
-
 
 /**
  * {@link ManagementHouseKeeper}
@@ -69,4 +68,5 @@ public class ManagementHouseKeeper extends AbstractManagementHouseKeeper {
     public static ManagementHouseKeeper getInstance() {
         return instance;
     }
+
 }
