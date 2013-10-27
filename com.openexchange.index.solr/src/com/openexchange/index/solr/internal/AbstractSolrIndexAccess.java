@@ -262,55 +262,55 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
     protected UpdateResponse addSolrDocument(final SolrInputDocument document, final boolean commit) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.requireService(SolrAccessService.class);
         final UpdateResponse response = accessService.add(identifier, document, commit);
         return response;
     }
 
     protected UpdateResponse addSolrDocuments(final Collection<SolrInputDocument> documents, final boolean commit) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.requireService(SolrAccessService.class);
         final UpdateResponse response = accessService.add(identifier, documents, commit);
         return response;
     }
 
     protected UpdateResponse commit() throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.requireService(SolrAccessService.class);
         final UpdateResponse response = accessService.commit(identifier);
         return response;
     }
 
     protected UpdateResponse optimize() throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.requireService(SolrAccessService.class);
         final UpdateResponse response = accessService.optimize(identifier);
         return response;
     }
 
     protected SolrResponse deleteDocumentById(final String id) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.requireService(SolrAccessService.class);
         final UpdateResponse response = accessService.deleteById(identifier, id, true);
         return response;
     }
 
     protected SolrResponse deleteDocumentsByQuery(final String query) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.requireService(SolrAccessService.class);
         final UpdateResponse response = accessService.deleteByQuery(identifier, query, true);
         return response;
     }
 
     protected QueryResponse query(final SolrParams query) throws OXException {
         lastAccess = System.currentTimeMillis();
-        final SolrAccessService accessService = Services.getService(SolrAccessService.class);
+        final SolrAccessService accessService = Services.requireService(SolrAccessService.class);
         final QueryResponse response = accessService.query(identifier, query);
         return response;
     }
 
     protected void checkIfIndexIsLocked() throws OXException {
-        IndexManagementService managementService = Services.getService(IndexManagementService.class);
+        IndexManagementService managementService = Services.requireService(IndexManagementService.class);
         if (managementService.isLocked(contextId, userId, module)) {
             throw IndexExceptionCodes.INDEX_LOCKED.create(module, userId, contextId);
         }
