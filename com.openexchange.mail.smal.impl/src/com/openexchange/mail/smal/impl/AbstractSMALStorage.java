@@ -290,6 +290,9 @@ public abstract class AbstractSMALStorage {
 
     protected boolean isIndexingAllowed() throws OXException {
         ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
+        if (null == config) {
+            return false;
+        }
         ConfigView view = config.getView(userId, contextId);
         String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
         ModuleSet modules = new ModuleSet(moduleStr);
