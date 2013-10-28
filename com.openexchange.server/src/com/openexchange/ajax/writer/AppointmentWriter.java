@@ -54,7 +54,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,6 +67,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -82,7 +82,7 @@ public class AppointmentWriter extends CalendarWriter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentWriter.class));
 
-    private CalendarCollectionService calColl;
+    private volatile CalendarCollectionService calColl;
 
     private final boolean forTesting;
 
@@ -112,22 +112,23 @@ public class AppointmentWriter extends CalendarWriter {
         this.session = session;
     }
 
-    public CalendarCollectionService getCalendarCollectionService(){
-        if ( null == calColl ) {
+    public CalendarCollectionService getCalendarCollectionService() {
+        CalendarCollectionService calColl = this.calColl;
+        if (null == calColl) {
             calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            this.calColl = calColl;
         }
         return calColl;
     }
 
-    public void setCalendarCollectionService(final CalendarCollectionService calColl){
+    public void setCalendarCollectionService(final CalendarCollectionService calColl) {
         this.calColl = calColl;
     }
 
-    public JSONArray writeArray(final Appointment appointmentObj, final int cols[], final Date betweenStart,
-            final Date betweenEnd, final JSONArray jsonArray) throws JSONException {
+    public JSONArray writeArray(final Appointment appointmentObj, final int cols[], final Date betweenStart, final Date betweenEnd, final JSONArray jsonArray) throws JSONException {
         if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
-            if (getCalendarCollectionService().inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate()
-                    .getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
+            final CalendarCollectionService collectionService = getCalendarCollectionService();
+            if (null != collectionService && collectionService.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
                 return writeArray(appointmentObj, cols, jsonArray);
             }
         } else {

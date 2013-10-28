@@ -105,40 +105,44 @@ public final class TransportLoginHandler implements LoginHandlerService {
             final Context ctx = login.getContext();
             final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
             final UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
-            if (TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore() && new OXFolderAccess(ctx).getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID).getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
-                String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
-                if ("i18n-defined".equals(name)) {
-                    name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
-                }
-                final int folderId;
-                final int lookUpFolder = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
-                if (-1 == lookUpFolder) {
-                    synchronized (TransportLoginHandler.class) {
-                        folderId = createIfAbsent(serverSession, ctx, name);
+            if (TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore()) {
+                final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
+                final FolderObject defaultInfoStoreFolder = folderAccess.getDefaultFolder(serverSession.getUserId(), FolderObject.INFOSTORE);
+                if (defaultInfoStoreFolder.getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
+                    String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
+                    if ("i18n-defined".equals(name)) {
+                        name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
                     }
-                } else {
-                    folderId = lookUpFolder;
-                }
-                serverSession.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderId));
-                /*
-                 * Check for elapsed documents inside infostore folder
-                 */
-                if (!TransportProperties.getInstance().publishedDocumentsExpire()) {
-                    return;
-                }
-                final IDBasedFileAccess fileAccess = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
-                final long now = System.currentTimeMillis();
-                final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now);
-                if (!toRemove.isEmpty()) {
+                    final int folderId;
+                    final int lookUpFolder = OXFolderSQL.lookUpFolder(defaultInfoStoreFolder.getObjectID(), name, FolderObject.INFOSTORE, null, ctx);
+                    if (-1 == lookUpFolder) {
+                        synchronized (TransportLoginHandler.class) {
+                            folderId = createIfAbsent(serverSession, ctx, name, defaultInfoStoreFolder);
+                        }
+                    } else {
+                        folderId = lookUpFolder;
+                    }
+                    serverSession.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderId));
                     /*
-                     * Remove elapsed documents
+                     * Check for elapsed documents inside infostore folder
                      */
-                    fileAccess.startTransaction();
-                    try {
-                        fileAccess.removeDocument(toRemove, now);
-                        fileAccess.commit();
-                    } finally {
-                        fileAccess.finish();
+                    if (!TransportProperties.getInstance().publishedDocumentsExpire()) {
+                        return;
+                    }
+                    final IDBasedFileAccess fileAccess = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
+                    final long now = System.currentTimeMillis();
+                    final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now);
+                    if (!toRemove.isEmpty()) {
+                        /*
+                         * Remove elapsed documents
+                         */
+                        fileAccess.startTransaction();
+                        try {
+                            fileAccess.removeDocument(toRemove, now);
+                            fileAccess.commit();
+                        } finally {
+                            fileAccess.finish();
+                        }
                     }
                 }
             }
@@ -189,13 +193,13 @@ public final class TransportLoginHandler implements LoginHandlerService {
         return ((now - creationDate) > ttl);
     }
 
-    private int createIfAbsent(final Session session, final Context ctx, final String name) throws SQLException, OXException {
-        final int lookUpFolder = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, null, ctx);
+    private int createIfAbsent(final Session session, final Context ctx, final String name, final FolderObject defaultInfoStoreFolder) throws SQLException, OXException {
+        final int lookUpFolder = OXFolderSQL.lookUpFolder(defaultInfoStoreFolder.getObjectID(), name, FolderObject.INFOSTORE, null, ctx);
         if (-1 == lookUpFolder) {
             /*
              * Create folder
              */
-            final FolderObject fo = createNewInfostoreFolder(ctx.getMailadmin(), name, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+            final FolderObject fo = createNewInfostoreFolder(session.getUserId(), name, defaultInfoStoreFolder.getObjectID());
             return OXFolderManager.getInstance(session).createFolder(fo, true, System.currentTimeMillis()).getObjectID();
         }
         return lookUpFolder;
@@ -223,10 +227,10 @@ public final class TransportLoginHandler implements LoginHandlerService {
         perm = new OCLPermission();
         perm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         perm.setFolderAdmin(false);
-        perm.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
-        perm.setReadObjectPermission(OCLPermission.READ_OWN_OBJECTS);
-        perm.setWriteObjectPermission(OCLPermission.WRITE_OWN_OBJECTS);
-        perm.setDeleteObjectPermission(OCLPermission.DELETE_OWN_OBJECTS);
+        perm.setFolderPermission(OCLPermission.READ_FOLDER);
+        perm.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
+        perm.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
+        perm.setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
         perm.setGroupPermission(true);
         perms.add(perm);
         newFolder.setPermissions(perms);

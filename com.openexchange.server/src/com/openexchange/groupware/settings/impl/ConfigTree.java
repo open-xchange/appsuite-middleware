@@ -148,7 +148,7 @@ public final class ConfigTree {
             if (0 == path[0].length()) {
                 child = actual;
             } else {
-                child = actual.getElement(path[0]);
+                child = null == actual ? null : actual.getElement(path[0]);
             }
             if (null == child) {
                 final StringBuilder sb = new StringBuilder(path[0]);

@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,13 +65,14 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
@@ -252,13 +254,15 @@ public class FolderCopyTask implements CopyUserTaskService {
 
     private void checkAndCreateMailAttachmentFolder(final Context srcCtx, final Context dstCtx, final int userId, final Connection srcCon, final Connection dstCon, final String attachmentFolderName) throws OXException {
         try {
-            final int sourceAttachmentFolderId = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, attachmentFolderName, FolderObject.INFOSTORE, srcCon, srcCtx);
-            int destAttachmentFolderId = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, attachmentFolderName, FolderObject.INFOSTORE, srcCon, dstCtx);
-            if (sourceAttachmentFolderId != -1 && destAttachmentFolderId == -1) {
+            final int sourcePersonalInfoStoreId = new OXFolderAccess(srcCon, srcCtx).getDefaultFolder(userId, FolderObject.INFOSTORE).getObjectID();
+            final int destPersonalInfoStoreId = new OXFolderAccess(dstCon, dstCtx).getDefaultFolder(userId, FolderObject.INFOSTORE).getObjectID();
+            final int sourceAttachmentFolderId = OXFolderSQL.lookUpFolder(sourcePersonalInfoStoreId, attachmentFolderName, FolderObject.INFOSTORE, srcCon, srcCtx);
+            int destAttachmentFolderId = OXFolderSQL.lookUpFolder(destPersonalInfoStoreId, attachmentFolderName, FolderObject.INFOSTORE, srcCon, dstCtx);
+            if (sourceAttachmentFolderId > 0 && destAttachmentFolderId < 0) {
                 destAttachmentFolderId = IDGenerator.getId(dstCtx.getContextId(), com.openexchange.groupware.Types.FOLDER, dstCon);
                 final Date date = new Date();
                 final FolderObject attachmentFolder = new FolderObject(destAttachmentFolderId);
-                attachmentFolder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+                attachmentFolder.setParentFolderID(destPersonalInfoStoreId);
                 attachmentFolder.setFolderName(attachmentFolderName);
                 attachmentFolder.setModule(FolderObject.INFOSTORE);
                 attachmentFolder.setType(FolderObject.PUBLIC);
@@ -266,17 +270,14 @@ public class FolderCopyTask implements CopyUserTaskService {
                 attachmentFolder.setCreator(userId);
                 attachmentFolder.setLastModified(date);
                 attachmentFolder.setModifiedBy(userId);
-                attachmentFolder.setPermissionFlag(FolderObject.PUBLIC_PERMISSION);
                 attachmentFolder.setSubfolderFlag(false);
                 attachmentFolder.setDefaultFolder(false);
 
-                final List<FolderObject> folders = new ArrayList<FolderObject>(1);
-                folders.add(attachmentFolder);
-                writeFoldersToDB(dstCon, folders, dstCtx.getContextId());
+                writeFoldersToDB(dstCon, Collections.singletonList(attachmentFolder), dstCtx.getContextId());
 
                 final List<FolderPermission> permissions = new ArrayList<FolderPermission>(2);
                 final FolderPermission userPermission = new FolderPermission();
-                userPermission.setUserId(dstCtx.getMailadmin());
+                userPermission.setUserId(userId);
                 userPermission.setFolderId(destAttachmentFolderId);
                 userPermission.setFp(128);
                 userPermission.setOrp(128);
@@ -289,10 +290,10 @@ public class FolderCopyTask implements CopyUserTaskService {
                 final FolderPermission groupPermission = new FolderPermission();
                 groupPermission.setUserId(0);
                 groupPermission.setFolderId(destAttachmentFolderId);
-                groupPermission.setFp(4);
-                groupPermission.setOrp(2);
-                groupPermission.setOwp(2);
-                groupPermission.setOdp(2);
+                groupPermission.setFp(2);
+                groupPermission.setOrp(4);
+                groupPermission.setOwp(0);
+                groupPermission.setOdp(0);
                 groupPermission.setAdminFlag(false);
                 groupPermission.setGroupFlag(true);
                 groupPermission.setSystem(false);
