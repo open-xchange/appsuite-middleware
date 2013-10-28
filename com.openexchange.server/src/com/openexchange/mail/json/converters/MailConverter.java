@@ -90,7 +90,6 @@ import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -618,19 +617,6 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 }
             }
             mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-        } else if (wasUnseen) {
-            try {
-                final ServerUserSetting setting = ServerUserSetting.getInstance();
-                final int contextId = session.getContextId();
-                final int userId = session.getUserId();
-                if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
-                    contextId,
-                    userId).booleanValue()) {
-                    AbstractMailAction.triggerContactCollector(session, mail);
-                }
-            } catch (final OXException e) {
-                LOG.warn("Contact collector could not be triggered.", e);
-            }
         }
     }
 

@@ -79,7 +79,7 @@ import com.openexchange.user.UserService;
  */
 public class RealtimeActivator extends HousekeepingActivator {
 
-    private SyntheticChannel synth; 
+    private SyntheticChannel synth;
     private RealtimeConfig realtimeConfig;
 
     @Override
@@ -90,18 +90,21 @@ public class RealtimeActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         RealtimeServiceRegistry.SERVICES.set(this);
-        
+        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
+        managementHouseKeeper.initialize(this);
+
         realtimeConfig = RealtimeConfig.getInstance();
         realtimeConfig.start();
-        ManagementHouseKeeper.getInstance().addManagementObject(realtimeConfig.getManagementObject());
+
+        managementHouseKeeper.addManagementObject(realtimeConfig.getManagementObject());
 
         synth = new SyntheticChannel(this);
 
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleAtFixedRate(synth, 0, 1, TimeUnit.MINUTES);
-        
+
         registerService(Channel.class, synth);
-        
+
         track(Component.class, new SimpleRegistryListener<Component>() {
 
             @Override
@@ -114,27 +117,25 @@ public class RealtimeActivator extends HousekeepingActivator {
                 synth.removeComponent(service);
             }
         });
-        
+
         DefaultPayloadTreeConverter converter = new DefaultPayloadTreeConverter(this);
         PayloadTree.CONVERTER = converter;
         PayloadTreeNode.CONVERTER = converter;
-        
+
         registerService(PayloadTreeConverter.class, converter);
-        
+
         registerService(Channel.class, new DevNullChannel());
-        
+
         //Expose all ManagementObjects for this bundle
-        ManagementHouseKeeper.getInstance().exposeManagementObjects();
+        managementHouseKeeper.exposeManagementObjects();
         openTrackers();
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         synth.shutdown();
         //Conceal all ManagementObjects for this bundle and remove them from the housekeeper
-        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
-        managementHouseKeeper.cleanup();
-        
+        ManagementHouseKeeper.getInstance().cleanup();
         realtimeConfig.stop();
     }
 

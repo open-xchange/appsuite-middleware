@@ -89,7 +89,9 @@ import com.sun.syndication.io.ParsingFeedException;
  */
 public class RssAction implements AJAXActionService {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(RssAction.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RssAction.class);
+
+    private static final int NOT_FOUND = 404;
 
 	private final TimoutHttpURLFeedFetcher fetcher;
 	private final HashMapFeedInfoCache feedCache;
@@ -146,9 +148,18 @@ public class RssAction implements AJAXActionService {
                         oxe.setCategory(Category.CATEGORY_WARNING);
                         warnings.add(oxe);
                     } catch (final FeedException e) {
-                        LOG.warn("Could not load RSS feed from " + url, e);
+                        LOG.warn("Could not load RSS feed from: " + url, e);
                     } catch (final FetcherException e) {
-                        LOG.warn("Could not load RSS feed from " + url, e);
+                        final int responseCode = e.getResponseCode();
+                        if (responseCode <= 0) {
+                            // No response code available
+                            LOG.warn("Could not load RSS feed from: " + url, e);
+                        }
+                        if (NOT_FOUND == responseCode) {
+                            LOG.debug("Resource could not be found: " + url, e);
+                        } else {
+                            LOG.warn("Could not load RSS feed from: " + url, e);
+                        }
                     }
                 }
 

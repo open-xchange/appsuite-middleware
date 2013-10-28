@@ -47,51 +47,26 @@
  *
  */
 
-package com.openexchange.realtime.group.commands;
+package com.openexchange.realtime.hazelcast.management;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.packet.Stanza;
-
+import com.openexchange.management.AbstractManagementHouseKeeper;
 
 /**
- * {@link JoinCommand}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ManagementHouseKeeper}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JoinCommand implements GroupCommand {
+public class ManagementHouseKeeper extends AbstractManagementHouseKeeper {
 
-    @Override
-    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        /*
-         * When the last client (clientX) just left the GroupDispatcher instance GD1 it might happen that GD1 gets disposed just before
-         * clientY can join GD1 that existed when the Stanza was routed here by the MessageDispatcher based on the infos of the
-         * ResourceDirectory.
-         * If this happens we restart the stanza handling at the MessageDispatcher again which will automatically create a new
-         * GroupDispatcher instance GD2 for us or use one that was created in the meantime.  
-         */
-        if(groupDispatcher.isDisposed()) {
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(stanza);
-            return;
-        }
+    private static ManagementHouseKeeper instance = new ManagementHouseKeeper();
 
-        if (isSynchronous(stanza)) {
-            groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector());
-            Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
-            welcomeMessage.setFrom(groupDispatcher.getId());
-            welcomeMessage.setTo(stanza.getFrom());
-           
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(welcomeMessage);
-        } else {
-            groupDispatcher.join(stanza.getFrom(), stanza.getSelector());
-        }
-    }
-
-    private boolean isSynchronous(Stanza stanza) {
-        return stanza.getFrom().getProtocol().equals("call");
+    /**
+     * Return the instance of the ManagementHouseKeeper singleton
+     * 
+     * @return the instance of the ManagementHouseKeeper singleton
+     */
+    public static ManagementHouseKeeper getInstance() {
+        return instance;
     }
 
 }

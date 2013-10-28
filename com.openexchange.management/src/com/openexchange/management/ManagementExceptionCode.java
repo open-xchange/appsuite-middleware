@@ -102,7 +102,11 @@ public enum ManagementExceptionCode implements OXExceptionCode {
     /**
      * A JMX connector is already bound to URL %1$s.
      */
-    JMX_URL_ALREADY_BOUND(ManagementExceptionMessage.JMX_URL_ALREADY_BOUND_MSG, CATEGORY_ERROR, 10);
+    JMX_URL_ALREADY_BOUND(ManagementExceptionMessage.JMX_URL_ALREADY_BOUND_MSG, CATEGORY_ERROR, 10),
+	/**
+	 * The following needed service is missing: "%1$s"
+	 */
+	NEEDED_SERVICE_MISSING(ManagementExceptionMessage.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 11);
 
     private final String message;
 

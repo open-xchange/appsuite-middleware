@@ -505,10 +505,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     }
 
     private Session session() {
-        if (serverSession != null) {
-            return serverSession;
-        }
-        return session;
+        return serverSession == null ? session : serverSession;
     }
 
     @Override
@@ -530,4 +527,10 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     public boolean isTransient() {
         return session.isTransient();
     }
+
+    @Override
+    public int hashCode() {
+        return session.hashCode();
+    }
+
 }

@@ -187,7 +187,7 @@ public class SyntheticChannel implements Channel, Runnable {
         stanza.trace("SyntheticChannel delivering to " + recipient);
         final ComponentHandle handle = handles.get(recipient);
         if (handle == null) {
-            stanza.trace("Unknown recipient: "+ stanza.getTo());
+            stanza.trace("Unknown recipient: " + stanza.getTo());
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
         stanza.trace("Delivering to handle " + handle);
@@ -198,14 +198,11 @@ public class SyntheticChannel implements Channel, Runnable {
         if (runLoop == null) {
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
-        if (handle.shouldBeDoneInGlobalThread(stanza)) {
-            new MessageDispatch(handle, stanza).tick();
-        } else {
-            final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
-            if (!taken) {
-                LOG.error("Queue refused offered Stanza");
-                RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
-            }
+
+        final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
+        if (!taken) {
+            LOG.error("Queue refused offered Stanza");
+            RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
         }
     }
     

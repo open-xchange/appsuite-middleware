@@ -93,6 +93,8 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
         });
 
         RealtimeServiceRegistry.SERVICES.set(this);
+        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
+        managementHouseKeeper.initialize(this);
 
         final LocalMessageDispatcher dispatcher = new LocalMessageDispatcherImpl();
 
@@ -111,7 +113,7 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
             }
         });
 
-        ManagementHouseKeeper.getInstance().exposeManagementObjects();
+        managementHouseKeeper.exposeManagementObjects();
         openTrackers();
     }
 

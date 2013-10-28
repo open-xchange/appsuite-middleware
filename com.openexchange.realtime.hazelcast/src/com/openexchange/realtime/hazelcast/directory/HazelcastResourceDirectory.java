@@ -62,9 +62,13 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.core.Transaction;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.ManagementAware;
+import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.directory.DefaultResourceDirectory;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryMBean;
+import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryManagement;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Presence;
@@ -78,7 +82,7 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HazelcastResourceDirectory extends DefaultResourceDirectory {
+public class HazelcastResourceDirectory extends DefaultResourceDirectory implements ManagementAware<HazelcastResourceDirectoryMBean> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
     
@@ -87,6 +91,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
 
     /** Mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap */
     private final String resource_map;
+    
+    private final HazelcastResourceDirectoryManagement managementObject;
 
     /**
      * Initializes a new {@link HazelcastResourceDirectory}.
@@ -97,8 +103,14 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         super();
         this.id_map = id_map;
         this.resource_map = resource_map;
+        this.managementObject = new HazelcastResourceDirectoryManagement(this);
     }
 
+    @Override
+    public ManagementObject<HazelcastResourceDirectoryMBean> getManagementObject() {
+        return managementObject;
+    }
+    
     @Override
     public IDMap<Resource> get(ID id) throws OXException {
          IDMap<Resource> foundResources = new IDMap<Resource>();
@@ -409,12 +421,12 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     }
 
     /**
-     * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premuim/random.
+     * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premium/random.
      * 
      * @return the map used for mapping general IDs to full IDs.
      * @throws OXException if the HazelcastInstance is missing. 
      */
-    protected MultiMap<String, String> getIDMapping() throws OXException {
+    public MultiMap<String, String> getIDMapping() throws OXException {
             HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
             return hazelcast.getMultiMap(id_map);
     }
@@ -425,7 +437,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
-    protected IMap<String, Map<String, Serializable>> getResourceMapping() throws OXException {
+    public IMap<String, Map<String, Serializable>> getResourceMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMap(resource_map);
     }

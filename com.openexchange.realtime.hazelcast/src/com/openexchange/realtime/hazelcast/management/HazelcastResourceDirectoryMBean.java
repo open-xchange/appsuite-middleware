@@ -47,51 +47,35 @@
  *
  */
 
-package com.openexchange.realtime.group.commands;
+package com.openexchange.realtime.hazelcast.management;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link JoinCommand}
+ * {@link HazelcastResourceDirectoryMBean}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JoinCommand implements GroupCommand {
+public interface HazelcastResourceDirectoryMBean {
 
-    @Override
-    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        /*
-         * When the last client (clientX) just left the GroupDispatcher instance GD1 it might happen that GD1 gets disposed just before
-         * clientY can join GD1 that existed when the Stanza was routed here by the MessageDispatcher based on the infos of the
-         * ResourceDirectory.
-         * If this happens we restart the stanza handling at the MessageDispatcher again which will automatically create a new
-         * GroupDispatcher instance GD2 for us or use one that was created in the meantime.  
-         */
-        if(groupDispatcher.isDisposed()) {
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(stanza);
-            return;
-        }
+    /**
+     * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premium/random.
+     * 
+     * @return the map used for mapping general IDs to full IDs.
+     * @throws OXException if the HazelcastInstance is missing. 
+     */
+    public Map<String, List<String>> getIDMapping() throws OXException;
 
-        if (isSynchronous(stanza)) {
-            groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector());
-            Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
-            welcomeMessage.setFrom(groupDispatcher.getId());
-            welcomeMessage.setTo(stanza.getFrom());
-           
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(welcomeMessage);
-        } else {
-            groupDispatcher.join(stanza.getFrom(), stanza.getSelector());
-        }
-    }
-
-    private boolean isSynchronous(Stanza stanza) {
-        return stanza.getFrom().getProtocol().equals("call");
-    }
+    /**
+     * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap.
+     * 
+     * @return the map used for mapping full IDs to ResourceMaps.
+     * @throws OXException if the map couldn't be fetched from hazelcast
+     */
+    public Map<String, Map<String, Serializable>> getResourceMapping() throws OXException;
 
 }
