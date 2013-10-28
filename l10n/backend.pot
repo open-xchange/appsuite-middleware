@@ -7514,7 +7514,7 @@ msgstr ""
 
 #. The name for "Unified Mail" root folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:177
-msgid "Unified mil"
+msgid "Unified mail"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
