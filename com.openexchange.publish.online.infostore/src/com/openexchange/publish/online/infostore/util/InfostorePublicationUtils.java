@@ -52,6 +52,7 @@ package com.openexchange.publish.online.infostore.util;
 import org.apache.commons.lang.Validate;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.infostore.FileMetadata;
@@ -62,7 +63,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link InfostorePublicationUtils}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */
@@ -70,7 +71,7 @@ public class InfostorePublicationUtils {
 
     /**
      * Loads the meta-data of the document associated with specified publication.
-     * 
+     *
      * @param publication The publication
      * @return The associated document's meta-data or <b><code>null</code></b>
      * @throws OXException If loading meta-data fails
@@ -84,7 +85,7 @@ public class InfostorePublicationUtils {
 
         if (fileAccess != null) {
             final String entityId = publication.getEntityId();
-            File file = fileAccess.getFileMetadata(entityId, String.valueOf(1));
+            File file = fileAccess.getFileMetadata(entityId, FileStorageFileAccess.CURRENT_VERSION);
             return FileMetadata.getMetadata(file);
         }
         return null;

@@ -73,7 +73,6 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -231,14 +230,6 @@ public final class ListAction extends AbstractFolderAction {
          * Return appropriate result
          */
         return new AJAXRequestResult(jsonArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(subfoldersResponse.getWarnings());
-    }
-
-    private boolean isUsmEas(final String clientId) {
-        if (Strings.isEmpty(clientId)) {
-            return false;
-        }
-        final String uc = Strings.toUpperCase(clientId);
-        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
 }

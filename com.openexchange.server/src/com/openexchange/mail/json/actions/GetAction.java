@@ -450,6 +450,21 @@ public final class GetAction extends AbstractMailAction {
                 if (!mail.containsAccountId()) {
                     mail.setAccountId(mailInterface.getAccountID());
                 }
+                final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                if (wasUnseen) {
+                    try {
+                        final ServerUserSetting setting = ServerUserSetting.getInstance();
+                        final int contextId = session.getContextId();
+                        final int userId = session.getUserId();
+                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                            contextId,
+                            userId).booleanValue()) {
+                            triggerContactCollector(session, mail);
+                        }
+                    } catch (final OXException e) {
+                        LOG.warn("Contact collector could not be triggered.", e);
+                    }
+                }
                 data = new AJAXRequestResult(mail, "mail");
             }
             data.addWarnings(warnings);

@@ -174,7 +174,7 @@ public class MailStrings implements LocalizableStrings {
         .intern();
 
     // The name for "Unified Mail" root folder
-    public static final String UNIFIED_MAIL = "Unified mil"
+    public static final String UNIFIED_MAIL = "Unified mail"
         .intern();
 
 }

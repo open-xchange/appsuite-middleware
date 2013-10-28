@@ -891,10 +891,13 @@ public final class MessageWriter {
 
     private static String prepareAddress(final String address) {
         String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
-        // Check for slash character
-        int pos = decoded.indexOf('/');
-        if (pos > 0) {
-            decoded = decoded.substring(0, pos);
+        // Check for slash character -- the delimiting character for MSISDN addresses
+        int pos = decoded.indexOf('@');
+        if (pos < 0) {
+            pos = decoded.indexOf('/');
+            if (pos > 0) {
+                decoded = decoded.substring(0, pos);
+            }
         }
         // Check for dummy domain
         pos = decoded.indexOf(DUMMY_DOMAIN);

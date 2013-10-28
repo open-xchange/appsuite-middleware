@@ -84,7 +84,7 @@ public final class XingEventHandler implements EventHandler {
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         try {
-            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_STORED_SESSION.equals(topic)) {
+            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 if (!session.isTransient() && XingOAuthAccessRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {

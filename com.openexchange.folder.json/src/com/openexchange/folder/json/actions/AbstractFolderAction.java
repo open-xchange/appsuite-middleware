@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -120,8 +121,15 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * @return <code>true</code> to suppress <i>Unified Mail</i>; otherwise <code>false</code>
      */
     protected static Boolean isSuppressUnifiedMail(final AJAXRequestData request, final ServerSession session) {
-        // final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
-        return Boolean.valueOf(false);
+        return Boolean.valueOf(isUsmEas(session.getClient()));
+    }
+
+    private static boolean isUsmEas(final String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
+        }
+        final String uc = Strings.toUpperCase(clientId);
+        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
     /**

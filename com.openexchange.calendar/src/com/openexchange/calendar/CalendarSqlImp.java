@@ -83,7 +83,7 @@ public interface CalendarSqlImp {
 
     SearchIterator<List<Integer>> getAllPrivateAppointmentAndFolderIdsForUser(Context c, int id, Connection readcon) throws SQLException;
 
-    PreparedStatement getSharedAppointmentFolderQuery(Context c, CalendarFolderObject cfo, Connection con) throws SQLException;
+    PreparedStatement getSharedAppointmentFolderQuery(Context c, int id, CalendarFolderObject cfo, Connection con) throws SQLException;
 
     PreparedStatement getResourceConflicts(Context c, Date d1, Date d2, Date d3, Date d4, Connection readcon, String resource_sql_in) throws SQLException;
 
@@ -168,9 +168,9 @@ public interface CalendarSqlImp {
     int getFolder(Session session, int objectId) throws OXException;
 
     public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException;
-    
+
     public int countAppointments(Session session) throws OXException;
-    
+
     public int countObjectsInFolder(Session session, int folderId, int folderType, EffectivePermission permission) throws OXException;
 
 }

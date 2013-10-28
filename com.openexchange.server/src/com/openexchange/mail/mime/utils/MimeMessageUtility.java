@@ -1235,7 +1235,10 @@ public final class MimeMessageUtility {
         }
         try {
             for (int i = 0; i < addrs.length; i++) {
-                addrs[i].setPersonal(addrs[i].getPersonal(), MailProperties.getInstance().getDefaultMimeCharset());
+                final InternetAddress addr = addrs[i];
+                if (null != addr) {
+                    addr.setPersonal(addr.getPersonal(), MailProperties.getInstance().getDefaultMimeCharset());
+                }
             }
         } catch (final UnsupportedEncodingException e) {
             /*
