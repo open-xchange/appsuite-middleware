@@ -66,6 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.infostore.FileMetadata;
@@ -179,9 +180,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     }
 
     private InputStream loadFile(final Publication publication, final int infoId) throws OXException {
-        Session session = new PublicationSession(publication);
-        IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
-        return fileAccess.getDocument(String.valueOf(infoId), String.valueOf(1));
+        final IDBasedFileAccess fileAccess = fileFactory.createAccess(new PublicationSession(publication));
+        return fileAccess.getDocument(String.valueOf(infoId), FileStorageFileAccess.CURRENT_VERSION);
     }
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
@@ -196,7 +196,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         }
 
         final String site = Strings.join(decode(normalized.subList(1, normalized.size()-2), req), "/");
-        final Map<String, String> args = new HashMap<String, String>();
+        final Map<String, String> args = new HashMap<String, String>(6);
         args.put(CONTEXTID, normalized.get(0));
         args.put(SITE, site);
         args.put(SECRET, req.getParameter(SECRET));
