@@ -572,17 +572,21 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
              * Get attachment's input stream
              */
             final InputStream in = attachment.getInputStream();
+            boolean rollbackNeeded = false;
             try {
                 /*
                  * Start InfoStore transaction
                  */
                 fileAccess.startTransaction();
+                rollbackNeeded = true;
                 try {
                     fileAccess.saveDocument(file, in, FileStorageFileAccess.DISTANT_FUTURE);
                     fileAccess.commit();
+                    rollbackNeeded = false;
                     retry = false;
                 } catch (final OXException x) {
                     fileAccess.rollback();
+                    rollbackNeeded = false;
                     if (!x.isPrefix("IFO")) {
                         throw x;
                     }
@@ -604,9 +608,11 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     file.setFileName(newName);
                     file.setTitle(newName);
                 } catch (final RuntimeException e) {
-                    fileAccess.rollback();
                     throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
+                    if (rollbackNeeded) {
+                        fileAccess.rollback();
+                    }
                     fileAccess.finish();
                 }
             } finally {
