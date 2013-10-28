@@ -364,11 +364,11 @@ public class MailAccountParser extends DataParser {
             final int port = account.getMailPort();
             if (account.isMailSecure()) {
                 if (standardPorts.isDefaultPort(port)) {
-                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_MAIL.create(mailProtocol));
+                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_MAIL.create(mailProtocol));
                 }
             } else {
                 if (standardPorts.isDefaultSSLPort(port)) {
-                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_MAIL.create(mailProtocol));
+                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_MAIL.create(mailProtocol));
                 }
             }
         }
@@ -384,11 +384,11 @@ public class MailAccountParser extends DataParser {
             final int port = account.getTransportPort();
             if (account.isTransportSecure()) {
                 if (standardPorts.isDefaultPort(port)) {
-                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT.create(transportProtocol));
+                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_TRANSPORT.create(transportProtocol));
                 }
             } else {
                 if (standardPorts.isDefaultSSLPort(port)) {
-                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_TRANSPORT.create(transportProtocol));
+                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT.create(transportProtocol));
                 }
             }
         }
