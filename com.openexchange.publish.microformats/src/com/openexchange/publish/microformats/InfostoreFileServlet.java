@@ -163,7 +163,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         try {
             Session session = new PublicationSession(publication);
             IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
-            return FileMetadata.getMetadata(fileAccess.getFileMetadata(String.valueOf(infoId), String.valueOf(1)));
+            return FileMetadata.getMetadata(fileAccess.getFileMetadata(String.valueOf(infoId), FileStorageFileAccess.CURRENT_VERSION));
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
                 throw PublicationErrorMessage.NotExist.create(e, new Object[0]);
