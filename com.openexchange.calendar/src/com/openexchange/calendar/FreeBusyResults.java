@@ -76,6 +76,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * FreeBusyResults
@@ -370,17 +371,16 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }
 
     private final boolean checkPermissions() {
-        boolean isVisible = isVisible();
-        if ((pflag == 0 && isVisible()) || (pflag == 1 && owner == uid)) {
-            return true;
-        }
-        return false;
+        return pflag == 1 && owner == uid || pflag == 0 && isVisible();
     }
 
     private final boolean isVisible() {
         if (cfo == null) {
             return false;
         }
+        /*
+         * public folder?
+         */
         if (fid > 0) {
             if ( cfo.canReadAllInPublicFolder(fid) ) {
                 readFolderId = fid;
@@ -390,27 +390,63 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 return true;
             }
         } else {
-            for (int a = 0, size = private_folder_array.length; a < size; a++) {
-                final PrivateFolderInformationObject pfio = private_folder_array[a];
-                if (pfio.compareObjectId(oid)) {
-                    final int o = pfio.getParticipant();
-                    final int p = pfio.getPrivateFolder();
-                    if (cfo.canReadAllInPrivateFolder(p)) {
-                        readFolderId = p;
-                        return true;
-                    } else if (cfo.canReadAllInSharedFolder(p)) {
-                        readFolderId = p;
-                        return true;
-                    } else if (o == uid) {
-                        if (cfo.canReadOwnInPrivateFolder(p)) {
-                            readFolderId = p;
-                            return true;
-                        } else if (cfo.canReadOwnInSharedFolder(p)) {
-                            readFolderId = p;
+            /*
+             * lookup parent folder information, try known private folders first
+             */
+            PrivateFolderInformationObject parentFolder = null;
+            for (PrivateFolderInformationObject pfio : private_folder_array) {
+                if (pfio.compareObjectId(oid) && canReadFrom(pfio)) {
+                    readFolderId = pfio.getPrivateFolder();
+                    return true;
+                }
+            }
+            /*
+             * lookup (shared) parent folder information based on current appointment's object id if no known private folder
+             */
+            if (null == parentFolder && 0 < cfo.getSharedFolderList().size()) {
+                ResultSet result = null;
+                PreparedStatement sharedFolderQuery = null;
+                try {
+                    sharedFolderQuery = calendarsqlimp.getSharedAppointmentFolderQuery(c, oid, cfo, con);
+                    result = sharedFolderQuery.executeQuery();
+                    while (result.next()) {
+                        PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(result.getInt(1), result.getInt(2), result.getInt(3));
+                        if (canReadFrom(pfio)) {
+                            readFolderId = pfio.getPrivateFolder();
                             return true;
                         }
                     }
+                } catch (SQLException e) {
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    DBUtils.closeSQLStuff(result, sharedFolderQuery);
                 }
+            }
+        }
+        /*
+         * not visible
+         */
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether the user may read objects in the private folder identified by the supplied folder information
+     * structure.
+     *
+     * @param parentFolder The parent folder information to check read-permissions for
+     * @return <code>true</code> if the user is allowed to read appointments in that folder, <code>false</code>, otherwise.
+     */
+    private boolean canReadFrom(PrivateFolderInformationObject parentFolder) {
+        int folderID = parentFolder.getPrivateFolder();
+        if (cfo.canReadAllInPrivateFolder(folderID)) {
+            return true;
+        } else if (cfo.canReadAllInSharedFolder(folderID)) {
+            return true;
+        } else if (parentFolder.getParticipant() == uid) {
+            if (cfo.canReadOwnInPrivateFolder(folderID)) {
+                return true;
+            } else if (cfo.canReadOwnInSharedFolder(folderID)) {
+                return true;
             }
         }
         return false;
@@ -501,7 +537,6 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         int uid = 0;
         PreparedStatement shared_folder_info = null;
         try {
-
             for (final SearchIterator<List<Integer>> iter = private_folder_information; iter.hasNext();) {
                 final List<Integer> vals = iter.next();
                 object_id = vals.get(0).intValue();
@@ -510,25 +545,6 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
                 list.add(pfio);
             }
-
-            // Add shared folders and check if there are such shared folders
-            if (! cfo.getSharedFolderList().isEmpty()) {
-                shared_folder_info = calendarsqlimp.getSharedAppointmentFolderQuery(c, cfo, con);
-
-                final ResultSet result = shared_folder_info.executeQuery();
-                while (result.next()) {
-                    object_id = result.getInt(1);
-                    pfid = result.getInt(2);
-                    uid = result.getInt(3);
-                    if (!result.wasNull()) {
-                        final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
-                        list.add(pfio);
-                    }
-                }
-                result.close();
-            }
-        } catch(final SQLException sqle) {
-            LOG.error(sqle.getMessage(), sqle);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {

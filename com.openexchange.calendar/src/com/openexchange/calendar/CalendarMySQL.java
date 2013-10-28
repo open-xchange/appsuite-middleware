@@ -637,14 +637,16 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
-    public PreparedStatement getSharedAppointmentFolderQuery(final Context c, final CalendarFolderObject cfo, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE cid = ? AND pfid IN (");
+    public PreparedStatement getSharedAppointmentFolderQuery(final Context c, int id, final CalendarFolderObject cfo, final Connection readcon) throws SQLException {
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(
+            "SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE cid = ? AND object_id = ? AND pfid IN (");
         for (final TIntIterator iter = cfo.getSharedFolderList().iterator(); iter.hasNext();) {
             sb.append(iter.next()).append(',');
         }
         sb.setCharAt(sb.length()-1, ')');
         final PreparedStatement stmt = readcon.prepareStatement(sb.toString());
         stmt.setInt(1, c.getContextId());
+        stmt.setInt(2, id);
         return stmt;
 
     }
