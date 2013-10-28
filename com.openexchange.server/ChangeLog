@@ -1,3 +1,7 @@
+* 2013-10-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29498: Check for regal RFC 822 E-Mail address prior to applying preparations for MSISDN addresses
+
 * 2013-10-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 29429: Use Java's naming for charset "cp932" that is "MS932"
