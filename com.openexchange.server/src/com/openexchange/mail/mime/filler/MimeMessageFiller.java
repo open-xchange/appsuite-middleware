@@ -2147,6 +2147,6 @@ public class MimeMessageFiller {
         if (null == e) {
             return false;
         }
-        return ((MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) || ("IMAP".equals(e.getPrefix()) && (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() == e.getCode())));
+        return ((MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) || (MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.equals(e)) || ("IMAP".equals(e.getPrefix()) && (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() == e.getCode())));
     }
 }
