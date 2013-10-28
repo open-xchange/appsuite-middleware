@@ -216,7 +216,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         // Admin permission
         OCLPermission perm = new OCLPermission();
         perm.setEntity(adminId);
-        perm.setFolderAdmin(true);
+        perm.setFolderAdmin(false);
         perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
         perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
         perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);

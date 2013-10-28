@@ -283,7 +283,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                 userPermission.setOrp(128);
                 userPermission.setOwp(128);
                 userPermission.setOdp(128);
-                userPermission.setAdminFlag(true);
+                userPermission.setAdminFlag(false);
                 userPermission.setGroupFlag(false);
                 userPermission.setSystem(false);
 
