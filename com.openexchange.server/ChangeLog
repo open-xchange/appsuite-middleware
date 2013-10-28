@@ -6,6 +6,10 @@
 
  - Fix for bug 29495: Swapped warnings
 
+* 2013-10-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28886: Removed obsolete GMX crawler identifiers/specs from 'crawler.properties' file
+
 * 2013-10-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 29274: Create user-individual publication folders for published E-Mail attachments that exceed user quota
