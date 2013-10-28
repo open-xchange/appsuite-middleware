@@ -13,6 +13,7 @@
  - Fix for bug 29509: Fixed typo in i18n string
  - Fix for bug 29512: File folder publication offers latest version of a listed file
  - Fix for bug 29498: Check for regal RFC 822 E-Mail address prior to applying preparations for MSISDN addresses
+ - Fix for bug 29113: Prefer MIME type by file name if signaled one differs from file extension
 
 * 2013-10-27 - thorben.betten@open-xchange.com
 
