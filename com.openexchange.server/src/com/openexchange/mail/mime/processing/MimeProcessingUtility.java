@@ -131,7 +131,7 @@ public final class MimeProcessingUtility {
      * @param timeZone The time zone
      * @return The formatted date
      */
-    static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
+    public static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
         final DateFormat dateFormat = DateFormat.getDateInstance(style, locale);
         dateFormat.setTimeZone(timeZone);
         return dateFormat.format(date);
@@ -338,7 +338,7 @@ public final class MimeProcessingUtility {
      * @param addrs The array of {@link InternetAddress} instances
      * @return A comma-separated list of addresses as a {@link String}
      */
-    static String addrs2String(final InternetAddress[] addrs) {
+    public static String addrs2String(final InternetAddress[] addrs) {
         final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(addrs.length << 4);
         boolean first = true;
         for (int i = 0; i < addrs.length; i++) {
