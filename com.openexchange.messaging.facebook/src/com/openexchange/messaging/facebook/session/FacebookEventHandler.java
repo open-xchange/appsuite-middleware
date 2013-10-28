@@ -84,7 +84,7 @@ public final class FacebookEventHandler implements EventHandler {
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         try {
-            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 if (!session.isTransient() && FacebookOAuthAccessRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
