@@ -60,11 +60,24 @@ import com.openexchange.realtime.packet.Stanza;
  * {@link JoinCommand}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class JoinCommand implements GroupCommand {
 
     @Override
     public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
+        /*
+         * When the last client (clientX) just left the GroupDispatcher instance GD1 it might happen that GD1 gets disposed just before
+         * clientY can join GD1 that existed when the Stanza was routed here by the MessageDispatcher based on the infos of the
+         * ResourceDirectory.
+         * If this happens we restart the stanza handling at the MessageDispatcher again which will automatically create a new
+         * GroupDispatcher instance GD2 for us or use one that was created in the meantime.  
+         */
+        if(groupDispatcher.isDisposed()) {
+            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(stanza);
+            return;
+        }
+
         if (isSynchronous(stanza)) {
             groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector());
             Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
