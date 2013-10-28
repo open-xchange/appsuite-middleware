@@ -9,6 +9,7 @@
 * 2013-10-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 28886: Removed obsolete GMX crawler identifiers/specs from 'crawler.properties' file
+ - Fix for bug 29509: Fixed type in i18n string
 
 * 2013-10-27 - thorben.betten@open-xchange.com
 
