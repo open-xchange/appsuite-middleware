@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -92,6 +93,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.processing.MimeProcessingUtility;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -227,8 +229,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Get discovery service
          */
-        final PublicationTargetDiscoveryService discoveryService =
-            ServerServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class, true);
+        final PublicationTargetDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class, true);
         /*
          * Get discovery service's target
          */
@@ -259,6 +260,11 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     private ComposedMailMessage[] generateComposedMails0(final ComposedMailMessage source, final List<PublicationAndInfostoreID> publications, final int folderId, final PublicationTarget target, final PublicationService publisher, final Context ctx) throws OXException {
         final List<LinkAndNamePair> links = new ArrayList<LinkAndNamePair>(attachments.size());
         /*
+         * Message information
+         */
+        final long now = System.currentTimeMillis();
+        final MessageInfo msgInfo = new MessageInfo(source.getSubject(), new Date(now), source.getTo());
+        /*
          * Generate publication link for each attachment
          */
         final StringBuilder linkBuilder = new StringBuilder(256);
@@ -266,7 +272,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             /*
              * Generate publish URL: "/publications/infostore/documents/12abead21498754abcfde"
              */
-            final String path = publishAttachmentAndGetPath(attachment, folderId, ctx, publications, target, publisher);
+            final String path = publishAttachmentAndGetPath(msgInfo, attachment, folderId, ctx, publications, target, publisher);
             /*
              * Add to list
              */
@@ -286,7 +292,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          */
         Date elapsedDate = null;
         if (TransportProperties.getInstance().publishedDocumentsExpire()) {
-            elapsedDate = new Date(System.currentTimeMillis() + TransportProperties.getInstance().getPublishedDocumentTimeToLive());
+            elapsedDate = new Date(now + TransportProperties.getInstance().getPublishedDocumentTimeToLive());
         }
         final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
         final Map<Locale, ComposedMailMessage> internalMessages = new HashMap<Locale, ComposedMailMessage>(addresses.size());
@@ -546,7 +552,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of createLinksAttachment()
 
-    private String publishAttachmentAndGetPath(final MailPart attachment, final int folderId, final Context ctx, final List<PublicationAndInfostoreID> publications, final PublicationTarget target, final PublicationService publisher) throws OXException, TransactionException, OXException {
+    private String publishAttachmentAndGetPath(final MessageInfo msgInfo, final MailPart attachment, final int folderId, final Context ctx, final List<PublicationAndInfostoreID> publications, final PublicationTarget target, final PublicationService publisher) throws OXException, TransactionException, OXException {
         /*
          * Create document meta data for current attachment
          */
@@ -560,6 +566,29 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         file.setFileName(name);
         file.setFileMIMEType(attachment.getContentType().toString());
         file.setTitle(name);
+        if (null != msgInfo) {
+            // Description
+            Locale locale = TransportProperties.getInstance().getExternalRecipientsLocale();
+            if (null == locale) {
+                locale = getSessionUserLocale();
+            }
+            final StringHelper stringHelper = StringHelper.valueOf(locale);
+            String desc = stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENT_INFO);
+            {
+                final String subject = msgInfo.subject;
+                desc = desc.replaceFirst("#SUBJECT#", com.openexchange.java.Strings.quoteReplacement(null == subject ? stringHelper.getString(MailStrings.DEFAULT_SUBJECT) : subject));
+            }
+            {
+                final Date date = msgInfo.date;
+                final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
+                desc = desc.replaceFirst("#DATE#", repl);
+            }
+            {
+                final InternetAddress[] to = msgInfo.to;
+                desc = desc.replaceFirst("#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
+            }
+            file.setDescription(desc);
+        }
         /*
          * Put attachment's document to dedicated infostore folder
          */
@@ -758,6 +787,19 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
 
     } // End of PublicationAndInfostoreID
+
+    private static final class MessageInfo {
+        final String subject;
+        final Date date;
+        final InternetAddress[] to;
+
+        MessageInfo(String subject, Date date, InternetAddress[] to) {
+            super();
+            this.subject = subject;
+            this.date = date;
+            this.to = to;
+        }
+    } // End of MessageInfo
 
     private static String saneProtocol(final String protocol) {
         if (protocol.endsWith("://")) {

@@ -146,6 +146,9 @@ public class MailStrings implements LocalizableStrings {
     // Indicates the elapsed date for affected message's attachments
     public static final String PUBLISHED_ATTACHMENTS_APPENDIX = "The links will be deleted on #DATE#";
 
+    // The text put into the description field of a published E-Mail attachment
+    public static final String PUBLISHED_ATTACHMENT_INFO = "This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#";
+
     // The greeting used for form mails. E.g.
     // "Dear Sir or Madam Jane Doe"
     public static final String GREETING = "Dear Sir or Madam";
