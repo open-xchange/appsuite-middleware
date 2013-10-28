@@ -50,8 +50,9 @@
 package com.openexchange.realtime.hazelcast.management;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -105,11 +106,12 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
      * @throws OXException if the HazelcastInstance is missing. 
      */
     @Override
-    public Map<String, Collection<String>> getIDMapping() throws OXException {
+    public Map<String, List<String>> getIDMapping() throws OXException {
         MultiMap<String, String> idMapping = resourceDirectory.getIDMapping();
-        Map<String, Collection<String>> jmxMap = new HashMap<String, Collection<String>>(idMapping.keySet().size());
+        Map<String, List<String>> jmxMap = new HashMap<String, List<String>>(idMapping.keySet().size());
         for (String id : idMapping.keySet()) {
-            jmxMap.put(id, idMapping.get(id));
+            ArrayList<String> valueList = new ArrayList<String>(idMapping.get(id));
+            jmxMap.put(id, valueList);
         }
         return jmxMap;
     }

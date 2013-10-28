@@ -50,7 +50,7 @@
 package com.openexchange.realtime.hazelcast.management;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 
@@ -68,7 +68,7 @@ public interface HazelcastResourceDirectoryMBean {
      * @return the map used for mapping general IDs to full IDs.
      * @throws OXException if the HazelcastInstance is missing. 
      */
-    public Map<String, Collection<String>> getIDMapping() throws OXException;
+    public Map<String, List<String>> getIDMapping() throws OXException;
 
     /**
      * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap.
