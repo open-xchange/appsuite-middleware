@@ -1,6 +1,7 @@
 * 2013-10-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24642: Resolve participant information for shared calendar folders as needed
+ - Fix for bug 29372: Ensure that "all"-host-wildcards from 'as-config.yml' are applied first
  
 * 2013-10-28 - jan.bauerdick@open-xchange.com
 

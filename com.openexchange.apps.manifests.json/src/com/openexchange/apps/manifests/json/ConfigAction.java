@@ -50,6 +50,7 @@
 package com.openexchange.apps.manifests.json;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -154,10 +155,20 @@ public class ConfigAction implements AJAXActionService {
 
         // Find other applicable configurations
         if (serverConfigs != null) {
+            LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String,Object>>();
             for (Object value : serverConfigs.values()) {
-                if (looksApplicable((Map<String, Object>) value, requestData, session)) {
-                    serverConfig.putAll((Map<String, Object>) value);
+                Map<String, Object> possibleConfig = (Map<String, Object>) value;
+                if (looksApplicable(possibleConfig, requestData, session)) {
+                    // ensure that "all"-host-wildcards are applied first
+                    if ("all".equals(possibleConfig.get("host"))) {
+                        applicableConfigs.addFirst(possibleConfig);
+                    } else {
+                        applicableConfigs.add(possibleConfig);
+                    }
                 }
+            }
+            for (Map<String, Object> config : applicableConfigs) {
+                serverConfig.putAll(config);
             }
         }
 
