@@ -377,20 +377,25 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
 
                     @Override
                     public void run() {
-                        if (pingCount.decrementAndGet() < 0) {
-                            final ScheduledTimerTask timerTask = ref.get();
-                            if (null != timerTask) {
-                                timerTask.cancel(false);
-                            }
-                            return;
-                        }
                         try {
                             final WatchInfo watchInfo = cm.get(ctx);
+                            boolean pingIssued = false;
                             if (null != watchInfo && (watchInfo.handlerResponse instanceof OXResponse)) {
                                 final StampingNIOOutputStreamImpl stamped = (StampingNIOOutputStreamImpl) ((OXResponse) watchInfo.handlerResponse).createOutputStream();
                                 if (!stamped.closed) {
                                     final long lastAccessed = stamped.lastAccessed;
                                     if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) >= pingDelay) {
+                                        // Check whether to issue a ping
+                                        if (pingCount.decrementAndGet() < 0) {
+                                            // Not allowed to issue a further ping
+                                            final ScheduledTimerTask timerTask = ref.get();
+                                            if (null != timerTask) {
+                                                timerTask.cancel(false);
+                                            }
+                                            return;
+                                        }
+
+                                        // Issue a ping
                                         final MemoryManager memoryManager = ctx.getMemoryManager();
                                         if (Ping.PROCESSING == ping) {
                                             final Buffer encodedBuffer = memoryManager.allocate(128);
@@ -417,9 +422,11 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                                             outputBuffer.writeBuffer(buffer);
                                             outputBuffer.flush();
                                         }
+                                        pingIssued = true;
                                     }
                                 }
-                            } else {
+                            }
+                            if (false == pingIssued) {
                                 pingCount.set(maxPingCount);
                             }
                         } catch (final Exception e) {
