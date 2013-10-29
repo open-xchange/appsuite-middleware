@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -683,13 +684,27 @@ public abstract class SessionServlet extends AJAXServlet {
      */
     public static void checkPublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-        if ((null != cookies) && (null == cookies.get(PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req)))) {
-            LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+        if (null != cookies) {
+            final String cookieName = PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req);
+            Cookie cookie = cookies.get(cookieName);
+            if (null == cookie) {
+                LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+            } else {
+                final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+                if (null == altId) {
+                    // Session has no public session identifier
+                    removeOXCookies(req, resp, Collections.singletonList(cookieName));
+                } else if (!altId.equals(cookie.getValue())) {
+                    // Identifier does not match -- recreate
+                    removeOXCookies(req, resp, Collections.singletonList(cookieName));
+                    LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+                }
+            }
         }
     }
 
     /**
-     * Check if the secret encoded in the open-xchange-secret Cookie matches the secret saved in the Session.
+     * Check if the secret encoded in the open-xchange-secret Cookie matches the secret saved in the session.
      *
      * @param source    The configured CookieHashSource
      * @param req       The incoming HttpServletRequest
@@ -702,7 +717,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     /**
-     * Check if the secret encoded in the open-xchange-secret Cookie matches the secret saved in the Session.
+     * Check if the secret encoded in the open-xchange-secret Cookie matches the secret saved in the session.
      *
      * @param source    The configured CookieHashSource
      * @param req       The incoming HttpServletRequest
@@ -818,11 +833,21 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param resp The HTTP response
      */
     public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
+        removeOXCookies(req, resp, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req)));
+    }
+
+    /**
+     * Removes the Open-Xchange cookies belonging to specified hash string.
+     *
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @param cookieNames The names of the cookies to remove
+     */
+    public static void removeOXCookies(final HttpServletRequest req, final HttpServletResponse resp, final List<String> cookieNames) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies == null) {
             return;
         }
-        final List<String> cookieNames = Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req));
         for (final String cookieName : cookieNames) {
             final Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
