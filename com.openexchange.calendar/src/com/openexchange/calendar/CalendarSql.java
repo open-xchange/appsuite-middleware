@@ -533,12 +533,17 @@ public class CalendarSql implements AppointmentSQLInterface {
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
         try {
-            writecon = DBPool.pickupWriteable(ctx);
-            final CalendarOperation co = new CalendarOperation();
-            final CalendarSqlImp cimp = CalendarSql.cimp;
-            final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon, checkPermissions);
-            DBPool.pushWriteAfterReading(ctx, writecon);
-            writecon = null;
+            final CalendarOperation co;
+            final CalendarSqlImp cimp;
+            final CalendarDataObject edao;
+            Connection readcon = DBPool.pickup(ctx);
+            try {
+                co = new CalendarOperation();
+                cimp = CalendarSql.cimp;
+                edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, readcon, checkPermissions);
+            } finally {
+                DBPool.push(ctx, readcon);
+            }
 
             if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
                 // Silently ignore updates on Appointments with an outdated Sequence. OLOX2-Requirement.
