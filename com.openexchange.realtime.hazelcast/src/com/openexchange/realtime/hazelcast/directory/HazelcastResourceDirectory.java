@@ -302,6 +302,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     @Override
     protected HazelcastResource doSet(ID id, Resource resource, boolean overwrite) throws OXException {
         HazelcastResource hazelcastResource = new HazelcastResource(resource);
+        id.on(ID.Events.REFRESH, TOUCH_ID);
+        id.on(ID.Events.DISPOSE, CLEAN_UP);
 
         MultiMap<String, String> idMapping = getIDMapping();
         IMap<String, Map<String,Serializable>> allResources = getResourceMapping();
@@ -398,7 +400,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         if (conjure(id)) {
             HazelcastResource res = new HazelcastResource();
             HazelcastResource meantime = setIfAbsent(id, res);
-            id.on(ID.Events.DISPOSE, CLEAN_UP);
             if (meantime == null) {
                 return res;
             }
@@ -470,16 +471,43 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         };
     }
 
+    /**
+     * Remove the entries we track for this id from the IDMapping and the ResourceMapping
+     */
     private final IDEventHandler CLEAN_UP = new IDEventHandler() {
 
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
             if (source != HazelcastResourceDirectory.this) {
                 try {
-                    removeWithoutDisposeEvent(id);
+                    IDMap<Resource> removed = removeWithoutDisposeEvent(id);
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Removed: " + removed.entrySet().toString());
+                    }
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
+            }
+        }
+
+    };
+    
+    /**
+     * Touch the infos we track for a given ID so they don't get automatically removed by Hazelcast's eviction policy as long as it's in
+     * active use. 
+     */
+    private final IDEventHandler TOUCH_ID = new IDEventHandler() {
+        
+        @Override
+        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            try {
+                /*
+                 * This performs a get on both maps to lookup the full IDs and the associated Resources which resets the idle times for the
+                 * eviction policy
+                 */
+                get(id.toGeneralForm());
+            } catch (OXException e) {
+                LOG.error(e.getMessage());
             }
         }
 

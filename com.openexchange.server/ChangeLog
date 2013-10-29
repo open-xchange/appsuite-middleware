@@ -3,6 +3,7 @@
  - Fix for bug 29516: Do not store password in IMAP store cache
  - Fix for bug 29518: Collect addresses on read access to unread/unseen messages
  - Fix for bug 29519: No public folder check for InfoStore folders
+ - Fix for bug 29564: Check for presence of "Content-Length" header prior to attempting to check it
 
 * 2013-10-29 - tobias.friedrich@open-xchange.com
 

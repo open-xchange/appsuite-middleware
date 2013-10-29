@@ -119,7 +119,8 @@ public class StateManager {
     }
 
     /**
-     * Times out states that haven't been touched in more than thirty minutes
+     * Times out states that haven't been touched in more than thirty minutes. Additionally this triggers a refresh of IDs that aren't 
+     * timed out, yet.
      * 
      * @param timestamp - The timestamp to compare the lastSeen value to
      */
@@ -127,6 +128,8 @@ public class StateManager {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
                 state.getId().trigger(ID.Events.DISPOSE, this);
+            } else {
+                state.getId().trigger(ID.Events.REFRESH, this);
             }
         }
     }
