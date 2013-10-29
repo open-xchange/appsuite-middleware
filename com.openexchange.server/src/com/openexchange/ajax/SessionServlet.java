@@ -237,7 +237,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 session = getSession(req, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
-                checkPublicSessionCookie(req, null, session);
+                checkPublicSessionCookie(req, resp, session);
             } else {
                 session = null;
             }
