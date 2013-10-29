@@ -630,6 +630,22 @@ public class LoginServlet extends AJAXServlet {
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 doHttpAuth(req, resp);
             } else if (null != action) {
+                // Check if autologin is enabled
+                if (action.equalsIgnoreCase("hasAutologin")) {
+                    // The magic spell to disable caching
+                    Tools.disableCaching(resp);
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+                    try {
+                        final JSONObject jo = new JSONObject(2);
+                        jo.put(ACTION_AUTOLOGIN, confReference.get().isSessiondAutoLogin());
+                        jo.write(resp.getWriter());
+                    } catch (final JSONException e) {
+                        LOG.error(LoginServlet.RESPONSE_ERROR, e);
+                        LoginServlet.sendError(resp);
+                    }
+                }
+                // Regular login handling
                 doJSONAuth(req, resp, action);
             } else {
                 logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
