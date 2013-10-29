@@ -502,5 +502,10 @@ public class ID implements Serializable {
          * This event is triggered, when an ID goes offline. You can use this to free up resources this ID uses, for example state information associated with the ID
          */
         public static final String DISPOSE = "dispose";
+        
+        /**
+         * This event is triggered to ensure that resources for this ID aren't freed up by eviction policies or sth. similar.
+         */
+        public static final String REFRESH = "refresh";
     }
 }
