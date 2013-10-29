@@ -1,6 +1,7 @@
 * 2013-10-29 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 29205: Use 'universalchardet' charset detection library 
+ - Fix for bug 29205: Use 'universalchardet' charset detection library
+ - Fix for bug 29529: Made 'validate_contact_email' setting available via 'io.ox/core//features/validateMailAddresses'
 
 * 2013-10-28 - tobias.friedrich@open-xchange.com
 
