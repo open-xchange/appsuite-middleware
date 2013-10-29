@@ -192,13 +192,23 @@ public class LoginServlet extends AJAXServlet {
         SESSION, SECRET;
     }
 
-    final AtomicReference<LoginConfiguration> confReference;
+    private static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
+
+    /**
+     * Gets the login configuration.
+     *
+     * @return The login configuration or <code>null</code> if not yet initialized
+     */
+    public static LoginConfiguration getLoginConfiguration() {
+        return confReference.get();
+    }
+
+    // --------------------------------------------------------------------------------------- //
 
     private final Map<String, LoginRequestHandler> handlerMap;
 
     public LoginServlet() {
         super();
-        confReference = new AtomicReference<LoginConfiguration>();
         handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16);
         handlerMap.put(ACTION_STORE, new LoginRequestHandler() {
 
@@ -620,6 +630,22 @@ public class LoginServlet extends AJAXServlet {
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 doHttpAuth(req, resp);
             } else if (null != action) {
+                // Check if autologin is enabled
+                if (action.equalsIgnoreCase("hasAutologin")) {
+                    // The magic spell to disable caching
+                    Tools.disableCaching(resp);
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+                    try {
+                        final JSONObject jo = new JSONObject(2);
+                        jo.put(ACTION_AUTOLOGIN, confReference.get().isSessiondAutoLogin());
+                        jo.write(resp.getWriter());
+                    } catch (final JSONException e) {
+                        LOG.error(LoginServlet.RESPONSE_ERROR, e);
+                        LoginServlet.sendError(resp);
+                    }
+                }
+                // Regular login handling
                 doJSONAuth(req, resp, action);
             } else {
                 logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
@@ -870,6 +896,24 @@ public class LoginServlet extends AJAXServlet {
         if (null != altId) {
             cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
             configureCookie(cookie, secure, serverName, conf);
+            resp.addCookie(cookie);
+        }
+    }
+
+    /**
+     * Writes the (groupware's) public session cookie <code>"open-xchange-public-session"</code> to specified HTTP servlet response.
+     *
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @param session The session providing the public session cookie identifier
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
+        final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+        if (null != altId) {
+            final Cookie cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
+            LoginServlet.configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }
     }

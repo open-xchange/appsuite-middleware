@@ -503,9 +503,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final boolean handDown, final long lastModified) throws OXException {
         final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, getFolderFromMaster(fo.getObjectID()));
         if (checkPermissions) {
-            if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-                session.getUserId(),
-                ctx).hasFullPublicFolderAccess()) {
+            if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && fo.getModule() != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
                 throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(OXFolderUtility.getUserName(session, user),
                     OXFolderUtility.getFolderName(fo),
                     Integer.valueOf(ctx.getContextId()));

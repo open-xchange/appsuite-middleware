@@ -73,21 +73,17 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     protected final String server;
     protected final int port;
-    protected final String login;
-    protected final String pw;
     protected final int maxRetryCount;
     private final AtomicInteger inUseCount;
 
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
-    public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
+    public UnboundedIMAPStoreContainer(final String server, final int port) {
         super();
         maxRetryCount = 10;
         availableQueue = new InheritedPriorityBlockingQueue();
-        this.login = login;
         this.port = port;
-        this.pw = pw;
         this.server = server;
         inUseCount = new AtomicInteger();
     }
@@ -107,7 +103,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(final javax.mail.Session imapSession, final String login, final String pw) throws MessagingException, InterruptedException {
         IMAPStore imapStore = null;
 
         final IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
@@ -151,7 +147,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
         if (DEBUG) {
-            LOG.debug("IMAPStoreContainer.closeElapsed(): " + availableQueue.size() + " IMAPStore instances in queue for " + login + "@" + server + ":" + port);
+            LOG.debug("IMAPStoreContainer.closeElapsed(): " + availableQueue.size() + " IMAPStore instances in queue for " + server + ":" + port);
         }
         IMAPStoreWrapper imapStoreWrapper;
         do {

@@ -71,7 +71,7 @@ import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
  *
  */
 public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransformer {
-
+    
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
     static {
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -128,7 +128,8 @@ public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransf
                     return TIME_FORMAT.parse(value);
                 }
             case VERSION: return Integer.valueOf(value);
-            case FILE_SIZE: return Long.valueOf(value);
+            case FILE_SIZE:
+                return Long.valueOf(value.replaceAll("[,.]", ""));
             }
         } catch (ParseException e) {
             return null;

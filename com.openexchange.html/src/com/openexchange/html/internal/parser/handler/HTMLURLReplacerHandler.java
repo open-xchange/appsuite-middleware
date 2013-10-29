@@ -162,7 +162,7 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
     }
 
     private static final String VAL_START = "=\"";
-    private static final char[] CANDIDATES = { '\'', '"', '<', '>', '%'};
+    private static final char[] CANDIDATES = { '\'', '"', '<', '>' };
 
     /**
      * Adds tag occurring in white list to HTML result.

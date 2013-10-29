@@ -136,37 +136,27 @@ public final class GetStructureAction extends AbstractMailAction {
             /*
              * Get message
              */
-            final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+            final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
             if (mail == null) {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
             }
-            final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-            final boolean doUnseen = (unseen && wasUnseen);
-            if (doUnseen) {
-                mail.setFlag(MailMessage.FLAG_SEEN, false);
-                final int unreadMsgs = mail.getUnreadMessages();
-                mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
+            if (!mail.containsAccountId()) {
+                mail.setAccountId(mailInterface.getAccountID());
             }
-            data = new AJAXRequestResult(MessageWriter.writeStructure(mailInterface.getAccountID(), mail, maxSize), "json");
-            if (doUnseen) {
-                /*
-                 * Leave mail as unseen
-                 */
-                mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-            } else if (wasUnseen) {
+            final boolean wasUnseen = (unseen ? !mail.isSeen() : mail.containsPrevSeen() && !mail.isPrevSeen());
+            if (wasUnseen) {
                 try {
                     final ServerUserSetting setting = ServerUserSetting.getInstance();
                     final int contextId = session.getContextId();
                     final int userId = session.getUserId();
-                    if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
-                        contextId,
-                        userId).booleanValue()) {
+                    if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
                         triggerContactCollector(session, mail);
                     }
                 } catch (final OXException e) {
                     LOG.warn("Contact collector could not be triggered.", e);
                 }
             }
+            data = new AJAXRequestResult(MessageWriter.writeStructure(mailInterface.getAccountID(), mail, maxSize), "json");
             return data;
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
