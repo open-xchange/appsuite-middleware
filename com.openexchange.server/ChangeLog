@@ -2,6 +2,7 @@
 
  - Fix for bug 29516: Do not store password in IMAP store cache
  - Fix for bug 29518: Collect addresses on read access to unread/unseen messages
+ - Fix for bug 29519: No public folder check for InfoStore folders
 
 * 2013-10-29 - tobias.friedrich@open-xchange.com
 
