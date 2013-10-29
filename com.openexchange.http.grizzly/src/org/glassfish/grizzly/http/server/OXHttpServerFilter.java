@@ -371,25 +371,31 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 final int maxPingCount = this.maxPingCount;
                 final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : this.maxPingCount);
                 final AtomicReference<ScheduledTimerTask> ref = new AtomicReference<ScheduledTimerTask>();
+                final int pingDelay = this.pingDelay;
 
                 final Runnable r = new Runnable() {
 
                     @Override
                     public void run() {
-                        if (pingCount.decrementAndGet() < 0) {
-                            final ScheduledTimerTask timerTask = ref.get();
-                            if (null != timerTask) {
-                                timerTask.cancel(false);
-                            }
-                            return;
-                        }
                         try {
                             final WatchInfo watchInfo = cm.get(ctx);
+                            boolean pingIssued = false;
                             if (null != watchInfo && (watchInfo.handlerResponse instanceof OXResponse)) {
                                 final StampingNIOOutputStreamImpl stamped = (StampingNIOOutputStreamImpl) ((OXResponse) watchInfo.handlerResponse).createOutputStream();
                                 if (!stamped.closed) {
                                     final long lastAccessed = stamped.lastAccessed;
-                                    if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) > 90000) {
+                                    if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) >= pingDelay) {
+                                        // Check whether to issue a ping
+                                        if (pingCount.decrementAndGet() < 0) {
+                                            // Not allowed to issue a further ping
+                                            final ScheduledTimerTask timerTask = ref.get();
+                                            if (null != timerTask) {
+                                                timerTask.cancel(false);
+                                            }
+                                            return;
+                                        }
+
+                                        // Issue a ping
                                         final MemoryManager memoryManager = ctx.getMemoryManager();
                                         if (Ping.PROCESSING == ping) {
                                             final Buffer encodedBuffer = memoryManager.allocate(128);
@@ -416,9 +422,11 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                                             outputBuffer.writeBuffer(buffer);
                                             outputBuffer.flush();
                                         }
+                                        pingIssued = true;
                                     }
                                 }
-                            } else {
+                            }
+                            if (false == pingIssued) {
                                 pingCount.set(maxPingCount);
                             }
                         } catch (final Exception e) {
@@ -427,8 +435,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                     }
                 };
 
-                final int delay = pingDelay / 3;
-                final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
+                final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, pingDelay, pingDelay);
                 ref.set(timerTask);
                 cm.put(ctx, new WatchInfo(timerTask, handlerResponse));
             }

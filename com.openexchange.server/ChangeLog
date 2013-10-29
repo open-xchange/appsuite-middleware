@@ -1,3 +1,14 @@
+* 2013-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29516: Do not store password in IMAP store cache
+ - Fix for bug 29518: Collect addresses on read access to unread/unseen messages
+ - Fix for bug 29519: No public folder check for InfoStore folders
+
+* 2013-10-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29205: Use 'universalchardet' charset detection library
+ - Fix for bug 29529: Made 'validate_contact_email' setting available via 'io.ox/core//features/validateMailAddresses'
+
 * 2013-10-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24642: Resolve participant information for shared calendar folders as needed
@@ -13,6 +24,7 @@
  - Fix for bug 29509: Fixed typo in i18n string
  - Fix for bug 29512: File folder publication offers latest version of a listed file
  - Fix for bug 29498: Check for regal RFC 822 E-Mail address prior to applying preparations for MSISDN addresses
+ - Fix for bug 29113: Prefer MIME type by file name if signaled one differs from file extension
 
 * 2013-10-27 - thorben.betten@open-xchange.com
 

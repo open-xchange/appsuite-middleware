@@ -192,19 +192,18 @@ public class LoginServlet extends AJAXServlet {
         SESSION, SECRET;
     }
 
-    /** The atomic reference for login configuration */
-    private static final AtomicReference<LoginConfiguration> CONF_REFERENCE = new AtomicReference<LoginConfiguration>();
+    private static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
 
     /**
-     * The currently active login configuration.
+     * Gets the login configuration.
      *
-     * @return The login configuration
+     * @return The login configuration or <code>null</code> if not yet initialized
      */
     public static LoginConfiguration getLoginConfiguration() {
-        return CONF_REFERENCE.get();
+        return confReference.get();
     }
 
-    // ------------------------------------------------------------------------------------ //
+    // --------------------------------------------------------------------------------------- //
 
     private final Map<String, LoginRequestHandler> handlerMap;
 
@@ -254,7 +253,7 @@ public class LoginServlet extends AJAXServlet {
                 try {
                     final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                     if (session != null) {
-                        final LoginConfiguration conf = CONF_REFERENCE.get();
+                        final LoginConfiguration conf = confReference.get();
                         SessionServlet.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
                         final String secret = SessionServlet.extractSecret(
                             conf.getHashSource(),
@@ -282,7 +281,7 @@ public class LoginServlet extends AJAXServlet {
 
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-                final LoginConfiguration conf = CONF_REFERENCE.get();
+                final LoginConfiguration conf = confReference.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -403,7 +402,7 @@ public class LoginServlet extends AJAXServlet {
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
                     session = sessiondService.getSession(sessionId);
-                    final LoginConfiguration conf = CONF_REFERENCE.get();
+                    final LoginConfiguration conf = confReference.get();
                     if (session != null) {
                         SessionServlet.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
                         final String secret = SessionServlet.extractSecret(
@@ -451,7 +450,7 @@ public class LoginServlet extends AJAXServlet {
 
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-                final LoginConfiguration conf = CONF_REFERENCE.get();
+                final LoginConfiguration conf = confReference.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -613,7 +612,7 @@ public class LoginServlet extends AJAXServlet {
             disableTrimLogin,
             formLoginWithoutAuthId,
             isRandomTokenEnabled);
-        CONF_REFERENCE.set(conf);
+        confReference.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
         handlerMap.put(ACTION_TOKENS, new Tokens(conf));
@@ -631,6 +630,22 @@ public class LoginServlet extends AJAXServlet {
             if (null != subPath && subPath.startsWith("/httpAuth")) {
                 doHttpAuth(req, resp);
             } else if (null != action) {
+                // Check if autologin is enabled
+                if (action.equalsIgnoreCase("hasAutologin")) {
+                    // The magic spell to disable caching
+                    Tools.disableCaching(resp);
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+                    try {
+                        final JSONObject jo = new JSONObject(2);
+                        jo.put(ACTION_AUTOLOGIN, confReference.get().isSessiondAutoLogin());
+                        jo.write(resp.getWriter());
+                    } catch (final JSONException e) {
+                        LOG.error(LoginServlet.RESPONSE_ERROR, e);
+                        LoginServlet.sendError(resp);
+                    }
+                }
+                // Regular login handling
                 doJSONAuth(req, resp, action);
             } else {
                 logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
@@ -672,7 +687,7 @@ public class LoginServlet extends AJAXServlet {
      * Writes or rewrites a cookie
      */
     private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws OXException, JSONException, IOException {
-        final LoginConfiguration conf = CONF_REFERENCE.get();
+        final LoginConfiguration conf = confReference.get();
         if (!conf.isSessiondAutoLogin() && CookieType.SESSION == type) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create("store");
         }
@@ -741,7 +756,7 @@ public class LoginServlet extends AJAXServlet {
      */
     protected void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
         final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
-        configureCookie(cookie, secure, serverName, CONF_REFERENCE.get());
+        configureCookie(cookie, secure, serverName, confReference.get());
         resp.addCookie(cookie);
     }
 
@@ -766,9 +781,9 @@ public class LoginServlet extends AJAXServlet {
 
     private String parseClient(final HttpServletRequest req) {
         try {
-            return LoginTools.parseClient(req, false, CONF_REFERENCE.get().getDefaultClient());
+            return LoginTools.parseClient(req, false, confReference.get().getDefaultClient());
         } catch (final OXException e) {
-            return CONF_REFERENCE.get().getDefaultClient();
+            return confReference.get().getDefaultClient();
         }
     }
 
@@ -814,7 +829,7 @@ public class LoginServlet extends AJAXServlet {
         if (!Authorization.checkForAuthorizationHeader(auth)) {
             throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create();
         }
-        final LoginConfiguration conf = CONF_REFERENCE.get();
+        final LoginConfiguration conf = confReference.get();
         if (Authorization.checkForBasicAuthorization(auth)) {
             creds = Authorization.decode(auth);
             version = conf.getClientVersion();
@@ -881,6 +896,24 @@ public class LoginServlet extends AJAXServlet {
         if (null != altId) {
             cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
             configureCookie(cookie, secure, serverName, conf);
+            resp.addCookie(cookie);
+        }
+    }
+
+    /**
+     * Writes the (groupware's) public session cookie <code>"open-xchange-public-session"</code> to specified HTTP servlet response.
+     *
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @param session The session providing the public session cookie identifier
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
+        final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+        if (null != altId) {
+            final Cookie cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
+            LoginServlet.configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }
     }

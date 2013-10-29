@@ -241,7 +241,7 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
-    protected void initializeSession(final HttpServletRequest req) throws OXException {
+    protected void initializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
         if (null != getSessionObject(req, true)) {
             return;
         }
@@ -272,6 +272,7 @@ public class DispatcherServlet extends SessionServlet {
                 }
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
+                checkPublicSessionCookie(req, resp, session);
                 sessionParamFound = true;
             } else {
                 session = null;

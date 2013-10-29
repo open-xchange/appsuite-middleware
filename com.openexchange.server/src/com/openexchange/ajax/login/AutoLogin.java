@@ -222,7 +222,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             /*-
              * Ensure appropriate public-session-cookie is set
              */
-            writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), conf);
+            LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), conf);
 
         } catch (final OXException e) {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {

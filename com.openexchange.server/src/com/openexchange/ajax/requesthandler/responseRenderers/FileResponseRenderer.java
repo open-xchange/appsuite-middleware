@@ -639,7 +639,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
-            close(file, documentData);
+            close(documentData, file);
             close(closeables);
         }
     }

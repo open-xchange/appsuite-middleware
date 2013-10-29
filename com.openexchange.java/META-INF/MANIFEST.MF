@@ -18,7 +18,7 @@ Import-Package: javax.activation;version="1.1.0",
  javax.security.sasl,
  org.apache.commons.logging,
  org.json,
- org.mozilla.intl.chardet,
+ org.mozilla.universalchardet,
  sun.misc
 Export-Package: com.damienmiller,
  com.davekoelle,

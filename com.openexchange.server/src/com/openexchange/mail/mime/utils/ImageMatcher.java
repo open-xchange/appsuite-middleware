@@ -66,6 +66,8 @@ import com.openexchange.image.ImageActionFactory;
  */
 public final class ImageMatcher {
 
+    private static final String DEFAULT_ALT_PREFIX = DispatcherPrefixService.DEFAULT_ALT_PREFIX;
+
     /**
      * Creates a new image matcher from given content.
      *
@@ -108,6 +110,10 @@ public final class ImageMatcher {
             String prefix = DefaultDispatcherPrefixService.getInstance().getPrefix();
             if (prefix.charAt(0) == '/') {
                 prefix = prefix.substring(1);
+            }
+            final String altPrefix = DEFAULT_ALT_PREFIX.substring(1);
+            if (!altPrefix.equalsIgnoreCase(prefix)) {
+                prefix = "(?:" + prefix + "|" + altPrefix + ")";
             }
             final String regexImageUrl =
                 "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
