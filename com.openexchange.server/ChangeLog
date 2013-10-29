@@ -1,3 +1,7 @@
+* 2013-10-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29205: Use 'universalchardet' charset detection library 
+
 * 2013-10-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24642: Resolve participant information for shared calendar folders as needed

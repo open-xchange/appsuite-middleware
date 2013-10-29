@@ -56,7 +56,8 @@ Export-Package: org.apache.tika;version="1.4.0",
  org.apache.tika.sax;version="1.4.0",
  org.apache.tika.sax.xpath;version="1.4.0",
  org.apache.tika.utils;version="1.4.0",
- org.apache.xmlbeans
+ org.apache.xmlbeans,
+ org.mozilla.universalchardet
 Import-Package: javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
