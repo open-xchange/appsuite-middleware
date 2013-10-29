@@ -237,9 +237,7 @@ public final class NewAction extends AbstractMailAction {
                     final ServerUserSetting setting = ServerUserSetting.getInstance();
                     final int contextId = session.getContextId();
                     final int userId = session.getUserId();
-                    if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
-                        contextId,
-                        userId).booleanValue()) {
+                    if (setting.isContactCollectOnMailTransport(contextId, userId).booleanValue()) {
                         triggerContactCollector(session, composedMails[0]);
                     }
                 } catch (final Exception e) {
