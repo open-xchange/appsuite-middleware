@@ -268,7 +268,7 @@ public final class IMAPStoreCache {
         }
     }
 
-    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final String pw, final Session session) throws OXException {
+    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final Session session) throws OXException {
         /*
          * Check for a cached one
          */
@@ -278,7 +278,7 @@ public final class IMAPStoreCache {
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final IMAPStoreContainer newContainer = newContainer(server, port, login, pw);
+            final IMAPStoreContainer newContainer = newContainer(server, port);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -298,16 +298,16 @@ public final class IMAPStoreCache {
         return container;
     }
 
-    private IMAPStoreContainer newContainer(final String server, final int port, final String login, final String pw) {
+    private IMAPStoreContainer newContainer(final String server, final int port) {
         switch (containerType) {
         case UNBOUNDED:
-            return new UnboundedIMAPStoreContainer(server, port, login, pw);
+            return new UnboundedIMAPStoreContainer(server, port);
         case BOUNDARY_AWARE:
-            return new BoundaryAwareIMAPStoreContainer(server, port, login, pw);
+            return new BoundaryAwareIMAPStoreContainer(server, port);
         case NON_CACHING:
-            return new NonCachingIMAPStoreContainer(server, port, login, pw);
+            return new NonCachingIMAPStoreContainer(server, port);
         default:
-            return new BoundaryAwareIMAPStoreContainer(server, port, login, pw);
+            return new BoundaryAwareIMAPStoreContainer(server, port);
         }
     }
 
@@ -346,10 +346,10 @@ public final class IMAPStoreCache {
          */
         try {
             if (!DEBUG) {
-                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+                return getContainer(accountId, server, port, login, session).getStore(imapSession, login, pw);
             }
             final long st = System.currentTimeMillis();
-            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+            final IMAPStore store = getContainer(accountId, server, port, login, session).getStore(imapSession, login, pw);
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
             return store;

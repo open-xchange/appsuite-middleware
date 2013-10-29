@@ -67,8 +67,8 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
     /**
      * Initializes a new {@link BoundaryAwareIMAPStoreContainer}.
      */
-    public BoundaryAwareIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
-        super(server, port, login, pw);
+    public BoundaryAwareIMAPStoreContainer(final String server, final int port) {
+        super(server, port);
     }
 
     /**
@@ -91,10 +91,10 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
     }
 
     @Override
-    public IMAPStore getStore(final Session imapSession) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(final Session imapSession, final String login, final String pw) throws MessagingException, InterruptedException {
         final int maxNumAuthenticated = PropUtil.getIntSessionProperty(imapSession, "mail.imap.maxNumAuthenticated", 0);
         if (maxNumAuthenticated <= 0) {
-            return super.getStore(imapSession);
+            return super.getStore(imapSession, login, pw);
         }
 
         // Try acquire a permit
@@ -104,7 +104,7 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
             if (debugEnabled) {
                 LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- " + limiter);
             }
-            return super.getStore(imapSession);
+            return super.getStore(imapSession, login, pw);
         }
 
         // Await until permit is available
@@ -128,7 +128,7 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
         if (debugEnabled) {
             LOG.debug("BoundaryAwareIMAPStoreContainer.getStore(): Acquired -- " + limiter);
         }
-        return super.getStore(imapSession);
+        return super.getStore(imapSession, login, pw);
     }
 
     @Override

@@ -62,18 +62,14 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     protected final String server;
     protected final int port;
-    protected final String login;
-    protected final String pw;
     private final AtomicInteger inUseCount;
 
     /**
      * Initializes a new {@link NonCachingIMAPStoreContainer}.
      */
-    public NonCachingIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
+    public NonCachingIMAPStoreContainer(final String server, final int port) {
         super();
-        this.login = login;
         this.port = port;
-        this.pw = pw;
         this.server = server;
         inUseCount = new AtomicInteger();
     }
@@ -84,7 +80,7 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(final javax.mail.Session imapSession, final String login, final String pw) throws MessagingException, InterruptedException {
         inUseCount.incrementAndGet();
         return newStore(server, port, login, pw, imapSession);
     }

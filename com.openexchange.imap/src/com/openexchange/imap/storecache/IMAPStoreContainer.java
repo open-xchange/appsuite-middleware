@@ -70,11 +70,13 @@ public interface IMAPStoreContainer {
      * Gets a connected IMAP store.
      *
      * @param imapSession The IMAP session
+     * @param login The login
+     * @param pw The password
      * @return The connected IMAP store or <code>null</code> if currently impossible to do so
      * @throws MessagingException If returning a connected IMAP store fails
      * @throws InterruptedException If thread is interrupted when possibly waiting for free resources
      */
-    IMAPStore getStore(javax.mail.Session imapSession) throws MessagingException, InterruptedException;
+    IMAPStore getStore(javax.mail.Session imapSession, String login, String pw) throws MessagingException, InterruptedException;
 
     /**
      * Returns specified IMAP store to container.

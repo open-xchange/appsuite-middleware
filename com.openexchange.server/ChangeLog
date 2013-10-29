@@ -1,3 +1,7 @@
+* 2013-10-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29516: Do not store password in IMAP store cache
+
 * 2013-10-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29205: Use 'universalchardet' charset detection library
