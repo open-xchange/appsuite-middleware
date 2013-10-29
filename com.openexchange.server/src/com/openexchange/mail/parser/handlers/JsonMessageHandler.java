@@ -131,7 +131,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String DISPOSITION = MailJSONField.DISPOSITION.getKey();
     private static final String SIZE = MailJSONField.SIZE.getKey();
     private static final String CONTENT_TYPE = MailJSONField.CONTENT_TYPE.getKey();
-    private static final String BASE_CONTENT_TYPE = "base_content_type";
     private static final String ID = MailListField.ID.getKey();
     private static final String PRIORITY = MailJSONField.PRIORITY.getKey();
     private static final String NESTED_MESSAGES = MailJSONField.NESTED_MESSAGES.getKey();
@@ -487,11 +486,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Content-Type
              */
-            {
-                final ContentType contentType = part.getContentType();
-                jsonObject.put(CONTENT_TYPE, contentType.toString());
-                jsonObject.put(BASE_CONTENT_TYPE, contentType.getBaseType());
-            }
+            jsonObject.put(CONTENT_TYPE, part.getContentType().toString());
             /*
              * Content
              */
