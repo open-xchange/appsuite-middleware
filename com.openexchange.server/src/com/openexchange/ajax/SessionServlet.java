@@ -213,7 +213,14 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    protected void initializeSession(final HttpServletRequest req) throws OXException {
+    /**
+     * Initializes associated request's session.
+     *
+     * @param req The request
+     * @param resp The response
+     * @throws OXException If initialization fails
+     */
+    protected void initializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
         if (null != getSessionObject(req, true)) {
             return;
         }
@@ -230,6 +237,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 session = getSession(req, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
+                checkPublicSessionCookie(req, null, session);
             } else {
                 session = null;
             }
@@ -313,7 +321,7 @@ public abstract class SessionServlet extends AJAXServlet {
         String sessionId = null;
         ServerSession session = null;
         try {
-            initializeSession(req);
+            initializeSession(req, resp);
             session = getSessionObject(req, true);
             if (null != session) {
                 /*
@@ -663,6 +671,20 @@ public abstract class SessionServlet extends AJAXServlet {
             throw e;
         } catch (final UndeclaredThrowableException e) {
             throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
+        }
+    }
+
+    /**
+     * Checks presence of public session cookie.
+     *
+     * @param req The request
+     * @param resp The response
+     * @param session The request-associated session
+     */
+    public static void checkPublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session) {
+        final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
+        if ((null != cookies) && (null == cookies.get(PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req)))) {
+            LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
         }
     }
 

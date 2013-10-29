@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -283,24 +282,6 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 return null;
             }
         });
-    }
-
-    /**
-     * Writes the (groupware's) public session cookie <code>"open-xchange-public-session"</code> to specified HTTP servlet response.
-     *
-     * @param req The HTTP request
-     * @param resp The HTTP response
-     * @param session The session providing the public session cookie identifier
-     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
-     * @param serverName The HTTP request's server name
-     */
-    public void writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
-        final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-        if (null != altId) {
-            final Cookie cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
-            LoginServlet.configureCookie(cookie, secure, serverName, conf);
-            resp.addCookie(cookie);
-        }
     }
 
 }
