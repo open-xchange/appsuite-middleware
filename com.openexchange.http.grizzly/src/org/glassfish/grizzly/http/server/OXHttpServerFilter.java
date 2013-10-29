@@ -371,6 +371,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 final int maxPingCount = this.maxPingCount;
                 final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : this.maxPingCount);
                 final AtomicReference<ScheduledTimerTask> ref = new AtomicReference<ScheduledTimerTask>();
+                final int pingDelay = this.pingDelay;
 
                 final Runnable r = new Runnable() {
 
@@ -389,7 +390,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                                 final StampingNIOOutputStreamImpl stamped = (StampingNIOOutputStreamImpl) ((OXResponse) watchInfo.handlerResponse).createOutputStream();
                                 if (!stamped.closed) {
                                     final long lastAccessed = stamped.lastAccessed;
-                                    if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) > 90000) {
+                                    if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) >= pingDelay) {
                                         final MemoryManager memoryManager = ctx.getMemoryManager();
                                         if (Ping.PROCESSING == ping) {
                                             final Buffer encodedBuffer = memoryManager.allocate(128);
@@ -427,8 +428,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                     }
                 };
 
-                final int delay = pingDelay / 3;
-                final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
+                final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, pingDelay, pingDelay);
                 ref.set(timerTask);
                 cm.put(ctx, new WatchInfo(timerTask, handlerResponse));
             }
