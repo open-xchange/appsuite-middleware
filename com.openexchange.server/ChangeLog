@@ -1,3 +1,7 @@
+* 2013-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29512: Fixed associated Microformat publication template and applied proper timeout
+
 * 2013-10-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 29516: Do not store password in IMAP store cache
