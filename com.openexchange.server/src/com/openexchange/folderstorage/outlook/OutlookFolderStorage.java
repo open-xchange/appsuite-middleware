@@ -104,6 +104,7 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
+import com.openexchange.folderstorage.database.DatabaseFolderStorageUtility;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -483,7 +484,20 @@ public final class OutlookFolderStorage implements FolderStorage {
                             if (restore) {
                                 folderStorage.restore(realTreeId, folderId, storageParameters);
                             } else {
-                                deleteFolder(treeId, folderId, storageParameters, DatabaseFolderType.getInstance().servesFolderId(folderId), memoryTable);
+                                deleteFolder(treeId, folderId, storageParameters, DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0, memoryTable);
+                            }
+                        } else if (DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0) {
+                            final String parentId = memoryTree.getParentOf(folderId);
+                            if (null != parentId && DatabaseFolderStorageUtility.getUnsignedInteger(parentId) >= 0) {
+                                try {
+                                    final Folder fld = folderStorage.getFolder(realTreeId, folderId, storageParameters);
+                                    if (parentId.equals(fld.getParentID())) {
+                                        // Unnecessary entry
+                                        deleteFolder(treeId, folderId, storageParameters, true, memoryTable);
+                                    }
+                                } catch (final Exception x) {
+                                    // ignore
+                                }
                             }
                         }
                     } catch (final OXException oxe) {
