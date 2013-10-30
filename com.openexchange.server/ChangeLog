@@ -2,6 +2,7 @@
 
  - Fix for bug 29512: Fixed associated Microformat publication template and applied proper timeout
  - Fix for bug 29561: Added null guards to reporting tool if 'Orchestration' has no last report available
+ - Fix for bug 29108: Output a message to user if 'stopbundle' CLI has been successfully invoked
 
 * 2013-10-29 - thorben.betten@open-xchange.com
 
