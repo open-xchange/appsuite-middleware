@@ -112,12 +112,6 @@ open-xchange-authentication-imap (7.4.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:29:06 +0200
 
-open-xchange-authentication-imap (7.2.2-23) stable; urgency=low
-
-  * Build for patch 2013-10-30
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 24 Oct 2013 15:56:33 +0200
-
 open-xchange-authentication-imap (7.2.2-22) stable; urgency=low
 
   * Build for patch 2013-10-21

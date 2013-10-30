@@ -47,8 +47,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Thu Oct 24 2013 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2013-10-30
 * Wed Oct 23 2013 Thorben Betten <thorben.betten@open-xchange.com>
 Second candidate for 7.4.1 release
 * Mon Oct 21 2013 Thorben Betten <thorben.betten@open-xchange.com>
