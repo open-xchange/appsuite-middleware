@@ -136,7 +136,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Handles events that belong to the infostore.
-     * 
+     *
      * @param event - the {@link Event} that was received
      * @param log - the log to add information
      * @throws OXException
@@ -168,8 +168,19 @@ public class AuditEventHandler implements EventHandler {
 
         final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_PUBLICATION))) {
+            String remoteAddress = null;
+            try {
+                remoteAddress = (String) event.getProperty("remoteAddress");
+            } catch (ClassCastException e) {
+                remoteAddress = "unknown";
+            }
+
+            if (remoteAddress == null) {
+                remoteAddress = "unknown";
+            }
+
             log.append("PUBLISH: ");
-            log.append(session.getLocalIp());
+            log.append(remoteAddress);
             log.append("; ");
         } else {
             appendUserInformation(session.getUserId(), session.getContextId(), log);
@@ -199,7 +210,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Handles events that belong to other server parts
-     * 
+     *
      * @param event - the {@link Event} that was received
      * @param log - the log to add information
      * @throws OXException
@@ -241,7 +252,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Handles the general information of a CommonEvent that should be logged for all action objects.
-     * 
+     *
      * @param commonEvent
      * @param log
      */
@@ -264,7 +275,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Handles appointment events.
-     * 
+     *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
      * @param log - the log to add information
@@ -292,7 +303,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Handles contact events.
-     * 
+     *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
      * @param log - the log to add information
@@ -328,7 +339,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Handles task events.
-     * 
+     *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
      * @param log - the log to add information
@@ -352,7 +363,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Handles infostore events.
-     * 
+     *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
      * @param log - the log to add information

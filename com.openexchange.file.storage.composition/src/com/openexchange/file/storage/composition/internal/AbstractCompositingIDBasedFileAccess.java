@@ -80,6 +80,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.FileStorageEventHelper.EventProperty;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
@@ -278,16 +279,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public Document getDocumentAndMetadata(String id, final String version) throws OXException {
-        Props properties = LogProperties.getLogProperties();
-        if (null != properties) {
-            Object serverName = properties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-            if (null == serverName) {
-                serverName = properties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
-            }
-            if (null != serverName) {
-                session.setLocalIp(serverName.toString());
-            }
-        }
         final FileID fileID = new FileID(id);
         final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
@@ -299,7 +290,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         {
             File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
             if (null != metaData) {
-                postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), metaData.getFolderId(), fileID.toUniqueID(), metaData.getFileName()));
+                postEvent(FileStorageEventHelper.buildAccessEvent(
+                    session,
+                    fileID.getService(),
+                    fileID.getAccountId(),
+                    metaData.getFolderId(),
+                    fileID.toUniqueID(),
+                    metaData.getFileName(),
+                    extractRemoteAddress()));
             }
         }
         // Proceed...
@@ -333,16 +331,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public Document getDocumentAndMetadata(String id, final String version, String clientETag) throws OXException {
-        Props properties = LogProperties.getLogProperties();
-        if (null != properties) {
-            Object serverName = properties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-            if (null == serverName) {
-                serverName = properties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
-            }
-            if (null != serverName) {
-                session.setLocalIp(serverName.toString());
-            }
-        }
         final FileID fileID = new FileID(id);
         final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
@@ -354,7 +342,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         {
             File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
             if (null != metaData) {
-                postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), metaData.getFolderId(), fileID.toUniqueID(), metaData.getFileName()));
+                postEvent(FileStorageEventHelper.buildAccessEvent(
+                    session,
+                    fileID.getService(),
+                    fileID.getAccountId(),
+                    metaData.getFolderId(),
+                    fileID.toUniqueID(),
+                    metaData.getFileName(),
+                    extractRemoteAddress()));
             }
         }
         // Proceed...
@@ -388,16 +383,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public InputStream getDocument(final String id, final String version) throws OXException {
-        Props properties = LogProperties.getLogProperties();
-        if (null != properties) {
-            Object serverName = properties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-            if (null == serverName) {
-                serverName = properties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
-            }
-            if (null != serverName) {
-                session.setLocalIp(serverName.toString());
-            }
-        }
         final FileID fileID = new FileID(id);
         final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
@@ -411,7 +396,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                     fileID.getAccountId(),
                     metaData.getFolderId(),
                     fileID.toUniqueID(),
-                    metaData.getFileName()));
+                    metaData.getFileName(),
+                    extractRemoteAddress()));
             }
         }
         // Proceed...
@@ -1457,6 +1443,21 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         if (null != pattern && com.openexchange.java.SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
             throw FileStorageExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumSearchCharacters));
         }
+    }
+
+    private EventProperty extractRemoteAddress() {
+        Props properties = LogProperties.getLogProperties();
+        if (null != properties) {
+            Object serverName = properties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
+            if (null == serverName) {
+                serverName = properties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
+            }
+            if (null != serverName) {
+                return new EventProperty("remoteAddress", serverName.toString());
+            }
+        }
+
+        return null;
     }
 
 }
