@@ -84,32 +84,8 @@ public abstract class AbstractExportAction implements AJAXActionService {
     private static final String DOWNLOAD = "download";
 
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
-        List<Integer> cols = req.getColumns();
-
-        final Map<String, Object> optionalParams;
-        {
-            final AJAXRequestData request = req.getRequest();
-            OutputStream out = null;
-            try {
-                out = request.optOutputStream();
-            } catch (IOException e) {
-                // Ignore
-            }
-            if (null == out) {
-                optionalParams = null;
-            } else {
-                optionalParams = new HashMap<String, Object>(4);
-                optionalParams.put("__requestData", request);
-                String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
-                String delivery = request.getParameter(DELIVERY);
-                if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
-                    optionalParams.put("__saveToDisk", Boolean.TRUE);
-                }
-            }
-        }
-
-        SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, optionalParams);
-
+        final List<Integer> cols = req.getColumns();
+        final SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
         if (null == sis) {
             // Streamed
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
@@ -119,5 +95,30 @@ public abstract class AbstractExportAction implements AJAXActionService {
         fileHolder.setDisposition("attachment");
         req.getRequest().setFormat("file");
         return new AJAXRequestResult(fileHolder, "file");
+    }
+
+    protected Map<String, Object> getOptionalParams(ExportRequest req) {
+        final Map<String, Object> optionalParams;
+        final AJAXRequestData request = req.getRequest();
+        OutputStream out = null;
+        try {
+            out = request.optOutputStream();
+        } catch (IOException e) {
+            // Ignore
+        }
+
+        if (null == out) {
+            optionalParams = null;
+        } else {
+            optionalParams = new HashMap<String, Object>(4);
+            optionalParams.put("__requestData", request);
+            String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
+            String delivery = request.getParameter(DELIVERY);
+            if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
+                optionalParams.put("__saveToDisk", Boolean.TRUE);
+            }
+        }
+
+        return optionalParams;
     }
 }

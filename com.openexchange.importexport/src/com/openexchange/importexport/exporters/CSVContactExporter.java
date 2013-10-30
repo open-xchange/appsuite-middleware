@@ -86,6 +86,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CSVContactExporter implements Exporter {
 
+    public static final String PARAMETER_EXPORT_DLISTS = "export_dlists";
+
     protected final static int[] POSSIBLE_FIELDS = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,
@@ -208,11 +210,12 @@ public class CSVContactExporter implements Exporter {
         ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(cols)));
 
         try {
+            final boolean exportDlists = optionalParams.containsKey(PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
             while (conIter.hasNext()) {
                 Contact current;
                 try {
                     current = conIter.next();
-                    if (current.containsDistributionLists()) {
+                    if (!exportDlists && current.containsDistributionLists()) {
                     	continue;
                     }
                     ret.append(convertToLine(convertToList(current, cols)));
