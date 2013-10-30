@@ -394,7 +394,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
-                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
+                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
+                    // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
                     checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                 }
@@ -744,7 +745,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 String checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
-                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
+                    imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
+                    // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
                     checkedCSS = cssBuffer.toString();
                     cssBuffer.setLength(0);
                 }
@@ -762,7 +764,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
             String checkedCSS = cssBuffer.toString();
             cssBuffer.setLength(0);
             if (dropExternalImages) {
-                imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
+                imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
+                // imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
                 checkedCSS = cssBuffer.toString();
                 cssBuffer.setLength(0);
             }

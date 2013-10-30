@@ -68,6 +68,7 @@ import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.InterruptibleCharSequence;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -315,7 +316,20 @@ public final class CSSMatcher {
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     public static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix) {
-        return checkCSS(cssBuilder, styleMap, cssPrefix, false);
+        return checkCSS(cssBuilder, styleMap, cssPrefix, true, false);
+    }
+
+    /**
+     * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
+     *
+     * @param cssBuilder A {@link StringBuilder} containing CSS content
+     * @param styleMap The style map
+     * @param cssPrefix The CSS prefix
+     * @param removeIfAbsent <code>true</code> to remove if not contained in style map
+     * @return <code>true</code> if modified; otherwise <code>false</code>
+     */
+    public static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent) {
+        return checkCSS(cssBuilder, styleMap, cssPrefix, removeIfAbsent, false);
     }
 
     private static final int MAX_ALLOWED_CSS_SELECTOR_SIZE = 2048;
@@ -348,7 +362,7 @@ public final class CSSMatcher {
      * @param internallyInvoked <code>true</code> if already internally invoked; otherwise <code>false</code>
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
-    protected static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean internallyInvoked) {
+    protected static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent, final boolean internallyInvoked) {
         // Schedule separate task to monitor duration
         // User StringBuffer-based invocation to honor concurrency
         final Stringer cssBld = new StringBufferStringer(new StringBuffer(cssBuilder.toString()));
@@ -357,15 +371,12 @@ public final class CSSMatcher {
 
             @Override
             public Boolean call() {
-                if (isEmpty(cssPrefix)) {
-                    return Boolean.valueOf(checkCSS(cssBld, styleMap, true));
-                }
                 boolean modified = false;
                 /*
                  * Feed matcher with buffer's content and reset
                  */
                 if (cssBld.indexOf("{") < 0) {
-                    return Boolean.valueOf(checkCSSElements(cssBld, styleMap, true));
+                    return Boolean.valueOf(checkCSSElements(cssBld, styleMap, removeIfAbsent));
                 }
                 final String css = CRLF.matcher(cssBld).replaceAll(" ");
                 final int length = css.length();
@@ -374,10 +385,9 @@ public final class CSSMatcher {
                 final Thread thread = Thread.currentThread();
                 // Block-wise sanitizing
                 if (CONSIDER_NESTED_BLOCKS) {
-                    boolean examined = true;
                     int off = 0;
                     Matcher m;
-                    while ((off < length) && (examined = continueParsing(off, css)) && (examined = !thread.isInterrupted()) && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css.substring(off)))).find()) {
+                    while ((off < length) && (continueParsing(off, css)) && (!thread.isInterrupted()) && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css.substring(off)))).find()) {
                         final int end = m.end() + off;
                         int index = end;
                         int level = 1;
@@ -394,7 +404,7 @@ public final class CSSMatcher {
                         cssElemsBuffer.append(css.substring(off, start));
                         final String prefix;
                         if (cssElemsBuffer.length() > 0) {
-                            modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                             prefix = cssElemsBuffer.toString();
                         } else {
                             prefix = "";
@@ -402,7 +412,7 @@ public final class CSSMatcher {
                         cssElemsBuffer.setLength(0);
                         // Check block part
                         cssElemsBuffer.append(css.substring(end, index - 1));
-                        modified |= checkCSS(cssElemsBuffer, styleMap, cssPrefix, true);
+                        modified |= checkCSS(cssElemsBuffer, styleMap, cssPrefix, removeIfAbsent, true);
                         // Check selector part
                         cssElemsBuffer.insert(0, prefixBlock(css.substring(start, end - 1), cssPrefix)).append('}').append('\n'); // Surround with block definition
                         final String block = cssElemsBuffer.toString();
@@ -412,9 +422,7 @@ public final class CSSMatcher {
                         cssBld.append(block);
                         off = index;
                     }
-                    if (examined) {
-                        cssElemsBuffer.append(css.substring(off, css.length()));
-                    }
+                    cssElemsBuffer.append(css.substring(off, css.length()));
                 } else {
                     final Matcher m = PATTERN_STYLE_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
                     cssBld.setLength(0);
@@ -422,12 +430,12 @@ public final class CSSMatcher {
                     while (!thread.isInterrupted() && m.find()) {
                         // Check prefix part
                         cssElemsBuffer.append(css.substring(lastPos, m.start()));
-                        modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                        modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                         final String prefix = cssElemsBuffer.toString();
                         cssElemsBuffer.setLength(0);
                         // Check block part
                         cssElemsBuffer.append(m.group(2));
-                        modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                        modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                         cssElemsBuffer.insert(0, prefixBlock(m.group(1), cssPrefix)).append('}').append('\n'); // Surround with block definition
                         final String block = cssElemsBuffer.toString();
                         cssElemsBuffer.setLength(0);
@@ -439,7 +447,7 @@ public final class CSSMatcher {
                     cssElemsBuffer.append(css.substring(lastPos, css.length()));
                 }
                 if (cssElemsBuffer.length() > 0) {
-                    modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                    modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                     final String tail = cssElemsBuffer.toString();
                     cssElemsBuffer.setLength(0);
                     cssBld.append(tail);
@@ -501,12 +509,15 @@ public final class CSSMatcher {
     private static final Pattern SPLIT_COMMA = Pattern.compile(",");
 
     static String prefixBlock(final String match, final String cssPrefix) {
-        if (isEmpty(match) || isEmpty(cssPrefix)) {
+        if (isEmpty(match)) {
             return match;
+        }
+        if (isEmpty(cssPrefix)) {
+            return new StringAllocator(match).append('{').toString();
         }
         final int length = match.length();
         if (1 == length) {
-            return match;
+            return new StringAllocator(match).append('{').toString();
         }
         // Cut off trailing '{' character
         final String s = match.indexOf('{') < 0 ? match : match.substring(0, length - 1);
@@ -607,20 +618,23 @@ public final class CSSMatcher {
                 builder.append('#').append(cssPrefix).append(' ');
             }
             builder.append('.').append(cssPrefix).append('-');
-            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
+            // builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
+            builder.append(selector.substring(1));
         } else if ('#' == firstChar) {
             // #id -> #prefix #prefix-id
             if (first) {
                 builder.append('#').append(cssPrefix).append(' ');
             }
             builder.append('#').append(cssPrefix).append('-');
-            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
+            // builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
+            builder.append(selector.substring(1));
         } else {
             // element -> #prefix element
             if (first) {
                 builder.append('#').append(cssPrefix).append(' ');
             }
-            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper));
+            // builder.append(replaceDotsAndHashes(selector, cssPrefix, helper));
+            builder.append(selector);
         }
     }
 
