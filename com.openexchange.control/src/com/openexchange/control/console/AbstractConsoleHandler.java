@@ -87,23 +87,23 @@ public abstract class AbstractConsoleHandler extends AbstractJMXHandler {
             try {
                 valueParser = new ValueParser(args, getParameter());
                 final ValueObject[] valueObjects = valueParser.getValueObjects();
-                for (int a = 0; a < valueObjects.length; a++) {
-                    if (valueObjects[a].getValue().equals("-help") || valueObjects[a].getValue().equals("--help")) {
+                for (ValueObject valueObject : valueObjects) {
+                    if (valueObject.getValue().equals("-help") || valueObject.getValue().equals("--help")) {
                         showHelp();
                         exit();
                     }
                 }
 
                 final ValuePairObject[] valuePairObjects = valueParser.getValuePairObjects();
-                for (int a = 0; a < valuePairObjects.length; a++) {
-                    if ("-h".equals(valuePairObjects[a].getName())) {
-                        jmxHost = valuePairObjects[a].getValue();
-                    } else if ("-p".equals(valuePairObjects[a].getName())) {
-                        jmxPort = Integer.parseInt(valuePairObjects[a].getValue());
-                    } else if ("-l".equals(valuePairObjects[a].getName())) {
-                        jmxLogin = valuePairObjects[a].getValue();
-                    } else if ("-pw".equals(valuePairObjects[a].getName())) {
-                        jmxPassword = valuePairObjects[a].getValue();
+                for (ValuePairObject valuePairObject : valuePairObjects) {
+                    if ("-h".equals(valuePairObject.getName())) {
+                        jmxHost = valuePairObject.getValue();
+                    } else if ("-p".equals(valuePairObject.getName())) {
+                        jmxPort = Integer.parseInt(valuePairObject.getValue());
+                    } else if ("-l".equals(valuePairObject.getName())) {
+                        jmxLogin = valuePairObject.getValue();
+                    } else if ("-pw".equals(valuePairObject.getName())) {
+                        jmxPassword = valuePairObject.getValue();
                     }
                 }
 
@@ -123,18 +123,4 @@ public abstract class AbstractConsoleHandler extends AbstractJMXHandler {
     protected ValueParser getParser() {
         return valueParser;
     }
-
-    /** Check for an empty string */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

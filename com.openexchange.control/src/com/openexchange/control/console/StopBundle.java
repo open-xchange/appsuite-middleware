@@ -54,6 +54,7 @@ import javax.management.ObjectName;
 import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.console.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link StopBundle} - The console handler for <code>&quot;stopbundle&quot;</code> command.
@@ -76,7 +77,7 @@ public final class StopBundle extends AbstractConsoleHandler {
             final ValueObject[] valueObjectArray = valueParser.getValueObjects();
             if (valueObjectArray.length > 0) {
                 bundleName = valueObjectArray[0].getValue();
-                if (isEmpty(bundleName)) {
+                if (Strings.isEmpty(bundleName)) {
                     showHelp();
                     exit();
                 }

@@ -88,10 +88,10 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         LOG.info("control command: list");
         final List<Map<String, String>> arrayList = new ArrayList<Map<String, String>>();
         final Bundle[] bundles = bundleContext.getBundles();
-        for (int a = 0; a < bundles.length; a++) {
+        for (Bundle bundle : bundles) {
             final Map<String, String> map = new HashMap<String, String>();
-            map.put("bundlename", bundles[a].getSymbolicName());
-            map.put("status", resolvState(bundles[a].getState()));
+            map.put("bundlename", bundle.getSymbolicName());
+            map.put("status", resolvState(bundle.getState()));
             arrayList.add(map);
         }
 
@@ -100,7 +100,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     @Override
     public void start(final String name) throws MBeanException {
-        LOG.info("control command: start package " + name);
+        LOG.info("control command: start bundle " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
@@ -115,7 +115,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     @Override
     public void stop(final String name) throws MBeanException {
-        LOG.info("control command: stop package " + name);
+        LOG.info("control command: stop bundle " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
@@ -136,7 +136,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     @Override
     public void install(final String location) {
-        LOG.info("install package: " + location);
+        LOG.info("install bundle: " + location);
         try {
             bundleContext.installBundle(location);
         } catch (final BundleException exc) {
@@ -146,7 +146,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     @Override
     public void uninstall(final String name) throws MBeanException {
-        LOG.info("uninstall package");
+        LOG.info("uninstall bundle");
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
@@ -161,7 +161,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     @Override
     public void update(final String name, final boolean autofresh) throws MBeanException {
-        LOG.info("control command: update package: " + name);
+        LOG.info("control command: update bundle: " + name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
@@ -261,8 +261,8 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                         final Bundle[] usedByBundles = service.getUsingBundles();
                         final List<String> bundleList = new ArrayList<String>();
                         if (usedByBundles != null) {
-                            for (int a = 0; a < usedByBundles.length; a++) {
-                                final String bundleName = usedByBundles[a].getSymbolicName();
+                            for (Bundle usedByBundle : usedByBundles) {
+                                final String bundleName = usedByBundle.getSymbolicName();
                                 if (bundleName != null) {
                                     bundleList.add(bundleName);
                                 }
@@ -290,9 +290,9 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
     }
 
     private Bundle getBundleByName(final String name, final Bundle[] bundle) {
-        for (int a = 0; a < bundle.length; a++) {
-            if (bundle[a].getSymbolicName().equals(name)) {
-                return bundle[a];
+        for (Bundle element : bundle) {
+            if (element.getSymbolicName().equals(name)) {
+                return element;
             }
         }
         return null;
