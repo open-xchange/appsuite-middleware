@@ -209,9 +209,14 @@ public class CSVContactExporter implements Exporter {
         final StringBuilder ret = new StringBuilder();
         ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(cols)));
 
+        final boolean exportDlists;
+        if (optionalParams == null) {
+        	exportDlists = true;
+        } else {
+        	exportDlists = optionalParams.containsKey(PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+        }
         try {
-            final boolean exportDlists = optionalParams.containsKey(PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
-            while (conIter.hasNext()) {
+        	while (conIter.hasNext()) {
                 Contact current;
                 try {
                     current = conIter.next();
