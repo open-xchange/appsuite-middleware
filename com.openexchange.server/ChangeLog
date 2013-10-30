@@ -1,3 +1,7 @@
+* 2013-10-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29412: Escape HTML content prior to writing to output writer
+
 * 2013-10-10 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29315: Avoid bad where condition

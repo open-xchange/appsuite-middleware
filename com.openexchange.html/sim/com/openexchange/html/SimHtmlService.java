@@ -177,4 +177,14 @@ public class SimHtmlService implements HtmlService {
         return htmlService.getHTMLEntity(entity);
     }
 
+    @Override
+    public String encodeForHTML(String input) {
+        return htmlService.encodeForHTML(input);
+    }
+
+    @Override
+    public String encodeForHTMLAttribute(String input) {
+        return htmlService.encodeForHTMLAttribute(input);
+    }
+
 }
