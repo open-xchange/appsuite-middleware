@@ -85,7 +85,7 @@ public class HTTPToolkit {
 
     public static InputStream grabStream(final String site, boolean check) throws IOException {
         final HttpClient client = new HttpClient();
-        final int timeout = 3000;
+        final int timeout = 5000;
         client.getParams().setSoTimeout(timeout);
         client.getParams().setIntParameter("http.connection.timeout", timeout);
 
@@ -110,7 +110,7 @@ public class HTTPToolkit {
             client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
 
             final GetMethod getMethod = new GetMethod(javaURL.getFile());
-            getMethod.getParams().setSoTimeout(1000);
+            getMethod.getParams().setSoTimeout(timeout);
             getMethod.setQueryString(javaURL.getQuery());
             client.executeMethod(getMethod);
 
@@ -130,7 +130,7 @@ public class HTTPToolkit {
 
     public static Reader post(final String site, final Map<String, String> values) throws HttpException, IOException {
         final HttpClient client = new HttpClient();
-        final int timeout = 3000;
+        final int timeout = 5000;
         client.getParams().setSoTimeout(timeout);
         client.getParams().setIntParameter("http.connection.timeout", timeout);
 
@@ -156,7 +156,7 @@ public class HTTPToolkit {
                 postMethod.addParameter(new NameValuePair(entry.getKey(), entry.getValue()));
             }
 
-            postMethod.getParams().setSoTimeout(1000);
+            postMethod.getParams().setSoTimeout(timeout);
             postMethod.setQueryString(javaURL.getQuery());
             client.executeMethod(postMethod);
 

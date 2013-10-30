@@ -78,7 +78,7 @@ import com.openexchange.test.mock.MockUtils;
 
 /**
  * Unit tests for {@link AuditEventHandler}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */
@@ -635,7 +635,6 @@ public class AuditEventHandlerTest {
 
         PowerMockito.when(event.getTopic()).thenReturn(FileStorageEventConstants.UPDATE_TOPIC);
         Session session = PowerMockito.mock(Session.class);
-        PowerMockito.when(session.getLocalIp()).thenReturn("theIp");
         PowerMockito.when(session.getParameter(Matchers.anyString())).thenReturn(Boolean.TRUE);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SESSION)).thenReturn(session);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(this.objectId);
@@ -647,7 +646,7 @@ public class AuditEventHandlerTest {
 
         Assert.assertFalse(stringBuilder.toString().startsWith("EVENT TYPE: ACCESS; "));
         Assert.assertTrue(stringBuilder.toString().startsWith("EVENT TYPE: UPDATE; "));
-        Assert.assertTrue(stringBuilder.toString().contains("PUBLISH: " + "theIp"));
+        Assert.assertTrue(stringBuilder.toString().contains("PUBLISH: " + "unknown"));
     }
 
     @Test
@@ -658,18 +657,18 @@ public class AuditEventHandlerTest {
 
         PowerMockito.when(event.getTopic()).thenReturn(FileStorageEventConstants.ACCESS_TOPIC);
         Session session = PowerMockito.mock(Session.class);
-        PowerMockito.when(session.getLocalIp()).thenReturn("theIp");
         PowerMockito.when(session.getParameter(Matchers.anyString())).thenReturn(Boolean.TRUE);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SESSION)).thenReturn(session);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(this.objectId);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SERVICE)).thenReturn(this.objectTitle);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).thenReturn(this.userId);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.FOLDER_ID)).thenReturn(this.objectTitle);
+        PowerMockito.when(event.getProperty("remoteAddress")).thenReturn("172.16.13.71");
 
         this.auditEventHandler.handleInfostoreEvent(event, stringBuilder);
 
         Assert.assertTrue(stringBuilder.toString().startsWith("EVENT TYPE: ACCESS; "));
-        Assert.assertTrue(stringBuilder.toString().contains("PUBLISH: " + "theIp"));
+        Assert.assertTrue(stringBuilder.toString().contains("PUBLISH: " + "172.16.13.71"));
     }
 
     @Test(expected = IllegalArgumentException.class)

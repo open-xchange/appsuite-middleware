@@ -137,7 +137,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
         }
         change.setDeleted(toDelete);
 
-        describeDiff(change, wrapper, session);
+        describeDiff(change, wrapper, session, message);
 
         analysis.addChange(change);
         analysis.recommendAction(ITipAction.DELETE);

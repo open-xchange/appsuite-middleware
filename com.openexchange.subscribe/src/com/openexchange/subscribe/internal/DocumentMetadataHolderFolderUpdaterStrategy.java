@@ -166,7 +166,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
     }
 
     private static InputStream grabFile(final DocumentMetadataHolder newElement) {
-        final String dataLink = newElement.dataLink;
+        String dataLink = newElement.dataLink;
         if (dataLink == null) {
             return null;
         }

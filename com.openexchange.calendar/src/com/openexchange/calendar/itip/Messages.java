@@ -193,11 +193,11 @@ public class Messages implements LocalizableStrings {
 
     public static final String DELETE_INTRO = "%1$s has deleted an appointment, or you have been removed as a participant:";
 
-    public static final String ASK_CHANGE_TITLE = "Change the description to %1$s.";
+    public static final String ASK_CHANGE_TITLE = "Change the title to %1$s.";
 
-    public static final String INTENTION_CHANGE_TITLE = "Change the description to %1$s.";
+    public static final String INTENTION_CHANGE_TITLE = "Change the title to %1$s.";
 
-    public static final String HAS_CHANGED_TITLE = "The appointment has a new description: %1$s.";
+    public static final String HAS_CHANGED_TITLE = "The appointment has a new title: %1$s.";
 
 	public static final String HAS_CHANGED_SHOWN_AS = "The appointment will now be shown as: \"%1$s\".";
 
@@ -209,11 +209,11 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_CHANGED_LOCATION = "The appointment takes place in a new location: %1$s.";
 
-    public static final String ASK_CHANGE_NOTE = "Use the comments below.";
+    public static final String ASK_CHANGE_NOTE = "Use the description below.";
 
-    public static final String INTENTION_CHANGE_NOTE = "Use the comments below.";
+    public static final String INTENTION_CHANGE_NOTE = "Use the description below.";
 
-    public static final String HAS_CHANGED_NOTE = "The appointment comments have changed.";
+    public static final String HAS_CHANGED_NOTE = "The appointments description has changed.";
 
     public static final String ASK_ADD_PARTICIPANT = "Please invite %1$s to the appointment.";
 

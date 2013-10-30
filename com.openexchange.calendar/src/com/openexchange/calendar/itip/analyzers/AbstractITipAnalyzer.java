@@ -82,6 +82,7 @@ import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling
 import com.openexchange.calendar.itip.generators.changes.generators.ShownAs;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
+import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -163,7 +164,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
 
 	public void describeDiff(final ITipChange change, final TypeWrapper wrapper,
-			final Session session) throws OXException {
+			final Session session, ITipMessage message) throws OXException {
 		if (services == null) {
 			change.setDiffDescription(new ArrayList<String>());
 			return;
@@ -182,7 +183,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			createIntro(change, users, ctx, wrapper, user.getLocale());
 			break;
 		case UPDATE:
-			updateIntro(change, users, ctx, wrapper, user.getLocale());
+			updateIntro(change, users, ctx, wrapper, user.getLocale(), message);
 			break;
 		case CREATE_DELETE_EXCEPTION:
 		case DELETE:
@@ -223,7 +224,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 				break;
 			} // Else Fall Through, creating change exceptions is more similar to updates
 		case UPDATE:
-			updateIntro(change, users, ctx, wrapper, user.getLocale());
+			updateIntro(change, users, ctx, wrapper, user.getLocale(), message);
 			break;
 		case CREATE_DELETE_EXCEPTION:
 		case DELETE:
@@ -243,7 +244,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	}
 
 	private void updateIntro(final ITipChange change, final UserService users, final Context ctx,
-			final TypeWrapper wrapper, final Locale locale) throws OXException {
+			final TypeWrapper wrapper, final Locale locale, ITipMessage message) throws OXException {
 		String displayName = displayNameFor(change.getCurrentAppointment()
 				.getOrganizer(), users, ctx);
 		if (onlyStateChanged(change.getDiff())) {
@@ -305,9 +306,11 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 				}
 			}
 		} else {
-			change.setIntroduction(new Sentence(Messages.UPDATE_INTRO).add(
-					displayName, ArgumentType.PARTICIPANT).getMessage(wrapper,
-					locale));
+		    if (message.getMethod() != ITipMethod.COUNTER) {
+	            change.setIntroduction(new Sentence(Messages.UPDATE_INTRO).add(
+                    displayName, ArgumentType.PARTICIPANT).getMessage(wrapper,
+                    locale));		        
+		    }
 		}
 	}
 
