@@ -485,6 +485,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                 folderStorage.restore(realTreeId, folderId, storageParameters);
                             } else {
                                 deleteFolder(treeId, folderId, storageParameters, DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0, memoryTable);
+                                LOG.warn("Deleted absent folder '" + folderId + "' from virtual folder tree as there is no real counterpart", new Throwable());
                             }
                         } else if (DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0) {
                             final String parentId = memoryTree.getParentOf(folderId);
