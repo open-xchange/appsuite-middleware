@@ -1,3 +1,7 @@
+* 2013-10-30 - martin.schneider@open-xchange.com
+
+ - Fix for bug 29240: Removed unnecessary creation of UUID for contacts from csv import
+
 * 2013-10-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 29512: Fixed associated Microformat publication template and applied proper timeout
