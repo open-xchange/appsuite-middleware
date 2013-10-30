@@ -55,6 +55,8 @@ ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/eas-provisioning-sms.properties
 
 %changelog
+* Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-30
 * Wed Oct 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.4.1 release
 * Mon Oct 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
