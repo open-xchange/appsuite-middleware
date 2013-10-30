@@ -1440,7 +1440,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         if (minimumSearchCharacters <= 0) {
             return;
         }
-        if (null != pattern && com.openexchange.java.SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
+        if (null != pattern && 0 != pattern.length() && com.openexchange.java.SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
             throw FileStorageExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumSearchCharacters));
         }
     }
