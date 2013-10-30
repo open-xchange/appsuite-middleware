@@ -295,8 +295,10 @@ public interface HtmlService {
      * Encode data for use in HTML attributes.
      *
      * @param input the text to encode for an HTML attribute
+     * @param input
+     *      the text to encode for an HTML attribute
+     *
      * @return input encoded for use as an HTML attribute
      */
     String encodeForHTMLAttribute(String input);
-
 }
