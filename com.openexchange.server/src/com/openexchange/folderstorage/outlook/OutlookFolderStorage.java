@@ -484,12 +484,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                             if (restore) {
                                 folderStorage.restore(realTreeId, folderId, storageParameters);
                             } else {
-                                deleteFolder(treeId, folderId, storageParameters, DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0, memoryTable);
+                                deleteFolder(treeId, folderId, storageParameters, isDatabaseFolder(folderId), memoryTable);
                                 LOG.warn("Deleted absent folder '" + folderId + "' from virtual folder tree as there is no real counterpart", new Throwable());
                             }
-                        } else if (DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0) {
+                        } else if (isDatabaseFolder(folderId)) {
                             final String parentId = memoryTree.getParentOf(folderId);
-                            if (null != parentId && DatabaseFolderStorageUtility.getUnsignedInteger(parentId) >= 0) {
+                            if (null != parentId && isDatabaseFolder(parentId)) {
                                 try {
                                     final Folder fld = folderStorage.getFolder(realTreeId, folderId, storageParameters);
                                     if (parentId.equals(fld.getParentID())) {
@@ -2833,6 +2833,10 @@ public final class OutlookFolderStorage implements FolderStorage {
             openedStorages.add(tmp);
         }
         return tmp;
+    }
+
+    private boolean isDatabaseFolder(final String folderId) {
+        return DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0;
     }
 
     private static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {
