@@ -485,6 +485,19 @@ public final class OutlookFolderStorage implements FolderStorage {
                             } else {
                                 deleteFolder(treeId, folderId, storageParameters, DatabaseFolderType.getInstance().servesFolderId(folderId), memoryTable);
                             }
+                        } else if (DatabaseFolderType.getInstance().servesFolderId(folderId)) {
+                            final String parentId = memoryTree.getParentOf(folderId);
+                            if (null != parentId && DatabaseFolderType.getInstance().servesFolderId(parentId)) {
+                                try {
+                                    final Folder fld = folderStorage.getFolder(realTreeId, folderId, storageParameters);
+                                    if (parentId.equals(fld.getParentID())) {
+                                        // Unnecessary entry
+                                        deleteFolder(treeId, folderId, storageParameters, true, memoryTable);
+                                    }
+                                } catch (final Exception x) {
+                                    // ignore
+                                }
+                            }
                         }
                     } catch (final OXException oxe) {
                         if (LOG.isDebugEnabled()) {
