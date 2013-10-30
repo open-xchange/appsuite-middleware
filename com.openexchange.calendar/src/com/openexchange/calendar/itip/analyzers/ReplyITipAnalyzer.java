@@ -285,7 +285,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			change.setDiffDescription(cd.getChanges(ctx, change.getCurrentAppointment(), change.getNewAppointment(), diff, wrapper, locale, tz));
 
 		} else {
-			describeDiff(change, wrapper, session);
+			describeDiff(change, wrapper, session, message);
 		}
 	}
 

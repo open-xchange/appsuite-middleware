@@ -129,7 +129,7 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
             change.setNewAppointment(exception);
             change.setMaster(master);
 
-            describeDiff(change, wrapper, session);
+            describeDiff(change, wrapper, session, message);
             analysis.addChange(change);
 
 
