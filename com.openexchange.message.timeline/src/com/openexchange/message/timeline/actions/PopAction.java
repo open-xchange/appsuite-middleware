@@ -85,7 +85,7 @@ public final class PopAction extends AbstractMessageTimelineAction {
 
         // Get appropriate queue(s)
         final List<Message> messages = new ArrayList<Message>(16);
-        if ("*".equals(client)) {
+        if ("*".equals(client) || "all".equalsIgnoreCase(client)) {
             final List<BlockingQueue<Message>> queues = MessageTimelineManagement.getInstance().getQueuesFor(msgTimelineRequest.getSession());
             for (final BlockingQueue<Message> queue : queues) {
                 queue.drainTo(messages);
