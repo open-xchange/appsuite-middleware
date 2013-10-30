@@ -50,6 +50,7 @@
 package com.openexchange.report.appsuite.management;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.report.appsuite.Report;
 import com.openexchange.report.appsuite.jobs.Orchestration;
 
 
@@ -81,19 +82,21 @@ public class ReportMXBeanImpl implements ReportMXBean {
 
     @Override
     public JMXReport retrieveLastReport(String reportType) throws Exception {
-        return new JMXReport(Orchestration.getInstance().getLastReport(reportType));
+        Report lastReport = Orchestration.getInstance().getLastReport(reportType);
+        return null == lastReport ? null : new JMXReport(lastReport);
     }
-    
+
     @Override
     public JMXReport retrieveLastReport() throws Exception {
-        return new JMXReport(Orchestration.getInstance().getLastReport());
+        Report lastReport = Orchestration.getInstance().getLastReport();
+        return null == lastReport ? null : new JMXReport(lastReport);
     }
 
     @Override
     public JMXReport[] retrievePendingReports(String reportType) throws Exception {
         return JMXReport.wrap(Orchestration.getInstance().getPendingReports(reportType));
     }
-    
+
     @Override
     public JMXReport[] retrievePendingReports() throws Exception {
         return JMXReport.wrap(Orchestration.getInstance().getPendingReports());
