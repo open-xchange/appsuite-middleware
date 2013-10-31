@@ -576,7 +576,7 @@ public class MimeMailException extends OXException {
         if (null == e) {
             return false;
         }
-        return isOverQuotaException(toLowerCase(e.getMessage()));
+        return isOverQuotaException(e.getMessage());
     }
 
     /**
@@ -586,7 +586,8 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        return (msg.indexOf("quota") >= 0 || msg.indexOf("limit") >= 0);
+        final String m = toLowerCase(msg);
+        return (m.indexOf("quota") >= 0 || m.indexOf("limit") >= 0);
     }
 
     /**
