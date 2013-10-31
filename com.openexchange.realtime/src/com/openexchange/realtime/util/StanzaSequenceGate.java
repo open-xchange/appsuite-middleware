@@ -388,8 +388,18 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
     private void notifyManagementInboxes() {
         notifyManagementNumberOfInboxes();
-//        ID, List<Long>
-//        managementObject.setInboxes(Collections.unmodifiableMap(inboxes);
+        
+        Map<String, List<Long>> clientSequenceMap = new HashMap<String, List<Long>>();
+        for (Entry<ID, List<StanzaWithCustomAction>> entry : inboxes.entrySet()) {
+            String client = entry.getKey().toString();
+            List<StanzaWithCustomAction> clientStanzas = entry.getValue();
+            List<Long> sequenceListPerClient = new ArrayList<Long>(clientStanzas.size());
+            for (StanzaWithCustomAction stanzaWithCustomAction : clientStanzas) {
+                sequenceListPerClient.add(stanzaWithCustomAction.sequenceNumber);
+            }
+            clientSequenceMap.put(client, sequenceListPerClient);
+        }
+        managementObject.setInboxes(clientSequenceMap);
     }
 
 }
