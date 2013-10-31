@@ -50,6 +50,7 @@
 package com.openexchange.realtime.synthetic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -58,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -84,6 +86,7 @@ public class SyntheticChannel implements Channel, Runnable {
     private static final int NUMBER_OF_RUNLOOPS = 16;
     
     private static final Log LOG = LogFactory.getLog(SyntheticChannel.class);
+    private static final String SENDLOCK = "syntheticChannel";
     
     private final ConcurrentHashMap<String, Component> components = new ConcurrentHashMap<String, Component>();
     private final ConcurrentHashMap<ID, ComponentHandle> handles = new ConcurrentHashMap<ID, ComponentHandle>();
@@ -129,7 +132,7 @@ public class SyntheticChannel implements Channel, Runnable {
     }
 
     @Override
-    public boolean conjure(ID id) throws OXException {
+    public boolean conjure(ID id) {
         if (shuttingDown.get()) {
             return false;
         }
@@ -153,17 +156,18 @@ public class SyntheticChannel implements Channel, Runnable {
         
         setUpEviction(component.getEvictionPolicy(), handle, id);
         
-        id.on(ID.Events.DISPOSE, new IDEventHandler() {
-            
-            @Override
-            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                handles.remove(id);
-                runLoopsPerID.remove(id);
-                lastAccess.remove(id);
-                timeouts.remove(this);
-
-            }
-        });
+//        id.on(ID.Events.DISPOSE, new IDEventHandler() {
+//            
+//            @Override
+//            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+//                handles.remove(id);
+//                runLoopsPerID.remove(id);
+//                lastAccess.remove(id);
+//                timeouts.remove(this);
+//
+//            }
+//        });
+        id.on(ID.Events.DISPOSE, CLEANUP);
         
         return true;
     }
@@ -199,10 +203,16 @@ public class SyntheticChannel implements Channel, Runnable {
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
 
-        final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
-        if (!taken) {
-            LOG.error("Queue refused offered Stanza");
-            RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
+        Lock sendLock = recipient.getLock(SENDLOCK);
+        try {
+            sendLock.lock();
+            final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
+            if (!taken) {
+                LOG.error("Queue refused offered Stanza");
+                throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
+            }
+        } finally {
+            sendLock.unlock();
         }
     }
     
@@ -258,5 +268,60 @@ public class SyntheticChannel implements Channel, Runnable {
             }
         }
     }
+
+    /**
+     * 
+     * A GroupDispatcher was disposed, messages that are already handed off to RunLoops might have to be reordered:
+     * - lock for ID to stop accepting new messages for the handle
+     * - get the associated Runloop
+     * - stop loop from handling 
+     * - check for MessageDispatchs directed to the handle
+     * - create new handle if necessary and remove the old one from handles, otherwise just remove the old one 
+     * - rewrite MessageDispatchs to use new handle and add them to the new RunLoop
+     * - unlock for ID to start accepting new messages for this ID again
+     */
+    private final IDEventHandler CLEANUP = new IDEventHandler() {
+        
+        @Override
+        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            Lock sendLock = id.getLock(SENDLOCK);
+            try {
+                sendLock.lock();
+//                handles.remove(id);
+//                runLoopsPerID.remove(id);
+                lastAccess.remove(id);
+//                timeouts.remove(this);
+                ComponentHandle disposedHandle = handles.remove(id);
+                //special removal actions necessary for disposedHandle?
+                SyntheticChannelRunLoop runLoop = runLoopsPerID.remove(id);
+                Collection<MessageDispatch> messagesForHandle = runLoop.removeMessagesForHandle(id);
+                if(!messagesForHandle.isEmpty()) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Migrated MessageDispatchs to new Handle for id: " + id);
+                    }
+                    if(conjure(id)) {
+                        ComponentHandle newHandle = handles.get(id);
+                        SyntheticChannelRunLoop newRunLoop = runLoopsPerID.get(id);
+                        for (MessageDispatch messageDispatch : messagesForHandle) {
+                            messageDispatch.setHandle(newHandle);
+                            boolean taken = newRunLoop.offer(messageDispatch);
+                            if (!taken) {
+                                LOG.error("Queue refused offered Stanza for id: " + id);
+                            }
+                        }
+                    } else {
+                        LOG.error("Unable to conjure ID and migrate MessageDispatchs to new handle for id: " + id);
+                    }
+                } else {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("No MessageDispatchs to migrate for id: " + id);
+                    }
+                }
+            } finally {
+                sendLock.unlock();
+            }
+        }
+
+    };
 
 }

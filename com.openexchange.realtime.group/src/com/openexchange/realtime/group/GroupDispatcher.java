@@ -533,4 +533,9 @@ public class GroupDispatcher implements ComponentHandle {
         return isDisposed;
     }
 
+    @Override
+    public ID getID() {
+        return id;
+    }
+
 }

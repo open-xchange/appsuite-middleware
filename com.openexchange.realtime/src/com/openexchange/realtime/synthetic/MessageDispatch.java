@@ -58,10 +58,11 @@ import com.openexchange.realtime.packet.Stanza;
  * {@link MessageDispatch}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class MessageDispatch {
     
-    private final ComponentHandle handle;
+    private ComponentHandle handle;
     private final Stanza stanza;
     
     public MessageDispatch(ComponentHandle handle, Stanza stanza) {
@@ -73,6 +74,25 @@ public class MessageDispatch {
     public void tick() throws OXException {
         stanza.trace("Passing stanza to handler");
         handle.process(stanza);
+    }
+
+    
+    /**
+     * Gets the handle
+     *
+     * @return The handle
+     */
+    public ComponentHandle getHandle() {
+        return handle;
+    }
+
+    /**
+     * Sets the handle
+     *
+     * @param handle The handle to set
+     */
+    public void setHandle(ComponentHandle handle) {
+        this.handle = handle;
     }
 
 }

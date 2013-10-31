@@ -491,7 +491,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         }
 
     };
-    
+
     /**
      * Touch the infos we track for a given ID so they don't get automatically removed by Hazelcast's eviction policy as long as it's in
      * active use. 

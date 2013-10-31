@@ -47,74 +47,107 @@
  *
  */
 
-package com.openexchange.realtime.synthetic;
+package com.openexchange.realtime;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.ComponentHandle;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.threadpool.RunLoop;
 
 
 /**
- * {@link SyntheticChannelRunLoop}
+ * {@link RunLoopTest}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
-    
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SyntheticChannelRunLoop.class);
-    
-    public SyntheticChannelRunLoop(String name) {
-        super(name);
-    }
+public class RunLoopTest {
 
-    @Override
-    protected void handle(MessageDispatch element) throws OXException {
-        element.tick();
+    PauseLoop pauseLoop;
+    Thread runLoopThread;
+    Filler filler1;
+    Filler filler2;
+
+    public RunLoopTest() throws Exception {
+        pauseLoop = new PauseLoop("PauseLoop");
+        runLoopThread = new Thread(pauseLoop);
+        runLoopThread.start();
+        
+        filler1 = new Filler(pauseLoop);
+        filler1.start();
+        
+        filler2 = new Filler(pauseLoop);
+        filler2.start();
+        
+        System.out.println("wurst");
+        Thread.sleep(2000);
+        pauseLoop.doPause();
+        Thread.sleep(2000);
+        pauseLoop.doContinue();
+        Thread.sleep(2000);
+        System.out.println("Exiting");
+        filler1.interrupt();
+        filler2.interrupt();
+        runLoopThread.interrupt();
     }
 
     /**
-     * Remove all {@link MessageDispatch}s that were destined for the given handle. This will pause the RunLoop, causing it to refuse any
-     * Elements offered. Matching elements are removed from the RunLoop. Finally handling continues and the matching elements are returned.
-     * @param destination The handle to match against 
-     * @return All {@link MessageDispatch}s that were destined for the given handle
+     * @param args
+     * @throws Exception 
      */
-    public Collection<MessageDispatch> removeMessagesForHandle(ID destination) {
-        List<MessageDispatch> matchingElements = new ArrayList<MessageDispatch>();
-        // Pause handling for MessageDispatch inspection but make sure to enable it again
-        try {
-            pauseHandling();
-            // Check currently handled element first. Set to null so it doesn't get handled if it isdestinedForID 
-            if (isDestinedForID(destination, currentElement)) {
-                matchingElements.add(currentElement);
-                currentElement=null;
-            }
-
-            // remove remaining messages from queue
-            Iterator<MessageDispatch> iterator = queue.iterator();
-            while (iterator.hasNext()) {
-                MessageDispatch next = iterator.next();
-                if (isDestinedForID(destination, next)) {
-                    matchingElements.add(next);
-                    queue.remove(next);
-                }
-            }
-        } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
-        } finally {
-            continueHandling();
-        }
-        return matchingElements;
+    public static void main(String[] args) throws Exception {
+        RunLoopTest rlt = new RunLoopTest();
     }
 
-    private boolean isDestinedForID(ID destination, MessageDispatch messageDispatch) {
-        ComponentHandle handle = messageDispatch.getHandle();
-        ID currentID = handle.getID();
-        return currentID.equals(destination);
+    
+    public class Filler extends Thread {
+
+        private RunLoop<Integer> runLoop;
+
+        public Filler(RunLoop<Integer> runLoop) {
+            this.runLoop = runLoop;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see java.lang.Thread#run()
+         */
+        @Override
+        public void run() {
+            int i = 0;
+            while (true) {
+                boolean taken = pauseLoop.offer(i++);
+                if (!taken) {
+                    System.out.println("didn't take" + i);
+                }
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        }
+    }
+    
+    public class PauseLoop extends RunLoop<Integer> {
+
+        public PauseLoop(String name) {
+            super(name);
+        }
+
+        @Override
+        protected void handle(Integer element) throws OXException {
+            System.out.println("Handling element:"+ element);
+        }
+        
+        public void doPause() throws InterruptedException {
+            this.pauseHandling();
+        }
+        
+        public void doContinue() throws Exception {
+            this.continueHandling();
+        }
+        
     }
 
 }
