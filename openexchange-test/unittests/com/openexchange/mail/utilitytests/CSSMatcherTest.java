@@ -643,16 +643,18 @@ public class CSSMatcherTest extends TestCase {
 
         final String line0 = lines[0];
         assertTrue(
-            "Unexpected CSS: " + saneCss,
+            "Unexpected CSS in line0! Expected: " + saneCss + "\n But was: \n",
             line0.trim().startsWith(
                 "/* +++++++++++++++++++++ RESET +++++++++++++++++++++ */ @namespace \"http://www.w3.org/1999/xhtml\";   @namespace svg \"http://www.w3.org/2000/svg\";   body * { #test font-size: 1px; line-height: 1px;"));
 
         final String line1 = lines[1];
         assertTrue(
-            "Unexpected CSS: " + saneCss,
+            "Unexpected CSS in line1! Expected: " + saneCss + "\n But was: \n",
             line1.trim().startsWith("#test a , #test img , #test a img , #test iframe , #test form , #test fieldset"));
 
         final String line10 = lines[10];
-        assertTrue("Unexpected CSS: " + saneCss, line10.trim().startsWith("#test { -webkit-text-size-adjust: none; "));
+        assertTrue(
+            "Unexpected CSS in line10! Expected: " + saneCss + "\n But was: \n",
+            line10.trim().startsWith("#test { -webkit-text-size-adjust: none; "));
     }
 }

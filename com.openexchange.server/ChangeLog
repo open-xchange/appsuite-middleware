@@ -1,3 +1,7 @@
+* 2013-10-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29598: Assume that subfolder creation basically works if returned NO response from IMAP server signals some kind of exceeded quota error
+
 * 2013-10-30 - martin.schneider@open-xchange.com
 
  - Fix for bug 29240: Removed unnecessary creation of UUID for contacts from csv import
@@ -28,6 +32,10 @@
 * 2013-10-28 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 29495: Swapped warnings
+ 
+* 2013-10-28 - ioannis.chouklis@open-xchange.com
+ 
+ - Fix for bug 29094: [L3] Automatically collect contacts in the folder "Collected addresses" while reading
 
 * 2013-10-28 - thorben.betten@open-xchange.com
 
