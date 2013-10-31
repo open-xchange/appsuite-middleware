@@ -90,7 +90,6 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
             pauseHandling();
             // Check currently handled element first. Set to null so it doesn't get handled if it isdestinedForID 
             if (isDestinedForID(destination, currentElement)) {
-                matchingElements.add(currentElement);
                 currentElement=null;
             }
 
