@@ -644,9 +644,10 @@ public class LoginServlet extends AJAXServlet {
                         LOG.error(LoginServlet.RESPONSE_ERROR, e);
                         LoginServlet.sendError(resp);
                     }
+                } else {
+                    // Regular login handling
+                    doJSONAuth(req, resp, action);
                 }
-                // Regular login handling
-                doJSONAuth(req, resp, action);
             } else {
                 logAndSendException(resp, AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION));
                 return;
