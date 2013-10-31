@@ -1,3 +1,7 @@
+* 2013-10-31 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29554: Introduced 'supported-calendar-component-sets' property for CalDAV collections
+
 * 2013-10-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 29598: Assume that subfolder creation basically works if returned NO response from IMAP server signals some kind of exceeded quota error
