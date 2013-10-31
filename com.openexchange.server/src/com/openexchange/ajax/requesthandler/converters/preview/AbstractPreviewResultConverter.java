@@ -54,6 +54,7 @@ import static com.openexchange.java.Charsets.toAsciiString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,6 +81,7 @@ import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
@@ -136,7 +138,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             // Check cache first
             final ResourceCache previewCache = ResourceCaches.getResourceCache();
             final String eTag = requestData.getETag();
-            final boolean isValidEtag = !isEmpty(eTag);
+            final boolean isValidEtag = !Strings.isEmpty(eTag);
             if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
                 final CachedResource cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
@@ -190,6 +192,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                     return;
                 }
             }
+
             // No cached preview available
             {
                 final Object resultObject = result.getResultObject();
@@ -198,11 +201,23 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 }
                 fileHolder = (IFileHolder) resultObject;
             }
-            /*
-             * Obtain preview document
-             */
+
+            // Check file holder's content
+            if (0 == fileHolder.getLength()) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
+            }
+
+            // Obtain preview document
             final PreviewDocument previewDocument;
             {
+                InputStream stream = fileHolder.getStream();
+                final Ref<InputStream> ref = new Ref<InputStream>();
+                if (streamIsEof(stream, null)) {
+                    Streams.close(stream, fileHolder);
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
+                }
+                stream = ref.getValue();
+
                 final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
 
                 final DataProperties dataProperties = new DataProperties(4);
@@ -215,7 +230,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 if (requestData.containsParameter("pages")) {
                     pages = requestData.getIntParameter("pages");
                 }
-                previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, pages);
+                previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, pages);
                 // Put to cache
                 if (null != previewCache && isValidEtag) {
                     final List<String> content = previewDocument.getContent();
@@ -373,19 +388,6 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      */
     public abstract PreviewOutput getOutput();
 
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /**
      * Finds the first occurrence of the pattern in the text.
      */
@@ -436,6 +438,58 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         }
 
         return failure;
+    }
+
+    /**
+     * Checks if passed stream signals EOF.
+     *
+     * @param in The stream to check
+     * @param ref The stream reference
+     * @return <code>true</code> if passed stream signals EOF; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     */
+    protected static boolean streamIsEof(final InputStream in, final Ref<InputStream> ref) throws IOException {
+        if (null == in) {
+            return true;
+        }
+        final PushbackInputStream pin = new PushbackInputStream(in);
+        final int read = pin.read();
+        if (read < 0) {
+            return true;
+        }
+        pin.unread(read);
+        ref.setValue(pin);
+        return false;
+    }
+
+    /** Simple reference class */
+    protected static final class Ref<V> {
+
+        private V value;
+
+        Ref() {
+            super();
+            this.value = null;
+        }
+
+        /**
+         * Gets the value
+         *
+         * @return The value
+         */
+        V getValue() {
+            return value;
+        }
+
+        /**
+         * Sets the value
+         *
+         * @param value The value to set
+         */
+        Ref<V> setValue(final V value) {
+            this.value = value;
+            return this;
+        }
     }
 
 }
