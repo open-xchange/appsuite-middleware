@@ -1,3 +1,22 @@
+* 2013-10-31 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29554: Introduced 'supported-calendar-component-sets' property for CalDAV collections
+
+* 2013-10-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29598: Assume that subfolder creation basically works if returned NO response from IMAP server signals some kind of exceeded quota error
+ - Fix for bug 27611: Deny generation of preview or provide default thumbnail image in case of an empty file holder
+
+* 2013-10-30 - martin.schneider@open-xchange.com
+
+ - Fix for bug 29240: Removed unnecessary creation of UUID for contacts from csv import
+ - Fix for bug 29108: Changed logged output for commands
+
+* 2013-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29512: Fixed associated Microformat publication template and applied proper timeout
+ - Fix for bug 29561: Added null guards to reporting tool if 'Orchestration' has no last report available
+
 * 2013-10-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 29516: Do not store password in IMAP store cache
@@ -18,6 +37,10 @@
 * 2013-10-28 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 29495: Swapped warnings
+ 
+* 2013-10-28 - ioannis.chouklis@open-xchange.com
+ 
+ - Fix for bug 29094: [L3] Automatically collect contacts in the folder "Collected addresses" while reading
 
 * 2013-10-28 - thorben.betten@open-xchange.com
 

@@ -338,6 +338,9 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 
             CommonCollection collection = null;
             if (isRoot(url)) {
+
+                CommonCollection rootCollection = new com.openexchange.caldav.resources.CalDAVRootCollection(factory);
+                collection = (CommonCollection)rootCollection.getChild("55");
                 collection = new com.openexchange.caldav.resources.CalDAVRootCollection(factory);
             } else if (ScheduleOutboxURL.SCHEDULE_OUTBOX.equals(url.name())) {
                 collection = factory.mixin(new com.openexchange.caldav.resources.ScheduleOutboxCollection(factory));

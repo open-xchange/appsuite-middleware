@@ -102,9 +102,9 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final IDBasedFileAccess fileAccess = request.getFileAccess();
         final String id = request.getId();
         final String version = request.getVersion();
-        
+
         final Document document = (request.getCachedDocument() == null) ? fileAccess.getDocumentAndMetadata(id, version) : request.getCachedDocument();
-        
+
         if (document != null) {
             final FileHolder fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
 
@@ -112,23 +112,23 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 public InputStream newStream() throws OXException, IOException {
                     return document.getData();
                 }
-                
+
             }, document.getSize(), document.getMimeType(), document.getName());
 
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             result.setHeader("ETag", document.getEtag());
             return result;
         }
-        
+
         final File fileMetadata = fileAccess.getFileMetadata(id, version);
 
+        // Download file
         final IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
 
             @Override
             public InputStream newStream() throws OXException, IOException {
                 final InputStream inputStream = fileAccess.getDocument(id, version);
                 if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                    //Download file
                     return inputStream;
                 }
                 return new BufferedInputStream(inputStream);
@@ -151,10 +151,10 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     public boolean checkETag(String clientETag, AJAXRequestData requestData, ServerSession session) throws OXException {
         final AJAXInfostoreRequest request = new AJAXInfostoreRequest(requestData, session);
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final String id = request.getId();
         final String version = request.getVersion();
-        
+
         final Document document = fileAccess.getDocumentAndMetadata(id, version, clientETag);
         if (document != null) {
             requestData.setProperty(DOCUMENT, document);
@@ -165,7 +165,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 return false;
             }
         }
-        
+
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
         return FileStorageUtility.getETagFor(fileMetadata).equals(clientETag);
     }

@@ -100,14 +100,54 @@ public interface MemoryTree {
      */
     public String[] getSubfolderIds(Locale locale, String parentId, List<String[]> realSubfolderIds);
 
+    /**
+     * Fills specified folder with data available from associated {@link MemoryFolder} instance.
+     *
+     * @param folder The folder
+     * @return <code>true</code> if such a folder is available; else <code>false</code>
+     */
     public boolean fillFolder(Folder folder);
 
+    /**
+     * Gets the CRUD (<b>C</b>reate <b>R</b>ead <b>U</b>pdate <b>D</b>elete) management.
+     *
+     * @return The CRUD management
+     */
     public MemoryCRUD getCrud();
 
+    /**
+     * Gets the size of this memory tree.
+     *
+     * @return The size
+     */
     public int size();
 
+    /**
+     * Checks if this memory tree is empty.
+     *
+     * @return <code>true</code> if empty; else <code>false</code>
+     */
     public boolean isEmpty();
 
+    /**
+     * Clears this memory tree.
+     */
     public void clear();
+
+    /**
+     * Gets the folder for given identifier.
+     *
+     * @param folderId The folder identifier
+     * @return The folder or <code>null</code>
+     */
+    public MemoryFolder getFolder(String folderId);
+
+    /**
+     * Gets the parent identifier for specified folder identifier.
+     *
+     * @param folderId The folder identifier
+     * @return The parent identifier or <code>null</code>
+     */
+    public String getParentOf(String folderId);
 
 }

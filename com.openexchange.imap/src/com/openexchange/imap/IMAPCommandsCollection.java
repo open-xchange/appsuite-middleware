@@ -107,6 +107,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.version.Version;
@@ -236,9 +237,14 @@ public final class IMAPCommandsCollection {
                  */
                 final StringAllocator sb = new StringAllocator(7 + mboxName.length());
                 final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
-                if (r[r.length - 1].isOK()) {
+                final Response response = r[r.length - 1];
+                if (response.isOK()) {
                     sb.reinitTo(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
+                    return Boolean.TRUE;
+                }
+                if (response.isNO() && MimeMailException.isOverQuotaException(response.getRest())) {
+                    // Creating folder failed due to a exceeded quota exception. Thus assume "true".
                     return Boolean.TRUE;
                 }
                 return Boolean.FALSE;
@@ -373,9 +379,14 @@ public final class IMAPCommandsCollection {
                  */
                 sb.reinitTo(0);
                 final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
-                if (r[r.length - 1].isOK()) {
+                final Response response = r[r.length - 1];
+                if (response.isOK()) {
                     sb.reinitTo(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
+                    return Boolean.TRUE;
+                }
+                if (response.isNO() && MimeMailException.isOverQuotaException(response.getRest())) {
+                    // Creating folder failed due to a exceeded quota exception. Thus assume "true".
                     return Boolean.TRUE;
                 }
                 return Boolean.FALSE;

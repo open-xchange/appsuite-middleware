@@ -49,40 +49,58 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.caldav.CalDAVTest;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link Bug29554Test}
+ *
+ * Mountain Lion: The server responded: &quot;403&quot; to operation CalDAVWriteEntityQueueableOperation.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CalDAVBugSuite {
+public class Bug29554Test extends CalDAVTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug21794Test.class);
-        suite.addTestSuite(Bug22094Test.class);
-        suite.addTestSuite(Bug22352Test.class);
-        suite.addTestSuite(Bug22338Test.class);
-        suite.addTestSuite(Bug22395Test.class);
-        suite.addTestSuite(Bug22451Test.class);
-        suite.addTestSuite(Bug22723Test.class);
-        suite.addTestSuite(Bug23067Test.class);
-        suite.addTestSuite(Bug23167Test.class);
-        suite.addTestSuite(Bug23181Test.class);
-        suite.addTestSuite(Bug22689Test.class);
-        suite.addTestSuite(Bug23610Test.class);
-        suite.addTestSuite(Bug23612Test.class);
-        suite.addTestSuite(Bug24682Test.class);
-        suite.addTestSuite(Bug25783Test.class);
-        suite.addTestSuite(Bug25672Test.class);
-        suite.addTestSuite(Bug26957Test.class);
-        suite.addTestSuite(Bug27224Test.class);
-        suite.addTestSuite(Bug27309Test.class);
-        suite.addTestSuite(Bug28490Test.class);
-        suite.addTestSuite(Bug28734Test.class);
-        suite.addTestSuite(Bug29554Test.class);
-        return suite;
+	public Bug29554Test(final String name) {
+		super(name);
+	}
+
+    public void testSupportedComponentSets() throws Exception {
+        /*
+         * discover supported component sets of root collection
+         */
+        DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SETS);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/",
+                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
+        assertNotNull("got no response", responses);
+        assertTrue("got no responses", 0 < responses.length);
+        Set<String> comps = new HashSet<String>();
+        for (MultiStatusResponse response : responses) {
+            if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SETS)) {
+                Node node = extractNodeValue(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SETS, response);
+                assertNotNull(node);
+                NodeList childNodes = node.getChildNodes();
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    Node item = childNodes.item(i);
+                    comps.add(item.getAttributes().getNamedItem("name").getTextContent());
+                }
+            } else {
+                fail("no multistatus response");
+            }
+        }
+        assertTrue("no VEVENT found", comps.contains("VEVENT"));
+        assertTrue("no VTODO found", comps.contains("VTODO"));
     }
+
 }

@@ -174,7 +174,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
             change.setConflicts(util.getConflicts(message.getDataObject(), session));
 
-            describeDiff(change, wrapper, session);
+            describeDiff(change, wrapper, session, message);
             analysis.addChange(change);
 
         } else {
@@ -210,7 +210,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 change.setNewAppointment(exception);
                 change.setConflicts(util.getConflicts(exception, session));
 
-                describeDiff(change, wrapper, session);
+                describeDiff(change, wrapper, session, message);
                 analysis.addChange(change);
             }
         }

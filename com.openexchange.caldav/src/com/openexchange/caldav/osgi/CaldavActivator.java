@@ -193,7 +193,7 @@ public class CaldavActivator extends HousekeepingActivator {
 
                 @Override
                 public String getJslobPath() {
-                    return "io.ox/caldav//active";
+                    return "io.ox/caldav//url";
                 }
 
                 @Override

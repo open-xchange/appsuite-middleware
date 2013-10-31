@@ -11,7 +11,7 @@
 </#macro>
 
 <#macro download infoitem linktext>
-<a href="${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}" class"ox_title ox_fileName">${linktext}</a>
+<a href="${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}" class="ox_file ox_title ox_fileName">${linktext}</a>
 </#macro>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -80,6 +80,7 @@
 					</div>
 					</#if>
 					<div class="oxmf-information ox_infoitem" id="infoitem_${infostore?seq_index_of(infoitem)}">
+					    <span class="ox_file">${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}</span>
 		                <span class="ox_title">${infoitem.title!""}</span>
 		                <span class="ox_url">${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}</span>
 		                <span class="ox_version">${infoitem.version!""}</span>

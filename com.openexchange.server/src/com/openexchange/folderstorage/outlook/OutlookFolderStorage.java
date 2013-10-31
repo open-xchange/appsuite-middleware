@@ -104,6 +104,7 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
+import com.openexchange.folderstorage.database.DatabaseFolderStorageUtility;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -483,7 +484,21 @@ public final class OutlookFolderStorage implements FolderStorage {
                             if (restore) {
                                 folderStorage.restore(realTreeId, folderId, storageParameters);
                             } else {
-                                deleteFolder(treeId, folderId, storageParameters, DatabaseFolderType.getInstance().servesFolderId(folderId), memoryTable);
+                                deleteFolder(treeId, folderId, storageParameters, isDatabaseFolder(folderId), memoryTable);
+                                LOG.warn("Deleted absent folder '" + folderId + "' from virtual folder tree as there is no real counterpart", new Throwable());
+                            }
+                        } else if (isDatabaseFolder(folderId)) {
+                            final String parentId = memoryTree.getParentOf(folderId);
+                            if (null != parentId && isDatabaseFolder(parentId)) {
+                                try {
+                                    final Folder fld = folderStorage.getFolder(realTreeId, folderId, storageParameters);
+                                    if (parentId.equals(fld.getParentID())) {
+                                        // Unnecessary entry
+                                        deleteFolder(treeId, folderId, storageParameters, true, memoryTable);
+                                    }
+                                } catch (final Exception x) {
+                                    // ignore
+                                }
                             }
                         }
                     } catch (final OXException oxe) {
@@ -2818,6 +2833,10 @@ public final class OutlookFolderStorage implements FolderStorage {
             openedStorages.add(tmp);
         }
         return tmp;
+    }
+
+    private boolean isDatabaseFolder(final String folderId) {
+        return DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0;
     }
 
     private static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {

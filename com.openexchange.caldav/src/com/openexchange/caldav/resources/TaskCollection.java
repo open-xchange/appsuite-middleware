@@ -56,6 +56,7 @@ import java.util.List;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
+import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.search.Order;
@@ -80,7 +81,10 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
     public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder, order);
         this.factory = factory;
-        super.includeProperties(new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VTODO));
+        includeProperties(
+            new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VTODO),
+            new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VTODO)
+        );
     }
 
     public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {

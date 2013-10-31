@@ -47,47 +47,53 @@
  *
  */
 
-package com.openexchange.importexport.actions.exporter;
+package com.openexchange.caldav.mixins;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.importexport.exporters.CSVContactExporter;
-import com.openexchange.importexport.exporters.Exporter;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.json.ExportRequest;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-@DispatcherNotes(defaultFormat="file")
-public class CsvExportAction extends AbstractExportAction {
 
-	private Exporter exporter;
+/**
+ * {@link SupportedCalendarComponentSets}
+ *
+ * Enumerates the sets of component restrictions the server is willing to allow the client to specify in MKCALENDAR or extended
+ * MKCOL requests.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class SupportedCalendarComponentSets extends SingleXMLPropertyMixin {
 
-	@Override
-	public Format getFormat() {
-		return Format.CSV;
-	}
+    public static final String VEVENT = "VEVENT";
+    public static final String VTODO = "VTODO";
 
-	@Override
-	public Exporter getExporter() {
-		if(this.exporter == null){
-			exporter = new CSVContactExporter();
-		}
-		return exporter;
-	}
+    private final String[] components;
 
-	@Override
-	protected Map<String, Object> getOptionalParams(ExportRequest req) {
-	    Map<String, Object> params = super.getOptionalParams(req);
-	    if (params == null) {
-	        params = new HashMap<String, Object>();
-	    }
+    public SupportedCalendarComponentSets() {
+        this(VEVENT);
+    }
 
-	    final String exportDlistsParam = req.getRequest().getParameter(CSVContactExporter.PARAMETER_EXPORT_DLISTS);
-	    if (exportDlistsParam != null) {
-	        params.put(CSVContactExporter.PARAMETER_EXPORT_DLISTS, exportDlistsParam);
-	    }
+    /**
+     * Initializes a new {@link SupportedCalendarComponentSets}.
+     *
+     * @param components The supported calendar components
+     */
+    public SupportedCalendarComponentSets(String...components) {
+        super(CaldavProtocol.CAL_NS.getURI(), "supported-calendar-component-sets");
+        this.components = components;
+    }
 
-	    return params;
-	}
+    @Override
+    protected String getValue() {
+        if (null != this.components) {
+            StringAllocator stringAllocator = new StringAllocator("<CAL:supported-calendar-component-set>");
+            for (String component : components) {
+                stringAllocator.append("<CAL:comp name=\"").append(component).append("\"/>");
+            }
+            stringAllocator.append("</CAL:supported-calendar-component-set>");
+            return stringAllocator.toString();
+        }
+        return null;
+    }
 
 }

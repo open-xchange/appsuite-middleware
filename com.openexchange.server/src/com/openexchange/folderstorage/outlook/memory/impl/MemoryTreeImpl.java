@@ -81,11 +81,9 @@ import com.openexchange.i18n.tools.StringHelper;
 public final class MemoryTreeImpl implements MemoryTree {
 
     private final ConcurrentMap<String, MemoryFolder> folderMap;
-
     private final ConcurrentMap<String, Set<MemoryFolder>> parentMap;
-
+    private final ConcurrentMap<String, String> folder2parentMap;
     private final MemoryCRUD crud;
-
     private final int treeId;
 
     /**
@@ -97,7 +95,18 @@ public final class MemoryTreeImpl implements MemoryTree {
         this.treeId = treeId;
         folderMap = new ConcurrentHashMap<String, MemoryFolder>(128);
         parentMap = new ConcurrentHashMap<String, Set<MemoryFolder>>(128);
-        crud = new MemoryCRUDImpl(folderMap, parentMap);
+        folder2parentMap = new ConcurrentHashMap<String, String>(128);
+        crud = new MemoryCRUDImpl(folderMap, parentMap, folder2parentMap);
+    }
+
+    @Override
+    public MemoryFolder getFolder(final String folderId) {
+        return folderMap.get(folderId);
+    }
+
+    @Override
+    public String getParentOf(final String folderId) {
+        return folder2parentMap.get(folderId);
     }
 
     /**
@@ -138,7 +147,7 @@ public final class MemoryTreeImpl implements MemoryTree {
     }
 
     @Override
-    public boolean hasSubfolderIds(String parentId) {
+    public boolean hasSubfolderIds(final String parentId) {
         final Set<MemoryFolder> set = parentMap.get(parentId);
         return null == set ? false : !set.isEmpty();
     }

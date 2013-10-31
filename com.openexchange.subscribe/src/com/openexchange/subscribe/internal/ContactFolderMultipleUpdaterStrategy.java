@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -179,8 +178,6 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
 
-        // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
-        newElement.setUserField20(UUID.randomUUID().toString());
         try {
             contactService.createContact(targetFolderSession, target.getFolderId(), newElement);
         } catch (OXException e) {
