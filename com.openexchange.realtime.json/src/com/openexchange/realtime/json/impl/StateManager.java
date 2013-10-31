@@ -127,7 +127,7 @@ public class StateManager {
     public void timeOutStaleStates(long timestamp) {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
-                state.getId().trigger(ID.Events.DISPOSE, this);
+                state.getId().dispose(this, null);
             } else {
                 state.getId().trigger(ID.Events.REFRESH, this);
             }

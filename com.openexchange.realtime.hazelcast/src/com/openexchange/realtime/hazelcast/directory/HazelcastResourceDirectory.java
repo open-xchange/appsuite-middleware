@@ -304,6 +304,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         HazelcastResource hazelcastResource = new HazelcastResource(resource);
         id.on(ID.Events.REFRESH, TOUCH_ID);
         id.on(ID.Events.DISPOSE, CLEAN_UP);
+        id.on(ID.Events.RESURRECT, RESURRECT);
 
         MultiMap<String, String> idMapping = getIDMapping();
         IMap<String, Map<String,Serializable>> allResources = getResourceMapping();
@@ -506,6 +507,27 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                  * eviction policy
                  */
                 get(id.toGeneralForm());
+            } catch (OXException e) {
+                LOG.error(e.getMessage());
+            }
+        }
+
+    };
+    
+    /**
+     * Touch the infos we track for a given ID so they don't get automatically removed by Hazelcast's eviction policy as long as it's in
+     * active use. 
+     */
+    private final IDEventHandler RESURRECT = new IDEventHandler() {
+        
+        @Override
+        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            try {
+                /*
+                 * This performs a get on both maps to lookup the full IDs and the associated Resources which resets the idle times for the
+                 * eviction policy
+                 */
+                
             } catch (OXException e) {
                 LOG.error(e.getMessage());
             }
