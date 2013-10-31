@@ -53,6 +53,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_i
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Oct 30 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-10-28
 * Thu Oct 24 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-30
 * Wed Oct 23 2013 Carsten Hoeger <choeger@open-xchange.com>
