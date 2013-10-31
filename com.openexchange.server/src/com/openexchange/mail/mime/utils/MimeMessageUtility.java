@@ -840,7 +840,10 @@ public final class MimeMessageUtility {
                         }
                         sb.append(decodeWord);
                     } else if (MessageUtility.isShiftJis(charset)) {
-                        final String encodedWord = m.group();
+                        String encodedWord = m.group();
+                        if ("cp932".equalsIgnoreCase(charset)) {
+                            encodedWord = new StringAllocator(encodedWord.length()).append("=?MS932?").append(m.group(2)).append('?').append(m.group(3)).append("?=").toString();
+                        }
                         String decodeWord = MimeUtility.decodeWord(encodedWord);
                         if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
                             decodeWord = CP932EmojiMapping.getInstance().replaceIn(MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932")));
