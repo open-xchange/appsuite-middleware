@@ -618,23 +618,20 @@ public final class CSSMatcher {
                 builder.append('#').append(cssPrefix).append(' ');
             }
             builder.append('.').append(cssPrefix).append('-');
-            // builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
-            builder.append(selector.substring(1));
+            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
         } else if ('#' == firstChar) {
             // #id -> #prefix #prefix-id
             if (first) {
                 builder.append('#').append(cssPrefix).append(' ');
             }
             builder.append('#').append(cssPrefix).append('-');
-            // builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
-            builder.append(selector.substring(1));
+            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
         } else {
             // element -> #prefix element
             if (first) {
                 builder.append('#').append(cssPrefix).append(' ');
             }
-            // builder.append(replaceDotsAndHashes(selector, cssPrefix, helper));
-            builder.append(selector);
+            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper));
         }
     }
 
