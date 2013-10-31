@@ -47,37 +47,53 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.caldav.mixins;
 
-import javax.annotation.concurrent.NotThreadSafe;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * A {@link ComponentHandle} is a recipient and handler of messages directed at a certain component. Component Handles need not be thread-safe.
+ * {@link SupportedCalendarComponentSets}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * 
+ * Enumerates the sets of component restrictions the server is willing to allow the client to specify in MKCALENDAR or extended
+ * MKCOL requests.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public @NotThreadSafe interface ComponentHandle {
-    
-    /**
-     * Process the stanza that was received for this handle.
-     */
-    void process(Stanza stanza) throws OXException;
+public class SupportedCalendarComponentSets extends SingleXMLPropertyMixin {
+
+    public static final String VEVENT = "VEVENT";
+    public static final String VTODO = "VTODO";
+
+    private final String[] components;
+
+    public SupportedCalendarComponentSets() {
+        this(VEVENT);
+    }
 
     /**
-     * Should this stanza be handled in the global thread. This should generally return false. Have this return
-     * true if the resource directory state might be changed by this method call
+     * Initializes a new {@link SupportedCalendarComponentSets}.
+     *
+     * @param components The supported calendar components
      */
-    boolean shouldBeDoneInGlobalThread(Stanza stanza);
-    
-    /**
-     * Get the id used to direct messages at this {@link ComponentHandle}
-     * @return the id used to direct messages at this {@link ComponentHandle}
-     */
-    ID getID();
+    public SupportedCalendarComponentSets(String...components) {
+        super(CaldavProtocol.CAL_NS.getURI(), "supported-calendar-component-sets");
+        this.components = components;
+    }
+
+    @Override
+    protected String getValue() {
+        if (null != this.components) {
+            StringAllocator stringAllocator = new StringAllocator("<CAL:supported-calendar-component-set>");
+            for (String component : components) {
+                stringAllocator.append("<CAL:comp name=\"").append(component).append("\"/>");
+            }
+            stringAllocator.append("</CAL:supported-calendar-component-set>");
+            return stringAllocator.toString();
+        }
+        return null;
+    }
 
 }

@@ -47,52 +47,107 @@
  *
  */
 
-package com.openexchange.realtime.synthetic;
+package com.openexchange.realtime;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.ComponentHandle;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.threadpool.RunLoop;
 
 
 /**
- * {@link MessageDispatch}
+ * {@link RunLoopTest}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class MessageDispatch {
-    
-    private ComponentHandle handle;
-    private final Stanza stanza;
-    
-    public MessageDispatch(ComponentHandle handle, Stanza stanza) {
-        super();
-        this.handle = handle;
-        this.stanza = stanza;
+public class RunLoopTest {
+
+    PauseLoop pauseLoop;
+    Thread runLoopThread;
+    Filler filler1;
+    Filler filler2;
+
+    public RunLoopTest() throws Exception {
+        pauseLoop = new PauseLoop("PauseLoop");
+        runLoopThread = new Thread(pauseLoop);
+        runLoopThread.start();
+        
+        filler1 = new Filler(pauseLoop);
+        filler1.start();
+        
+        filler2 = new Filler(pauseLoop);
+        filler2.start();
+        
+        System.out.println("wurst");
+        Thread.sleep(2000);
+        pauseLoop.doPause();
+        Thread.sleep(2000);
+        pauseLoop.doContinue();
+        Thread.sleep(2000);
+        System.out.println("Exiting");
+        filler1.interrupt();
+        filler2.interrupt();
+        runLoopThread.interrupt();
     }
 
-    public void tick() throws OXException {
-        stanza.trace("Passing stanza to handler");
-        handle.process(stanza);
-    }
-
-    
     /**
-     * Gets the handle
-     *
-     * @return The handle
+     * @param args
+     * @throws Exception 
      */
-    public ComponentHandle getHandle() {
-        return handle;
+    public static void main(String[] args) throws Exception {
+        RunLoopTest rlt = new RunLoopTest();
     }
 
-    /**
-     * Sets the handle
-     *
-     * @param handle The handle to set
-     */
-    public void setHandle(ComponentHandle handle) {
-        this.handle = handle;
+    
+    public class Filler extends Thread {
+
+        private RunLoop<Integer> runLoop;
+
+        public Filler(RunLoop<Integer> runLoop) {
+            this.runLoop = runLoop;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see java.lang.Thread#run()
+         */
+        @Override
+        public void run() {
+            int i = 0;
+            while (true) {
+                boolean taken = pauseLoop.offer(i++);
+                if (!taken) {
+                    System.out.println("didn't take" + i);
+                }
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        }
+    }
+    
+    public class PauseLoop extends RunLoop<Integer> {
+
+        public PauseLoop(String name) {
+            super(name);
+        }
+
+        @Override
+        protected void handle(Integer element) throws OXException {
+            System.out.println("Handling element:"+ element);
+        }
+        
+        public void doPause() throws InterruptedException {
+            this.pauseHandling();
+        }
+        
+        public void doContinue() throws Exception {
+            this.continueHandling();
+        }
+        
     }
 
 }

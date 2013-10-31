@@ -108,9 +108,6 @@ public class GroupDispatcher implements ComponentHandle {
     /** Action handler */
     private final ActionHandler handler;
 
-    /** Track if the last user left the room and the dispatcher was disposed already */
-    private boolean isDisposed = false;
-
     /**
      * Initializes a new {@link GroupDispatcher}.
      *
@@ -346,11 +343,9 @@ public class GroupDispatcher implements ComponentHandle {
         }
 
         if (empty) {
-            //Mark this dispatcher as disposed and remove it from the hazelcastdirectory via ID.Events.DISPOSE 
-            isDisposed=true;
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
-            this.id.trigger(ID.Events.DISPOSE, this, properties);
+            this.id.dispose(this, properties);
         }
     }
 
@@ -525,12 +520,9 @@ public class GroupDispatcher implements ComponentHandle {
         return goodbye;
     }
 
-    /**
-     * Check if the last user left the room and the dispatcher was disposed already.
-     * @return true if the dispatcher was disposed already, otherwise false
-     */
-    public boolean isDisposed() {
-        return isDisposed;
+    @Override
+    public ID getID() {
+        return id;
     }
 
 }

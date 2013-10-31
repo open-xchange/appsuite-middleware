@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.utilitytests;
 
-import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.java.CharsetDetector;
+import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -83,7 +83,8 @@ public final class MailCharsetDetectorTest extends AbstractMailTest {
 			usedCharset = "US-ASCII";
 			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line"
 					.getBytes(usedCharset)));
-			assertTrue(usedCharset + " not detected" + charset, usedCharset.equalsIgnoreCase(charset));
+			assertTrue(usedCharset + " not detected" + charset,
+			    usedCharset.equalsIgnoreCase(charset) || "ISO-8859-1".equalsIgnoreCase(charset)); // "ISO-8859-1" is also okay as a superset of "US-ASCII"
 
 			usedCharset = "UTF-8";
 			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(

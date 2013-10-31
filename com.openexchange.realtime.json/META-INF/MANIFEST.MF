@@ -55,4 +55,5 @@ Import-Package: com.openexchange.ajax,
 Export-Package: com.openexchange.realtime.json,
  com.openexchange.realtime.json.impl,
  com.openexchange.realtime.json.impl.stanza.builder,
+ com.openexchange.realtime.json.impl.stanza.writer,
  com.openexchange.realtime.json.stanza

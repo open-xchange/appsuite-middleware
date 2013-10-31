@@ -872,7 +872,7 @@ public final class CSSMatcher {
      *            <code>false</code>
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
-    static boolean checkCSSElements(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
+    protected static boolean checkCSSElements(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
         if ((null == styleMap) || (cssBuilder.length() <= 0)) {
             return false;
         }

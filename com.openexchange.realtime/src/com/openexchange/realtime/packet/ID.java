@@ -50,6 +50,7 @@
 package com.openexchange.realtime.packet;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -410,7 +411,11 @@ public class ID implements Serializable {
      * Trigger an event on this ID, with the give properties
      */
     public void trigger(String event, Object source, Map<String, Object> properties) {
-        for (IDEventHandler handler : handlerList(event)) {
+        if (properties == null) {
+            properties = new HashMap<String, Object>();
+        }
+        List<IDEventHandler> handlerList = new ArrayList<IDEventHandler>(handlerList(event));
+        for (IDEventHandler handler : handlerList) {
             handler.handle(event, this, source, properties);
         }
         if (event.equals("dispose")) {
@@ -490,22 +495,45 @@ public class ID implements Serializable {
 
         return lock;
     }
+    
+    public void dispose(Object source, Map<String, Object> properties) {
+        Map<String, Object> vetoProperties = new HashMap<String, Object>();
+        this.trigger(Events.BEFOREDISPOSE, this, vetoProperties);
+        Boolean veto = (Boolean) vetoProperties.get("veto");
+        if (veto != null && !veto) {
+            this.trigger(Events.DISPOSE, source, properties);
+        }
+    }
 
     /**
-     *
-     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and {@link ID#on(String, IDEventHandler)}
-     *
+     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and
+     * {@link ID#on(String, IDEventHandler)}
+     * 
      * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
      */
     public static interface Events {
+
         /**
-         * This event is triggered, when an ID goes offline. You can use this to free up resources this ID uses, for example state information associated with the ID
+         * Triggered before dispose. Offers the chance to veto the disposal of the ID by adding a key named "veto" with a value of true to
+         * the properties
+         */
+        public static final String BEFOREDISPOSE = "beforedispose";
+
+        /**
+         * This event is triggered, when an ID goes offline. You can use this to free up resources this ID uses, for example state
+         * information associated with the ID. Use {@link ID#dispose(Object, Map)} to give EventHandlers a chance to veto the disposal of
+         * the ID.
          */
         public static final String DISPOSE = "dispose";
-        
+
         /**
          * This event is triggered to ensure that resources for this ID aren't freed up by eviction policies or sth. similar.
          */
         public static final String REFRESH = "refresh";
+
+        /**
+         * An ID was resurrected after being disposed
+         */
+        public static final String RESURRECT = "resurrect";
     }
 }
