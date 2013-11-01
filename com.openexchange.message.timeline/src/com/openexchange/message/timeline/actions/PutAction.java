@@ -52,7 +52,7 @@ package com.openexchange.message.timeline.actions;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.message.timeline.Message;
@@ -82,7 +82,7 @@ public final class PutAction extends AbstractMessageTimelineAction {
         final String client = checkClient(msgTimelineRequest.getSession());
 
         // Get JSON object to store
-        final JSONObject toStore = (JSONObject) msgTimelineRequest.getRequestData().getData();
+        final JSONValue toStore = (JSONValue) msgTimelineRequest.getRequestData().getData();
 
         // Get appropriate queue
         final BlockingQueue<Message> queue = MessageTimelineManagement.getInstance().getQueueFor(msgTimelineRequest.getSession(), client);

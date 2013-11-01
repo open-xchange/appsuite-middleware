@@ -49,7 +49,7 @@
 
 package com.openexchange.message.timeline;
 
-import org.json.JSONObject;
+import org.json.JSONValue;
 
 
 /**
@@ -60,7 +60,7 @@ import org.json.JSONObject;
 public final class Message implements Comparable<Message> {
 
     /** The JSON payload */
-    public final JSONObject jsonObject;
+    public final JSONValue jsonValue;
 
     /** The time stamp */
     public final long stamp;
@@ -68,9 +68,9 @@ public final class Message implements Comparable<Message> {
     /**
      * Initializes a new {@link Message}.
      */
-    public Message(final JSONObject jsonObject) {
+    public Message(final JSONValue jsonValue) {
         super();
-        this.jsonObject = jsonObject;
+        this.jsonValue = jsonValue;
         stamp = System.currentTimeMillis();
     }
 

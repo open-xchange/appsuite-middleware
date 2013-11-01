@@ -100,7 +100,7 @@ public final class PopAction extends AbstractMessageTimelineAction {
 
         final JSONArray jArray = new JSONArray(messages.size());
         for (final Message m : messages) {
-            jArray.put(m.jsonObject);
+            jArray.put(m.jsonValue);
         }
         return new AJAXRequestResult(jArray, "json");
     }
