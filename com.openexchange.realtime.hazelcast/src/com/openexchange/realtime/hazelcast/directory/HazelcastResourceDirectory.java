@@ -522,15 +522,15 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            try {
-                /*
-                 * This performs a get on both maps to lookup the full IDs and the associated Resources which resets the idle times for the
-                 * eviction policy
-                 */
-                
-            } catch (OXException e) {
-                LOG.error(e.getMessage());
-            }
+//            try {
+//                /*
+//                 * This performs a get on both maps to lookup the full IDs and the associated Resources which resets the idle times for the
+//                 * eviction policy
+//                 */
+//                
+//            } catch (OXException e) {
+//                LOG.error(e.getMessage());
+//            }
         }
 
     };
