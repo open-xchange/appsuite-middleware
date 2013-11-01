@@ -531,9 +531,5 @@ public class ID implements Serializable {
          */
         public static final String REFRESH = "refresh";
 
-        /**
-         * An ID was resurrected after being disposed
-         */
-        public static final String RESURRECT = "resurrect";
     }
 }
