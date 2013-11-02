@@ -689,6 +689,9 @@ public abstract class SessionServlet extends AJAXServlet {
             Cookie cookie = cookies.get(cookieName);
             if (null == cookie) {
                 LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+                if (INFO) {
+                    LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
+                }
             } else {
                 final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
                 if (null == altId) {
@@ -698,6 +701,9 @@ public abstract class SessionServlet extends AJAXServlet {
                     // Identifier does not match -- recreate
                     removeOXCookies(req, resp, Collections.singletonList(cookieName));
                     LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+                    if (INFO) {
+                        LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
+                    }
                 }
             }
         }
