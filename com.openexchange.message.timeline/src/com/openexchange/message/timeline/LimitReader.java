@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,90 @@
  *
  */
 
-package com.openexchange.message.timeline.osgi;
+package com.openexchange.message.timeline;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.message.timeline.MessageTimelineActionFactory;
-import com.openexchange.message.timeline.Services;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
-
+import java.io.FilterReader;
+import java.io.IOException;
+import java.io.Reader;
 
 /**
- * {@link MessageTimelineActivator}
+ * {@link LimitReader} - A {@link Reader reader} that limits the number of characters which can be read.
+ * <p>
+ * If limit is exceeded a <code>LimitExceededIOException</code> is thrown.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class MessageTimelineActivator extends AJAXModuleActivator {
+public final class LimitReader extends FilterReader {
+
+    private long left;
+    private long mark = -1;
 
     /**
-     * Initializes a new {@link MessageTimelineActivator}.
+     * Wraps another reader, limiting the number of characters which can be read.
+     *
+     * @param in the reader to be wrapped
+     * @param limit the maximum number of characters to be read
      */
-    public MessageTimelineActivator() {
-        super();
+    public LimitReader(final Reader in, final long limit) {
+        super(in);
+        if (null == in) {
+            throw new IllegalArgumentException("Reader must not be null");
+        }
+        if (limit < 0) {
+            throw new IllegalArgumentException("Limit must be non-negative");
+        }
+        left = limit;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class };
+    public void mark(final int readlimit) throws IOException {
+        in.mark(readlimit);
+        mark = left;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new MessageTimelineEventHandler(), serviceProperties);
+    public int read() throws IOException {
+        if (left <= 0) {
+            throw new LimitExceededIOException("Max. character count exceeded.");
         }
 
-        registerModule(new MessageTimelineActionFactory(this), MessageTimelineActionFactory.MODULE);
+        final int result = in.read();
+        if (result != -1) {
+            --left;
+        }
+        return result;
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        Services.setServiceLookup(null);
-        super.stop(context);
+    public int read(final char[] b, final int off, final int len) throws IOException {
+        if (left <= 0) {
+            throw new LimitExceededIOException("Max. character count exceeded.");
+        }
+
+        final int result = in.read(b, off, (int) Math.min(len, left));
+        if (result != -1) {
+            left -= result;
+        }
+        return result;
     }
 
+    @Override
+    public void reset() throws IOException {
+        if (!in.markSupported()) {
+            throw new IOException("Mark not supported");
+        }
+        if (mark == -1) {
+            throw new IOException("Mark not set");
+        }
+        in.reset();
+        left = mark;
+    }
+
+    @Override
+    public long skip(final long n) throws IOException {
+        final long skipped = in.skip(Math.min(n, left));
+        left -= skipped;
+        return skipped;
+    }
 }

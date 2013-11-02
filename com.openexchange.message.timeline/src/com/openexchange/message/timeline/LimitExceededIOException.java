@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,53 @@
  *
  */
 
-package com.openexchange.message.timeline.osgi;
+package com.openexchange.message.timeline;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.message.timeline.MessageTimelineActionFactory;
-import com.openexchange.message.timeline.Services;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
-
+import java.io.IOException;
 
 /**
- * {@link MessageTimelineActivator}
+ * {@link LimitExceededIOException}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class MessageTimelineActivator extends AJAXModuleActivator {
+public final class LimitExceededIOException extends IOException {
+
+    private static final long serialVersionUID = 4303119149782966974L;
 
     /**
-     * Initializes a new {@link MessageTimelineActivator}.
+     * Initializes a new {@link LimitExceededIOException}.
      */
-    public MessageTimelineActivator() {
+    public LimitExceededIOException() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class };
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param message The error message
+     */
+    public LimitExceededIOException(final String message) {
+        super(message);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new MessageTimelineEventHandler(), serviceProperties);
-        }
-
-        registerModule(new MessageTimelineActionFactory(this), MessageTimelineActionFactory.MODULE);
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param cause The cause
+     */
+    public LimitExceededIOException(final Throwable cause) {
+        super(cause);
     }
 
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        Services.setServiceLookup(null);
-        super.stop(context);
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param message The error message
+     * @param cause The cause
+     */
+    public LimitExceededIOException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
 }

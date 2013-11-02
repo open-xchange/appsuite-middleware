@@ -56,9 +56,11 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.message.timeline.actions.AbstractMessageTimelineAction;
+import com.openexchange.message.timeline.actions.PopAction;
+import com.openexchange.message.timeline.actions.PutAction;
 import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link MessageTimelineActionFactory} - The action factory for message timeline module.
@@ -67,6 +69,13 @@ import com.openexchange.server.ServiceLookup;
  */
 @Module(name = "message.timeline", description = "Provides access to a message timeline associated with a certain client.")
 public class MessageTimelineActionFactory implements AJAXActionServiceFactory {
+
+    /**
+     * The module name.
+     */
+    public static final String MODULE = "message.timeline";
+
+    // ----------------------------------------------------------------------------------- //
 
     private final Map<String, AbstractMessageTimelineAction> actions;
 
@@ -78,8 +87,14 @@ public class MessageTimelineActionFactory implements AJAXActionServiceFactory {
     public MessageTimelineActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AbstractMessageTimelineAction>(4);
-        actions.put("put", new com.openexchange.message.timeline.actions.PutAction(services, actions));
-        actions.put("pop", new com.openexchange.message.timeline.actions.PopAction(services, actions));
+        {
+            final PutAction putAction = new PutAction(services, actions);
+            actions.put(putAction.getAction(), putAction);
+        }
+        {
+            final PopAction popAction = new PopAction(services, actions);
+            actions.put(popAction.getAction(), popAction);
+        }
     }
 
     @Override
@@ -90,6 +105,19 @@ public class MessageTimelineActionFactory implements AJAXActionServiceFactory {
     @Override
     public Collection<? extends AJAXActionService> getSupportedServices() {
         return java.util.Collections.unmodifiableCollection(actions.values());
+    }
+
+    /**
+     * Checks if this action factory supports given action identifier.
+     *
+     * @param action The action identifier
+     * @return <code>true</code> if supported; else <code>false</code>
+     */
+    public boolean contains(final String action) {
+        if (Strings.isEmpty(action)) {
+            return false;
+        }
+        return actions.containsKey(action);
     }
 
 }

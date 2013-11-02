@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,62 @@
  *
  */
 
-package com.openexchange.message.timeline.osgi;
+package com.openexchange.message.timeline;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.message.timeline.MessageTimelineActionFactory;
-import com.openexchange.message.timeline.Services;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
+import java.io.IOException;
+import java.io.Reader;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.DefaultBodyParser;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
- * {@link MessageTimelineActivator}
+ * {@link MessageTimelineBodyParser}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class MessageTimelineActivator extends AJAXModuleActivator {
+public final class MessageTimelineBodyParser extends DefaultBodyParser {
+
+    private static final int LIMIT = 2048;
+
+    private static final String MODULE = MessageTimelineActionFactory.MODULE;
+
+    // ---------------------------------------------------------------------------------------- //
+
+    private final MessageTimelineActionFactory actionFactory;
 
     /**
-     * Initializes a new {@link MessageTimelineActivator}.
+     * Initializes a new {@link MessageTimelineBodyParser}.
      */
-    public MessageTimelineActivator() {
+    public MessageTimelineBodyParser(final MessageTimelineActionFactory actionFactory) {
         super();
+        this.actionFactory = actionFactory;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class };
+    public int getRanking() {
+        return 10;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+    public boolean accepts(final AJAXRequestData requestData) {
+        return MODULE.equals(requestData.getModule()) && actionFactory.contains(requestData.getAction());
+    }
 
-        {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new MessageTimelineEventHandler(), serviceProperties);
+    @Override
+    protected void hookHandleIOException(final IOException ioe) throws OXException {
+        if (ioe instanceof LimitExceededIOException) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
-
-        registerModule(new MessageTimelineActionFactory(this), MessageTimelineActionFactory.MODULE);
+        super.hookHandleIOException(ioe);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        Services.setServiceLookup(null);
-        super.stop(context);
+    protected Reader hookGetReaderFor(final HttpServletRequest req) throws IOException {
+        return new LimitReader(super.hookGetReaderFor(req), LIMIT);
     }
 
 }

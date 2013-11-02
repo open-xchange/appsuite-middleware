@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,40 @@
  *
  */
 
-package com.openexchange.message.timeline.osgi;
+package com.openexchange.ajax.requesthandler;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.message.timeline.MessageTimelineActionFactory;
-import com.openexchange.message.timeline.Services;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
-
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link MessageTimelineActivator}
+ * {@link BodyParser} - Sets the appropriate body object in a given <code>requestData</code> using specified HTTP request.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class MessageTimelineActivator extends AJAXModuleActivator {
+public interface BodyParser {
 
     /**
-     * Initializes a new {@link MessageTimelineActivator}.
+     * Sets the appropriate body object in given <code>requestData</code> using passed HTTP request.
+     *
+     * @param requestData The AJAX request data
+     * @param req The HTTP request
+     * @throws OXException If setting the body fails
      */
-    public MessageTimelineActivator() {
-        super();
-    }
+    void setBody(AJAXRequestData requestData, HttpServletRequest req) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class };
-    }
+    /**
+     * Gets the ranking for this body parser.
+     *
+     * @return The ranking
+     */
+    int getRanking();
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new MessageTimelineEventHandler(), serviceProperties);
-        }
-
-        registerModule(new MessageTimelineActionFactory(this), MessageTimelineActionFactory.MODULE);
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        Services.setServiceLookup(null);
-        super.stop(context);
-    }
-
+    /**
+     * Signals whether this body parser handles specified request data.
+     *
+     * @param requestData The AJAX request data
+     * @return <code>true</code> if accepted; otherwise <code>false</code>
+     */
+    boolean accepts(AJAXRequestData requestData);
 }
