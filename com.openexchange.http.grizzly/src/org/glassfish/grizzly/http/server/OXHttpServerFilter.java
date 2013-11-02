@@ -313,10 +313,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final WatchInfo watchInfo = pingMap.remove(ctx);
                         if (null != watchInfo) {
                             watchInfo.timerTask.cancel(false);
-                            final TimerService timerService = Services.optService(TimerService.class);
-                            if (null != timerService) {
-                                timerService.purge();
-                            }
+                            // Canceled timer task gets purged by CustomThreadPoolExecutorTimerService.PurgeRunnable
                         }
                     }
                 }
