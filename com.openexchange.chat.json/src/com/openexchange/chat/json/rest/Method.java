@@ -51,9 +51,9 @@ package com.openexchange.chat.json.rest;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import com.openexchange.java.Strings;
 
 /**
  * An enumeration for HTTP methods.
@@ -75,12 +75,15 @@ public enum Method {
     }
 
     /**
-     * Gets the method appropriate for specified HTTP Servlet request.
+     * Gets the method appropriate for specified HTTP request.
      *
-     * @param req The HTTP Servlet request
+     * @param req The HTTP request
      * @return The appropriate method or <code>null</code>
      */
     public static Method valueOf(final HttpServletRequest req) {
-        return MAP.get(req.getMethod().toUpperCase(Locale.US));
+        if (null == req) {
+            return null;
+        }
+        return MAP.get(Strings.toUpperCase(req.getMethod()));
     }
 }

@@ -51,8 +51,8 @@ package com.openexchange.jslob.json.action;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
+import com.openexchange.java.Strings;
 
 /**
  * An enumeration for HTTP methods.
@@ -83,6 +83,6 @@ public enum Method {
         if (null == method) {
             return null;
         }
-        return MAP.get(method.toUpperCase(Locale.US));
+        return MAP.get(Strings.toUpperCase(method));
     }
 }
