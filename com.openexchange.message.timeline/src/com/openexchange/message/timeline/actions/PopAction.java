@@ -98,6 +98,7 @@ public final class PopAction extends AbstractMessageTimelineAction {
         // Sort according to time stamp
         Collections.sort(messages);
 
+        // Output as JSON array
         final JSONArray jArray = new JSONArray(messages.size());
         for (final Message m : messages) {
             jArray.put(m.jsonValue);
