@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.message.timeline;
+package com.openexchange.message.timeline.util;
 
 /**
  * {@link Key} - A user-bound key to his queues.

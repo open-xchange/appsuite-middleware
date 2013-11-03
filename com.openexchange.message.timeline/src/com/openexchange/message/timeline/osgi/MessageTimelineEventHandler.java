@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.message.timeline.MessageTimelineManagement;
-import com.openexchange.message.timeline.Services;
+import com.openexchange.message.timeline.services.Services;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;

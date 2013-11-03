@@ -47,72 +47,90 @@
  *
  */
 
-package com.openexchange.message.timeline;
+package com.openexchange.message.timeline.util;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.io.FilterReader;
+import java.io.IOException;
+import java.io.Reader;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link LimitReader} - A {@link Reader reader} that limits the number of characters which can be read.
+ * <p>
+ * If limit is exceeded a <code>LimitExceededIOException</code> is thrown.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class Services {
+public final class LimitReader extends FilterReader {
+
+    private long left;
+    private long mark = -1;
 
     /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
-    }
-
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
+     * Wraps another reader, limiting the number of characters which can be read.
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @param in the reader to be wrapped
+     * @param limit the maximum number of characters to be read
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.message.timeline\" not started?");
+    public LimitReader(final Reader in, final long limit) {
+        super(in);
+        if (null == in) {
+            throw new IllegalArgumentException("Reader must not be null");
         }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
+        if (limit < 0) {
+            throw new IllegalArgumentException("Limit must be non-negative");
         }
+        left = limit;
     }
 
+    @Override
+    public void mark(final int readlimit) throws IOException {
+        in.mark(readlimit);
+        mark = left;
+    }
+
+    @Override
+    public int read() throws IOException {
+        if (left <= 0) {
+            throw new LimitExceededIOException("Max. character count exceeded.");
+        }
+
+        final int result = in.read();
+        if (result != -1) {
+            --left;
+        }
+        return result;
+    }
+
+    @Override
+    public int read(final char[] b, final int off, final int len) throws IOException {
+        if (left <= 0) {
+            throw new LimitExceededIOException("Max. character count exceeded.");
+        }
+
+        final int result = in.read(b, off, (int) Math.min(len, left));
+        if (result != -1) {
+            left -= result;
+        }
+        return result;
+    }
+
+    @Override
+    public void reset() throws IOException {
+        if (!in.markSupported()) {
+            throw new IOException("Mark not supported");
+        }
+        if (mark == -1) {
+            throw new IOException("Mark not set");
+        }
+        in.reset();
+        left = mark;
+    }
+
+    @Override
+    public long skip(final long n) throws IOException {
+        final long skipped = in.skip(Math.min(n, left));
+        left -= skipped;
+        return skipped;
+    }
 }

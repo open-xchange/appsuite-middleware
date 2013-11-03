@@ -47,53 +47,72 @@
  *
  */
 
-package com.openexchange.message.timeline;
+package com.openexchange.message.timeline.services;
 
-import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link LimitExceededIOException}
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
  */
-public final class LimitExceededIOException extends IOException {
-
-    private static final long serialVersionUID = 4303119149782966974L;
+public final class Services {
 
     /**
-     * Initializes a new {@link LimitExceededIOException}.
+     * Initializes a new {@link Services}.
      */
-    public LimitExceededIOException() {
+    private Services() {
         super();
     }
 
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
     /**
-     * Initializes a new {@link LimitExceededIOException}.
+     * Sets the service lookup.
      *
-     * @param message The error message
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public LimitExceededIOException(final String message) {
-        super(message);
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Initializes a new {@link LimitExceededIOException}.
+     * Gets the service lookup.
      *
-     * @param cause The cause
+     * @return The service lookup or <code>null</code>
      */
-    public LimitExceededIOException(final Throwable cause) {
-        super(cause);
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
     /**
-     * Initializes a new {@link LimitExceededIOException}.
+     * Gets the service of specified type
      *
-     * @param message The error message
-     * @param cause The cause
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public LimitExceededIOException(final String message, final Throwable cause) {
-        super(message, cause);
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.message.timeline\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

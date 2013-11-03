@@ -47,90 +47,53 @@
  *
  */
 
-package com.openexchange.message.timeline;
+package com.openexchange.message.timeline.util;
 
-import java.io.FilterReader;
 import java.io.IOException;
-import java.io.Reader;
 
 /**
- * {@link LimitReader} - A {@link Reader reader} that limits the number of characters which can be read.
- * <p>
- * If limit is exceeded a <code>LimitExceededIOException</code> is thrown.
+ * {@link LimitExceededIOException}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public final class LimitReader extends FilterReader {
+public final class LimitExceededIOException extends IOException {
 
-    private long left;
-    private long mark = -1;
+    private static final long serialVersionUID = 4303119149782966974L;
 
     /**
-     * Wraps another reader, limiting the number of characters which can be read.
-     *
-     * @param in the reader to be wrapped
-     * @param limit the maximum number of characters to be read
+     * Initializes a new {@link LimitExceededIOException}.
      */
-    public LimitReader(final Reader in, final long limit) {
-        super(in);
-        if (null == in) {
-            throw new IllegalArgumentException("Reader must not be null");
-        }
-        if (limit < 0) {
-            throw new IllegalArgumentException("Limit must be non-negative");
-        }
-        left = limit;
+    public LimitExceededIOException() {
+        super();
     }
 
-    @Override
-    public void mark(final int readlimit) throws IOException {
-        in.mark(readlimit);
-        mark = left;
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param message The error message
+     */
+    public LimitExceededIOException(final String message) {
+        super(message);
     }
 
-    @Override
-    public int read() throws IOException {
-        if (left <= 0) {
-            throw new LimitExceededIOException("Max. character count exceeded.");
-        }
-
-        final int result = in.read();
-        if (result != -1) {
-            --left;
-        }
-        return result;
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param cause The cause
+     */
+    public LimitExceededIOException(final Throwable cause) {
+        super(cause);
     }
 
-    @Override
-    public int read(final char[] b, final int off, final int len) throws IOException {
-        if (left <= 0) {
-            throw new LimitExceededIOException("Max. character count exceeded.");
-        }
-
-        final int result = in.read(b, off, (int) Math.min(len, left));
-        if (result != -1) {
-            left -= result;
-        }
-        return result;
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param message The error message
+     * @param cause The cause
+     */
+    public LimitExceededIOException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public void reset() throws IOException {
-        if (!in.markSupported()) {
-            throw new IOException("Mark not supported");
-        }
-        if (mark == -1) {
-            throw new IOException("Mark not set");
-        }
-        in.reset();
-        left = mark;
-    }
-
-    @Override
-    public long skip(final long n) throws IOException {
-        final long skipped = in.skip(Math.min(n, left));
-        left -= skipped;
-        return skipped;
-    }
 }

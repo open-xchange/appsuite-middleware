@@ -58,7 +58,7 @@ import com.openexchange.ajax.requesthandler.BodyParser;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.message.timeline.MessageTimelineActionFactory;
 import com.openexchange.message.timeline.MessageTimelineBodyParser;
-import com.openexchange.message.timeline.Services;
+import com.openexchange.message.timeline.services.Services;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 

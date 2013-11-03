@@ -55,6 +55,8 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DefaultBodyParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.message.timeline.util.LimitExceededIOException;
+import com.openexchange.message.timeline.util.LimitReader;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
