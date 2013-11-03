@@ -52,6 +52,7 @@ package javax.servlet.http.sim;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -293,6 +294,7 @@ public final class SimHttpServletResponse implements HttpServletResponse {
      *
      * @return The status
      */
+    @Override
     public int getStatus() {
         return status;
     }
@@ -310,6 +312,24 @@ public final class SimHttpServletResponse implements HttpServletResponse {
      */
     public String getStatusMessage() {
         return statusMessage;
+    }
+
+    @Override
+    public String getHeader(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection<String> getHeaders(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection<String> getHeaderNames() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /** ASCII-wise to lower-case */

@@ -56,6 +56,7 @@ import java.nio.charset.Charset;
 import java.security.Principal;
 import java.security.SecureRandom;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -66,13 +67,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.exception.AJPv13Exception;
@@ -482,7 +490,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
      * @return The header values as an {@link Enumeration}
      */
     @Override
-    public Enumeration<?> getHeaders(final String name) {
+    public Enumeration<String> getHeaders(final String name) {
         return makeEnumeration(headers.get(name.toLowerCase(Locale.ENGLISH)));
     }
 
@@ -492,7 +500,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
      * @return The header names as an {@link Enumeration}
      */
     @Override
-    public Enumeration<?> getHeaderNames() {
+    public Enumeration<String> getHeaderNames() {
         return makeEnumeration(headers.keySet().iterator());
     }
 
@@ -512,12 +520,12 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
     }
 
     @Override
-    public Enumeration<?> getParameterNames() {
+    public Enumeration<String> getParameterNames() {
         return makeEnumeration(parameters.keySet().iterator());
     }
 
     @Override
-    public Map<?, ?> getParameterMap() {
+    public Map<String, String[]> getParameterMap() {
         final Map<String, String[]> retval = new HashKeyMap<String[]>(parameters.size()).setGenerator(hashKeyGenerator);
         for (final Entry<String, List<String>> entry : parameters.entrySet()) {
             final List<String> values = entry.getValue();
@@ -542,7 +550,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
     }
 
     @Override
-    public Enumeration<?> getAttributeNames() {
+    public Enumeration<String> getAttributeNames() {
         return makeEnumeration(attributes.keySet().iterator());
     }
 
@@ -607,7 +615,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
     }
 
     @Override
-    public Enumeration<?> getLocales() {
+    public Enumeration<Locale> getLocales() {
         return null;
     }
 
@@ -1200,6 +1208,61 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
         return requestedSessionIdFromURL;
     }
 
+    @Override
+    public AsyncContext startAsync() throws IllegalStateException {
+        throw new IllegalStateException("Not supported");
+    }
+
+    @Override
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        throw new IllegalStateException("Not supported");
+    }
+
+    @Override
+    public boolean isAsyncStarted() {
+        return false;
+    }
+
+    @Override
+    public boolean isAsyncSupported() {
+        return false;
+    }
+
+    @Override
+    public AsyncContext getAsyncContext() {
+        return null;
+    }
+
+    @Override
+    public DispatcherType getDispatcherType() {
+        return DispatcherType.REQUEST;
+    }
+
+    @Override
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        return false;
+    }
+
+    @Override
+    public void login(String username, String password) throws ServletException {
+        throw new ServletException("Not supported");
+    }
+
+    @Override
+    public void logout() throws ServletException {
+        throw new ServletException("Not supported");
+    }
+
+    @Override
+    public Collection<Part> getParts() throws IOException, ServletException {
+        throw new ServletException("Not supported");
+    }
+
+    @Override
+    public Part getPart(String name) throws IOException, ServletException {
+        throw new ServletException("Not supported");
+    }
+
     public void setRequestedSessionIdFromURL(final boolean requestedSessionIdFromURL) {
         this.requestedSessionIdFromURL = requestedSessionIdFromURL;
     }
@@ -1221,7 +1284,8 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
         }
     }
 
-    private final ServletContext getServletContext() {
+    @Override
+    public ServletContext getServletContext() {
         return ServletConfigLoader.getDefaultInstance().getContext(servletInstance.getClass().getCanonicalName(), servletPath);
     }
 

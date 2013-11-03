@@ -169,7 +169,7 @@ public class HttpSessionWrapper implements HttpSession {
     }
 
     @Override
-    public Enumeration<?> getAttributeNames() {
+    public Enumeration<String> getAttributeNames() {
         return new IteratorEnumeration(attributes.keySet().iterator());
     }
 
@@ -300,11 +300,11 @@ public class HttpSessionWrapper implements HttpSession {
         }
     }
 
-    private static class IteratorEnumeration implements Enumeration<Object> {
+    private static class IteratorEnumeration implements Enumeration<String> {
 
-        private final Iterator<?> iter;
+        private final Iterator<String> iter;
 
-        public IteratorEnumeration(final Iterator<?> iter) {
+        public IteratorEnumeration(final Iterator<String> iter) {
             this.iter = iter;
         }
 
@@ -314,7 +314,7 @@ public class HttpSessionWrapper implements HttpSession {
         }
 
         @Override
-        public Object nextElement() {
+        public String nextElement() {
             return iter.next();
         }
     }

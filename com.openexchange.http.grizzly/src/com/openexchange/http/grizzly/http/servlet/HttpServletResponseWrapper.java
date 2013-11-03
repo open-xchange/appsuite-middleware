@@ -51,6 +51,7 @@ package com.openexchange.http.grizzly.http.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Locale;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -71,143 +72,9 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
 
     private final HttpServletResponse httpServletResponse;
 
-    public HttpServletResponseWrapper(HttpServletResponse httpServletResponse) {
+    public HttpServletResponseWrapper(final HttpServletResponse httpServletResponse) {
+        super();
         this.httpServletResponse = httpServletResponse;
-    }
-
-    @Override
-    public void addCookie(Cookie arg0) {
-        httpServletResponse.addCookie(arg0);
-    }
-
-    @Override
-    public void addDateHeader(String arg0, long arg1) {
-        httpServletResponse.addDateHeader(arg0, arg1);
-    }
-
-    @Override
-    public void addHeader(String arg0, String arg1) {
-        httpServletResponse.addHeader(arg0, arg1);
-    }
-
-    @Override
-    public void addIntHeader(String arg0, int arg1) {
-        httpServletResponse.addIntHeader(arg0, arg1);
-    }
-
-    @Override
-    public boolean containsHeader(String arg0) {
-        return httpServletResponse.containsHeader(arg0);
-    }
-
-    @Override
-    public String encodeRedirectURL(String arg0) {
-        return httpServletResponse.encodeRedirectURL(arg0);
-    }
-
-    @Override
-    public String encodeRedirectUrl(String arg0) {
-        return httpServletResponse.encodeRedirectUrl(arg0);
-    }
-
-    @Override
-    public String encodeURL(String arg0) {
-        return httpServletResponse.encodeURL(arg0);
-    }
-
-    @Override
-    public String encodeUrl(String arg0) {
-        return httpServletResponse.encodeUrl(arg0);
-    }
-
-    @Override
-    public void flushBuffer() throws IOException {
-        httpServletResponse.flushBuffer();
-    }
-
-    @Override
-    public int getBufferSize() {
-        return httpServletResponse.getBufferSize();
-    }
-
-    @Override
-    public String getCharacterEncoding() {
-        return httpServletResponse.getCharacterEncoding();
-    }
-
-    @Override
-    public String getContentType() {
-        return httpServletResponse.getContentType();
-    }
-
-    @Override
-    public Locale getLocale() {
-        return httpServletResponse.getLocale();
-    }
-
-    @Override
-    public ServletOutputStream getOutputStream() throws IOException {
-        return httpServletResponse.getOutputStream();
-    }
-
-    @Override
-    public PrintWriter getWriter() throws IOException {
-        return httpServletResponse.getWriter();
-    }
-
-    @Override
-    public boolean isCommitted() {
-        return httpServletResponse.isCommitted();
-    }
-
-    @Override
-    public void reset() {
-        httpServletResponse.reset();
-    }
-
-    @Override
-    public void resetBuffer() {
-        httpServletResponse.resetBuffer();
-    }
-
-    @Override
-    public void sendError(int arg0, String arg1) throws IOException {
-        httpServletResponse.sendError(arg0, arg1);
-    }
-
-    @Override
-    public void sendError(int arg0) throws IOException {
-        httpServletResponse.sendError(arg0);
-    }
-
-    @Override
-    public void sendRedirect(String arg0) throws IOException {
-        httpServletResponse.sendRedirect(arg0);
-    }
-
-    @Override
-    public void setBufferSize(int arg0) {
-        httpServletResponse.setBufferSize(arg0);
-    }
-
-    @Override
-    public void setCharacterEncoding(String arg0) {
-        httpServletResponse.setCharacterEncoding(arg0);
-    }
-
-    @Override
-    public void setContentLength(int arg0) {
-        httpServletResponse.setContentLength(arg0);
-    }
-
-    @Override
-    public void setContentType(String arg0) {
-        httpServletResponse.setContentType(arg0);
-    }
-
-    @Override
-    public void setDateHeader(String arg0, long arg1) {
-        httpServletResponse.setDateHeader(arg0, arg1);
     }
 
     /**
@@ -218,16 +85,16 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
      * @throws IllegalStateException if the underlying Response is already committed
      */
     @Override
-    public void setHeader(String headerName, String headerValue) {
-        Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
+    public void setHeader(final String headerName, final String headerValue) {
+        final Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
 
         if (httpServletResponse.isCommitted()) {
             throw new IllegalStateException("Respone is already committed");
         }
 
         if (headerValue == null) {
-            HttpResponsePacket httpResponsePacket = internalResponse.getResponse();
-            MimeHeaders responseMimeHeaders = httpResponsePacket.getHeaders();
+            final HttpResponsePacket httpResponsePacket = internalResponse.getResponse();
+            final MimeHeaders responseMimeHeaders = httpResponsePacket.getHeaders();
             responseMimeHeaders.removeHeader(headerName);
         } else { // delegate to the original response implementation
             httpServletResponse.setHeader(headerName, headerValue);
@@ -235,23 +102,179 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
     }
 
     @Override
-    public void setIntHeader(String arg0, int arg1) {
-        httpServletResponse.setIntHeader(arg0, arg1);
+    public void addCookie(final Cookie cookie) {
+        httpServletResponse.addCookie(cookie);
     }
 
     @Override
-    public void setLocale(Locale arg0) {
-        httpServletResponse.setLocale(arg0);
+    public boolean containsHeader(final String name) {
+        return httpServletResponse.containsHeader(name);
     }
 
     @Override
-    public void setStatus(int arg0, String arg1) {
-        httpServletResponse.setStatus(arg0, arg1);
+    public String encodeURL(final String url) {
+        return httpServletResponse.encodeURL(url);
     }
 
     @Override
-    public void setStatus(int arg0) {
-        httpServletResponse.setStatus(arg0);
+    public String getCharacterEncoding() {
+        return httpServletResponse.getCharacterEncoding();
+    }
+
+    @Override
+    public String encodeRedirectURL(final String url) {
+        return httpServletResponse.encodeRedirectURL(url);
+    }
+
+    @Override
+    public String getContentType() {
+        return httpServletResponse.getContentType();
+    }
+
+    @Override
+    public String encodeUrl(final String url) {
+        return httpServletResponse.encodeUrl(url);
+    }
+
+    @Override
+    public String encodeRedirectUrl(final String url) {
+        return httpServletResponse.encodeRedirectUrl(url);
+    }
+
+    @Override
+    public ServletOutputStream getOutputStream() throws IOException {
+        return httpServletResponse.getOutputStream();
+    }
+
+    @Override
+    public void sendError(final int sc, final String msg) throws IOException {
+        httpServletResponse.sendError(sc, msg);
+    }
+
+    @Override
+    public PrintWriter getWriter() throws IOException {
+        return httpServletResponse.getWriter();
+    }
+
+    @Override
+    public void sendError(final int sc) throws IOException {
+        httpServletResponse.sendError(sc);
+    }
+
+    @Override
+    public void setCharacterEncoding(final String charset) {
+        httpServletResponse.setCharacterEncoding(charset);
+    }
+
+    @Override
+    public void sendRedirect(final String location) throws IOException {
+        httpServletResponse.sendRedirect(location);
+    }
+
+    @Override
+    public void setDateHeader(final String name, final long date) {
+        httpServletResponse.setDateHeader(name, date);
+    }
+
+    @Override
+    public void setContentLength(final int len) {
+        httpServletResponse.setContentLength(len);
+    }
+
+    @Override
+    public void addDateHeader(final String name, final long date) {
+        httpServletResponse.addDateHeader(name, date);
+    }
+
+    @Override
+    public void setContentType(final String type) {
+        httpServletResponse.setContentType(type);
+    }
+
+    @Override
+    public void addHeader(final String name, final String value) {
+        httpServletResponse.addHeader(name, value);
+    }
+
+    @Override
+    public void setBufferSize(final int size) {
+        httpServletResponse.setBufferSize(size);
+    }
+
+    @Override
+    public void setIntHeader(final String name, final int value) {
+        httpServletResponse.setIntHeader(name, value);
+    }
+
+    @Override
+    public void addIntHeader(final String name, final int value) {
+        httpServletResponse.addIntHeader(name, value);
+    }
+
+    @Override
+    public void setStatus(final int sc) {
+        httpServletResponse.setStatus(sc);
+    }
+
+    @Override
+    public int getBufferSize() {
+        return httpServletResponse.getBufferSize();
+    }
+
+    @Override
+    public void flushBuffer() throws IOException {
+        httpServletResponse.flushBuffer();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void setStatus(final int sc, final String sm) {
+        httpServletResponse.setStatus(sc, sm);
+    }
+
+    @Override
+    public void resetBuffer() {
+        httpServletResponse.resetBuffer();
+    }
+
+    @Override
+    public int getStatus() {
+        return httpServletResponse.getStatus();
+    }
+
+    @Override
+    public boolean isCommitted() {
+        return httpServletResponse.isCommitted();
+    }
+
+    @Override
+    public String getHeader(final String name) {
+        return httpServletResponse.getHeader(name);
+    }
+
+    @Override
+    public void reset() {
+        httpServletResponse.reset();
+    }
+
+    @Override
+    public Collection<String> getHeaders(final String name) {
+        return httpServletResponse.getHeaders(name);
+    }
+
+    @Override
+    public void setLocale(final Locale loc) {
+        httpServletResponse.setLocale(loc);
+    }
+
+    @Override
+    public Collection<String> getHeaderNames() {
+        return httpServletResponse.getHeaderNames();
+    }
+
+    @Override
+    public Locale getLocale() {
+        return httpServletResponse.getLocale();
     }
 
 }
