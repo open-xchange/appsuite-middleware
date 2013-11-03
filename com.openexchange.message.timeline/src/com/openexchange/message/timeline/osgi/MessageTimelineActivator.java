@@ -54,8 +54,10 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.ajax.requesthandler.BodyParser;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.message.timeline.MessageTimelineActionFactory;
+import com.openexchange.message.timeline.MessageTimelineBodyParser;
 import com.openexchange.message.timeline.Services;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -90,7 +92,9 @@ public final class MessageTimelineActivator extends AJAXModuleActivator {
             registerService(EventHandler.class, new MessageTimelineEventHandler(), serviceProperties);
         }
 
-        registerModule(new MessageTimelineActionFactory(this), MessageTimelineActionFactory.MODULE);
+        final MessageTimelineActionFactory actionFactory = new MessageTimelineActionFactory(this);
+        registerService(BodyParser.class, new MessageTimelineBodyParser(actionFactory));
+        registerModule(actionFactory, MessageTimelineActionFactory.MODULE);
     }
 
     @Override
