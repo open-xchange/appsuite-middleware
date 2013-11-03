@@ -91,9 +91,11 @@ public final class PutAction extends AbstractMessageTimelineAction {
         final boolean offered = queue.offer(new Message(toStore));
 
         if (!offered) {
+            // Boundary exceeded
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
 
+        // Signal positive result
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 
