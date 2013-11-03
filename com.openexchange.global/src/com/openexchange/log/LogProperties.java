@@ -467,7 +467,7 @@ public final class LogProperties {
         }
         final Props props = LogProperties.getLogProperties();
         props.put(LogProperties.Name.SESSION_SESSION_ID, session.getSessionID());
-        props.put(LogProperties.Name.SESSION_USER_ID, ForceLog.valueOf(Integer.valueOf(session.getUserId())));
+        props.put(LogProperties.Name.SESSION_USER_ID, ForceLog.valueOf(new StringAllocator(24).append(session.getUserId()).append(" (").append(session.getLogin()).append(')').toString()));
         props.put(LogProperties.Name.SESSION_CONTEXT_ID, ForceLog.valueOf(Integer.valueOf(session.getContextId())));
         final String client  = session.getClient();
         props.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
