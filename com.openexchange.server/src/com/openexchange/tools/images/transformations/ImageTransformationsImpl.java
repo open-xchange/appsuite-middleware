@@ -399,7 +399,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private BufferedImage read(InputStream inputStream) throws IOException {
         try {
             return ImageIO.read(inputStream);
-        } catch (IllegalArgumentException e) {
+        } catch (final RuntimeException e) {
             LOG.debug("error reading image from stream", e);
             return null;
         } finally {
