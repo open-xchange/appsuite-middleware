@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,35 @@
  *
  */
 
-package com.openexchange.message.timeline.actions;
+package com.openexchange.message.timeline;
 
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import org.json.JSONException;
-import org.json.JSONValue;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.message.timeline.Message;
-import com.openexchange.message.timeline.MessageTimelineExceptionCodes;
-import com.openexchange.message.timeline.MessageTimelineManagement;
-import com.openexchange.message.timeline.MessageTimelineRequest;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link PutAction} - The 'put' action.
+ * {@link MessageTimelineExceptionMessages} - Exception messages for message timeline module that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PutAction extends AbstractMessageTimelineAction {
+public final class MessageTimelineExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // Maximum number of messages already stored for client %1$s
+    public static final String NO_MORE_MSGS_MSG = "Maximum number of messages already stored for client %1$s";
+
+    // No client identifier associated with session %1$s
+    public static final String NO_CLIENT_MSG = "No client identifier associated with session %1$s";
 
     /**
-     * Initializes a new {@link PutAction}.
+     * Initializes a new {@link MessageTimelineExceptionMessages}.
      */
-    public PutAction(final ServiceLookup services, final Map<String, AbstractMessageTimelineAction> actions) {
-        super(services, actions);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final MessageTimelineRequest msgTimelineRequest) throws OXException, JSONException {
-        // Check client identifier
-        final String client = checkClient(msgTimelineRequest.getSession());
-
-        // Get JSON object to store
-        final JSONValue toStore = (JSONValue) msgTimelineRequest.getRequestData().getData();
-
-        // Get appropriate queue
-        final BlockingQueue<Message> queue = MessageTimelineManagement.getInstance().getQueueFor(msgTimelineRequest.getSession(), client);
-
-        // Put to queue (if possible)
-        final boolean offered = queue.offer(new Message(toStore));
-
-        if (!offered) {
-            // Boundary exceeded
-            throw MessageTimelineExceptionCodes.NO_MORE_MSGS.create(client);
-        }
-
-        // Signal positive result
-        return new AJAXRequestResult(Boolean.TRUE, "native");
-    }
-
-    @Override
-    public String getAction() {
-        return "put";
+    private MessageTimelineExceptionMessages() {
+        super();
     }
 
 }

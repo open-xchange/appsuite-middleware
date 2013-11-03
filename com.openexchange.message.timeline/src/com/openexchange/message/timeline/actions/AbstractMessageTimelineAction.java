@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.message.timeline.MessageTimelineExceptionCodes;
 import com.openexchange.message.timeline.MessageTimelineRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -176,7 +177,7 @@ public abstract class AbstractMessageTimelineAction implements AJAXActionService
     protected String checkClient(final Session session) throws OXException {
         final String client = session.getClient();
         if (Strings.isEmpty(client)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("client");
+            throw MessageTimelineExceptionCodes.NO_CLIENT.create(session.getSessionID());
         }
         return client;
     }
