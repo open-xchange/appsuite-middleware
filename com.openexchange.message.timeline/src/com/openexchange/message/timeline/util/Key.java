@@ -49,12 +49,18 @@
 
 package com.openexchange.message.timeline.util;
 
+import com.openexchange.session.Session;
+
 /**
  * {@link Key} - A user-bound key to his queues.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Key {
+
+    public static Key valueOf(final Session session) {
+        return valueOf(session.getUserId(), session.getContextId());
+    }
 
     public static Key valueOf(final int userId, final int cid) {
         return new Key(userId, cid);

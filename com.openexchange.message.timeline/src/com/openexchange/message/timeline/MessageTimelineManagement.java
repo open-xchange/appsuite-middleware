@@ -95,7 +95,7 @@ public final class MessageTimelineManagement {
      * @param session The user session
      */
     public void dropFor(final Session session) {
-        maps.remove(Key.valueOf(session.getUserId(), session.getContextId()));
+        maps.remove(Key.valueOf(session));
     }
 
     /**
@@ -108,7 +108,7 @@ public final class MessageTimelineManagement {
     public BlockingQueue<Message> getQueueFor(final Session session, final String client) {
         ConcurrentMap<String, BlockingQueue<Message>> queues;
         {
-            final Key key = Key.valueOf(session.getUserId(), session.getContextId());
+            final Key key = Key.valueOf(session);
             queues = maps.get(key);
             if (null == queues) {
                 final ConcurrentMap<String, BlockingQueue<Message>> newQueues = new ConcurrentHashMap<String, BlockingQueue<Message>>(4);
@@ -140,7 +140,7 @@ public final class MessageTimelineManagement {
     public List<BlockingQueue<Message>> getQueuesFor(final Session session) {
         ConcurrentMap<String, BlockingQueue<Message>> queues;
         {
-            final Key key = Key.valueOf(session.getUserId(), session.getContextId());
+            final Key key = Key.valueOf(session);
             queues = maps.get(key);
             if (null == queues) {
                 final ConcurrentMap<String, BlockingQueue<Message>> newQueues = new ConcurrentHashMap<String, BlockingQueue<Message>>(4);
