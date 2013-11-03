@@ -79,6 +79,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -134,7 +135,11 @@ public class AppointmentWriter extends CalendarWriter {
     }
 
     public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
-        final AppointmentSQLInterface appointmentsql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
+        final AppointmentSqlFactoryService factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+        if (null == factoryService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AppointmentSqlFactoryService.class.getName());
+        }
+        final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(sessionObj);
         final Element eProp = new Element("prop", "D", "DAV:");
         final XMLOutputter xo = new XMLOutputter();
         try {
@@ -153,9 +158,12 @@ public class AppointmentWriter extends CalendarWriter {
         }
     }
 
-    public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id,
-            final Date lastsync, final OutputStream os) throws Exception {
-        final AppointmentSQLInterface appointmentsql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
+    public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+        final AppointmentSqlFactoryService factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+        if (null == factoryService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AppointmentSqlFactoryService.class.getName());
+        }
+        final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(sessionObj);
         final XMLOutputter xo = new XMLOutputter();
         SearchIterator<? extends Appointment> it = null;
         /*
@@ -203,8 +211,10 @@ public class AppointmentWriter extends CalendarWriter {
                                      * Load withheld change exceptions by IDs
                                      */
                                     final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-                                    final Appointment[] ces = calColl.getAppointmentsByID(
-                                            folder_id, ids, deleteFields, sessionObj);
+                                    if (null == calColl) {
+                                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CalendarCollectionService.class.getName());
+                                    }
+                                    final Appointment[] ces = calColl.getAppointmentsByID(folder_id, ids, deleteFields, sessionObj);
                                     for (final Appointment ce : ces) {
                                         if (null != ce) {
                                             /*
