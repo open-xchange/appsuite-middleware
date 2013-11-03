@@ -54,8 +54,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -406,7 +404,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         headers.put(name, val);
     }
 
-    @Override
     public int getStatus() {
         return status;
     }
@@ -457,21 +454,18 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return headers.size();
     }
 
-    @Override
-    public final Collection<String> getHeaderNames() {
-        return headers.keySet();
+    public final Iterator<String> getHeaderNames() {
+        return headers.keySet().iterator();
     }
 
     public final Set<Map.Entry<String, String[]>> getHeaderEntrySet() {
         return headers.entrySet();
     }
 
-    @Override
-    public Collection<String> getHeaders(final String name) {
-        return Arrays.asList(headers.get(name));
+    public Enumeration<?> getHeaders(final String name) {
+        return makeEnumeration(headers.get(name));
     }
 
-    @Override
     public final String getHeader(final String name) {
         if (!containsHeader(name)) {
             return null;

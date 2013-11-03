@@ -54,28 +54,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.CountingInputStream;
 
@@ -133,7 +125,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
      *
      * @param max The max. number of bytes to accept
      */
-    public void setMax(final long max) {
+    public void setMax(long max) {
         this.max = max;
     }
 
@@ -160,7 +152,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<String> getAttributeNames() {
+    public Enumeration<?> getAttributeNames() {
         return servletRequest.getAttributeNames();
     }
 
@@ -197,7 +189,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<String> getHeaders(final String name) {
+    public Enumeration<?> getHeaders(final String name) {
         return servletRequest.getHeaders(name);
     }
 
@@ -225,7 +217,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<String> getHeaderNames() {
+    public Enumeration<?> getHeaderNames() {
         return servletRequest.getHeaderNames();
     }
 
@@ -235,7 +227,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<String> getParameterNames() {
+    public Enumeration<?> getParameterNames() {
         return servletRequest.getParameterNames();
     }
 
@@ -255,7 +247,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Map<String, String[]> getParameterMap() {
+    public Map<?, ?> getParameterMap() {
         return servletRequest.getParameterMap();
     }
 
@@ -355,7 +347,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     @Override
-    public Enumeration<Locale> getLocales() {
+    public Enumeration<?> getLocales() {
         return servletRequest.getLocales();
     }
 
@@ -429,64 +421,31 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
         return servletRequest.isRequestedSessionIdFromUrl();
     }
 
-    @Override
-    public ServletContext getServletContext() {
-        return servletRequest.getServletContext();
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
-    @Override
-    public AsyncContext startAsync() throws IllegalStateException {
-        return servletRequest.startAsync();
-    }
-
-    @Override
-    public boolean authenticate(final HttpServletResponse response) throws IOException, ServletException {
-        return servletRequest.authenticate(response);
-    }
-
-    @Override
-    public AsyncContext startAsync(final ServletRequest servletRequest, final ServletResponse servletResponse) throws IllegalStateException {
-        return servletRequest.startAsync(servletRequest, servletResponse);
-    }
-
-    @Override
-    public void login(final String username, final String password) throws ServletException {
-        servletRequest.login(username, password);
-    }
-
-    @Override
-    public void logout() throws ServletException {
-        servletRequest.logout();
-    }
-
-    @Override
-    public Collection<Part> getParts() throws IOException, ServletException {
-        return servletRequest.getParts();
-    }
-
-    @Override
-    public boolean isAsyncStarted() {
-        return servletRequest.isAsyncStarted();
-    }
-
-    @Override
-    public Part getPart(final String name) throws IOException, ServletException {
-        return servletRequest.getPart(name);
-    }
-
-    @Override
-    public boolean isAsyncSupported() {
-        return servletRequest.isAsyncSupported();
-    }
-
-    @Override
-    public AsyncContext getAsyncContext() {
-        return servletRequest.getAsyncContext();
-    }
-
-    @Override
-    public DispatcherType getDispatcherType() {
-        return servletRequest.getDispatcherType();
+    /** ASCII-wise to lower-case */
+    static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

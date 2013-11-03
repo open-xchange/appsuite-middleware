@@ -53,23 +53,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
 import org.glassfish.grizzly.http.server.OXRequest;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.servlet.ServletUtils;
@@ -78,43 +69,47 @@ import com.openexchange.dispatcher.Parameterizable;
 public class HttpServletRequestWrapper implements HttpServletRequest, Parameterizable {
 
     public final static String HTTP_SCHEME = "http";
+
     public final static String HTTPS_SCHEME = "https";
 
     private final HttpServletRequest delegate;
+
     private final String requestScheme;
+
     private final int serverPort;
+
     private final boolean isSecure;
+
     private final String remoteAddress;
 
-    /**
-     * Initializes a new {@link HttpServletRequestWrapper}.
-     *
-     * @param requestScheme The scheme of the incoming request: http or https
-     * @param remoteAddress
-     * @param serverPort The serverPort of the incoming request
-     * @param httpServletRequest The incoming request
-     * @throws IllegalArgumentException If the port is smaller than 1
-     */
-    public HttpServletRequestWrapper(String requestScheme, String remoteAddress, int serverPort, HttpServletRequest httpServletRequest) {
-        super();
-        if (serverPort < 1) {
-            throw new IllegalArgumentException("Port is out of valid range: " + serverPort);
-        }
-        if (requestScheme.equalsIgnoreCase(HTTPS_SCHEME)) {
-            this.requestScheme = HTTPS_SCHEME;
-            this.isSecure = true;
-        } else {
-            this.requestScheme = HTTP_SCHEME;
-            this.isSecure = false;
-        }
-        this.remoteAddress = remoteAddress;
-        this.serverPort = serverPort;
-        this.delegate = httpServletRequest;
+        /**
+         * Initializes a new {@link HttpServletRequestWrapper}.
+         *
+         * @param requestScheme The scheme of the incoming request: http or https
+         * @param remoteAddress
+         * @param serverPort The serverPort of the incoming request
+         * @param httpServletRequest The incoming request
+         * @throws IllegalArgumentException If the port is smaller than 1
+         */
+        public HttpServletRequestWrapper(String requestScheme, String remoteAddress, int serverPort, HttpServletRequest httpServletRequest) {
+            if (serverPort < 1) {
+                throw new IllegalArgumentException("Port is out of valid range: " + serverPort);
+            }
+            if (requestScheme.equalsIgnoreCase(HTTPS_SCHEME)) {
+                this.requestScheme = HTTPS_SCHEME;
+                this.isSecure = true;
+            } else {
+                this.requestScheme = HTTP_SCHEME;
+                this.isSecure = false;
+            }
+            this.remoteAddress = remoteAddress;
+            this.serverPort = serverPort;
+            this.delegate = httpServletRequest;
 
-        OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(delegate);
-        internalRequest.setXForwardPort(serverPort);
-        internalRequest.setxForwardProto(requestScheme);
-    }
+            OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(delegate);
+            internalRequest.setXForwardPort(serverPort);
+            internalRequest.setxForwardProto(requestScheme);
+        }
 
     /**
      * Initializes a new {@link HttpServletRequestWrapper}.
@@ -410,66 +405,6 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     public void putParameter(String name, String value) {
         Request internalRequest = ServletUtils.getInternalRequest(delegate);
         internalRequest.putParameter(name, value);
-    }
-
-    @Override
-    public ServletContext getServletContext() {
-        return delegate.getServletContext();
-    }
-
-    @Override
-    public AsyncContext startAsync() throws IllegalStateException {
-        return delegate.startAsync();
-    }
-
-    @Override
-    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
-        return delegate.authenticate(response);
-    }
-
-    @Override
-    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
-        return delegate.startAsync(servletRequest, servletResponse);
-    }
-
-    @Override
-    public void login(String username, String password) throws ServletException {
-        delegate.login(username, password);
-    }
-
-    @Override
-    public void logout() throws ServletException {
-        delegate.logout();
-    }
-
-    @Override
-    public Collection<Part> getParts() throws IOException, ServletException {
-        return delegate.getParts();
-    }
-
-    @Override
-    public boolean isAsyncStarted() {
-        return delegate.isAsyncStarted();
-    }
-
-    @Override
-    public Part getPart(String name) throws IOException, ServletException {
-        return delegate.getPart(name);
-    }
-
-    @Override
-    public boolean isAsyncSupported() {
-        return delegate.isAsyncSupported();
-    }
-
-    @Override
-    public AsyncContext getAsyncContext() {
-        return delegate.getAsyncContext();
-    }
-
-    @Override
-    public DispatcherType getDispatcherType() {
-        return delegate.getDispatcherType();
     }
 
 }

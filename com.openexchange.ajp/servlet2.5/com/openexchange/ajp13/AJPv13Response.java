@@ -360,7 +360,7 @@ public class AJPv13Response {
         final byte[] headers;
         {
             sink.reset();
-            final Iterator<String> iterator = servletResponse.getHeaderNames().iterator();
+            final Iterator<String> iterator = servletResponse.getHeaderNames();
             for (int i = 0; i < headersSize; i++) {
                 final String headerName = iterator.next();
                 writeHeader(headerName, servletResponse.getHeader(headerName), sink);

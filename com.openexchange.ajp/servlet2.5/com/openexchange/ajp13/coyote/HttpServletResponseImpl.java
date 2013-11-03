@@ -884,7 +884,6 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         return list;
     }
 
-    @Override
     public int getStatus() {
         return status;
     }
@@ -935,21 +934,18 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         return headers.size();
     }
 
-    @Override
-    public final Collection<String> getHeaderNames() {
-        return headers.keySet();
+    public final Iterator<String> getHeaderNames() {
+        return headers.keySet().iterator();
     }
 
     public final Set<Map.Entry<String, List<String>>> getHeaderEntrySet() {
         return headers.entrySet();
     }
 
-    @Override
-    public Collection<String> getHeaders(final String name) {
-        return headers.get(name);
+    public Enumeration<?> getHeaders(final String name) {
+        return makeEnumeration(headers.get(name));
     }
 
-    @Override
     public final String getHeader(final String name) {
         if (!containsHeader(name)) {
             return null;

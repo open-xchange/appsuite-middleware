@@ -63,12 +63,9 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
@@ -87,7 +84,7 @@ import com.openexchange.mail.mime.ContentType;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class ServletRequestWrapper implements ServletRequest {
+public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * The name of the "Content-Type" header.
@@ -294,7 +291,7 @@ public abstract class ServletRequestWrapper implements ServletRequest {
      * @param name The header name
      * @return The header values as an {@link Enumeration}
      */
-    public Enumeration<String> getHeaders(final String name) {
+    public Enumeration<?> getHeaders(final String name) {
         return makeEnumeration(headers.get(name.toLowerCase(Locale.ENGLISH)));
     }
 
@@ -303,7 +300,7 @@ public abstract class ServletRequestWrapper implements ServletRequest {
      *
      * @return The header names as an {@link Enumeration}
      */
-    public Enumeration<String> getHeaderNames() {
+    public Enumeration<?> getHeaderNames() {
         return makeEnumeration(headers.keySet().iterator());
     }
 
@@ -329,12 +326,12 @@ public abstract class ServletRequestWrapper implements ServletRequest {
     }
 
     @Override
-    public Enumeration<String> getParameterNames() {
+    public Enumeration<?> getParameterNames() {
         return makeEnumeration(parameters.keySet().iterator());
     }
 
     @Override
-    public Map<String, String[]> getParameterMap() {
+    public Map<?, ?> getParameterMap() {
         return Collections.unmodifiableMap(parameters);
     }
 
@@ -354,7 +351,7 @@ public abstract class ServletRequestWrapper implements ServletRequest {
     }
 
     @Override
-    public Enumeration<String> getAttributeNames() {
+    public Enumeration<?> getAttributeNames() {
         return makeEnumeration(attributes.keySet().iterator());
     }
 
@@ -415,7 +412,7 @@ public abstract class ServletRequestWrapper implements ServletRequest {
     }
 
     @Override
-    public Enumeration<Locale> getLocales() {
+    public Enumeration<?> getLocales() {
         return null;
     }
 
@@ -663,36 +660,6 @@ public abstract class ServletRequestWrapper implements ServletRequest {
         final String[] clone = new String[len];
         System.arraycopy(src, 0, clone, 0, len);
         return clone;
-    }
-
-    @Override
-    public AsyncContext startAsync() throws IllegalStateException {
-        throw new IllegalStateException("Not supported");
-    }
-
-    @Override
-    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
-        throw new IllegalStateException("Not supported");
-    }
-
-    @Override
-    public boolean isAsyncStarted() {
-        return false;
-    }
-
-    @Override
-    public boolean isAsyncSupported() {
-        return false;
-    }
-
-    @Override
-    public AsyncContext getAsyncContext() {
-        return null;
-    }
-
-    @Override
-    public DispatcherType getDispatcherType() {
-        return DispatcherType.REQUEST;
     }
 
 }
