@@ -63,7 +63,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
- * {@link PutAction} - The 'store' action.
+ * {@link PutAction} - The 'put' action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

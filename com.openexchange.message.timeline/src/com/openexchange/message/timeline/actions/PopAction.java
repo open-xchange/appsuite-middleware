@@ -65,7 +65,7 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link PopAction} - The 'store' action.
+ * {@link PopAction} - The 'pop' action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
