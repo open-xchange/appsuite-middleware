@@ -1730,11 +1730,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if (null == charEnc) {
             charEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
         }
-        final String DecodedRequestURI = AJPv13Utility.decodeUrl(requestURI,charEnc);
+        final String decodedRequestURI = AJPv13Utility.decodeUrl(requestURI, charEnc);
         /*
          * Remove leading slash character
          */
-        final String path = DecodedRequestURI.length() > 1 ? removeFromPath(DecodedRequestURI, '/') : DecodedRequestURI;
+        final String path = decodedRequestURI.length() > 1 ? removeFromPath(decodedRequestURI, '/') : decodedRequestURI;
         /*
          * Lookup path in available servlet paths
          */
@@ -1743,7 +1743,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         HttpServlet servlet = HttpServletManager.getServlet(path, servletId);
         if (servlet == null) {
-            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(DecodedRequestURI));
+            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(decodedRequestURI, charEnc));
         }
         this.servlet = servlet;
         // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
@@ -1765,7 +1765,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 /*
                  * Set complete request URI as path info
                  */
-                request.setPathInfo(DecodedRequestURI);
+                request.setPathInfo(decodedRequestURI);
             } else {
                 /*
                  * The path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include
@@ -1776,8 +1776,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * Set path info: The extra path information follows the servlet path but precedes the query string and will start with a
                  * "/" character.
                  */
-                if ((DecodedRequestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
-                    request.setPathInfo(DecodedRequestURI.substring(servletPathLen));
+                if ((decodedRequestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
+                    request.setPathInfo(decodedRequestURI.substring(servletPathLen));
                 } else {
                     request.setPathInfo(null);
                 }
