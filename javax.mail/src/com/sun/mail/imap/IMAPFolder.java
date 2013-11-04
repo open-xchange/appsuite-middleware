@@ -1392,6 +1392,15 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
+     * Return the available flags for this IMAP folder.
+     */
+    public synchronized Flags getAvailableFlags() {
+    if (availableFlags == null)
+        return null;
+    return (Flags)(availableFlags.clone());
+    }
+
+    /**
      * Get the total message count.
      */
     public synchronized int getMessageCount() throws MessagingException {
