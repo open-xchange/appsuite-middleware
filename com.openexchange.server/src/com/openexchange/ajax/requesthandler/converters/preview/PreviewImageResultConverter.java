@@ -177,7 +177,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
                 // Obtain preview
                 final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-                final DataProperties dataProperties = new DataProperties(7);
+                final DataProperties dataProperties = new DataProperties(9);
                 dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
                 dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
                 dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
@@ -185,6 +185,8 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
                 dataProperties.put("PreviewWidth", requestData.getParameter("width"));
                 dataProperties.put("PreviewHeight", requestData.getParameter("height"));
+                dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
+                dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
                 previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, 1);
             }
 
