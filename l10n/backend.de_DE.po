@@ -54,7 +54,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2013-10-31 14:23+0100\n"
+"PO-Revision-Date: 2013-11-04 16:32+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1380,11 +1380,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
-msgid "Change the title to %1$s."
+msgid "Change the subject to %1$s."
 msgstr "Ersetzen Sie den Betreff durch: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:200
-msgid "The appointment has a new title: %1$s."
+msgid "The appointment has a new subject: %1$s."
 msgstr "Der Termin hat einen neuen Betreff: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
@@ -1406,12 +1406,12 @@ msgstr "Der Termin findet an einem neuen Ort statt: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:212
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:214
-msgid "Use the description below."
-msgstr "Verwenden Sie die unten genannte Beschreibung."
+msgid "Use the appointment description below."
+msgstr "Verwenden Sie die unten genannte Terminbeschreibung."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:216
-msgid "The appointments description has changed."
-msgstr "Die Beschreibung des Termins wurde geändert."
+msgid "The appointment description has changed."
+msgstr "Die Terminbeschreibung wurde geändert."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:218
 msgid "Please invite %1$s to the appointment."
@@ -2393,8 +2393,7 @@ msgid ""
 "please upgrade to a newer version"
 msgstr ""
 "Die von Ihnen verwendete Client-Applikation ist veraltet und wird nicht "
-"länger unterstützt. "
-"Bitte aktualisieren Sie auf eine neuere Version."
+"länger unterstützt. Bitte aktualisieren Sie auf eine neuere Version."
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
