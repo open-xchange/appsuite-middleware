@@ -60,7 +60,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -69,7 +68,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.PatternSyntaxException;
 import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
@@ -78,7 +76,6 @@ import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
-import com.openexchange.config.internal.filewatcher.ProcessingFileListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -246,8 +243,11 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (file.isDirectory()) {
                 processDirectory(file, fileFilter, processor);
             } else {
-                final FileWatcher fileWatcher = FileWatcher.getFileWatcher(file);
-                fileWatcher.addFileListener(new ProcessingFileListener(file, processor));
+                /**
+                 * Preparations for US: 55795476 Change configuration values without restarting the systems
+                 * final FileWatcher fileWatcher = FileWatcher.getFileWatcher(file); fileWatcher.addFileListener(new
+                 * ProcessingFileListener(file, processor));
+                 */
                 processor.processFile(file);
             }
         }
@@ -334,7 +334,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     @Override
     public List<String> getProperty(String name, String defaultValue, String separator) {
         String property = getProperty(name, defaultValue);
-        return splitAndTrim(property, separator);
+        return Strings.splitAndTrim(property, separator);
     }
 
     @Override
@@ -342,7 +342,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         if(watchProperty(name, propertyListener)) {
             return getProperty(name, defaultValue, separator);
         }
-        return splitAndTrim(defaultValue, separator);
+        return Strings.splitAndTrim(defaultValue, separator);
     }
 
     @Override
@@ -698,36 +698,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         }
         return retval;
-    }
-    
-    /**
-     * Takes a String of separated values, splits it at the separator, trims the split values and returns them as List.
-     * 
-     * @param input String of separated values
-     * @param separator the seperator as regular expression used to split the input around this separator
-     * @return the split and trimmed input as List or an empty list
-     * @throws IllegalArgumentException if input or the seperator are missing
-     */
-    private List<String> splitAndTrim(String input, String separator) {
-        if (input == null) {
-            throw new IllegalArgumentException("Missing input");
-        }
-        if (Strings.isEmpty(input)) {
-            return Collections.emptyList();
-        }
-        if (Strings.isEmpty(separator)) {
-            throw new IllegalArgumentException("Missing separator");
-        }
-        ArrayList<String> trimmedSplits = new ArrayList<String>();
-        try {
-            String[] splits = input.split(separator);
-            for (String string : splits) {
-                trimmedSplits.add(string.trim());
-            }
-        } catch (PatternSyntaxException pse) {
-            LOG.error("Unable to split Property", pse);
-        }
-        return trimmedSplits;
     }
 
 }

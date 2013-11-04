@@ -284,8 +284,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final HttpHandler httpHandlerLocal = httpHandler;
                         if (httpHandlerLocal != null) {
                             // Initiate ping
-                            initiatePing(handlerResponse, ctx);
-                            pingInitiated = true;
+                            pingInitiated = initiatePing(handlerResponse, ctx);
                             // Handle HTTP message
                             httpHandlerLocal.doHandle(handlerRequest, handlerResponse);
                         }
@@ -314,10 +313,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final WatchInfo watchInfo = pingMap.remove(ctx);
                         if (null != watchInfo) {
                             watchInfo.timerTask.cancel(false);
-                            final TimerService timerService = Services.optService(TimerService.class);
-                            if (null != timerService) {
-                                timerService.purge();
-                            }
+                            // Canceled timer task gets purged by CustomThreadPoolExecutorTimerService.PurgeRunnable
                         }
                     }
                 }
@@ -359,87 +355,90 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         return ctx.getStopAction();
     }
 
-    private void initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
+    private boolean initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
         final Ping ping = this.ping;
-        if (ping != Ping.NONE) {
-            final TimerService timerService = Services.optService(TimerService.class);
-            if (null != timerService) {
-                final ConcurrentMap<FilterChainContext, WatchInfo> cm = pingMap;
-                final Logger logger = LOGGER;
-                final byte[] crlfBytes = CRLF;
+        if (ping == Ping.NONE) {
+            return false;
+        }
+        final TimerService timerService = Services.optService(TimerService.class);
+        if (null == timerService) {
+            return false;
+        }
+        final ConcurrentMap<FilterChainContext, WatchInfo> cm = pingMap;
+        final Logger logger = LOGGER;
+        final byte[] crlfBytes = CRLF;
 
-                final int maxPingCount = this.maxPingCount;
-                final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : this.maxPingCount);
-                final AtomicReference<ScheduledTimerTask> ref = new AtomicReference<ScheduledTimerTask>();
-                final int pingDelay = this.pingDelay;
+        final int maxPingCount = this.maxPingCount;
+        final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : this.maxPingCount);
+        final AtomicReference<ScheduledTimerTask> ref = new AtomicReference<ScheduledTimerTask>();
+        final int pingDelay = this.pingDelay;
 
-                final Runnable r = new Runnable() {
+        final Runnable r = new Runnable() {
 
-                    @Override
-                    public void run() {
-                        try {
-                            final WatchInfo watchInfo = cm.get(ctx);
-                            boolean pingIssued = false;
-                            if (null != watchInfo && (watchInfo.handlerResponse instanceof OXResponse)) {
-                                final StampingNIOOutputStreamImpl stamped = (StampingNIOOutputStreamImpl) ((OXResponse) watchInfo.handlerResponse).createOutputStream();
-                                if (!stamped.closed) {
-                                    final long lastAccessed = stamped.lastAccessed;
-                                    if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) >= pingDelay) {
-                                        // Check whether to issue a ping
-                                        if (pingCount.decrementAndGet() < 0) {
-                                            // Not allowed to issue a further ping
-                                            final ScheduledTimerTask timerTask = ref.get();
-                                            if (null != timerTask) {
-                                                timerTask.cancel(false);
-                                            }
-                                            return;
-                                        }
-
-                                        // Issue a ping
-                                        final MemoryManager memoryManager = ctx.getMemoryManager();
-                                        if (Ping.PROCESSING == ping) {
-                                            final Buffer encodedBuffer = memoryManager.allocate(128);
-                                            put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 102 Processing"));
-                                            put(memoryManager, encodedBuffer, crlfBytes);
-                                            put(memoryManager, encodedBuffer, crlfBytes);
-                                            encodedBuffer.trim();
-                                            encodedBuffer.allowBufferDispose(true);
-                                            ctx.write(encodedBuffer, true);
-                                        } else if (Ping.CONTINUE == ping) {
-                                            final Buffer encodedBuffer = memoryManager.allocate(128);
-                                            put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 100 Continue"));
-                                            put(memoryManager, encodedBuffer, crlfBytes);
-                                            put(memoryManager, encodedBuffer, crlfBytes);
-                                            encodedBuffer.trim();
-                                            encodedBuffer.allowBufferDispose(true);
-                                            ctx.write(encodedBuffer, true);
-                                        } else {
-                                            final Buffer buffer = memoryManager.allocate(128);
-                                            put(memoryManager, buffer, Charsets.toAsciiBytes(" "));
-                                            buffer.trim();
-                                            buffer.allowBufferDispose(true);
-                                            final OutputBuffer outputBuffer = handlerResponse.getOutputBuffer();
-                                            outputBuffer.writeBuffer(buffer);
-                                            outputBuffer.flush();
-                                        }
-                                        pingIssued = true;
+            @Override
+            public void run() {
+                try {
+                    final WatchInfo watchInfo = cm.get(ctx);
+                    boolean pingIssued = false;
+                    if (null != watchInfo && (watchInfo.handlerResponse instanceof OXResponse)) {
+                        final StampingNIOOutputStreamImpl stamped = (StampingNIOOutputStreamImpl) ((OXResponse) watchInfo.handlerResponse).createOutputStream();
+                        if (!stamped.closed) {
+                            final long lastAccessed = stamped.lastAccessed;
+                            if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) >= pingDelay) {
+                                // Check whether to issue a ping
+                                if (pingCount.decrementAndGet() < 0) {
+                                    // Not allowed to issue a further ping
+                                    final ScheduledTimerTask timerTask = ref.get();
+                                    if (null != timerTask) {
+                                        timerTask.cancel(false);
                                     }
+                                    return;
                                 }
+
+                                // Issue a ping
+                                final MemoryManager memoryManager = ctx.getMemoryManager();
+                                if (Ping.PROCESSING == ping) {
+                                    final Buffer encodedBuffer = memoryManager.allocate(128);
+                                    put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 102 Processing"));
+                                    put(memoryManager, encodedBuffer, crlfBytes);
+                                    put(memoryManager, encodedBuffer, crlfBytes);
+                                    encodedBuffer.trim();
+                                    encodedBuffer.allowBufferDispose(true);
+                                    ctx.write(encodedBuffer, true);
+                                } else if (Ping.CONTINUE == ping) {
+                                    final Buffer encodedBuffer = memoryManager.allocate(128);
+                                    put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 100 Continue"));
+                                    put(memoryManager, encodedBuffer, crlfBytes);
+                                    put(memoryManager, encodedBuffer, crlfBytes);
+                                    encodedBuffer.trim();
+                                    encodedBuffer.allowBufferDispose(true);
+                                    ctx.write(encodedBuffer, true);
+                                } else {
+                                    final Buffer buffer = memoryManager.allocate(128);
+                                    put(memoryManager, buffer, Charsets.toAsciiBytes(" "));
+                                    buffer.trim();
+                                    buffer.allowBufferDispose(true);
+                                    final OutputBuffer outputBuffer = handlerResponse.getOutputBuffer();
+                                    outputBuffer.writeBuffer(buffer);
+                                    outputBuffer.flush();
+                                }
+                                pingIssued = true;
                             }
-                            if (false == pingIssued) {
-                                pingCount.set(maxPingCount);
-                            }
-                        } catch (final Exception e) {
-                            logger.log(Level.WARNING, "Timer run failed: " + e.getMessage(), e);
                         }
                     }
-                };
-
-                final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, pingDelay, pingDelay);
-                ref.set(timerTask);
-                cm.put(ctx, new WatchInfo(timerTask, handlerResponse));
+                    if (false == pingIssued) {
+                        pingCount.set(maxPingCount);
+                    }
+                } catch (final Exception e) {
+                    logger.log(Level.WARNING, "Timer run failed: " + e.getMessage(), e);
+                }
             }
-        }
+        };
+
+        final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, pingDelay, pingDelay);
+        ref.set(timerTask);
+        cm.put(ctx, new WatchInfo(timerTask, handlerResponse));
+        return true;
     }
 
     /**

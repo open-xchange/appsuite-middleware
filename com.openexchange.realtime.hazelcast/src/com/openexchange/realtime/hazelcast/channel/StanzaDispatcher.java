@@ -75,7 +75,7 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
 
     /**
      * Initializes a new {@link StanzaDispatcher}.
-     * @throws OXException 
+     * @throws OXException
      */
     public StanzaDispatcher() throws OXException {
         this(null, null);
@@ -85,7 +85,7 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
      * Initializes a new {@link StanzaDispatcher}.
      *
      * @param stanza The stanza to dispatch
-     * @throws OXException 
+     * @throws OXException
      */
     public StanzaDispatcher(Stanza stanza, Set<ID> targets) throws OXException {
         super();
@@ -107,12 +107,17 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
          * can conjure the Resource.
          */
         if (Utils.shouldResend(exceptions, stanza)) {
-            ResourceDirectory directory = Services.optService(ResourceDirectory.class);
-            directory.remove(stanza.getTo());
-            Services.getService(MessageDispatcher.class).send(stanza);
+            final ResourceDirectory directory = Services.optService(ResourceDirectory.class);
+            if (null != directory) {
+                directory.remove(stanza.getTo());
+            }
+            final MessageDispatcher messageDispatcher = Services.getService(MessageDispatcher.class);
+            if (null != messageDispatcher) {
+                messageDispatcher.send(stanza);
+            }
         }
         return exceptions;
-            
+
     }
 
 }

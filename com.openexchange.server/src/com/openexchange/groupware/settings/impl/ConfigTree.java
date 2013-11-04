@@ -381,6 +381,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.TimeZone.class,
             com.openexchange.groupware.settings.tree.LocationLogout.class,
             com.openexchange.groupware.settings.tree.LocationError.class,
+            com.openexchange.groupware.settings.tree.ValidateContactEmail.class,
         };
     }
 

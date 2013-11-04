@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
@@ -91,7 +93,6 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
@@ -247,7 +248,6 @@ public abstract class SessionServlet extends AJAXServlet {
         findPublicSessionId(req, session, sessiondService);
     }
 
-    private static final String PUBLIC_SESSION_PREFIX = LoginServlet.PUBLIC_SESSION_PREFIX;
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
 
     /**
@@ -261,7 +261,7 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies != null) {
-            final Cookie cookie = cookies.get(PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req));
+            final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
             if (null != cookie) {
                 final String altId = cookie.getValue();
                 if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
@@ -685,10 +685,13 @@ public abstract class SessionServlet extends AJAXServlet {
     public static void checkPublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
-            final String cookieName = PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req);
+            final String cookieName = getPublicSessionCookieName(req);
             Cookie cookie = cookies.get(cookieName);
             if (null == cookie) {
                 LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+                if (INFO) {
+                    LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
+                }
             } else {
                 final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
                 if (null == altId) {
@@ -698,6 +701,9 @@ public abstract class SessionServlet extends AJAXServlet {
                     // Identifier does not match -- recreate
                     removeOXCookies(req, resp, Collections.singletonList(cookieName));
                     LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+                    if (INFO) {
+                        LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
+                    }
                 }
             }
         }
@@ -833,7 +839,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param resp The HTTP response
      */
     public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeOXCookies(req, resp, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req)));
+        removeOXCookies(req, resp, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, getPublicSessionCookieName(req)));
     }
 
     /**
@@ -940,20 +946,6 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         return null;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }

@@ -1,3 +1,16 @@
+* 2013-11-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29628: Make 'validate_contact_email' available in config tree, so it becomes visible for JSlob mapping
+
+* 2013-11-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27721: Improved parsing of an IMAP folder's capability to store user flags
+
+* 2013-10-31 - marc.arens@open-xchange.com
+
+ - Fix for bug 25994: Expose basic realtime components via jmx
+ - Fix for bug 29103: Use ComponentHandles singlethreaded
+ 
 * 2013-10-31 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29554: Introduced 'supported-calendar-component-sets' property for CalDAV collections

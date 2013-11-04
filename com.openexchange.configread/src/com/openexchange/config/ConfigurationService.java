@@ -111,6 +111,7 @@ public interface ConfigurationService {
      * @param separator the seperator as regular expression used to split the input around this separator
      * @return The value in this property list with the specified key value or given default value argument split and trimmed at the given
      * separator
+     * @throws IllegalArgumentException - if defaultValue or the seperator are missing or if the separator isn't a valid pattern
      */
     public List<String> getProperty(String name, String defaultValue, String separator);
 
@@ -153,6 +154,7 @@ public interface ConfigurationService {
      * @param separator the seperator as regular expression used to split the input around this separator
      * @return The value in this property list with the specified key value or given default value argument split and trimmed at the given
      * separator
+     * @throws IllegalArgumentException - if defaultValue or the seperator are missing or if the separator isn't a valid pattern
      */
     public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator);
 

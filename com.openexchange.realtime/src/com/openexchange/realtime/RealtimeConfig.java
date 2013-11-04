@@ -52,6 +52,7 @@ package com.openexchange.realtime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -62,6 +63,7 @@ import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentSet;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -83,7 +85,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
 
     private final AtomicBoolean started = new AtomicBoolean();
 
-    private HashMap<String, ChangeListener> changeListeners = new HashMap<String, ChangeListener>(2);
+    private HashMap<String, PropertyListener> changeListeners = new HashMap<String, PropertyListener>(2);
 
     private static final String isTraceAllUsersEnabledPropertyName = "com.openexchange.realtime.isTraceAllUsersEnabled";
 
@@ -182,7 +184,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
                 "Couldn't unregister PropertyListeners",
                 RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName()));
         } else {
-            for (Entry<String, ChangeListener> entry : changeListeners.entrySet()) {
+            for (Entry<String, PropertyListener> entry : changeListeners.entrySet()) {
                 configService.removePropertyListener(entry.getKey(), entry.getValue());
             }
         }
@@ -199,26 +201,53 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
 
-        ChangeListener isTraceAllUsersEnabledChangeListener = new ChangeListener() {
-
+        PropertyListener isTraceAllUsersEnabledChangeListener = new PropertyListener() {
+            
             @Override
-            void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService) {
-                realtimeConfig.setTraceAllUsersEnabled(configService.getBoolProperty(isTraceAllUsersEnabledPropertyName, false));
+            public void onPropertyChange(PropertyEvent event) {
+                if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
+                    String value = event.getValue();
+                    boolean enabled = false;
+                    if (!Strings.isEmpty(value)) {
+                        enabled = Boolean.parseBoolean(value.trim());
+                    }
+                    setTraceAllUsersEnabled(enabled);
+                }
             }
+
         };
+//        = new ChangeListener() {
+//
+//            @Override
+//            void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService) {
+//                realtimeConfig.setTraceAllUsersEnabled(configService.getBoolProperty(isTraceAllUsersEnabledPropertyName, false));
+//            }
+//        };
         changeListeners.put(isTraceAllUsersEnabledPropertyName, isTraceAllUsersEnabledChangeListener);
         isTraceAllUsersEnabled = configService.getBoolProperty(
             isTraceAllUsersEnabledPropertyName,
             false,
             isTraceAllUsersEnabledChangeListener);
 
-        ChangeListener usersToTraceChangeListener = new ChangeListener() {
-
+        PropertyListener usersToTraceChangeListener = new PropertyListener() {
+            
             @Override
-            void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService) {
-                realtimeConfig.setUsersToTrace(new HashSet<String>(configService.getProperty(usersToTracePropertyName, "", ",")));
+            public void onPropertyChange(PropertyEvent event) {
+                if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
+                    String value = event.getValue();
+                    List<String> splitAndTrimmed = Strings.splitAndTrim(value, ",");
+                    setUsersToTrace(new HashSet<String>(splitAndTrimmed));
+                }
+                
             }
         };
+//        = new ChangeListener() {
+//
+//            @Override
+//            void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService) {
+//                realtimeConfig.setUsersToTrace(new HashSet<String>(configService.getProperty(usersToTracePropertyName, "", ",")));
+//            }
+//        };
         changeListeners.put(usersToTracePropertyName, usersToTraceChangeListener);
         usersToTrace = new HashSet<String>(configService.getProperty(usersToTracePropertyName, "", usersToTraceChangeListener, ","));
     }

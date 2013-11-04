@@ -108,6 +108,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
@@ -201,6 +202,19 @@ public class LoginServlet extends AJAXServlet {
      */
     public static LoginConfiguration getLoginConfiguration() {
         return confReference.get();
+    }
+
+    /**
+     * Gets the name of the public session cookie for specified HTTP request.
+     * <pre>
+     *  "open-xchange-public-session-" + &lt;hash(req.userAgent)&gt;
+     * </pre>
+     *
+     * @param req The HTTP request
+     * @return The name of the public session cookie
+     */
+    public static String getPublicSessionCookieName(final HttpServletRequest req) {
+        return new StringAllocator(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
     }
 
     // --------------------------------------------------------------------------------------- //
@@ -895,7 +909,7 @@ public class LoginServlet extends AJAXServlet {
 
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
+            cookie = new Cookie(getPublicSessionCookieName(req), altId);
             configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }
@@ -913,7 +927,7 @@ public class LoginServlet extends AJAXServlet {
     public static void writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            final Cookie cookie = new Cookie(LoginServlet.PUBLIC_SESSION_PREFIX + HashCalculator.getInstance().getUserAgentHash(req), altId);
+            final Cookie cookie = new Cookie(getPublicSessionCookieName(req), altId);
             LoginServlet.configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }
