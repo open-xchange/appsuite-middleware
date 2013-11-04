@@ -64,11 +64,22 @@ public class PingServlet extends HttpServlet {
 
     private static final long serialVersionUID = -4037317824217606661L;
 
+    private final String page;
+
     /**
      * Default constructor.
      */
     public PingServlet() {
         super();
+        final StringBuilder page = new StringBuilder(1024);
+        page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
+        page.append("<html>\n");
+        page.append("<head><title>PingServlet's doGet Page</title></head>\n");
+        page.append("<body>\n");
+        page.append("<h1>Ping</h1><hr/>\n");
+        page.append("<p>Open-Xchange Ping</p>\n");
+        page.append("</body>\n</html>");
+        this.page = page.toString();
     }
 
     @Override
@@ -83,14 +94,7 @@ public class PingServlet extends HttpServlet {
      */
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        final StringBuilder page = new StringBuilder(1024);
-        page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
-        page.append("<html>\n");
-        page.append("<head><title>TestServlet's doGet Page</title></head>\n");
-        page.append("<body>\n");
-        page.append("<h1>Ping</h1><hr/>\n");
-        page.append("<p>Open-Xchange Ping</p>\n");
-        page.append("</body>\n</html>");
+        final String page = this.page;
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
