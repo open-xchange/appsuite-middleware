@@ -1,3 +1,7 @@
+* 2013-11-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29628: Make 'validate_contact_email' available in config tree, so it becomes visible for JSlob mapping
+ 
 * 2013-10-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29529: Made 'validate_contact_email' setting available via 'io.ox/core//features/validateMailAddresses'
