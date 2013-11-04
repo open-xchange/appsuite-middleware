@@ -7,6 +7,7 @@
  - Fix for bug 27721: Improved parsing of an IMAP folder's capability to store user flags
  - Fix for bug 29631: Signal that read-write connection has been used for reading
  - Fix for bug 29633: Signal read-only access with used read-write connection if no manipulation was done
+ - Fix for bug 29630: Return with "after reading" if an exception is thrown meanwhile
 
 * 2013-10-31 - marc.arens@open-xchange.com
 
