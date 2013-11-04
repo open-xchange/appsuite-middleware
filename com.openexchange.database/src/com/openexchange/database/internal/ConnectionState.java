@@ -50,18 +50,22 @@
 package com.openexchange.database.internal;
 
 /**
- * {@link ConnectionState}
+ * {@link ConnectionState} - Tracks a connection state.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class ConnectionState {
 
     private boolean usedAsRead;
-
     private boolean usedForUpdate;
-
     private boolean updateCommitted;
 
+    /**
+     * Initializes a new {@link ConnectionState}.
+     *
+     * @param usedAsRead <code>true</code> if a read-write connection has been intentionally used for reading; otherwise <code>false</code>
+     */
     public ConnectionState(boolean usedAsRead) {
         super();
         this.usedAsRead = usedAsRead;
@@ -69,26 +73,56 @@ public class ConnectionState {
         updateCommitted = false;
     }
 
+    /**
+     * Checks if a read-write connection has been intentionally used for reading.
+     *
+     * @return <code>true</code> if a read-write connection has been intentionally used for reading; otherwise <code>false</code>
+     */
     public boolean isUsedAsRead() {
         return usedAsRead;
     }
 
+    /**
+     * Sets if a read-write connection has been intentionally used for reading.
+     *
+     * @param usedAsRead <code>true</code> if a read-write connection has been intentionally used for reading; otherwise <code>false</code>
+     */
     public void setUsedAsRead(boolean usedAsRead) {
         this.usedAsRead = usedAsRead;
     }
 
+    /**
+     * Checks if associated connection has been used for a data modification operation; such as <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>.
+     *
+     * @return <code>true</code> for a data modification operation; otherwise <code>false</code>
+     */
     public boolean isUsedForUpdate() {
         return usedForUpdate;
     }
 
+    /**
+     * Sets if associated connection has been used for a data modification operation; such as <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>.
+     *
+     * @param usedForUpdate <code>true</code> for a data modification operation; otherwise <code>false</code>
+     */
     public void setUsedForUpdate(boolean usedForUpdate) {
         this.usedForUpdate = usedForUpdate;
     }
 
+    /**
+     * Checks if a <code>COMMIT</code> has been invoked on associated connection.
+     *
+     * @return <code>true</code> if a <code>COMMIT</code> has been invoked; otherwise <code>false</code>
+     */
     public boolean isUpdateCommitted() {
         return updateCommitted;
     }
 
+    /**
+     * Sets if a <code>COMMIT</code> has been invoked on associated connection.
+     *
+     * @param updateCommitted <code>true</code> if a <code>COMMIT</code> has been invoked; otherwise <code>false</code>
+     */
     public void setUpdateCommitted(boolean updateCommitted) {
         this.updateCommitted = updateCommitted;
     }
