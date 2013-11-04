@@ -50,14 +50,10 @@
 package com.openexchange.realtime.hazelcast.directory;
 
 import java.io.Serializable;
-import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import com.hazelcast.core.Member;
-import com.hazelcast.impl.MemberImpl;
-import com.hazelcast.impl.NodeType;
-import com.hazelcast.nio.Address;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
@@ -67,34 +63,28 @@ import com.openexchange.realtime.packet.PresenceState;
 /**
  * {@link HazelcastResourceWrapper} - Helper class to map/unmap the HazelcastResource to a java.* based map that can be deserialized by
  * hazelcast.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastResourceWrapper {
 
     private final static String resource_timestamp = "resource_timestamp";
 
-    private final static String routingInfo_inetSocketAddress = "routingInfo_inetSocketAddress";
-
-    private final static String routingInfo_uuid = "routingInfo_uuid";
-
-    private final static String routingInfo_islocalmember = "routingInfo_localmember";
-
-    private final static String routingInfo_islitemember = "routingInfo_litemember";
-
     private final static String presence_from = "presence_from";
 
     private final static String presence_type = "presence_type";
 
     private final static String presence_message = "presence_message";
-    
+
     private final static String presence_state = "presence_status";
-    
+
     private final static String presence_priority = "presence_priority";
+
+    private final static String routingInfo = "routingInfo";
 
     /**
      * Map an instance of HazelcastResource to a Map from String to Serializable.
-     * 
+     *
      * @param hazelcastResource th resource to wrap
      * @return the wrapping map
      * @throws RealtimeException if wrapping the HazelcastResource fails
@@ -110,8 +100,7 @@ public class HazelcastResourceWrapper {
             wrapPresence(wrap, presence);
         }
 
-        Member routingInfo = hazelcastResource.getRoutingInfo();
-        wrapRoutingInfo(wrap, routingInfo);
+        wrap.put(routingInfo, hazelcastResource.getRoutingInfo());
 
         Date timestamp = hazelcastResource.getTimestamp();
         wrap.put(resource_timestamp, timestamp);
@@ -126,38 +115,22 @@ public class HazelcastResourceWrapper {
 
         Type type = presence.getType();
         wrap.put(presence_type, type.name());
-        
+
         String message = presence.getMessage();
         wrap.put(presence_message, message);
-        
+
         PresenceState state = presence.getState();
         wrap.put(presence_state, state.name());
-        
+
         Byte priority = presence.getPriority();
         wrap.put(presence_priority, priority);
 
         return wrap;
     }
 
-    private static HashMap<String, Serializable> wrapRoutingInfo(HashMap<String, Serializable> wrap, Member member) {
-        InetSocketAddress inetSocketAddress = member.getInetSocketAddress();
-        wrap.put(routingInfo_inetSocketAddress, inetSocketAddress);
-        
-        String uuid = member.getUuid();
-        wrap.put(routingInfo_uuid, uuid);
-        
-        Boolean isLocalMember = member.localMember();
-        wrap.put(routingInfo_islocalmember, isLocalMember);
-        
-        Boolean isLiteMember = member.isLiteMember();
-        wrap.put(routingInfo_islitemember, isLiteMember);
-        
-        return wrap;
-    }
-
     /**
      * Unwrap a previously wrapped HazelcastResource.
-     * 
+     *
      * @param map the wrapped HazelcastResource
      * @return the unwrapped HazelcastResource POJO, or null if map was null
      */
@@ -167,22 +140,21 @@ public class HazelcastResourceWrapper {
             return null;
         }
         Presence presence = null;
-        Member routingInfo = null;
+        Member member = null;
         Date timestamp = null;
 
         if(map.get(presence_from) != null) {
             presence = unwrapPresence(map);
         }
-        
-        routingInfo = unwrapRoutingInfo(map);
-        
+
+        member = (Member) map.get(routingInfo);
         timestamp = (Date) map.get(resource_timestamp);
-        
-        return new HazelcastResource(presence, timestamp, routingInfo);
+
+        return new HazelcastResource(presence, timestamp, member);
     }
 
     private static Presence unwrapPresence(Map<String, Serializable> map) {
-        
+
         if(map.get(presence_from) == null) {
             //the resource didn't have a presence
             return null;
@@ -190,17 +162,17 @@ public class HazelcastResourceWrapper {
 
         String fromString = (String) map.get(presence_from);
         ID from = new ID(fromString);
-        
+
         String typeString = (String) map.get(presence_type);
         Presence.Type type = getType(typeString);
-        
+
         String message = (String) map.get(presence_message);
-        
+
         String stateString = (String) map.get(presence_state);
         PresenceState state = getState(stateString);
-        
+
         Byte priority = (Byte) map.get(presence_priority);
-        
+
         Presence presence = Presence.builder()
             .from(from)
             .type(type)
@@ -208,7 +180,7 @@ public class HazelcastResourceWrapper {
             .message(message)
             .priority(priority)
             .build();
-        
+
         return presence;
 
     }
@@ -229,21 +201,6 @@ public class HazelcastResourceWrapper {
             }
         }
         return PresenceState.ONLINE;
-    }
-
-    private static Member unwrapRoutingInfo(Map<String, Serializable> map) {
-        Member member;
-        InetSocketAddress inetSocketAddress = (InetSocketAddress) map.get(routingInfo_inetSocketAddress);
-        Boolean isLocalMember = (Boolean) map.get(routingInfo_islocalmember);
-        Boolean isLiteMember = (Boolean) map.get(routingInfo_islitemember);
-        String uuid = (String) map.get(routingInfo_uuid);
-        Address address = new Address(inetSocketAddress);
-        if(isLiteMember) {
-            member = new MemberImpl(address, isLocalMember, NodeType.LITE_MEMBER, uuid);
-        } else {
-            member = new MemberImpl(address, isLocalMember, NodeType.MEMBER, uuid);
-        }
-        return member;
     }
 
 }

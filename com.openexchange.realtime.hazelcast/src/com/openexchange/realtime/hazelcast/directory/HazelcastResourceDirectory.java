@@ -57,6 +57,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MultiMap;
@@ -78,42 +80,65 @@ import com.openexchange.realtime.util.IDMap;
  * {@link HazelcastResourceDirectory} - Keeps mappings of general {@link ID}s to full {@link ID}s and full {@link ID}s to {@link Resource}.
  * New DefaultResources that are added to this directory are automatically converted to HazelcastResources and extended with the local
  * Hazelcast Member as routing info.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastResourceDirectory extends DefaultResourceDirectory implements ManagementAware<HazelcastResourceDirectoryMBean> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
-    
+
     /** Mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random. */
     private final String id_map;
 
     /** Mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap */
     private final String resource_map;
-    
+
     private final HazelcastResourceDirectoryManagement managementObject;
 
     /**
      * Initializes a new {@link HazelcastResourceDirectory}.
      * @param id_map the name of the apping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random
      * @param resource_map the name of the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap
+     * @throws OXException
      */
-    public HazelcastResourceDirectory(String id_map, String resource_map) {
+    public HazelcastResourceDirectory(String id_map, String resource_map) throws OXException {
         super();
         this.id_map = id_map;
         this.resource_map = resource_map;
         this.managementObject = new HazelcastResourceDirectoryManagement(this);
+        getResourceMapping().addEntryListener(new EntryListener<String, Map<String,Serializable>>() {
+            @Override
+            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) {}
+            @Override
+            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) {}
+            @Override
+            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) {}
+
+            @Override
+            public void entryEvicted(EntryEvent<String, Map<String, Serializable>> event) {
+                String id = event.getKey();
+                try {
+                    if (getIDMapping().remove(new ID(id).toGeneralForm().toString(), id)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Removed mapping for '" + id + "' due to eviction of according resource.");
+                        }
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Could not handle eviction for id '" + id + "'", e);
+                }
+            }
+        }, false);
     }
 
     @Override
     public ManagementObject<HazelcastResourceDirectoryMBean> getManagementObject() {
         return managementObject;
     }
-    
+
     @Override
     public IDMap<Resource> get(ID id) throws OXException {
-         IDMap<Resource> foundResources = new IDMap<Resource>();
+        IDMap<Resource> foundResources = new IDMap<Resource>();
         if (id.isGeneralForm()) {
             MultiMap<String, String> idMapping = getIDMapping();
             Collection<String> concreteIds = idMapping.get(id.toString());
@@ -329,7 +354,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                     if (overwrite) {
                         previousResourceMap = allResources.put(id.toString(), HazelcastResourceWrapper.wrap(hazelcastResource));
                         previousResource = HazelcastResourceWrapper.unwrap(previousResourceMap);
-                    } else {    
+                    } else {
                         previousResourceMap = allResources.putIfAbsent(id.toString(), HazelcastResourceWrapper.wrap(hazelcastResource));
                         previousResource = HazelcastResourceWrapper.unwrap(previousResourceMap);
                     }
@@ -391,7 +416,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Try to create a new HazelcastResource for the given ID. One place where this is used is during creation of GroupDispatchers.
-     * 
+     *
      * @param id The ID used to reach a Resource
      * @return null if the HazelcastResource couldn't be created, otherwise the new Resource
      * @throws OXException
@@ -423,9 +448,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premium/random.
-     * 
+     *
      * @return the map used for mapping general IDs to full IDs.
-     * @throws OXException if the HazelcastInstance is missing. 
+     * @throws OXException if the HazelcastInstance is missing.
      */
     public MultiMap<String, String> getIDMapping() throws OXException {
             HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
@@ -434,7 +459,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap.
-     * 
+     *
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
@@ -494,10 +519,10 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Touch the infos we track for a given ID so they don't get automatically removed by Hazelcast's eviction policy as long as it's in
-     * active use. 
+     * active use.
      */
     private final IDEventHandler TOUCH_ID = new IDEventHandler() {
-        
+
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
             try {
@@ -505,7 +530,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                  * This performs a get on both maps to lookup the full IDs and the associated Resources which resets the idle times for the
                  * eviction policy
                  */
-                get(id.toGeneralForm());
+                getIDMapping().get(id.toGeneralForm().toString());
+                getResourceMapping().get(id.toString());
             } catch (OXException e) {
                 LOG.error(e.getMessage());
             }
