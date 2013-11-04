@@ -64,7 +64,7 @@ public class PingServlet extends HttpServlet {
 
     private static final long serialVersionUID = -4037317824217606661L;
 
-    private final String page;
+    private final byte[] output;
 
     /**
      * Default constructor.
@@ -79,7 +79,7 @@ public class PingServlet extends HttpServlet {
         page.append("<h1>Ping</h1><hr/>\n");
         page.append("<p>Open-Xchange Ping</p>\n");
         page.append("</body>\n</html>");
-        this.page = page.toString();
+        this.output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
     }
 
     @Override
@@ -94,10 +94,9 @@ public class PingServlet extends HttpServlet {
      */
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        final String page = this.page;
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType("text/html; charset=UTF-8");
-        final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
+        final byte[] output = this.output;
         resp.setContentLength(output.length);
         resp.getOutputStream().write(output);
     }
