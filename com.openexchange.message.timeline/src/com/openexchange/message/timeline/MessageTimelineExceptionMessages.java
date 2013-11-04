@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,35 @@
  *
  */
 
-package com.openexchange.message.timeline.osgi;
+package com.openexchange.message.timeline;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.ajax.requesthandler.BodyParser;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.message.timeline.MessageTimelineActionFactory;
-import com.openexchange.message.timeline.MessageTimelineBodyParser;
-import com.openexchange.message.timeline.services.Services;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link MessageTimelineActivator}
+ * {@link MessageTimelineExceptionMessages} - Exception messages for message timeline module that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MessageTimelineActivator extends AJAXModuleActivator {
+public final class MessageTimelineExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // Maximum number of messages already stored for client %1$s
+    public static final String NO_MORE_MSGS_MSG = "Maximum number of messages already stored for client %1$s";
+
+    // No client identifier associated with session %1$s
+    public static final String NO_CLIENT_MSG = "No client identifier associated with session %1$s";
 
     /**
-     * Initializes a new {@link MessageTimelineActivator}.
+     * Initializes a new {@link MessageTimelineExceptionMessages}.
      */
-    public MessageTimelineActivator() {
+    private MessageTimelineExceptionMessages() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new MessageTimelineEventHandler(), serviceProperties);
-        }
-
-        final MessageTimelineActionFactory actionFactory = new MessageTimelineActionFactory(this);
-        registerService(BodyParser.class, new MessageTimelineBodyParser(actionFactory));
-        registerModule(actionFactory, MessageTimelineActionFactory.MODULE);
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        Services.setServiceLookup(null);
-        super.stop(context);
     }
 
 }

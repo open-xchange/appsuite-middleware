@@ -52,18 +52,18 @@ package com.openexchange.message.timeline.actions;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.message.timeline.Message;
+import com.openexchange.message.timeline.MessageTimelineExceptionCodes;
 import com.openexchange.message.timeline.MessageTimelineManagement;
 import com.openexchange.message.timeline.MessageTimelineRequest;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
- * {@link PutAction} - The 'store' action.
+ * {@link PutAction} - The 'put' action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,7 +82,7 @@ public final class PutAction extends AbstractMessageTimelineAction {
         final String client = checkClient(msgTimelineRequest.getSession());
 
         // Get JSON object to store
-        final JSONObject toStore = (JSONObject) msgTimelineRequest.getRequestData().getData();
+        final JSONValue toStore = (JSONValue) msgTimelineRequest.getRequestData().getData();
 
         // Get appropriate queue
         final BlockingQueue<Message> queue = MessageTimelineManagement.getInstance().getQueueFor(msgTimelineRequest.getSession(), client);
@@ -91,9 +91,11 @@ public final class PutAction extends AbstractMessageTimelineAction {
         final boolean offered = queue.offer(new Message(toStore));
 
         if (!offered) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
+            // Boundary exceeded
+            throw MessageTimelineExceptionCodes.NO_MORE_MSGS.create(client);
         }
 
+        // Signal positive result
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 

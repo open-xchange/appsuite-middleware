@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,66 @@
  *
  */
 
-package com.openexchange.message.timeline;
+package com.openexchange.message.timeline.util;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link Key} - A user-bound key to his queues.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Services {
+public final class Key {
+
+    public static Key valueOf(final Session session) {
+        return valueOf(session.getUserId(), session.getContextId());
+    }
+
+    public static Key valueOf(final int userId, final int cid) {
+        return new Key(userId, cid);
+    }
+
+    // -------------------------------------------------------------- //
+
+    private final int userId;
+    private final int cid;
+    private final int hash;
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link Key}.
      */
-    private Services() {
+    private Key(final int userId, final int cid) {
         super();
+        this.userId = userId;
+        this.cid = cid;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + cid;
+        result = prime * result + userId;
+        hash = result;
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    @Override
+    public int hashCode() {
+        return hash;
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.message.timeline\" not started?");
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
+        if (!(obj instanceof Key)) {
+            return false;
         }
+        final Key other = (Key) obj;
+        if (cid != other.cid) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        return true;
     }
 
 }

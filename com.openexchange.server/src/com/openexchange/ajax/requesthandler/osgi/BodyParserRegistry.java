@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,77 @@
  *
  */
 
-package com.openexchange.message.timeline.osgi;
+package com.openexchange.ajax.requesthandler.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.Collections;
+import java.util.List;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.BodyParser;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.message.timeline.MessageTimelineActionFactory;
-import com.openexchange.message.timeline.MessageTimelineBodyParser;
-import com.openexchange.message.timeline.services.Services;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.ajax.requesthandler.DefaultBodyParser;
+import com.openexchange.java.ConcurrentList;
 
 
 /**
- * {@link MessageTimelineActivator}
+ * {@link BodyParserRegistry} - A registry for {@link BodyParser} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class MessageTimelineActivator extends AJAXModuleActivator {
+public final class BodyParserRegistry extends ServiceTracker<BodyParser, BodyParser> {
+
+    private final ConcurrentList<BodyParser> parsers;
 
     /**
-     * Initializes a new {@link MessageTimelineActivator}.
+     * Initializes a new {@link BodyParserRegistry}.
+     *
+     * @param context The bundle context
      */
-    public MessageTimelineActivator() {
-        super();
+    public BodyParserRegistry(BundleContext context) {
+        super(context, BodyParser.class, null);
+        parsers = new ConcurrentList<BodyParser>(Collections.<BodyParser> singletonList(DefaultBodyParser.getInstance()));
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new MessageTimelineEventHandler(), serviceProperties);
+    public BodyParser addingService(ServiceReference<BodyParser> reference) {
+        final BodyParser bodyParser = context.getService(reference);
+        if (parsers.addIfAbsent(bodyParser)) {
+            return bodyParser;
         }
-
-        final MessageTimelineActionFactory actionFactory = new MessageTimelineActionFactory(this);
-        registerService(BodyParser.class, new MessageTimelineBodyParser(actionFactory));
-        registerModule(actionFactory, MessageTimelineActionFactory.MODULE);
+        return null;
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        Services.setServiceLookup(null);
-        super.stop(context);
+    public void removedService(ServiceReference<BodyParser> reference, BodyParser bodyParser) {
+        parsers.remove(bodyParser);
+        context.ungetService(reference);
+    }
+
+    /**
+     * Gets the appropriate body parser for given request data.
+     *
+     * @param requestData The AJAX request data
+     * @return The body parser or <code>null</code>
+     */
+    public BodyParser getParserFor(final AJAXRequestData requestData) {
+        BodyParser candidate = null;
+        for (final BodyParser parser : parsers) {
+            if (parser.accepts(requestData) && (null == candidate || candidate.getRanking() < parser.getRanking())) {
+                candidate = parser;
+            }
+        }
+        return candidate;
+    }
+
+    /**
+     * Gets the available parsers
+     *
+     * @return The parsers
+     */
+    public List<BodyParser> getParsers() {
+        return Collections.unmodifiableList(parsers);
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,53 @@
  *
  */
 
-package com.openexchange.message.timeline;
+package com.openexchange.message.timeline.util;
+
+import java.io.IOException;
 
 /**
- * {@link Key} - A user-bound key to his queues.
+ * {@link LimitExceededIOException}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class Key {
+public final class LimitExceededIOException extends IOException {
 
-    public static Key valueOf(final int userId, final int cid) {
-        return new Key(userId, cid);
-    }
-
-    // -------------------------------------------------------------- //
-
-    private final int userId;
-    private final int cid;
-    private final int hash;
+    private static final long serialVersionUID = 4303119149782966974L;
 
     /**
-     * Initializes a new {@link Key}.
+     * Initializes a new {@link LimitExceededIOException}.
      */
-    private Key(final int userId, final int cid) {
+    public LimitExceededIOException() {
         super();
-        this.userId = userId;
-        this.cid = cid;
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + cid;
-        result = prime * result + userId;
-        hash = result;
     }
 
-    @Override
-    public int hashCode() {
-        return hash;
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param message The error message
+     */
+    public LimitExceededIOException(final String message) {
+        super(message);
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Key)) {
-            return false;
-        }
-        final Key other = (Key) obj;
-        if (cid != other.cid) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        return true;
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param cause The cause
+     */
+    public LimitExceededIOException(final Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Initializes a new {@link LimitExceededIOException}.
+     *
+     * @param message The error message
+     * @param cause The cause
+     */
+    public LimitExceededIOException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
 }

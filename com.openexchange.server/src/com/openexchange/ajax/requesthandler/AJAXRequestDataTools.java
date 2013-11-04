@@ -55,19 +55,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.osgi.BodyParserRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.java.UnsynchronizedPushbackReader;
-import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
@@ -79,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestDataTools {
-    
+
     private static final Log LOG = LogFactory.getLog(AJAXRequestDataTools.class);
 
     private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
@@ -93,6 +90,17 @@ public class AJAXRequestDataTools {
      */
     public static AJAXRequestDataTools getInstance() {
         return INSTANCE;
+    }
+
+    private static final AtomicReference<BodyParserRegistry> REGISTRY = new AtomicReference<BodyParserRegistry>();
+
+    /**
+     * Sets the registry.
+     *
+     * @param registry The registry
+     */
+    public static void setBodyParserRegistry(final BodyParserRegistry registry) {
+        REGISTRY.set(registry);
     }
 
     /*-
@@ -205,85 +213,19 @@ public class AJAXRequestDataTools {
             /*
              * Guess an appropriate body object
              */
-            UnsynchronizedPushbackReader reader = null;
-            try {
-                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
-                int read = reader.read();
-                if (read < 0) {
-                    trySetDataByParameter(req, retval);
+            final BodyParserRegistry registry = REGISTRY.get();
+            if (null == registry) {
+                DefaultBodyParser.getInstance().setBody(retval, req);
+            } else {
+                final BodyParser bodyParser = registry.getParserFor(retval);
+                if (null == bodyParser) {
+                    DefaultBodyParser.getInstance().setBody(retval, req);
                 } else {
-                    // Skip whitespaces
-                    while (isWhitespace((char) read)) {
-                        read = reader.read();
-                        if (read < 0) {
-                            trySetDataByParameter(req, retval);
-                            Streams.close(reader);
-                            reader = null;
-                            return retval;
-                        }
-                    }
-                    // Check first non-whitespace character
-                    final char c = (char) read;
-                    reader.unread(c);
-                    if ('[' == c || '{' == c) {
-                        try {
-                            retval.setData(JSONObject.parse(reader));
-                        } catch (JSONException e) {
-                            retval.setData(AJAXServlet.readFrom(reader));
-                        }
-                    } else {
-                        retval.setData(AJAXServlet.readFrom(reader));
-                    }
+                    bodyParser.setBody(retval, req);
                 }
-            } catch (IOException x) {
-                LOG.debug(x.getMessage(), x);
-            } finally {
-                Streams.close(reader);
             }
         }
         return retval;
-    }
-
-    private void trySetDataByParameter(final HttpServletRequest req, final AJAXRequestData retval) {
-        retval.setData(null);
-        final String data = req.getParameter("data");
-        if (data != null && data.length() > 0) {
-            try {
-                final char c = data.charAt(0);
-                if ('[' == c || '{' == c) {
-                    retval.setData(JSONObject.parse(new UnsynchronizedStringReader(data)));
-                } else {
-                    retval.setData(data);
-                }
-            } catch (final JSONException e) {
-                retval.setData(data);
-            }
-        }
-    }
-
-    /**
-     * High speed test for whitespace!  Faster than the java one (from some testing).
-     *
-     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
-     */
-    private boolean isWhitespace(char c) {
-        switch (c) {
-            case 9:  //'unicode: 0009
-            case 10: //'unicode: 000A'
-            case 11: //'unicode: 000B'
-            case 12: //'unicode: 000C'
-            case 13: //'unicode: 000D'
-            case 28: //'unicode: 001C'
-            case 29: //'unicode: 001D'
-            case 30: //'unicode: 001E'
-            case 31: //'unicode: 001F'
-            case ' ': // Space
-                //case Character.SPACE_SEPARATOR:
-                //case Character.LINE_SEPARATOR:
-            case Character.PARAGRAPH_SEPARATOR:
-                return true;
-        }
-        return false;
     }
 
     /**

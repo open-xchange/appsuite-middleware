@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.message.timeline.MessageTimelineExceptionCodes;
 import com.openexchange.message.timeline.MessageTimelineRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -110,7 +111,7 @@ public abstract class AbstractMessageTimelineAction implements AJAXActionService
     }
 
     /**
-     * Performs given JSlob request.
+     * Performs given message timeline request.
      *
      * @param msgTimelineRequest The message timeline request
      * @return The AJAX result
@@ -119,7 +120,7 @@ public abstract class AbstractMessageTimelineAction implements AJAXActionService
     protected abstract AJAXRequestResult perform(MessageTimelineRequest msgTimelineRequest) throws OXException, JSONException;
 
     /**
-     * Performs given JSlob request in REST style.
+     * Performs given message timeline request in REST style.
      *
      * @param msgTimelineRequest The message timeline request
      * @param method The REST method to perform
@@ -133,14 +134,14 @@ public abstract class AbstractMessageTimelineAction implements AJAXActionService
     }
 
     /**
-     * Gets the action identifier for this JSlob action.
+     * Gets the action identifier for this message timeline action.
      *
      * @return The action identifier; e.g. <code>"get"</code>
      */
     public abstract String getAction();
 
     /**
-     * Gets the REST method identifiers for this JSlob action.
+     * Gets the REST method identifiers for this message timeline action.
      *
      * @return The REST method identifiers or <code>null</code> (e.g. <code>"GET"</code>)
      */
@@ -176,7 +177,7 @@ public abstract class AbstractMessageTimelineAction implements AJAXActionService
     protected String checkClient(final Session session) throws OXException {
         final String client = session.getClient();
         if (Strings.isEmpty(client)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("client");
+            throw MessageTimelineExceptionCodes.NO_CLIENT.create(session.getSessionID());
         }
         return client;
     }

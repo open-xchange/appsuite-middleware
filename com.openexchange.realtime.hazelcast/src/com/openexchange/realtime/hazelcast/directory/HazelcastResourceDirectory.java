@@ -78,20 +78,21 @@ import com.openexchange.realtime.util.IDMap;
  * {@link HazelcastResourceDirectory} - Keeps mappings of general {@link ID}s to full {@link ID}s and full {@link ID}s to {@link Resource}.
  * New DefaultResources that are added to this directory are automatically converted to HazelcastResources and extended with the local
  * Hazelcast Member as routing info.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastResourceDirectory extends DefaultResourceDirectory implements ManagementAware<HazelcastResourceDirectoryMBean> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
-    
+    /** The logger */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
+
     /** Mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random. */
     private final String id_map;
 
     /** Mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap */
     private final String resource_map;
-    
+
     private final HazelcastResourceDirectoryManagement managementObject;
 
     /**
@@ -110,7 +111,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     public ManagementObject<HazelcastResourceDirectoryMBean> getManagementObject() {
         return managementObject;
     }
-    
+
     @Override
     public IDMap<Resource> get(ID id) throws OXException {
          IDMap<Resource> foundResources = new IDMap<Resource>();
@@ -329,7 +330,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                     if (overwrite) {
                         previousResourceMap = allResources.put(id.toString(), HazelcastResourceWrapper.wrap(hazelcastResource));
                         previousResource = HazelcastResourceWrapper.unwrap(previousResourceMap);
-                    } else {    
+                    } else {
                         previousResourceMap = allResources.putIfAbsent(id.toString(), HazelcastResourceWrapper.wrap(hazelcastResource));
                         previousResource = HazelcastResourceWrapper.unwrap(previousResourceMap);
                     }
@@ -372,7 +373,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             }
             if (selectedResource == null) {
                 selectedResource = candidateResource;
-                continue;
             } else {
                 int comparisonResult = selectedResource.getTimestamp().compareTo(candidateResource.getTimestamp());
                 if (comparisonResult < 0) {
@@ -383,30 +383,28 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
         if (selectedResource == null) {
             return null;
-        } else {
-            return selectedResource.getPresence();
         }
+        return selectedResource.getPresence();
 
     }
 
     /**
      * Try to create a new HazelcastResource for the given ID. One place where this is used is during creation of GroupDispatchers.
-     * 
+     *
      * @param id The ID used to reach a Resource
      * @return null if the HazelcastResource couldn't be created, otherwise the new Resource
      * @throws OXException
      */
     private HazelcastResource conjureResource(ID id) throws OXException {
-        if (conjure(id)) {
-            HazelcastResource res = new HazelcastResource();
-            HazelcastResource meantime = setIfAbsent(id, res);
-            if (meantime == null) {
-                return res;
-            }
-            return meantime;
-        } else {
+        if (!conjure(id)) {
             return null;
         }
+        HazelcastResource res = new HazelcastResource();
+        HazelcastResource meantime = setIfAbsent(id, res);
+        if (meantime == null) {
+            return res;
+        }
+        return meantime;
     }
 
     /*
@@ -423,9 +421,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premium/random.
-     * 
+     *
      * @return the map used for mapping general IDs to full IDs.
-     * @throws OXException if the HazelcastInstance is missing. 
+     * @throws OXException if the HazelcastInstance is missing.
      */
     public MultiMap<String, String> getIDMapping() throws OXException {
             HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
@@ -434,7 +432,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap.
-     * 
+     *
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
@@ -443,6 +441,12 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         return hazelcast.getMap(resource_map);
     }
 
+    /**
+     * Creates a new transaction.
+     *
+     * @return The newly created transaction
+     * @throws OXException If an error occurs while creating the transaction
+     */
     protected static Transaction newTransaction() throws OXException {
         /*
          * HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance(); return hazelcast.getTransaction();
@@ -451,7 +455,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
             @Override
             public void rollback() throws IllegalStateException {
-
+                // Nothing
             }
 
             @Override
@@ -461,12 +465,12 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
             @Override
             public void commit() throws IllegalStateException {
-
+                // Nothing
             }
 
             @Override
             public void begin() throws IllegalStateException {
-
+                // Nothing
             }
         };
     }
@@ -494,10 +498,10 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Touch the infos we track for a given ID so they don't get automatically removed by Hazelcast's eviction policy as long as it's in
-     * active use. 
+     * active use.
      */
     private final IDEventHandler TOUCH_ID = new IDEventHandler() {
-        
+
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
             try {

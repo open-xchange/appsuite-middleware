@@ -65,7 +65,7 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link PopAction} - The 'store' action.
+ * {@link PopAction} - The 'pop' action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -98,9 +98,10 @@ public final class PopAction extends AbstractMessageTimelineAction {
         // Sort according to time stamp
         Collections.sort(messages);
 
+        // Output as JSON array
         final JSONArray jArray = new JSONArray(messages.size());
         for (final Message m : messages) {
-            jArray.put(m.jsonObject);
+            jArray.put(m.jsonValue);
         }
         return new AJAXRequestResult(jArray, "json");
     }
