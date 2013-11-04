@@ -6,7 +6,8 @@ Bundle-Version: 7.4.1
 Bundle-Activator: com.openexchange.halo.pictures.osgi.PictureHaloActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.documentation,
  com.openexchange.exception,
