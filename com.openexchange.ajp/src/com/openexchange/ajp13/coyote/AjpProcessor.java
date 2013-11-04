@@ -2044,101 +2044,101 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * When committing the response, we have to validate the set of headers, as well as setup the response filters.
      */
     protected void prepareResponse() throws IOException {
-        response.setCommitted(true);
-        /*
-         * prefix + http_status_code + http_status_msg (empty string) + num_headers (integer)
-         */
-        String statusMsg = response.getStatusMsg();
-        if (null == statusMsg) {
-            statusMsg = "";
-        }
-        /*-
-         * Check for echo header presence
-         */
-        {
-            final String echoHeaderName = AJPv13Response.getEchoHeaderName();
-            if (null != echoHeaderName) {
-                final String echoValue = request.getHeader(echoHeaderName);
-                if (null != echoValue) {
-                    response.setHeader(echoHeaderName, urlEncode(echoValue));
-                }
-            }
-        }
-        /*-
-         * Check for Content-Security-Policy header
-         */
-        {
-            final String contentSecurityPolicy = AJPv13Config.getContentSecurityPolicy();
-            if (!Strings.isEmpty(contentSecurityPolicy)) {
-                response.setHeader("Content-Security-Policy", contentSecurityPolicy);
-                response.setHeader("X-WebKit-CSP", contentSecurityPolicy);
-                response.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
-            }
-        }
-        /*
-         * Write headers&cookies to JK_AJP13_SEND_HEADERS message
-         */
-        int numHeaders = 0;
-        final byte[] headers;
-        {
-            sink.reset();
-            for (final Entry<String, List<String>> entry : response.getHeaderEntrySet()) {
-                for (final String value : entry.getValue()) {
-                    writeHeaderSafe(entry.getKey(), value, sink);
-                    numHeaders++;
-                }
-            }
-            headers = sink.toByteArray();
-        }
-        final byte[] cookies;
-        final int numCookies;
-        {
-            sink.reset();
-            final List<List<String>> formattedCookies = response.getFormatedCookies();
-            final int length = formattedCookies.size();
-            if (length > 0) {
-                List<String> list = formattedCookies.get(0);
-                for (final String sCookie : list) {
-                    writeHeaderSafe(STR_SET_COOKIE, sCookie, sink);
-                }
-                if (length > 1) {
-                    final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
-                    for (int i = 1; i < length; i++) {
-                        sb.setLength(0);
-                        final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
-                        list = formattedCookies.get(i);
-                        for (final String sCookie : list) {
-                            writeHeaderSafe(hdrName, sCookie, sink);
-                        }
-                    }
-                }
-                cookies = sink.toByteArray();
-                numCookies = getNumOfCookieHeader(formattedCookies);
-            } else {
-                cookies = new byte[0];
-                numCookies =  0;
-            }
-        }
-        /*
-         * Calculate data length
-         */
-        final int dataLength = SEND_HEADERS_LENGTH + headers.length + cookies.length + statusMsg.length();
-        try {
-            if (dataLength + RESPONSE_PREFIX_LENGTH > Constants.MAX_PACKET_SIZE) {
-                throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
-            }
-            sink.reset();
-            AJPv13Response.fillStartBytes(Constants.JK_AJP13_SEND_HEADERS, dataLength, sink);
-            AJPv13Response.writeInt(response.getStatus(), sink);
-            AJPv13Response.writeString(statusMsg, sink);
-            AJPv13Response.writeInt(numHeaders + numCookies, sink);
-            AJPv13Response.writeByteArray(headers, sink);
-            AJPv13Response.writeByteArray(cookies, sink);
-        } catch (final AJPv13Exception e) {
-            throw new IOException(e.getMessage(), e);
-        }
         softLock.lock();
         try {
+            response.setCommitted(true);
+            /*
+             * prefix + http_status_code + http_status_msg (empty string) + num_headers (integer)
+             */
+            String statusMsg = response.getStatusMsg();
+            if (null == statusMsg) {
+                statusMsg = "";
+            }
+            /*-
+             * Check for echo header presence
+             */
+            {
+                final String echoHeaderName = AJPv13Response.getEchoHeaderName();
+                if (null != echoHeaderName) {
+                    final String echoValue = request.getHeader(echoHeaderName);
+                    if (null != echoValue) {
+                        response.setHeader(echoHeaderName, urlEncode(echoValue));
+                    }
+                }
+            }
+            /*-
+             * Check for Content-Security-Policy header
+             */
+            {
+                final String contentSecurityPolicy = AJPv13Config.getContentSecurityPolicy();
+                if (!Strings.isEmpty(contentSecurityPolicy)) {
+                    response.setHeader("Content-Security-Policy", contentSecurityPolicy);
+                    response.setHeader("X-WebKit-CSP", contentSecurityPolicy);
+                    response.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
+                }
+            }
+            /*
+             * Write headers&cookies to JK_AJP13_SEND_HEADERS message
+             */
+            int numHeaders = 0;
+            final byte[] headers;
+            {
+                sink.reset();
+                for (final Entry<String, List<String>> entry : response.getHeaderEntrySet()) {
+                    for (final String value : entry.getValue()) {
+                        writeHeaderSafe(entry.getKey(), value, sink);
+                        numHeaders++;
+                    }
+                }
+                headers = sink.toByteArray();
+            }
+            final byte[] cookies;
+            final int numCookies;
+            {
+                sink.reset();
+                final List<List<String>> formattedCookies = response.getFormatedCookies();
+                final int length = formattedCookies.size();
+                if (length > 0) {
+                    List<String> list = formattedCookies.get(0);
+                    for (final String sCookie : list) {
+                        writeHeaderSafe(STR_SET_COOKIE, sCookie, sink);
+                    }
+                    if (length > 1) {
+                        final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
+                        for (int i = 1; i < length; i++) {
+                            sb.setLength(0);
+                            final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
+                            list = formattedCookies.get(i);
+                            for (final String sCookie : list) {
+                                writeHeaderSafe(hdrName, sCookie, sink);
+                            }
+                        }
+                    }
+                    cookies = sink.toByteArray();
+                    numCookies = getNumOfCookieHeader(formattedCookies);
+                } else {
+                    cookies = new byte[0];
+                    numCookies = 0;
+                }
+            }
+            /*
+             * Calculate data length
+             */
+            final int dataLength = SEND_HEADERS_LENGTH + headers.length + cookies.length + statusMsg.length();
+            try {
+                if (dataLength + RESPONSE_PREFIX_LENGTH > Constants.MAX_PACKET_SIZE) {
+                    throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
+                }
+                sink.reset();
+                AJPv13Response.fillStartBytes(Constants.JK_AJP13_SEND_HEADERS, dataLength, sink);
+                AJPv13Response.writeInt(response.getStatus(), sink);
+                AJPv13Response.writeString(statusMsg, sink);
+                AJPv13Response.writeInt(numHeaders + numCookies, sink);
+                AJPv13Response.writeByteArray(headers, sink);
+                AJPv13Response.writeByteArray(cookies, sink);
+            } catch (final AJPv13Exception e) {
+                throw new IOException(e.getMessage(), e);
+            }
             sink.writeTo(output);
             lastWriteAccess = System.currentTimeMillis();
             output.flush();
