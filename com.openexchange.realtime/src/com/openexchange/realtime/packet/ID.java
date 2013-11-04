@@ -500,7 +500,7 @@ public class ID implements Serializable {
         Map<String, Object> vetoProperties = new HashMap<String, Object>();
         this.trigger(Events.BEFOREDISPOSE, this, vetoProperties);
         Boolean veto = (Boolean) vetoProperties.get("veto");
-        if (veto != null && !veto) {
+        if (veto == null || !veto) {
             this.trigger(Events.DISPOSE, source, properties);
         }
     }

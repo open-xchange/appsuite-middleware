@@ -279,7 +279,11 @@ public final class FileStoreResourceCacheImpl implements ResourceCache, EventHan
             }
             Databases.closeSQLStuff(stmt);
             Databases.autocommit(con);
-            databaseService.backWritable(contextId, con);
+            if (committed) {
+                databaseService.backWritable(contextId, con);
+            } else {
+                databaseService.backWritableAfterReading(contextId, con);
+            }
         }
     }
 

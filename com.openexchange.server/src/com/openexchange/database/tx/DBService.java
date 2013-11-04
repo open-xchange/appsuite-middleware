@@ -135,7 +135,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     public void releaseReadConnection(final Context ctx, final Connection con) {
         final ThreadState threadState = txState.get();
         if(threadState != null && threadState.preferWriteCon && threadState.writeCons.contains(con)){
-            releaseWriteConnection(ctx,con);
+            releaseWriteConnectionAfterReading(ctx,con);
             return;
         }
         provider.releaseReadConnection(ctx, con);

@@ -427,6 +427,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         final Context ctx = Tools.getContext(session);
         final User user = Tools.getUser(session, ctx);
         final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        boolean modificationPerformed = false;
         try {
             final CalendarOperation co = new CalendarOperation();
             if (cdao.containsRecurrenceType()) {
@@ -439,81 +440,60 @@ public class CalendarSql implements AppointmentSQLInterface {
                     if (oclp.canCreateObjects()) {
                         recColl.checkForInvalidCharacters(cdao);
                         cdao.setActionFolder(cdao.getParentFolderID());
-                        writecon = DBPool.pickupWriteable(ctx);
-                        writecon.setAutoCommit(false);
                         final ConflictHandler ch = new ConflictHandler(cdao, null, session, true);
                         final CalendarDataObject conflicts[] = ch.getConflicts();
                         if (conflicts.length == 0) {
-                            return cimp.insertAppointment(cdao, writecon, session);
+                            writecon = DBPool.pickupWriteable(ctx);
+                            writecon.setAutoCommit(false);
+                            try {
+                                final CalendarDataObject[] appointments = cimp.insertAppointment(cdao, writecon, session);
+                                modificationPerformed = true;
+                                return appointments;
+                            } catch(final DataTruncation dt) {
+                                final String fields[] = DBUtils.parseTruncatedFields(dt);
+                                final int fid[] = new int[fields.length];
+                                final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create();
+                                int id = -1;
+                                for (int a = 0; a < fid.length; a++) {
+                                    id = recColl.getFieldId(fields[a]);
+                                    final String value = recColl.getString(cdao, id);
+                                    if(value == null) {
+                                        oxe.addTruncatedId(id);
+                                    } else {
+                                        final int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
+                                        final int maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
+                                        oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength, value));
+                                    }
+                                }
+                                throw oxe;
+                            }
                         }
                         return conflicts;
                     }
                     throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_6.create();
-                } catch(final DataTruncation dt) {
-                    final String fields[] = DBUtils.parseTruncatedFields(dt);
-                    final int fid[] = new int[fields.length];
-                    final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create();
-                    int id = -1;
-                    for (int a = 0; a < fid.length; a++) {
-                        id = recColl.getFieldId(fields[a]);
-                        final String value = recColl.getString(cdao, id);
-                        if(value == null) {
-                            oxe.addTruncatedId(id);
-                        } else {
-                            final int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
-                            final int maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
-                            oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength, value));
-                        }
-                    }
-                    throw oxe;
+                } catch (OXException e) {
+                    Databases.rollback(writecon);
+                    throw e;
                 } catch(final SQLException sqle) {
-                    try {
-                        if (!writecon.getAutoCommit()) {
-                            writecon.rollback();
-                        }
-                    } catch(final SQLException rb) {
-                        LOG.error("Rollback failed: " + rb.getMessage(), rb);
-                    }
+                    Databases.rollback(writecon);
                     throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
+                } catch(final RuntimeException re) {
+                    Databases.rollback(writecon);
+                    throw re;
                 } finally {
-                    if (writecon != null) {
-                        writecon.setAutoCommit(true);
-                    }
+                    Databases.autocommit(writecon);
                 }
             }
             throw OXCalendarExceptionCodes.INSERT_WITH_OBJECT_ID.create();
-        } catch(final DataTruncation dt) {
-            final String fields[] = DBUtils.parseTruncatedFields(dt);
-            final int fid[] = new int[fields.length];
-            final OXException oxe = OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.create(dt, new Object[0]);
-            int id = -1;
-            for (int a = 0; a < fid.length; a++) {
-                id = recColl.getFieldId(fields[a]);
-                final String value = recColl.getString(cdao, id);
-                if(value == null) {
-                    oxe.addTruncatedId(id);
-                } else {
-                    final int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
-                    int maxLength = 0;
-                    try {
-                        maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
-                        oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
-                    } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
-                        oxe.addTruncatedId(id);
-                    }
-                }
-            }
-            throw oxe;
-        } catch (final SQLException sqle) {
-            final OXException exception = OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
-            LOG.error("Additioal info for: "+exception.getExceptionId()+": "+sqle.getMessage(), sqle);
-            throw exception;
         } catch(final RuntimeException e) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(25));
         } finally {
             if (writecon != null) {
-                DBPool.pushWrite(ctx, writecon);
+                if (modificationPerformed) {
+                    DBPool.pushWrite(ctx, writecon);
+                } else {
+                    DBPool.pushWriteAfterReading(ctx, writecon);
+                }
             }
         }
     }

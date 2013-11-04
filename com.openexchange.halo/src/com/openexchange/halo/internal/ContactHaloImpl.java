@@ -50,6 +50,7 @@
 package com.openexchange.halo.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -151,6 +152,14 @@ public class ContactHaloImpl implements ContactHalo {
         final ContactService contactService = services.getService(ContactService.class);
 
         final HaloContactQuery contactQuery = new HaloContactQuery();
+
+        if (contact.getObjectID() > 0 && contact.getParentFolderID() > 0) {
+            Contact loaded = contactService.getContact(session, "" + contact.getParentFolderID(), "" + contact.getObjectID());
+            contactQuery.setContact(loaded);
+            contactQuery.setMergedContacts(Arrays.asList(loaded));
+            return contactQuery;
+        }
+
 
         // Try to find a user with a given eMail address
 
