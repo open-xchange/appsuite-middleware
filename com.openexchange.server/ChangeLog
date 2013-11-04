@@ -10,6 +10,7 @@
  - Fix for bug 29630: Return with "after reading" if an exception is thrown meanwhile
  - Fix for bug 29629: Signal read-only access with used read-write connection if no manipulation was done
  - Fix for bug 29621: Don't propagate OXException via RMI
+ - Fix for bug 29639: Use configured default charset encoding when decoding a Servlet path in AJP module
 
 * 2013-10-31 - marc.arens@open-xchange.com
 
