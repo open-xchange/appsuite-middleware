@@ -2,6 +2,7 @@
 
  - Fix for bug 29649: Check needed service for not null
  - Fix for bug 29650: Avoid possible NPE when resolving a folder storage by a Content-Type identifier
+ - Fix for bug 29651: Added null guard when accessing possibly absent service
 
 * 2013-11-04 - jan.bauerdick@open-xchange.com
 
