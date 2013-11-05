@@ -128,15 +128,15 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             contact.setInternalUserId(req.getIntParameter("user_id"));
         }
         
-        if (req.isSet("id")) {
+        if (req.isSet("id") && !hadCriterium) {
             hadCriterium = true;
             contact.setObjectID(req.getIntParameter("id"));
+            if (req.isSet("folder")) {
+                hadCriterium = true;
+                contact.setParentFolderID(req.getIntParameter("folder"));
+            }
         }
         
-        if (req.isSet("folder")) {
-            hadCriterium = true;
-            contact.setParentFolderID(req.getIntParameter("folder"));
-        }
         
         if (req.isSet("email")) {
             hadCriterium = true;
