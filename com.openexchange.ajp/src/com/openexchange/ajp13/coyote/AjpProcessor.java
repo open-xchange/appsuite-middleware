@@ -2217,7 +2217,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         while (read < n) {
             res = input.read(buf, read + pos, n - read);
             if (res <= 0) {
-                throw new IOException("Socket read failed. Web server provided only " + read + " bytes, although " + n + " were requested.");
+                throw new IOException("Unexpected EOF. Web server provided only " + read + " bytes, although " + n + " were requested.");
             }
             read += res;
         }
