@@ -86,7 +86,8 @@ import com.openexchange.realtime.util.IDMap;
  */
 public class HazelcastResourceDirectory extends DefaultResourceDirectory implements ManagementAware<HazelcastResourceDirectoryMBean> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
+    /** The logger */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
 
     /** Mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random. */
     private final String id_map;
@@ -109,11 +110,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         this.managementObject = new HazelcastResourceDirectoryManagement(this);
         getResourceMapping().addEntryListener(new EntryListener<String, Map<String,Serializable>>() {
             @Override
-            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) { /*nothing*/ }
             @Override
-            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) { /*nothing*/ }
             @Override
-            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) { /*nothing*/ }
 
             @Override
             public void entryEvicted(EntryEvent<String, Map<String, Serializable>> event) {
@@ -395,23 +396,12 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             if (candidatePresence == null || candidatePresence.getPriority() < 0) {
                 continue;
             }
-            if (selectedResource == null) {
+            if ((selectedResource == null) || (selectedResource.getTimestamp().compareTo(candidateResource.getTimestamp()) < 0)) {
                 selectedResource = candidateResource;
-                continue;
-            } else {
-                int comparisonResult = selectedResource.getTimestamp().compareTo(candidateResource.getTimestamp());
-                if (comparisonResult < 0) {
-                    selectedResource = candidateResource;
-                }
             }
         }
 
-        if (selectedResource == null) {
-            return null;
-        } else {
-            return selectedResource.getPresence();
-        }
-
+        return selectedResource == null ? null : selectedResource.getPresence();
     }
 
     /**
@@ -422,16 +412,15 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
      * @throws OXException
      */
     private HazelcastResource conjureResource(ID id) throws OXException {
-        if (conjure(id)) {
-            HazelcastResource res = new HazelcastResource();
-            HazelcastResource meantime = setIfAbsent(id, res);
-            if (meantime == null) {
-                return res;
-            }
-            return meantime;
-        } else {
+        if (!conjure(id)) {
             return null;
         }
+        HazelcastResource res = new HazelcastResource();
+        HazelcastResource meantime = setIfAbsent(id, res);
+        if (meantime == null) {
+            return res;
+        }
+        return meantime;
     }
 
     /*
@@ -476,7 +465,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
             @Override
             public void rollback() throws IllegalStateException {
-
+                /*nothing*/
             }
 
             @Override
@@ -486,12 +475,12 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
             @Override
             public void commit() throws IllegalStateException {
-
+                /*nothing*/
             }
 
             @Override
             public void begin() throws IllegalStateException {
-
+                /*nothing*/
             }
         };
     }
