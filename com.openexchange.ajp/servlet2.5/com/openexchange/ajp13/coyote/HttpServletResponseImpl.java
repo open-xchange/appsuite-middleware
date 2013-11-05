@@ -222,7 +222,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     private Locale locale;
 
-    private boolean committed;
+    private volatile boolean committed;
 
     private int bufferSize;
 

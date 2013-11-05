@@ -60,6 +60,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -71,6 +72,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,7 +82,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.fileupload.FileItem;
@@ -815,6 +817,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return encodeUrl(s, forAnchor, false);
     }
 
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     * @throws IllegalArgumentException If URL is invalid
+     */
+    public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation) {
+        return encodeUrl(s, forAnchor, forLocation, null);
+    }
+
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|\r|(?:%0[aA])?%0[dD]|%0[aA]");
     private static final Pattern PATTERN_DSLASH = Pattern.compile("(?://+)");
     private static final Pattern PATTERN_DSLASH2 = Pattern.compile("(?:/|%2[fF]){2,}");
@@ -825,7 +837,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      * @throws IllegalArgumentException If URL is invalid
      */
-    public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation) {
+    public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation, final String charsetName) {
         if (isEmpty(s)) {
             return s;
         }
@@ -833,9 +845,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             String prefix = null;
             // Strip possible "\r?\n" and/or "%0A?%0D"
             String retval = PATTERN_CRLF.matcher(s).replaceAll("");
+            final Charset charset;
+            {
+                final String cs = isEmpty(charsetName) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charsetName;
+                charset = isEmpty(cs) ? Charsets.UTF_8 : Charsets.forName(cs);
+            }
             if (forAnchor) {
                 // Prepare for being used as anchor/link
-                retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, retval.getBytes(Charsets.ISO_8859_1)));
+                retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, retval.getBytes(charset)));
                 final int pos = retval.length() > 6 ? retval.indexOf("://") : -1;
                 if (pos > 0) { // Seems to contain protocol/scheme part; e.g "http://..."
                     final String tmp = Strings.toLowerCase(retval.substring(0, pos));
@@ -848,7 +865,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     }
                 }
             } else {
-                retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, retval.getBytes(Charsets.ISO_8859_1)));
+                retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, retval.getBytes(charset)));
             }
             // Again -- Strip possible "\r?\n" and/or "%0A?%0D"
             retval = PATTERN_CRLF.matcher(retval).replaceAll("");
@@ -899,7 +916,27 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
-    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
+    private static final ConcurrentMap<String, URLCodec> URL_CODECS = new ConcurrentHashMap<String, URLCodec>(8);
+
+    private static URLCodec getUrlCodec(final String charset) {
+        String cs = charset;
+        if (null == cs) {
+            final String defCharset = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+            if (null == defCharset) {
+                return null;
+            }
+            cs = defCharset;
+        }
+        URLCodec urlCodec = URL_CODECS.get(cs);
+        if (null == urlCodec) {
+            final URLCodec nc = new URLCodec(cs);
+            urlCodec = URL_CODECS.putIfAbsent(cs, nc);
+            if (null == urlCodec) {
+                urlCodec = nc;
+            }
+        }
+        return urlCodec;
+    }
 
     /**
      * URL decodes given string.
@@ -908,7 +945,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     public static String decodeUrl(final String s, final String charset) {
         try {
-            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+            if (isEmpty(s)) {
+                return s;
+            }
+            final String cs = isEmpty(charset) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charset;
+            return getUrlCodec(cs).decode(s, cs);
         } catch (final DecoderException e) {
             return s;
         } catch (final UnsupportedEncodingException e) {
@@ -1194,34 +1235,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            switch (string.charAt(i)) {
-            case 9: // 'unicode: 0009
-            case 10: // 'unicode: 000A'
-            case 11: // 'unicode: 000B'
-            case 12: // 'unicode: 000C'
-            case 13: // 'unicode: 000D'
-            case 28: // 'unicode: 001C'
-            case 29: // 'unicode: 001D'
-            case 30: // 'unicode: 001E'
-            case 31: // 'unicode: 001F'
-            case ' ': // Space
-                // case Character.SPACE_SEPARATOR:
-                // case Character.LINE_SEPARATOR:
-            case Character.PARAGRAPH_SEPARATOR:
-                isWhitespace = true;
-                break;
-            default:
-                isWhitespace = false;
-                break;
-            }
-        }
-        return isWhitespace;
+        return Strings.isEmpty(string);
     }
 
  	private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws Exception {

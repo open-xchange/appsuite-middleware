@@ -57,6 +57,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MultiMap;
@@ -99,12 +101,35 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
      * Initializes a new {@link HazelcastResourceDirectory}.
      * @param id_map the name of the apping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random
      * @param resource_map the name of the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap
+     * @throws OXException
      */
-    public HazelcastResourceDirectory(String id_map, String resource_map) {
+    public HazelcastResourceDirectory(String id_map, String resource_map) throws OXException {
         super();
         this.id_map = id_map;
         this.resource_map = resource_map;
         this.managementObject = new HazelcastResourceDirectoryManagement(this);
+        getResourceMapping().addEntryListener(new EntryListener<String, Map<String,Serializable>>() {
+            @Override
+            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) {}
+            @Override
+            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) {}
+            @Override
+            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) {}
+
+            @Override
+            public void entryEvicted(EntryEvent<String, Map<String, Serializable>> event) {
+                String id = event.getKey();
+                try {
+                    if (getIDMapping().remove(new ID(id).toGeneralForm().toString(), id)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Removed mapping for '" + id + "' due to eviction of according resource.");
+                        }
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Could not handle eviction for id '" + id + "'", e);
+                }
+            }
+        }, false);
     }
 
     @Override
@@ -114,7 +139,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     @Override
     public IDMap<Resource> get(ID id) throws OXException {
-         IDMap<Resource> foundResources = new IDMap<Resource>();
+        IDMap<Resource> foundResources = new IDMap<Resource>();
         if (id.isGeneralForm()) {
             MultiMap<String, String> idMapping = getIDMapping();
             Collection<String> concreteIds = idMapping.get(id.toString());
@@ -509,7 +534,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                  * This performs a get on both maps to lookup the full IDs and the associated Resources which resets the idle times for the
                  * eviction policy
                  */
-                get(id.toGeneralForm());
+                getIDMapping().get(id.toGeneralForm().toString());
+                getResourceMapping().get(id.toString());
             } catch (OXException e) {
                 LOG.error(e.getMessage());
             }

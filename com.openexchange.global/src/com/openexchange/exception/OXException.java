@@ -708,14 +708,18 @@ public class OXException extends Exception implements OXExceptionConstants {
         Collections.sort(comparables);
         categories.clear();
         for (final ComparableCategory comparable : comparables) {
-            categories.add(comparable.category);
+            if (null != comparable) {
+                categories.add(comparable.category);
+            }
         }
     }
 
     private static List<ComparableCategory> toComparables(final List<Category> categories) {
         final List<ComparableCategory> ret = new ArrayList<ComparableCategory>(categories.size());
         for (final Category category : categories) {
-            ret.add(new ComparableCategory(category));
+            if (null != category) {
+                ret.add(new ComparableCategory(category));
+            }
         }
         return ret;
     }

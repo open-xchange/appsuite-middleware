@@ -57,20 +57,27 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import junit.framework.Assert;
+import java.util.concurrent.TimeUnit;
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MultiMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
@@ -85,48 +92,95 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
-    
-    public HazelcastResourceDirectoryTest() {
-        super("","");
+
+    private static final String ID_MAP_NAME = "ID_MAP";
+
+    private static final String RESOURCE_MAP_NAME = "RESOURCE_MAP";
+
+    public HazelcastResourceDirectoryTest() throws OXException {
+        super(ID_MAP_NAME, RESOURCE_MAP_NAME);
     }
-    
+
     private static ExecutorService executorService;
     private static Random random;
-    
+
     @BeforeClass
     public static void beforeClass() throws Exception {
         HazelcastInstance hazelcast = Hazelcast.getDefaultInstance();
         HazelcastAccess.setHazelcastInstance(hazelcast);
+        MapConfig config = new MapConfig(RESOURCE_MAP_NAME);
+        config.setMaxIdleSeconds(1);
+        hazelcast.getConfig().addMapConfig(config);
         executorService = Executors.newFixedThreadPool(25);
         random = new Random();
     }
-    
+
     @AfterClass
     public static void afterClass() throws Exception {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         hazelcast.getLifecycleService().shutdown();
         HazelcastAccess.setHazelcastInstance(null);
     }
-    
+
     @After
     public void after() throws Exception {
-        getIDMapping().clear();
-        getResourceMapping().clear();
+        getIDMapping().destroy();
+        getResourceMapping().destroy();
     }
-    
+
     @Test
     public void testSetNewResource() throws Exception {
         ID concreteId = generateId();
         ID generalId = concreteId.toGeneralForm();
         Resource resource = generateResource(concreteId);
-        
+
         Assert.assertEquals("Wrong return value", null, set(concreteId, resource));
         IDMap<Resource> resources = get(generalId);
         Assert.assertEquals("Wrong size", 1, resources.size());
         ID reloadedId = resources.keySet().iterator().next();
         Assert.assertEquals("Wrong id", reloadedId, concreteId);
+
+        Resource reloaded = resources.get(concreteId);
+        Assert.assertEquals("Wrong routing info", HazelcastAccess.getLocalMember(), reloaded.getRoutingInfo());
     }
-    
+
+    @Test
+    public void testResourceEviction() throws Exception {
+        final CyclicBarrier barrier = new CyclicBarrier(2);
+        final EntryListener<String, Map<String,Serializable>> listener = new EntryListener<String, Map<String,Serializable>>() {
+            @Override
+            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) {}
+            @Override
+            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) {}
+            @Override
+            public void entryEvicted(EntryEvent<String, Map<String, Serializable>> event) {
+                try {
+                    barrier.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (BrokenBarrierException e) {
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) {}
+        };
+
+        getResourceMapping().addEntryListener(listener, false);
+        try {
+            ID concreteId = generateId();
+            Resource resource = generateResource(concreteId);
+            set(concreteId, resource);
+            Assert.assertEquals("Resource directory empty", 1, getResourceMapping().size());
+            Assert.assertEquals("ID map empty", 1, getIDMapping().size());
+            barrier.await(60, TimeUnit.SECONDS);
+            Assert.assertEquals("Resource directory not empty", 0, getResourceMapping().size());
+            Assert.assertEquals("ID map not empty", 0, getIDMapping().size());
+        } finally {
+            getResourceMapping().removeEntryListener(listener);
+        }
+    }
+
     @Test
     public void testUpdateResource() throws Exception {
         //Generate and ad Presence in ResourceDirectory
@@ -134,12 +188,12 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         ID generalId = concreteId.toGeneralForm();
         Resource resource = generateResource(concreteId);
         set(concreteId, resource);
-        
+
         //Reload Resource from directory and assert that presence state hasn't changed
         Resource reloadedResource = get(generalId).entrySet().iterator().next().getValue();
         assertTrue("Wrong Presence in reloaded Resource", arePresencesEqual(resource.getPresence(), reloadedResource.getPresence()));
         Assert.assertEquals("Wrong Timestamp in reloaded Resource", resource.getTimestamp(), reloadedResource.getTimestamp());
-        
+
         //Change state by adding a new resource with PresenceState offline
         DefaultResource changedResource = new DefaultResource(Presence.builder().from(concreteId).state(PresenceState.OFFLINE).build());
         Resource previous = set(concreteId, changedResource);
@@ -148,7 +202,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         assertTrue("Wrong Presence in reloaded Resource", arePresencesEqual(changedResource.getPresence(), reloadedResource.getPresence()));
         Assert.assertEquals("Wrong Timestamp in reloaded Resource", changedResource.getTimestamp(), reloadedResource.getTimestamp());
     }
-    
+
     @Test
     public void testSetAndRemoveMultiple() throws Exception {
         ID id1 = generateId();
@@ -157,18 +211,18 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Resource r1 = generateResource(id1);
         Resource r2 = generateResource(id2);
         Resource r3 = generateResource(id3);
-        
+
         set(id1, r1);
         set(id2, r2);
         set(id3, r3);
-        
+
         IDMap<Resource> idMap1 = get(id1);
         Assert.assertEquals("Wrong size", 1, idMap1.size());
         Resource reloadedResource1 = idMap1.entrySet().iterator().next().getValue();
 
         Assert.assertEquals("Wrong Timestamp in reloaded Resource", r1.getTimestamp(), reloadedResource1.getTimestamp());
 
-        
+
         IDMap<Resource> idMap2 = get(id2);
         Assert.assertEquals("Wrong size", 1, idMap2.size());
         Resource reloadedResource2 = idMap2.entrySet().iterator().next().getValue();
@@ -176,39 +230,39 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
 
         Assert.assertEquals("Wrong Timestamp in reloaded Resource", r2.getTimestamp(), reloadedResource2.getTimestamp());
 
-        
+
         IDMap<Resource> idMap3 = get(id3);
         Assert.assertEquals("Wrong size", 1, idMap3.size());
         Resource reloadedResource3 = idMap3.entrySet().iterator().next().getValue();
         assertTrue("Wrong Presence in reloaded Resource", arePresencesEqual(r3.getPresence(), reloadedResource3.getPresence()));
         Assert.assertEquals("Wrong Timestamp in reloaded Resource", r3.getTimestamp(), reloadedResource3.getTimestamp());
 
-        
+
         IDMap<Resource> all = get(id1.toGeneralForm());
         Assert.assertEquals("Wrong size", 3, all.size());
         Assert.assertTrue("Result did not contain id", all.containsKey(id1));
         Assert.assertTrue("Result did not contain id", all.containsKey(id2));
         Assert.assertTrue("Result did not contain id", all.containsKey(id3));
-        
+
         IDMap<Resource> remove1 = remove(id1);
         Assert.assertEquals("Wrong size", 1, remove1.size());
         Resource removedResource1 = remove1.entrySet().iterator().next().getValue();
         assertTrue("Wrong Presence in reloaded Resource", arePresencesEqual(r1.getPresence(), removedResource1.getPresence()));
         Assert.assertEquals("Wrong Timestamp in reloaded Resource", r1.getTimestamp(), removedResource1.getTimestamp());
-        
+
         Set<ID> toRemove = new HashSet<ID>();
         toRemove.add(id2);
         toRemove.add(id3);
-        
+
         IDMap<Resource> remove2 = remove(toRemove);
         Assert.assertEquals("Wrong size", 2, remove2.size());
-        
+
         MultiMap<String,String> idMapping = getIDMapping();
         IMap<String, Map<String, Serializable>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
-    
+
     @Test
     public void testSetAndGetAndRemoveMultipleWithMixedIdTypes() throws Exception {
         ID id1 = generateId();
@@ -221,13 +275,13 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Resource r3 = generateResource(id3);
         Resource r4 = generateResource(id4);
         Resource r5 = generateResource(id5);
-        
+
         set(id1, r1);
         set(id2, r2);
         set(id3, r3);
         set(id4, r4);
         set(id5, r5);
-        
+
         Set<ID> toGet = new HashSet<ID>();
         toGet.add(id1.toGeneralForm());
         toGet.add(id4);
@@ -237,7 +291,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertTrue("Result did not contain id", idMap.containsKey(id2));
         Assert.assertTrue("Result did not contain id", idMap.containsKey(id3));
         Assert.assertTrue("Result did not contain id", idMap.containsKey(id4));
-        
+
         Set<ID> toRemove = new HashSet<ID>();
         toRemove.add(id1.toGeneralForm());
         toRemove.add(id5);
@@ -247,16 +301,16 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertTrue("Result did not contain id", removed.containsKey(id2));
         Assert.assertTrue("Result did not contain id", removed.containsKey(id3));
         Assert.assertTrue("Result did not contain id", removed.containsKey(id5));
-        
+
         IDMap<Resource> removed2 = remove(id4);
         Assert.assertEquals("Wrong size", 1, removed2.size());
-        
+
         MultiMap<String,String> idMapping = getIDMapping();
         IMap<String, Map<String, Serializable>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
-    
+
     /*
      * https://github.com/hazelcast/hazelcast/issues/441
      */
@@ -264,9 +318,9 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     public void testTransactionsInSet() throws Exception {
         final ID testID = generateId();
         final Resource testResource = generateResource(testID);
-        
+
         List<Callable<Integer>> callables = new ArrayList<Callable<Integer>>();
-        
+
         for (int i = 0; i < 3; i++) {
             final int j = i;
             callables.add(new Callable<Integer>() {
@@ -286,15 +340,15 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
             System.out.println(future.get());
         }
     }
-    
+
     private ID generateId() {
         return new ID("ox", "some.component", "some.body", "context", UUID.randomUUID().toString());
     }
-    
+
     private Resource generateResource(ID id) {
         return new DefaultResource(Presence.builder().from(id).state(PresenceState.ONLINE).build());
     }
-    
+
     private boolean arePresencesEqual(Presence p1, Presence p2) {
         assertNotNull(p1);
         assertNotNull(p2);
