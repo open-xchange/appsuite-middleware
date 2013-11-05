@@ -54,6 +54,7 @@ import static com.openexchange.ajp13.AJPv13Utility.decodeUrl;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -2217,7 +2218,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         while (read < n) {
             res = input.read(buf, read + pos, n - read);
             if (res <= 0) {
-                throw new IOException("Unexpected EOF. Web server provided only " + read + " bytes, although " + n + " were requested.");
+                throw new EOFException("Unexpected EOF. Web server provided only " + read + " bytes, although " + n + " were requested.");
             }
             read += res;
         }
