@@ -6,6 +6,7 @@
  - Fix for bug 29653: Added null guard when accessing possibly absent service
  - Fix for bug 29654: Added null guard when accessing possibly absent service
  - Fix for bug 29660: Handle OXException's that do not have a category assigned
+ - Fix for bug 29666: User proper default charset when URL-encoding publication's site name
 
 * 2013-11-04 - jan.bauerdick@open-xchange.com
 
