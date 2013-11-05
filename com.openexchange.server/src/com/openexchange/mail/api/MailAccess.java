@@ -756,7 +756,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      */
     public void logTrace(final StringBuilder sBuilder, final org.apache.commons.logging.Log log) {
-        {
+        final Thread usingThread = this.usingThread;
+        if (null != usingThread) {
             final Props taskProps = LogProperties.optLogProperties(usingThread);
             if (null != taskProps) {
                 final Map<String, String> sorted = new TreeMap<String, String>();
