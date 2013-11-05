@@ -247,6 +247,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
      */
     public TIntList getAccountIDs(final String serviceId, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
+        if (null == databaseService) {
+            return new TIntArrayList(0);
+        }
         /*
          * Readable connection
          */
