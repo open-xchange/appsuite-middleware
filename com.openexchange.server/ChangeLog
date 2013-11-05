@@ -5,6 +5,7 @@
  - Fix for bug 29651: Added null guard when accessing possibly absent service
  - Fix for bug 29653: Added null guard when accessing possibly absent service
  - Fix for bug 29654: Added null guard when accessing possibly absent service
+ - Fix for bug 29660: Handle OXException's that do not have a category assigned
 
 * 2013-11-04 - jan.bauerdick@open-xchange.com
 
