@@ -51,8 +51,8 @@ package com.openexchange.drive.events.ms;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.drive.events.DriveEvent;
@@ -75,7 +75,7 @@ public class DriveEventWrapper {
         if (null == driveEvent) {
             return null;
         }
-        Map<String, Serializable> map = new HashMap<String, Serializable>(2);
+        Map<String, Serializable> map = new LinkedHashMap<String, Serializable>(2);
         map.put("__contextID", Integer.valueOf(driveEvent.getContextID()));
         Set<String> folderIDs = driveEvent.getFolderIDs();
         if (null != folderIDs) {
