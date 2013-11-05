@@ -71,8 +71,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
@@ -226,14 +225,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * <p>
      * A writer can acquire the read lock, but not vice-versa.
      */
-    private final ReadWriteLock mainLock;
-
-    /**
-     * The soft lock for non-blocking access to output/input stream.
-     * <p>
-     * A writer can acquire this read lock.
-     */
-    protected final Lock softLock;
+    protected final Lock mainLock;
 
     /**
      * Use Tomcat authentication ?
@@ -437,8 +429,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         bodyBytes = MessageBytes.newInstance();
         sink = new UnsynchronizedByteArrayOutputStream(Constants.MAX_PACKET_SIZE);
         certificates = MessageBytes.newInstance();
-        mainLock = new ReentrantReadWriteLock();
-        softLock = mainLock.readLock();
+        mainLock = new ReentrantLock();
         lastWriteAccess = 0L;
         this.listenerMonitor = listenerMonitor;
         this.number = Long.valueOf(NUMBER.incrementAndGet());
@@ -773,7 +764,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
                 }
                 if (type == Constants.JK_AJP13_CPING_REQUEST && 1 == requestHeaderMessage.getLen()) {
-                    softLock.lock();
+                    mainLock.lock();
                     try {
                         output.write(pongMessageArray);
                         lastWriteAccess = System.currentTimeMillis();
@@ -781,7 +772,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     } catch (final IOException e) {
                         error = true;
                     } finally {
-                        softLock.unlock();
+                        mainLock.unlock();
                     }
                     continue;
                 } else if (type != Constants.JK_AJP13_FORWARD_REQUEST) {
@@ -1085,33 +1076,38 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         switch (actionCode) {
         case COMMIT:
             {
-                if (response.isCommitted()) {
-                    return;
-                }
-
-                // Validate and write response headers
+                mainLock.lock();
                 try {
-                    prepareResponse();
-                } catch (final IOException e) {
-                    // Set error flag
-                    error = true;
-                }
-            }
-            break;
-        case CLIENT_FLUSH:
-            {
-                if (!response.isCommitted()) {
+                    if (response.isCommitted()) {
+                        return;
+                    }
+
                     // Validate and write response headers
                     try {
                         prepareResponse();
                     } catch (final IOException e) {
                         // Set error flag
                         error = true;
-                        return;
                     }
+                } finally {
+                    mainLock.unlock();
                 }
-                softLock.lock();
+            }
+            break;
+        case CLIENT_FLUSH:
+            {
+                mainLock.lock();
                 try {
+                    if (!response.isCommitted()) {
+                        // Validate and write response headers
+                        try {
+                            prepareResponse();
+                        } catch (final IOException e) {
+                            // Set error flag
+                            error = true;
+                            return;
+                        }
+                    }
                     /*
                      * Write empty SEND-BODY-CHUNK package
                      */
@@ -1122,14 +1118,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // Set error flag
                     error = true;
                 } finally {
-                    softLock.unlock();
+                    mainLock.unlock();
                 }
             }
             break;
         case CLIENT_PING:
             {
-                final Lock hardLock = mainLock.writeLock();
-                hardLock.lock();
+                mainLock.lock();
                 try {
                     /*
                      * Ensure we still exceed max. idle time and are not yet finished
@@ -1204,7 +1199,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final AJPv13Exception e) {
                     // Cannot occur
                 } finally {
-                    hardLock.unlock();
+                    mainLock.unlock();
                 }
             }
             break;
@@ -2045,7 +2040,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * When committing the response, we have to validate the set of headers, as well as setup the response filters.
      */
     protected void prepareResponse() throws IOException {
-        softLock.lock();
         try {
             response.setCommitted(true);
             /*
@@ -2144,8 +2138,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             output.flush();
         } catch (final AJPv13Exception e) {
             throw new IOException(e.getMessage(), e);
-        } finally {
-            softLock.unlock();
         }
     }
 
@@ -2181,31 +2173,30 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Finish AJP response.
      */
     protected void finish(final boolean reuse) throws IOException {
-
-        if (!response.isCommitted()) {
-            // Validate and write response headers
-            try {
-                prepareResponse();
-            } catch (final IOException e) {
-                // Set error flag
-                error = true;
-            }
-        }
-
-        if (finished) {
-            return;
-        }
-
-        finished = true;
-
-        // Add the end message
-        softLock.lock();
+        mainLock.lock();
         try {
+            if (!response.isCommitted()) {
+                // Validate and write response headers
+                try {
+                    prepareResponse();
+                } catch (final IOException e) {
+                    // Set error flag
+                    error = true;
+                }
+            }
+
+            if (finished) {
+                return;
+            }
+
+            finished = true;
+
+            // Add the end message
             output.write(reuse ? endMessageArray : endMessageArrayNoReuse);
             lastWriteAccess = System.currentTimeMillis();
             output.flush();
         } finally {
-            softLock.unlock();
+            mainLock.unlock();
         }
     }
 
@@ -2264,20 +2255,20 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
 
         // Request more data immediately
-        softLock.lock();
+        mainLock.lock();
         try {
             output.write(getBodyMessageArray);
             lastWriteAccess = System.currentTimeMillis();
             output.flush();
-        } finally {
-            softLock.unlock();
-        }
 
-        final boolean moreData = receive();
-        if (!moreData) {
-            endOfStream = true;
+            final boolean moreData = receive();
+            if (!moreData) {
+                endOfStream = true;
+            }
+            return moreData;
+        } finally {
+            mainLock.unlock();
         }
-        return moreData;
     }
 
     /**
@@ -2394,41 +2385,43 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         @Override
         public int doWrite(final ByteChunk chunk) throws IOException {
-            if (!response.isCommitted()) {
-                // Validate and write response headers
-                try {
-                    prepareResponse();
-                } catch (final IOException e) {
-                    // Set error flag
-                    error = true;
+            mainLock.lock();
+            try {
+                if (!response.isCommitted()) {
+                    // Validate and write response headers
+                    try {
+                        prepareResponse();
+                    } catch (final IOException e) {
+                        // Set error flag
+                        error = true;
+                    }
                 }
-            }
-            int len = chunk.getLength();
-            if (len <= 0) {
-                return len;
-            }
-            // 4 - hardcoded, byte[] marshalling overhead
-            // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
-            final byte[] b = chunk.getBuffer();
-            final int start = chunk.getOffset();
-            int off = 0;
-            do {
-                int thisTime = len;
-                if (thisTime > chunkSize) {
-                    thisTime = chunkSize;
+                int len = chunk.getLength();
+                if (len <= 0) {
+                    return len;
                 }
-                len -= thisTime;
-                softLock.lock();
-                try {
+                // 4 - hardcoded, byte[] marshalling overhead
+                // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
+                final byte[] b = chunk.getBuffer();
+                final int start = chunk.getOffset();
+                int off = 0;
+                do {
+                    int thisTime = len;
+                    if (thisTime > chunkSize) {
+                        thisTime = chunkSize;
+                    }
+                    len -= thisTime;
+
                     writeSendBodyChunkBytes(b, start + off, thisTime);
                     lastWriteAccess = System.currentTimeMillis();
                     output.flush();
-                } finally {
-                    softLock.unlock();
-                }
-                off += thisTime;
-            } while (len > 0);
-            return chunk.getLength();
+
+                    off += thisTime;
+                } while (len > 0);
+                return chunk.getLength();
+            } finally {
+                mainLock.unlock();
+            }
         }
 
         private void writeSendBodyChunkBytes(final byte[] b, final int off, final int len) throws IOException {
