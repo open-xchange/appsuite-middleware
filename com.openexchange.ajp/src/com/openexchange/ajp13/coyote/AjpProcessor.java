@@ -2125,23 +2125,24 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
              * Calculate data length
              */
             final int dataLength = SEND_HEADERS_LENGTH + headers.length + cookies.length + statusMsg.length();
-            try {
-                if (dataLength + RESPONSE_PREFIX_LENGTH > Constants.MAX_PACKET_SIZE) {
-                    throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
-                }
-                sink.reset();
-                AJPv13Response.fillStartBytes(Constants.JK_AJP13_SEND_HEADERS, dataLength, sink);
-                AJPv13Response.writeInt(response.getStatus(), sink);
-                AJPv13Response.writeString(statusMsg, sink);
-                AJPv13Response.writeInt(numHeaders + numCookies, sink);
-                AJPv13Response.writeByteArray(headers, sink);
-                AJPv13Response.writeByteArray(cookies, sink);
-            } catch (final AJPv13Exception e) {
-                throw new IOException(e.getMessage(), e);
+            if (dataLength + RESPONSE_PREFIX_LENGTH > Constants.MAX_PACKET_SIZE) {
+                throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
             }
+            /*
+             * Write to output stream
+             */
+            sink.reset();
+            AJPv13Response.fillStartBytes(Constants.JK_AJP13_SEND_HEADERS, dataLength, sink);
+            AJPv13Response.writeInt(response.getStatus(), sink);
+            AJPv13Response.writeString(statusMsg, sink);
+            AJPv13Response.writeInt(numHeaders + numCookies, sink);
+            AJPv13Response.writeByteArray(headers, sink);
+            AJPv13Response.writeByteArray(cookies, sink);
             sink.writeTo(output);
             lastWriteAccess = System.currentTimeMillis();
             output.flush();
+        } catch (final AJPv13Exception e) {
+            throw new IOException(e.getMessage(), e);
         } finally {
             softLock.unlock();
         }
