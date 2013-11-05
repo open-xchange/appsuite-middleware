@@ -203,7 +203,14 @@ public final class LoginPerformer {
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
             // Create session
-            final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+            SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+            if (null == sessiondService) {
+                sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                if (null == sessiondService) {
+                    // Giving up...
+                    throw ServiceExceptionCode.absentService(SessiondService.class);
+                }
+            }
             final Session session = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
             if (null == session) {
                 // Session could not be created
@@ -307,7 +314,14 @@ public final class LoginPerformer {
      */
     public Session doLogout(final String sessionId) throws OXException {
         // Drop the session
-        final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (null == sessiondService) {
+            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (null == sessiondService) {
+                // Giving up...
+                throw ServiceExceptionCode.absentService(SessiondService.class);
+            }
+        }
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (LOG.isDebugEnabled()) {
