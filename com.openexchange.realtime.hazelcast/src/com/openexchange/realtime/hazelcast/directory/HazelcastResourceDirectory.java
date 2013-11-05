@@ -110,11 +110,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         this.managementObject = new HazelcastResourceDirectoryManagement(this);
         getResourceMapping().addEntryListener(new EntryListener<String, Map<String,Serializable>>() {
             @Override
-            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) { /*nothing*/ }
             @Override
-            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) { /*nothing*/ }
             @Override
-            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) { /*nothing*/ }
 
             @Override
             public void entryEvicted(EntryEvent<String, Map<String, Serializable>> event) {
@@ -396,21 +396,12 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             if (candidatePresence == null || candidatePresence.getPriority() < 0) {
                 continue;
             }
-            if (selectedResource == null) {
+            if ((selectedResource == null) || (selectedResource.getTimestamp().compareTo(candidateResource.getTimestamp()) < 0)) {
                 selectedResource = candidateResource;
-            } else {
-                int comparisonResult = selectedResource.getTimestamp().compareTo(candidateResource.getTimestamp());
-                if (comparisonResult < 0) {
-                    selectedResource = candidateResource;
-                }
             }
         }
 
-        if (selectedResource == null) {
-            return null;
-        }
-        return selectedResource.getPresence();
-
+        return selectedResource == null ? null : selectedResource.getPresence();
     }
 
     /**
