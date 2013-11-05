@@ -76,6 +76,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -106,12 +107,18 @@ public abstract class AbstractITipAction implements AJAXActionService{
         final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
 
         final ITipParser itipParser = services.getService(ITipParser.class);
+        if (null == itipParser) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipParser.class);
+        }
         final ITipAnalyzerService analyzer = services.getService(ITipAnalyzerService.class);
+        if (null == analyzer) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipAnalyzerService.class);
+        }
 
         final TimeZone tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
         final String timezoneParameter = request.getParameter("timezone");
         TimeZone outputTimeZone = timezoneParameter == null ? tz : TimeZone.getTimeZone(timezoneParameter);
-        
+
         final Map<String, String> mailHeader = new HashMap<String, String>();
         final InputStream stream = getInputStreamAndFillMailHeader(request, session, mailHeader);
         int owner = 0;
@@ -153,6 +160,9 @@ public abstract class AbstractITipAction implements AJAXActionService{
             }
 
             final ConversionService conversionEngine = services.getService(ConversionService.class);
+            if (null == conversionEngine) {
+                throw ServiceExceptionCode.serviceUnavailable(ConversionService.class);
+            }
 
             final DataSource dataSource = conversionEngine.getDataSource(ds);
 
