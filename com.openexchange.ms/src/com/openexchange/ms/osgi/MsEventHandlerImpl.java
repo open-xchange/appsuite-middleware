@@ -47,89 +47,61 @@
  *
  */
 
-package com.openexchange.ms.internal;
+package com.openexchange.ms.osgi;
 
-import java.util.LinkedHashMap;
+import java.text.MessageFormat;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.java.Strings;
+import com.openexchange.ms.MsEventConstants;
+import com.openexchange.ms.MsService;
+import com.openexchange.ms.Topic;
+import com.openexchange.ms.internal.HzMsService;
 
 /**
- * {@link HzDataUtility} - A utility class for Hazelcast-based messaging.
+ * {@link MsEventHandlerImpl} - The event handler for {@link MsService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class HzDataUtility {
+public final class MsEventHandlerImpl implements EventHandler {
+
+    private final HzMsService msService;
 
     /**
-     * Initializes a new {@link HzDataUtility}.
-     */
-    private HzDataUtility() {
-        super();
-    }
-
-    // ------------------------------------- DELAY STUFF -------------------------------------------- //
-
-    /**
-     * The delay for pooled messages.
-     */
-    public static final long DELAY_MSEC = 5000L;
-
-    /**
-     * The frequency to check for delayed pooled messages.
-     */
-    public static final int DELAY_FREQUENCY = 3000;
-
-    // ------------------------------------- CHUNK STUFF -------------------------------------------- //
-
-    /**
-     * The chunk size of a multiple message.
-     */
-    public static final int CHUNK_SIZE = 10;
-
-    /**
-     * The threshold when to switch to a multiple message.
-     */
-    public static final int CHUNK_THRESHOLD = 2;
-
-    // ------------------------------------- MESSAGE DATA ------------------------------------------- //
-
-    /**
-     * The property name for the identifier of the sender that transmitted message data.
-     */
-    public static final String MESSAGE_DATA_SENDER_ID = "__senderId".intern();
-
-    /**
-     * The property name for transmitted message data object.
-     */
-    public static final String MESSAGE_DATA_OBJECT = "__object".intern();
-
-    /**
-     * The property to mark as a multiple transport.
-     */
-    public static final String MULTIPLE_MARKER = "__multiple".intern();
-
-    /**
-     * The property prefix on a multiple transport.
-     */
-    public static final String MULTIPLE_PREFIX = "__map".intern();
-
-    /**
-     * Generates message data for given arguments.
+     * Initializes a new {@link MsEventHandlerImpl}.
      *
-     * @param e The message data object; POJOs preferred
-     * @param senderId The sender identifier
-     * @return The message data container
+     * @param msService The associated service
      */
-    public static <E> Map<String, Object> generateMapFor(final E e, final String senderId) {
-        final Map<String, Object> map = new LinkedHashMap<String, Object>(4);
-        if (null != e) {
-            map.put(MESSAGE_DATA_OBJECT, e);
-        }
-        if (null != senderId) {
-            map.put(MESSAGE_DATA_SENDER_ID, senderId);
-        }
-        return map;
+    public MsEventHandlerImpl(final HzMsService msService) {
+        this.msService = msService;
     }
 
-    // ------------------------------------- OTHER STIFF ------------------------------------------- //
+    @Override
+    public void handleEvent(final Event event) {
+        final String topic = event.getTopic();
+        if (MsEventConstants.TOPIC_REMOTE_REPUBLISH.equals(topic)) {
+            handleForRemotePublication(msService, event);
+        }
+    }
+
+    private void handleForRemotePublication(final HzMsService msService, final Event event) {
+        try {
+            final String topicName = (String) event.getProperty(MsEventConstants.PROPERTY_TOPIC_NAME);
+            if (!Strings.isEmpty(topicName)) {
+                final Map<String, Object> map = (Map<String, Object>) event.getProperty(MsEventConstants.PROPERTY_DATA_MAP);
+                if (null != map && !map.isEmpty()) {
+                    final Topic<Map<String, Object>> msTopic = msService.getTopic(topicName);
+                    msTopic.publish(map);
+                }
+            }
+        } catch (final Exception e) {
+            // Ignore
+            final Log logger = com.openexchange.log.Log.loggerFor(MsActivator.class);
+            logger.warn(MessageFormat.format("Could not handle event with topic ''{0}'': \"{1}\"", event.getTopic(), e.getMessage()), e);
+        }
+    }
 
 }

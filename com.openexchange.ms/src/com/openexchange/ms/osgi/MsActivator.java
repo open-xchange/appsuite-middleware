@@ -49,12 +49,17 @@
 
 package com.openexchange.ms.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.ms.MsEventConstants;
 import com.openexchange.ms.MsService;
 import com.openexchange.ms.internal.HzMsService;
 import com.openexchange.ms.internal.Services;
@@ -100,6 +105,7 @@ public class MsActivator extends HousekeepingActivator {
                     final HzMsService msService = new HzMsService(hz);
                     if (msServiceRef.compareAndSet(null, msService)) {
                         registerService(MsService.class, msService);
+                        registerEventHandler(msService);
                         return hz;
                     }
                     context.ungetService(reference);
@@ -116,7 +122,7 @@ public class MsActivator extends HousekeepingActivator {
                     if (null != service) {
                         final MsService msService = msServiceRef.get();
                         if (null != msService) {
-                            unregisterService(msService);
+                            unregisterServices();
                             msServiceRef.set(null);
                         }
                         context.ungetService(reference);
@@ -139,8 +145,20 @@ public class MsActivator extends HousekeepingActivator {
     }
 
     @Override
-    public <S> void unregisterService(final S service) {
-        super.unregisterService(service);
+    public void unregisterServices() {
+        super.unregisterServices();
+    }
+
+    /**
+     * Registers the event handler.
+     *
+     * @param msService The associated service used to remotely re-publish received events.
+     */
+    protected void registerEventHandler(final HzMsService msService) {
+        // Register event handler
+        final Dictionary<String, Object> dict = new Hashtable<String, Object>(2);
+        dict.put(EventConstants.EVENT_TOPIC, MsEventConstants.getAllTopics());
+        registerService(EventHandler.class, new MsEventHandlerImpl(msService), dict);
     }
 
 }

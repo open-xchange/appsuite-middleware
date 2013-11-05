@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,89 +47,63 @@
  *
  */
 
-package com.openexchange.ms.internal;
+package com.openexchange.ms;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+
 
 /**
- * {@link HzDataUtility} - A utility class for Hazelcast-based messaging.
+ * {@link MsEventConstants}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class HzDataUtility {
+public final class MsEventConstants {
 
     /**
-     * Initializes a new {@link HzDataUtility}.
+     * Initializes a new {@link MsEventConstants}.
      */
-    private HzDataUtility() {
+    private MsEventConstants() {
         super();
     }
 
-    // ------------------------------------- DELAY STUFF -------------------------------------------- //
+    // ------------------------------------------------------------------------------------------------- //
 
     /**
-     * The delay for pooled messages.
+     * The topic intended to remotely republish received event.
      */
-    public static final long DELAY_MSEC = 5000L;
+    public static final String TOPIC_REMOTE_REPUBLISH = "com/openexchange/ms/remote/republish";
 
     /**
-     * The frequency to check for delayed pooled messages.
+     * An array of {@link String string} including all known topics.
+     * <p>
+     * Needed on event handler registration to a bundle context.
      */
-    public static final int DELAY_FREQUENCY = 3000;
-
-    // ------------------------------------- CHUNK STUFF -------------------------------------------- //
+    private static final String[] TOPICS = { TOPIC_REMOTE_REPUBLISH };
 
     /**
-     * The chunk size of a multiple message.
-     */
-    public static final int CHUNK_SIZE = 10;
-
-    /**
-     * The threshold when to switch to a multiple message.
-     */
-    public static final int CHUNK_THRESHOLD = 2;
-
-    // ------------------------------------- MESSAGE DATA ------------------------------------------- //
-
-    /**
-     * The property name for the identifier of the sender that transmitted message data.
-     */
-    public static final String MESSAGE_DATA_SENDER_ID = "__senderId".intern();
-
-    /**
-     * The property name for transmitted message data object.
-     */
-    public static final String MESSAGE_DATA_OBJECT = "__object".intern();
-
-    /**
-     * The property to mark as a multiple transport.
-     */
-    public static final String MULTIPLE_MARKER = "__multiple".intern();
-
-    /**
-     * The property prefix on a multiple transport.
-     */
-    public static final String MULTIPLE_PREFIX = "__map".intern();
-
-    /**
-     * Generates message data for given arguments.
+     * Gets an array of {@link String string} including all known topics.
+     * <p>
+     * Needed on event handler registration to a bundle context.
      *
-     * @param e The message data object; POJOs preferred
-     * @param senderId The sender identifier
-     * @return The message data container
+     * @return An array of {@link String string} including all known topics.
      */
-    public static <E> Map<String, Object> generateMapFor(final E e, final String senderId) {
-        final Map<String, Object> map = new LinkedHashMap<String, Object>(4);
-        if (null != e) {
-            map.put(MESSAGE_DATA_OBJECT, e);
-        }
-        if (null != senderId) {
-            map.put(MESSAGE_DATA_SENDER_ID, senderId);
-        }
-        return map;
+    public static String[] getAllTopics() {
+        final String[] retval = new String[TOPICS.length];
+        System.arraycopy(TOPICS, 0, retval, 0, TOPICS.length);
+        return retval;
     }
 
-    // ------------------------------------- OTHER STIFF ------------------------------------------- //
+    // ------------------------------------------------------------------------------------------------- //
+
+    /**
+     * The property name for the topic.
+     */
+    public static final String PROPERTY_TOPIC_NAME = "__topicName";
+
+    /**
+     * The property name for the message's data map (instance of <b><code>Map&lt;String, Object&gt;</code></b>).
+     */
+    public static final String PROPERTY_DATA_MAP = "__map";
 
 }

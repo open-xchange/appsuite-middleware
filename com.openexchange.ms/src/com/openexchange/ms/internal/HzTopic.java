@@ -189,9 +189,9 @@ public final class HzTopic<E> implements Topic<E> {
     private static final int CHUNK_THRESHOLD = HzDataUtility.CHUNK_THRESHOLD;
 
     /**
-     * (Immediately) Publishes specified message to queue.
+     * (Immediately) Publishes specified messages to queue.
      *
-     * @param message The message to publish
+     * @param messages The messages to publish
      */
     private void publishNow(final List<E> messages) {
         final int size = messages.size();
@@ -260,11 +260,7 @@ public final class HzTopic<E> implements Topic<E> {
 
         private void onMessageReceived(final String name, final Map<String, Object> messageData) {
             final String messageSender = (String) messageData.get(MESSAGE_DATA_SENDER_ID);
-            listener.onMessage(new Message<E>(
-                name,
-                messageSender,
-                (E) messageData.get(MESSAGE_DATA_OBJECT),
-                !senderId.equals(messageSender)));
+            listener.onMessage(new Message<E>(name, messageSender, (E) messageData.get(MESSAGE_DATA_OBJECT), !senderId.equals(messageSender)));
         }
     }
 }
