@@ -275,7 +275,6 @@ public class FolderCopyTask implements CopyUserTaskService {
 
                 writeFoldersToDB(dstCon, Collections.singletonList(attachmentFolder), dstCtx.getContextId());
 
-                final List<FolderPermission> permissions = new ArrayList<FolderPermission>(2);
                 final FolderPermission userPermission = new FolderPermission();
                 userPermission.setUserId(userId);
                 userPermission.setFolderId(destAttachmentFolderId);
@@ -287,19 +286,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                 userPermission.setGroupFlag(false);
                 userPermission.setSystem(false);
 
-                final FolderPermission groupPermission = new FolderPermission();
-                groupPermission.setUserId(0);
-                groupPermission.setFolderId(destAttachmentFolderId);
-                groupPermission.setFp(2);
-                groupPermission.setOrp(4);
-                groupPermission.setOwp(0);
-                groupPermission.setOdp(0);
-                groupPermission.setAdminFlag(false);
-                groupPermission.setGroupFlag(true);
-                groupPermission.setSystem(false);
-
-                permissions.add(userPermission);
-                permissions.add(groupPermission);
+                final List<FolderPermission> permissions = Collections.singletonList(userPermission);
 
                 writePermissionsToDB(permissions, dstCon, dstCtx.getContextId());
             }

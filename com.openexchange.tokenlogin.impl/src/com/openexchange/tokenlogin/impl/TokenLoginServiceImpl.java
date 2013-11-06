@@ -211,10 +211,14 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         return hazelcastInstance.getMap(hzMapName);
     }
 
-    private void removeFromHzMap(final String token) {
+    private void removeFromHzMap(final String token, final boolean async) {
         final IMap<String, String> hzMap = hzMap();
         if (null != hzMap) {
-            hzMap.removeAsync(token);
+            if (async) {
+                hzMap.removeAsync(token);
+            } else {
+                hzMap.remove(token);
+            }
         }
     }
 
@@ -272,7 +276,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             }
         } else {
             // Local HIT, remove from Hazelcast map
-            removeFromHzMap(token);
+            removeFromHzMap(token, false);
         }
         // Remove from other mapping, too
         sessionId2token.remove(sessionId);
@@ -307,7 +311,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         final String token = sessionId2token.remove(session.getSessionID());
         if (null != token) {
             token2sessionId.remove(token);
-            removeFromHzMap(token);
+            removeFromHzMap(token, true);
         }
     }
 }
