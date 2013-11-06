@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Event System
+Bundle-SymbolicName: com.openexchange.eventsystem
+Bundle-Version: 7.4.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.ms,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.eventsystem
+Bundle-Activator: com.openexchange.eventsystem.osgi.EventSystemActivator
