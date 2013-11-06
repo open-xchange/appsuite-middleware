@@ -50,13 +50,13 @@
 package com.openexchange.dav.caldav.bugs;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -88,12 +88,10 @@ public class Bug29554Test extends CalDAVTest {
         Set<String> comps = new HashSet<String>();
         for (MultiStatusResponse response : responses) {
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SETS)) {
-                Node node = extractNodeValue(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SETS, response);
-                assertNotNull(node);
-                NodeList childNodes = node.getChildNodes();
-                for (int i = 0; i < childNodes.getLength(); i++) {
-                    Node item = childNodes.item(i);
-                    comps.add(item.getAttributes().getNamedItem("name").getTextContent());
+                List<Node> nodes = extractNodeListValue(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SETS, response);
+                assertNotNull(nodes);
+                for (Node node : nodes) {
+                    comps.add(node.getChildNodes().item(0).getAttributes().getNamedItem("name").getTextContent());
                 }
             } else {
                 fail("no multistatus response");
