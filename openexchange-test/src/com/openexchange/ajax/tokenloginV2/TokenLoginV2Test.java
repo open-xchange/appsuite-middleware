@@ -99,6 +99,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         LoginResponse loginResponse = client.execute(login);
         assertEquals("Wrong password.", AJAXConfig.getProperty(User.User1.getPassword()), loginResponse.getPassword());
 
+        Thread.sleep(500);
         login = new LoginRequest(new TokenLoginParameters(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
         client = new AJAXClient();
         loginResponse = client.execute(login);
