@@ -49,13 +49,18 @@
 
 package com.openexchange.eventsystem;
 
+import org.osgi.framework.BundleContext;
+
 
 /**
- * {@link EventListener} - To be registered via OSGi.
+ * {@link EventHandler} - Handles incoming {@link Event events}.
+ * <p>
+ * To be registered via {@link BundleContext#registerService(Class, Object, java.util.Dictionary) OSGi}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public interface EventListener {
+public interface EventHandler {
 
     /**
      * Handles given event.
@@ -63,4 +68,5 @@ public interface EventListener {
      * @param event The event
      */
     void handleEvent(Event event);
+
 }

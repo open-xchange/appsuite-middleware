@@ -6,9 +6,13 @@ Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
+ com.openexchange.log,
  com.openexchange.ms,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
+ org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.eventsystem

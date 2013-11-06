@@ -58,6 +58,7 @@ import java.util.UUID;
  * {@link Event} - An event.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
 public final class Event {
 

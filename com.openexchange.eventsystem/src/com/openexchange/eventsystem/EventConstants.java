@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,40 @@
  *
  */
 
-package com.openexchange.eventsystem.internal;
+package com.openexchange.eventsystem;
 
 
 /**
- * {@link EventSystemConstants}
+ * {@link EventConstants} - Defines standard names for {@code EventHandler} properties.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public class EventSystemConstants {
+public final class EventConstants {
 
     /**
-     * Initializes a new {@link EventSystemConstants}.
+     * Initializes a new {@link EventConstants}.
      */
-    private EventSystemConstants() {
+    private EventConstants() {
         super();
     }
 
     /**
-     * The name for the topic.
+     * Service registration property specifying the {@code Event} topics of interest to an Event Handler service.
+     * <p>
+     * Event handlers SHOULD be registered with this property. Each value of this property is a string that describe the topics in which the
+     * handler is interested. An asterisk ('*') may be used as a trailing wildcard. Event Handlers which do not have a value for this
+     * property must not receive events. More precisely, the value of each string must conform to the following grammar:
+     *
+     * <pre>
+     *  topic-description := '*' | topic ( '/*' )?
+     *  topic := token ( '/' token )*
+     * </pre>
+     * <p>
+     * The value of this property must be of type {@code String}, {@code String[]}, or {@code Collection<String>}.
+     *
+     * @see Event
      */
-    public static final String NAME_TOPIC = "ox-event-system-topic-0";
-
-    /**
-     * The name for the queue.
-     */
-    public static final String NAME_QUEUE = "ox-event-system-queue-0";
-
-    // ----------------------------------------------------------------------------  //
-
-    /**
-     * The property for the event's UUID.
-     */
-    public static final String PROP_UUID = "__uuid";
-
-    /**
-     * The property for the event's topic.
-     */
-    public static final String PROP_TOPIC = "__topic";
+    public static final String EVENT_TOPIC = "event.topics";
 
 }

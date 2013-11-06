@@ -59,6 +59,7 @@ import com.openexchange.eventsystem.Event;
  * {@link EventUtility}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
 public final class EventUtility {
 

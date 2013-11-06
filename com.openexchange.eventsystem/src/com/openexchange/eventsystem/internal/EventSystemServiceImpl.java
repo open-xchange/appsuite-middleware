@@ -50,13 +50,9 @@
 package com.openexchange.eventsystem.internal;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventListener;
 import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.exception.OXException;
-import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.MsService;
 import com.openexchange.ms.Queue;
@@ -65,22 +61,34 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link EventSystemServiceImpl}
+ * {@link EventSystemServiceImpl} - An event service using {@link MsService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
 public final class EventSystemServiceImpl implements EventSystemService {
 
+    private static final String NAME_TOPIC = EventSystemConstants.NAME_TOPIC;
+    private static final String NAME_QUEUE = EventSystemConstants.NAME_QUEUE;
+
     private final ServiceLookup services;
-    private final ConcurrentMap<EventListener, MessageListener<Map<String, Object>>> listeners;
 
     /**
      * Initializes a new {@link EventSystemServiceImpl}.
+     *
+     * @throws OXException If initialization fails
      */
-    public EventSystemServiceImpl(final ServiceLookup services) {
+    public EventSystemServiceImpl(final ServiceLookup services, final EventHandlerTracker handlers) throws OXException {
         super();
         this.services = services;
-        listeners = new ConcurrentHashMap<EventListener, MessageListener<Map<String, Object>>>(16);
+
+        final MsService msService = getMsService();
+        final Topic<Map<String, Object>> topic = msService.getTopic(NAME_TOPIC);
+        final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
+
+        final MessageListener<Map<String, Object>> messageListener = new EventDistributingMessageListener(handlers, true);
+        topic.addMessageListener(messageListener);
+        queue.addMessageListener(messageListener);
     }
 
     private MsService getMsService() throws OXException {
@@ -97,7 +105,7 @@ public final class EventSystemServiceImpl implements EventSystemService {
             return;
         }
         final MsService msService = getMsService();
-        final Topic<Map<String, Object>> topic = msService.getTopic(EventSystemConstants.NAME_TOPIC);
+        final Topic<Map<String, Object>> topic = msService.getTopic(NAME_TOPIC);
         topic.publish(EventUtility.wrap(event));
     }
 
@@ -107,55 +115,8 @@ public final class EventSystemServiceImpl implements EventSystemService {
             return;
         }
         final MsService msService = getMsService();
-        final Queue<Map<String, Object>> queue = msService.getQueue(EventSystemConstants.NAME_QUEUE);
+        final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
         queue.offer(EventUtility.wrap(event));
-    }
-
-    /**
-     * Registers given listener.
-     *
-     * @param listener The listener
-     * @throws OXException If registration fails
-     */
-    public void registerListener(final EventListener listener) throws OXException {
-        if (null == listener) {
-            return;
-        }
-        final MessageListener<Map<String, Object>> messageListener = new MessageListener<Map<String, Object>>() {
-
-            @Override
-            public void onMessage(final Message<Map<String, Object>> message) {
-                listener.handleEvent(EventUtility.unwrap(message.getMessageObject()));
-            }
-        };
-        if (null == listeners.putIfAbsent(listener, messageListener)) { // not present, yet
-            final MsService msService = getMsService();
-            final Topic<Map<String, Object>> topic = msService.getTopic(EventSystemConstants.NAME_TOPIC);
-            final Queue<Map<String, Object>> queue = msService.getQueue(EventSystemConstants.NAME_QUEUE);
-
-            topic.addMessageListener(messageListener);
-            queue.addMessageListener(messageListener);
-        }
-    }
-
-    /**
-     * Unregisters given listeners
-     *
-     * @param listener The listener
-     * @throws OXException If unregistration fails
-     */
-    public void unregisterListener(final EventListener listener) throws OXException {
-        if (null == listener) {
-            return;
-        }
-        final MessageListener<Map<String, Object>> messageListener = listeners.remove(listener);
-        if (null != messageListener) {
-            final MsService msService = getMsService();
-            final Topic<Map<String, Object>> topic = msService.getTopic(EventSystemConstants.NAME_TOPIC);
-            final Queue<Map<String, Object>> queue = msService.getQueue(EventSystemConstants.NAME_QUEUE);
-            topic.removeMessageListener(messageListener);
-            queue.removeMessageListener(messageListener);
-        }
     }
 
 }

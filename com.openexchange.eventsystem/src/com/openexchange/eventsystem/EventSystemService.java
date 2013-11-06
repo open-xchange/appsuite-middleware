@@ -53,13 +53,18 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link EventSystemService} - The event system service.
+ * <p>
+ * Broadcasts events in cluster either following Point-to-Point Messaging Domain or Publish/Subscribe Messaging Domain.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
 public interface EventSystemService {
 
     /**
-     * Publishes given event to all registered listeners.
+     * Publishes given event to all listeners which subscribed to the topic of the event.
+     * <p>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub" width="480">
      *
      * @param event The event
      * @throws OXException If event publication fails
@@ -67,7 +72,9 @@ public interface EventSystemService {
     void publish(Event event) throws OXException;
 
     /**
-     * Delivers given event; thus available for exactly one listener.
+     * Delivers given event, thus available for exactly one listener that subscribed to the topic of the event.
+     * <p>
+     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p" width="480">
      *
      * @param event The event
      * @throws OXException If enqueue operations fails
