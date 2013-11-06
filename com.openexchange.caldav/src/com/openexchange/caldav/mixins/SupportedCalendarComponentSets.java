@@ -86,12 +86,19 @@ public class SupportedCalendarComponentSets extends SingleXMLPropertyMixin {
     @Override
     protected String getValue() {
         if (null != this.components) {
-            StringAllocator stringAllocator = new StringAllocator("<CAL:supported-calendar-component-set>");
+
+            StringAllocator stringAllocator = new StringAllocator("");
             for (String component : components) {
-                stringAllocator.append("<CAL:comp name=\"").append(component).append("\"/>");
+                stringAllocator.append("<CAL:supported-calendar-component-set><CAL:comp name=\"")
+                    .append(component).append("\"/></CAL:supported-calendar-component-set>");
             }
-            stringAllocator.append("</CAL:supported-calendar-component-set>");
             return stringAllocator.toString();
+//            StringAllocator stringAllocator = new StringAllocator("<CAL:supported-calendar-component-set>");
+//            for (String component : components) {
+//                stringAllocator.append("<CAL:comp name=\"").append(component).append("\"/>");
+//            }
+//            stringAllocator.append("</CAL:supported-calendar-component-set>");
+//            return stringAllocator.toString();
         }
         return null;
     }
