@@ -59,13 +59,10 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
-import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.InfostorePerformer.Action;
-import com.openexchange.webdav.tools.WebdavWhiteList;
 
 /**
  * {@link Infostore} - The WebDAV/XML servlet for infostore module.
@@ -154,45 +151,14 @@ public class Infostore extends OXServlet {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        try {
-            final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-                session.getUserId(),
-                session.getContext());
-            if ((uc.hasWebDAV() && uc.hasInfostore())) {
-                InfostorePerformer.getInstance().doIt(req, resp, action, session);
-            } else {
-                resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-            }
-        } finally {
-            if (mustLogOut(req)) {
-                logout(session, req, resp);
-            }
+        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+            session.getUserId(),
+            session.getContext());
+        if ((uc.hasWebDAV() && uc.hasInfostore())) {
+            InfostorePerformer.getInstance().doIt(req, resp, action, session);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
         }
-    }
-
-    private void logout(final ServerSession session, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeCookie(req, resp);
-        try {
-            LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {
-
-        @Override
-        public boolean matches(final String cookieName) {
-            return (COOKIE_SESSIONID.equals(cookieName) || Tools.JSESSIONID_COOKIE.equals(cookieName));
-        }
-    };
-
-    private void removeCookie(final HttpServletRequest req, final HttpServletResponse resp) {
-        Tools.deleteCookies(req, resp, COOKIE_MATCHER);
-    }
-
-    private boolean mustLogOut(final HttpServletRequest req) {
-        return !WebdavWhiteList.getInstance().acceptClient(req);
     }
 
 }

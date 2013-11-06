@@ -272,19 +272,21 @@ public class CalDAVRootCollection extends CommonCollection {
      * @throws FolderException
      */
     private boolean isTrashFolder(UserizedFolder folder) throws OXException {
-        String trashFolderId = this.getTrashFolderID();
-        if (null != trashFolderId) {
-            FolderResponse<UserizedFolder[]> pathResponse = getFolderService().getPath(
-                    OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
-            UserizedFolder[] response = pathResponse.getResponse();
-            for (UserizedFolder parentFolder : response) {
-                if (trashFolderId.equals(parentFolder.getID())) {
-                    LOG.debug("Detected folder below trash: " + folder);
-                    return true;
+        if (PrivateType.getInstance().equals(folder.getType())) {
+            String trashFolderId = this.getTrashFolderID();
+            if (null != trashFolderId) {
+                FolderResponse<UserizedFolder[]> pathResponse = getFolderService().getPath(
+                        OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
+                UserizedFolder[] response = pathResponse.getResponse();
+                for (UserizedFolder parentFolder : response) {
+                    if (trashFolderId.equals(parentFolder.getID())) {
+                        LOG.debug("Detected folder below trash: " + folder);
+                        return true;
+                    }
                 }
+            } else {
+                LOG.warn("No config value for trash folder id found");
             }
-        } else {
-            LOG.warn("No config value for trash folder id found");
         }
         return false;
     }

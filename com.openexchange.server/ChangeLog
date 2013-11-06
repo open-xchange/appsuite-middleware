@@ -1,3 +1,7 @@
+* 2013-11-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29609: Use cached sessions for consecutive WebDAV requests of the same client 
+
 * 2013-11-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 29649: Check needed service for not null

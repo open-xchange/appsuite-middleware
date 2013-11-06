@@ -58,9 +58,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
@@ -173,22 +171,16 @@ public class CalDAV extends OXServlet {
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final CaldavPerformer.Action action) throws ServletException, IOException {
         ServerSession session = null;
         try {
-            try {
-                session = ServerSessionAdapter.valueOf(getSession(req));
-                if (!checkPermission(session)) {
-                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
-            } catch (final OXException exc) {
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            session = ServerSessionAdapter.valueOf(getSession(req));
+            if (!checkPermission(session)) {
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-            CaldavPerformer.getInstance().doIt(req, resp, action, session);
-        } finally {
-            if (null != session && mustLogOut(req)) {
-                logout(session, req, resp);
-            }
+        } catch (final OXException exc) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
         }
+        CaldavPerformer.getInstance().doIt(req, resp, action, session);
     }
 
     private boolean checkPermission(final ServerSession session) {
@@ -200,36 +192,16 @@ public class CalDAV extends OXServlet {
         }
     }
 
-    private void logout(final ServerSession session, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeCookie(req, resp);
-        try {
-            LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {
-
-        @Override
-		public boolean matches(final String cookieName) {
-            return (COOKIE_SESSIONID.equals(cookieName) || Tools.JSESSIONID_COOKIE.equals(cookieName));
-        }
-    };
-
-    private void removeCookie(final HttpServletRequest req, final HttpServletResponse resp) {
-        Tools.deleteCookies(req, resp, COOKIE_MATCHER);
-    }
-
-    private boolean mustLogOut(final HttpServletRequest req) {
-        return true; // Check this
-    }
-
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
 
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;
+    }
+
+    @Override
+    protected boolean useCookies() {
+        return false;
     }
 
 }
