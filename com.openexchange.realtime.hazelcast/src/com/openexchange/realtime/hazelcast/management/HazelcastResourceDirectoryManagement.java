@@ -125,9 +125,17 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
     @Override
     public Map<String, Map<String, Serializable>> getResourceMapping() throws OXException {
         IMap<String,Map<String,Serializable>> resourceMapping = resourceDirectory.getResourceMapping();
-        Map<String,Map<String,Serializable>> jmxMap = new HashMap<String,Map<String,Serializable>>(resourceMapping);
+        Map<String,Map<String,Serializable>> jmxMap = new HashMap<String,Map<String,Serializable>>(resourceMapping.size());
+        for (Map.Entry<String, Map<String, Serializable>> entry : resourceMapping.entrySet()) {
+            String concreteID = entry.getKey();
+            Map<String, Serializable> resourceMap = entry.getValue();
+            Serializable routingInfo = resourceMap.get("routingInfo");
+            if(routingInfo!=null) {
+                resourceMap.put("routingInfo", routingInfo.toString());
+            }
+            jmxMap.put(concreteID, resourceMap);
+        }
         return jmxMap;
-        
     }
     
 
