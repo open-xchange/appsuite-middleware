@@ -59,6 +59,8 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -83,7 +85,11 @@ public final class ResolveUIDAction extends AppointmentAction {
 
     @Override
     protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(req.getSession());
+        final AppointmentSqlFactoryService service = getService();
+        if (null == service) {
+            throw ServiceExceptionCode.serviceUnavailable(AppointmentSqlFactoryService.class);
+        }
+        final AppointmentSQLInterface appointmentSql = service.createAppointmentSql(req.getSession());
         final JSONObject json = new JSONObject();
         final String uid = req.getParameter(AJAXServlet.PARAMETER_UID);
         final int id = appointmentSql.resolveUid(uid);

@@ -58,21 +58,22 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DefaultPayloadTreeConverter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultPayloadTreeConverter implements PayloadTreeConverter {
 
-    private final Map<ElementPath, String> preferredFormats = new ConcurrentHashMap<ElementPath, String>();
-
+    private final Map<ElementPath, String> preferredFormats;
     private final ServiceLookup services;
 
     public DefaultPayloadTreeConverter(ServiceLookup services) {
         super();
+        preferredFormats = new ConcurrentHashMap<ElementPath, String>();
         this.services = services;
     }
 
@@ -93,7 +94,12 @@ public class DefaultPayloadTreeConverter implements PayloadTreeConverter {
 
         PayloadElement payloadElement = node.getPayloadElement();
 
-        Object transformed = services.getService(SimpleConverter.class).convert(
+        SimpleConverter service = services.getService(SimpleConverter.class);
+        if (null == service) {
+            throw ServiceExceptionCode.serviceUnavailable(SimpleConverter.class);
+        }
+
+        Object transformed = service.convert(
             payloadElement.getFormat(),
             format,
             payloadElement.getData(),
@@ -124,10 +130,15 @@ public class DefaultPayloadTreeConverter implements PayloadTreeConverter {
 
     @Override
     public PayloadTreeNode outgoing(PayloadTreeNode node, String format) throws OXException {
-       
+
         PayloadElement payloadElement = node.getPayloadElement();
 
-        Object transformed = services.getService(SimpleConverter.class).convert(
+        SimpleConverter service = services.getService(SimpleConverter.class);
+        if (null == service) {
+            throw ServiceExceptionCode.serviceUnavailable(SimpleConverter.class);
+        }
+
+        Object transformed = service.convert(
             payloadElement.getFormat(),
             format,
             payloadElement.getData(),

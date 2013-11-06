@@ -241,13 +241,32 @@ public abstract class OXServlet extends WebDavServlet {
         return true;
     }
 
+    /**
+     * Gets a value indicating whether this servlet uses HTTP cookies to associate consecutive requests to the same server session.
+     * Otherwise, a short-living server session is used for requests from the same client that expires a short while after the last
+     * request of that client.
+     * <p/>
+     * Override if applicable, e.g. if the client does not use cookies anyway, it truly makes sense to return <code>false</code> here.
+     * <p/>
+     * When using the default value <code>true</code>, it's up to the subclass to care about removing the client cookies and triggering
+     * the session removal / logout.
+     *
+     * @return <code>true</code> if HTTP cookies are used (default), <code>false</code>, otherwise.
+     */
+    protected boolean useCookies() {
+        return true;
+    }
+
     protected abstract Interface getInterface();
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // create a new HttpSession it it's missing
-        req.getSession(true);
-        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface(), getLoginCustomizer())) {
+        boolean useCookies = useCookies();
+        if (useCookies) {
+            // create a new HttpSession it it's missing
+            req.getSession(true);
+        }
+        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface(), getLoginCustomizer(), useCookies)) {
             return;
         }
         try {
@@ -284,13 +303,33 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws IOException If an I/O error occurs
      */
     public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face, final LoginCustomizer customizer) throws IOException {
-        Session session;
-        try {
-            session = findSessionByCookie(req, resp);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-            return false;
+        return doAuth(req, resp, face, customizer, true);
+    }
+
+    /**
+     * Performs authentication.
+     *
+     * @param req The HTTP servlet request.
+     * @param resp The HTTP servlet response.
+     * @param face the used interface.
+     * @param customizer The login customizer, or <code>null</code> if not used
+     * @param useCookies <code>true</code> if cookies should be used, <code>false</code>, otherwise
+     * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
+     * @throws IOException If an I/O error occurs
+     */
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face, final LoginCustomizer customizer, boolean useCookies) throws IOException {
+        Session session = null;
+        if (useCookies) {
+            /*
+             * try by cookie
+             */
+            try {
+                session = findSessionByCookie(req, resp);
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                return false;
+            }
         }
         if (null == session) {
             /*
@@ -309,8 +348,18 @@ public abstract class OXServlet extends WebDavServlet {
                 return false;
             }
             try {
-                final Map<String, Object> properties = new HashMap<String, Object>(1);
-                session = addSession(loginRequest, properties);
+                if (false == useCookies) {
+                    /*
+                     * try to get session indirectly from store
+                     */
+                    session = WebDAVSessionStore.getInstance().getSession(loginRequest);
+                } else {
+                    /*
+                     * login as usual
+                     */
+                    final Map<String, Object> properties = new HashMap<String, Object>(1);
+                    session = addSession(loginRequest, properties);
+                }
             } catch (final OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                     addUnauthorizedHeader(req, resp);
@@ -321,7 +370,9 @@ public abstract class OXServlet extends WebDavServlet {
                 }
                 return false;
             }
-            resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
+            if (useCookies) {
+                resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
+            }
         } else {
             /*
              * Session found by cookie
