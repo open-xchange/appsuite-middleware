@@ -516,6 +516,16 @@ public class Strings {
     }
 
     /**
+     * Puts double quotes around a string.
+     *
+     * @param s The string to quote.
+     * @return The quoted string.
+     */
+    public static String quote(final String s) {
+        return concat('"', s, '"');
+    }
+
+    /**
      * Removes single or double quotes from a string if its quoted.
      *
      * @param s The value to be unquoted
@@ -601,10 +611,10 @@ public class Strings {
         }
         return builder.toString();
     }
-    
+
     /**
      * Takes a String of separated values, splits it at the separator, trims the split values and returns them as List.
-     * 
+     *
      * @param input String of separated values
      * @param separator the seperator as regular expression used to split the input around this separator
      * @return the split and trimmed input as List or an empty list
