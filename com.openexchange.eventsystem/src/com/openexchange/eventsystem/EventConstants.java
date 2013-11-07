@@ -83,4 +83,9 @@ public final class EventConstants {
      */
     public static final String EVENT_TOPIC = "event.topics";
 
+    /**
+     * The property name for context identifier.
+     */
+    public static final String PROP_CONTEXT_ID = "event.contextid";
+
 }

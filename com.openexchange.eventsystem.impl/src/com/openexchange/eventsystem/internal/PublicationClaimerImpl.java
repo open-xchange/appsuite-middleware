@@ -49,83 +49,50 @@
 
 package com.openexchange.eventsystem.internal;
 
-import java.util.Map;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventSystemService;
+import com.openexchange.eventsystem.EventConstants;
+import com.openexchange.eventsystem.EventSystemExceptionCodes;
 import com.openexchange.eventsystem.PublicationClaimer;
 import com.openexchange.exception.OXException;
-import com.openexchange.ms.MessageListener;
-import com.openexchange.ms.MsService;
-import com.openexchange.ms.Queue;
-import com.openexchange.ms.Topic;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
+
 /**
- * {@link EventSystemServiceImpl} - An event service using {@link MsService}.
+ * {@link PublicationClaimerImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
  */
-public final class EventSystemServiceImpl implements EventSystemService {
-
-    private static final String NAME_TOPIC = EventSystemConstants.NAME_TOPIC;
-    private static final String NAME_QUEUE = EventSystemConstants.NAME_QUEUE;
+public final class PublicationClaimerImpl implements PublicationClaimer {
 
     private final ServiceLookup services;
-    private final PublicationClaimerImpl publicationClaimer;
 
     /**
-     * Initializes a new {@link EventSystemServiceImpl}.
-     *
-     * @throws OXException If initialization fails
+     * Initializes a new {@link PublicationClaimerImpl}.
      */
-    public EventSystemServiceImpl(final ServiceLookup services, final EventHandlerTracker handlers) throws OXException {
+    public PublicationClaimerImpl(final ServiceLookup services) {
         super();
         this.services = services;
-
-        final MsService msService = getMsService();
-        final Topic<Map<String, Object>> topic = msService.getTopic(NAME_TOPIC);
-        final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
-
-        final MessageListener<Map<String, Object>> messageListener = new EventDistributingMessageListener(handlers, true);
-        topic.addMessageListener(messageListener);
-        queue.addMessageListener(messageListener);
-
-        publicationClaimer = new PublicationClaimerImpl(services);
-    }
-
-    private MsService getMsService() throws OXException {
-        final MsService service = services.getService(MsService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.serviceUnavailable(MsService.class);
-        }
-        return service;
     }
 
     @Override
-    public void publish(final Event event) throws OXException {
-        if (null == event) {
-            return;
+    public boolean claimEvent(final Event event) throws OXException {
+        final DatabaseService databaseService = services.getService(DatabaseService.class);
+        if (null == databaseService) {
+            throw ServiceExceptionCode.serviceUnavailable(DatabaseService.class);
         }
-        final MsService msService = getMsService();
-        final Topic<Map<String, Object>> topic = msService.getTopic(NAME_TOPIC);
-        topic.publish(EventUtility.wrap(event));
-    }
-
-    @Override
-    public void deliver(final Event event) throws OXException {
-        if (null == event) {
-            return;
+        final int contextId;
+        {
+            final Object property = event.getProperty(EventConstants.PROP_CONTEXT_ID);
+            if (null == property) {
+                throw EventSystemExceptionCodes.EVENT_NOT_CLAIMABLE.create();
+            }
         }
-        final MsService msService = getMsService();
-        final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
-        queue.offer(EventUtility.wrap(event));
-    }
 
-    @Override
-    public PublicationClaimer getClaimer() throws OXException {
-        return publicationClaimer;
+        // TODO: F**K!
+
+        return false;
     }
 
 }

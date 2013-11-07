@@ -47,45 +47,24 @@
  *
  */
 
-package com.openexchange.eventsystem.osgi;
+package com.openexchange.eventsystem;
 
-import com.openexchange.database.DatabaseService;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.internal.EventHandlerTracker;
-import com.openexchange.eventsystem.internal.EventSystemServiceImpl;
-import com.openexchange.ms.MsService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link EventSystemActivator}
+ * {@link PublicationClaimer} - Provides the possibility to claim a certain event.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
  */
-public final class EventSystemActivator extends HousekeepingActivator {
+public interface PublicationClaimer {
 
     /**
-     * Initializes a new {@link EventSystemActivator}.
+     * Claims specified event.
+     *
+     * @return <code>true</code> if successfully claimed; otherwise <code>false</code> if already claimed by another handler
+     * @throws OXException If claim attempt fails
      */
-    public EventSystemActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MsService.class, ThreadPoolService.class, DatabaseService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final EventHandlerTracker handlers = new EventHandlerTracker(context);
-        rememberTracker(handlers);
-        openTrackers();
-
-        final EventSystemServiceImpl serviceImpl = new EventSystemServiceImpl(this, handlers);
-        registerService(EventSystemService.class, serviceImpl);
-    }
+    boolean claimEvent(Event event) throws OXException;
 
 }

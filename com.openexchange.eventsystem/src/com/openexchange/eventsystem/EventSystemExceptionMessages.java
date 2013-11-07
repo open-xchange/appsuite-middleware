@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,32 @@
  *
  */
 
-package com.openexchange.eventsystem.osgi;
+package com.openexchange.eventsystem;
 
-import com.openexchange.database.DatabaseService;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.internal.EventHandlerTracker;
-import com.openexchange.eventsystem.internal.EventSystemServiceImpl;
-import com.openexchange.ms.MsService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link EventSystemActivator}
+ * {@link EventSystemExceptionMessages} - Exception messages for event system module that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
  */
-public final class EventSystemActivator extends HousekeepingActivator {
+public final class EventSystemExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // The event cannot be claimed.
+    public static final String EVENT_NOT_CLAIMABLE_MSG = "The event cannot be claimed.";
 
     /**
-     * Initializes a new {@link EventSystemActivator}.
+     * Initializes a new {@link EventSystemExceptionMessages}.
      */
-    public EventSystemActivator() {
+    private EventSystemExceptionMessages() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MsService.class, ThreadPoolService.class, DatabaseService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final EventHandlerTracker handlers = new EventHandlerTracker(context);
-        rememberTracker(handlers);
-        openTrackers();
-
-        final EventSystemServiceImpl serviceImpl = new EventSystemServiceImpl(this, handlers);
-        registerService(EventSystemService.class, serviceImpl);
     }
 
 }
