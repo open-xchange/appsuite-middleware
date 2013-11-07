@@ -71,6 +71,8 @@ public final class EventSystemServiceImpl implements EventSystemService {
     private static final String NAME_TOPIC = EventSystemConstants.NAME_TOPIC;
     private static final String NAME_QUEUE = EventSystemConstants.NAME_QUEUE;
 
+    // ----------------------------------------------------------------------------------------- //
+
     private final ServiceLookup services;
 
     /**

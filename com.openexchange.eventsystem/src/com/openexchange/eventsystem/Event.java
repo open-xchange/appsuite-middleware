@@ -171,4 +171,21 @@ public final class Event {
         return properties.keySet();
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(super.toString());
+        builder.append(" [");
+        if (topic != null) {
+            builder.append("topic=").append(topic).append(", ");
+        }
+        if (uuid != null) {
+            builder.append("uuid=").append(uuid).append(", ");
+        }
+        if (properties != null) {
+            builder.append("properties=").append(properties);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

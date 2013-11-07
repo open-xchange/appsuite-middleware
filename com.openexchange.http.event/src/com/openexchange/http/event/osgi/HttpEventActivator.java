@@ -49,7 +49,12 @@
 
 package com.openexchange.http.event.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.eventsystem.EventConstants;
+import com.openexchange.eventsystem.EventHandler;
+import com.openexchange.http.event.HttpEventEventHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -65,8 +70,6 @@ public final class HttpEventActivator extends HousekeepingActivator {
      */
     public HttpEventActivator() {
         super();
-        // TODO Auto-generated constructor stub
-
     }
 
     @Override
@@ -76,8 +79,9 @@ public final class HttpEventActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        // TODO Auto-generated method stub
-
+        final Dictionary<String, String> dict = new Hashtable<String, String>(2);
+        dict.put(EventConstants.EVENT_TOPIC, "*");
+        registerService(EventHandler.class, new HttpEventEventHandler(this), dict);
     }
 
 }

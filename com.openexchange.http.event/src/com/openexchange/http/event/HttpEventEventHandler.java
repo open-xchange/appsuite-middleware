@@ -49,10 +49,12 @@
 
 package com.openexchange.http.event;
 
+import java.net.InetSocketAddress;
 import java.text.MessageFormat;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.Member;
 import com.openexchange.eventsystem.Event;
 import com.openexchange.eventsystem.EventHandler;
 import com.openexchange.exception.OXException;
@@ -66,6 +68,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpEventEventHandler implements EventHandler {
+
+    private static final String TALKINGSTICK = "__talkingstick";
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpEventEventHandler.class);
 
@@ -82,7 +86,16 @@ public final class HttpEventEventHandler implements EventHandler {
 
         final HazelcastInstance hzInstance = getHazelcastInstance();
         final IMap<String, String> map = hzInstance.getMap(mapName);
-        map.putIfAbsent("__talkingstick", hzInstance.getCluster().getLocalMember().getUuid());
+        final Member localMember = hzInstance.getCluster().getLocalMember();
+        final String thisUuid = localMember.getUuid();
+        if (null == map.putIfAbsent(TALKINGSTICK, thisUuid)) {
+            LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpEventEventHandler.class.getName()));
+        }
+    }
+
+    private String getHostNameFrom(final Member localMember) {
+        final InetSocketAddress address = localMember.getInetSocketAddress();
+        return address.isUnresolved() ? address.getAddress().toString() : address.getHostName();
     }
 
     private HazelcastInstance getHazelcastInstance() throws OXException {
@@ -97,18 +110,22 @@ public final class HttpEventEventHandler implements EventHandler {
     public void handleEvent(final Event event) {
         try {
             final HazelcastInstance hzInstance = getHazelcastInstance();
-            final String thisUuid = hzInstance.getCluster().getLocalMember().getUuid();
+            final Member localMember = hzInstance.getCluster().getLocalMember();
+            final String thisUuid = localMember.getUuid();
 
             final IMap<String, String> map = hzInstance.getMap(mapName);
-            String talkingStickHolder = map.get("__talkingstick");
+            String talkingStickHolder = map.get(TALKINGSTICK);
             if (null == talkingStickHolder) {
-                talkingStickHolder = map.putIfAbsent("__talkingstick", thisUuid);
+                talkingStickHolder = map.putIfAbsent(TALKINGSTICK, thisUuid);
                 if (null == talkingStickHolder) {
                     talkingStickHolder = thisUuid;
+                    LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpEventEventHandler.class.getName()));
                 }
             }
             if (talkingStickHolder.equals(thisUuid)) {
                 // It is about us to handle this event
+
+                LOG.info("Handling event " + event.getTopic());
 
                 // TODO: Pass event to registered HTTP listeners
 
