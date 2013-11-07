@@ -87,6 +87,6 @@ public interface EventSystemService {
      * @return The claimer
      * @throws OXException If claimer cannot be returned
      */
-    PublicationClaimer getClaimer() throws OXException;
+    EventPublicationClaimer getClaimer() throws OXException;
 
 }

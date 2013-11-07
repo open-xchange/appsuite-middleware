@@ -49,10 +49,18 @@
 
 package com.openexchange.eventsystem.internal;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.eventsystem.Event;
+import com.openexchange.eventsystem.EventPublicationClaimer;
+import com.openexchange.eventsystem.EventSystemExceptionCodes;
 import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.PublicationClaimer;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.MsService;
@@ -60,6 +68,8 @@ import com.openexchange.ms.Queue;
 import com.openexchange.ms.Topic;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link EventSystemServiceImpl} - An event service using {@link MsService}.
@@ -72,8 +82,9 @@ public final class EventSystemServiceImpl implements EventSystemService {
     private static final String NAME_TOPIC = EventSystemConstants.NAME_TOPIC;
     private static final String NAME_QUEUE = EventSystemConstants.NAME_QUEUE;
 
-    private final ServiceLookup services;
-    private final PublicationClaimerImpl publicationClaimer;
+    protected final ServiceLookup services;
+    protected final EventPublicationClaimerImpl publicationClaimer;
+    private volatile ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link EventSystemServiceImpl}.
@@ -92,7 +103,75 @@ public final class EventSystemServiceImpl implements EventSystemService {
         topic.addMessageListener(messageListener);
         queue.addMessageListener(messageListener);
 
-        publicationClaimer = new PublicationClaimerImpl(services);
+        publicationClaimer = new EventPublicationClaimerImpl(services, this);
+    }
+
+    /**
+     * Starts the timer.
+     */
+    public void startTimer() {
+        if (null == timerTask) {
+            synchronized (this) {
+                if (null == timerTask) {
+                    final TimerService service = services.getService(TimerService.class);
+                    if (service != null) {
+                        final Runnable task = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                final DatabaseService databaseService = services.getService(DatabaseService.class);
+                                if (null != databaseService) {
+                                    final Set<Integer> contextIds = publicationClaimer.getContextIds();
+                                    if (false == contextIds.isEmpty()) {
+                                        final long minStamp = System.currentTimeMillis() - 300000L; // Older than 5 minutes
+                                        for (final Integer contextId : contextIds) {
+                                            try {
+                                                forContextId(contextId.intValue(), minStamp, databaseService);
+                                            } catch (final Exception e) {
+                                                // Ignore
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            private boolean forContextId(final int contextId, final long minStamp, final DatabaseService databaseService) throws OXException {
+                                final Connection con = databaseService.getWritable(contextId);
+                                PreparedStatement stmt = null;
+                                try {
+                                    stmt = con.prepareStatement("DELETE FROM eventSystemClaim WHERE cid=? AND lastModified < ?");
+                                    stmt.setInt(1, contextId);
+                                    stmt.setLong(2, minStamp);
+                                    return stmt.executeUpdate() > 0;
+                                } catch (final SQLException e) {
+                                    throw EventSystemExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                                } finally {
+                                    Databases.closeSQLStuff(stmt);
+                                    databaseService.backWritable(contextId, con);
+                                }
+                            }
+                        };
+                        timerTask = service.scheduleWithFixedDelay(task, 5, 5, TimeUnit.MINUTES);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Shuts-down this event system.
+     */
+    public void shutdown() {
+        final MsService service = services.getOptionalService(MsService.class);
+        if (null != service) {
+            service.getTopic(NAME_TOPIC).cancel();
+        }
+
+        final ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            timerTask.cancel();
+            this.timerTask = null;
+        }
     }
 
     private MsService getMsService() throws OXException {
@@ -124,7 +203,7 @@ public final class EventSystemServiceImpl implements EventSystemService {
     }
 
     @Override
-    public PublicationClaimer getClaimer() throws OXException {
+    public EventPublicationClaimer getClaimer() throws OXException {
         return publicationClaimer;
     }
 

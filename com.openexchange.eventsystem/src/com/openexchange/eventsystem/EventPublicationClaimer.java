@@ -47,52 +47,26 @@
  *
  */
 
-package com.openexchange.eventsystem.internal;
+package com.openexchange.eventsystem;
 
-import com.openexchange.database.DatabaseService;
-import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventConstants;
-import com.openexchange.eventsystem.EventSystemExceptionCodes;
-import com.openexchange.eventsystem.PublicationClaimer;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link PublicationClaimerImpl}
+ * {@link EventPublicationClaimer} - Provides the possibility to claim a certain published event.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PublicationClaimerImpl implements PublicationClaimer {
-
-    private final ServiceLookup services;
+public interface EventPublicationClaimer {
 
     /**
-     * Initializes a new {@link PublicationClaimerImpl}.
+     * Claims specified published event.
+     *
+     * @param event The published event to claim
+     * @param identifier The claimer's identifier; usually the {@code EventHandler}'s class name
+     * @return <code>true</code> if successfully claimed; otherwise <code>false</code> if already claimed by another handler
+     * @throws OXException If claim attempt fails
      */
-    public PublicationClaimerImpl(final ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    @Override
-    public boolean claimEvent(final Event event) throws OXException {
-        final DatabaseService databaseService = services.getService(DatabaseService.class);
-        if (null == databaseService) {
-            throw ServiceExceptionCode.serviceUnavailable(DatabaseService.class);
-        }
-        final int contextId;
-        {
-            final Object property = event.getProperty(EventConstants.PROP_CONTEXT_ID);
-            if (null == property) {
-                throw EventSystemExceptionCodes.EVENT_NOT_CLAIMABLE.create();
-            }
-        }
-
-        // TODO: F**K!
-
-        return false;
-    }
+    boolean claimEvent(Event event, String identifier) throws OXException;
 
 }

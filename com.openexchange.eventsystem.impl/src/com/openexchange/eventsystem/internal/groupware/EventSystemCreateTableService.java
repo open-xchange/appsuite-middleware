@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,24 +47,66 @@
  *
  */
 
-package com.openexchange.eventsystem;
+package com.openexchange.eventsystem.internal.groupware;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 
 /**
- * {@link PublicationClaimer} - Provides the possibility to claim a certain event.
+ * {@link EventSystemCreateTableService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface PublicationClaimer {
+public final class EventSystemCreateTableService extends AbstractCreateTableImpl {
+
+    private static final String TABLE = "eventSystemClaim";
+
+    private static final String CREATE = "CREATE TABLE " + TABLE + " (\n" +
+        "  cid INT4 unsigned NOT NULL,\n" +
+        "  uuid binary(16) NOT NULL,\n" +
+        "  id varchar(128) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL DEFAULT '',\n" +
+        "  lastModified bigint(64) NOT NULL,\n" +
+        "  PRIMARY KEY (cid, uuid, id)\n" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
-     * Claims specified event.
+     * Gets the table names.
      *
-     * @return <code>true</code> if successfully claimed; otherwise <code>false</code> if already claimed by another handler
-     * @throws OXException If claim attempt fails
+     * @return The table names.
      */
-    boolean claimEvent(Event event) throws OXException;
+    public static String[] getTablesToCreate() {
+        return new String[] { TABLE };
+    }
+
+    /**
+     * Gets the CREATE-TABLE statements.
+     *
+     * @return The CREATE statements
+     */
+    public static String[] getCreateStmts() {
+        return new String[] { CREATE };
+    }
+
+    /**
+     * Initializes a new {@link EventSystemCreateTableService}.
+     */
+    public EventSystemCreateTableService() {
+        super();
+    }
+
+    @Override
+    public String[] requiredTables() {
+        return NO_TABLES;
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return getTablesToCreate();
+    }
+
+    @Override
+    protected String[] getCreateStatements() {
+        return getCreateStmts();
+    }
 
 }

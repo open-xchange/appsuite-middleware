@@ -49,22 +49,31 @@
 
 package com.openexchange.eventsystem.osgi;
 
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.eventsystem.internal.EventHandlerTracker;
 import com.openexchange.eventsystem.internal.EventSystemServiceImpl;
+import com.openexchange.eventsystem.internal.groupware.EventSystemCreateTableService;
+import com.openexchange.eventsystem.internal.groupware.EventSystemCreateTableTask;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.ms.MsService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 
 /**
- * {@link EventSystemActivator}
+ * {@link EventSystemActivator} - The activator for event system.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
 public final class EventSystemActivator extends HousekeepingActivator {
+
+    /** The event system service */
+    private volatile EventSystemServiceImpl serviceImpl;
 
     /**
      * Initializes a new {@link EventSystemActivator}.
@@ -75,17 +84,34 @@ public final class EventSystemActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MsService.class, ThreadPoolService.class, DatabaseService.class };
+        return new Class<?>[] { MsService.class, ThreadPoolService.class, DatabaseService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        // Tracker for event handlers
         final EventHandlerTracker handlers = new EventHandlerTracker(context);
         rememberTracker(handlers);
         openTrackers();
 
+        // Register services for table creation
+        registerService(CreateTableService.class, new EventSystemCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new EventSystemCreateTableTask(this)));
+
+        // Register service
         final EventSystemServiceImpl serviceImpl = new EventSystemServiceImpl(this, handlers);
+        this.serviceImpl = serviceImpl;
         registerService(EventSystemService.class, serviceImpl);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        final EventSystemServiceImpl serviceImpl = this.serviceImpl;
+        if (null != serviceImpl) {
+            serviceImpl.shutdown();
+            this.serviceImpl = null;
+        }
+        super.stopBundle();
     }
 
 }
