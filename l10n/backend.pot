@@ -1902,36 +1902,9 @@ msgstr ""
 msgid "Unable to change data. (%1$s)"
 msgstr ""
 
-#. *
-#. * Bad password.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:71
-msgid "Wrong Password."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:72
-msgid "The provided passwords seems to be wrong or something bad happened."
-msgstr ""
-
-#. *
-#. * Encoding error.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:77
-msgid "Error during encoding operation."
-msgstr ""
-
-#. *
-#. * Security Exception.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:82
-msgid "General Security Exception occurred."
-msgstr ""
-
-#. *
-#. * Arbitrary byte sequence is missing to generate a secure key.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:87
-msgid "Arbitrary byte sequence is missing to generate a secure key."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:68
+msgid ""
+"The provided passwords seems to be wrong or something bad happened. %2$s"
 msgstr ""
 
 #. The server is unable to connect to the configuration database.
