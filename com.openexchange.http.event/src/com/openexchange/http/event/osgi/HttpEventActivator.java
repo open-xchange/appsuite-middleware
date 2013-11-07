@@ -47,26 +47,37 @@
  *
  */
 
-package com.openexchange.eventsystem;
+package com.openexchange.http.event.osgi;
 
-import com.openexchange.exception.OXException;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
- * {@link EventPublicationClaimer} - Provides the possibility to claim a certain published event.
+ * {@link HttpEventActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface EventPublicationClaimer {
+public final class HttpEventActivator extends HousekeepingActivator {
 
     /**
-     * Claims specified published event.
-     *
-     * @param event The published event to claim
-     * @param identifier The claimer's identifier; usually the {@code EventHandler}'s class name
-     * @return <code>true</code> if successfully claimed; otherwise <code>false</code> if already claimed by another handler
-     * @throws OXException If claim attempt fails
+     * Initializes a new {@link HttpEventActivator}.
      */
-    boolean claimEvent(Event event, String identifier) throws OXException;
+    public HttpEventActivator() {
+        super();
+        // TODO Auto-generated constructor stub
+
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { HazelcastInstance.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        // TODO Auto-generated method stub
+
+    }
 
 }

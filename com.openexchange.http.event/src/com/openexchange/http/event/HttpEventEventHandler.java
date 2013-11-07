@@ -47,86 +47,75 @@
  *
  */
 
-package com.openexchange.eventsystem.internal;
+package com.openexchange.http.event;
 
-import java.util.Map;
+import java.text.MessageFormat;
+import org.apache.commons.logging.Log;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventSystemService;
+import com.openexchange.eventsystem.EventHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.ms.MessageListener;
-import com.openexchange.ms.MsService;
-import com.openexchange.ms.Queue;
-import com.openexchange.ms.Topic;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
+
 /**
- * {@link EventSystemServiceImpl} - An event service using {@link MsService}.
+ * {@link HttpEventEventHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
  */
-public final class EventSystemServiceImpl implements EventSystemService {
+public final class HttpEventEventHandler implements EventHandler {
 
-    private static final String NAME_TOPIC = EventSystemConstants.NAME_TOPIC;
-    private static final String NAME_QUEUE = EventSystemConstants.NAME_QUEUE;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpEventEventHandler.class);
 
+    private final String mapName;
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link EventSystemServiceImpl}.
-     *
-     * @throws OXException If initialization fails
+     * Initializes a new {@link HttpEventEventHandler}.
      */
-    public EventSystemServiceImpl(final ServiceLookup services, final EventHandlerTracker handlers) throws OXException {
+    public HttpEventEventHandler(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
+        mapName = "http.event.talkingstick-map-0";
 
-        final MsService msService = getMsService();
-        final Topic<Map<String, Object>> topic = msService.getTopic(NAME_TOPIC);
-        final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
-
-        final MessageListener<Map<String, Object>> messageListener = new EventDistributingMessageListener(handlers, true);
-        topic.addMessageListener(messageListener);
-        queue.addMessageListener(messageListener);
+        final HazelcastInstance hzInstance = getHazelcastInstance();
+        final IMap<String, String> map = hzInstance.getMap(mapName);
+        map.putIfAbsent("__talkingstick", hzInstance.getCluster().getLocalMember().getUuid());
     }
 
-    /**
-     * Shuts-down this event system.
-     */
-    public void shutdown() {
-        final MsService service = services.getOptionalService(MsService.class);
-        if (null != service) {
-            service.getTopic(NAME_TOPIC).cancel();
+    private HazelcastInstance getHazelcastInstance() throws OXException {
+        HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
+        if (hzInstance == null || !hzInstance.getLifecycleService().isRunning()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
         }
-    }
-
-    private MsService getMsService() throws OXException {
-        final MsService service = services.getService(MsService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.serviceUnavailable(MsService.class);
-        }
-        return service;
+        return hzInstance;
     }
 
     @Override
-    public void publish(final Event event) throws OXException {
-        if (null == event) {
-            return;
-        }
-        final MsService msService = getMsService();
-        final Topic<Map<String, Object>> topic = msService.getTopic(NAME_TOPIC);
-        topic.publish(EventUtility.wrap(event));
-    }
+    public void handleEvent(final Event event) {
+        try {
+            final HazelcastInstance hzInstance = getHazelcastInstance();
+            final String thisUuid = hzInstance.getCluster().getLocalMember().getUuid();
 
-    @Override
-    public void deliver(final Event event) throws OXException {
-        if (null == event) {
-            return;
+            final IMap<String, String> map = hzInstance.getMap(mapName);
+            String talkingStickHolder = map.get("__talkingstick");
+            if (null == talkingStickHolder) {
+                talkingStickHolder = map.putIfAbsent("__talkingstick", thisUuid);
+                if (null == talkingStickHolder) {
+                    talkingStickHolder = thisUuid;
+                }
+            }
+            if (talkingStickHolder.equals(thisUuid)) {
+                // It is about us to handle this event
+
+                // TODO: Pass event to registered HTTP listeners
+
+            }
+        } catch (final Exception e) {
+            LOG.warn(MessageFormat.format("Could not handle event {0}. Reason: {1}", event.getTopic(), e.getMessage()), e);
         }
-        final MsService msService = getMsService();
-        final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
-        queue.offer(EventUtility.wrap(event));
     }
 
 }

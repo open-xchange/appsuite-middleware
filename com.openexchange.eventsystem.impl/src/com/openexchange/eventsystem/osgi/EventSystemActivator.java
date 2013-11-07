@@ -49,19 +49,12 @@
 
 package com.openexchange.eventsystem.osgi;
 
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.eventsystem.internal.EventHandlerTracker;
 import com.openexchange.eventsystem.internal.EventSystemServiceImpl;
-import com.openexchange.eventsystem.internal.groupware.EventSystemCreateTableService;
-import com.openexchange.eventsystem.internal.groupware.EventSystemCreateTableTask;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.ms.MsService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.timer.TimerService;
 
 
 /**
@@ -84,7 +77,7 @@ public final class EventSystemActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MsService.class, ThreadPoolService.class, DatabaseService.class, TimerService.class };
+        return new Class<?>[] { MsService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -93,10 +86,6 @@ public final class EventSystemActivator extends HousekeepingActivator {
         final EventHandlerTracker handlers = new EventHandlerTracker(context);
         rememberTracker(handlers);
         openTrackers();
-
-        // Register services for table creation
-        registerService(CreateTableService.class, new EventSystemCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new EventSystemCreateTableTask(this)));
 
         // Register service
         final EventSystemServiceImpl serviceImpl = new EventSystemServiceImpl(this, handlers);

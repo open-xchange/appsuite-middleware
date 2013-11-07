@@ -4,10 +4,8 @@ Bundle-SymbolicName: com.openexchange.eventsystem.impl
 Bundle-Version: 7.4.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.database,
- com.openexchange.eventsystem,
+Import-Package: com.openexchange.eventsystem,
  com.openexchange.exception,
- com.openexchange.groupware.update,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
@@ -16,8 +14,6 @@ Import-Package: com.openexchange.database,
  com.openexchange.server,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
- com.openexchange.timer,
- com.openexchange.tools.sql,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
