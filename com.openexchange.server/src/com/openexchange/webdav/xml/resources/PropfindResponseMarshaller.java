@@ -65,18 +65,25 @@ import com.openexchange.webdav.protocol.WebdavStatusImpl;
 
 public class PropfindResponseMarshaller extends PropertiesMarshaller implements ResourceMarshaller{
 
-	public PropfindResponseMarshaller(final String uriPrefix, final String charset) {
-		super(uriPrefix,charset);
+    private final Set<WebdavProperty> requestedProps = new HashSet<WebdavProperty>();
+    private final boolean brief;
+
+    /**
+     * Initializes a new {@link PropfindResponseMarshaller}.
+     *
+     * @param uriPrefix The uri prefix
+     * @param charset The charset
+     * @param brief <code>true</code> to omit not found properties, <code>false</code>, otherwise
+     */
+	public PropfindResponseMarshaller(final String uriPrefix, final String charset, boolean brief) {
+		super(uriPrefix, charset);
+		this.brief = brief;
 	}
-
-	private final Set<WebdavProperty> requestedProps = new HashSet<WebdavProperty>();
-
 
 	public PropfindResponseMarshaller addProperty(final String namespace, final String name) {
 		requestedProps.add(new WebdavProperty(namespace, name));
 		return this;
 	}
-
 
 	@Override
 	protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
@@ -87,7 +94,9 @@ public class PropfindResponseMarshaller extends PropertiesMarshaller implements 
 			try {
 				final WebdavProperty p = resource.getProperty(prop.getNamespace(), prop.getName());
 				if(p == null) {
-					notFound.add(prop);
+				    if (false == brief) {
+				        notFound.add(prop);
+				    }
 				} else {
 					props.add(p);
 				}
@@ -100,7 +109,7 @@ public class PropfindResponseMarshaller extends PropertiesMarshaller implements 
 		if(!props.isEmpty()) {
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_OK, resource.getUrl(), props));
 		}
-		if(!notFound.isEmpty()) {
+		if(!notFound.isEmpty() && brief) {
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), notFound));
 		}
 

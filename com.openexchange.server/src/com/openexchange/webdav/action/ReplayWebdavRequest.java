@@ -171,4 +171,10 @@ public class ReplayWebdavRequest implements WebdavRequest{
     public Map<String, Object> getUserInfo() {
 	    return delegate.getUserInfo();
 	}
+
+    @Override
+    public boolean isBrief() {
+        return delegate.isBrief();
+    }
+
 }
