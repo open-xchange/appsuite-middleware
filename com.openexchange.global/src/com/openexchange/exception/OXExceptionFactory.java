@@ -160,15 +160,19 @@ public class OXExceptionFactory {
     public OXException create(final OXExceptionCode code, final Category category, final Throwable cause, final Object... args) {
         final Category cat = null == category ? code.getCategory() : category;
         final OXException ret;
-        if (cat.getLogLevel().implies(LogLevel.DEBUG)) {
-            ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
+        if (DisplayableOXExceptionCode.class.isInstance(code)) {
+            ret = new OXException(code.getNumber(), ((DisplayableOXExceptionCode) code).getDisplayMessage(), cause, args).setLogMessage(code.getMessage(), args);
         } else {
-            if (DISPLAYABLE.contains(cat.getType())) {
-                // Displayed message is equal to logged one
-                ret = new OXException(code.getNumber(), code.getMessage(), cause, args).setLogMessage(code.getMessage(), args);
+            if (cat.getLogLevel().implies(LogLevel.DEBUG)) {
+                ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
             } else {
-                final String displayMessage = Category.EnumType.TRY_AGAIN.equals(cat.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
-                ret = new OXException(code.getNumber(), displayMessage, cause, new Object[0]).setLogMessage(code.getMessage(), args);
+                if (DISPLAYABLE.contains(cat.getType())) {
+                    // Displayed message is equal to logged one
+                    ret = new OXException(code.getNumber(), code.getMessage(), cause, args).setLogMessage(code.getMessage(), args);
+                } else {
+                    final String displayMessage = Category.EnumType.TRY_AGAIN.equals(cat.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
+                    ret = new OXException(code.getNumber(), displayMessage, cause, new Object[0]).setLogMessage(code.getMessage(), args);
+                }
             }
         }
         if (code instanceof LogLevelAwareOXExceptionCode) {

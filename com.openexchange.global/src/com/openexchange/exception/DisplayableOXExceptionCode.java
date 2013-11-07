@@ -47,43 +47,20 @@
  *
  */
 
-package com.openexchange.crypto;
-
-import com.openexchange.i18n.LocalizableStrings;
+package com.openexchange.exception;
 
 /**
- * {@link CryptoExceptionMessage}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link DisplayableOXExceptionCode}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class CryptoExceptionMessage implements LocalizableStrings {
-
+public interface DisplayableOXExceptionCode extends OXExceptionCode {
+    
     /**
-     * Initializes a new {@link CryptoExceptionMessage}.
+     * Gets the message intended for being displayed to the user.
+     * 
+     * @return The message.
      */
-    private CryptoExceptionMessage() {
-        super();
-    }
-
-    /**
-     * Bad password.
-     */
-    public final static String BAD_PASSWORD_MSG = "Wrong Password.";
-    public final static String BAD_PASSWORD_DISPLAY = "The provided passwords seems to be wrong or something bad happened.";
-
-    /**
-     * Encoding error.
-     */
-    public final static String ENCODING_ERROR_MSG = "Error during encoding operation.";
-
-    /**
-     * Security Exception.
-     */
-    public final static String SECURITY_EXCEPTION_MSG = "General Security Exception occurred.";
-
-    /**
-     * Arbitrary byte sequence is missing to generate a secure key.
-     */
-    public final static String NO_SALT_MSG = "Arbitrary byte sequence is missing to generate a secure key.";
+    public String getDisplayMessage();
 
 }
