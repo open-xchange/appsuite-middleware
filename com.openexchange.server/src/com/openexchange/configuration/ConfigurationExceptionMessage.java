@@ -67,30 +67,6 @@ public class ConfigurationExceptionMessage implements LocalizableStrings {
     }
 
     // Filename for property file is not defined.
-    public final static String NO_FILENAME_MSG = "File name for property file is not defined.";
-
-    // File "%1$s" does not exist.
-    public final static String FILE_NOT_FOUND_MSG = "File \"%1$s\" does not exist.";
-
-    // File "%1$s" is not readable.
-    public final static String NOT_READABLE_MSG = "File \"%1$s\" is not readable.";
-
-    // Cannot read file "%1$s".
-    public final static String READ_ERROR_MSG = "Cannot read file \"%1$s\".";
-
-    // Property "%1$s" is not defined.
-    public final static String PROPERTY_MISSING_MSG = "Property \"%1$s\" is not defined.";
-
-    // Cannot load class "%1$s".
-    public final static String CLASS_NOT_FOUND_MSG = "Cannot load class \"%1$s\".";
-
-    // Invalid configuration: %1$s
-    public final static String INVALID_CONFIGURATION_MSG = "Invalid configuration: %1$s";
-
-    // Property %1$s is not an integer
-    public final static String PROPERTY_NOT_AN_INTEGER_MSG = "Property %1$s is not an integer";
-
-    // An I/O error occurred: %1$s
-    public final static String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    public final static String CONFIG_ERROR_DISPLAY = "Error in server configuration."; 
 
 }
