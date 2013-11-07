@@ -63,23 +63,23 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link HttpEventEventHandler}
+ * {@link HttpMessengerEventHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HttpEventEventHandler implements EventHandler {
+public final class HttpMessengerEventHandler implements EventHandler {
 
     private static final String TALKINGSTICK = "__talkingstick";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpEventEventHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpMessengerEventHandler.class);
 
     private final String mapName;
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link HttpEventEventHandler}.
+     * Initializes a new {@link HttpMessengerEventHandler}.
      */
-    public HttpEventEventHandler(final ServiceLookup services) throws OXException {
+    public HttpMessengerEventHandler(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
         mapName = "http.event.talkingstick-map-0";
@@ -89,7 +89,7 @@ public final class HttpEventEventHandler implements EventHandler {
         final Member localMember = hzInstance.getCluster().getLocalMember();
         final String thisUuid = localMember.getUuid();
         if (null == map.putIfAbsent(TALKINGSTICK, thisUuid)) {
-            LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpEventEventHandler.class.getName()));
+            LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName()));
         }
     }
 
@@ -119,7 +119,7 @@ public final class HttpEventEventHandler implements EventHandler {
                 talkingStickHolder = map.putIfAbsent(TALKINGSTICK, thisUuid);
                 if (null == talkingStickHolder) {
                     talkingStickHolder = thisUuid;
-                    LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpEventEventHandler.class.getName()));
+                    LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName()));
                 }
             }
             if (talkingStickHolder.equals(thisUuid)) {

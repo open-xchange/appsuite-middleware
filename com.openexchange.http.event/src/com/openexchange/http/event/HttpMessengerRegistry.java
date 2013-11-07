@@ -47,41 +47,21 @@
  *
  */
 
-package com.openexchange.http.event.osgi;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.eventsystem.EventConstants;
-import com.openexchange.eventsystem.EventHandler;
-import com.openexchange.http.event.HttpMessengerEventHandler;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.http.event;
 
 
 /**
- * {@link HttpEventActivator}
+ * {@link HttpMessengerRegistry}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HttpEventActivator extends HousekeepingActivator {
+public final class HttpMessengerRegistry {
 
     /**
-     * Initializes a new {@link HttpEventActivator}.
+     * Initializes a new {@link HttpMessengerRegistry}.
      */
-    public HttpEventActivator() {
+    public HttpMessengerRegistry() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, String> dict = new Hashtable<String, String>(2);
-        dict.put(EventConstants.EVENT_TOPIC, "*");
-        registerService(EventHandler.class, new HttpMessengerEventHandler(this), dict);
     }
 
 }
