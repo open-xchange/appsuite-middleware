@@ -64,19 +64,19 @@ public enum CryptoErrorMessage implements LogLevelAwareOXExceptionCode, Displaya
     /**
      * Bad password.
      */
-    BadPassword(CATEGORY_USER_INPUT, 1, CryptoExceptionMessage.BAD_PASSWORD_MSG, CryptoExceptionMessage.BAD_PASSWORD_DISPLAY, LogLevel.ERROR),
+    BadPassword(CATEGORY_USER_INPUT, 1, "Wrong Password: %1$s.", CryptoExceptionMessage.BAD_PASSWORD_DISPLAY, LogLevel.ERROR),
     /**
      * Encoding error.
      */
-    EncodingException(CATEGORY_ERROR, 2, CryptoExceptionMessage.ENCODING_ERROR_MSG, null, LogLevel.ERROR),
+    EncodingException(CATEGORY_ERROR, 2, "Error during encoding operation.", null, LogLevel.ERROR),
     /**
      * Security Exception.
      */
-    SecurityException(CATEGORY_ERROR, 3, CryptoExceptionMessage.SECURITY_EXCEPTION_MSG, null, LogLevel.ERROR),
+    SecurityException(CATEGORY_ERROR, 3, "General Security Exception occurred.", null, LogLevel.ERROR),
     /**
      * Arbitrary byte sequence is missing to generate a secure key.
      */
-    NoSalt(CATEGORY_USER_INPUT, 4, CryptoExceptionMessage.NO_SALT_MSG, null, LogLevel.ERROR);
+    NoSalt(CATEGORY_USER_INPUT, 4, "Arbitrary byte sequence is missing to generate a secure key.", null, LogLevel.ERROR);
 
     private static final String PREFIX = "CRP";
 

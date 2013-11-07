@@ -65,25 +65,6 @@ public class CryptoExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    /**
-     * Bad password.
-     */
-    public final static String BAD_PASSWORD_MSG = "Wrong Password.";
-    public final static String BAD_PASSWORD_DISPLAY = "The provided passwords seems to be wrong or something bad happened.";
-
-    /**
-     * Encoding error.
-     */
-    public final static String ENCODING_ERROR_MSG = "Error during encoding operation.";
-
-    /**
-     * Security Exception.
-     */
-    public final static String SECURITY_EXCEPTION_MSG = "General Security Exception occurred.";
-
-    /**
-     * Arbitrary byte sequence is missing to generate a secure key.
-     */
-    public final static String NO_SALT_MSG = "Arbitrary byte sequence is missing to generate a secure key.";
+    public final static String BAD_PASSWORD_DISPLAY = "The provided passwords seems to be wrong or something bad happened. %2$s";
 
 }
