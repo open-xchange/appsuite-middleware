@@ -3205,7 +3205,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
 msgid ""
 "A temporary error occurred inside the server which prevented it from "
-"fulfilling the request.. Please try again later."
+"fulfilling the request. Please try again later."
 msgstr ""
 
 #. The general message for a conflicting update operation.
