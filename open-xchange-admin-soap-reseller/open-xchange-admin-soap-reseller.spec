@@ -8,7 +8,7 @@ BuildRequires: open-xchange-soap-cxf
 BuildRequires: open-xchange-admin-reseller
 BuildRequires: java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Nov 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.4.1 release
 * Wed Oct 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-28
 * Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>

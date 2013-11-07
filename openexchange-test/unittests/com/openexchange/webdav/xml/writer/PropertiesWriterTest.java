@@ -1,18 +1,14 @@
 package com.openexchange.webdav.xml.writer;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-
 import junit.framework.TestCase;
-
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.DummyResourceManager;
 import com.openexchange.webdav.protocol.util.Utils;
 import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
@@ -42,7 +38,7 @@ public class PropertiesWriterTest extends TestCase {
 		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
 		resource.create();
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
+		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
 		marshaller
 			.addProperty("DAV:","getlastmodified");
 
@@ -68,7 +64,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("myDisplayName");
 		resource.create();
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
+		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
 		marshaller
 			.addProperty("DAV:","getlastmodified")
 			.addProperty("DAV:", "displayname");
@@ -149,7 +145,7 @@ public class PropertiesWriterTest extends TestCase {
 		final WebdavResource resource = DummyResourceManager.getInstance().resolveResource(testCollection +"test.txt");
 		resource.create();
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
+		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
 		marshaller
 			.addProperty("DAV:","resourcetype");
 
@@ -171,7 +167,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("<&>");
 		resource.create();
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
+		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
 		marshaller
 			.addProperty("DAV:","displayname");
 
@@ -198,7 +194,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.putProperty(property);
 		resource.create();
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
+		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
 		marshaller
 			.addProperty(TEST_NS.getURI(),"test");
 
@@ -244,7 +240,7 @@ public class PropertiesWriterTest extends TestCase {
 		resource.setDisplayName("myDisplayName");
 		resource.create();
 
-		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8");
+		final PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller("","UTF-8", false);
 		marshaller
 			.addProperty("DAV:","getlastmodified")
 			.addProperty("DAV:", "displayname")
