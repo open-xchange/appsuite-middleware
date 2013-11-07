@@ -80,11 +80,11 @@ public class EventSystemConstants {
     /**
      * The property for the event's UUID.
      */
-    public static final String PROP_UUID = "__uuid";
+    public static final String PROP_UUID = "__event.uuid";
 
     /**
      * The property for the event's topic.
      */
-    public static final String PROP_TOPIC = "__topic";
+    public static final String PROP_TOPIC = "__event.topic";
 
 }
