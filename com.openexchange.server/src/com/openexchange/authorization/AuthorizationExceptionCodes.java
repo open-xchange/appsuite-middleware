@@ -56,6 +56,7 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link AuthorizationExceptionCodes}
@@ -77,7 +78,7 @@ public enum AuthorizationExceptionCodes implements OXExceptionCode, DisplayableO
 
     private AuthorizationExceptionCodes(final String message, final String displayMessage, final Category category, final int number) {
         this.message = message;
-        this.displayMessage = displayMessage;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
     }
