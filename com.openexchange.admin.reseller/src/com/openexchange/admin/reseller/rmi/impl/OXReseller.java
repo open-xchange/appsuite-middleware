@@ -124,6 +124,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             } else {
                 resellerauth.doAuthentication(creds);
                 pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId();
+                if (adm.getParentId() != null ) {
+                    throw new OXResellerException(Code.SUBAMIN_NOT_ALLOWED_TO_CHANGE_PARENTID);
+                }
             }
 
             checkIdOrName(adm);
@@ -142,6 +145,17 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
             if (adm.getPasswordMech() == null) {
                 adm.setPasswordMech(dbadm.getPasswordMech());
+            }
+
+            final Integer parentId = adm.getParentId();
+            if ( parentId != null && 0 != parentId ) {
+                if( !oxresell.existsAdmin(new ResellerAdmin(adm.getParentId())) ) {
+                    throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, "with parentId=" + adm.getParentId());
+                }
+                final ResellerAdmin parentAdmin = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(adm.getParentId())})[0];
+                if( parentAdmin.getParentId() > 0 ) {
+                    throw new OXResellerException(Code.CANNOT_SET_PARENTID_TO_SUBSUBADMIN);
+                }
             }
 
             Restriction[] res = adm.getRestrictions();
