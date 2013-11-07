@@ -91,6 +91,8 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     public static final String OPT_REMOVE_RESTRICTION_LONG = "removerestriction";
     public static final char OPT_CUSTOMID_SHORT = 'C';
     public static final String OPT_CUSTOMID_LONG = "customid";
+    public static final char OPT_PARENT_ID_SHORT = 'n';
+    public static final String OPT_PARENT_ID_LONG = "parentid";
 
     protected CLIOption idOption = null;
     protected CLIOption adminNameOption = null;
@@ -100,6 +102,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected CLIOption addRestrictionsOption = null;
     protected CLIOption editRestrictionsOption = null;
     protected CLIOption removeRestrictionsOption = null;
+    protected CLIOption parentIdOption = null;
 
     protected Integer adminid = null;
     protected String adminname = null;
@@ -136,6 +139,10 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         this.removeRestrictionsOption = setShortLongOpt(admp, OPT_REMOVE_RESTRICTION_SHORT, OPT_REMOVE_RESTRICTION_LONG, "Restriction to remove (can be specified multiple times)", true, NeededQuadState.notneeded);
     }
 
+    protected final void setParentIdOption(final AdminParser admp){
+        this.parentIdOption = setShortLongOpt(admp, OPT_PARENT_ID_SHORT, OPT_PARENT_ID_LONG, "ParentId of the user", true, NeededQuadState.notneeded);
+    }
+
     protected void setNameAndIdOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
@@ -152,6 +159,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         setAddRestrictionsOption(parser);
         setEditRestrictionsOption(parser);
         setRemoveRestrictionsOption(parser);
+        setParentIdOption(parser);
     }
 
     protected void setCreateOptions(final AdminParser parser) {
@@ -177,6 +185,13 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         if (null != optionValue) {
             this.adminid = new Integer(optionValue);
             adm.setId(adminid);
+        }
+    }
+
+    protected void parseAndSetParentId(final AdminParser parser, final ResellerAdmin adm) {
+        final String optionValue = (String) parser.getOptionValue(this.parentIdOption);
+        if (null != optionValue) {
+            adm.setParentId(new Integer(optionValue));
         }
     }
 
@@ -262,7 +277,10 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final ResellerAdmin parseChangeOptions(final AdminParser parser) throws InvalidDataException {
-        return parseCreateOptions(parser);
+        final ResellerAdmin adm = parseCreateOptions(parser);
+        parseAndSetParentId(parser, adm);
+        
+        return adm;
     }
 
     protected final ResellerAdmin parseCreateOptions(final AdminParser parser) throws InvalidDataException {
