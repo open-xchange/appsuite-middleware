@@ -5981,10 +5981,6 @@ msgstr ""
 msgid "Password expired"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/authorization/AuthorizationExceptionMessages.java:64
-msgid "Unknown error"
-msgstr ""
-
 #. Filename for property file is not defined.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:70
 msgid "File name for property file is not defined."
