@@ -49,6 +49,7 @@
 
 package com.openexchange.eventsystem.osgi;
 
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.eventsystem.internal.EventHandlerTracker;
 import com.openexchange.eventsystem.internal.EventSystemServiceImpl;
@@ -77,7 +78,7 @@ public final class EventSystemActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MsService.class, ThreadPoolService.class };
+        return new Class<?>[] { MsService.class, ThreadPoolService.class, HazelcastInstance.class };
     }
 
     @Override

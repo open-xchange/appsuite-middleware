@@ -51,6 +51,7 @@ package com.openexchange.eventsystem.internal;
 
 import java.util.Map;
 import com.openexchange.eventsystem.Event;
+import com.openexchange.eventsystem.EventHandler;
 import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.MessageListener;
@@ -129,6 +130,11 @@ public final class EventSystemServiceImpl implements EventSystemService {
         final MsService msService = getMsService();
         final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
         queue.offer(EventUtility.wrap(event));
+    }
+
+    @Override
+    public EventHandler synchronizedEventHandler(final EventHandler eventHandler) throws OXException {
+        return new TalkingStickEventHandler(eventHandler, services);
     }
 
 }

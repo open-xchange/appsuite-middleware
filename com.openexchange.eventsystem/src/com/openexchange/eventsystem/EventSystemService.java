@@ -81,4 +81,25 @@ public interface EventSystemService {
      */
     void deliver(Event event) throws OXException;
 
+    /**
+     * Creates a "synchronized" event handler for specified event handler. <br>
+     * Synchronized in terms of only one listener of the same type will be allowed to handle the event.
+     *
+     * <pre>
+     *         EventSystemService eventSystemService = ...;
+     *
+     *         final Dictionary<String, String> dict = new Hashtable<String, String>(2);
+     *         dict.put(EventConstants.EVENT_TOPIC, "some/interesting/topics/*");
+     *
+     *         final EventHandler synchronizedEventHandler = eventSystemService.synchronizedEventHandler(new MyEventHandler());
+     *
+     *         registerService(EventHandler.class, synchronizedEventHandler, dict);
+     * </pre>
+     *
+     * @param eventHandler The delegate event handler
+     * @return The "synchronized" event handler for specified event handler
+     * @throws OXException If generating a "synchronized" event handler fails
+     */
+    EventHandler synchronizedEventHandler(EventHandler eventHandler) throws OXException;
+
 }
