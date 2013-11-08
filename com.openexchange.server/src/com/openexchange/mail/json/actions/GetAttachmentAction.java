@@ -144,9 +144,14 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 }
             }
             try {
-                // Try to read first byte and push back immediately
                 final PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
-                in.unread(in.read());
+                // Check if readable...
+                final int check = in.read();
+                if (check < 0) {
+                    return Streams.EMPTY_INPUT_STREAM;
+                }
+                // ... then push back to stream
+                in.unread(check);
                 return in;
             } catch (final com.sun.mail.util.FolderClosedIOException e) {
                 // Need to reconnect

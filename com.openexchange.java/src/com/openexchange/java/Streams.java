@@ -74,6 +74,30 @@ public class Streams {
         super();
     }
 
+    /** An input stream that just returns EOF. */
+    public static final InputStream EMPTY_INPUT_STREAM = new InputStream() {
+
+        @Override
+        public int available() {
+            return 0;
+        }
+
+        @Override
+        public int read() {
+            return -1;
+        }
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) throws IOException {
+            return -1;
+        }
+
+        @Override
+        public int read(final byte[] b) throws IOException {
+            return -1;
+        }
+    };
+
     /**
      * Reads the content from given reader.
      *
