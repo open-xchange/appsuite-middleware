@@ -377,7 +377,6 @@ Obsoletes:      open-xchange-lang-community-pt-br <= %{version}
 
 %description pt-br
 Package containing Open-Xchange backend localization for pt_BR
-This localization package are driven by the community.
 
 Authors:
 --------
