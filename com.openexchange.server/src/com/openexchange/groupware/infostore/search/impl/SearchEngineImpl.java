@@ -454,6 +454,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                         boolean goahead = true;
                         DocumentMetadata current = null;
 
+                        final boolean debug = LOG.isDebugEnabled();
+                        final long st = debug ? System.currentTimeMillis() : 0L;
                         while (goahead) {
                             current = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
                             NextObject: while (current == null) {
@@ -471,6 +473,13 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                                 goahead = rs.next();
                             }
                             if (!goahead) {
+                                if (debug) {
+                                    final long dur = System.currentTimeMillis() - st;
+                                    if (dur > 2000L) {
+                                        final String sql = stmt.toString();
+                                        LOG.debug("Query took " + dur + "msec: " + sql.substring(sql.indexOf(": ") + 2));
+                                    }
+                                }
                                 close();
                             }
                         }
@@ -478,6 +487,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                         delegate = new SearchIteratorAdapter<DocumentMetadata>(list.iterator(), list.size());
                     }
                 } else {
+                    delegate = SearchIteratorAdapter.emptyIterator();
                     close();
                 }
             } catch (final Exception e) {
