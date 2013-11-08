@@ -50,14 +50,15 @@
 package com.openexchange.tools.servlet;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for JSON exceptions.
  */
-public enum OXJSONExceptionCodes implements OXExceptionCode {
+public enum OXJSONExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Exception while writing JSON.
      */
@@ -69,7 +70,7 @@ public enum OXJSONExceptionCodes implements OXExceptionCode {
     /**
      * Invalid cookie.
      */
-    INVALID_COOKIE(OXJSONExceptionMessage.INVALID_COOKIE_MSG, Category.CATEGORY_TRY_AGAIN, 3),
+    INVALID_COOKIE(OXJSONExceptionMessage.INVALID_COOKIE_MSG, Category.CATEGORY_TRY_AGAIN, 3, OXJSONExceptionMessage.INVALID_COOKIE_MSG_DISPLAY),
     /**
      * Exception while building JSON.
      */
@@ -77,11 +78,11 @@ public enum OXJSONExceptionCodes implements OXExceptionCode {
     /**
      * Value "%1$s" of attribute %s contains non digit characters.
      */
-    CONTAINS_NON_DIGITS(OXJSONExceptionMessage.CONTAINS_NON_DIGITS_MSG, Category.CATEGORY_USER_INPUT, 5),
+    CONTAINS_NON_DIGITS(OXJSONExceptionMessage.CONTAINS_NON_DIGITS_MSG, Category.CATEGORY_USER_INPUT, 5, OXJSONExceptionMessage.CONTAINS_NON_DIGITS_MSG_DISPLAY),
     /**
      * Too many digits within field %1$s.
      */
-    TOO_BIG_NUMBER(OXJSONExceptionMessage.TOO_BIG_NUMBER_MSG, Category.CATEGORY_USER_INPUT, 6),
+    TOO_BIG_NUMBER(OXJSONExceptionMessage.TOO_BIG_NUMBER_MSG, Category.CATEGORY_USER_INPUT, 6, OXJSONExceptionMessage.TOO_BIG_NUMBER_MSG_DISPLAY),
     /**
      * Unable to parse value "%1$s" within field %2$s as a number.
      */
@@ -101,10 +102,35 @@ public enum OXJSONExceptionCodes implements OXExceptionCode {
     private final Category category;
     private final int number;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link OXJSONExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     */
     private OXJSONExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    /**
+     * Initializes a new {@link OXJSONExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     * @param displayMessage
+     */
+    private OXJSONExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.category = category;
         number = detailNumber;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -133,8 +159,16 @@ public enum OXJSONExceptionCodes implements OXExceptionCode {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
+    }
+
+    /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

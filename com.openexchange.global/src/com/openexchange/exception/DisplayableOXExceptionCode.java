@@ -53,9 +53,10 @@ package com.openexchange.exception;
  * {@link DisplayableOXExceptionCode}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since 7.4.2
  */
 public interface DisplayableOXExceptionCode extends OXExceptionCode {
-    
+
     /**
      * Gets the message intended for being displayed to the user.
      * 
