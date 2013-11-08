@@ -1720,7 +1720,10 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
 
-    private static String validateWithHtmlCleaner(final String htmlContent) {
+    private static final Pattern P_HTMLE_COPY = Pattern.compile("&#169;|&copy;", Pattern.CASE_INSENSITIVE);
+    private static final Pattern P_HTMLE_REG = Pattern.compile("&#174;|&reg;", Pattern.CASE_INSENSITIVE);
+
+    protected static String validateWithHtmlCleaner(final String htmlContent) {
         try {
             /*-
              * http://stackoverflow.com/questions/238036/java-html-parsing
@@ -1750,7 +1753,10 @@ public final class HtmlServiceImpl implements HtmlService {
             if (buffer.indexOf("<!DOCTYPE") < 0) {
                 buffer.insert(0, DOCTYPE_DECL);
             }
-            return buffer.toString();
+            /*
+             * Keep Unicode representation of 'copy' and 'reg' intact
+             */
+            return P_HTMLE_REG.matcher(P_HTMLE_COPY.matcher(buffer.toString()).replaceAll("\u00a9")).replaceAll("\u00ae");
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: " + e.getMessage(), e);

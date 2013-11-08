@@ -1,3 +1,15 @@
+* 2013-11-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29628: Make 'validate_contact_email' available in config tree, so it becomes visible for JSlob mapping
+ 
+* 2013-10-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29529: Made 'validate_contact_email' setting available via 'io.ox/core//features/validateMailAddresses'
+
+* 2013-10-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29498: Check for regal RFC 822 E-Mail address prior to applying preparations for MSISDN addresses
+
 * 2013-10-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 29429: Use Java's naming for charset "cp932" that is "MS932"
@@ -26,6 +38,7 @@
 * 2013-09-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 29002: Keep proper emoji characters on reply/forward operation
+ - Fix for bug 28933: Orderly pass empty content to message part
 
 * 2013-09-19 - thorben.betten@open-xchange.com
 
