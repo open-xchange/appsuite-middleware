@@ -1,3 +1,7 @@
+* 2013-11-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29288: Use two-step approach when querying infostore documents from many folders 
+
 * 2013-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 29683: Create special "E-Mail attachments" InfoStore folder with private-only permissions
