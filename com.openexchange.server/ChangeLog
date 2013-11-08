@@ -6,6 +6,7 @@
 
  - Fix for bug 29725: Handle possible error when initializing capabilities + let OXFolderManager rather operate on user's permission
                       than on user's configuration
+ - Fix for bug 29737: Inlined used method from c.o.java.Strings
 
 * 2013-11-06 - thorben.betten@open-xchange.com
 
