@@ -169,6 +169,16 @@ public class MimeMessageFiller {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageFiller.class));
 
+    private static final String EMPTY_HTML_DOCUMENT =
+        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" +
+        "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+        " <head>\n" +
+        "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
+        " </head>\n" +
+        " <body>\n" +
+        " </body>\n" +
+        "</html>";
+
     private static final String HDR_ORGANIZATION = MessageHeaders.HDR_ORGANIZATION;
     private static final String HDR_X_MAILER = MessageHeaders.HDR_X_MAILER;
     private static final String HDR_MIME_VERSION = MessageHeaders.HDR_MIME_VERSION;
@@ -1146,11 +1156,15 @@ public class MimeMessageFiller {
                     }
                     mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 } else {
-                    final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
-                    if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
-                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
+                    if (null == content || 0 == content.length()) {
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(EMPTY_HTML_DOCUMENT, contentType)));
                     } else {
-                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
+                        final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
+                        if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
+                            mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(EMPTY_HTML_DOCUMENT, contentType)));
+                        } else {
+                            mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
+                        }
                     }
                 }
                 // mimeMessage.setContent(mailText, contentType.toString());
