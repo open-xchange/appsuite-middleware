@@ -856,6 +856,9 @@ fi
 # SoftwareChange_Request-1667
 ox_add_property com.openexchange.html.css.parse.timeout 4 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-1684
+ox_add_property com.openexchange.templating.usertemplating false /opt/open-xchange/etc/templating.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
