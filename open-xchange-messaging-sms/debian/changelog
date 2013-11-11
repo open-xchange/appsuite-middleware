@@ -1,3 +1,9 @@
+open-xchange-messaging-sms (7.4.0-18) stable; urgency=low
+
+  * Build for patch 2013-11-08
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 11 Nov 2013 11:32:53 +0100
+
 open-xchange-messaging-sms (7.4.0-17) stable; urgency=low
 
   * Build for patch 2013-10-28
