@@ -47,75 +47,54 @@
  *
  */
 
-package com.openexchange.threadpool.internal;
+package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link CustomThread} - Enhances {@link Thread} class by a setter/getter method for a thread's original name.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CustomThread extends Thread implements ThreadRenamer {
+public final class ValidateContactEmail implements PreferencesItemService {
 
-    private volatile String originalName;
-    private volatile String appendix;
-    private volatile boolean changed;
+    private static final String NAME = "validate_contact_email";
 
     /**
-     * Initializes a new {@link CustomThread}.
-     *
-     * @param target The object whose run method is called
-     * @param name The name of the new thread which is also used as original name
+     * Default constructor.
      */
-    public CustomThread(final Runnable target, final String name) {
-        super(target, name);
-        applyName(name);
-    }
-
-    private void applyName(final String name) {
-        originalName = name;
-        final int pos = originalName.indexOf('-');
-        if (pos > 0) {
-            appendix = name.substring(pos);
-        } else {
-            appendix = null;
-        }
-    }
-
-    /**
-     * Gets the original name.
-     *
-     * @return The original name
-     */
-    public String getOriginalName() {
-        return originalName;
-    }
-
-    /**
-     * Restores the original name.
-     */
-    public void restoreName() {
-        if (!changed) {
-            return;
-        }
-        setName(originalName);
+    public ValidateContactEmail() {
+        super();
     }
 
     @Override
-    public void rename(final String newName) {
-        setName(newName);
-        changed = true;
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     @Override
-    public void renamePrefix(final String newPrefix) {
-        if (null == appendix) {
-            setName(newPrefix);
-        } else {
-            setName(new com.openexchange.java.StringAllocator(16).append(newPrefix).append(appendix).toString());
-        }
-        changed = true;
-    }
+    public IValueHandler getSharedValue() {
 
+        return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(Boolean.valueOf(ContactConfig.getInstance().getBoolean(ContactConfig.Property.VALIDATE_CONTACT_EMAIL)));
+            }
+
+        };
+    }
 }

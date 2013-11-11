@@ -51,8 +51,8 @@ package com.openexchange.groupware.contact;
 
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
 
 /**
  * Configuration class for contact options.
@@ -176,7 +176,13 @@ public class ContactConfig {
         /**
          * Maximum size in bytes of an image that may be stored.
          */
-        MAX_IMAGE_SIZE("max_image_size", "33750000");
+        MAX_IMAGE_SIZE("max_image_size", "33750000"),
+
+        /**
+         * Check the entered email address from a new contact for correctness
+         * (syntactic check user@domain.tld)
+         */
+        VALIDATE_CONTACT_EMAIL("validate_contact_email", Boolean.TRUE.toString());
 
         /**
          * Name of the property in the participant.properties file.
