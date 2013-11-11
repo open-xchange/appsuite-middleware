@@ -527,7 +527,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     /**
      * Starts the timer that refreshes synthetic resources
      */
-    private void startRefreshTimer() {
+    protected void startRefreshTimer() {
         Services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
 
             @Override
