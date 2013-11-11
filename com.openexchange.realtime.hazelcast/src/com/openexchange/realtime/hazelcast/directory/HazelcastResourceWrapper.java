@@ -81,6 +81,8 @@ public class HazelcastResourceWrapper {
     private final static String presence_priority = "presence_priority";
 
     private final static String routingInfo = "routingInfo";
+    
+    public final static String eviction_timestamp = "eviction_timestamp";
 
     /**
      * Map an instance of HazelcastResource to a Map from String to Serializable.
@@ -104,6 +106,9 @@ public class HazelcastResourceWrapper {
 
         Date timestamp = hazelcastResource.getTimestamp();
         wrap.put(resource_timestamp, timestamp);
+
+        //update to prevent eviction
+        wrap.put(eviction_timestamp, System.currentTimeMillis());
 
         return wrap;
     }
@@ -134,7 +139,6 @@ public class HazelcastResourceWrapper {
      * @param map the wrapped HazelcastResource
      * @return the unwrapped HazelcastResource POJO, or null if map was null
      */
-    @SuppressWarnings("unchecked")
     public static HazelcastResource unwrap(Map<String, Serializable> map) {
         if(map == null) {
             return null;
