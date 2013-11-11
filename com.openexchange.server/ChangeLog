@@ -1,6 +1,7 @@
 * 2013-11-11 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29728: Be prepared for initially synchronized recurring appointments with delete exceptions 
+ - Fix for bug 29746: Adjust buffer position in enhanced random access file after append operations  
 
 * 2013-11-08 - tobias.friedrich@open-xchange.com
 
