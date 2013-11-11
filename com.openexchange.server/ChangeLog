@@ -1,3 +1,7 @@
+* 2013-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28479: Remotely distribute events for "com/openexchange/push" topic if they do not contain a CommonEvent instance
+
 * 2013-11-11 - marc.arens@open-xchange.com
 
  - Fix for bug 29724: Continue processing remaining Stanzas after finding protocol related Stanza type
