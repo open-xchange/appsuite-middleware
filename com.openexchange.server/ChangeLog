@@ -3,6 +3,25 @@
  - Fix for bug 29724: Continue processing remaining Stanzas after finding protocol related Stanza type
  - Fix for bug 29539: Refresh resources via set to prevent eviction
  
+* 2013-11-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29728: Be prepared for initially synchronized recurring appointments with delete exceptions 
+ - Fix for bug 29746: Adjust buffer position in enhanced random access file after append operations  
+
+* 2013-11-11 - martin.schneider@open-xchange.com
+
+ - Fix for bug 29720: Allow admin templates to be displayed even if user templating is disabled 
+
+* 2013-11-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29288: Use two-step approach when querying infostore documents from many folders 
+
+* 2013-11-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29725: Handle possible error when initializing capabilities + let OXFolderManager rather operate on user's permission
+                      than on user's configuration
+ - Fix for bug 29737: Inlined used method from c.o.java.Strings
+
 * 2013-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 29683: Create special "E-Mail attachments" InfoStore folder with private-only permissions
