@@ -89,7 +89,7 @@ public class JSONProtocolHandler {
      * @param serverSession His session
      * @param entry The stateEntry
      * @param stanzas the Stanzas
-     * @param acknowledgements
+     * @param acknowledgements List for acknowledgements to use while handling incoming Stanzas
      * @throws RealtimeException 
      */
     public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements) throws RealtimeException {
@@ -99,13 +99,13 @@ public class JSONProtocolHandler {
                 
                 if (type.equals("nextSequence")) {
                     protocol.nextSequence(constructedId, json.optInt("seq"), gate, entry.state);
-                    return;
+                    continue;
                 }
                 
                 if (type.equals("ping")) {
                     // PING received
                     protocol.ping(constructedId, json.optBoolean("commit"), entry.state, entry.transmitter);
-                    return;
+                    continue;
                 }
 
                 if (type.equals("ack")) {
@@ -119,8 +119,7 @@ public class JSONProtocolHandler {
                     } else if (seqExpression instanceof Number) {
                         protocol.acknowledgementReceived(Long.parseLong(seqExpression.toString()), entry.state);
                     }
-
-                    return;
+                    continue;
                 }
             }
             // Handle regular message
