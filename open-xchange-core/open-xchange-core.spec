@@ -862,6 +862,8 @@ ox_add_property com.openexchange.templating.usertemplating false /opt/open-xchan
 # SoftwareChange_Request-1702
 ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts false /opt/open-xchange/etc/transport.properties
 
+# SoftwareChange_Request-1707
+ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
