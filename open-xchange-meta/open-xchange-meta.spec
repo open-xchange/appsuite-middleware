@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define        ox_release 18
+%define        ox_release 20
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -399,6 +399,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Mon Nov 11 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-11-12
 * Fri Nov 08 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-11
 * Thu Nov 07 2013 Carsten Hoeger <choeger@open-xchange.com>
