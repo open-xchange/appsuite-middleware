@@ -1,6 +1,7 @@
 * 2013-11-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29767: Restrict infostore document count to current context 
+ - Fix for bug 29288: Correctly check for "order by" property 
   
 * 2013-11-11 - thorben.betten@open-xchange.com
 
