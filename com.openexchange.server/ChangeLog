@@ -1,3 +1,26 @@
+* 2013-11-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29767: Restrict infostore document count to current context 
+ - Fix for bug 29288: Correctly check for "order by" property 
+  
+* 2013-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28479: Remotely distribute events for "com/openexchange/push" topic if they do not contain a CommonEvent instance
+
+* 2013-11-11 - marc.arens@open-xchange.com
+
+ - Fix for bug 29724: Continue processing remaining Stanzas after finding protocol related Stanza type
+ - Fix for bug 29539: Refresh resources via set to prevent eviction
+ 
+* 2013-11-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29728: Be prepared for initially synchronized recurring appointments with delete exceptions 
+ - Fix for bug 29746: Adjust buffer position in enhanced random access file after append operations  
+
+* 2013-11-11 - martin.schneider@open-xchange.com
+
+ - Fix for bug 29720: Allow admin templates to be displayed even if user templating is disabled 
+
 * 2013-11-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29288: Use two-step approach when querying infostore documents from many folders 

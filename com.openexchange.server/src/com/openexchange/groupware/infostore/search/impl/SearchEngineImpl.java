@@ -182,7 +182,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 maxResults = NOT_SET;
             }
             if (NOT_SET != maxResults && own.size() + all.size() > maxResults &&
-                null == sortedBy && InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(sortedBy)) {
+                (null == sortedBy || InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(sortedBy))) {
                 /*
                  * no pattern, ordering possible, and more folders queried than results needed - use optimized query
                  */

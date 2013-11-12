@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2013-10-28 18:34+1000\n"
+"PO-Revision-Date: 2013-11-08 23:02+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1236,12 +1236,12 @@ msgstr "%1$s 已经删除了一个约会，或者你已被从参与者中移除:
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
-msgid "Change the description to %1$s."
-msgstr "修改描述为 %1$s。"
+msgid "Change the subject to %1$s."
+msgstr "修改主题为 %1$s。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:200
-msgid "The appointment has a new description: %1$s."
-msgstr "约会有了一个新的描述: %1$s。"
+msgid "The appointment has a new subject: %1$s."
+msgstr "约会有了一个新的主题：%1$s。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
@@ -1262,12 +1262,12 @@ msgstr "约会有了一个新的位置: %1$s。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:212
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:214
-msgid "Use the comments below."
-msgstr "使用如下的备注。"
+msgid "Use the appointment description below."
+msgstr "使用以下的约会描述。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:216
-msgid "The appointment comments have changed."
-msgstr "约会备注已修改。"
+msgid "The appointment description has changed."
+msgstr "约会描述已修改。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:218
 msgid "Please invite %1$s to the appointment."
@@ -2200,6 +2200,12 @@ msgid ""
 "synchronization problems"
 msgstr "目录 \"%1$s\"（校验和 \"%2$s\"）引致重复的同步问题"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The client application you're using is outdated and no longer supported - "
+"please upgrade to a newer version"
+msgstr "您使用中的客户端应用程序已过时或不再支援：请升级到一个比较新的版本"
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -2911,6 +2917,23 @@ msgstr "无此类文件夹。"
 msgid "Authentication failed for login %1$s to server %2$s (service: %3$s)."
 msgstr "对服务器 %2$s 上的登录 %1$s 验证失败（服务：%3$s）。"
 
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
+msgid ""
+"In order to accomplish the search, %1$d or more characters are required."
+msgstr "要完成搜索，需要 %1$d 个或更多字符。"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr "没有空闲的 / 繁忙的提供者可用"
@@ -3486,9 +3509,13 @@ msgstr "服务器无法启动"
 
 #. * The following needed service is missing: \"%1$s\"
 #. The following needed service is missing: "%1$s"
+#. *
+#. * The following needed service is missing: \"%1$s\"
+#.
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -4820,7 +4847,7 @@ msgstr "已确认的垃圾邮件文件夹"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:161
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "草稿"
@@ -4842,7 +4869,7 @@ msgstr "已发送邮件文件夹"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:169
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "垃圾邮件"
@@ -4856,7 +4883,7 @@ msgstr "垃圾邮件文件夹"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "垃圾筒"
@@ -7029,21 +7056,6 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "不支持将一个定期约会移到另一文件夹。"
 
 #. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#. In order to accomplish the search, %1$d or more characters are required.
-#. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
-msgid ""
-"In order to accomplish the search, %1$d or more characters are required."
-msgstr "要完成搜索，需要 %1$d 个或更多字符。"
-
-#. *
 #. * Redundant information.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:346
@@ -7529,7 +7541,7 @@ msgstr "收件箱"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
 msgstr "已发送对象"
 
@@ -7543,7 +7555,7 @@ msgstr "已发送邮件"
 #. The internationalized name for the archive mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:173
 msgid "Archive"
 msgstr "存档"
 
@@ -7627,11 +7639,22 @@ msgstr "可以通过以下链接访问此电子邮件的可用附件："
 msgid "The links will be deleted on #DATE#"
 msgstr "链接将在 #DATE# 前删除"
 
+#. The text put into the description field of a published E-Mail attachment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+msgid ""
+"This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
+msgstr "文件已为 #DATE# 发送到 #TO#、主题为 \"#SUBJECT#\" 的电子邮件发布。"
+
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 msgid "Dear Sir or Madam"
 msgstr "尊敬的先生或女士"
+
+#. The name for "Unified Mail" root folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:177
+msgid "Unified mail"
+msgstr "统一邮件"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -8949,10 +8972,10 @@ msgstr "验证失败：%1$s"
 msgid "File name must not contain slashes."
 msgstr "文件名称不能包含斜线。"
 
-#. File name contains illegal characters.
+#. File name contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:127
-msgid "File name contains illegal characters."
-msgstr "文件名称包含不允许的字符。"
+msgid "File name contains invalid characters."
+msgstr "文件名称包含不可用字符。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
 msgid "New file versions can't be saved with an offset."
@@ -15249,6 +15272,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "祖鲁"
+
+#~ msgid "Change the description to %1$s."
+#~ msgstr "修改描述为 %1$s。"
 
 #~ msgid "IO error."
 #~ msgstr "输入 / 输出错误。"

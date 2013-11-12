@@ -75,7 +75,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
     private static final long serialVersionUID = -8490584616201401142L;
 
     public static PushMsObject valueFor(final Map<String, Object> pojo) {
-        if (null == pojo) {
+        if (null == pojo || pojo.containsKey("__pure")) {
             return null;
         }
         try {

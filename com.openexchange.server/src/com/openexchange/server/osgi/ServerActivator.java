@@ -658,7 +658,11 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(AttachmentBase.class, Attachment.ATTACHMENT_BASE);
 
         // Register event factory service
-        registerService(EventFactoryService.class, new EventFactoryServiceImpl());
+        {
+            final EventFactoryServiceImpl eventFactoryServiceImpl = new EventFactoryServiceImpl();
+            registerService(EventFactoryService.class, eventFactoryServiceImpl);
+            ServerServiceRegistry.getInstance().addService(EventFactoryService.class, eventFactoryServiceImpl);
+        }
 
         // Register folder service
         final FolderService folderService = new FolderServiceImpl();

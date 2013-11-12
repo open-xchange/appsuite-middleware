@@ -848,14 +848,15 @@ public class DatabaseImpl extends DBService {
 
         try {
             con = getReadConnection(ctx);
-            final StringBuilder SQL = new StringBuilder("SELECT count(id) from infostore where infostore.folder_id=?");
+            final StringBuilder SQL = new StringBuilder("SELECT count(id) from infostore where infostore.cid=? AND infostore.folder_id=?");
             if (onlyOwnObjects) {
                 SQL.append(" AND infostore.created_by=?");
             }
             stmt = con.prepareStatement(SQL.toString());
-            stmt.setLong(1, folderId);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setLong(2, folderId);
             if (onlyOwnObjects) {
-                stmt.setInt(2, user.getId());
+                stmt.setInt(3, user.getId());
             }
             result = stmt.executeQuery();
             if (result.next()) {
