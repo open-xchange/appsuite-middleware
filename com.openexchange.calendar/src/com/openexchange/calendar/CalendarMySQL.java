@@ -3710,6 +3710,12 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (deleted_userparticipants != null && deleted_userparticipants.length > 0) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Remove participants:");
+                for (UserParticipant d : deleted_userparticipants) {
+                    LOG.debug(d.getIdentifier());
+                }
+            }
             retval = true;
             cup.setMBoolean(true);
             PreparedStatement pd = null;
