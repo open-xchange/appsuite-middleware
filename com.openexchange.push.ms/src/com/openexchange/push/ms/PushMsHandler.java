@@ -183,7 +183,10 @@ public class PushMsHandler implements EventHandler {
     private Map<String, Object> toPojo(final Event e) {
         final Map<String, Object> m = new LinkedHashMap<String, Object>(8);
         for (final String name : e.getPropertyNames()) {
-            m.put(name, e.getProperty(name));
+            final Object value = e.getProperty(name);
+            if (isPojo(value)) {
+                m.put(name, value);
+            }
         }
         m.put("__topic", e.getTopic());
         m.put("__pure", Boolean.TRUE);
@@ -199,6 +202,12 @@ public class PushMsHandler implements EventHandler {
         } catch (final RuntimeException ex) {
             LOG.error(ex.getMessage(), ex);
         }
+    }
+
+    private static final String POJO_PACKAGE = "java.lang.";
+
+    private boolean isPojo(final Object obj) {
+        return obj != null && obj.getClass().getName().startsWith(POJO_PACKAGE);
     }
 
     private void publishDelayed(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {

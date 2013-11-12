@@ -227,7 +227,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         if (isEmpty(site)) {
             return site;
         }
-        return AJAXServlet.encodeUrl(site, true, true);
+        return AJAXServlet.encodeUrl(site, true, false);
     }
 
     protected String normalizeSiteName(final String siteName) {

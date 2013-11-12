@@ -1,3 +1,10 @@
+* 2013-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29770: Only distribute Java POJOs
+ - Fix for bug 29762: Added proper mapping for "MOBILITY" constant from UserPermissionBits.java
+ - Fix for bug 29748: Invoke "AJAXServlet.encodeUrl()" with proper arguments when safe-encoding a publication's site name
+ - Fix for bug 29747: Orderly handle possible 'MessageRemovedException' on access to message content
+
 * 2013-11-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29767: Restrict infostore document count to current context 

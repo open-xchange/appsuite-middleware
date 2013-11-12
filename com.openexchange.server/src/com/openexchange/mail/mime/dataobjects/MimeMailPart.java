@@ -399,6 +399,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             } catch (final IOException e) {
                 return getRawInputStream(e);
+            } catch (final MessageRemovedException e) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             } catch (final MessagingException e) {
                 return getRawInputStream(e);
             } catch (final NullPointerException e) {
