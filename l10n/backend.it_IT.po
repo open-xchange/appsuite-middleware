@@ -45,7 +45,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-10-31 21:22+0100\n"
+"PO-Revision-Date: 2013-11-04 21:56+0100\n"
 "Last-Translator: Vincenzo Reale <vincenzo@bureau-cornavin.com>\n"
 "Language-Team: Italian <it@bureau-cornavin.com>\n"
 "Language: it\n"
@@ -246,8 +246,7 @@ msgid ""
 "completing successfully."
 msgstr ""
 "Si è verificato un problema con il tuo account AWS che impedisce l'esito "
-"positivo "
-"dell'operazione."
+"positivo dell'operazione."
 
 #. The e-mail address you provided is associated with more than one account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:77
@@ -268,10 +267,9 @@ msgid ""
 "The requested bucket name is not available. The bucket namespace is shared "
 "by all users of the system. Please select a different name and try again."
 msgstr ""
-"Il nome del bucket richiesto non è disponibile. Lo spazio dei nomi dei bucket "
-"è condiviso da tutti gli utenti del sistema. Seleziona un nome diverso e "
-"prova "
-"ancora."
+"Il nome del bucket richiesto non è disponibile. Lo spazio dei nomi dei "
+"bucket è condiviso da tutti gli utenti del sistema. Seleziona un nome "
+"diverso e prova ancora."
 
 #. Your previous request to create the named bucket succeeded and you already own it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:86
@@ -299,9 +297,8 @@ msgid ""
 "cannot log information to a bucket in another location."
 msgstr ""
 "La registrazione incrociata tra diverse posizioni non è consentita. I bucket "
-"in una "
-"posizione geografica non possono registrare informazioni nel bucket in "
-"un'altra posizione."
+"in una posizione geografica non possono registrare informazioni nel bucket "
+"in un'altra posizione."
 
 #. Your proposed upload is smaller than the minimum allowed object size.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:98
@@ -332,8 +329,8 @@ msgid ""
 "You did not provide the number of bytes specified by the Content-Length HTTP "
 "header"
 msgstr ""
-"Non hai fornito il numero di byte specificati dall'intestazione HTTP "
-"Content-Length"
+"Non hai fornito il numero di byte specificati dall'intestazione HTTP Content-"
+"Length"
 
 #. POST requires exactly one file upload per request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:113
@@ -411,8 +408,7 @@ msgid ""
 "order by part number."
 msgstr ""
 "L'elenco delle parti non erano in ordine crescente. L'elenco deve essere "
-"ordinato "
-"in base al numero della parte."
+"ordinato in base al numero della parte."
 
 #. All access to this object has been disabled.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:152
@@ -459,9 +455,8 @@ msgid ""
 "The target bucket for logging does not exist, is not owned by you, or does "
 "not have the appropriate grants for the log-delivery group."
 msgstr ""
-"Il bucket di destinazione per la registrazione non esiste, non è di "
-"tua proprietà o non ha i permessi appropriati per il gruppo di consegna dei "
-"log."
+"Il bucket di destinazione per la registrazione non esiste, non è di tua "
+"proprietà o non ha i permessi appropriati per il gruppo di consegna dei log."
 
 #. The provided token is malformed or otherwise invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:176
@@ -484,8 +479,8 @@ msgid ""
 "The XML you provided was not well-formed or did not validate against our "
 "published schema."
 msgstr ""
-"Il codice XML fornito non era valido o non viene validato dallo nostro schema "
-"pubblicato."
+"Il codice XML fornito non era valido o non viene validato dallo nostro "
+"schema pubblicato."
 
 #. The body of your POST request is not well-formed multipart/form-data.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:188
@@ -577,10 +572,8 @@ msgid ""
 "invalid, or the multipart upload might have been aborted or completed."
 msgstr ""
 "Il caricamento multiparte specificato non esiste. L'ID del caricamento "
-"potrebbe "
-"non essere valido o il caricamento multiparte potrebbe essere stato "
-"interrotto "
-"o completato."
+"potrebbe non essere valido o il caricamento multiparte potrebbe essere stato "
+"interrotto o completato."
 
 #. Indicates that the version ID specified in the request does not match an existing version.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:236
@@ -588,8 +581,8 @@ msgid ""
 "Indicates that the version ID specified in the request does not match an "
 "existing version."
 msgstr ""
-"Indica che l'ID della versione specificato nella richiesta non corrisponde "
-"a una versione esistente."
+"Indica che l'ID della versione specificato nella richiesta non corrisponde a "
+"una versione esistente."
 
 #. A header you provided implies functionality that is not implemented.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:239
@@ -623,8 +616,8 @@ msgid ""
 "specified endpoint. Please send all future requests to this endpoint."
 msgstr ""
 "Il bucket al quale stai tentando di accedere deve essere indirizzato "
-"utilizzando la destinazione "
-"specificata. Invia tutte le richieste future a questa destinazione."
+"utilizzando la destinazione specificata. Invia tutte le richieste future a "
+"questa destinazione."
 
 #. At least one of the preconditions you specified did not hold.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:254
@@ -674,8 +667,8 @@ msgid ""
 "The request signature we calculated does not match the signature you "
 "provided. Check your AWS Secret Access Key and signing method."
 msgstr ""
-"La firma richiesta che abbiamo calcolato non corrisponde alla firma che "
-"hai fornito. Controlla la chiave segreta di accesso AWS e il metodo di firma."
+"La firma richiesta che abbiamo calcolato non corrisponde alla firma che hai "
+"fornito. Controlla la chiave segreta di accesso AWS e il metodo di firma."
 
 #. Please reduce your request rate.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:278
@@ -1366,12 +1359,12 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
-msgid "Change the description to %1$s."
-msgstr "Cambia la descrizione a %1$s."
+msgid "Change the subject to %1$s."
+msgstr "Cambia l'oggetto a %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:200
-msgid "The appointment has a new description: %1$s."
-msgstr "L'appuntamento ha una nuova descrizione: %1$s."
+msgid "The appointment has a new subject: %1$s."
+msgstr "L'appuntamento ha un nuovo oggetto: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
@@ -1392,12 +1385,12 @@ msgstr "L'appuntamento avrà luogo in una nuova posizione: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:212
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:214
-msgid "Use the comments below."
-msgstr "Usa i commenti in basso."
+msgid "Use the appointment description below."
+msgstr "Usa la descrizione dell'appuntamento in basso."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:216
-msgid "The appointment comments have changed."
-msgstr "I commenti all'appuntamento sono stati modificati."
+msgid "The appointment description has changed."
+msgstr "La descrizione dell'appuntamento è stata modificata."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:218
 msgid "Please invite %1$s to the appointment."
@@ -2381,6 +2374,14 @@ msgstr ""
 "La cartella \"%1$s\" con il codice di controllo \"%2$s\" ha provocato "
 "ripetuti problemi di sincronizzazione"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The client application you're using is outdated and no longer supported - "
+"please upgrade to a newer version"
+msgstr ""
+"L'applicazione client che stai utilizzando è obsoleta e non più supportata - "
+"aggiorna a una versione più recente"
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -3133,6 +3134,23 @@ msgstr ""
 "Autenticazione non riuscita per l'accesso %1$s sul server %2$s (servizio="
 "%3$s)."
 
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
+msgid ""
+"In order to accomplish the search, %1$d or more characters are required."
+msgstr "Per eseguire la ricerca, %1$d o più caratteri sono richiesti."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr "Nessun fornitore di libero/occupato disponibile"
@@ -3418,8 +3436,8 @@ msgid ""
 "A temporary error occurred inside the server which prevented it from "
 "fulfilling the request.. Please try again later."
 msgstr ""
-"Si è verificato un errore temporaneo sul server che ha impedito "
-"di soddisfare la richiesta. Riprova più tardi."
+"Si è verificato un errore temporaneo sul server che ha impedito di "
+"soddisfare la richiesta. Riprova più tardi."
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
@@ -3608,8 +3626,8 @@ msgid ""
 "Client login IP changed from %1$s to %2$s and is not covered by IP white-"
 "list or netmask."
 msgstr ""
-"L'IP di accesso del client è cambiato da %1$s a %2$s e non è coperto da liste "
-"bianche o maschere di rete."
+"L'IP di accesso del client è cambiato da %1$s a %2$s e non è coperto da "
+"liste bianche o maschere di rete."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:103
 msgid "Your session was invalidated. Please try again."
@@ -3747,9 +3765,13 @@ msgstr "Il server grizzly non può essere avviato"
 
 #. * The following needed service is missing: \"%1$s\"
 #. The following needed service is missing: "%1$s"
+#. *
+#. * The following needed service is missing: \"%1$s\"
+#.
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -5184,7 +5206,7 @@ msgstr "Cartella per la posta indesiderata accertata"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:161
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Bozze"
@@ -5206,7 +5228,7 @@ msgstr "Cartella della posta inviata "
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:169
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Posta indesiderata"
@@ -5220,7 +5242,7 @@ msgstr "Cartella della posta indesiderata"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Cestino"
@@ -5720,10 +5742,9 @@ msgid ""
 "mailbox is nearly full. In that case, please try to empty your deleted items "
 "first, or delete smaller messages first."
 msgstr ""
-"Questo messaggio non può essere spostato nel cestino poiché la casella "
-"di posta è quasi piena. Prova a svuotare prima gli elementi eliminati, o "
-"elimina "
-"prima i messaggi più piccoli."
+"Questo messaggio non può essere spostato nel cestino poiché la casella di "
+"posta è quasi piena. Prova a svuotare prima gli elementi eliminati, o "
+"elimina prima i messaggi più piccoli."
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -5926,8 +5947,8 @@ msgid ""
 "context=%4$s). Try again in %5$s seconds. Error message from server: %6$s"
 msgstr ""
 "Il ritardo di accesso impedisce di connettersi al server %1$s per l'accesso "
-"%2$s (utente=%3$s, contesto=%4$s). Riprovare tra %5$s secondi. Messaggio "
-"di errore dal server: %6$s"
+"%2$s (utente=%3$s, contesto=%4$s). Riprovare tra %5$s secondi. Messaggio di "
+"errore dal server: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -6472,8 +6493,7 @@ msgstr "La sequenza inviata non è valida."
 msgid ""
 "The server has no state associated with this client. Please enrol first."
 msgstr ""
-"Il server non ha alcuno stato associato con questo client. Registrati "
-"prima."
+"Il server non ha alcuno stato associato con questo client. Registrati prima."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -7554,21 +7574,6 @@ msgstr ""
 "supportato."
 
 #. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#. In order to accomplish the search, %1$d or more characters are required.
-#. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
-msgid ""
-"In order to accomplish the search, %1$d or more characters are required."
-msgstr "Per eseguire la ricerca, %1$d o più caratteri sono richiesti."
-
-#. *
 #. * Redundant information.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:346
@@ -8098,7 +8103,7 @@ msgstr "Posta in arrivo"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
 msgstr "Messaggi inviati"
 
@@ -8112,7 +8117,7 @@ msgstr "Posta inviata"
 #. The internationalized name for the archive mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:173
 msgid "Archive"
 msgstr "Archivio"
 
@@ -8201,11 +8206,24 @@ msgstr ""
 msgid "The links will be deleted on #DATE#"
 msgstr "I collegamenti saranno eliminati dal #DATE#"
 
+#. The text put into the description field of a published E-Mail attachment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+msgid ""
+"This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
+msgstr ""
+"Questo file è stato pubblicato tramite il messaggio \"#SUBJECT#\" inviato il "
+"#DATE# a #TO#"
+
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 msgid "Dear Sir or Madam"
 msgstr "Spett.le Signor o Signora"
+
+#. The name for "Unified Mail" root folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:177
+msgid "Unified mail"
+msgstr "Posta unificata"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -9566,10 +9584,10 @@ msgstr "Validazione non riuscita: %1$s"
 msgid "File name must not contain slashes."
 msgstr "Il nome del file non può contenere barre (/)."
 
-#. File name contains illegal characters.
+#. File name contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:127
-msgid "File name contains illegal characters."
-msgstr "Il nome del file contiene caratteri non consentiti."
+msgid "File name contains invalid characters."
+msgstr "Il nome del file contiene caratteri non validi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
 msgid "New file versions can't be saved with an offset."
@@ -10756,9 +10774,8 @@ msgid ""
 "messages first."
 msgstr ""
 "Questo messaggio non può essere spostato nel cestino poiché la casella di "
-"posta "
-"è quasi piena. Prova a svuotare prima gli elementi eliminati, o elimina "
-"prima i messaggi più piccoli."
+"posta è quasi piena. Prova a svuotare prima gli elementi eliminati, o "
+"elimina prima i messaggi più piccoli."
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -11282,10 +11299,9 @@ msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
 "%4$s, context=%5$s). Probably your request took too long."
 msgstr ""
-"La cartella \"%1$s\" è stata chiusa sul server di posta %2$s per l'accesso %"
-"3$s "
-"(utente=%4$s, contesto=%5$s). Probabilmente l'operazione ha richiesto troppo "
-"tempo."
+"La cartella \"%1$s\" è stata chiusa sul server di posta %2$s per l'accesso "
+"%3$s (utente=%4$s, contesto=%5$s). Probabilmente l'operazione ha richiesto "
+"troppo tempo."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -11655,8 +11671,8 @@ msgid ""
 "That mailbox is already in use by another process. Please try again later. "
 "Error message: %1$s"
 msgstr ""
-"La casella di posta è già utilizzata da un altro processo. Riprova più tardi. "
-"Messaggio di errore: %1$s"
+"La casella di posta è già utilizzata da un altro processo. Riprova più "
+"tardi. Messaggio di errore: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid ""
@@ -12658,8 +12674,7 @@ msgid ""
 "characters. Current length: %3$d characters."
 msgstr ""
 "Il valore dell'attributo %1$s contiene più del numero consentito di %2$d "
-"caratteri. "
-"Lunghezza attuale: %3$d caratteri."
+"caratteri. Lunghezza attuale: %3$d caratteri."
 
 #. *
 #. * Unable to map OCL permission value %1$s to a JSON permission value
@@ -16224,6 +16239,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Change the description to %1$s."
+#~ msgstr "Cambia la descrizione a %1$s."
 
 #~ msgid "IO error."
 #~ msgstr "Errore di I/O."

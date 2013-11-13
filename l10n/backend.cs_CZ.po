@@ -46,7 +46,7 @@ msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-11-01 16:05+0100\n"
+"PO-Revision-Date: 2013-11-09 12:01+0100\n"
 "Last-Translator: Robert Kratky <rkratky@gmail.com>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
@@ -270,7 +270,8 @@ msgid ""
 "by all users of the system. Please select a different name and try again."
 msgstr ""
 "Požadovaný název kontejneru není k dispozici. Jmenný prostor kontejnerů je "
-"sdílený všemi uživateli systému. Zvolte, prosím, jiný název a zkuste to znovu."
+"sdílený všemi uživateli systému. Zvolte, prosím, jiný název a zkuste to "
+"znovu."
 
 #. Your previous request to create the named bucket succeeded and you already own it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:86
@@ -573,7 +574,8 @@ msgstr "Značí, že ID verze dané v požadavku neodpovídá žádné existují
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:239
 msgid "A header you provided implies functionality that is not implemented."
 msgstr ""
-"Hlavička, kterou jste poskytl(a), předpokládá funkci, jež není implementovaná."
+"Hlavička, kterou jste poskytl(a), předpokládá funkci, jež není "
+"implementovaná."
 
 #. Your account is not signed up for the Amazon S3 service.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:242
@@ -591,8 +593,8 @@ msgid ""
 "A conflicting conditional operation is currently in progress against this "
 "resource. Please try again."
 msgstr ""
-"S tímto zdrojem je v tuto chvíli v konfliktu jiná probíhající operace. Zkuste "
-"to, prosím, znovu."
+"S tímto zdrojem je v tuto chvíli v konfliktu jiná probíhající operace. "
+"Zkuste to, prosím, znovu."
 
 #. The bucket you are attempting to access must be addressed using the specified endpoint. Please send all future requests to this endpoint.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:251
@@ -630,8 +632,8 @@ msgid ""
 "Your socket connection to the server was not read from or written to within "
 "the timeout period."
 msgstr ""
-"Socket vašeho připojení k serveru nebyl ve lhůtě pro vypršení použit ke čtení "
-"ani k zápisu."
+"Socket vašeho připojení k serveru nebyl ve lhůtě pro vypršení použit ke "
+"čtení ani k zápisu."
 
 #. The difference between the request time and the server's time is too large.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:269
@@ -1330,12 +1332,12 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
-msgid "Change the description to %1$s."
-msgstr "Změňte popis na %1$s."
+msgid "Change the subject to %1$s."
+msgstr "Změnit předmět na %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:200
-msgid "The appointment has a new description: %1$s."
-msgstr "Schůzka má nový popis: %1$s."
+msgid "The appointment has a new subject: %1$s."
+msgstr "Schůzka má nový předmět: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
@@ -1356,12 +1358,12 @@ msgstr "Schůzka proběhne na jiném místě: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:212
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:214
-msgid "Use the comments below."
-msgstr "Využijte komentáře níže."
+msgid "Use the appointment description below."
+msgstr "Využijte popis schůzky níže."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:216
-msgid "The appointment comments have changed."
-msgstr "Komentáře u schůzky se změnily."
+msgid "The appointment description has changed."
+msgstr "Popis schůzky se změnil."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:218
 msgid "Please invite %1$s to the appointment."
@@ -2308,6 +2310,14 @@ msgstr ""
 "Adresář „%1$s“ s kontrolním součtem „%2$s“ způsobil opakované problémy se "
 "synchronizací"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The client application you're using is outdated and no longer supported - "
+"please upgrade to a newer version"
+msgstr ""
+"Klientská aplikace, kterou používáte, je zastaralá a již není podporovaná - "
+"upgradujte, prosím, na novější verzi."
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -3040,6 +3050,23 @@ msgid "Authentication failed for login %1$s to server %2$s (service: %3$s)."
 msgstr ""
 "Selhala autentizace přihlašovacího jména %1$s na serveru %2$s (služba: %3$s)."
 
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
+msgid ""
+"In order to accomplish the search, %1$d or more characters are required."
+msgstr "Aby mohlo být vyhledávání provedeno, je potřeba alespoň %1$d znaků."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr "K dispozici není žádný zdroj informací o stavu volný/zaneprázdněný."
@@ -3645,9 +3672,13 @@ msgstr "Nepodařilo se spustit server grizzly."
 
 #. * The following needed service is missing: \"%1$s\"
 #. The following needed service is missing: "%1$s"
+#. *
+#. * The following needed service is missing: \"%1$s\"
+#.
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -5037,7 +5068,7 @@ msgstr "Složka potvrzeného spamu"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:161
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Koncepty"
@@ -5059,7 +5090,7 @@ msgstr "Odeslaná pošta"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:169
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Spam"
@@ -5073,7 +5104,7 @@ msgstr "Složka Spam"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Koš"
@@ -5565,8 +5596,8 @@ msgid ""
 "first, or delete smaller messages first."
 msgstr ""
 "Zprávu se nepodařilo přesunout do koše - nejspíš proto, že je vaše poštovní "
-"schránka téměř plná. Je-li tomu tak, zkuste prosím odstranit vymazané položky "
-"nebo nejdříve smazat menší zprávy."
+"schránka téměř plná. Je-li tomu tak, zkuste prosím odstranit vymazané "
+"položky nebo nejdříve smazat menší zprávy."
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -7335,21 +7366,6 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "Přesun opakované schůzky do jiné složky není podporován."
 
 #. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#. In order to accomplish the search, %1$d or more characters are required.
-#. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
-msgid ""
-"In order to accomplish the search, %1$d or more characters are required."
-msgstr "Aby mohlo být vyhledávání provedeno, je potřeba alespoň %1$d znaků."
-
-#. *
 #. * Redundant information.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:346
@@ -7868,7 +7884,7 @@ msgstr "Doručená pošta"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
 msgstr "Odeslané položky"
 
@@ -7882,7 +7898,7 @@ msgstr "Odeslané položky"
 #. The internationalized name for the archive mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:173
 msgid "Archive"
 msgstr "Archiv"
 
@@ -7969,11 +7985,24 @@ msgstr "K přílohám této zprávy můžete přistupovat pomocí odkazů:"
 msgid "The links will be deleted on #DATE#"
 msgstr "Odkazy budou smazány #DATE#"
 
+#. The text put into the description field of a published E-Mail attachment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+msgid ""
+"This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
+msgstr ""
+"Tento soubor byl publikován pro e-mailovou zprávu s předmětem „#SUBJECT#“ "
+"odeslanou #DATE# na adresu #TO#"
+
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 msgid "Dear Sir or Madam"
 msgstr "Vážená paní nebo pane"
+
+#. The name for "Unified Mail" root folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:177
+msgid "Unified mail"
+msgstr "Spojená pošta"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -9325,9 +9354,9 @@ msgstr "Ověření platnosti selhalo: %1$s"
 msgid "File name must not contain slashes."
 msgstr "Název souboru nesmí obsahovat lomítka."
 
-#. File name contains illegal characters.
+#. File name contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:127
-msgid "File name contains illegal characters."
+msgid "File name contains invalid characters."
 msgstr "Název souboru obsahuje nepovolené znaky."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
@@ -12701,8 +12730,8 @@ msgid ""
 "Cookie \"%1$s\" cannot be found because requests do not have any cookies. "
 "Please re-login."
 msgstr ""
-"Cookie „%1$s“ se nepodařilo najít, protože požadavky neobsahují žádná cookie. "
-"Přihlaste se, prosím, znovu."
+"Cookie „%1$s“ se nepodařilo najít, protože požadavky neobsahují žádná "
+"cookie. Přihlaste se, prosím, znovu."
 
 #. *
 #. * Exception while writing JSON.
@@ -15838,6 +15867,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Change the description to %1$s."
+#~ msgstr "Změňte popis na %1$s."
 
 #~ msgid "IO error."
 #~ msgstr "Chyba IO."
