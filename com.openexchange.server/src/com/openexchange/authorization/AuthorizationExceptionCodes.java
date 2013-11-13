@@ -67,9 +67,9 @@ public enum AuthorizationExceptionCodes implements OXExceptionCode, DisplayableO
     /** User is deactivated */
     USER_DISABLED("User is deactivated", USER_DISABLED_DISPLAY, CATEGORY_PERMISSION_DENIED, 1),
     /** Unknown error */
-    UNKNOWN("Password expired", null, CATEGORY_ERROR, 2),
+    UNKNOWN("Unknown error", null, CATEGORY_ERROR, 2),
     /** Password expired */
-    PASSWORD_EXPIRED("Unknown error", PASSWORD_EXPIRED_DISPLAY, CATEGORY_PERMISSION_DENIED, 3);
+    PASSWORD_EXPIRED("Password expired", PASSWORD_EXPIRED_DISPLAY, CATEGORY_PERMISSION_DENIED, 3);
 
     private String message;
     private String displayMessage;
