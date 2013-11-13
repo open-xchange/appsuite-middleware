@@ -42,14 +42,22 @@ if [ ${1:-0} -eq 2 ]; then
     GLOBIGNORE='*'
 
     # SoftwareChange_Request-1539
+    # updated by SoftwareChange_Request-1721
+    # updated by SoftwareChange_Request-1730
     pfile=/opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
     VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.name $pfile)
-    if [ "$VALUE" == "rtResourceDirectory-0" ]; then
-        ox_set_property com.openexchange.hazelcast.configuration.map.name rtResourceDirectory-1 $pfile
+    if [ "$VALUE" == "rtResourceDirectory-0" ] || [ "$VALUE" == "rtResourceDirectory-1" ]; then
+        ox_set_property com.openexchange.hazelcast.configuration.map.name rtResourceDirectory-2 $pfile
     fi
     VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile)
-    if [ "$VALUE" == "0" ]; then
-        ox_set_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds 3600 $pfile
+    if [ "$VALUE" == "0" ] || [ "$VALUE" == "3600" ]; then
+        ox_set_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds 86400 $pfile
+    fi
+
+    # SoftwareChange_Request-1721
+    pfile=/opt/open-xchange/etc/hazelcast/rtIDMapping.properties
+    if ox_exists_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile; then
+       ox_remove_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile
     fi
 fi
 
