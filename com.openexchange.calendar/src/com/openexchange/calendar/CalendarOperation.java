@@ -1606,12 +1606,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     if (cdao.getFolderType() != FolderObject.PRIVATE) {
                         throw OXCalendarExceptionCodes.PRIVATE_FLAG_IN_PRIVATE_FOLDER.create();
                     }
-                    //                    if ((cdao.getUsers() != null && cdao.getUsers().length > 1) || (cdao.getParticipants() != null && cdao.getParticipants().length > 1)) {
-                    //                        throw OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS.create();
-                    //                    }
                 }
-            } else if (cdao.getPrivateFlag()) {
-                throw OXCalendarExceptionCodes.UNSUPPORTED_PRIVATE_FLAG.create(cdao.getPrivateFlag());
             }
         } else if (edao != null && edao.containsPrivateFlag() && edao.getPrivateFlag()) {
             if (cdao.getSharedFolderOwner() != uid) {

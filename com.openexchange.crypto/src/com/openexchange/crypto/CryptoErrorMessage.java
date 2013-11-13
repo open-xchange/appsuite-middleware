@@ -64,19 +64,19 @@ public enum CryptoErrorMessage implements LogLevelAwareOXExceptionCode, Displaya
     /**
      * Bad password.
      */
-    BadPassword(CATEGORY_USER_INPUT, 1, "Wrong Password: %1$s.", CryptoExceptionMessage.BAD_PASSWORD_DISPLAY, LogLevel.ERROR),
+    BadPassword(CATEGORY_USER_INPUT, 1, "Wrong Password.", CryptoExceptionMessage.BAD_PASSWORD_DISPLAY, LogLevel.ERROR),
     /**
      * Encoding error.
      */
-    EncodingException(CATEGORY_ERROR, 2, "Error during encoding operation.", null, LogLevel.ERROR),
+    EncodingException(CATEGORY_ERROR, 2, "Error during encoding operation.", LogLevel.ERROR),
     /**
      * Security Exception.
      */
-    SecurityException(CATEGORY_ERROR, 3, "General Security Exception occurred.", null, LogLevel.ERROR),
+    SecurityException(CATEGORY_ERROR, 3, "General Security Exception occurred.", LogLevel.ERROR),
     /**
      * Arbitrary byte sequence is missing to generate a secure key.
      */
-    NoSalt(CATEGORY_USER_INPUT, 4, "Arbitrary byte sequence is missing to generate a secure key.", null, LogLevel.ERROR);
+    NoSalt(CATEGORY_USER_INPUT, 4, "Arbitrary byte sequence is missing to generate a secure key.", LogLevel.ERROR);
 
     private static final String PREFIX = "CRP";
 
@@ -94,6 +94,10 @@ public enum CryptoErrorMessage implements LogLevelAwareOXExceptionCode, Displaya
     private final String message;
     private String displayMessage;
     private final LogLevel logLevel;
+    
+    private CryptoErrorMessage(Category category, int errorCode, String message, LogLevel logLevel) {
+        this(category, errorCode, message, OXExceptionStrings.MESSAGE, logLevel);
+    }
 
     private CryptoErrorMessage(final Category category, final int errorCode, final String message, String displayMessage, final LogLevel logLevel) {
         this.category = category;

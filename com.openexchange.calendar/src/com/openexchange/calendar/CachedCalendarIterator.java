@@ -247,7 +247,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			        try {
 			            new CalendarMySQL().getUserParticipantsSQLIn(visibleFolders, list, readcon, c.getContextId(), uid, sqlin);
 			        } catch (final SQLException ex) {
-			            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, I(202));
+			            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(ex);
 			        }
 			    }
 
@@ -255,7 +255,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			        try {
 			            new CalendarMySQL().getParticipantsSQLIn(list, readcon, cdao.getContextID(), sqlin);
 			        } catch (final SQLException ex) {
-			            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, I(203));
+			            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(ex);
 			        }
 			    }
 			    if (cdao.fillConfirmations()) {

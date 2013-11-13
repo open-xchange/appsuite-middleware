@@ -198,7 +198,7 @@ public class ConflictHandler {
 
         final RecurringResultsInterface rss = recColl.calculateRecurringIgnoringExceptions(edao, 0, 0, clone.getRecurrencePosition());
         if (rss == null) {
-            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create();
+            throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create(clone.getRecurrencePosition());
         }
         final RecurringResultInterface rs = rss.getRecurringResult(0);
         clone.setStartDate(new Date(rs.getStart()));

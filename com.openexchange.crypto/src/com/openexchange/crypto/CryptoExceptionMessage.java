@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link CryptoExceptionMessage}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CryptoExceptionMessage implements LocalizableStrings {
@@ -65,7 +65,6 @@ public class CryptoExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    // The provided passwords seems to be wrong or something bad happened. %2$s
-    public final static String BAD_PASSWORD_DISPLAY = "The provided passwords seems to be wrong or something bad happened. %2$s";
+    public final static String BAD_PASSWORD_DISPLAY = "The provided passwords seems to be wrong or something bad happened.";
 
 }
