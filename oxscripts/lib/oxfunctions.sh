@@ -293,8 +293,9 @@ if ( $found ) {
 s;\(^$prop[[:space:]]*[:=]\).*$;\1${val};
 EOF
         else
+	    # add a newline to the last line if it doesn't exist
+	    sed -i -e '$a\' $tmp
             echo "${prop}=$val" >> $tmp
-            echo "" >> $tmp
         fi
         if [ $? -gt 0 ]; then
             rm -f $tmp
