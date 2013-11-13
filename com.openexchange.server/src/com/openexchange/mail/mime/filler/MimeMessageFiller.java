@@ -1156,15 +1156,11 @@ public class MimeMessageFiller {
                     }
                     mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 } else {
-                    if (null == content || 0 == content.length()) {
-                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(EMPTY_HTML_DOCUMENT, contentType)));
+                    final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
+                    if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
                     } else {
-                        final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
-                        if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
-                            mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(EMPTY_HTML_DOCUMENT, contentType)));
-                        } else {
-                            mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
-                        }
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
                     }
                 }
                 // mimeMessage.setContent(mailText, contentType.toString());
