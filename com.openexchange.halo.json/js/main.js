@@ -19,7 +19,7 @@ define("com.openexchange.halo.json/main", ["osgi", "httpAPI"], function (osgi, h
               if (req.getData() != null) {
                   parser.parse(contact, req.getData());
                   var obj = req.getData();
-                  var userId = obj.optInt("user_id");
+                  var userId = obj.optInt("contact_id");
                   if (userId <= 0) {
                       userId = obj.optInt("internal_userid");
                   }
