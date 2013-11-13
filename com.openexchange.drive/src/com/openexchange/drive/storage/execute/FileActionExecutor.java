@@ -70,7 +70,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 
@@ -125,156 +124,142 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
     protected void execute(AbstractAction<FileVersion> action) throws OXException {
         switch (action.getAction()) {
         case REMOVE:
-            /*
-             * move to temp folder
-             */
-            ServerFileVersion versionToRemove = ServerFileVersion.valueOf(action.getVersion(), path, session);
-            FileChecksum fileChecksum = versionToRemove.getFileChecksum();
-            if (DriveConstants.EMPTY_MD5.equals(fileChecksum.getChecksum())) {
-                // don't preserve empty files
-                session.getStorage().deleteFile(versionToRemove.getFile());
-                session.getChecksumStore().removeFileChecksum(fileChecksum);
-            } else {
-                File removedFile = session.getStorage().moveFile(
-                    versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
-                if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
-                    // moved successfully, update checksum
-                    fileChecksum.setFileID(IDUtil.getFileID(removedFile));
-                    fileChecksum.setVersion(removedFile.getVersion());
-                    fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
-                    session.getChecksumStore().updateFileChecksum(fileChecksum);
-                } else {
-                    // file already in trash, cleanup
-                    session.getStorage().deleteFile(removedFile);
-                    session.getChecksumStore().removeFileChecksum(fileChecksum);
-                }
-            }
+            remove(action);
             break;
         case DOWNLOAD:
-            /*
-             * check for empty file that simply can be 'touched'
-             */
-            if (null == action.getVersion() && DriveConstants.EMPTY_MD5.equals(action.getNewVersion().getChecksum())) {
-                File metadata = new DefaultFile();
-                metadata.setFileSize(0);
-                metadata.setFileMD5Sum(DriveConstants.EMPTY_MD5);
-                metadata.setVersion("1");
-                metadata.setVersionComment(session.getStorage().getVersionComment());
-                InputStream data = new UnsynchronizedByteArrayInputStream(new byte[0]);
-                File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata, data);
-                session.getChecksumStore().insertFileChecksum(IDUtil.getFileID(createdFile), createdFile.getVersion(),
-                    createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5);
-                return;
-            }
-            /*
-             * check source and target files
-             */
-            ServerFileVersion sourceVersion = (ServerFileVersion)action.getParameters().get("sourceVersion");
-            File sourceFile = sourceVersion.getFile();
-            if (null == sourceFile.getVersion()) {
-                /*
-                 * no versioning support, re-check sequence number within this transaction
-                 */
-                File reloadedSourceFile = session.getStorage().getFile(sourceFile.getId(), sourceFile.getVersion());
-                if (null == reloadedSourceFile || sourceFile.getSequenceNumber() != reloadedSourceFile.getSequenceNumber()) {
-                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(sourceVersion.getName(), sourceVersion.getChecksum(), path);
-                }
-            }
-            File targetFile = null;
-            if (null != action.getVersion()) {
-                File file = session.getStorage().findFileByName(path, action.getVersion().getName(), true);
-                if (null != file && ChecksumProvider.matches(session, file, action.getVersion().getChecksum())) {
-                    targetFile = file;
-                }
-            }
-            /*
-             * invalidate target file checksum
-             */
-            if (null != targetFile) {
-                FileID fileID = new FileID(targetFile.getId());
-                FolderID folderID = new FolderID(targetFile.getFolderId());
-                if (null == fileID.getFolderId()) {
-                    // TODO: check
-                    fileID.setFolderId(folderID.getFolderId());
-                }
-                session.getChecksumStore().removeFileChecksum(
-                    fileID, targetFile.getVersion(), targetFile.getSequenceNumber());
-            }
-            if (sourceFile.isCurrentVersion() && isFromTemp(session, sourceFile)) {
-                /*
-                 * restore from temp folder possible, move file & update stored checksum
-                 */
-                File movedFile = null != targetFile ? session.getStorage().moveFile(sourceFile, targetFile) :
-                    session.getStorage().moveFile(sourceFile, action.getNewVersion().getName(), path);
-                fileChecksum = sourceVersion.getFileChecksum();
-                FileID fileID = new FileID(movedFile.getId());
-                FolderID folderID = new FolderID(movedFile.getFolderId());
-                if (null == fileID.getFolderId()) {
-                    // TODO: check
-                    fileID.setFolderId(folderID.getFolderId());
-                }
-                fileChecksum.setFileID(fileID);
-                fileChecksum.setVersion(movedFile.getVersion());
-                fileChecksum.setSequenceNumber(movedFile.getSequenceNumber());
-                session.getChecksumStore().updateFileChecksum(fileChecksum);
-            } else {
-                /*
-                 * copy file, store checksum
-                 */
-                try {
-                    File copiedFile = null != targetFile ? session.getStorage().copyFile(sourceFile, targetFile) :
-                        session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
-                    FileID fileID = new FileID(copiedFile.getId());
-                    FolderID folderID = new FolderID(copiedFile.getFolderId());
-                    if (null == fileID.getFolderId()) {
-                        // TODO: check
-                        fileID.setFolderId(folderID.getFolderId());
-                    }
-                    session.getChecksumStore().insertFileChecksum(fileID, copiedFile.getVersion(),
-                        copiedFile.getSequenceNumber(), sourceVersion.getChecksum());
-                } catch (OXException e) {
-                    if ("FLS-0017".equals(e.getErrorCode())) {
-                        // not found
-                        FileID fileID = new FileID(sourceFile.getId());
-                        FolderID folderID = new FolderID(sourceFile.getFolderId());
-                        if (null == fileID.getFolderId()) {
-                            // TODO: check
-                            fileID.setFolderId(folderID.getFolderId());
-                        }
-                        session.getChecksumStore().removeFileChecksums(fileID);
-                    }
-                    throw e;
-                }
-            }
+            download(action);
             break;
         case EDIT:
-            /*
-             * rename file, update checksum
-             */
-            ServerFileVersion targetVersion = null != action.getParameters().get("targetVersion") ?
-                ServerFileVersion.valueOf((FileVersion)action.getParameters().get("targetVersion"), path, session) : null;
-            ServerFileVersion originalVersion = ServerFileVersion.valueOf(action.getVersion(), path, session);
-            fileChecksum = originalVersion.getFileChecksum();
-            File renamedFile;
-            if (null != targetVersion) {
-                session.getChecksumStore().removeFileChecksum(targetVersion.getFileChecksum());
-                renamedFile = session.getStorage().moveFile(originalVersion.getFile(), targetVersion.getFile());
-            } else {
-                renamedFile = session.getStorage().renameFile(originalVersion.getFile(), action.getNewVersion().getName());
-            }
-            FileID fileID = new FileID(renamedFile.getId());
-            FolderID folderID = new FolderID(renamedFile.getFolderId());
-            if (null == fileID.getFolderId()) {
-                // TODO: check
-                fileID.setFolderId(folderID.getFolderId());
-            }
-            fileChecksum.setFileID(fileID);
-            fileChecksum.setVersion(renamedFile.getVersion());
-            fileChecksum.setSequenceNumber(renamedFile.getSequenceNumber());
-            session.getChecksumStore().updateFileChecksum(fileChecksum);
+            edit(action);
             break;
         default:
             throw new IllegalStateException("Can't perform action " + action + " on server");
+        }
+    }
+
+    private void edit(AbstractAction<FileVersion> action) throws OXException {
+        /*
+         * rename file, update checksum
+         */
+        ServerFileVersion targetVersion = null != action.getParameters().get("targetVersion") ?
+            ServerFileVersion.valueOf((FileVersion)action.getParameters().get("targetVersion"), path, session) : null;
+        ServerFileVersion originalVersion = ServerFileVersion.valueOf(action.getVersion(), path, session);
+        FileChecksum fileChecksum = originalVersion.getFileChecksum();
+        File renamedFile;
+        if (null != targetVersion) {
+            session.getChecksumStore().removeFileChecksum(targetVersion.getFileChecksum());
+            renamedFile = session.getStorage().moveFile(originalVersion.getFile(), targetVersion.getFile());
+        } else {
+            renamedFile = session.getStorage().renameFile(originalVersion.getFile(), action.getNewVersion().getName());
+        }
+        fileChecksum.setFileID(IDUtil.getFileID(renamedFile));
+        fileChecksum.setVersion(renamedFile.getVersion());
+        fileChecksum.setSequenceNumber(renamedFile.getSequenceNumber());
+        FileChecksum updatedFileChecksum = session.getChecksumStore().updateFileChecksum(fileChecksum);
+        action.setResultingVersion(new ServerFileVersion(renamedFile, updatedFileChecksum));
+    }
+
+    private void download(AbstractAction<FileVersion> action) throws OXException {
+        /*
+         * check for empty file that simply can be 'touched'
+         */
+        if (null == action.getVersion() && DriveConstants.EMPTY_MD5.equals(action.getNewVersion().getChecksum())) {
+            File metadata = new DefaultFile();
+            metadata.setFileSize(0);
+            metadata.setFileMD5Sum(DriveConstants.EMPTY_MD5);
+            metadata.setVersion("1");
+            metadata.setVersionComment(session.getStorage().getVersionComment());
+            InputStream data = new UnsynchronizedByteArrayInputStream(new byte[0]);
+            File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata, data);
+            FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(IDUtil.getFileID(createdFile), createdFile.getVersion(),
+                createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5);
+            action.setResultingVersion(new ServerFileVersion(createdFile, insertedFileChecksum));
+            return;
+        }
+        /*
+         * check source and target files
+         */
+        ServerFileVersion sourceVersion = (ServerFileVersion)action.getParameters().get("sourceVersion");
+        File sourceFile = sourceVersion.getFile();
+        if (null == sourceFile.getVersion()) {
+            /*
+             * no versioning support, re-check sequence number within this transaction
+             */
+            File reloadedSourceFile = session.getStorage().getFile(sourceFile.getId(), sourceFile.getVersion());
+            if (null == reloadedSourceFile || sourceFile.getSequenceNumber() != reloadedSourceFile.getSequenceNumber()) {
+                throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(sourceVersion.getName(), sourceVersion.getChecksum(), path);
+            }
+        }
+        File targetFile = null;
+        if (null != action.getVersion()) {
+            File file = session.getStorage().findFileByName(path, action.getVersion().getName(), true);
+            if (null != file && ChecksumProvider.matches(session, file, action.getVersion().getChecksum())) {
+                targetFile = file;
+            }
+        }
+        /*
+         * invalidate target file checksum
+         */
+        if (null != targetFile) {
+            session.getChecksumStore().removeFileChecksum(
+                IDUtil.getFileID(targetFile), targetFile.getVersion(), targetFile.getSequenceNumber());
+        }
+        if (sourceFile.isCurrentVersion() && isFromTemp(session, sourceFile)) {
+            /*
+             * restore from temp folder possible, move file & update stored checksum
+             */
+            File movedFile = null != targetFile ? session.getStorage().moveFile(sourceFile, targetFile) :
+                session.getStorage().moveFile(sourceFile, action.getNewVersion().getName(), path);
+            FileChecksum fileChecksum = sourceVersion.getFileChecksum();
+            fileChecksum.setFileID(IDUtil.getFileID(movedFile));
+            fileChecksum.setVersion(movedFile.getVersion());
+            fileChecksum.setSequenceNumber(movedFile.getSequenceNumber());
+            FileChecksum updatedFileChecksum = session.getChecksumStore().updateFileChecksum(fileChecksum);
+            action.setResultingVersion(new ServerFileVersion(movedFile, updatedFileChecksum));
+        } else {
+            /*
+             * copy file, store checksum
+             */
+            try {
+                File copiedFile = null != targetFile ? session.getStorage().copyFile(sourceFile, targetFile) :
+                    session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
+                FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(IDUtil.getFileID(copiedFile), copiedFile.getVersion(),
+                    copiedFile.getSequenceNumber(), sourceVersion.getChecksum());
+                action.setResultingVersion(new ServerFileVersion(copiedFile, insertedFileChecksum));
+            } catch (OXException e) {
+                if ("FLS-0017".equals(e.getErrorCode())) {
+                    // not found
+                    session.getChecksumStore().removeFileChecksums(IDUtil.getFileID(sourceFile));
+                }
+                throw e;
+            }
+        }
+    }
+
+    private void remove(AbstractAction<FileVersion> action) throws OXException {
+        /*
+         * move to temp folder
+         */
+        ServerFileVersion versionToRemove = ServerFileVersion.valueOf(action.getVersion(), path, session);
+        FileChecksum fileChecksum = versionToRemove.getFileChecksum();
+        if (DriveConstants.EMPTY_MD5.equals(fileChecksum.getChecksum())) {
+            // don't preserve empty files
+            session.getStorage().deleteFile(versionToRemove.getFile());
+            session.getChecksumStore().removeFileChecksum(fileChecksum);
+        } else {
+            File removedFile = session.getStorage().moveFile(
+                versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
+            if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
+                // moved successfully, update checksum
+                fileChecksum.setFileID(IDUtil.getFileID(removedFile));
+                fileChecksum.setVersion(removedFile.getVersion());
+                fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
+                session.getChecksumStore().updateFileChecksum(fileChecksum);
+            } else {
+                // file already in trash, cleanup
+                session.getStorage().deleteFile(removedFile);
+                session.getChecksumStore().removeFileChecksum(fileChecksum);
+            }
         }
     }
 
