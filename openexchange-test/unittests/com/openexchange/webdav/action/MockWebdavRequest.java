@@ -150,4 +150,10 @@ public class MockWebdavRequest implements WebdavRequest {
     public Map<String, Object> getUserInfo() {
         return userInfo;
     }
+
+    @Override
+    public boolean isBrief() {
+        return "t".equals(getHeader("Brief"));
+    }
+
 }

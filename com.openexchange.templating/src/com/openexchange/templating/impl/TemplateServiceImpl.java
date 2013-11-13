@@ -130,6 +130,11 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
+    public OXTemplate loadTemplate(final String templateName) throws OXException {
+        return loadTemplate(templateName, null);
+    }
+
+    @Override
     public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
         final String templatePath = defaultTemplatePath;
         if (templatePath == null) {
@@ -151,9 +156,35 @@ public class TemplateServiceImpl implements TemplateService {
         return retval;
     }
 
-    @Override
-    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
-        return loadTemplate(templateName, defaultTemplateName, session);
+    protected Template loadTemplate(final String templatePath, final String templateName, final Properties properties) throws OXException {
+        final File path = new File(templatePath);
+        if (!path.exists() || !path.isDirectory() || !path.canRead()) {
+            return null;
+        }
+        checkTemplatePath(templatePath);
+
+        synchronized (lock) {
+            Template retval = null;
+            try {
+                if (existsInFilesystem(templateName)) {
+                    final String userDir = System.getProperty("user.dir");
+                    System.setProperty("user.dir", templatePath);
+                    final Configuration config = new Configuration();
+                    System.setProperty("user.dir", userDir);
+                    config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+                    String templateText = loadFromFileSystem(templateName);
+                    templateText = extractProperties(templateText, properties);
+
+                    retval = new Template(templateName, new StringReader(templateText), config);
+                }
+            } catch (final IOException e) {
+                throw IOException.create(e);
+            }
+            if (retval == null) {
+                throw TemplateNotFound.create(templateName);
+            }
+            return retval;
+        }
     }
 
     @Override
@@ -162,8 +193,8 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public OXTemplate loadTemplate(final String templateName) throws OXException {
-        return loadTemplate(templateName, null);
+    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
+        return loadTemplate(templateName, defaultTemplateName, session);
     }
 
     @Override
@@ -174,9 +205,13 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session sess, final boolean createCopy) throws OXException {
         final ServerSession session = ServerSessionAdapter.valueOf(sess);
-        if (isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
-            return loadTemplate(defaultTemplateName);
+
+        if (Strings.isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
+            if (!isAdminTemplate(templateName)) {
+                return loadTemplate(defaultTemplateName);
+            }
         }
+
         synchronized (lock) {
             try {
                 FolderObject folder = folders.getPrivateTemplateFolder(session);
@@ -248,47 +283,31 @@ public class TemplateServiceImpl implements TemplateService {
         }
     }
 
-    protected Template loadTemplate(final String templatePath, final String templateName, final Properties properties) throws OXException {
-        final File path = new File(templatePath);
-        if (!path.exists() || !path.isDirectory() || !path.canRead()) {
-            return null;
+    /**
+     * Indicates if a given template is an admin template which means that it is defined from the administrator and stored within the
+     * backend.
+     * 
+     * @param templateName - the name of the template to check.
+     * @return true - if the template is indicated to be from the admin. false - if it is configured from the user.
+     */
+    protected boolean isAdminTemplate(String templateName) {
+        List<String> basicTemplateNames = getBasicTemplateNames(new String[0]);
+        if (basicTemplateNames.contains(templateName) && existsInFilesystem(templateName)) {
+            return true;
         }
-        checkTemplatePath(templatePath);
-
-        synchronized (lock) {
-            Template retval = null;
-            try {
-                if (existsInFilesystem(templateName)) {
-                    final String userDir = System.getProperty("user.dir");
-                    System.setProperty("user.dir", templatePath);
-                    final Configuration config = new Configuration();
-                    System.setProperty("user.dir", userDir);
-                    config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-                    String templateText = loadFromFileSystem(templateName);
-                    templateText = extractProperties(templateText, properties);
-
-                    retval = new Template(templateName, new StringReader(templateText), config);
-                }
-            } catch (final IOException e) {
-                throw IOException.create(e);
-            }
-            if (retval == null) {
-                throw TemplateNotFound.create(templateName);
-            }
-            return retval;
-        }
+        return false;
     }
 
     private void checkTemplatePath(final String templatePath) throws OXException {
         try {
-            if (isEmpty(templatePath)) {
+            if (Strings.isEmpty(templatePath)) {
                 return;
             }
             final String defaultTemplatePath = this.defaultTemplatePath;
             if (defaultTemplatePath == null) {
                 return;
             }
-            if (toLowerCase(defaultTemplatePath).equals(toLowerCase(templatePath))) {
+            if (Strings.toLowerCase(defaultTemplatePath).equals(Strings.toLowerCase(templatePath))) {
                 // Equal directory
                 return;
             }
@@ -557,27 +576,4 @@ public class TemplateServiceImpl implements TemplateService {
         basicTemplateNames.addAll(userTemplates);
         return basicTemplateNames;
     }
-
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    private String toLowerCase(final CharSequence chars) {
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

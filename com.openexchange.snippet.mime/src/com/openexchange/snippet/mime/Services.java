@@ -97,7 +97,7 @@ public final class Services {
     public static <S extends Object> S getService(final Class<? extends S> clazz) {
         final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
         if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.snippet.mime\" not started?");
         }
         return serviceLookup.getService(clazz);
     }

@@ -74,18 +74,21 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.sql.SearchStrings;
 
 /**
@@ -130,7 +133,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         {
             Connection con = getReadConnection(ctx);
             try {
-            	final int userId = user.getId();
+                final int userId = user.getId();
                 if (folderId == NOT_SET || folderId == NO_FOLDER) {
                     final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
                         userId,
@@ -167,29 +170,34 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
+        if (Strings.isEmpty(query) || "*".equals(query)) {
+            int maxResults;
+            if (NOT_SET != start && NOT_SET != end && end >= start) {
+                maxResults = end + 1 - start;
+            } else if (NOT_SET != start) {
+                maxResults = 200;
+            } else if (NOT_SET != end) {
+                maxResults = end + 1;
+            } else {
+                maxResults = NOT_SET;
+            }
+            if (NOT_SET != maxResults && own.size() + all.size() > maxResults &&
+                (null == sortedBy || InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(sortedBy))) {
+                /*
+                 * no pattern, ordering possible, and more folders queried than results needed - use optimized query
+                 */
+                return get(ctx, user, all, own, cols, sortedBy, dir, start, end);
+            }
+        }
+
         final StringAllocator SQL_QUERY = new StringAllocator(512);
         SQL_QUERY.append(getResultFieldsSelect(cols));
         SQL_QUERY.append(
             " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
             ctx.getContextId());
-        boolean needOr = false;
 
-        if (!all.isEmpty()) {
-            SQL_QUERY.append(" AND ((infostore.folder_id IN (").append(join(all)).append("))");
-            needOr = true;
-        }
+        appendFolders(SQL_QUERY, user.getId(), all, own);
 
-        if (!own.isEmpty()) {
-            if (needOr) {
-                SQL_QUERY.append(" OR ");
-            } else {
-                SQL_QUERY.append(" AND (");
-            }
-            SQL_QUERY.append("(infostore.created_by = ").append(user.getId()).append(" AND infostore.folder_id in (").append(join(own)).append(
-                ")))");
-        } else {
-            SQL_QUERY.append(')');
-        }
         String q = query;
         if (q.length() > 0 && !"*".equals(q)) {
             checkPatternLength(q);
@@ -222,39 +230,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
-        if (sortedBy != null && dir != NOT_SET) {
-            final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
-            if ((orderColumn != null) && (orderColumn[0] != null)) {
-                if (dir == DESC) {
-                    SQL_QUERY.append(" ORDER BY ");
-                    SQL_QUERY.append(orderColumn[0]);
-                    SQL_QUERY.append(" DESC");
-                } else if (dir == ASC) {
-                    SQL_QUERY.append(" ORDER BY ");
-                    SQL_QUERY.append(orderColumn[0]);
-                    SQL_QUERY.append(" ASC");
-                }
-            }
-        }
-
-        if ((start != NOT_SET) && (end != NOT_SET)) {
-            if (end >= start) {
-                SQL_QUERY.append(" LIMIT ");
-                SQL_QUERY.append(start);
-                SQL_QUERY.append(", ");
-                SQL_QUERY.append(((end + 1) - start));
-            }
-        } else {
-            if (start != NOT_SET) {
-                SQL_QUERY.append(" LIMIT ");
-                SQL_QUERY.append(start);
-                SQL_QUERY.append(",200");
-            }
-            if (end != NOT_SET) {
-                SQL_QUERY.append(" LIMIT ");
-                SQL_QUERY.append(end + 1);
-            }
-        }
+        appendOrderBy(SQL_QUERY, sortedBy, dir);
+        appendLimit(SQL_QUERY, start, end);
 
         {
             Connection con = getReadConnection(ctx);
@@ -281,6 +258,123 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 if (con != null && !keepConnection) {
                     releaseReadConnection(ctx, con);
                 }
+            }
+        }
+    }
+
+    private void appendFolders(StringAllocator sqlQuery, int userID, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
+        boolean needOr = false;
+
+        if (!readAllFolders.isEmpty()) {
+            sqlQuery.append(" AND ((infostore.folder_id IN (").append(join(readAllFolders)).append("))");
+            needOr = true;
+        }
+
+        if (!readOwnFolders.isEmpty()) {
+            if (needOr) {
+                sqlQuery.append(" OR ");
+            } else {
+                sqlQuery.append(" AND (");
+            }
+            sqlQuery.append("(infostore.created_by = ").append(userID).append(" AND infostore.folder_id in (").append(join(readOwnFolders)).append(
+                ")))");
+        } else {
+            sqlQuery.append(')');
+        }
+    }
+
+    private void appendLimit(StringAllocator sqlQuery, int start, int end) {
+        if ((start != NOT_SET) && (end != NOT_SET)) {
+            if (end >= start) {
+                sqlQuery.append(" LIMIT ");
+                sqlQuery.append(start);
+                sqlQuery.append(", ");
+                sqlQuery.append(((end + 1) - start));
+            }
+        } else {
+            if (start != NOT_SET) {
+                sqlQuery.append(" LIMIT ");
+                sqlQuery.append(start);
+                sqlQuery.append(",200");
+            }
+            if (end != NOT_SET) {
+                sqlQuery.append(" LIMIT ");
+                sqlQuery.append(end + 1);
+            }
+        }
+    }
+
+    private void appendOrderBy(StringAllocator sqlQuery, Metadata sortedBy, int dir) {
+        if (sortedBy != null && dir != NOT_SET) {
+            final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
+            if ((orderColumn != null) && (orderColumn[0] != null)) {
+                if (dir == DESC) {
+                    sqlQuery.append(" ORDER BY ");
+                    sqlQuery.append(orderColumn[0]);
+                    sqlQuery.append(" DESC");
+                } else if (dir == ASC) {
+                    sqlQuery.append(" ORDER BY ");
+                    sqlQuery.append(orderColumn[0]);
+                    sqlQuery.append(" ASC");
+                }
+            }
+        }
+    }
+
+    private SearchIterator<DocumentMetadata> get(Context context, User user, List<Integer> readAllFolders, List<Integer> readOwnFolders, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
+        /*
+         * get matching object IDs first
+         */
+        StringAllocator sqlQuery = new StringAllocator();
+        sqlQuery.append("SELECT infostore.id FROM infostore WHERE infostore.cid=").append(context.getContextId());
+        appendFolders(sqlQuery, user.getId(), readAllFolders, readOwnFolders);
+        appendOrderBy(sqlQuery, sortedBy, dir);
+        appendLimit(sqlQuery, start, end);
+
+        Connection connection = getReadConnection(context);
+        List<Integer> objectIDs = new ArrayList<Integer>();
+        PreparedStatement statement = null;
+        ResultSet results = null;
+        try {
+            statement = connection.prepareStatement(sqlQuery.toString());
+            results = statement.executeQuery();
+            while (results.next()) {
+                objectIDs.add(results.getInt(1));
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
+        } finally {
+            DBUtils.closeSQLStuff(results, statement);
+        }
+        if (0 == objectIDs.size()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        /*
+         * get requested metadata in a second step
+         */
+        sqlQuery = new StringAllocator();
+        sqlQuery.append(getResultFieldsSelect(cols));
+        sqlQuery.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ")
+            .append(context.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
+        appendOrderBy(sqlQuery, sortedBy, dir);
+        boolean keepConnection = false;
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(sqlQuery.toString());
+            InfostoreSearchIterator iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, context, connection, stmt);
+            // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
+            keepConnection = true;
+            return iter;
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
+        } finally {
+            if (connection != null && !keepConnection) {
+                releaseReadConnection(context, connection);
             }
         }
     }

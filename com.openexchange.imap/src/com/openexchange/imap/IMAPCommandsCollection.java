@@ -134,6 +134,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.ListInfo;
+import com.sun.mail.imap.protocol.MailboxInfo;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
 
@@ -3153,9 +3154,9 @@ public final class IMAPCommandsCollection {
         }))).booleanValue();
     }
 
-    private static final String ATOM_PERMANENTFLAGS = "[PERMANENTFLAGS";
+    // private static final String ATOM_PERMANENTFLAGS = "[PERMANENTFLAGS";
 
-    static final Pattern PATTERN_USER_FLAGS = Pattern.compile("(?:\\(|\\s)(?:\\\\\\*)(?:\\)|\\s)");
+    // static final Pattern PATTERN_USER_FLAGS = Pattern.compile("(?:\\(|\\s)(?:\\\\\\*)(?:\\)|\\s)");
 
     /**
      * Applies the IMAPv4 SELECT command on given folder and returns whether its permanent flags supports user-defined flags or not.
@@ -3180,23 +3181,8 @@ public final class IMAPCommandsCollection {
                 final Response response = r[r.length - 1];
                 Boolean retval = Boolean.FALSE;
                 if (response.isOK()) {
-                    NextResp: for (int i = 0, len = r.length - 1; i < len; i++) {
-                        if (!(r[i] instanceof IMAPResponse)) {
-                            continue;
-                        }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
-                        if (ir.isUnTagged() && ir.isOK()) {
-                            /*
-                             * " OK [PERMANENTFLAGS (\Deleted \)]"
-                             */
-                            ir.skipSpaces();
-                            if (ATOM_PERMANENTFLAGS.equals(ir.readAtom('\0'))) {
-                                retval = Boolean.valueOf(PATTERN_USER_FLAGS.matcher(ir.getRest()).find());
-                                break NextResp;
-                            }
-                        }
-                        r[i] = null;
-                    }
+                    final MailboxInfo mi = new MailboxInfo(r);
+                    retval = Boolean.valueOf(mi.permanentFlags.contains(Flags.Flag.USER));
                     notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(

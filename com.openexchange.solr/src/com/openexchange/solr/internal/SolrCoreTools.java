@@ -72,7 +72,7 @@ public class SolrCoreTools {
         solrNodes.lock(localAddress);
         try {
             Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() + 1));
+            solrNodes.put(localAddress, Integer.valueOf(null == integer ? 1 : integer.intValue() + 1));
         } finally {
             solrNodes.unlock(localAddress);
         }
@@ -84,19 +84,16 @@ public class SolrCoreTools {
         solrNodes.lock(localAddress);
         try {
             Integer integer = solrNodes.get(localAddress);
-            solrNodes.put(localAddress, new Integer(integer.intValue() - 1));
+            if (null != integer) {
+                solrNodes.put(localAddress, Integer.valueOf(integer.intValue() - 1));
+            }
         } finally {
             solrNodes.unlock(localAddress);
         }
     }
 
     public static String resolveSocketAddress(InetSocketAddress addr) {
-        if (addr.isUnresolved()) {
-            return addr.getHostName();
-        } else {
-            return addr.getAddress().getHostAddress();
-        }
+        return addr.isUnresolved() ? addr.getHostName() : addr.getAddress().getHostAddress();
     }
-
 
 }

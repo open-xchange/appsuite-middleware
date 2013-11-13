@@ -83,9 +83,11 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -404,27 +406,33 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		 * @throws FolderException
 		 */
 	    private List<UserizedFolder> getVisibleFolders() throws OXException {
+	        UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(factory.getSession()).getUserPermissionBits();
 	    	List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
 	    	folders.addAll(this.getVisibleFolders(PrivateType.getInstance()));
-	    	folders.addAll(this.getVisibleFolders(PublicType.getInstance()));
-	    	folders.addAll(this.getVisibleFolders(SharedType.getInstance()));
+	    	if (permissionBits.hasFullPublicFolderAccess()) {
+	    	    folders.addAll(this.getVisibleFolders(PublicType.getInstance()));
+	    	}
+	    	if (permissionBits.hasFullSharedFolderAccess()) {
+	    	    folders.addAll(this.getVisibleFolders(SharedType.getInstance()));
+	    	}
 	    	return folders;
 	    }
 
 		/**
 		 * Gets a list containing all visible folders of the given {@link Type}.
-		 * @param type
-		 * @return
+		 *
+		 * @param type The folder type
+		 * @return The visible folders
 		 * @throws FolderException
 		 */
-        private List<UserizedFolder> getVisibleFolders(final Type type) throws OXException {
-            final List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
-            final FolderService folderService = this.factory.getFolderService();
-            final FolderResponse<UserizedFolder[]> visibleFoldersResponse = folderService.getVisibleFolders(
-                    FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, true,
-                    this.factory.getSession(), null);
-            final UserizedFolder[] response = visibleFoldersResponse.getResponse();
-            for (final UserizedFolder folder : response) {
+        private List<UserizedFolder> getVisibleFolders(Type type) throws OXException {
+            List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
+            FolderService folderService = this.factory.getFolderService();
+            FolderResponse<UserizedFolder[]> visibleFoldersResponse = folderService.getVisibleFolders(
+                FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, true,
+                this.factory.getSession(), null);
+            UserizedFolder[] response = visibleFoldersResponse.getResponse();
+            for (UserizedFolder folder : response) {
                 if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isBlacklisted(folder)) {
                     folders.add(folder);
                 }

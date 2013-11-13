@@ -172,4 +172,15 @@ public enum ServiceExceptionCode implements LogLevelAwareOXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
+    /**
+     * Generates an appropriate OXException for specified absent service.
+     *
+     * @param serviceClass The class of absent service
+     * @return An appropriate OXException for specified absent service
+     */
+    public static <S> OXException absentService(final Class<S> serviceClass) {
+        return SERVICE_UNAVAILABLE.create(serviceClass.getName());
+    }
+
 }

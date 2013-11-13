@@ -53,7 +53,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -84,7 +86,8 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
 
     @Override
     public void onMessage(final Message<Map<String, Object>> message) {
-        final PushMsObject pushObj = PushMsObject.valueFor(message.getMessageObject());
+        final Map<String, Object> m = message.getMessageObject();
+        final PushMsObject pushObj = PushMsObject.valueFor(m);
         if (null != pushObj) {
             final boolean debug = LOG.isDebugEnabled();
             if (!getHostname().equals(pushObj.getHostname())) {
@@ -129,9 +132,28 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
             } else if (debug) {
                 LOG.debug("Recieved PushMsObject's host name is equal to this listener's host name: " + getHostname() + ". Ignore...");
             }
-        } else if (LOG.isDebugEnabled()) {
-            LOG.debug("Received null from topic. Ignore...");
+        } else if (message.isRemote() && m.containsKey("__pure")) {
+            final EventAdmin eventAdmin = Services.getServiceLookup().getService(EventAdmin.class);
+            if (null != eventAdmin) {
+                final Event event = eventFrom(m);
+                eventAdmin.postEvent(event);
+            }
         }
+    }
+
+    private Event eventFrom(final Map<String, Object> m) {
+        if (null == m) {
+            return null;
+        }
+        final String topic = (String) m.get("__topic");
+        final Map<String, Object> props = new LinkedHashMap<String, Object>(8);
+        for (final Entry<String, Object> entry : m.entrySet()) {
+            final String key = entry.getKey();
+            if (!"__topic".equals(key) && !"__pure".equals(key)) {
+                props.put(key, entry.getValue());
+            }
+        }
+        return new Event(topic, props);
     }
 
     private String getHostname() {

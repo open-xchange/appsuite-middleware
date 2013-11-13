@@ -78,6 +78,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -247,6 +248,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
      */
     public TIntList getAccountIDs(final String serviceId, final Session session) throws OXException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
+        if (null == databaseService) {
+            throw ServiceExceptionCode.serviceUnavailable(CLAZZ_DB);
+        }
         /*
          * Readable connection
          */

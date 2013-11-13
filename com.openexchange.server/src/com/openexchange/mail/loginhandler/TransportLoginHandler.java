@@ -212,28 +212,18 @@ public final class TransportLoginHandler implements LoginHandlerService {
         newFolder.setType(FolderObject.PUBLIC);
         newFolder.setModule(FolderObject.INFOSTORE);
 
-        final List<OCLPermission> perms = new ArrayList<OCLPermission>(2);
         // Admin permission
-        OCLPermission perm = new OCLPermission();
-        perm.setEntity(adminId);
-        perm.setFolderAdmin(true);
-        perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
-        perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        perm.setGroupPermission(false);
-        perms.add(perm);
-        // All groups and users permission
-        perm = new OCLPermission();
-        perm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
-        perm.setFolderAdmin(false);
-        perm.setFolderPermission(OCLPermission.READ_FOLDER);
-        perm.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
-        perm.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
-        perm.setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
-        perm.setGroupPermission(true);
-        perms.add(perm);
-        newFolder.setPermissions(perms);
+        {
+            final OCLPermission perm = new OCLPermission();
+            perm.setEntity(adminId);
+            perm.setFolderAdmin(true);
+            perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
+            perm.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
+            perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
+            perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
+            perm.setGroupPermission(false);
+            newFolder.setPermissions(Collections.singletonList(perm));
+        }
 
         return newFolder;
     }

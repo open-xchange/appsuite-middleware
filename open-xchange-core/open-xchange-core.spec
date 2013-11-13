@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -856,6 +856,15 @@ fi
 # SoftwareChange_Request-1667
 ox_add_property com.openexchange.html.css.parse.timeout 4 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-1684
+ox_add_property com.openexchange.templating.usertemplating false /opt/open-xchange/etc/templating.properties
+
+# SoftwareChange_Request-1702
+ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts false /opt/open-xchange/etc/transport.properties
+
+# SoftwareChange_Request-1707
+ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
@@ -899,6 +908,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Thu Nov 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.4.1 release
 * Wed Oct 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-28
 * Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -1,3 +1,81 @@
+* 2013-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29770: Only distribute Java POJOs
+ - Fix for bug 29762: Added proper mapping for "MOBILITY" constant from UserPermissionBits.java
+ - Fix for bug 29748: Invoke "AJAXServlet.encodeUrl()" with proper arguments when safe-encoding a publication's site name
+ - Fix for bug 29747: Orderly handle possible 'MessageRemovedException' on access to message content
+
+* 2013-11-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29767: Restrict infostore document count to current context 
+ - Fix for bug 29288: Correctly check for "order by" property 
+  
+* 2013-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28479: Remotely distribute events for "com/openexchange/push" topic if they do not contain a CommonEvent instance
+
+* 2013-11-11 - marc.arens@open-xchange.com
+
+ - Fix for bug 29724: Continue processing remaining Stanzas after finding protocol related Stanza type
+ - Fix for bug 29539: Refresh resources via set to prevent eviction
+ 
+* 2013-11-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29728: Be prepared for initially synchronized recurring appointments with delete exceptions 
+ - Fix for bug 29746: Adjust buffer position in enhanced random access file after append operations  
+
+* 2013-11-11 - martin.schneider@open-xchange.com
+
+ - Fix for bug 29720: Allow admin templates to be displayed even if user templating is disabled 
+
+* 2013-11-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29288: Use two-step approach when querying infostore documents from many folders 
+
+* 2013-11-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29725: Handle possible error when initializing capabilities + let OXFolderManager rather operate on user's permission
+                      than on user's configuration
+ - Fix for bug 29737: Inlined used method from c.o.java.Strings
+
+* 2013-11-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29683: Create special "E-Mail attachments" InfoStore folder with private-only permissions
+
+* 2013-11-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29609: Use cached sessions for consecutive WebDAV requests of the same client 
+ - Fix for bug 29641: Supply one 'supported-calendar-component-set' inside 'supported-calendar-component-sets' for each supported component
+
+* 2013-11-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29649: Check needed service for not null
+ - Fix for bug 29650: Avoid possible NPE when resolving a folder storage by a Content-Type identifier
+ - Fix for bug 29651: Added null guard when accessing possibly absent service
+ - Fix for bug 29653: Added null guard when accessing possibly absent service
+ - Fix for bug 29654: Added null guard when accessing possibly absent service
+ - Fix for bug 29660: Handle OXException's that do not have a category assigned
+ - Fix for bug 29666: User proper default charset when URL-encoding publication's site name
+ - Fix for bug 29656: Check for possibly absent count Integer instance
+
+* 2013-11-04 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29652: Added NPE check
+
+* 2013-11-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29628: Make 'validate_contact_email' available in config tree, so it becomes visible for JSlob mapping
+
+* 2013-11-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27721: Improved parsing of an IMAP folder's capability to store user flags
+ - Fix for bug 29631: Signal that read-write connection has been used for reading
+ - Fix for bug 29633: Signal read-only access with used read-write connection if no manipulation was done
+ - Fix for bug 29630: Return with "after reading" if an exception is thrown meanwhile
+ - Fix for bug 29629: Signal read-only access with used read-write connection if no manipulation was done
+ - Fix for bug 29621: Don't propagate OXException via RMI
+ - Fix for bug 29639: Use configured default charset encoding when decoding a Servlet path in AJP module
+
 * 2013-10-31 - marc.arens@open-xchange.com
 
  - Fix for bug 25994: Expose basic realtime components via jmx

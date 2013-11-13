@@ -98,15 +98,25 @@ public final class UserFlagsCache {
              * Obtain folder lock here to avoid multiple acquire/release when invoking folder's methods
              */
             synchronized (f) {
-                if (f.isOpen() && (Folder.READ_WRITE == f.getMode())) {
-                    entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
+                if (f.isOpen()) {
+                    if (Folder.READ_WRITE == f.getMode()) {
+                        entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
+                    } else {
+                        final String[] userFlags = f.getAvailableFlags().getUserFlags();
+                        if (null != userFlags && userFlags.length > 0) {
+                            entry.setValue(Boolean.TRUE);
+                        } else {
+                            entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
+                        }
+                    }
                 } else {
                     entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
                 }
             }
             mailCache.put(entry);
         }
-        return entry.getValue() == null ? false : entry.getValue().booleanValue();
+        final Boolean b = entry.getValue();
+        return b == null ? false : b.booleanValue();
     }
 
     /**

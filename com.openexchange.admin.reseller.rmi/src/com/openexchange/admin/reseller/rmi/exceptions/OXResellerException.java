@@ -148,7 +148,15 @@ public class OXResellerException extends Exception {
         /**
          * Subadmin %1$s does not belong to %2$s
          */
-        SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN("Subadmin %1$s does not belong to %2$s");
+        SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN("Subadmin %1$s does not belong to %2$s"),
+        /**
+         * Subadmins cannot change parentId
+         */
+        SUBAMIN_NOT_ALLOWED_TO_CHANGE_PARENTID("Subadmins cannot change parentId"),
+        /**
+         * Cannot change parentId to id of subsubadmin
+         */
+        CANNOT_SET_PARENTID_TO_SUBSUBADMIN("Cannot change parentId to id of subsubadmin");
 
         private final String text;
 

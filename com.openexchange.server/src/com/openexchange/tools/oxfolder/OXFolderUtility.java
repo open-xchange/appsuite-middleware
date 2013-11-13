@@ -72,6 +72,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -343,23 +344,23 @@ public final class OXFolderUtility {
      * Ensures that an user who does not hold full shared folder access cannot share one of his private folders
      *
      * @param folderObj The folder object
-     * @param sessionUserConfig The session user's configuration
+     * @param sessionUserPerms The session user's permissions
      * @param ctx The context
      * @throws OXException If an user tries to share a folder although he is not allowed to
      */
-    public static void checkPermissionsAgainstSessionUserConfig(final FolderObject folderObj, final UserConfiguration sessionUserConfig, final Context ctx) throws OXException {
+    public static void checkPermissionsAgainstSessionUserConfig(final FolderObject folderObj, final UserPermissionBits sessionUserPerms, final Context ctx) throws OXException {
         final List<OCLPermission> perms = folderObj.getPermissions();
         final int size = perms.size();
         final Iterator<OCLPermission> iter = perms.iterator();
         final boolean isPrivate = (folderObj.getType() == FolderObject.PRIVATE);
-        final boolean hasFullSharedFolderAccess = sessionUserConfig.hasFullSharedFolderAccess();
+        final boolean hasFullSharedFolderAccess = sessionUserPerms.hasFullSharedFolderAccess();
         for (int i = 0; i < size; i++) {
             final OCLPermission oclPerm = iter.next();
             if (!hasFullSharedFolderAccess && isPrivate && i > 0 && !isEmptyPermission(oclPerm)) {
                 /*
                  * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
                  */
-                throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(getUserName(sessionUserConfig.getUserId(), ctx),
+                throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(getUserName(sessionUserPerms.getUserId(), ctx),
                     getFolderName(folderObj),
                     Integer.valueOf(ctx.getContextId()));
             }

@@ -50,17 +50,19 @@
 package com.openexchange.realtime.json.impl;
 
 import static com.openexchange.realtime.packet.StanzaMatcher.isStanza;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.json.impl.JSONProtocolHandler;
-import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
@@ -84,12 +86,21 @@ public class ProtocolHandlerTest {
         public void handleInternal(Stanza stanza, ID recipient) throws OXException {
         }
     };
+    private JSONObject message0, message1, message2;
+    private List<JSONObject> stanzas;
     
     
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         protocol = mock(RTProtocol.class);
         handler = new JSONProtocolHandler(protocol, gate);
+        stanzas = new ArrayList<JSONObject>();
+        message0 = new JSONObject("{element: 'message', payloads: [{namespace: 'test', element: 'number', data: 1}], to: 'test@1', from: 'test@1', seq: '0'}");
+        message1 = new JSONObject("{element: 'message', payloads: [{namespace: 'test', element: 'number', data: 2}], to: 'test@1', from: 'test@1', seq: '1'}");
+        message2 = new JSONObject("{element: 'message', payloads: [{namespace: 'test', element: 'number', data: 3}], to: 'test@1', from: 'test@1', seq: '2'}");
+        stanzas.add(message0);
+        stanzas.add(message1);
+        stanzas.add(message2);
     }
     
     @Test
@@ -116,6 +127,14 @@ public class ProtocolHandlerTest {
         verify(protocol).acknowledgementReceived(12l, null);
         
     }
+    
+    @Test
+    public void passesANextSequence() throws OXException, JSONException {
+        String message = "{type: 'nextSequence', seq: 0}";
+        handle(message);
+        verify(protocol).nextSequence(id, 0, gate, null);
+    }
+    
     
     @Test
     public void acksCanBeCompressedIntoAnArrayOfValues() throws OXException, JSONException {
@@ -151,8 +170,45 @@ public class ProtocolHandlerTest {
         handle(message);
         verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 23)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
     }
+    
+    @Test
+    public void passNextSequenceAndMessages() throws Exception {
+        JSONObject nextSequence = new JSONObject("{type: 'nextSequence', seq: 0}");
+        stanzas.add(0, nextSequence);
+        handle(stanzas);
+        verify(protocol).nextSequence(id, 0, gate, null);
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+    }
+
+    @Test
+    public void passPingAndMessages() throws Exception {
+        JSONObject ping = new JSONObject("{type: 'ping', commit: false}");
+        stanzas.add(0, ping);
+        handle(stanzas);
+        verify(protocol).ping(id, false, null, null);
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+    }
+
+    @Test
+    public void passAckAndMessages() throws Exception {
+        JSONObject ack = new JSONObject("{type: 'ack', seq: 12}");
+        stanzas.add(0, ack);
+        handle(stanzas);
+        verify(protocol).acknowledgementReceived(12L, null);
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 1)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 2)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 3)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
+    }
 
     private void handle(String message) throws OXException, JSONException {
         handler.handleIncomingMessages(id, null, new StateEntry(null, null, false), Arrays.asList(new JSONObject(message)), null);
+    }
+
+    private void handle(List<JSONObject> stanzas) throws OXException, JSONException {
+        handler.handleIncomingMessages(id, null, new StateEntry(null, null, false), stanzas, null);
     }
 }

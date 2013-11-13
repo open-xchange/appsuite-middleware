@@ -81,6 +81,11 @@ public class OXJSONExceptionMessage implements LocalizableStrings {
     public static final String INVALID_COOKIE_MSG = "Invalid cookie.";
 
     /**
+     * The provided cookie is invalid. Please login.
+     */
+    public static final String INVALID_COOKIE_MSG_DISPLAY = "The provided cookie is invalid. Please login.";
+
+    /**
      * Exception while building JSON.
      */
     public static final String JSON_BUILD_ERROR_MSG = "Exception while building JSON.";
@@ -91,9 +96,19 @@ public class OXJSONExceptionMessage implements LocalizableStrings {
     public static final String CONTAINS_NON_DIGITS_MSG = "Value \"%1$s\" of attribute %2$s contains non digit characters.";
 
     /**
+     * The value \"%1$s\" you set for attribute %2$s do not have to contain non digit characters.
+     */
+    public static final String CONTAINS_NON_DIGITS_MSG_DISPLAY = "The value \"%1$s\" you set for attribute %2$s do not have to contain non digit characters.";
+
+    /**
      * Too many digits within field %1$s.
      */
     public static final String TOO_BIG_NUMBER_MSG = "Too many digits within field %1$s.";
+
+    /**
+     * You inserted too many digits into field %1$s.
+     */
+    public static final String TOO_BIG_NUMBER_MSG_DISPLAY = "You inserted too many digits into field %1$s.";
 
     /**
      * Unable to parse value "%1$s" within field %2$s as a number.

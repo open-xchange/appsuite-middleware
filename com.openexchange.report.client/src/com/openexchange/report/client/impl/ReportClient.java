@@ -124,9 +124,9 @@ public class ReportClient extends AbstractJMXTools {
     private static final char OPT_APPSUITE_RUN_AND_DELIVER_REPORT_SHORT = 'x';
 
     private static final String OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG = "run-and-deliver-report";
-    
+
     private static final String OPT_APPSUITE_SILENT_LONG = "silent";
-    
+
     private CLIOption displayonly = null;
 
     private CLIOption sendonly = null;
@@ -154,7 +154,7 @@ public class ReportClient extends AbstractJMXTools {
     private CLIOption asReportType = null;
 
     private CLIOption asSilent = null;
-    
+
     public enum ReportMode {
         SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE
     };
@@ -351,7 +351,7 @@ public class ReportClient extends AbstractJMXTools {
             "Create a new report and send it immediately. Note: This command will run until the report is finished, and that could take a while. Can (and should) be combined with the options for sending, displaying or saving the report ",
             false,
             NeededQuadState.notneeded);
-        
+
         this.asSilent = setLongOpt(parser, OPT_APPSUITE_SILENT_LONG, "Do not print out the status line. To be used with " + OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG + ".", false, false);
     }
 
@@ -443,6 +443,7 @@ public class ReportClient extends AbstractJMXTools {
             put("RSS_BOOKMARKS", "access-rss-bookmarks");
             put("RSS_PORTAL", "access-rss-portal");
             put("SYNCML", "access-syncml");
+            put("MOBILITY", "access-syncml");
             put("TASKS", "access-tasks");
             put("VCARD", "access-vcard");
             put("WEBDAV", "access-webdav");
@@ -556,19 +557,19 @@ public class ReportClient extends AbstractJMXTools {
                 "run",
                 new Object[] { reportType },
                 new String[] { String.class.getCanonicalName() });
-           
-           
+
+
            // Start polling
            boolean done = false;
            int charNum = 0;
-           
+
            while (!done) {
                CompositeData[] reports = (CompositeData[]) server.invoke(
                    getAppSuiteReportingName(),
                    "retrievePendingReports",
                    new Object[] { reportType },
                    new String[] { String.class.getCanonicalName() });
-               
+
                boolean found = false;
                for (CompositeData report : reports) {
                    if (report.get("uuid").equals(uuid)) {
@@ -579,16 +580,16 @@ public class ReportClient extends AbstractJMXTools {
                        }
                    }
                }
-               
+
                done = !found;
-               
+
                if (!done) {
                    Thread.sleep(silent ? 60000 : 1000);
                }
            }
-           
-           
-           
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
@@ -613,9 +614,9 @@ public class ReportClient extends AbstractJMXTools {
             timePerContext = elapsedTime / finishedContexts;
 
         }
-        
+
         StringBuilder b = new StringBuilder();
-        
+
         b.append(report.get("uuid")).append(": ");
         b.append(String.format(
             "%d/%d (%.2f %%) ",
@@ -625,9 +626,9 @@ public class ReportClient extends AbstractJMXTools {
         if (timePerContext > 0) {
             b.append("ETA: " + prettyPrintTimeInterval(timePerContext * pendingContexts));
         }
-        
+
         System.out.print(b);
-        
+
         return b.length();
     }
 

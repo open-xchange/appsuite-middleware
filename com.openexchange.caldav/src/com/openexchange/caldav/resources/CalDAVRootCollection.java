@@ -67,6 +67,8 @@ import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -95,7 +97,7 @@ public class CalDAVRootCollection extends CommonCollection {
      * @param factory the factory
      */
     public CalDAVRootCollection(GroupwareCaldavFactory factory) {
-        super(factory, new WebdavPath());
+        super(factory, GroupwareCaldavFactory.ROOT_URL);
         this.factory = factory;
         super.includeProperties(
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO)
@@ -213,16 +215,26 @@ public class CalDAVRootCollection extends CommonCollection {
     }
 
     /**
-     * Gets a list of all visible and subscribed calendar folders in the configured folder tree.
-     * @return
+     * Gets a list of all visible and subscribed task- and calendar-folders in the configured folder tree.
+     *
+     * @return The visible folders
      * @throws FolderException
      */
     private List<UserizedFolder> getVisibleFolders() throws OXException {
+        UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(factory.getSession()).getUserPermissionBits();
         List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
-        folders.addAll(getVisibleFolders(PrivateType.getInstance(), CalendarContentType.getInstance()));
-        folders.addAll(getVisibleFolders(PublicType.getInstance(), CalendarContentType.getInstance()));
-        folders.addAll(getVisibleFolders(SharedType.getInstance(), CalendarContentType.getInstance()));
-        folders.addAll(getVisibleFolders(PrivateType.getInstance(), TaskContentType.getInstance()));
+        if (permissionBits.hasCalendar()) {
+            folders.addAll(getVisibleFolders(PrivateType.getInstance(), CalendarContentType.getInstance()));
+            if (permissionBits.hasFullPublicFolderAccess()) {
+                folders.addAll(getVisibleFolders(PublicType.getInstance(), CalendarContentType.getInstance()));
+            }
+            if (permissionBits.hasFullSharedFolderAccess()) {
+                folders.addAll(getVisibleFolders(SharedType.getInstance(), CalendarContentType.getInstance()));
+            }
+        }
+        if (permissionBits.hasTask()) {
+            folders.addAll(getVisibleFolders(PrivateType.getInstance(), TaskContentType.getInstance()));
+        }
         return folders;
     }
 
@@ -263,28 +275,34 @@ public class CalDAVRootCollection extends CommonCollection {
     }
 
     /**
-     * Checks whether the supplied folder is a trash folder, i.e. one of
-     * it's parent folders is the default trash folder.
+     * Checks whether the supplied folder is a trash folder, i.e. one of it's parent folders is the default trash folder.
+     * <p/>
+     * Only applicable when using the {@link #OUTLOOK_TREE_ID}.
      *
-     * @param folder
-     * @return
-     * @throws WebdavProtocolException
-     * @throws FolderException
+     * @param folder The folder to check
+     * @return <code>true</code> if the folder is a trash folder, <code>false</code>, otherwise
+     * @throws OXException
      */
     private boolean isTrashFolder(UserizedFolder folder) throws OXException {
-        String trashFolderId = this.getTrashFolderID();
-        if (null != trashFolderId) {
-            FolderResponse<UserizedFolder[]> pathResponse = getFolderService().getPath(
-                    OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
-            UserizedFolder[] response = pathResponse.getResponse();
-            for (UserizedFolder parentFolder : response) {
-                if (trashFolderId.equals(parentFolder.getID())) {
-                    LOG.debug("Detected folder below trash: " + folder);
+        if (OUTLOOK_TREE_ID.equals(factory.getState().getTreeID()) && PrivateType.getInstance().equals(folder.getType()) &&
+            ServerSessionAdapter.valueOf(factory.getSession()).getUserPermissionBits().hasOLOX20()) {
+            String trashFolderId = this.getTrashFolderID();
+            if (null != trashFolderId) {
+                if (trashFolderId.equals(folder.getParentID())) {
                     return true;
                 }
+                FolderResponse<UserizedFolder[]> pathResponse = getFolderService().getPath(
+                        OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
+                UserizedFolder[] response = pathResponse.getResponse();
+                for (UserizedFolder parentFolder : response) {
+                    if (trashFolderId.equals(parentFolder.getID())) {
+                        LOG.debug("Detected folder below trash: " + folder);
+                        return true;
+                    }
+                }
+            } else {
+                LOG.warn("No config value for trash folder id found");
             }
-        } else {
-            LOG.warn("No config value for trash folder id found");
         }
         return false;
     }

@@ -172,7 +172,6 @@ Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Replaces: open-xchange-lang-community-pt-br (<< 6.21.0-0)
 Conflicts: open-xchange-lang-community-pt-br (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for pt_BR
- This localization package are driven by the community.
 
 Package: open-xchange-l10n-pt-pt
 Architecture: all

@@ -72,6 +72,7 @@ import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
 import com.openexchange.realtime.hazelcast.management.ManagementHouseKeeper;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastRealtimeActivator}
@@ -85,7 +86,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class };
+        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class };
     }
 
     @Override

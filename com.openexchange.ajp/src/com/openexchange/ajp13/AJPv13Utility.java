@@ -50,11 +50,13 @@
 package com.openexchange.ajp13;
 
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
-import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
+import com.openexchange.configuration.ServerConfig.Property;
 
 /**
  * {@link AJPv13Utility} - Provides some utility methods for AJP processing
@@ -62,6 +64,28 @@ import org.apache.commons.codec.net.URLCodec;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Utility {
+
+    private static final ConcurrentMap<String, URLCodec> URL_CODECS = new ConcurrentHashMap<String, URLCodec>(8);
+
+    private static URLCodec getUrlCodec(final String charset) {
+        String cs = charset;
+        if (null == cs) {
+            final String defCharset = AJPv13Config.getServerProperty(Property.DefaultEncoding);
+            if (null == defCharset) {
+                return null;
+            }
+            cs = defCharset;
+        }
+        URLCodec urlCodec = URL_CODECS.get(cs);
+        if (null == urlCodec) {
+            final URLCodec nc = new URLCodec(cs);
+            urlCodec = URL_CODECS.putIfAbsent(cs, nc);
+            if (null == urlCodec) {
+                urlCodec = nc;
+            }
+        }
+        return urlCodec;
+    }
 
     /**
      * Initializes a new {@link AJPv13Utility}
@@ -71,19 +95,20 @@ public final class AJPv13Utility {
     }
 
     private static final Pattern P_DOT = Pattern.compile("\\.");
-
     private static final Pattern P_MINUS = Pattern.compile("-");
-
-    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
 
     /**
      * URL encodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
-    public static String urlEncode(final String s) {
+    public static String urlEncode(final String s, final String charset) {
         try {
-            return isEmpty(s) ? s : P_MINUS.matcher(P_DOT.matcher(URL_CODEC.encode(s)).replaceAll("%2E")).replaceAll("%2D");
+            if (isEmpty(s)) {
+                return s;
+            }
+            final URLCodec urlCodec = getUrlCodec(null == charset ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charset);
+            return P_MINUS.matcher(P_DOT.matcher(urlCodec.encode(s)).replaceAll("%2E")).replaceAll("%2D");
         } catch (final EncoderException e) {
             return s;
         }
@@ -96,7 +121,11 @@ public final class AJPv13Utility {
      */
     public static String decodeUrl(final String s, final String charset) {
         try {
-            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+            if (isEmpty(s)) {
+                return s;
+            }
+            final String cs = isEmpty(charset) ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charset;
+            return getUrlCodec(cs).decode(s, cs);
         } catch (final DecoderException e) {
             return s;
         } catch (final UnsupportedEncodingException e) {

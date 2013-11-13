@@ -49,33 +49,36 @@
 
 package com.openexchange.authorization;
 
-import static com.openexchange.authorization.AuthorizationExceptionMessages.PASSWORD_EXPIRED_MSG;
-import static com.openexchange.authorization.AuthorizationExceptionMessages.UNKNOWN_MSG;
-import static com.openexchange.authorization.AuthorizationExceptionMessages.USER_DISABLED_MSG;
+import static com.openexchange.authorization.AuthorizationExceptionMessages.PASSWORD_EXPIRED_DISPLAY;
+import static com.openexchange.authorization.AuthorizationExceptionMessages.USER_DISABLED_DISPLAY;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link AuthorizationExceptionCodes}
  *
  */
-public enum AuthorizationExceptionCodes implements OXExceptionCode {
+public enum AuthorizationExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
 
     /** User is deactivated */
-    USER_DISABLED(USER_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 1),
+    USER_DISABLED("User is deactivated", USER_DISABLED_DISPLAY, CATEGORY_PERMISSION_DENIED, 1),
     /** Unknown error */
-    UNKNOWN(UNKNOWN_MSG, CATEGORY_ERROR, 2),
+    UNKNOWN("Password expired", null, CATEGORY_ERROR, 2),
     /** Password expired */
-    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, CATEGORY_PERMISSION_DENIED, 3);
+    PASSWORD_EXPIRED("Unknown error", PASSWORD_EXPIRED_DISPLAY, CATEGORY_PERMISSION_DENIED, 3);
 
     private String message;
+    private String displayMessage;
     private Category category;
     private int number;
 
-    private AuthorizationExceptionCodes(final String message, final Category category, final int number) {
+    private AuthorizationExceptionCodes(final String message, final String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
     }
@@ -93,6 +96,11 @@ public enum AuthorizationExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     public String getHelp() {

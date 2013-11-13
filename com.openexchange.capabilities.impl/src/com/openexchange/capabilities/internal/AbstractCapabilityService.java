@@ -500,13 +500,17 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         List<CapabilityChecker> list = checkers.get(cap);
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
-                if (checker instanceof DependentCapabilityChecker) {
-                    DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
-                    if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
+                try {
+                    if (checker instanceof DependentCapabilityChecker) {
+                        DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
+                        if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
+                            return false;
+                        }
+                    } else if (!checker.isEnabled(cap, session)) {
                         return false;
                     }
-                } else if (!checker.isEnabled(cap, session)) {
-                    return false;
+                } catch (final Exception e) {
+                    LOG.warn("Could not check availability for capability '" + cap + "'. Assuming as absent this time.", e);
                 }
             }
         }

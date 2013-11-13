@@ -64,6 +64,8 @@ import com.openexchange.realtime.packet.IDEventHandler;
  */
 public class StateManager {
 
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(StateManager.class);
+    
     private final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
 
     private final ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
@@ -127,6 +129,9 @@ public class StateManager {
     public void timeOutStaleStates(long timestamp) {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("State for id " + state.getId() + " is timed out. Last seen: " + state.getLastSeen());
+                }
                 state.getId().dispose(this, null);
             } else {
                 state.getId().trigger(ID.Events.REFRESH, this);

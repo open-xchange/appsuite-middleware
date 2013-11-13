@@ -49,25 +49,25 @@
 
 package com.openexchange.templating;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.templating.impl.DocumentMetadataMatcherTest;
+import com.openexchange.templating.impl.TemplateServiceImplTest;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UnitTests {
+@RunWith(Suite.class)
+@SuiteClasses({
+    TestTemplateService.class,
+    DocumentMetadataMatcherTest.class,
+    TemplateServiceImplTest.class
+})
+public class UnitTests {
 
     public UnitTests() {
-        super();
-    }
-
-    public static final Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(TestTemplateService.class);
-        tests.addTestSuite(DocumentMetadataMatcherTest.class);
-        return tests;
     }
 }

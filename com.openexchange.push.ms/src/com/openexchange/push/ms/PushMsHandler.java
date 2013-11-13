@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -90,20 +91,28 @@ public class PushMsHandler implements EventHandler {
      * @param publishTopic
      * @param delayPushQueue the delayQueue that is used for pushing PIM objects except E-Mails
      */
-    public PushMsHandler(final Topic<Map<String, Object>> publishTopic, DelayPushQueue delayPushQueue) {
+    public PushMsHandler(final Topic<Map<String, Object>> publishTopic, final DelayPushQueue delayPushQueue) {
         super();
         this.publishTopic = publishTopic;
         this.delayPushQueue = delayPushQueue;
     }
 
     @Override
-    public void handleEvent(Event e) {
+    public void handleEvent(final Event e) {
         final CommonEvent event;
         {
+
+            // ------------------------------------------------------------------------- //
+
             final Object obj = e.getProperty(CommonEvent.EVENT_KEY);
             if (obj == null) {
+                // Handle events w/o a CommonEvent
+                handleNonCommonEvent(e);
                 return;
             }
+
+            // ------------------------------------------------------------------------- //
+
             try {
                 event = (CommonEvent) obj;
             } catch (final ClassCastException cce) {
@@ -124,7 +133,7 @@ public class PushMsHandler implements EventHandler {
 
         final int module = event.getModule();
 
-        Object tmp = event.getSourceFolder();
+        final Object tmp = event.getSourceFolder();
         final FolderObject parentFolder;
         if (tmp instanceof FolderObject) {
             parentFolder = (FolderObject) event.getSourceFolder();
@@ -160,6 +169,30 @@ public class PushMsHandler implements EventHandler {
         }
     }
 
+    private void handleNonCommonEvent(final Event e) {
+        // Just pass to topic
+        if (e.getTopic().startsWith("com/openexchange/push")) {
+            try {
+                publishTopic.publish(toPojo(e));
+            } catch (final RuntimeException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private Map<String, Object> toPojo(final Event e) {
+        final Map<String, Object> m = new LinkedHashMap<String, Object>(8);
+        for (final String name : e.getPropertyNames()) {
+            final Object value = e.getProperty(name);
+            if (isPojo(value)) {
+                m.put(name, value);
+            }
+        }
+        m.put("__topic", e.getTopic());
+        m.put("__pure", Boolean.TRUE);
+        return m;
+    }
+
     private void publish(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {
         if (users == null) {
             return;
@@ -169,6 +202,12 @@ public class PushMsHandler implements EventHandler {
         } catch (final RuntimeException ex) {
             LOG.error(ex.getMessage(), ex);
         }
+    }
+
+    private static final String POJO_PACKAGE = "java.lang.";
+
+    private boolean isPojo(final Object obj) {
+        return obj != null && obj.getClass().getName().startsWith(POJO_PACKAGE);
     }
 
     private void publishDelayed(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {

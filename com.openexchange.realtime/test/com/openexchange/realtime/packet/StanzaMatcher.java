@@ -68,6 +68,15 @@ public class StanzaMatcher extends BaseMatcher<Stanza> {
     private Object payload;
     private String selector;
     
+    /**
+     * 
+     * @param from sender
+     * @param to recipient
+     * @param namespace namespace
+     * @param name name
+     * @param payload payload
+     * @return new StanzaMatcher
+     */
     public static StanzaMatcher isStanza(ID from, ID to, String namespace, String name, Object payload) {
         return new StanzaMatcher(from, to, namespace, name, null, payload);
     }

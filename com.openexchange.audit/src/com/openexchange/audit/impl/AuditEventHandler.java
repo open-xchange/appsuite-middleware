@@ -50,6 +50,7 @@
 package com.openexchange.audit.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
@@ -286,6 +287,7 @@ public class AuditEventHandler implements EventHandler {
         Validate.notNull(log, "StringBuilder to write to mustn't be null.");
 
         final Appointment appointment = (Appointment) commonEvent.getActionObj();
+        Appointment oldAppointment = (Appointment) commonEvent.getOldObj();
 
         log.append("OBJECT TYPE: APPOINTMENT; ");
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
@@ -298,7 +300,12 @@ public class AuditEventHandler implements EventHandler {
         log.append("TITLE: ").append(appointment.getTitle()).append("; ");
         log.append("START DATE: ").append(appointment.getStartDate()).append("; ");
         log.append("END DATE: ").append(appointment.getEndDate()).append("; ");
-        log.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append(';');
+        log.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append("; ");
+        log.append("PARTICIPANTS: ").append(Arrays.toString(appointment.getParticipants())).append("; ");
+        if (oldAppointment != null) {
+            log.append("OLD PARTICIPANTS: ").append(Arrays.toString(oldAppointment.getParticipants())).append("; ");
+        }
+        log.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
     }
 
     /**
