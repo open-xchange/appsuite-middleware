@@ -438,9 +438,6 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
             }
         };
 
-        final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, pingDelay, pingDelay);
-        ref.set(timerTask);
-        cm.put(ctx, new WatchInfo(timerTask, handlerResponse));
         return true;
     }
 
