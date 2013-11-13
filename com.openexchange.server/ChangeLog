@@ -1,3 +1,7 @@
+* 2013-11-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29790: Check availability of session event property
+
 * 2013-11-13 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 29693: Use contact_id to search contact
