@@ -93,6 +93,7 @@ public abstract class DynamicMetadataFileAction extends AbstractFileAction {
      */
     public DynamicMetadataFileAction(SyncSession session, FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
         super(file, newFile, comparison);
+        parameters.put(PARAMETER_PATH, path);
         this.session = session;
         this.metadata = serverFile;
     }
