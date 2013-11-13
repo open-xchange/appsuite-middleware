@@ -52,6 +52,7 @@ package com.openexchange.http.grizzly.osgi;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometAddOn;
+import org.glassfish.grizzly.http.KeepAlive;
 import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
@@ -141,8 +142,18 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
             }
 
-            TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
-            networkListener.setTransport(configuredTcpNioTransport);
+            // Set the transport
+            {
+                TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
+                networkListener.setTransport(configuredTcpNioTransport);
+            }
+
+            // Configure keep-alive
+            {
+                final KeepAlive keepAlive = networkListener.getKeepAlive();
+                keepAlive.setIdleTimeoutInSeconds(-1);
+                keepAlive.setMaxRequestsCount(-1);
+            }
 
             if (grizzlyConfig.isJMXEnabled()) {
                 grizzly.getServerConfiguration().setJmxEnabled(true);
@@ -214,13 +225,13 @@ public class GrizzlyActivator extends HousekeepingActivator {
      * @throws OXException If the Transport can't be build
      */
     private TCPNIOTransport buildTcpNioTransport() throws OXException {
-        ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
+        final ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
         if (threadPoolService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
         }
-        TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
+        final TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance().setKeepAlive(true).setTcpNoDelay(true);
         final TCPNIOTransport transport = builder.build();
-        ExecutorService executor = GrizzlOXExecutorService.createInstance();
+        final ExecutorService executor = GrizzlOXExecutorService.createInstance();
         transport.setWorkerThreadPool(executor);
         return transport;
     }

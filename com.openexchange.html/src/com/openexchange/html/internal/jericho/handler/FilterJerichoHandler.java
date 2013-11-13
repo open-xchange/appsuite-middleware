@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
+import static com.openexchange.html.HtmlServices.isNonJavaScriptURL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
@@ -57,7 +58,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,7 +82,6 @@ import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.html.tools.HTMLUtils;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
@@ -97,6 +96,8 @@ import com.openexchange.log.LogFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FilterJerichoHandler implements JerichoHandler {
+
+    private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_', '/', ';', '=', ' ' };
 
     private static final Set<String> NUM_ATTRIBS = new HashSet<String>(0);
 
@@ -183,6 +184,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private final StringBuilder attrBuilder;
 
+    private final HtmlServiceImpl htmlService;
+
     private boolean body;
 
     private boolean isCss;
@@ -216,8 +219,9 @@ public final class FilterJerichoHandler implements JerichoHandler {
     /**
      * Initializes a new {@link FilterJerichoHandler}.
      */
-    public FilterJerichoHandler(final int capacity) {
+    public FilterJerichoHandler(final int capacity, final HtmlServiceImpl htmlService) {
         super();
+        this.htmlService = htmlService;
         urlBuilder = new StringBuilder(256);
         cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
@@ -232,8 +236,9 @@ public final class FilterJerichoHandler implements JerichoHandler {
     /**
      * Initializes a new {@link FilterJerichoHandler}.
      */
-    public FilterJerichoHandler(final int capacity, final String mapStr) {
+    public FilterJerichoHandler(final int capacity, final String mapStr, final HtmlServiceImpl htmlService) {
         super();
+        this.htmlService = htmlService;
         urlBuilder = new StringBuilder(256);
         cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
@@ -509,14 +514,22 @@ public final class FilterJerichoHandler implements JerichoHandler {
         attrBuilder.setLength(0);
         final String tagName = startTag.getName();
         final Attributes attributes = startTag.getAttributes();
-        if (simple && HTMLElementName.META.equals(tagName) && (null != attributes.get("http-equiv")) && allowedAttributes.containsKey("http-equiv")) {
+        if (simple && HTMLElementName.META.equals(tagName) && null != attributes.get("http-equiv") && allowedAttributes.containsKey("http-equiv")) {
             /*
              * Special handling for allowed meta tag which provides an allowed HTTP header indicated through 'http-equiv' attribute
              */
             for (final Attribute attribute : attributes) {
-                attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(attribute.getValue()).append('"');
+                final String val = attribute.getValue();
+                if (isNonJavaScriptURL(val, "url=")) {
+                    attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
+                } else {
+                    attrBuilder.setLength(0);
+                    break;
+                }
             }
-            htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+            if (attrBuilder.length() > 0) {
+                htmlBuilder.append('<').append(tagName).append(attrBuilder.toString()).append('>');
+            }
             return;
         }
         /*
@@ -713,32 +726,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         }
-    }
-
-    private static final Set<String> NOT_ALLOWED = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("%3c", "%3e", "%22")));
-
-    private static boolean isNonJavaScriptURL(final String val) {
-        // http://www.raumausstatter-innung-schwalm-eder.de/index.php?eID=tx_cms_showpic&file=uploads%2Fpics%2F13-06-Raumausstatter-JHV.jpg&width=500m&height=500&bodyTag=%3Cbody%20bgColor%3D%22%23ffffff%22%3E&wrap=%3Ca%20href%3D%22javascript%3Aclose%28%29%3B%22%3E%20%7C%20%3C%2Fa%3E&md5=a0a07697cb8be1898b5e9ec79d249de2
-        if (null == val) {
-            return false;
-        }
-        String lc = toLowerCase(val.trim());
-        if (lc.startsWith("javascript:") || lc.startsWith("vbscript:")) {
-            return false;
-        }
-        if (lc.indexOf("%") < 0) {
-            return true;
-        }
-        for (final String notAllowed : NOT_ALLOWED) {
-            if (lc.indexOf(notAllowed) >= 0) {
-                return false;
-            }
-        }
-        lc = HTMLUtils.decodeUrl(val, null);
-        if (lc.startsWith("javascript:") || lc.startsWith("vbscript:")) {
-            return false;
-        }
-        return true;
     }
 
     @Override

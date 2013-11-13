@@ -494,6 +494,20 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlCodec.encode(IMMUNE_HTMLATTR, input);
     }
 
+    /**
+     * Encode a String so that it can be safely used in a specific context.
+     *
+     * @param immune
+     * @param input the String to encode
+     * @return the encoded String
+     */
+    public String encodeForHTMLAttribute(final char[] immune, final String input) {
+        if (input == null) {
+            return null;
+        }
+        return htmlCodec.encode(immune, input);
+    }
+
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
         try {
@@ -516,7 +530,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     definition = null == confName ? null : getConfiguration().getText(confName);
                 }
                 // Handle HTML content
-                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
+                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length(), this) : new FilterJerichoHandler(html.length(), definition, this);
                 JerichoParser.getInstance().parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
@@ -1720,7 +1734,10 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
 
-    private static String validateWithHtmlCleaner(final String htmlContent) {
+    private static final Pattern P_HTMLE_COPY = Pattern.compile("&#169;|&copy;", Pattern.CASE_INSENSITIVE);
+    private static final Pattern P_HTMLE_REG = Pattern.compile("&#174;|&reg;", Pattern.CASE_INSENSITIVE);
+
+    protected static String validateWithHtmlCleaner(final String htmlContent) {
         try {
             /*-
              * http://stackoverflow.com/questions/238036/java-html-parsing
@@ -1750,7 +1767,10 @@ public final class HtmlServiceImpl implements HtmlService {
             if (buffer.indexOf("<!DOCTYPE") < 0) {
                 buffer.insert(0, DOCTYPE_DECL);
             }
-            return buffer.toString();
+            /*
+             * Keep Unicode representation of 'copy' and 'reg' intact
+             */
+            return P_HTMLE_REG.matcher(P_HTMLE_COPY.matcher(buffer.toString()).replaceAll("\u00a9")).replaceAll("\u00ae");
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: " + e.getMessage(), e);
