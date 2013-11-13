@@ -58,7 +58,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class ConsistencyExceptionMessages implements LocalizableStrings {
 
-    public static final String MALFORMED_POLICY_DISPLAY = "Malformed policy. Policies are formed like \"condition:action\"";
+    // The policy you have entered is malformed. It should look like \"condition:action\"
+    public static final String MALFORMED_POLICY_MSG_DISPLAY = "The policy you have entered is malformed. It should look like \"condition:action\"";
 
     private ConsistencyExceptionMessages() {
         super();

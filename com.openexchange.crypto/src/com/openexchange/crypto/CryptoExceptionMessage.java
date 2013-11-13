@@ -65,6 +65,7 @@ public class CryptoExceptionMessage implements LocalizableStrings {
         super();
     }
 
+    // The provided passwords seems to be wrong or something bad happened. %2$s
     public final static String BAD_PASSWORD_DISPLAY = "The provided passwords seems to be wrong or something bad happened. %2$s";
 
 }

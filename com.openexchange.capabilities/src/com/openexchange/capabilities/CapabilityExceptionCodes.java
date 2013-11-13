@@ -76,9 +76,7 @@ public enum CapabilityExceptionCodes implements OXExceptionCode {
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(CapabilityExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 4),
-
-    ;
+    SQL_ERROR(CapabilityExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 4);
 
     /**
      * The error code prefix for capability module.

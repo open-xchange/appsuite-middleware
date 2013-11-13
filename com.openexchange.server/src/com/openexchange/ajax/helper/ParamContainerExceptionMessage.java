@@ -66,19 +66,9 @@ public class ParamContainerExceptionMessage implements LocalizableStrings {
     }
 
     /**
-     * Bad value %1$s in parameter %2$s
-     */
-    public final static String BAD_PARAM_VALUE_MSG = "Bad value %1$s in parameter %2$s";
-
-    /**
      * The value you inserted for %2$s is not correct
      */
     public final static String BAD_PARAM_VALUE_MSG_DISPLAY = "The value inserted for %2$s is not correct.";
-
-    /**
-     * Missing parameter %1$s
-     */
-    public final static String MISSING_PARAMETER_MSG = "Missing parameter %1$s";
 
     /**
      * Please add a value for parameter %1$s
