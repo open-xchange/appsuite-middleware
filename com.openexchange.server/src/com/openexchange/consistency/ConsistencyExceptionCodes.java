@@ -49,34 +49,37 @@
 
 package com.openexchange.consistency;
 
-import static com.openexchange.consistency.ConsistencyExceptionMessages.*;
-
+import static com.openexchange.consistency.ConsistencyExceptionMessages.MALFORMED_POLICY_DISPLAY;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link ConsistencyExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ConsistencyExceptionCodes implements OXExceptionCode {
+public enum ConsistencyExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
     /** Error communicating with mbean in server: %s */
-    COMMUNICATION_PROBLEM(COMMUNICATION_PROBLEM_MSG, CATEGORY_ERROR, 1),
+    COMMUNICATION_PROBLEM("Error communicating with mbean in server: %s", null, CATEGORY_ERROR, 1),
     /** Registration of consistency MBean failed. */
-    REGISTRATION_FAILED(REGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 2),
+    REGISTRATION_FAILED("Registration of consistency MBean failed.", null, CATEGORY_CONFIGURATION, 2),
     /** Unregistration of consistency MBean failed. */
-    UNREGISTRATION_FAILED(UNREGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 3),
+    UNREGISTRATION_FAILED("Unregistration of consistency MBean failed.", null, CATEGORY_CONFIGURATION, 3),
     /** User entered malformed policy string. */
-    MALFORMED_POLICY(MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4);
+    MALFORMED_POLICY("Malformed policy. Policies are formed like \"condition:action\"", MALFORMED_POLICY_DISPLAY, CATEGORY_USER_INPUT, 4);
 
     private final String message;
+    private final String displayMessage;
     private final Category category;
     private final int number;
 
-    private ConsistencyExceptionCodes(final String message, final Category category, final int number) {
+    private ConsistencyExceptionCodes(final String message, final String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
     }
@@ -94,6 +97,11 @@ public enum ConsistencyExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     public String getHelp() {

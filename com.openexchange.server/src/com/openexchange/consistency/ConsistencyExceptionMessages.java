@@ -58,13 +58,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class ConsistencyExceptionMessages implements LocalizableStrings {
 
-    public static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
-
-    public static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
-
-    public static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
-
-    public static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
+    public static final String MALFORMED_POLICY_DISPLAY = "Malformed policy. Policies are formed like \"condition:action\"";
 
     private ConsistencyExceptionMessages() {
         super();
