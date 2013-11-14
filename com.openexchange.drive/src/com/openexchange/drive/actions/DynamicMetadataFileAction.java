@@ -49,7 +49,8 @@
 
 package com.openexchange.drive.actions;
 
-import com.openexchange.drive.Action;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
@@ -57,33 +58,75 @@ import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.file.storage.File;
 
 /**
- * {@link AcknowledgeFileAction}
+ * {@link DynamicMetadataFileAction}
  *
- * Acknowledges a change for the client, indicating that he should update his stored metadata. This currently happens in the following
- * situations:
- * <ul>
- * <li>if a file deletion reported by the client is executed on the server - the <code>file</code> parameter is set to the original file,
- *     while the <code>newFile</code> parameter is <code>null</code>.</li>
- * <li>if a file modification reported by the client is executed on the server - the <code>file</code> parameter is set to the original,
- *     and the <code>newFile</code> parameter to the modified file.</li>
- * <li>if a file creation reported by the client is executed on the server - the <code>file</code> parameter is set to <code>null</code>,
- *     and the <code>newFile</code> parameter is set to the new file.</li>
- * </ul>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AcknowledgeFileAction extends DynamicMetadataFileAction {
+public abstract class DynamicMetadataFileAction extends AbstractFileAction {
 
-    public AcknowledgeFileAction(SyncSession session, FileVersion file, ServerFileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
+    protected final SyncSession session;
+    private File metadata;
+    private AbstractFileAction dependingAction;
+
+    /**
+     * Initializes a new {@link DynamicMetadataFileAction}. The initial meta data is taken from the newFile parameter if possible.
+     *
+     * @param session The sync session
+     * @param file The file
+     * @param newFile the new file
+     * @param comparison The comparison
+     * @param path The path
+     */
+    public DynamicMetadataFileAction(SyncSession session, FileVersion file, ServerFileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
         this(session, file, newFile, comparison, path, null != newFile ? newFile.getFile() : null);
     }
 
-    public AcknowledgeFileAction(SyncSession session, FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
-        super(session, file, newFile, comparison, path, serverFile);
+    /**
+     * Initializes a new {@link DynamicMetadataFileAction}.
+     *
+     * @param session The sync session
+     * @param file The file
+     * @param newFile The new file
+     * @param comparison The comparison
+     * @param path The path
+     * @param serverFile The server file to get the initial metadata from
+     */
+    public DynamicMetadataFileAction(SyncSession session, FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
+        super(file, newFile, comparison);
+        parameters.put(PARAMETER_PATH, path);
+        this.session = session;
+        this.metadata = serverFile;
     }
 
     @Override
-    public Action getAction() {
-        return Action.ACKNOWLEDGE;
+    public Map<String, Object> getParameters() {
+        Map<String, Object> parameters = super.getParameters();
+        /*
+         * overwrite metadata with dependent action if available
+         */
+        if (null != this.dependingAction) {
+            FileVersion fileVersion = dependingAction.getResultingVersion();
+            if (null != fileVersion && ServerFileVersion.class.isInstance(fileVersion)) {
+                this.metadata = ((ServerFileVersion)fileVersion).getFile();
+            }
+        }
+        /*
+         * inject current metadata to parameters
+         */
+        if (null != this.metadata) {
+            parameters = new HashMap<String, Object>(parameters);
+            applyMetadataParameters(metadata, session);
+        }
+        return parameters;
+    }
+
+    /**
+     * Sets the depending action
+     *
+     * @param action The depending action to set
+     */
+    public void setDependingAction(AbstractFileAction action) {
+        this.dependingAction = action;
     }
 
 }

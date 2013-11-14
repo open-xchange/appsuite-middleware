@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -239,7 +238,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 session = getSession(req, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
-                checkPublicSessionCookie(req, resp, session);
+                checkPublicSessionCookie(req, resp, session, sessiondService);
             } else {
                 session = null;
             }
@@ -681,8 +680,9 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param req The request
      * @param resp The response
      * @param session The request-associated session
+     * @param sessiondService The <code>SessiondService</code> instance
      */
-    public static void checkPublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session) {
+    public static void checkPublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final SessiondService sessiondService) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             final String cookieName = getPublicSessionCookieName(req);
@@ -692,20 +692,17 @@ public abstract class SessionServlet extends AJAXServlet {
                 if (INFO) {
                     LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
                 }
-            } else {
-                final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-                if (null == altId) {
-                    // Session has no public session identifier
-                    removeOXCookies(req, resp, Collections.singletonList(cookieName));
-                } else if (!altId.equals(cookie.getValue())) {
-                    // Identifier does not match -- recreate
-                    removeOXCookies(req, resp, Collections.singletonList(cookieName));
-                    LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
-                    if (INFO) {
-                        LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
-                    }
-                }
             }
+//            else {
+//                final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+//                if ((null != altId) && !altId.equals(cookie.getValue()) && (null == sessiondService.getSessionByAlternativeId(altId))) {
+//                    removeOXCookies(req, resp, Collections.singletonList(cookieName));
+//                    LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+//                    if (INFO) {
+//                        LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
+//                    }
+//                }
+//            }
         }
     }
 

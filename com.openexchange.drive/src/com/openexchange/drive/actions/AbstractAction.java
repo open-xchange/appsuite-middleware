@@ -66,8 +66,10 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
 
     protected final T version;
     protected final T newVersion;
-    protected ThreeWayComparison<T> comparison;
     protected final Map<String, Object> parameters;
+
+    protected ThreeWayComparison<T> comparison;
+    protected T resultingVersion;
 
     /**
      * Initializes a new {@link AbstractAction}.
@@ -127,6 +129,24 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
      */
     public ThreeWayComparison<T> getComparison() {
         return comparison;
+    }
+
+    /**
+     * Gets the resulting version after this action was executed, if applicable.
+     *
+     * @return The resulting version, or <code>null</code> if not specified
+     */
+    public T getResultingVersion() {
+        return resultingVersion;
+    }
+
+    /**
+     * Sets a version representing the result of this action.
+     *
+     * @param version The resulting version to set
+     */
+    public void setResultingVersion(T version) {
+        this.resultingVersion = version;
     }
 
 }

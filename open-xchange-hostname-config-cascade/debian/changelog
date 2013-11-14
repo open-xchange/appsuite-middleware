@@ -22,6 +22,30 @@ open-xchange-hostname-config-cascade (7.4.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Sep 2013 11:44:11 +0200
 
+open-xchange-hostname-config-cascade (7.4.0-20) stable; urgency=low
+
+  * Build for patch 2013-11-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 11 Nov 2013 17:18:07 +0100
+
+open-xchange-hostname-config-cascade (7.4.0-19) stable; urgency=low
+
+  * Build for patch 2013-11-11
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 08 Nov 2013 10:12:35 +0100
+
+open-xchange-hostname-config-cascade (7.4.0-18) stable; urgency=low
+
+  * Build for patch 2013-11-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 05 Nov 2013 12:56:53 +0100
+
+open-xchange-hostname-config-cascade (7.4.0-18) stable; urgency=low
+
+  * Build for patch 2013-11-08
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 07 Nov 2013 17:15:36 +0100
+
 open-xchange-hostname-config-cascade (7.4.0-17) stable; urgency=low
 
   * Build for patch 2013-10-28

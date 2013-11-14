@@ -230,9 +230,12 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                      * just renamed on client, let server edit the file, acknowledge rename to client
                      */
                     ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
-                    result.addActionForServer(new EditFileAction(serverFileVersion, comparison.getClientVersion(), comparison, path));
-                    result.addActionForClient(new AcknowledgeFileAction(session,
-                        comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile()));
+                    EditFileAction serverEdit = new EditFileAction(serverFileVersion, comparison.getClientVersion(), comparison, path);
+                    AcknowledgeFileAction clientAcknowledge = new AcknowledgeFileAction(session,
+                        comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile());
+                    clientAcknowledge.setDependingAction(serverEdit);
+                    result.addActionForServer(serverEdit);
+                    result.addActionForClient(clientAcknowledge);
                     return 1;
                 } else {
                     /*

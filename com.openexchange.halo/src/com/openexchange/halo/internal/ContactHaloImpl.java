@@ -55,10 +55,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -154,7 +152,7 @@ public class ContactHaloImpl implements ContactHalo {
         final HaloContactQuery contactQuery = new HaloContactQuery();
 
         if (contact.getObjectID() > 0 && contact.getParentFolderID() > 0) {
-            Contact loaded = contactService.getContact(session, "" + contact.getParentFolderID(), "" + contact.getObjectID());
+            Contact loaded = contactService.getContact(session, "" + contact.getParentFolderID(), "" + contact.getInternalUserId());
             contactQuery.setContact(loaded);
             contactQuery.setMergedContacts(Arrays.asList(loaded));
             return contactQuery;

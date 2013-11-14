@@ -124,7 +124,7 @@ public class DriveConstants {
     /**
      * The minimum expected API version the client has to support that is used if no other one is specified via configuration.
      */
-    public static int DEFAULT_MIN_API_VERSION = 0;
+    public static int DEFAULT_MIN_API_VERSION = 1;
 
     /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.
