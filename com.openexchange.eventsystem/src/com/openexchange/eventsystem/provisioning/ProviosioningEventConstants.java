@@ -54,7 +54,11 @@ package com.openexchange.eventsystem.provisioning;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ProviosioningEventConstants {
+public final class ProviosioningEventConstants {
+
+    private ProviosioningEventConstants() {
+        super();
+    }
 
     // ----------------------------------------------------------------------------------------------------- //
     // --------------------------------------    TOPICS    ------------------------------------------------- //
