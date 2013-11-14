@@ -79,7 +79,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unexpected SQL Error!
      */
-    CALENDAR_SQL_ERROR(OXCalendarExceptionCodes.CALENDAR_SQL_ERROR_MSG, OXCalendarExceptionMessage.CALENDAR_SQL_ERROR_DISPLAY, 5, Category.CATEGORY_ERROR),
+    CALENDAR_SQL_ERROR(OXCalendarExceptionCodes.CALENDAR_SQL_ERROR_MSG, OXExceptionStrings.SQL_ERROR_MSG, 5, Category.CATEGORY_ERROR),
     /**
      * TODO remove this exception. The AJAX interface should already check for a missing last modified.
      */
@@ -327,7 +327,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Moving an instance of a recurring appointment into another folder is not allowed.
      */
-    UPDATE_EXCEPTION(OXCalendarExceptionCodes.UPDATE_EXCEPTION_MSG, OXCalendarExceptionMessage.CALENDAR_SQL_ERROR_DISPLAY, 67, Category.CATEGORY_ERROR),
+    UPDATE_EXCEPTION(OXCalendarExceptionCodes.UPDATE_EXCEPTION_MSG, OXExceptionStrings.SQL_ERROR_MSG, 67, Category.CATEGORY_ERROR),
     /**
      * Move to a shared folder not allowed if the private flag is set.
      */
@@ -347,7 +347,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Some data exceeds a field limit. Please shorten the input(s) for affected field(s).
      */
-    TRUNCATED_SQL_ERROR(OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR_MSG, OXCalendarExceptionMessage.CALENDAR_SQL_ERROR_DISPLAY, 72, Category.CATEGORY_TRUNCATED),
+    TRUNCATED_SQL_ERROR(OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR_MSG, OXExceptionStrings.SQL_ERROR_MSG, 72, Category.CATEGORY_TRUNCATED),
     /**
      * Calendar calculation requires a proper defined time zone.
      */
@@ -463,11 +463,11 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * SQL Problem.
      */
-    SQL_ERROR(OXCalendarExceptionCodes.SQL_ERROR_MSG, OXCalendarExceptionMessage.CALENDAR_SQL_ERROR_DISPLAY, 101, Category.CATEGORY_ERROR),
-    /** 
+    SQL_ERROR(OXCalendarExceptionCodes.SQL_ERROR_MSG, OXExceptionStrings.SQL_ERROR_MSG, 101, Category.CATEGORY_ERROR),
+    /**
      * Wrong number of rows changed. Expected %1$d but was %2$d.
      */
-    WRONG_ROW_COUNT(OXCalendarExceptionCodes.WRONG_ROW_COUNT_MSG, OXCalendarExceptionMessage.CALENDAR_SQL_ERROR_DISPLAY, 102, Category.CATEGORY_ERROR),
+    WRONG_ROW_COUNT(OXCalendarExceptionCodes.WRONG_ROW_COUNT_MSG, OXExceptionStrings.SQL_ERROR_MSG, 102, Category.CATEGORY_ERROR),
     /**
      * Unable to find a participant for a specified object.
      */
@@ -498,7 +498,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNKNOWN_RECURRENCE_TYPE(OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_TYPE_MSG, 109, Category.CATEGORY_USER_INPUT),
 
     ;
-    
+
     private static final String CFO_NOT_INITIALIZIED_MSG = "CalendarFolderObject not initialized.";
 
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported!";
@@ -719,7 +719,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      * Message of the exception.
      */
     private final String message;
-    
+
     /**
      * The message intended for being displayed to the user.
      */
@@ -780,7 +780,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

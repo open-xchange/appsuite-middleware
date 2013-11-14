@@ -58,9 +58,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class FolderExceptionMessages implements LocalizableStrings {
 
-    // Error while reading/writing data from/to the database.
-    public static final String SQL_ERROR_MSG_DISPLAY = "Error while reading/writing data from/to the database.";
-
     // You do not have a valid session. Please login again.
     public static final String MISSING_SESSION_MSG_DISPLAY = "You do not have a valid session. Please login again.";
 

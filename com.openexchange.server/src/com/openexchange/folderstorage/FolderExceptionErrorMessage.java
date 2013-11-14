@@ -94,7 +94,7 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     /**
      * SQL error: %1$s
      */
-    SQL_ERROR(FolderExceptionErrorMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1007, FolderExceptionMessages.SQL_ERROR_MSG_DISPLAY),
+    SQL_ERROR(FolderExceptionErrorMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1007, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * Folder "%1$s" could not be found in tree "%2$s".
      */

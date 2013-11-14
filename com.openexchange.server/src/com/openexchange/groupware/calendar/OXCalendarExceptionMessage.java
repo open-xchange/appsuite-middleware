@@ -67,11 +67,6 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     }
 
     /**
-     * Error while reading/writing data from/to the database.
-     */
-    public static final String CALENDAR_SQL_ERROR_DISPLAY = "Error while reading/writing data from/to the database.";
-
-    /**
      * Appointments must have at least one participant.
      */
     public static final String UPDATE_WITHOUT_PARTICIPANTS_DISPLAY = "Appointments must have at least one participant.";
