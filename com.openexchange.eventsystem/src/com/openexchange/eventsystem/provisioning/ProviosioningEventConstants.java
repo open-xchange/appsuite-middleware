@@ -49,6 +49,9 @@
 
 package com.openexchange.eventsystem.provisioning;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * {@link ProviosioningEventConstants} - Provides constants for provisioning-related events.
  *
@@ -95,6 +98,22 @@ public final class ProviosioningEventConstants {
      * The name of the topic to notify about a deleted user.
      */
     public static final String TOPIC_USER_DELETE = "com/openexchange/provisioning/user/delete";
+
+    /**
+     * Gets all provisioning topics.
+     *
+     * @return All provisioning topics
+     */
+    public static String[] getTopics() {
+        final List<String> lst = new ArrayList<String>(8);
+        lst.add(TOPIC_CONTEXT_CREATE);
+        lst.add(TOPIC_CONTEXT_DELETE);
+        lst.add(TOPIC_CONTEXT_UPDATE);
+        lst.add(TOPIC_USER_CREATE);
+        lst.add(TOPIC_USER_DELETE);
+        lst.add(TOPIC_USER_UPDATE);
+        return lst.toArray(new String[0]);
+    }
 
     // ----------------------------------------------------------------------------------------------------- //
     // --------------------------------------  PROPERTIES  ------------------------------------------------- //
