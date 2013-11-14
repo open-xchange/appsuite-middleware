@@ -151,6 +151,7 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
         for (final Entry<String, Object> entry : m.entrySet()) {
             final String key = entry.getKey();
             if ("__wrappedSession".equals(key)) {
+                @SuppressWarnings("unchecked")
                 final Map<String, Serializable> wrappedSession = (Map<String, Serializable>) entry.getValue();
                 props.put((String) wrappedSession.get("__wrappedSessionName"), PushMsSession.unwrap(wrappedSession));
             } else if (!"__topic".equals(key) && !"__pure".equals(key)) {
