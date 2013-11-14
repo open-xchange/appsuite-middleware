@@ -49,13 +49,7 @@
 
 package com.openexchange.realtime.synthetic;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.ComponentHandle;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.threadpool.RunLoop;
 
 
@@ -65,9 +59,7 @@ import com.openexchange.threadpool.RunLoop;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
-    
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SyntheticChannelRunLoop.class);
-    
+
     public SyntheticChannelRunLoop(String name) {
         super(name);
     }
@@ -75,45 +67,6 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
     @Override
     protected void handle(MessageDispatch element) throws OXException {
         element.tick();
-    }
-
-    /**
-     * Remove all {@link MessageDispatch}s that were destined for the given handle. This will pause the RunLoop, causing it to refuse any
-     * Elements offered. Matching elements are removed from the RunLoop. Finally handling continues and the matching elements are returned.
-     * @param destination The handle to match against 
-     * @return All {@link MessageDispatch}s that were destined for the given handle
-     */
-    public Collection<MessageDispatch> removeMessagesForHandle(ID destination) {
-        List<MessageDispatch> matchingElements = new ArrayList<MessageDispatch>();
-        // Pause handling for MessageDispatch inspection but make sure to enable it again
-        try {
-            pauseHandling();
-            // Check currently handled element first. Set to null so it doesn't get handled if it isdestinedForID 
-            if (isDestinedForID(destination, currentElement)) {
-                currentElement=null;
-            }
-
-            // remove remaining messages from queue
-            Iterator<MessageDispatch> iterator = queue.iterator();
-            while (iterator.hasNext()) {
-                MessageDispatch next = iterator.next();
-                if (isDestinedForID(destination, next)) {
-                    matchingElements.add(next);
-                    queue.remove(next);
-                }
-            }
-        } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
-        } finally {
-            continueHandling();
-        }
-        return matchingElements;
-    }
-
-    private boolean isDestinedForID(ID destination, MessageDispatch messageDispatch) {
-        ComponentHandle handle = messageDispatch.getHandle();
-        ID currentID = handle.getID();
-        return currentID.equals(destination);
     }
 
 }

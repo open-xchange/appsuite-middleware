@@ -51,10 +51,6 @@ package com.openexchange.threadpool;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -64,104 +60,35 @@ import com.openexchange.log.LogFactory;
  * {@link RunLoop}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class RunLoop<E> implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(RunLoop.class);
     
-    protected final BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
+    private final BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
 
     private final String name;
-
-    /** Is the RunLoop currently paused */
-    private AtomicBoolean isPaused = new AtomicBoolean();
-
-    private Lock handleLock = new ReentrantLock();
-
-    /** The Condition to await before the runloop continues processing */
-    private Condition proceedCondition = handleLock.newCondition();
-
-    /** The element we have just taken from the queue for handling */
-    protected E currentElement;
-
+    
     public RunLoop(String name) {
         this.name = name;
     }
-
+    
     @Override
     public void run() {
         Thread.currentThread().setName(name);
-        while (true) {
-            /*
-             * Get the current element from the queue. blocking, so this must be done outside the handleLock
-             */
+        while(true) {
             try {
-                currentElement = queue.take();
-            } catch (InterruptedException ie) {
-                LOG.warn("Returning from RunLoop due to interruption", ie);
-                return;
-            }
-
-            /*
-             * Try to handle the element if the RunLoop isn't paused
-             */
-            try {
-                handleLock.lock();
-                while(isPaused.get()) {
-                    proceedCondition.await();
-                }
-                /*
-                 * Element could have been removed while RunLoop was paused
-                 */
-                if(null != currentElement) {
-                    handle(currentElement);
-                }
+                handle(queue.take());
             } catch (InterruptedException e) {
-                LOG.warn("Returning from RunLoop due to interruption", e);
                 return;
             } catch (Throwable t) {
                 LOG.error(t.getMessage(), t);
-            } finally {
-                handleLock.unlock();
             }
         }
     }
-
-    /**
-     * Offer an element to this RunLoop.
-     * @param element The element to offer
-     * @return false if the Runloop was paused or is out of capacity
-     */
+    
     public boolean offer(final E element) {
-        if(isPaused.get()) {
-         return false;
-        } else {
-            return this.queue.offer(element);
-        }
-    }
-
-    /**
-     * Causes the Runloop to pause until {@link RunLoop#continueHandling()} is called again.
-     * 
-     * @throws InterruptedException
-     */
-    protected void pauseHandling() {
-        isPaused.set(true);
-    }
-
-    /**
-     * Causes the Runloop to continue handling offered Elements after {@link RunLoop#pauseHandling()} was called.
-     * @throws InterruptedException 
-     */
-    protected void continueHandling() {
-          try {
-              handleLock.lock();
-              isPaused.set(false);
-              proceedCondition.signalAll();
-          } finally {
-              handleLock.unlock();
-          }
+        return this.queue.offer(element);
     }
 
     protected abstract void handle(E element) throws OXException;
