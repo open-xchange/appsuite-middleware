@@ -1,3 +1,7 @@
+* 2013-11-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29770: Use custom (de)serialization for session in distributed events 
+
 * 2013-11-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 29790: Check availability of session event property
