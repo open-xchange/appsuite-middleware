@@ -84,18 +84,18 @@ public class SnippetActionFactory implements AJAXActionServiceFactory {
     public SnippetActionFactory(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices) {
         super();
         actions = new ConcurrentHashMap<String, SnippetAction>(10);
-        addJSlobAction(new com.openexchange.snippet.json.action.AllAction(services, snippetServices, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.GetAction(services, snippetServices, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.ListAction(services, snippetServices, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.DeleteAction(services, snippetServices, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.NewAction(services, snippetServices, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.AttachAction(services, snippetServices, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.DetachAction(services, snippetServices, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.UpdateAction(services, snippetServices, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.GetAttachmentAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.AllAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.GetAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.ListAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.DeleteAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.NewAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.AttachAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.DetachAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.UpdateAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.GetAttachmentAction(services, snippetServices, actions));
     }
 
-    private void addJSlobAction(final SnippetAction snippetAction) {
+    private void addAction(final SnippetAction snippetAction) {
         final List<Method> restMethods = snippetAction.getRESTMethods();
         if (null != restMethods && !restMethods.isEmpty()) {
             for (final Method method : restMethods) {

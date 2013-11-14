@@ -42,5 +42,5 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker;version="1.5.1"
+ org.osgi.util.tracker
 Bundle-Activator: com.openexchange.snippet.json.osgi.SnippetJsonActivator
