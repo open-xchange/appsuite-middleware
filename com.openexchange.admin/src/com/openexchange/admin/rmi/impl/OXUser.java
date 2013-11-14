@@ -93,6 +93,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.eventsystem.Event;
 import com.openexchange.eventsystem.EventSystemService;
+import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -201,13 +202,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
         if (null != eventSystemService) {
             try {
-                final Event event = new Event("com/openexchange/provisioning/user/update");
-                event.setProperty("contextId", ctx.getId());
-                event.setProperty("userId", user.getId());
-                // event.setProperty("name", user.getName());
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
+                //event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
                 eventSystemService.publish(event);
             } catch (final Exception e) {
-                log.warn("Could not distribute user creation event.", e);
+                log.warn("Could not distribute user event.", e);
             }
         }
     }
@@ -373,13 +374,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
         if (null != eventSystemService) {
             try {
-                final Event event = new Event("com/openexchange/provisioning/user/update");
-                event.setProperty("contextId", ctx.getId());
-                event.setProperty("userId", usrdata.getId());
-                // event.setProperty("name", usr.getName());
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, usrdata.getId());
+                // event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, usrdata.getName());
                 eventSystemService.publish(event);
             } catch (final Exception e) {
-                log.warn("Could not distribute user creation event.", e);
+                log.warn("Could not distribute user event.", e);
             }
         }
     }
@@ -444,13 +445,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
         if (null != eventSystemService) {
             try {
-                final Event event = new Event("com/openexchange/provisioning/user/update");
-                event.setProperty("contextId", ctx.getId());
-                event.setProperty("userId", user.getId());
-                // event.setProperty("name", user.getName());
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
+                // event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
                 eventSystemService.publish(event);
             } catch (final Exception e) {
-                log.warn("Could not distribute user creation event.", e);
+                log.warn("Could not distribute user event.", e);
             }
         }
     }
@@ -532,13 +533,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
         if (null != eventSystemService) {
             try {
-                final Event event = new Event("com/openexchange/provisioning/user/update");
-                event.setProperty("contextId", ctx.getId());
-                event.setProperty("userId", user.getId());
-                // event.setProperty("name", user.getName());
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
                 eventSystemService.publish(event);
             } catch (final Exception e) {
-                log.warn("Could not distribute user creation event.", e);
+                log.warn("Could not distribute user event.", e);
             }
         }
     }
@@ -828,13 +829,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
         if (null != eventSystemService) {
             try {
-                final Event event = new Event("com/openexchange/provisioning/user/create");
-                event.setProperty("contextId", ctx.getId());
-                event.setProperty("userId", usr.getId());
-                event.setProperty("name", usr.getName());
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_CREATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, usr.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, usr.getName());
                 eventSystemService.publish(event);
             } catch (final Exception e) {
-                log.warn("Could not distribute user creation event.", e);
+                log.warn("Could not distribute user event.", e);
             }
         }
 
@@ -1000,6 +1001,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         // END OF JCS
 
+        // Signal deleted user(s)
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            for (final User user : users) {
+                try {
+                    final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_DELETE);
+                    event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                    event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
+                    event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
+                    eventSystemService.publish(event);
+                } catch (final Exception e) {
+                    log.warn("Could not distribute user event.", e);
+                }
+            }
+        }
+
         if (!exceptionlist.isEmpty()) {
             final StringBuilder sb = new StringBuilder("The following exceptions occured in the plugins: ");
             for (final Exception e : exceptionlist) {
@@ -1007,22 +1024,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 sb.append('\n');
             }
             throw new StorageException(sb.toString());
-        }
-
-        // Signal deleted user(s)
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            for (final User user : users) {
-                try {
-                    final Event event = new Event("com/openexchange/provisioning/user/delete");
-                    event.setProperty("contextId", ctx.getId());
-                    event.setProperty("userId", user.getId());
-                    // event.setProperty("name", user.getName());
-                    eventSystemService.publish(event);
-                } catch (final Exception e) {
-                    log.warn("Could not distribute user creation event.", e);
-                }
-            }
         }
     }
 
