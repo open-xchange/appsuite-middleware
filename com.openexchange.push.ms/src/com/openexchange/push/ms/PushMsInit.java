@@ -70,6 +70,8 @@ public class PushMsInit {
 
     private volatile DelayPushQueue delayPushQueue;
 
+    private volatile String obfuscationKey;
+
     /**
      * Initializes a new {@link PushMsInit}.
      */
@@ -102,6 +104,15 @@ public class PushMsInit {
      */
     public DelayPushQueue getDelayPushQueue() {
         return delayPushQueue;
+    }
+
+    /**
+     * Gets the key to obfuscate sensible data
+     *
+     * @return The obfuscation key
+     */
+    public String getObfuscationKey() {
+        return obfuscationKey;
     }
 
     /**
@@ -142,6 +153,20 @@ public class PushMsInit {
                     int delayDuration = configService.getIntProperty("com.openexchange.push.ms.delayDuration", 120000);
                     int maxDelays = configService.getIntProperty("com.openexchange.push.ms.maxDelayDuration", 600000);
                     delayPushQueue = new DelayPushQueue(publishTopic, delayDuration, maxDelays);
+                }
+            }
+        }
+        String obfuscationKey = this.obfuscationKey;
+        if (null == obfuscationKey) {
+            synchronized (this) {
+                obfuscationKey = this.obfuscationKey;
+                if (null == obfuscationKey) {
+                    ConfigurationService configService = Services.getService(ConfigurationService.class);
+                    if (null == configService) {
+                        throw MsExceptionCodes.ILLEGAL_STATE.create("Missing service: " + ConfigurationService.class.getName());
+                    }
+                    this.obfuscationKey = configService.getProperty("com.openexchange.sessiond.encryptionKey",
+                        "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn");
                 }
             }
         }
