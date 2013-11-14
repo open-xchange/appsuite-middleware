@@ -49,248 +49,272 @@
 
 package com.openexchange.groupware.contact;
 
-import static com.openexchange.groupware.contact.ContactExceptionMessages.BAD_CHARACTER_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.CONTACT_NOT_FOUND_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.CONTACT_OBJECT_MISSING_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.CONV_OBJ_2_DATE_FAILED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.DATA_TRUNCATION_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.DATE_CONVERSION_FAILED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.DISPLAY_NAME_IN_USE_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.FEATURE_DISABLED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.FIRST_NAME_MANDATORY_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.ID_GENERATION_FAILED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.ID_PARSING_FAILED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.IMAGE_BROKEN_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.IMAGE_DOWNSCALE_FAILED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.IMAGE_SCALE_PROBLEM_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.IMAGE_TOO_LARGE_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.INIT_CONNECTION_FROM_DBPOOL_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.INVALID_EMAIL_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.LAST_NAME_MANDATORY_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.LOAD_OBJECT_FAILED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.LOAD_OLD_CONTACT_FAILED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.MARK_PRIVATE_NOT_ALLOWED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.MIME_TYPE_NOT_DEFINED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NEGATIVE_OBJECT_ID_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NON_CONTACT_FOLDER_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NOT_IN_FOLDER_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NOT_VALID_IMAGE_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_ACCESS_PERMISSION_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_CHANGES_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_CHANGE_PERMISSION_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_CREATE_PERMISSION_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_DELETE_PERMISSION_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_PRIMARY_EMAIL_EDIT_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_PRIVATE_MOVE_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_USER_CONTACT_DELETE_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.OBJECT_HAS_CHANGED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.PFLAG_IN_PUBLIC_FOLDER_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.TOO_FEW_ATTACHMENTS_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.TOO_FEW_ATTRIBUTES_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.TOO_FEW_SEARCH_CHARS_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.TRIGGERING_EVENT_FAILED_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.USER_OUTSIDE_GLOBAL_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.LogLevelAwareOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link ContactExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ContactExceptionCodes implements LogLevelAwareOXExceptionCode {
+public enum ContactExceptionCodes implements LogLevelAwareOXExceptionCode, DisplayableOXExceptionCode {
 
     /**
      * Found a user contact outside global address book in folder %1$d in
      * context %2$d.
      */
-    USER_OUTSIDE_GLOBAL(USER_OUTSIDE_GLOBAL_MSG, Category.CATEGORY_ERROR, 1),
+    USER_OUTSIDE_GLOBAL("Found a user contact outside global address book in folder %1$d in context %2$d.", null,
+        Category.CATEGORY_ERROR, 1),
+    
     /**
      * Invalid E-Mail address: '%s'. Please correct the E-Mail address.
      */
-    INVALID_EMAIL(INVALID_EMAIL_MSG, Category.CATEGORY_USER_INPUT, 100, LogLevel.ERROR),
+    INVALID_EMAIL("Invalid E-Mail address: '%s'. Please correct the E-Mail address.", ContactExceptionMessages.INVALID_EMAIL_DISPLAY,
+        Category.CATEGORY_USER_INPUT, 100, LogLevel.ERROR),
+        
     /**
      * Unable to import this contact picture. Either the type is not part of the
      * supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your file
      * type is %1$s and your image size is %2$d.
      */
-    IMAGE_SCALE_PROBLEM(IMAGE_SCALE_PROBLEM_MSG, Category.CATEGORY_USER_INPUT,
-            101),
+    IMAGE_SCALE_PROBLEM("Unable to import this contact picture. Either the type is not part of the supported type (JPG, GIF, BMP or PNG)"
+        + " or the size exceed %3$d. Your file type is %1$s and your image size is %2$d.",
+        ContactExceptionMessages.IMAGE_SCALE_PROBLEM_DISPLAY, Category.CATEGORY_USER_INPUT, 101),
+        
     /**
      * You are not allowed to store this contact in a non-contact folder: folder
      * id %1$d in context %2$d with user %3$d
      */
-    NON_CONTACT_FOLDER(NON_CONTACT_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 103),
+    NON_CONTACT_FOLDER("You are not allowed to store this contact in a non-contact folder: folder id %1$d in context %2$d with user %3$d",
+        ContactExceptionMessages.NON_CONTACT_FOLDER_DISPLAY, Category.CATEGORY_PERMISSION_DENIED, 103),
+        
     /**
      * You do not have the permission to access objects in this
      * folder %1$d in context %2$d with user %3$d
      */
-    NO_ACCESS_PERMISSION(NO_ACCESS_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 104),
+    NO_ACCESS_PERMISSION("You do not have the permission to access objects in the folder %1$d in the context %2$d as user %3$d",
+        ContactExceptionMessages.NO_ACCESS_DISPLAY, Category.CATEGORY_PERMISSION_DENIED, 104),
+        
     /** Got a -1 ID from IDGenerator */
-    ID_GENERATION_FAILED(ID_GENERATION_FAILED_MSG, Category.CATEGORY_ERROR, 107),
+    ID_GENERATION_FAILED("Got a -1 ID from IDGenerator", null, Category.CATEGORY_ERROR, 107),
+    
     /** Unable to scale image down. */
-    IMAGE_DOWNSCALE_FAILED(IMAGE_DOWNSCALE_FAILED_MSG, Category.CATEGORY_ERROR, 108),
+    IMAGE_DOWNSCALE_FAILED("Unable to scale image down.", ContactExceptionMessages.IMAGE_DOWNSCALE_FAILED_DISPLAY,
+        Category.CATEGORY_ERROR, 108),
+        
     /** Invalid SQL Query. */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 109),
+    SQL_PROBLEM("Invalid SQL query.", ContactExceptionMessages.SQL_ERROR_DISPLAY,Category.CATEGORY_ERROR, 109),
+    
     /** Invalid SQL Query: %s */
-    AGGREGATING_CONTACTS_NOT_ENABLED(FEATURE_DISABLED_MSG, Category.CATEGORY_SERVICE_DOWN, 110),
+    AGGREGATING_CONTACTS_NOT_ENABLED("This feature has not been enabled", ContactExceptionMessages.AGGREGATING_CONTACTS_DISABLED_DISPLAY,
+        Category.CATEGORY_SERVICE_DOWN, 110),
+        
     /**
      * You do not have CATEGORY_PERMISSION_DENIED to create objects in this
      * folder %1$d in context %2$d with user %3$d
      */
-    NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 112),
+    NO_CREATE_PERMISSION("You do not have the permission to create objects in the folder %1$d in context %2$d as user %3$d",
+        ContactExceptionMessages.NO_CREATE_DISPLAY, Category.CATEGORY_PERMISSION_DENIED, 112),
+        
     /**
      * Unable to synchronize the old contact with the new changes: Context %1$d
      * Object %2$d
      */
-    LOAD_OLD_CONTACT_FAILED(LOAD_OLD_CONTACT_FAILED_MSG, Category.CATEGORY_ERROR, 116),
+    LOAD_OLD_CONTACT_FAILED("Unable to synchronize the old contact with the new changes: context %1$d object %2$d",
+        ContactExceptionMessages.LOAD_OLD_CONTACT_FAILED_DISPLAY, Category.CATEGORY_ERROR, 116),
+        
     /**
      * You are not allowed to mark this contact as private contact: Context %1$d
      * Object %2$d
      */
-    MARK_PRIVATE_NOT_ALLOWED(MARK_PRIVATE_NOT_ALLOWED_MSG, Category.CATEGORY_PERMISSION_DENIED, 118),
+    MARK_PRIVATE_NOT_ALLOWED("You are not allowed to mark this contact as private contact: context %1$d object %2$d",
+        ContactExceptionMessages.MARK_PRIVATE_NOT_ALLOWED_DISPLAY, Category.CATEGORY_PERMISSION_DENIED, 118),
+        
     /**
      * Edit Conflict. Your change cannot be completed because somebody else has
      * made a conflicting change to the same item. Please refresh or synchronize
      * and try again.
      */
-    OBJECT_HAS_CHANGED(OBJECT_HAS_CHANGED_MSG, Category.CATEGORY_CONFLICT, 119),
+    OBJECT_HAS_CHANGED("Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the "
+        + "same item. Please refresh or synchronize and try again.", ContactExceptionMessages.OBJECT_HAS_CHANGED_DISPLAY,
+        Category.CATEGORY_CONFLICT, 119),
+        
     /** An error occurred: Object id is -1 */
-    NEGATIVE_OBJECT_ID(NEGATIVE_OBJECT_ID_MSG, Category.CATEGORY_ERROR, 121),
+    NEGATIVE_OBJECT_ID("An error occurred: object id is -1", null, Category.CATEGORY_ERROR, 121),
+    
     /** No changes found. No update required. Context %1$d Object %2$d */
-    NO_CHANGES(NO_CHANGES_MSG, Category.CATEGORY_USER_INPUT, 122),
+    NO_CHANGES("No changes found. No update required. context %1$d object %2$d", ContactExceptionMessages.NO_CHANGES_DISPLAY,
+        Category.CATEGORY_USER_INPUT, 122),
+        
     /** Contact %1$d not found in context %2$d. */
-    CONTACT_NOT_FOUND(CONTACT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 125),
+    CONTACT_NOT_FOUND("Contact %1$d not found in context %2$d.", ContactExceptionMessages.CONTACT_NOT_FOUND_DISPLAY,
+        Category.CATEGORY_ERROR, 125),
+        
     /** Unable to save contact image. The image appears to be broken. */
-    IMAGE_BROKEN(IMAGE_BROKEN_MSG, Category.CATEGORY_USER_INPUT, 136),
+    IMAGE_BROKEN("Unable to save contact image. The image appears to be broken.", ContactExceptionMessages.IMAGE_BROKEN_DISPLAY,
+        Category.CATEGORY_USER_INPUT, 136),
+        
     /** Unable to trigger object Events: Context %1$d Folder %2$d */
-    TRIGGERING_EVENT_FAILED(TRIGGERING_EVENT_FAILED_MSG,
+    TRIGGERING_EVENT_FAILED("Unable to trigger object events: context %1$d folder %2$d", null,
             Category.CATEGORY_ERROR, 146),
+            
     /** Unable to pick up a connection from the DBPool */
-    INIT_CONNECTION_FROM_DBPOOL(INIT_CONNECTION_FROM_DBPOOL_MSG,
+    INIT_CONNECTION_FROM_DBPOOL("Unable to pick up a connection from the DBPool", null,
             Category.CATEGORY_SERVICE_DOWN, 151),
+            
     /**
      * Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$s, current: %3$s) and try again."
      */
-    DATA_TRUNCATION(DATA_TRUNCATION_MSG, Category.CATEGORY_USER_INPUT, 154),
+    DATA_TRUNCATION("Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$s, current: %3$s)"
+        + " and try again.", ContactExceptionMessages.DATA_TRUNCATION_DISPLAY, Category.CATEGORY_USER_INPUT, 154),
+        
     /**
      * The image you tried to attach is not a valid picture. It may be broken or
      * is not a valid file.
      */
-    NOT_VALID_IMAGE(NOT_VALID_IMAGE_MSG, Category.CATEGORY_TRY_AGAIN, 158),
+    NOT_VALID_IMAGE("The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
+        ContactExceptionMessages.NOT_VALID_IMAGE_DISPLAY, Category.CATEGORY_TRY_AGAIN, 158),
+        
     /** Your first name is mandatory. Please enter it. */
-    FIRST_NAME_MANDATORY(FIRST_NAME_MANDATORY_MSG,
+    FIRST_NAME_MANDATORY("Your first name is mandatory. Please enter it.", ContactExceptionMessages.FIRST_NAME_MANDATORY_DISPLAY,
             Category.CATEGORY_USER_INPUT, 164),
+            
     /**
      * Unable to move this contact because it is marked as private: Context %1$d
      * Object %2$d
      */
-    NO_PRIVATE_MOVE(NO_PRIVATE_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED,
-            165),
+    NO_PRIVATE_MOVE("Unable to move this contact because it is marked as private: context %1$d object %2$d",
+        ContactExceptionMessages.NO_PRIVATE_MOVE, Category.CATEGORY_PERMISSION_DENIED, 165),
+        
     /** Your display name is mandatory. Please enter it. */
-    DISPLAY_NAME_MANDATORY(ContactExceptionMessages.DISPLAY_NAME_MANDATORY,
+    DISPLAY_NAME_MANDATORY("Your display name is mandatory. Please enter it.", ContactExceptionMessages.DISPLAY_NAME_MANDATORY_DISPLAY,
             Category.CATEGORY_USER_INPUT, 166),
+            
     /**
      * The name you entered is already assigned to another user. Please choose
      * another display name. Context %1$d Object %2$d
      */
-    DISPLAY_NAME_IN_USE(DISPLAY_NAME_IN_USE_MSG, Category.CATEGORY_TRY_AGAIN,
-            167),
+    DISPLAY_NAME_IN_USE("The name you entered is already assigned to another user. Please choose another display name."
+        + " context %1$d object %2$d", ContactExceptionMessages.DISPLAY_NAME_IN_USE_DISPLAY, Category.CATEGORY_TRY_AGAIN, 167),
+        
     /** Bad character in field %2$s. Error: %1$s */
-    BAD_CHARACTER(BAD_CHARACTER_MSG, Category.CATEGORY_USER_INPUT, 168),
+    BAD_CHARACTER("Bad character in field %2$s. Error: %1$s", ContactExceptionMessages.BAD_CHARACTER_DISPLAY,
+        Category.CATEGORY_USER_INPUT, 168),
+        
     /**
      * You do not have CATEGORY_PERMISSION_DENIED to delete objects from folder
      * %1$d in context %2$d with user %3$d
      */
-    NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG,
-            Category.CATEGORY_PERMISSION_DENIED, 169),
+    NO_DELETE_PERMISSION("You do not have the permission to delete objects from folder %1$d in context %2$d as user %3$d",
+            ContactExceptionMessages.NO_DELETE_PERMISSION_DISPLAY, Category.CATEGORY_PERMISSION_DENIED, 169),
+            
     /** Mime type is not defined. */
-    MIME_TYPE_NOT_DEFINED(MIME_TYPE_NOT_DEFINED_MSG,
+    MIME_TYPE_NOT_DEFINED("Mime type is not defined.", ContactExceptionMessages.MIME_TYPE_NOT_DEFINED_DISPLAY,
             Category.CATEGORY_USER_INPUT, 170),
+            
     /**
      * A contact with private flag cannot be stored in a public folder. Folder:
      * %1$d context %2$d user %3$d
      */
-    PFLAG_IN_PUBLIC_FOLDER(PFLAG_IN_PUBLIC_FOLDER_MSG,
-            Category.CATEGORY_USER_INPUT, 171),
+    PFLAG_IN_PUBLIC_FOLDER("A contact with private flag cannot be stored in a public folder. Folder: %1$d context %2$d user %3$d",
+            ContactExceptionMessages.PFLAG_IN_PUBLIC_FOLDER_DISPLAY, Category.CATEGORY_USER_INPUT, 171),
+            
     /** Image size too large. Image size: %1$d. Max. size: %2$d. */
-    IMAGE_TOO_LARGE(IMAGE_TOO_LARGE_MSG, Category.CATEGORY_USER_INPUT, 172),
+    IMAGE_TOO_LARGE("Image size too large. Image size: %1$d. Max. size: %2$d.", ContactExceptionMessages.IMAGE_TOO_LARGE_DISPLAY,
+        Category.CATEGORY_USER_INPUT, 172),
+        
     /**
      * Primary email address in system contact must not be edited: Context %1$d
      * Object %2$d User %3$d
      */
-    NO_PRIMARY_EMAIL_EDIT(NO_PRIMARY_EMAIL_EDIT_MSG,
-            Category.CATEGORY_PERMISSION_DENIED, 173),
+    NO_PRIMARY_EMAIL_EDIT("Primary E-Mail address in system contact must not be edited: context %1$d object %2$d user %3$d",
+            ContactExceptionMessages.NO_PRIMARY_EMAIL_EDIT_DISPLAY, Category.CATEGORY_PERMISSION_DENIED, 173),
+            
     /** The contact %1$d is not located in folder %2$s (%3$d) */
-    NOT_IN_FOLDER(NOT_IN_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 174),
+    NOT_IN_FOLDER("The contact %1$d is not located in folder %2$s (%3$d)", ContactExceptionMessages.NOT_IN_FOLDER_DISPLAY,
+        Category.CATEGORY_PERMISSION_DENIED, 174),
+        
     /** Your last name is mandatory. Please enter it. */
-    LAST_NAME_MANDATORY(LAST_NAME_MANDATORY_MSG, Category.CATEGORY_USER_INPUT,
-            175),
+    LAST_NAME_MANDATORY("Your last name is mandatory. Please enter it.", ContactExceptionMessages.LAST_NAME_MANDATORY_DISPLAY,
+        Category.CATEGORY_USER_INPUT, 175),
+        
     /** You are not allowed to modify contact %1$d in context %2$d. */
-    NO_CHANGE_PERMISSION(NO_CHANGE_PERMISSION_MSG,
+    NO_CHANGE_PERMISSION("You are not allowed to modify contact %1$d in context %2$d.", ContactExceptionMessages.NO_CHANGE_PERMISSION_DISPLAY,
             Category.CATEGORY_PERMISSION_DENIED, 176),
 
     /** An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address. */
-    EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS(EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG, Category.CATEGORY_USER_INPUT, 177),
+    EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS("An E-Mail address is mandatory for external distribution list members. Please add a valid"
+        + " E-Mail address.", ContactExceptionMessages.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_DISPLAY, Category.CATEGORY_USER_INPUT, 177),
 
     /** The object identifier is mandatory for distribution list members referencing existing contacts. */
-    OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS(OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS_MSG, Category.CATEGORY_USER_INPUT, 178),
+    OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS("The object identifier is mandatory for distribution list members referencing"
+        + " existing contacts.", ContactExceptionMessages.OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS_DISPLAY, Category.CATEGORY_USER_INPUT, 178),
 
     /** Unable to load objects. Context %1$d User %2$d */
-    LOAD_OBJECT_FAILED(LOAD_OBJECT_FAILED_MSG, Category.CATEGORY_ERROR, 252),
+    LOAD_OBJECT_FAILED("Unable to load objects. Context %1$d user %2$d", null, Category.CATEGORY_ERROR, 252),
+    
     /** User contacts can not be deleted. */
-    NO_USER_CONTACT_DELETE(NO_USER_CONTACT_DELETE_MSG,
+    NO_USER_CONTACT_DELETE("User contacts can not be deleted.", ContactExceptionMessages.NO_USER_CONTACT_DELETE_DISPLAY,
             Category.CATEGORY_PERMISSION_DENIED, 260),
+            
     /** The identifier %1$s can't be parsed. */
-    ID_PARSING_FAILED(ID_PARSING_FAILED_MSG, Category.CATEGORY_ERROR, 261),
+    ID_PARSING_FAILED("The identifier %1$s can not be parsed.", null, Category.CATEGORY_ERROR, 261),
+    
     /**
      * Number of documents attached to this contact is below zero. You can not
      * remove any more attachments.
      */
-    TOO_FEW_ATTACHMENTS(TOO_FEW_ATTACHMENTS_MSG, Category.CATEGORY_USER_INPUT,
-            400),
+    TOO_FEW_ATTACHMENTS("Number of documents attached to this contact is below zero. You can not remove any more attachments.",
+        ContactExceptionMessages.TOO_FEW_ATTACHMENTS_DISPLAY, Category.CATEGORY_USER_INPUT, 400),
+        
     /** Need at least a ContactObject and a value to set %s */
-    TOO_FEW_ATTRIBUTES(TOO_FEW_ATTRIBUTES_MSG, Category.CATEGORY_ERROR, 500),
+    TOO_FEW_ATTRIBUTES("Setting %s requires at least a ContactObject and a value.", ContactExceptionMessages.TOO_FEW_ATTRIBUTES_DISPLAY,
+        Category.CATEGORY_ERROR, 500),
+        
     /** Could not convert given string %1$s to a date. */
-    DATE_CONVERSION_FAILED(DATE_CONVERSION_FAILED_MSG, Category.CATEGORY_ERROR,
-            600),
+    DATE_CONVERSION_FAILED("Given string %1$s could not be converted to a date.", ContactExceptionMessages.DATE_CONVERSION_FAILED_DISPLAY,
+        Category.CATEGORY_ERROR, 600),
+        
     /** Could not convert given object %1$s to a date when setting %2$s. */
-    CONV_OBJ_2_DATE_FAILED(CONV_OBJ_2_DATE_FAILED_MSG, Category.CATEGORY_ERROR,
-            700),
+    CONV_OBJ_2_DATE_FAILED("Could not convert given object %s to a date when setting %s.",
+        ContactExceptionMessages.CONV_OBJ_2_DATE_FAILED_DISPLAY, Category.CATEGORY_ERROR, 700),
+        
     /** Need at least a ContactObject to get the value of %s */
-    CONTACT_OBJECT_MISSING(CONTACT_OBJECT_MISSING_MSG, Category.CATEGORY_ERROR,
-            800),
+    CONTACT_OBJECT_MISSING("Getting the value of %s requires at least a ContactObject",
+        ContactExceptionMessages.CONTACT_OBJECT_MISSING_DISPLAY, Category.CATEGORY_ERROR, 800),
+        
     /** In order to accomplish the search, %1$d or more characters are required. */
-    TOO_FEW_SEARCH_CHARS(TOO_FEW_SEARCH_CHARS_MSG,
-            Category.CATEGORY_USER_INPUT, 1000),
+    TOO_FEW_SEARCH_CHARS("In order to accomplish the search, %1$d or more characters are required.",
+        ContactExceptionMessages.TOO_FEW_SEARCH_CHARS_DISPLAY, Category.CATEGORY_USER_INPUT, 1000),
+        
     /** An unexpected error occurred: %1$s */
-    UNEXPECTED_ERROR(ContactExceptionMessages.UNEXPECTED_ERROR_MSG,
-            Category.CATEGORY_USER_INPUT, 1001),
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", null, Category.CATEGORY_ERROR, 1001),
 
     ;
 
     public static final String PREFIX = "CON".intern();
 
     private String message;
+    private String displayMessage;
     private Category category;
     private int number;
     private LogLevel logLevel;
 
-    private ContactExceptionCodes(final String message,
+    private ContactExceptionCodes(final String message, final String displayMessage,
         final Category category, final int number) {
-        this(message, category, number, null);
+        this(message, displayMessage, category, number, null);
     }
 
-    private ContactExceptionCodes(final String message,
+    private ContactExceptionCodes(final String message, final String displayMessage,
             final Category category, final int number, final LogLevel logLevel) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
         this.logLevel = logLevel;
@@ -304,6 +328,11 @@ public enum ContactExceptionCodes implements LogLevelAwareOXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
