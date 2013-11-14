@@ -75,6 +75,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -102,6 +103,7 @@ public class Activator extends HousekeepingActivator {
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         AdminServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, fullPrimaryKeySupportService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
+        track(EventSystemService.class, new RegistryServiceTrackerCustomizer<EventSystemService>(context, AdminServiceRegistry.getInstance(), EventSystemService.class));
         openTrackers();
 
         log.info("Starting Admindaemon...");
