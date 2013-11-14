@@ -50,12 +50,10 @@
 package com.openexchange.admin.osgi;
 
 import java.util.Dictionary;
-import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -78,7 +76,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.FullPrimaryKeySupportService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
@@ -88,14 +85,12 @@ import com.openexchange.version.Version;
 
 public class Activator extends HousekeepingActivator {
 
-    static Log log = LogFactory.getLog(AdminDaemon.class);
-
-    private AdminDaemon daemon = null;
-
-    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
+    private volatile AdminDaemon daemon;
 
     @Override
     public void startBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
@@ -110,12 +105,13 @@ public class Activator extends HousekeepingActivator {
         openTrackers();
 
         log.info("Starting Admindaemon...");
-        this.daemon = new AdminDaemon();
-        this.daemon.getCurrentBundleStatus(context);
-        this.daemon.registerBundleListener(context);
+        final AdminDaemon daemon = new AdminDaemon();
+        this.daemon = daemon;
+        daemon.getCurrentBundleStatus(context);
+        daemon.registerBundleListener(context);
         try {
             AdminDaemon.initCache(configurationService);
-            this.daemon.initAccessCombinationsInCache();
+            daemon.initAccessCombinationsInCache();
         } catch (final OXGenericException e) {
             log.fatal(e.getMessage(), e);
             throw e;
@@ -124,7 +120,7 @@ public class Activator extends HousekeepingActivator {
             throw e;
         }
         track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
-        this.daemon.initRMI(context);
+        daemon.initRMI(context);
 
 
         if (log.isInfoEnabled()) {
@@ -179,15 +175,13 @@ public class Activator extends HousekeepingActivator {
      */
     @Override
     public void stopBundle() throws Exception {
-        closeTrackers();
-        while (!trackers.isEmpty()) {
-            final ServiceTracker<?,?> tracker = trackers.pop();
-            tracker.close();
-        }
+        cleanUp();
+        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
         log.info("Stopping RMI...");
         final AdminDaemon daemon = this.daemon;
         if (null != daemon) {
             daemon.unregisterRMI(context);
+            this.daemon = null;
         }
         log.info("Thanks for using Open-Xchange AdminDaemon");
     }
