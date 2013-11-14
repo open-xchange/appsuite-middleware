@@ -70,7 +70,7 @@ public interface ContactCollectorService {
      * @param addresses The addresses to remember
      * @param session The user-session
      */
-    public void memorizeAddresses(List<InternetAddress> addresses, Session session);
+    void memorizeAddresses(List<InternetAddress> addresses, Session session);
 
     /**
      * Creates a contact collect folder if necessary.
@@ -82,5 +82,6 @@ public interface ContactCollectorService {
      * @throws SQLException
      * @throws OXException
      */
-    public void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws SQLException, OXException;
+    void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws SQLException, OXException;
+
 }
