@@ -57,6 +57,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.management.ManagementService;
@@ -90,13 +91,14 @@ public class PushMsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class, ContextService.class, FolderService.class, MsService.class, ConfigurationService.class };
+        return new Class<?>[] { EventAdmin.class, EventFactoryService.class, ContextService.class, FolderService.class, MsService.class,
+            ConfigurationService.class, CryptoService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final Log LOG = com.openexchange.log.Log.loggerFor(PushMsActivator.class);
-        
+
         {
             final ConfigurationService service = getService(ConfigurationService.class);
             if (service.getBoolProperty("com.openexchange.push.udp.pushEnabled", false)) {
