@@ -756,7 +756,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     private OXCalendarExceptionCodes(final String message, String displayMessage, final int detailNumber, final Category category) {
         this.message = message;
-        this.displayMessage = displayMessage;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
         this.category = category;
         this.detailNumber = detailNumber;
     }

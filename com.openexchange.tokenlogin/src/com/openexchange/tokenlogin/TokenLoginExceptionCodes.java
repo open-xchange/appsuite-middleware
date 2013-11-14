@@ -145,7 +145,7 @@ public enum TokenLoginExceptionCodes implements DisplayableOXExceptionCode {
      */
     private TokenLoginExceptionCodes(String message, String displayableMessage, Category category, int detailNumber) {
         this.message = message;
-        this.displayableMessage = displayableMessage != null ? OXExceptionStrings.MESSAGE : displayableMessage;
+        this.displayableMessage = displayableMessage == null ? OXExceptionStrings.MESSAGE : displayableMessage;
         this.detailNumber = detailNumber;
         this.category = category;
     }
