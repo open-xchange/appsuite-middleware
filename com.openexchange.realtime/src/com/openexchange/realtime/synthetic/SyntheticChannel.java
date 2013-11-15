@@ -84,7 +84,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SyntheticChannel implements Channel, Runnable {
     
-    private static final int NUMBER_OF_RUNLOOPS = 1;
+    private static final int NUMBER_OF_RUNLOOPS = 16;
     
     private static final Log LOG = LogFactory.getLog(SyntheticChannel.class);
     private static final String SENDLOCK = "syntheticChannel";
