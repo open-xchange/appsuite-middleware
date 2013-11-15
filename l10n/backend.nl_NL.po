@@ -48,7 +48,7 @@ msgstr ""
 "Project-Id-Version: errors.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-04 14:10+0100\n"
-"PO-Revision-Date: 2013-11-10 09:55+0100\n"
+"PO-Revision-Date: 2013-11-13 21:40+0100\n"
 "Last-Translator: Ivar Snaaijer <Ivar@bureau-cornavin.com >\n"
 "Language-Team: Dutch <kde-i18n-doc@kde.org>\n"
 "Language: nl\n"
@@ -8025,7 +8025,7 @@ msgstr "Standaard groep"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:62
 msgid "Inbox"
-msgstr "Inbox"
+msgstr "Postvak IN"
 
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
@@ -13923,7 +13923,7 @@ msgstr "Unified Mail ondersteund het aanmaken van mappen niet"
 #. Unified Mail does not support to clear INBOX folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:97
 msgid "Unified Mail does not support to clear INBOX folder."
-msgstr "Unified Mail ondersteund het opschonen van de INBOX map niet."
+msgstr "Unified Mail ondersteund het opschonen van de Postvak IN map niet."
 
 #. Unknown default folder fullname: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:103

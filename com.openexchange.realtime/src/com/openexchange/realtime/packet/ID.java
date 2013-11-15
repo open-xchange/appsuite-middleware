@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
@@ -102,7 +103,10 @@ public class ID implements Serializable {
     private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> LISTENERS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
 
     private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> LOCKS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
-
+    
+    private static final ConcurrentHashMap<ID, Boolean> DISPOSING = new ConcurrentHashMap<ID, Boolean>();
+    
+    
     private String protocol;
     private String component;
     private String user;
@@ -497,11 +501,19 @@ public class ID implements Serializable {
     }
     
     public void dispose(Object source, Map<String, Object> properties) {
-        Map<String, Object> vetoProperties = new HashMap<String, Object>();
-        this.trigger(Events.BEFOREDISPOSE, this, vetoProperties);
-        Boolean veto = (Boolean) vetoProperties.get("veto");
-        if (veto == null || !veto) {
-            this.trigger(Events.DISPOSE, source, properties);
+        Boolean currentValue = DISPOSING.putIfAbsent(this, Boolean.TRUE);
+        if (currentValue == Boolean.TRUE) {
+            return;
+        }
+        try {
+            Map<String, Object> vetoProperties = new HashMap<String, Object>();
+            this.trigger(Events.BEFOREDISPOSE, this, vetoProperties);
+            Boolean veto = (Boolean) vetoProperties.get("veto");
+            if (veto == null || !veto) {
+                this.trigger(Events.DISPOSE, source, properties);
+            }
+        } finally {
+            DISPOSING.remove(this);
         }
     }
 
