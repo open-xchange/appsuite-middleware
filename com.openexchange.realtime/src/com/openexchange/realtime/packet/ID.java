@@ -104,7 +104,8 @@ public class ID implements Serializable {
 
     private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> LOCKS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
     
-    private AtomicBoolean disposing = new AtomicBoolean(false);
+    private static final ConcurrentHashMap<ID, Boolean> DISPOSING = new ConcurrentHashMap<ID, Boolean>();
+    
     
     private String protocol;
     private String component;
@@ -500,8 +501,9 @@ public class ID implements Serializable {
     }
     
     public void dispose(Object source, Map<String, Object> properties) {
-        if (!disposing.compareAndSet(false, true)) {
-            return; // Already disposing
+        Boolean currentValue = DISPOSING.putIfAbsent(this, Boolean.TRUE);
+        if (currentValue == Boolean.TRUE) {
+            return;
         }
         try {
             Map<String, Object> vetoProperties = new HashMap<String, Object>();
@@ -511,7 +513,7 @@ public class ID implements Serializable {
                 this.trigger(Events.DISPOSE, source, properties);
             }
         } finally {
-            disposing.set(false);
+            DISPOSING.remove(this);
         }
     }
 
