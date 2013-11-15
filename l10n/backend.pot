@@ -4862,7 +4862,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:96
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:62
 msgid "Cannot get database connection."
 msgstr ""
 
@@ -5505,7 +5505,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:77
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:103
 msgid "Unexpected error: %1$s"
@@ -5877,9 +5876,7 @@ msgid ""
 msgstr ""
 
 #. SQL Problem: "%1$s".
-#. * SQL Problem: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:112
 msgid "SQL Problem: \"%1$s\""
 msgstr ""
 
@@ -7817,60 +7814,52 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:61
-msgid ""
-"Unable to access the link between these two objects. Insufficient rights. "
-"First object %1$d folder %2$d. Second object %3$d folder %4$d context %5$d."
+msgid "You do not have appropriate permissions to access this link."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:63
-msgid ""
-"Unable to create a link between these two objects. This link already exists. "
-"First object %1$d folder %2$d. Second object %3$d folder %4$d context %5$d."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:65
-msgid "Invalid SQL query: %s"
+msgid "This link already exists."
 msgstr ""
 
 #. *
 #. * User is missing for the reminder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
-msgid "User is missing for the reminder."
+msgid "Required  value \"user\" was not supplied."
 msgstr ""
 
 #. *
 #. * Identifier of the object is missing.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:76
-msgid "Object identifier is missing."
+msgid "Required  value \"target id\" was not supplied."
 msgstr ""
 
 #. *
 #. * Alarm date for the reminder is missing.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:81
-msgid "Alarm date for the reminder is missing."
+msgid "Required  value \"alarm date\" was not supplied."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:83
-msgid "Unable to insert reminder"
+msgid "Unable to insert reminder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:85
-msgid "Unable to update reminder"
+msgid "Unable to update reminder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:87
-msgid "Unable to delete reminder"
+msgid "Unable to delete reminder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:89
-msgid "Unable to load reminder"
+msgid "Unable to load reminder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:91
-msgid "Unable to list reminder"
+msgid "Unable to list reminder."
 msgstr ""
 
 #. * Can not find reminder with identifier %1$d in context %2$d.
@@ -7882,14 +7871,14 @@ msgstr ""
 #. * Folder of the object is missing.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:99
-msgid "Object folder is missing"
+msgid "Required  value \"folder\" was not supplied."
 msgstr ""
 
 #. *
 #. * Module type of the object is missing.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:104
-msgid "Object's module type is missing"
+msgid "Required  value \"module\" was not supplied."
 msgstr ""
 
 #. *
@@ -7900,15 +7889,15 @@ msgid "Updated too many reminders."
 msgstr ""
 
 #. * No target service is registered for module %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:112
 msgid "No target service is registered for module %1$d."
 msgstr ""
 
 #. *
 #. * Reminder identifier is missing.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:125
-msgid "Reminder identifier is missing."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:117
+msgid "Required  value \"identifier\" was not supplied."
 msgstr ""
 
 #. * Writing the setting %1$s is not permitted.
@@ -8252,7 +8241,6 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:74
 msgid "A SQL problem occurred: %1$s."
 msgstr ""
 
@@ -8283,7 +8271,6 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:78
 msgid ""
 "Processed a wrong number of rows in database. Expected %1$d rows but worked "
 "on %2$d rows."
@@ -8307,31 +8294,8 @@ msgstr ""
 msgid "Column \"%1$s\" not found in table %2$s."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:62
-msgid "No row found in table version in schema %1$s."
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:64
-msgid "Multiple rows found in table version in schema %1$s."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:66
-msgid ""
-"Update conflict detected. Another process is currently updating schema %1$s."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:68
-msgid "Table update failed. Schema %1$s could not be locked."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:70
-msgid "Update conflict detected. Schema %1$s is not marked as locked."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:72
-msgid ""
-"Schema %1$s could not be unlocked. Lock information could no be removed from "
-"database."
+msgid "Error while updating database."
 msgstr ""
 
 #. File upload failed: %1$s
