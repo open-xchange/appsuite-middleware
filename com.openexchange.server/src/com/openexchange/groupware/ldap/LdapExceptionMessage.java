@@ -57,6 +57,26 @@ import com.openexchange.i18n.LocalizableStrings;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class LdapExceptionMessage implements LocalizableStrings {
+    
+    public final static String CACHE_PROBLEM_DISPLAY = "Problem putting/removing an object into/from the cache.";
+    
+    public final static String HASH_ALGORITHM_DISPLAY = "Hash algorithm \"%s\" could not be found.";
+    
+    public final static String UNSUPPORTED_ENCODING_DISPLAY = "Encoding \"%s\" cannot be used.";
+    
+    public final static String RESOURCEGROUP_NOT_FOUND_DISPLAY = "No resource group found for identifier \"%1$d\".";
+
+    public final static String RESOURCEGROUP_CONFLICT_DISPLAY = "Found resource groups with the same identifier \"%1$d\".";
+
+    public final static String RESOURCE_NOT_FOUND_DISPLAY = "No resource found with identifier \"%1$d\".";
+
+    public final static String RESOURCE_CONFLICT_DISPLAY = "Found resource(s) with same identifier \"%1$s.\".";
+    
+    public final static String NO_USER_BY_MAIL_DISPLAY = "Cannot find user with E-Mail \"%s\".";
+    
+    public final static String USER_NOT_FOUND_DISPLAY = "Cannot find user with identifier \"%1$s\" in context %2$d.";
+    
+    public final static String GROUP_NOT_FOUND_DISPLAY = "Cannot find group with identifier \"%1$s\" in context %2$d.";
 
     /**
      * Initializes a new {@link LdapExceptionMessage}.
@@ -64,90 +84,5 @@ public class LdapExceptionMessage implements LocalizableStrings {
     private LdapExceptionMessage() {
         super();
     }
-
-    /**
-     * A property from the ldap.properties file is missing.
-     */
-    public final static String PROPERTY_MISSING_MSG = "Cannot find property %s.";
-
-    /**
-     * A problem with distinguished names occurred.
-     */
-    public final static String DN_PROBLEM_MSG = "Cannot build distinguished name from %s.";
-
-    /**
-     * Class can not be found.
-     */
-    public final static String CLASS_NOT_FOUND_MSG = "Class %s can not be loaded.";
-
-    /**
-     * An implementation can not be instantiated.
-     */
-    public final static String INSTANTIATION_PROBLEM_MSG = "Cannot instantiate class %s.";
-
-    /**
-     * A database connection Cannot be obtained.
-     */
-    public final static String NO_CONNECTION_MSG = "Cannot get database connection.";
-
-    /**
-     * SQL Problem: "%s".
-     */
-    public final static String SQL_ERROR_MSG = "SQL problem: \"%s\"";
-
-    /**
-     * Problem putting an object into the cache.
-     */
-    public final static String CACHE_PROBLEM_MSG = "Problem putting/removing an object into/from the cache.";
-
-    /**
-     * Hash algorithm %s isn't found.
-     */
-    public final static String HASH_ALGORITHM_MSG = "Hash algorithm %s could not be found.";
-
-    /**
-     * Encoding %s cannot be used.
-     */
-    public final static String UNSUPPORTED_ENCODING_MSG = "Encoding %s cannot be used.";
-
-    /**
-     * Cannot find resource group with identifier %d.
-     */
-    public final static String RESOURCEGROUP_NOT_FOUND_MSG = "Cannot find resource group with identifier %d.";
-
-    /**
-     * Found resource groups with same identifier %d.
-     */
-    public final static String RESOURCEGROUP_CONFLICT_MSG = "Found resource groups with same identifier %d.";
-
-    /**
-     * Cannot find resource with identifier %d.
-     */
-    public final static String RESOURCE_NOT_FOUND_MSG = "Cannot find resource with identifier %d.";
-
-    /**
-     * Found resources with same identifier %d.
-     */
-    public final static String RESOURCE_CONFLICT_MSG = "Found resources with same identifier %d.";
-
-    /**
-     * Cannot find user with email %s.
-     */
-    public final static String NO_USER_BY_MAIL_MSG = "Cannot find user with E-Mail %s.";
-
-    /**
-     * Cannot find user with identifier %1$s in context %2$d.
-     */
-    public final static String USER_NOT_FOUND_MSG = "Cannot find user with identifier %1$s in context %2$d.";
-
-    /**
-     * Cannot find group with identifier %1$s in context %2$d.
-     */
-    public final static String GROUP_NOT_FOUND_MSG = "Cannot find group with identifier %1$s in context %2$d.";
-
-    /**
-     * Unexpected error: %1$s
-     */
-    public final static String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
 
 }
