@@ -198,7 +198,9 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
                 filesToGet.put(child.getChildText("URL"), child.getChildText("MD5"));
             }
 
-            assertTrue("Product {92406A45-8205-4EF4-B7BF-8CA57D56B822} (Appsuite URL for Hotlink) was missing.", foundAppsuiteLinkProduct);
+            /* Deactivated artificial App Suite product
+             * assertTrue("Product {92406A45-8205-4EF4-B7BF-8CA57D56B822} (Appsuite URL for Hotlink) was missing.", foundAppsuiteLinkProduct);
+             */
 
             for (String url : filesToGet.keySet()) {
                 FileRequest fileRequest = new FileRequest(extractFileName(url));

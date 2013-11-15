@@ -50,7 +50,7 @@
 package com.openexchange.push.ms;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -116,7 +116,7 @@ public class PushMsSession implements PutIfAbsent {
      * @return The wrapped session
      */
     public static Map<String, Serializable> wrap(Session session) {
-        Map<String, Serializable> map = new HashMap<String, Serializable>();
+        Map<String, Serializable> map = new LinkedHashMap<String, Serializable>(24);
         map.put("__loginName", session.getLoginName());
         map.put("__password", obfuscate(session.getPassword()));
         map.put("__contextId", Integer.valueOf(session.getContextId()));

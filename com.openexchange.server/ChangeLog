@@ -1,3 +1,7 @@
+* 2013-11-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29824: Don't re-distribute already remotely received events
+
 * 2013-11-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29817: Consider "If-Match" header on DELETE and PUT operations
