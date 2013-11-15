@@ -179,7 +179,8 @@ find %{buildroot}/opt/open-xchange/etc \
         -type f \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
-perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|oauth-provider|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %pre
 if [ ${1:-0} -eq 2 ]; then
@@ -865,7 +866,7 @@ ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts fals
 # SoftwareChange_Request-1707
 ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
 
-PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
+PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
@@ -901,11 +902,6 @@ exit 0
 %doc docs/
 %doc com.openexchange.server/doc/examples
 %doc com.openexchange.server/ChangeLog
-%config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
-%config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
-%config(noreplace) /opt/open-xchange/etc/preview.properties
-%config(noreplace) /opt/open-xchange/etc/quota.properties
-%config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
