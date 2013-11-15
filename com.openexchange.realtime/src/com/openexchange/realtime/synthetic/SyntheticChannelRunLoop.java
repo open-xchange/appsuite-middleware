@@ -88,7 +88,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
         // Pause handling for MessageDispatch inspection but make sure to enable it again
         try {
             pauseHandling();
-            // Check currently handled element first. Set to null so it doesn't get handled if it isdestinedForID 
+            // Check currently handled element(leave?) first. Set to null so it doesn't get handled if it isdestinedForID 
             if (currentElement != null && isDestinedForID(destination, currentElement)) {
                 currentElement=null;
             }

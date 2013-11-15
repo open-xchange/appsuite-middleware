@@ -59,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -95,6 +96,9 @@ public class SyntheticChannel implements Channel, Runnable {
     private final ConcurrentHashMap<ID, Long> lastAccess = new ConcurrentHashMap<ID, Long>();
     private final ConcurrentHashMap<ID, TimeoutEviction> timeouts = new ConcurrentHashMap<ID, TimeoutEviction>();
     
+    /** Only one CLEANUP handler may clean a loop at a time */
+    private final ConcurrentHashMap<SyntheticChannelRunLoop, Lock> cleanUpLocks = new ConcurrentHashMap<SyntheticChannelRunLoop, Lock>();
+    
     private final Random loadBalancer = new Random();
     
     private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
@@ -103,6 +107,7 @@ public class SyntheticChannel implements Channel, Runnable {
         for (int i = 0; i < NUMBER_OF_RUNLOOPS; i++) {
             SyntheticChannelRunLoop rl = new SyntheticChannelRunLoop("message-handler-" + i);
             runLoops.add(rl);
+            cleanUpLocks.put(rl, new ReentrantLock());
             services.getService(ThreadPoolService.class).getExecutor().execute(rl);
         }
     }
@@ -274,8 +279,11 @@ public class SyntheticChannel implements Channel, Runnable {
         
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            SyntheticChannelRunLoop runLoopForId = runLoopsPerID.get(id);
+            Lock cleanUpLock = cleanUpLocks.get(runLoopForId); 
             Lock sendLock = id.getLock(SENDLOCK);
             try {
+                cleanUpLock.lock();
                 sendLock.lock();
                 lastAccess.remove(id);
                 timeouts.remove(id);
@@ -314,6 +322,7 @@ public class SyntheticChannel implements Channel, Runnable {
                 }
             } finally {
                 sendLock.unlock();
+                cleanUpLock.unlock();
             }
         }
 
