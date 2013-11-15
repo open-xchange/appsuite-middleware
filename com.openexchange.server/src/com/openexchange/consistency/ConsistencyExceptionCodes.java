@@ -75,13 +75,13 @@ public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
     /** User entered malformed policy string. */
     MALFORMED_POLICY(ConsistencyExceptionCodes.MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4, MALFORMED_POLICY_MSG_DISPLAY);
 
-    public static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
+    private static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
 
-    public static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
+    private static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
 
-    public static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
+    private static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
 
-    public static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
+    private static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
 
     private final String message;
     private final Category category;
@@ -133,7 +133,7 @@ public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     public String getHelp() {
         return null;
     }

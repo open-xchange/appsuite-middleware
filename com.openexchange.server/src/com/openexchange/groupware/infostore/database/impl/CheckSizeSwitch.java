@@ -58,7 +58,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -93,12 +92,8 @@ public class CheckSizeSwitch {
     }
 
     public static void checkSizes(final DocumentMetadata metadata, final DBProvider provider, final Context ctx) throws OXException {
-        boolean error = false;
-
         final CheckSizeSwitch checkSize = new CheckSizeSwitch(provider, ctx);
         final GetSwitch get = new GetSwitch(metadata);
-
-        final OXException x = InfostoreExceptionCodes.TOO_LONG_VALUES.create();
 
         for(final Metadata m : Metadata.VALUES) {
             if(!FIELDS_TO_CHECK.contains(m)) {
@@ -113,18 +108,12 @@ public class CheckSizeSwitch {
                 valueLength = 0;
             }
             if(maxSize < valueLength) {
-                final ProblematicAttribute attr = new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength);
-                x.addProblematic(attr);
-                error = true;
+                final OXException x = InfostoreExceptionCodes.TOO_LONG_VALUES.create();
+                x.addProblematic(new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength));
+                throw x;
             }
         }
-
-        if(error) {
-            throw x;
-        }
     }
-
-
 
     public int getSize(final Metadata field) {
         if(SIZES.containsKey(field)) {

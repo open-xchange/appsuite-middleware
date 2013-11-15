@@ -116,67 +116,67 @@ public enum ResourceExceptionCode implements DisplayableOXExceptionCode {
     /**
      * A database connection Cannot be obtained.
      */
-    public final static String NO_CONNECTION_MSG = "Cannot get database connection.";
+    private final static String NO_CONNECTION_MSG = "Cannot get database connection.";
 
     /**
      * SQL Problem: "%1$s".
      */
-    public final static String SQL_ERROR_MSG = "SQL problem: \"%1$s\"";
+    private final static String SQL_ERROR_MSG = "SQL problem: \"%1$s\"";
 
     /**
      * Cannot find resource group with identifier %1$d.
      */
-    public final static String RESOURCEGROUP_NOT_FOUND_MSG = "Cannot find resource group with identifier %1$d.";
+    private final static String RESOURCEGROUP_NOT_FOUND_MSG = "Cannot find resource group with identifier %1$d.";
 
     /**
      * Found resource groups with same identifier %1$d.
      */
-    public final static String RESOURCEGROUP_CONFLICT_MSG = "Found resource groups with same identifier %1$d.";
+    private final static String RESOURCEGROUP_CONFLICT_MSG = "Found resource groups with same identifier %1$d.";
 
     /**
      * Cannot find resource with identifier %1$d.
      */
-    public final static String RESOURCE_NOT_FOUND_MSG = "Cannot find resource with identifier %1$d.";
+    private final static String RESOURCE_NOT_FOUND_MSG = "Cannot find resource with identifier %1$d.";
 
     /**
      * Found resource(s) with same identifier %1$s.
      */
-    public final static String RESOURCE_CONFLICT_MSG = "Found resource(s) with same identifier %1$s.";
+    private final static String RESOURCE_CONFLICT_MSG = "Found resource(s) with same identifier %1$s.";
 
     /**
      * No resource given.
      */
-    public final static String NULL_MSG = "No resource given.";
+    private final static String NULL_MSG = "No resource given.";
 
     /**
      * Missing mandatory field(s) in given resource.
      */
-    public final static String MANDATORY_FIELD_MSG = "Missing mandatory field(s) in given resource.";
+    private final static String MANDATORY_FIELD_MSG = "Missing mandatory field(s) in given resource.";
 
     /**
      * No permission to modify resources in context %1$s
      */
-    public final static String PERMISSION_MSG = "No permission to modify resources in context %1$s";
+    private final static String PERMISSION_MSG = "No permission to modify resources in context %1$s";
 
     /**
      * Found resource(s) with same email address %1$s.
      */
-    public final static String RESOURCE_CONFLICT_MAIL_MSG = "Found resource(s) with same email address %1$s.";
+    private final static String RESOURCE_CONFLICT_MAIL_MSG = "Found resource(s) with same email address %1$s.";
 
     /**
      * Invalid resource identifier: %1$s
      */
-    public final static String INVALID_RESOURCE_IDENTIFIER_MSG = "Invalid resource identifier: %1$s";
+    private final static String INVALID_RESOURCE_IDENTIFIER_MSG = "Invalid resource identifier: %1$s";
 
     /**
      * Invalid resource email address: %1$s
      */
-    public final static String INVALID_RESOURCE_MAIL_MSG = "Invalid resource E-Mail address: %1$s";
+    private final static String INVALID_RESOURCE_MAIL_MSG = "Invalid resource E-Mail address: %1$s";
 
     /**
      * The resource has been changed in the meantime: %1$s
      */
-    public final static String CONCURRENT_MODIFICATION_MSG = "The resource has been changed in the meantime: %1$s";
+    private final static String CONCURRENT_MODIFICATION_MSG = "The resource has been changed in the meantime: %1$s";
 
     /**
      * Message of the exception.

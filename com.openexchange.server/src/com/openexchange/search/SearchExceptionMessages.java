@@ -93,22 +93,22 @@ public enum SearchExceptionMessages implements DisplayableOXExceptionCode {
     UNKNOWN_OPERATION(SearchExceptionMessages.UNKNOWN_OPERATION_MSG, CATEGORY_ERROR, 6);
 
     // Search failed: %1$s.
-    public static final String SEARCH_FAILED_MSG = "Search failed: %1$s.";
+    private static final String SEARCH_FAILED_MSG = "Search failed: %1$s.";
 
     // Missing operation in JSON object.
-    public static final String PARSING_FAILED_MISSING_OPERATION_MSG = "Missing operation in JSON object.";
+    private static final String PARSING_FAILED_MISSING_OPERATION_MSG = "Missing operation in JSON object.";
 
     // Missing operands in JSON object.
-    public static final String PARSING_FAILED_MISSING_OPERANDS_MSG = "Missing operands in JSON object.";
+    private static final String PARSING_FAILED_MISSING_OPERANDS_MSG = "Missing operands in JSON object.";
 
     // Invalid search term in JSON object.
-    public static final String PARSING_FAILED_INVALID_SEARCH_TERM_MSG = "Invalid search term in JSON object.";
+    private static final String PARSING_FAILED_INVALID_SEARCH_TERM_MSG = "Invalid search term in JSON object.";
 
     // Missing field "%1$s" in JSON object.
-    public static final String PARSING_FAILED_MISSING_FIELD_MSG = "Missing field \"%1$s\" in JSON object.";
+    private static final String PARSING_FAILED_MISSING_FIELD_MSG = "Missing field \"%1$s\" in JSON object.";
 
     // Unknown operation: %1$s.
-    public static final String UNKNOWN_OPERATION_MSG = "Unknown operation: %1$s.";
+    private static final String UNKNOWN_OPERATION_MSG = "Unknown operation: %1$s.";
 
     /**
      * Message of the exception.

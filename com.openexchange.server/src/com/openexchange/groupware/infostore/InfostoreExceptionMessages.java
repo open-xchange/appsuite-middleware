@@ -58,75 +58,65 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class InfostoreExceptionMessages implements LocalizableStrings {
 
-    public static final String TOO_LONG_VALUES_MSG = "Some field values are too long.";
+    // The document you requested does not exist.
+    public static final String NOT_EXIST_MSG_DISPLAY = "The document you requested does not exist.";
 
-    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %1$s";
+    // Unable to load the document(s). Please try again.
+    public static final String COULD_NOT_LOAD_MSG_DISPLAY = "Unable to load the document(s). Please try again.";
 
-    public static final String PREFETCH_FAILED_MSG = "Cannot pre-fetch results.";
+    // The folder %1$s you requested is not an Infostore folder.
+    public static final String NOT_INFOSTORE_FOLDER_MSG_DISPLAY = "The folder %1$s you requested is not an Infostore folder.";
 
-    public static final String NOT_EXIST_MSG = "The requested item does not exist.";
+    // You do not have the appropriate permissions to read the document.
+    public static final String NO_READ_PERMISSION_MSG_DISPLAY = "You do not have the appropriate permissions to read the document.";
 
-    public static final String COULD_NOT_LOAD_MSG = "Could not load documents to check the permissions";
+    // You do not have the appropriate permissions to create a document in this folder.
+    public static final String NO_CREATE_PERMISSION_MSG_DISPLAY = "You do not have the appropriate permissions to create a document in this folder.";
 
-    public static final String NOT_INFOSTORE_FOLDER_MSG = "The folder %1$s is not an Infostore folder";
+    // You do not have the appropriate permissions to update the document.
+    public static final String NO_WRITE_PERMISSION_MSG_DISPLAY = "You do not have the appropriate permissions to update the document.";
 
-    public static final String NO_READ_PERMISSION_MSG = "You do not have sufficient read permissions to read objects in this folder..";
+    // Unable to delete all documents. Please try again.
+    public static final String NOT_ALL_DELETED_MSG_DISPLAY = "Unable to delete all documents. Please try again.";
 
-    public static final String NO_CREATE_PERMISSION_MSG = "You do not have sufficient permissions to create objects in this folder.";
+    // You do not have the appropriate permissions to delete this version.
+    public static final String NO_DELETE_PERMISSION_FOR_VERSION_MSG_DISPLAY = "You do not have the appropriate permissions to delete this version.";
 
-    public static final String NO_WRITE_PERMISSION_MSG = "You are not allowed to update this item.";
+    // The document is already locked. Please try again later.
+    public static final String ALREADY_LOCKED_MSG_DISPLAY = "The document is already locked. Please try again later.";
 
-    public static final String NO_TARGET_CREATE_PERMISSION_MSG = "You are not allowed to create objects in the target folder.";
+    // You do not have the appropriate permissions to unlock the document.
+    public static final String WRITE_PERMS_FOR_UNLOCK_MISSING_MSG_DISPLAY = "You do not have the appropriate permissions to unlock the document.";
 
-    public static final String NOT_ALL_DELETED_MSG = "Could not delete all objects.";
+    // You do not have the appropriate permissions to lock a document.
+    public static final String WRITE_PERMS_FOR_LOCK_MISSING_MSG_DISPLAY = "You do not have the appropriate permissions to lock a document.";
 
-    public static final String NO_DELETE_PERMISSION_FOR_VERSION_MSG = "You do not have sufficient permissions to delete this version.";
+    // You do not have the appropriate permissions to move the document.
+    public static final String NO_SOURCE_DELETE_PERMISSION_MSG_DISPLAY = "You do not have the appropriate permissions to move the document.";
 
-    public static final String ITERATE_FAILED_MSG = "Could not iterate result.";
+    // The document you requested does not exist.
+    public static final String DOCUMENT_NOT_EXISTS_MSG_DISPLAY = "The document you requested does not exist.";
 
-    public static final String ALREADY_LOCKED_MSG = "This document is locked.";
+    // The document name \"%1$s\" already exists. Please choose another.
+    public static final String FILENAME_NOT_UNIQUE_MSG_DISPLAY = "The document name \"%1$s\" already exists. Please choose another.";
 
-    public static final String LOCKED_BY_ANOTHER_MSG = "You cannot unlock this document.";
+    // You do not have the appropriate permissions to delete a document.
+    public static final String NO_DELETE_PERMISSION_MSG_DISPLAY = "You do not have the appropriate permissions to delete a document.";
 
-    public static final String WRITE_PERMS_FOR_LOCK_MISSING_MSG = "You need write permissions to lock a document.";
+    // In order to accomplish the search, %1$s or more characters are required.
+    public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG_DISPLAY = "In order to accomplish the search, %1$s or more characters are required.";
 
-    public static final String NEW_ID_FAILED_MSG = "Could not generate new ID.";
+    // The document could not be updated because it was modified. Please try again.
+    public static final String MODIFIED_CONCURRENTLY_MSG_DISPLAY = "The document could not be updated because it was modified. Please try again.";
 
-    public static final String NO_SOURCE_DELETE_PERMISSION_MSG = "You are not allowed to delete objects in the source folder. This document cannot be moved.";
+    // The file name must not contain slashes.
+    public static final String VALIDATION_FAILED_SLASH_MSG_DISPLAY = "The file name must not contain slashes.";
 
-    public static final String WRITE_PERMS_FOR_UNLOCK_MISSING_MSG = "You need write permissions to unlock a document.";
+    // The file name contains invalid characters.
+    public static final String VALIDATION_FAILED_CHARACTERS_MSG_DISPLAY = "The file name contains invalid characters.";
 
-    public static final String DOCUMENT_NOT_EXISTS_MSG = "The document you requested does not exist.";
-
-    public static final String FILENAME_NOT_UNIQUE_MSG = "Files attached to InfoStore items must have unique names. File name: %1$s. The other document with this file name is %2$s.";
-
-    public static final String NUMBER_OF_VERSIONS_FAILED_MSG = "Could not determine number of versions for info item %1$s in context %s. Invalid query: %2$s";
-
-    public static final String NO_DELETE_PERMISSION_MSG = "You do not have the permissions to delete at least one of the info items.";
-
-    public static final String DOCUMENT_CONTAINS_NO_FILE_MSG = "Illegal argument: document %1$s contains no file";
-
-    public static final String DUPLICATE_SUBFOLDER_MSG = "Folder %1$s has two subfolders named %2$s. The database for context %3$s is not consistent.";
-
-    public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$s or more characters are required.";
-
-    public static final String DELETE_FAILED_MSG = "DocumentMetadata %1$s could not be deleted. Please try again.";
-
-    public static final String MODIFIED_CONCURRENTLY_MSG = "The document could not be updated because it was modified. Reload the view.";
-
-    public static final String UPDATED_BETWEEN_DO_AND_UNDO_MSG = "The document was updated in between do and undo. The database is now probably inconsistent.";
-
-    public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG = "This folder is a virtual folder. It cannot contain documents.";
-
-    public static final String VALIDATION_FAILED_MSG = "Validation failed: %1$s";
-
-    // File name must not contain slashes.
-    public static final String VALIDATION_FAILED_SLASH_MSG = "File name must not contain slashes.";
-
-    // File name contains invalid characters.
-    public static final String VALIDATION_FAILED_CHARACTERS_MSG = "File name contains invalid characters.";
-
-    public static final String NO_OFFSET_FOR_NEW_VERSIONS_MSG = "New file versions can't be saved with an offset.";
+    // New file versions can't be saved with an offset.
+    public static final String NO_OFFSET_FOR_NEW_VERSIONS_MSG_DISPLAY = "New file versions can't be saved with an offset.";
 
     private InfostoreExceptionMessages() {
         super();

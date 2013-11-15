@@ -99,47 +99,47 @@ public enum OXJSONExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Exception while writing JSON.
      */
-    public static final String JSON_WRITE_ERROR_MSG = "Exception while writing JSON.";
+    private static final String JSON_WRITE_ERROR_MSG = "Exception while writing JSON.";
 
     /**
      * Exception while parsing JSON: "%s".
      */
-    public static final String JSON_READ_ERROR_MSG = "Exception while parsing JSON: \"%s\".";
+    private static final String JSON_READ_ERROR_MSG = "Exception while parsing JSON: \"%s\".";
 
     /**
      * Exception while building JSON.
      */
-    public static final String JSON_BUILD_ERROR_MSG = "Exception while building JSON.";
+    private static final String JSON_BUILD_ERROR_MSG = "Exception while building JSON.";
 
     /**
      * Unable to parse value "%1$s" within field %2$s as a number.
      */
-    public static final String NUMBER_PARSING_MSG = "Unable to parse value \"%1$s\" within field %2$s as a number.";
+    private static final String NUMBER_PARSING_MSG = "Unable to parse value \"%1$s\" within field %2$s as a number.";
 
     /**
      * Invalid value \"%2$s\" in JSON attribute \"%1$s\".
      */
-    public static final String INVALID_VALUE_MSG = "Invalid value \"%2$s\" in JSON attribute \"%1$s\".";
+    private static final String INVALID_VALUE_MSG = "Invalid value \"%2$s\" in JSON attribute \"%1$s\".";
 
     /**
      * Missing field "%1$s" in JSON data.
      */
-    public static final String MISSING_FIELD_MSG = "Missing field \"%1$s\" in JSON data.";
+    private static final String MISSING_FIELD_MSG = "Missing field \"%1$s\" in JSON data.";
 
     /**
      * Invalid cookie.
      */
-    public static final String INVALID_COOKIE_MSG = "Invalid cookie.";
+    private static final String INVALID_COOKIE_MSG = "Invalid cookie.";
 
     /**
      * Value "%1$s" of attribute %s contains non digit characters.
      */
-    public static final String CONTAINS_NON_DIGITS_MSG = "Value \"%1$s\" of attribute %2$s contains non digit characters.";
+    private static final String CONTAINS_NON_DIGITS_MSG = "Value \"%1$s\" of attribute %2$s contains non digit characters.";
 
     /**
      * Too many digits within field %1$s.
      */
-    public static final String TOO_BIG_NUMBER_MSG = "Too many digits within field %1$s.";
+    private static final String TOO_BIG_NUMBER_MSG = "Too many digits within field %1$s.";
 
     private static final String PREFIX = "SVL";
 

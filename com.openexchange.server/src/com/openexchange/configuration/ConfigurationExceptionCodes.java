@@ -52,7 +52,6 @@ package com.openexchange.configuration;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -61,7 +60,7 @@ import com.openexchange.exception.OXExceptionStrings;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum ConfigurationExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum ConfigurationExceptionCodes implements DisplayableOXExceptionCode {
     /** Filename for property file is not defined. */
     NO_FILENAME("File name for property file is not defined.", ConfigurationExceptionCodes.CONFIG_ERROR_DISPLAY, Category.CATEGORY_CONFIGURATION, 1),
     /** File "%1$s" does not exist. */
@@ -82,7 +81,7 @@ public enum ConfigurationExceptionCodes implements OXExceptionCode, DisplayableO
     IO_ERROR("An I/O error occurred: %1$s", ConfigurationExceptionCodes.CONFIG_ERROR_DISPLAY, Category.CATEGORY_CONFIGURATION, 9);
 
     // Error in server configuration.
-    public final static String CONFIG_ERROR_DISPLAY = "Error in server configuration.";
+    private final static String CONFIG_ERROR_DISPLAY = "Error in server configuration.";
 
     private final String message;
 

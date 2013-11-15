@@ -54,7 +54,6 @@ import static com.openexchange.authorization.AuthorizationExceptionMessages.USER
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -62,7 +61,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link AuthorizationExceptionCodes}
  *
  */
-public enum AuthorizationExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum AuthorizationExceptionCodes implements DisplayableOXExceptionCode {
 
     /** User is deactivated */
     USER_DISABLED("User is deactivated", USER_DISABLED_DISPLAY, CATEGORY_PERMISSION_DENIED, 1),

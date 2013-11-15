@@ -73,8 +73,8 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // A folder named "%1$s" already exists below the parent folder "%2$s".
     public static final String EQUAL_NAME_MSG_DISPLAY = "A folder named \"%1$s\" already exists below the parent folder \"%2$s\".";
 
-    // The requested folder can not be found.
-    public static final String NOT_FOUND_MSG_DISPLAY = "The requested folder can not be found.";
+    // The folder you requested does not exist.
+    public static final String NOT_FOUND_MSG_DISPLAY = "The folder you requested does not exist.";
 
     // You do not have the appropriate permissions to delete the folder \"%1$s\".
     public static final String FOLDER_NOT_DELETEABLE_MSG_DISPLAY = "You do not have the appropriate permissions to delete the folder \"%1$s\".";
