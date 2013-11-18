@@ -59,31 +59,27 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class UpdateExceptionMessages implements LocalizableStrings {
 
-    public static final String ONLY_REDUCE_MSG = "The current version number %1$s is already lower than or equal to the desired version number %2$s.";
+    public static final String ONLY_REDUCE_DISPLAY = "The current version number %1$s is already lower than or equal to the desired version number %2$s.";
 
-    public static final String SQL_PROBLEM_MSG = "A SQL problem occurred: %1$s.";
+    public static final String LOADING_TASK_FAILED_DISPLAY = "Error loading update task \"%1$s\".";
 
-    public static final String LOADING_TASK_FAILED_MSG = "Error loading update task \"%1$s\".";
+    public static final String UNKNOWN_SCHEMA_DISPLAY = "Unknown schema name: \"%1$s\".";
 
-    public static final String UNKNOWN_SCHEMA_MSG = "Unknown schema name: %1$s.";
+    public static final String UNKNOWN_CONCURRENCY_DISPLAY = "Update task \"%1$s\" returned an unknown concurrency level. Running as blocking task.";
 
-    public static final String UNKNOWN_CONCURRENCY_MSG = "Update task %1$s returned an unknown concurrency level. Running as blocking task.";
+    public static final String RESET_FORBIDDEN_DISPLAY = "The version can not be set back if the update tasks handling has been migrated to the Remember Executed Update Tasks concept on schema \"%1$s\".";
 
-    public static final String RESET_FORBIDDEN_MSG = "The version can not be set back if the update tasks handling has been migrated to the Remember Executed Update Tasks concept on schema %1$s.";
+    public static final String UNRESOLVABLE_DEPENDENCIES_DISPLAY = "Unable to determine next update task to execute. Executed: \"%1$s\". Enqueued: \"%2$s\". Scheduled: \"%3$s\".";
 
-    public static final String UNRESOLVABLE_DEPENDENCIES_MSG = "Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.";
+    public static final String WRONG_ROW_COUNT_DISPLAY = "Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.";
 
-    public static final String WRONG_ROW_COUNT_MSG = "Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.";
+    public static final String UPDATE_FAILED_DISPLAY = "Updating schema \"%1$s\" failed. Cause: \"%2$s\".";
 
-    public static final String UPDATE_FAILED_MSG = "Updating schema %1$s failed. Cause: %2$s.";
+    public static final String BLOCKING_FIRST_DISPLAY = "Blocking tasks (\"%1$s\") must be executed before background tasks can be executed (\"%2$s\").";
 
-    public static final String BLOCKING_FIRST_MSG = "Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).";
+    public static final String UNKNOWN_TASK_DISPLAY = "Unknown task: \"%1$s\".";
 
-    public static final String UNKNOWN_TASK_MSG = "Unknown task: %1$s.";
-
-    public static final String COLUMN_NOT_FOUND_MSG = "Column \"%1$s\" not found in table %2$s.";
-
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+    public static final String COLUMN_NOT_FOUND_DISPLAY = "Column \"%1$s\" not found in table \"%2$s\".";
 
     private UpdateExceptionMessages() {
         super();
