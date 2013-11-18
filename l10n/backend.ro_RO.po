@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-11-03 16:50+0100\n"
+"PO-Revision-Date: 2013-11-06 07:43+0100\n"
 "Last-Translator: daiana heinrich <xdaiana@yahoo.com>\n"
 "Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
 "Language: ro\n"
@@ -196,7 +196,7 @@ msgstr "A apărut o eroare de I/O: %1$s"
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:71
 msgid "Access denied."
-msgstr "*Acces refuzat."
+msgstr "Acces refuzat."
 
 #. There is a problem with your AWS account that prevents the operation from completing successfully.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:74
@@ -204,19 +204,19 @@ msgid ""
 "There is a problem with your AWS account that prevents the operation from "
 "completing successfully."
 msgstr ""
-"*A apărut o problemă la contul AWS, ceea ce împiedică finalizarea cu succes "
-"a operației."
+"A apărut o problemă la contul AWS, ceea ce împiedică finalizarea cu succes a "
+"operației."
 
 #. The e-mail address you provided is associated with more than one account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:77
 msgid ""
 "The e-mail address you provided is associated with more than one account"
-msgstr "*Adresa de e-mail specificată este asociată cu mai mult de un cont"
+msgstr "Adresa de e-mail specificată este asociată cu mai mult de un cont"
 
 #. The Content-MD5 you specified did not match what we received.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:80
 msgid "The Content-MD5 you specified did not match what we received."
-msgstr "*Valoarea MD5 de conținut specificată nu coincide cu datele obținute."
+msgstr "Valoarea MD5 de conținut specificată nu coincide cu datele obținute."
 
 #. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:83
@@ -224,7 +224,7 @@ msgid ""
 "The requested bucket name is not available. The bucket namespace is shared "
 "by all users of the system. Please select a different name and try again."
 msgstr ""
-"*Numele de container cerut nu este disponibil. Spațiul de nume al "
+"Numele de container cerut nu este disponibil. Spațiul de nume al "
 "containerelor este comun pentru toți utilizatorii sistemului. Selectați alt "
 "nume și încercați din nou."
 
@@ -234,18 +234,18 @@ msgid ""
 "Your previous request to create the named bucket succeeded and you already "
 "own it."
 msgstr ""
-"*Cererea precedentă de creare a unui container cu nume a fost finalizată cu "
+"Cererea precedentă de creare a unui container cu nume a fost finalizată cu "
 "succes și sunteți deja proprietarul acestuia."
 
 #. The bucket you tried to delete is not empty.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:89
 msgid "The bucket you tried to delete is not empty."
-msgstr "*Containerul pe care doriți să-l eliminați nu este gol."
+msgstr "Containerul pe care doriți să-l eliminați nu este gol."
 
 #. This request does not support credentials.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:92
 msgid "This request does not support credentials."
-msgstr "*Această cerere nu suportă date de autentificare."
+msgstr "Această cerere nu suportă date de autentificare."
 
 #. Cross location logging not allowed. Buckets in one geographic location cannot log information to a bucket in another location.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:95
@@ -253,29 +253,29 @@ msgid ""
 "Cross location logging not allowed. Buckets in one geographic location "
 "cannot log information to a bucket in another location."
 msgstr ""
-"*Jurnalizarea între zone nu este permisă. Containere dintr-o zonă geografică "
+"Jurnalizarea între zone nu este permisă. Containere dintr-o zonă geografică "
 "nu pot jurnaliza informațiile unui container din altă zonă."
 
 #. Your proposed upload is smaller than the minimum allowed object size.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:98
 msgid "Your proposed upload is smaller than the minimum allowed object size."
 msgstr ""
-"*Încărcarea propusă este mai mică decît dimensiunea minimă a obiectelor."
+"Încărcarea propusă este mai mică decât dimensiunea minimă a obiectelor."
 
 #. Your proposed upload exceeds the maximum allowed object size.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:101
 msgid "Your proposed upload exceeds the maximum allowed object size."
-msgstr "*Încărcarea propusă depășește dimensiunea maximă a obiectelor."
+msgstr "Încărcarea propusă depășește dimensiunea maximă a obiectelor."
 
 #. The provided token has expired.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:104
 msgid "The provided token has expired."
-msgstr "*Simbolul furnizat a expirat."
+msgstr "Simbolul furnizat a expirat."
 
 #. The versioning configuration is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:107
 msgid "The versioning configuration is invalid."
-msgstr "*Configurația de versiuni este incorectă."
+msgstr "Configurația de versiuni este incorectă."
 
 #. You did not provide the number of bytes specified by the Content-Length HTTP header
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:110
@@ -283,64 +283,64 @@ msgid ""
 "You did not provide the number of bytes specified by the Content-Length HTTP "
 "header"
 msgstr ""
-"*Nu ați furnizat numărul de bytes specificat de antetul HTTP Content-Length"
+"Nu ați furnizat numărul de bytes specificat de antetul HTTP Content-Length"
 
 #. POST requires exactly one file upload per request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:113
 msgid "POST requires exactly one file upload per request.e."
-msgstr "*POST permite încărcarea unui singur fișier pe cerere."
+msgstr "POST permite încărcarea unui singur fișier pe cerere."
 
 #. Inline data exceeds the maximum allowed size.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:116
 msgid "Inline data exceeds the maximum allowed size."
-msgstr "*Datele incluse depășesc dimensiunea maximă permisă."
+msgstr "Datele incluse depășesc dimensiunea maximă permisă."
 
 #. We encountered an internal error. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:119
 msgid "We encountered an internal error. Please try again."
-msgstr "*A apărut o eroare internă. Încercați din nou."
+msgstr "A apărut o eroare internă. Încercați din nou."
 
 #. The AWS Access Key Id you provided does not exist in our records.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:122
 msgid "The AWS Access Key Id you provided does not exist in our records."
 msgstr ""
-"*Identificatorul de cheie de acces AWS specificat nu există în baza noastră "
+"Identificatorul de cheie de acces AWS specificat nu există în baza noastră "
 "de date."
 
 #. You must specify the Anonymous role.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:125
 msgid "You must specify the Anonymous role."
-msgstr "*Trebuie să specificați rolul anonim."
+msgstr "Trebuie să specificați rolul anonim."
 
 #. Invalid argument
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:128
 msgid "Invalid argument"
-msgstr "*Argument incorect"
+msgstr "Argument incorect"
 
 #. The specified bucket is not valid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:131
 msgid "The specified bucket is not valid."
-msgstr "*Containerul specificat este incorect."
+msgstr "Containerul specificat este incorect."
 
 #. The request is not valid with the current state of the bucket.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:134
 msgid "The request is not valid with the current state of the bucket."
-msgstr "*Cererea nu este corectă pentru starea actuală a containerului."
+msgstr "Cererea nu este corectă pentru starea actuală a containerului."
 
 #. The Content-MD5 you specified was an invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:137
 msgid "The Content-MD5 you specified was an invalid."
-msgstr "*Valoarea MD5 de conținut specificată este incorectă."
+msgstr "Valoarea MD5 de conținut specificată este incorectă."
 
 #. The specified location constraint is not valid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:140
 msgid "The specified location constraint is not valid."
-msgstr "*Constrângerea de zonă specificată este incorectă."
+msgstr "Constrângerea de zonă specificată este incorectă."
 
 #. The operation is not valid for the current state of the object.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:143
 msgid "The operation is not valid for the current state of the object."
-msgstr "*Operația nu este corectă pentru starea curentă a obiectului."
+msgstr "Operația nu este corectă pentru starea curentă a obiectului."
 
 #. One or more of the specified parts could not be found. The part might not have been uploaded, or the specified entity tag might not have matched the part's entity tag.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:146
@@ -349,7 +349,7 @@ msgid ""
 "have been uploaded, or the specified entity tag might not have matched the "
 "part's entity tag."
 msgstr ""
-"*Una sau mai pulte părți specificate nu au putut fi găsite. Partea poate să "
+"Una sau mai multe părți specificate nu au putut fi găsite. Partea poate să "
 "nu fi fost încărcată sau eticheta de entitate specificată poate să nu "
 "corespundă cu eticheta de entitate a părții."
 
@@ -359,13 +359,13 @@ msgid ""
 "The list of parts was not in ascending order.Parts list must specified in "
 "order by part number."
 msgstr ""
-"*Lista de părți nu este ordonată ascendent. Lista de părți trebuie "
+"Lista de părți nu este ordonată ascendent. Lista de părți trebuie "
 "specificată ordonată după numerele părților."
 
 #. All access to this object has been disabled.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:152
 msgid "All access to this object has been disabled."
-msgstr "*Accesul la acest obiect a fost dezactivat."
+msgstr "Accesul la acest obiect a fost dezactivat."
 
 #. The content of the form does not meet the conditions specified in the policy document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:155
@@ -373,33 +373,33 @@ msgid ""
 "The content of the form does not meet the conditions specified in the policy "
 "document."
 msgstr ""
-"*Conținutul formularului nu respectă condițiile specificate în documentul de "
+"Conținutul formularului nu respectă condițiile specificate în documentul de "
 "strategie."
 
 #. The requested range cannot be satisfied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:158
 msgid "The requested range cannot be satisfied."
-msgstr "*Intervalul cerut nu poate fi respectat."
+msgstr "Intervalul cerut nu poate fi respectat."
 
 #. SOAP requests must be made over an HTTPS connection.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:161
 msgid "SOAP requests must be made over an HTTPS connection."
-msgstr "*Cererile SOAP trebuie făcute folosind o conexiune HTTPS."
+msgstr "Cererile SOAP trebuie făcute folosind o conexiune HTTPS."
 
 #. The provided security credentials are not valid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:164
 msgid "The provided security credentials are not valid."
-msgstr "*Datele de acreditare furnizate sunt incorecte."
+msgstr "Datele de acreditare furnizate sunt incorecte."
 
 #. The SOAP request body is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:167
 msgid "The SOAP request body is invalid."
-msgstr "*Corpul cererii SOAP este incorect."
+msgstr "Corpul cererii SOAP este incorect."
 
 #. The storage class you specified is not valid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:170
 msgid "The storage class you specified is not valid."
-msgstr "*Clasa de stocare specificată este incorectă."
+msgstr "Clasa de stocare specificată este incorectă."
 
 #. The target bucket for logging does not exist, is not owned by you, or does not have the appropriate grants for the log-delivery group.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:173
@@ -407,24 +407,24 @@ msgid ""
 "The target bucket for logging does not exist, is not owned by you, or does "
 "not have the appropriate grants for the log-delivery group."
 msgstr ""
-"*Containerul destinație pentru jurnalizare nu există, nu vă aparține sau nu "
+"Containerul destinație pentru jurnalizare nu există, nu vă aparține sau nu "
 "dispune de permisiunile necesare pentru grupul de jurnalizare."
 
 #. The provided token is malformed or otherwise invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:176
 msgid "The provided token is malformed or otherwise invalid."
 msgstr ""
-"*Simbolul specificat este în format incorect sau nu este valid din alt motiv."
+"Simbolul specificat este în format incorect sau nu este valid din alt motiv."
 
 #. Couldn't parse the specified URI.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:179
 msgid "Couldn't parse the specified URI."
-msgstr "*Nu s-a putut analiza URI-ul specificat."
+msgstr "Nu s-a putut analiza URI-ul specificat."
 
 #. Your key is too long.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:182
 msgid "Your key is too long."
-msgstr "*Cheia este prea lungă."
+msgstr "Cheia este prea lungă."
 
 #. The XML you provided was not well-formed or did not validate against our published schema.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:185
@@ -432,89 +432,87 @@ msgid ""
 "The XML you provided was not well-formed or did not validate against our "
 "published schema."
 msgstr ""
-"*XML-ul specificat nu este formatat corect sau nu este valid conform schemei "
+"XML-ul specificat nu este formatat corect sau nu este valid conform schemei "
 "publicate de noi."
 
 #. The body of your POST request is not well-formed multipart/form-data.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:188
 msgid "The body of your POST request is not well-formed multipart/form-data."
-msgstr "*Corpul cererii POST este incorect formatat ca multipart/form-data."
+msgstr "Corpul cererii POST este incorect formatat ca multipart/form-data."
 
 #. The XML was not well-formed or did not validate against our published schema.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:191
 msgid ""
 "The XML was not well-formed or did not validate against our published schema."
 msgstr ""
-"*XML-ul nu este formatat corect sau nu este valid conform schemei publicate "
-"de noi.\""
+"XML-ul nu este formatat corect sau nu este valid conform schemei publicate "
+"de noi."
 
 #. Your request was too big.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:194
 msgid "Your request was too big."
-msgstr "*Cererea dumneavoastră este prea lungă."
+msgstr "Cererea dumneavoastră este prea lungă."
 
 #. Your POST request fields preceding the upload file were too large.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:197
 msgid "Your POST request fields preceding the upload file were too large."
-msgstr ""
-"*Câmpurile cererii POST ce preced fișierul de încărcat sunt prea lungi."
+msgstr "Câmpurile cererii POST ce preced fișierul de încărcat sunt prea lungi."
 
 #. Your metadata headers exceed the maximum allowed metadata size.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:200
 msgid "Your metadata headers exceed the maximum allowed metadata size."
 msgstr ""
-"*Antetele de metadate depășesc dimensiunea maximă admisă pentru metadate."
+"Antetele de metadate depășesc dimensiunea maximă admisă pentru metadate."
 
 #. The specified method is not allowed against this resource.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:203
 msgid "The specified method is not allowed against this resource."
-msgstr "*Metoda specificată nu este permisă pentru această resursă."
+msgstr "Metoda specificată nu este permisă pentru această resursă."
 
 #. A SOAP attachment was expected, but none were found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:206
 msgid "A SOAP attachment was expected, but none were found."
-msgstr "*S-a așteptat un fișier atașat SOAP, dar nu a fost găsit."
+msgstr "S-a așteptat un fișier atașat SOAP, dar nu a fost găsit."
 
 #. You must provide the Content-Length HTTP header.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:209
 msgid "You must provide the Content-Length HTTP header."
-msgstr "*Trebuie să specificați antetul HTTP Content-Length."
+msgstr "Trebuie să specificați antetul HTTP Content-Length."
 
 #. Request body is empty.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:212
 msgid "Request body is empty."
-msgstr "*Corpul cererii este gol."
+msgstr "Corpul cererii este gol."
 
 #. The SOAP 1.1 request is missing a security element.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:215
 msgid "The SOAP 1.1 request is missing a security element."
-msgstr "*Din cererea SOAP 1.1 lipsește un element de securitate."
+msgstr "Din cererea SOAP 1.1 lipsește un element de securitate."
 
 #. Your request was missing a required header.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:218
 msgid "Your request was missing a required header."
-msgstr "*Din cererea dumneavoastră lipsește un antet obligatoriu."
+msgstr "Din cererea dumneavoastră lipsește un antet obligatoriu."
 
 #. There is no such thing as a logging status sub-resource for a key.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:221
 msgid "There is no such thing as a logging status sub-resource for a key."
-msgstr ""
-"*Conceptul de stare de sub-resursă a stării de autentificare nu există."
+msgstr "Conceptul de stare de sub-resursă a stării de autentificare nu există."
 
 #. The specified bucket does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:224
 msgid "The specified bucket does not exist."
-msgstr "*Containerul specificat nu există."
+msgstr "Containerul specificat nu există."
 
 #. The specified key does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:227
 msgid "The specified key does not exist."
-msgstr "*Cheia specificată nu există."
+msgstr "Cheia specificată nu există."
 
 #. The lifecycle configuration does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:230
 msgid "The lifecycle configuration does not exist."
-msgstr "*Configurația de durată de viață nu există."
+msgstr "Configurația de durată de viață nu există."
 
 #. The specified multipart upload does not exist. The upload ID might be invalid, or the multipart upload might have been aborted or completed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:233
@@ -522,7 +520,7 @@ msgid ""
 "The specified multipart upload does not exist. The upload ID might be "
 "invalid, or the multipart upload might have been aborted or completed."
 msgstr ""
-"*Upload-ul multipart specificat nu există. Identificatorul încărcării poate "
+"Upload-ul multipart specificat nu există. Identificatorul încărcării poate "
 "fi incorect sau încărcarea a fost întreruptă sau finalizată."
 
 #. Indicates that the version ID specified in the request does not match an existing version.
@@ -531,23 +529,23 @@ msgid ""
 "Indicates that the version ID specified in the request does not match an "
 "existing version."
 msgstr ""
-"*Semnalează că identificatorul de versiune specificat în cerere nu "
-"corespunde unei versiuni existente."
+"Semnalează că identificatorul de versiune specificat în cerere nu corespunde "
+"unei versiuni existente."
 
 #. A header you provided implies functionality that is not implemented.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:239
 msgid "A header you provided implies functionality that is not implemented."
-msgstr "*Antetul specificat include funcționalitate ce nu este implementată."
+msgstr "Antetul specificat include o funcționalitate ce nu este implementată."
 
 #. Your account is not signed up for the Amazon S3 service.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:242
 msgid "Your account is not signed up for the Amazon S3 service."
-msgstr "*Contul dumneavoastră nu este abonat la serviciul Amazon S3."
+msgstr "Contul dumneavoastră nu este abonat la serviciul Amazon S3."
 
 #. The specified bucket does not have a bucket policy.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:245
 msgid "The specified bucket does not have a bucket policy."
-msgstr "*Containerul specificat nu are nicio strategie."
+msgstr "Containerul specificat nu are nicio strategie."
 
 #. A conflicting conditional operation is currently in progress against this resource. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:248
@@ -555,7 +553,7 @@ msgid ""
 "A conflicting conditional operation is currently in progress against this "
 "resource. Please try again."
 msgstr ""
-"*În acest moment se efectuează o altă operație condițională asupra acestei "
+"În acest moment se efectuează o altă operație condițională asupra acestei "
 "resurse. Încercați din nou."
 
 #. The bucket you are attempting to access must be addressed using the specified endpoint. Please send all future requests to this endpoint.
@@ -564,30 +562,29 @@ msgid ""
 "The bucket you are attempting to access must be addressed using the "
 "specified endpoint. Please send all future requests to this endpoint."
 msgstr ""
-"*Containerul pe care încercață să-l accesați trebuie adresat utilizând "
+"Containerul pe care încercați să-l accesați trebuie adresat utilizând "
 "endpoint-ul specificat. Trimiteți toate cererile către acest endpoint."
 
 #. At least one of the preconditions you specified did not hold.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:254
 msgid "At least one of the preconditions you specified did not hold."
 msgstr ""
-"*Cel puțin una dintre condițiile prealabile specificate nu a fost "
-"satisfăcută."
+"Cel puțin una dintre condițiile prealabile specificate nu a fost satisfăcută."
 
 #. Temporary redirect.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:257
 msgid "Temporary redirect."
-msgstr "*Redirectare temporară."
+msgstr "Redirecționare temporară."
 
 #. Object restore is already in progress.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:260
 msgid "Object restore is already in progress."
-msgstr "*Restaurarea obiectelor este deja în curs."
+msgstr "Restaurarea obiectelor este deja în curs."
 
 #. Bucket POST must be of the enclosure-type multipart/form-data.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:263
 msgid "Bucket POST must be of the enclosure-type multipart/form-data."
-msgstr "*Containerul POST trebuie să fie de tipul multipart/form-data."
+msgstr "Containerul POST trebuie să fie de tipul multipart/form-data."
 
 #. Your socket connection to the server was not read from or written to within the timeout period.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:266
@@ -595,19 +592,19 @@ msgid ""
 "Your socket connection to the server was not read from or written to within "
 "the timeout period."
 msgstr ""
-"*Conexiunea pe socket cu serverul nu a fost utilizată nici pentru citire, "
+"Conexiunea pe socket cu serverul nu a fost utilizată nici pentru citire, "
 "nici pentru scriere înainte de a expira."
 
 #. The difference between the request time and the server's time is too large.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:269
 msgid ""
 "The difference between the request time and the server's time is too large."
-msgstr "*Diferența orară dintre cerere și server este prea mare."
+msgstr "Diferența orară dintre cerere și server este prea mare."
 
 #. Requesting the torrent file of a bucket is not permitted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:272
 msgid "Requesting the torrent file of a bucket is not permitted."
-msgstr "*Nu este permisă solicitarea unui fișier torrent într-un container."
+msgstr "Nu este permisă solicitarea unui fișier torrent într-un container."
 
 #. The request signature we calculated does not match the signature you provided. Check your AWS Secret Access Key and signing method.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:275
@@ -615,20 +612,20 @@ msgid ""
 "The request signature we calculated does not match the signature you "
 "provided. Check your AWS Secret Access Key and signing method."
 msgstr ""
-"*Semnătura calculată pentru cerere nu corespunde cu semnătura specificată. "
-"Verificați cheia dumenavoastră secretă AWS și metoda de semnare."
+"Semnătura calculată pentru cerere nu corespunde cu semnătura specificată. "
+"Verificați cheia dumneavoastră secretă AWS și metoda de semnare."
 
 #. Please reduce your request rate.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:278
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:281
 msgid "Please reduce your request rate."
-msgstr "*Reduceți rata de cereri."
+msgstr "Reduceți rata de cereri."
 
 #. You are being redirected to the bucket while DNS updates.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:284
 msgid "You are being redirected to the bucket while DNS updates."
 msgstr ""
-"*Veți fi redirecționat către container cât timp serverul DNS se actualizează."
+"Veți fi redirecționat către container cât timp serverul DNS se actualizează."
 
 #. The provided token must be refreshed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:287
@@ -638,18 +635,18 @@ msgstr "/Simbolul specificat trebuie actualizat."
 #. You have attempted to create more buckets than allowed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:290
 msgid "You have attempted to create more buckets than allowed."
-msgstr "*Ați încercat să creați mai multe containere decât sunt permise."
+msgstr "Ați încercat să creați mai multe containere decât sunt permise."
 
 #. This request does not support content.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:293
 msgid "This request does not support content."
-msgstr "*Această cerere nu permite conținut."
+msgstr "Această cerere nu permite niciun conținut."
 
 #. The e-mail address you provided does not match any account on record.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:296
 msgid "The e-mail address you provided does not match any account on record."
 msgstr ""
-"*Adresa de e-mail specificată nu corespunde niciunui cont din baza de date."
+"Adresa de e-mail specificată nu corespunde niciunui cont din baza de date."
 
 #. The bucket POST must contain the specified field name. If it is specified, please check the order of the fields.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:299
@@ -657,7 +654,7 @@ msgid ""
 "The bucket POST must contain the specified field name. If it is specified, "
 "please check the order of the fields."
 msgstr ""
-"*Containerul POST trebuie să conțină numele de câmp specificat. Dacă este "
+"Containerul POST trebuie să conțină numele de câmp specificat. Dacă este "
 "specificat deja, verificați ordinea câmpurilor."
 
 #. A cache error occurred: %1$s
@@ -1309,12 +1306,12 @@ msgstr "%1$s a șters o întâlnire sau ați fost eliminat ca participant:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
-msgid "Change the description to %1$s."
-msgstr "Modifică descrierea în %1$s."
+msgid "Change the subject to %1$s."
+msgstr "Modifică subiectul în %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:200
-msgid "The appointment has a new description: %1$s."
-msgstr "Întâlnirea are o nouă descriere: %1$s."
+msgid "The appointment has a new subject: %1$s."
+msgstr "Întâlnirea are un subiect nou: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
@@ -1335,12 +1332,12 @@ msgstr "Întâlnirea se desfășoară  într-un alt loc: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:212
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:214
-msgid "Use the comments below."
-msgstr "Utilizați comentariile de mai jos."
+msgid "Use the appointment description below."
+msgstr "Utilizați descrierea întâlnirii de mai jos."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:216
-msgid "The appointment comments have changed."
-msgstr "Comentariile întâlnirii au fost modificate."
+msgid "The appointment description has changed."
+msgstr "Descrierea întâlnirii a fost modificată."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:218
 msgid "Please invite %1$s to the appointment."
@@ -2292,19 +2289,19 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:84
 msgid "Push via long polling is not available"
-msgstr "*Push prin long polling nu este disponibil."
+msgstr "Push prin long polling nu este disponibil."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:85
 msgid "The server is too busy at the moment - please try again later."
-msgstr "*Serverul este ocupat momentan - încercați din nou."
+msgstr "Serverul este ocupat momentan - încercați din nou."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:86
 msgid "The path \"%1$s\" is ignored"
-msgstr "*Calea \"%1$s\" va fi ignorată"
+msgstr "Calea \"%1$s\" va fi ignorată"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:87
 msgid "The file name \"%1$s\" is conflicting"
-msgstr "*Numele de fișier \"%1$s\" este conflictual"
+msgstr "Numele de fișier \"%1$s\" este conflictual"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
 msgid ""
@@ -2314,10 +2311,18 @@ msgstr ""
 "Directorul \"%1$s\" cu suma de control \"%2$s\" a cauzat probleme frecvente "
 "de sincronizare"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The client application you're using is outdated and no longer supported - "
+"please upgrade to a newer version"
+msgstr ""
+"Aplicația client pe care o utilizați este depășită și nu mai este suportată "
+"- treceți la o versiune mai nouă"
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
-msgstr "*Încărcat cu %1$s (%2$s)"
+msgstr "Încărcat cu %1$s (%2$s)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
@@ -3066,6 +3071,23 @@ msgstr ""
 "A eșuat autentificarea pentru numele de autentificare %1$s pe serverul %2$s "
 "(serviciu: %3$s)."
 
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
+msgid ""
+"In order to accomplish the search, %1$d or more characters are required."
+msgstr "Pentru a completa căutarea sunt necesare %1$d sau mai multe caractere."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr "Niciun furnizor liber/ocupat disponibil"
@@ -3339,7 +3361,7 @@ msgstr "[Nu este disponibil]"
 msgid ""
 "An error occurred inside the server which prevented it from fulfilling the "
 "request."
-msgstr "*A apărut o eroare pe serve care a nu a permis soluționarea cererii."
+msgstr "A apărut o eroare pe server care a nu a permis soluționarea cererii."
 
 #. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
@@ -3347,7 +3369,7 @@ msgid ""
 "A temporary error occurred inside the server which prevented it from "
 "fulfilling the request.. Please try again later."
 msgstr ""
-"*A apărut o eroare temporară pe server care nu a permis soluționarea "
+"A apărut o eroare temporară pe server care nu a permis soluționarea "
 "cererii.. Încercați din nou."
 
 #. The general message for a conflicting update operation.
@@ -3538,8 +3560,8 @@ msgid ""
 "Client login IP changed from %1$s to %2$s and is not covered by IP white-"
 "list or netmask."
 msgstr ""
-"*Adresa IP de conectare a clientului a fost modificată din %1$s în %2$s și "
-"nu este conținută nici în lista de adrese permise și nici în masca de rețea."
+"Adresa IP de conectare a clientului a fost modificată din %1$s în %2$s și nu "
+"este conținută nici în lista de adrese permise și nici în masca de rețea."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:103
 msgid "Your session was invalidated. Please try again."
@@ -3677,9 +3699,13 @@ msgstr "Serverul grizzly nu a putut fi pornit"
 
 #. * The following needed service is missing: \"%1$s\"
 #. The following needed service is missing: "%1$s"
+#. *
+#. * The following needed service is missing: \"%1$s\"
+#.
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -5094,7 +5120,7 @@ msgstr "Dosar de spam confirmat"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:161
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Schițe"
@@ -5116,7 +5142,7 @@ msgstr "Dosar de mesaje trimise"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:169
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Spam"
@@ -5130,7 +5156,7 @@ msgstr "Dosar de spam"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Coș de gunoi"
@@ -5630,7 +5656,7 @@ msgid ""
 "mailbox is nearly full. In that case, please try to empty your deleted items "
 "first, or delete smaller messages first."
 msgstr ""
-"*Nu s-a putut muta mesajul în dosarul de coș de gunoi, probabil deoarece "
+"Nu s-a putut muta mesajul în dosarul de coș de gunoi, probabil deoarece "
 "căsuța dumneavoastră poștală este aproape plină. Goliți mai întâi dosarul de "
 "elemente șterse sau ștergeți mesajele mai scurte. "
 
@@ -5820,7 +5846,7 @@ msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
 "context=%4$s). Error message from server: %5$s"
 msgstr ""
-"*Conexiune refuzată din cauza întârzierii autentificării la serverul %1$s cu "
+"Conexiune refuzată din cauza întârzierii autentificării la serverul %1$s cu "
 "autentificarea %2$s (utilizator=%3$s, context=%4$s). Mesaj de eroare de pe "
 "server: %5$s"
 
@@ -5833,7 +5859,7 @@ msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
 "context=%4$s). Try again in %5$s seconds. Error message from server: %6$s"
 msgstr ""
-"*Conexiune refuzată din cauza întârzierii autentificării la serverul %1$s cu "
+"Conexiune refuzată din cauza întârzierii autentificării la serverul %1$s cu "
 "autentificarea %2$s (utilizator=%3$s, context=%4$s). Încercați din nou peste "
 "%5$s secunde. Mesaj de eroare de pe server: %6$s"
 
@@ -6377,8 +6403,7 @@ msgstr "Secvența de trimitere este incorectă."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:115
 msgid ""
 "The server has no state associated with this client. Please enrol first."
-msgstr ""
-"*Serverul nu asociază nicio stare acestui client. Înscrieți-vă înainte."
+msgstr "Serverul nu asociază nicio stare acestui client. Înscrieți-vă înainte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -6393,8 +6418,8 @@ msgstr "Nu s-a putut crea registrul RMI."
 msgid ""
 "Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s"
 msgstr ""
-"*URL RSS incorect -- De la URL-ul %1$s nu s-a obținut niciun conținut XML "
-"sau conținut formatat greșit."
+"URL RSS incorect -- De la URL-ul %1$s nu s-a obținut niciun conținut XML sau "
+"conținut formatat greșit."
 
 #. Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:69
@@ -7445,21 +7470,6 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "Mutarea unei întâlniri periodice într-un alt dosar nu este suportată."
 
 #. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#. In order to accomplish the search, %1$d or more characters are required.
-#. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
-msgid ""
-"In order to accomplish the search, %1$d or more characters are required."
-msgstr "Pentru a completa căutarea sunt necesare %1$d sau mai multe caractere."
-
-#. *
 #. * Redundant information.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:346
@@ -7759,7 +7769,7 @@ msgid ""
 "The object identifier is mandatory for distribution list members referencing "
 "existing contacts."
 msgstr ""
-"*Identificatorul de obiect este obligatoriu pentru membrii listei de "
+"Identificatorul de obiect este obligatoriu pentru membrii listei de "
 "distribuție ce referențiază contacte existente."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:131
@@ -7988,7 +7998,7 @@ msgstr "Mesaje primite"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
 msgstr "Obiecte trimise"
 
@@ -8002,7 +8012,7 @@ msgstr "Mesaje trimise"
 #. The internationalized name for the archive mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:173
 msgid "Archive"
 msgstr "Arhivă"
 
@@ -8089,11 +8099,24 @@ msgstr "Fișierele atașate acestui mesaj pot fi accesate utilizând legăturile
 msgid "The links will be deleted on #DATE#"
 msgstr "Legăturile vor fi șterse în #DATE#"
 
+#. The text put into the description field of a published E-Mail attachment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+msgid ""
+"This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
+msgstr ""
+"Fișierul a fost publicatpentru e-mailul  \"#SUBJECT#\" trimis în #DATE# "
+"către #TO#"
+
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 msgid "Dear Sir or Madam"
 msgstr "Stimată doamnă/Stimate domn"
+
+#. The name for "Unified Mail" root folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:177
+msgid "Unified mail"
+msgstr "Mesagerie unificată"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -9449,9 +9472,9 @@ msgstr "Validarea a eșuat: %1$s"
 msgid "File name must not contain slashes."
 msgstr "Numele fișierului nu poate să conțină bare oblice."
 
-#. File name contains illegal characters.
+#. File name contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:127
-msgid "File name contains illegal characters."
+msgid "File name contains invalid characters."
 msgstr "Numele fișierului conține caractere nepermise."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
@@ -10619,7 +10642,7 @@ msgid ""
 "full. Please try to empty your deleted items first, or delete smaller "
 "messages first."
 msgstr ""
-"*Nu s-a putut muta mesajul în dosarul de coș de gunoi, probabil deoarece "
+"Nu s-a putut muta mesajul în dosarul de coș de gunoi, probabil deoarece "
 "căsuța dumneavoastră poștală este aproape plină. Goliți mai întâi dosarul de "
 "elemente șterse sau ștergeți mesajele mai scurte. "
 
@@ -11131,8 +11154,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
 msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
 msgstr ""
-"*Dosarul  \"%1$s\" a fost închis. Probabil cererea dumneavoastră a durat "
-"prea mult."
+"Dosarul  \"%1$s\" a fost închis. Probabil cererea dumneavoastră a durat prea "
+"mult."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -11143,7 +11166,7 @@ msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
 "%4$s, context=%5$s). Probably your request took too long."
 msgstr ""
-"*Dosarul \"%1$s\" a fost închis pe serverul de mail %2$s cu autentificarea "
+"Dosarul \"%1$s\" a fost închis pe serverul de mail %2$s cu autentificarea "
 "%3$s (utilizator=%4$s, context=%5$s). Probabil cererea dumneavoastră a durat "
 "prea mult."
 
@@ -11511,7 +11534,7 @@ msgid ""
 "That mailbox is already in use by another process. Please try again later. "
 "Error message: %1$s"
 msgstr ""
-"*Căsuța poștală este deja utilizată de un alt proces. Încercați din nou. "
+"Căsuța poștală este deja utilizată de un alt proces. Încercați din nou. "
 "Mesaj de eroare: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
@@ -11520,9 +11543,9 @@ msgid ""
 "login %2$s (user=%3$s, context=%4$s). Please try again later. Error message: "
 "%5$s"
 msgstr ""
-"*Căsuța poștală este deja utilizată de un alt proces pe serverul de mail "
-"%1$s cu autentificarea %2$s (utilizator=%3$s, context=%4$s). Încercați din "
-"nou. Mesaj de eroare: %5$s"
+"Căsuța poștală este deja utilizată de un alt proces pe serverul de mail %1$s "
+"cu autentificarea %2$s (utilizator=%3$s, context=%4$s). Încercați din nou. "
+"Mesaj de eroare: %5$s"
 
 #. Unexpected error: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -12508,7 +12531,7 @@ msgid ""
 "The value for attribute %1$s contains more than the allowed number of %2$d "
 "characters. Current length: %3$d characters."
 msgstr ""
-"*Valoarea pentru atributul %1$s conține mai multe caractere decât %2$d, "
+"Valoarea pentru atributul %1$s conține mai multe caractere decât %2$d, "
 "numărul maxim permis. Lungime curentă: %3$d caractere."
 
 #. *
@@ -12894,7 +12917,7 @@ msgstr "Format nesuportat: %1$s"
 #. Missing cookie: %1$s. Please re-login.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
 msgid "Missing cookie: %1$s. Please re-login."
-msgstr "*Lipsește modulul cookie: %1$s. Autentificați-vă din nou."
+msgstr "Lipsește modulul cookie: %1$s. Autentificați-vă din nou."
 
 #. Cookie "%1$s" cannot be found because requests do not have any cookies. Please re-login.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
@@ -12902,7 +12925,7 @@ msgid ""
 "Cookie \"%1$s\" cannot be found because requests do not have any cookies. "
 "Please re-login."
 msgstr ""
-"*Cookie-ul \"%1$s\" nu a putut fi găsit pentru că cererea nu conține cookie-"
+"Cookie-ul \"%1$s\" nu a putut fi găsit pentru că cererea nu conține cookie-"
 "uri. Autentificați-vă din nou."
 
 #. *
@@ -13942,7 +13965,7 @@ msgstr "Proprietatea %1$s trebuie setată dacă %2$s este setat la %3$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:78
 msgid "The %1$s cannot be used as a property type in the property %2$s"
 msgstr ""
-"*%1$s nu poate fi utilizat ca tip de proprietate pentru proprietatea %2$s"
+"%1$s nu poate fi utilizat ca tip de proprietate pentru proprietatea %2$s"
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:71
@@ -16055,6 +16078,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Change the description to %1$s."
+#~ msgstr "Modifică descrierea în %1$s."
 
 #~ msgid "IO error."
 #~ msgstr "Eroare de I/O."

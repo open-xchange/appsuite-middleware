@@ -50,10 +50,11 @@
 package com.openexchange.folderstorage;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link FolderExceptionErrorMessage} - Error messages for folder exceptions.
@@ -62,158 +63,262 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum FolderExceptionErrorMessage implements OXExceptionCode {
+public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * Unexpected error: %1$s
      */
-    UNEXPECTED_ERROR(FolderExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1001),
+    UNEXPECTED_ERROR(FolderExceptionErrorMessage.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1001),
     /**
      * I/O error: %1$s
      */
-    IO_ERROR(FolderExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 1002),
+    IO_ERROR(FolderExceptionErrorMessage.IO_ERROR_MSG, Category.CATEGORY_ERROR, 1002),
     /**
      * Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
      * <p>
      * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
      */
-    FOLDER_NOT_VISIBLE(FolderExceptionMessages.FOLDER_NOT_VISIBLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 3),
+    FOLDER_NOT_VISIBLE(FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 3, FolderExceptionMessages.FOLDER_NOT_VISIBLE_MSG_DISPLAY),
     /**
      * No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
      */
-    NO_STORAGE_FOR_ID(FolderExceptionMessages.NO_STORAGE_FOR_ID_MSG, Category.CATEGORY_ERROR, 1004),
+    NO_STORAGE_FOR_ID(FolderExceptionErrorMessage.NO_STORAGE_FOR_ID_MSG, Category.CATEGORY_ERROR, 1004),
     /**
      * No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
      */
-    NO_STORAGE_FOR_CT(FolderExceptionMessages.NO_STORAGE_FOR_CT_MSG, Category.CATEGORY_ERROR, 1005),
+    NO_STORAGE_FOR_CT(FolderExceptionErrorMessage.NO_STORAGE_FOR_CT_MSG, Category.CATEGORY_ERROR, 1005),
     /**
      * Missing session.
      */
-    MISSING_SESSION(FolderExceptionMessages.MISSING_SESSION_MSG, Category.CATEGORY_ERROR, 1006),
+    MISSING_SESSION(FolderExceptionErrorMessage.MISSING_SESSION_MSG, Category.CATEGORY_ERROR, 1006, FolderExceptionMessages.MISSING_SESSION_MSG_DISPLAY),
     /**
      * SQL error: %1$s
      */
-    SQL_ERROR(FolderExceptionMessages.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1007),
+    SQL_ERROR(FolderExceptionErrorMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1007, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * Folder "%1$s" could not be found in tree "%2$s".
      */
-    NOT_FOUND(FolderExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 8),
+    NOT_FOUND(FolderExceptionErrorMessage.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 8, FolderExceptionMessages.NOT_FOUND_MSG_DISPLAY),
     /**
      * Missing tree identifier.
      */
-    MISSING_TREE_ID(FolderExceptionMessages.MISSING_TREE_ID_MSG, Category.CATEGORY_ERROR, 1009),
+    MISSING_TREE_ID(FolderExceptionErrorMessage.MISSING_TREE_ID_MSG, Category.CATEGORY_ERROR, 1009),
     /**
      * Missing parent folder identifier.
      */
-    MISSING_PARENT_ID(FolderExceptionMessages.MISSING_PARENT_ID_MSG, Category.CATEGORY_ERROR, 1010),
+    MISSING_PARENT_ID(FolderExceptionErrorMessage.MISSING_PARENT_ID_MSG, Category.CATEGORY_ERROR, 1010),
     /**
      * Missing folder identifier.
      */
-    MISSING_FOLDER_ID(FolderExceptionMessages.MISSING_FOLDER_ID_MSG, Category.CATEGORY_ERROR, 1011),
+    MISSING_FOLDER_ID(FolderExceptionErrorMessage.MISSING_FOLDER_ID_MSG, Category.CATEGORY_ERROR, 1011),
     /**
      * Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
      */
-    INVALID_CONTENT_TYPE(FolderExceptionMessages.INVALID_CONTENT_TYPE_MSG, Category.CATEGORY_ERROR, 1012),
+    INVALID_CONTENT_TYPE(FolderExceptionErrorMessage.INVALID_CONTENT_TYPE_MSG, Category.CATEGORY_ERROR, 1012, FolderExceptionMessages.INVALID_CONTENT_TYPE_MSG_DISPLAY),
     /**
      * Move operation not permitted.
      */
-    MOVE_NOT_PERMITTED(FolderExceptionMessages.MOVE_NOT_PERMITTED_MSG, Category.CATEGORY_ERROR, 1013),
+    MOVE_NOT_PERMITTED(FolderExceptionErrorMessage.MOVE_NOT_PERMITTED_MSG, Category.CATEGORY_ERROR, 1013, FolderExceptionMessages.MOVE_NOT_PERMITTED_MSG_DISPLAY),
     /**
      * A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
      */
-    EQUAL_NAME(FolderExceptionMessages.EQUAL_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1014),
+    EQUAL_NAME(FolderExceptionErrorMessage.EQUAL_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1014, FolderExceptionMessages.EQUAL_NAME_MSG_DISPLAY),
     /**
      * Subscribe operation not permitted on tree "%1$s".
      */
-    NO_REAL_SUBSCRIBE(FolderExceptionMessages.NO_REAL_SUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1015),
+    NO_REAL_SUBSCRIBE(FolderExceptionErrorMessage.NO_REAL_SUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1015),
     /**
      * Unsubscribe operation not permitted on tree "%1$s".
      */
-    NO_REAL_UNSUBSCRIBE(FolderExceptionMessages.NO_REAL_UNSUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1016),
+    NO_REAL_UNSUBSCRIBE(FolderExceptionErrorMessage.NO_REAL_UNSUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1016),
     /**
      * Unsubscribe operation not permitted on folder "%1$s" in tree "%2$s". Unsubscribe subfolders first.
      */
-    NO_UNSUBSCRIBE(FolderExceptionMessages.NO_UNSUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1017),
+    NO_UNSUBSCRIBE(FolderExceptionErrorMessage.NO_UNSUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1017),
     /**
      * Unknown content type: %1$s.
      */
-    UNKNOWN_CONTENT_TYPE(FolderExceptionMessages.UNKNOWN_CONTENT_TYPE_MSG, Category.CATEGORY_ERROR, 1018),
+    UNKNOWN_CONTENT_TYPE(FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE_MSG, Category.CATEGORY_ERROR, 1018),
     /**
      * Missing parameter: %1$s.
      */
-    MISSING_PARAMETER(FolderExceptionMessages.MISSING_PARAMETER_MSG, Category.CATEGORY_ERROR, 1019),
+    MISSING_PARAMETER(FolderExceptionErrorMessage.MISSING_PARAMETER_MSG, Category.CATEGORY_ERROR, 1019),
     /**
      * Unsupported storage type: %1$s.
      */
-    UNSUPPORTED_STORAGE_TYPE(FolderExceptionMessages.UNSUPPORTED_STORAGE_TYPE_MSG, Category.CATEGORY_ERROR, 1020),
+    UNSUPPORTED_STORAGE_TYPE(FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE_MSG, Category.CATEGORY_ERROR, 1020),
     /**
      * Missing property: %1$s.
      */
-    MISSING_PROPERTY(FolderExceptionMessages.MISSING_PROPERTY_MSG, Category.CATEGORY_ERROR, 1021),
+    MISSING_PROPERTY(FolderExceptionErrorMessage.MISSING_PROPERTY_MSG, Category.CATEGORY_ERROR, 1021),
     /**
      * The object has been changed in the meantime.
      */
-    CONCURRENT_MODIFICATION(FolderExceptionMessages.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 1022),
+    CONCURRENT_MODIFICATION(FolderExceptionErrorMessage.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 1022),
     /**
      * JSON error: %1$s
      */
-    JSON_ERROR(FolderExceptionMessages.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 1023),
+    JSON_ERROR(FolderExceptionErrorMessage.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 1023),
     /**
      * No default folder available for content type "%1$s" in tree "%2$s".
      */
-    NO_DEFAULT_FOLDER(FolderExceptionMessages.NO_DEFAULT_FOLDER_MSG, Category.CATEGORY_ERROR, 1024),
+    NO_DEFAULT_FOLDER(FolderExceptionErrorMessage.NO_DEFAULT_FOLDER_MSG, Category.CATEGORY_ERROR, 1024),
     /**
      * Invalid folder identifier: %1$s.
      */
-    INVALID_FOLDER_ID(FolderExceptionMessages.INVALID_FOLDER_ID_MSG, Category.CATEGORY_ERROR, 1025),
+    INVALID_FOLDER_ID(FolderExceptionErrorMessage.INVALID_FOLDER_ID_MSG, Category.CATEGORY_ERROR, 1025),
     /**
      * Folder "%1$s" must not be deleted by user "%2$s" in context "%3$s".
      * <p>
      * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
      */
-    FOLDER_NOT_DELETEABLE(FolderExceptionMessages.FOLDER_NOT_DELETEABLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1026),
+    FOLDER_NOT_DELETEABLE(FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1026, FolderExceptionMessages.FOLDER_NOT_DELETEABLE_MSG_DISPLAY),
     /**
      * Folder "%1$s" must not be moved by user "%2$s" in context "%3$s".
      * <p>
      * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
      */
-    FOLDER_NOT_MOVEABLE(FolderExceptionMessages.FOLDER_NOT_MOVEABLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1027),
+    FOLDER_NOT_MOVEABLE(FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1027, FolderExceptionMessages.FOLDER_NOT_MOVEABLE_MSG_DISPLAY),
     /**
      * A temporary error occurred. Please retry.
      */
-    TEMPORARY_ERROR(FolderExceptionMessages.TEMPORARY_ERROR_MSG, Category.CATEGORY_ERROR, 1028),
+    TEMPORARY_ERROR(FolderExceptionErrorMessage.TEMPORARY_ERROR_MSG, Category.CATEGORY_ERROR, 1028),
     /**
      * User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
      */
-    NO_CREATE_SUBFOLDERS(FolderExceptionMessages.NO_CREATE_SUBFOLDERS_MSG, Category.CATEGORY_PERMISSION_DENIED, 1029),
+    NO_CREATE_SUBFOLDERS(FolderExceptionErrorMessage.NO_CREATE_SUBFOLDERS_MSG, Category.CATEGORY_PERMISSION_DENIED, 1029, FolderExceptionMessages.NO_CREATE_SUBFOLDERS_MSG_DISPLAY),
     /**
      * No mail folder allowed below a public folder.
      */
-    NO_PUBLIC_MAIL_FOLDER(FolderExceptionMessages.NO_PUBLIC_MAIL_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 1030),
+    NO_PUBLIC_MAIL_FOLDER(FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 1030, FolderExceptionMessages.NO_PUBLIC_MAIL_FOLDER_MSG_DISPLAY),
     /**
      * No such tree with identifier "%1$s".
      */
-    TREE_NOT_FOUND(FolderExceptionMessages.TREE_NOT_FOUND_MSG, Category.CATEGORY_PERMISSION_DENIED, 1031),
+    TREE_NOT_FOUND(FolderExceptionErrorMessage.TREE_NOT_FOUND_MSG, Category.CATEGORY_PERMISSION_DENIED, 1031),
     /**
      * A tree with identifier "%1$s" already exists.
      */
-    DUPLICATE_TREE(FolderExceptionMessages.DUPLICATE_TREE_MSG, Category.CATEGORY_ERROR, 1032),
+    DUPLICATE_TREE(FolderExceptionErrorMessage.DUPLICATE_TREE_MSG, Category.CATEGORY_ERROR, 1032),
     /**
      * The folder name "%1$s" is reserved. Please choose another name.
      */
-    RESERVED_NAME(FolderExceptionMessages.RESERVED_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1033),
+    RESERVED_NAME(FolderExceptionErrorMessage.RESERVED_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1033, FolderExceptionMessages.RESERVED_NAME_MSG_DISPLAY),
     /**
      * Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two folders with the same name.
      */
-    DUPLICATE_NAME(FolderExceptionMessages.DUPLICATE_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1034),
+    DUPLICATE_NAME(FolderExceptionErrorMessage.DUPLICATE_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1034, FolderExceptionMessages.DUPLICATE_NAME_MSG_DISPLAY),
     /**
      * An unexpected error occurred: %1$s. Please try again.
      */
-    TRY_AGAIN(FolderExceptionMessages.TRY_AGAIN_MSG, Category.CATEGORY_TRY_AGAIN, 1035)
-
-    ;
+    TRY_AGAIN(FolderExceptionErrorMessage.TRY_AGAIN_MSG, Category.CATEGORY_TRY_AGAIN, 1035);
 
     private static final String PREFIX = "FLD";
+
+    // Unexpected error: %1$s
+    private static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
+
+    // I/O error: %1$s
+    private static final String IO_ERROR_MSG = "I/O error: %1$s";
+
+    // No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
+    private static final String NO_STORAGE_FOR_ID_MSG = "No appropriate folder storage for tree identifier \"%1$s\" and folder identifier \"%2$s\".";
+
+    // No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
+    private static final String NO_STORAGE_FOR_CT_MSG = "No appropriate folder storage for tree identifier \"%1$s\" and content type \"%2$s\".";
+
+    // JSON error: %1$s
+    private static final String JSON_ERROR_MSG = "JSON error: %1$s";
+
+    // Missing tree identifier.
+    private static final String MISSING_TREE_ID_MSG = "Missing tree identifier.";
+
+    // Missing parent folder identifier.
+    private static final String MISSING_PARENT_ID_MSG = "Missing parent folder identifier.";
+
+    // Missing folder identifier.
+    private static final String MISSING_FOLDER_ID_MSG = "Missing folder identifier.";
+
+    // No default folder available for content type "%1$s" in tree "%2$s".
+    private static final String NO_DEFAULT_FOLDER_MSG = "No default folder available for content type \"%1$s\" in tree \"%2$s\".";
+
+    // Invalid folder identifier: %1$s.
+    private static final String INVALID_FOLDER_ID_MSG = "Invalid folder identifier: %1$s.";
+
+    // Subscribe operation not permitted on tree "%1$s".
+    private static final String NO_REAL_SUBSCRIBE_MSG = "Subscribe operation not permitted on tree \"%1$s\".";
+
+    // Unsubscribe operation not permitted on tree "%1$s".
+    private static final String NO_REAL_UNSUBSCRIBE_MSG = "Unsubscribe operation not permitted on tree \"%1$s\".";
+
+    // Unsubscribe operation not permitted on folder "%1$s" in tree "%2$s". Delete subfolders first.
+    private static final String NO_UNSUBSCRIBE_MSG = "Unsubscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\". Unsubscribe subfolders first.";
+
+    // Unknown content type: %1$s.
+    private static final String UNKNOWN_CONTENT_TYPE_MSG = "Unknown content type: %1$s.";
+
+    // Missing parameter: %1$s.
+    private static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
+
+    // Missing property: %1$s.
+    private static final String MISSING_PROPERTY_MSG = "Missing property: %1$s.";
+
+    // Unsupported storage type: %1$s.
+    private static final String UNSUPPORTED_STORAGE_TYPE_MSG = "Unsupported storage type: %1$s.";
+
+    // The object has been changed in the meantime.
+    private static final String CONCURRENT_MODIFICATION_MSG = "The object has been changed in the meantime.";
+
+    // A temporary error occurred. Please retry.
+    private static final String TEMPORARY_ERROR_MSG = "A temporary error occurred. Please retry.";
+
+    // No such tree with identifier "%1$s".
+    private static final String TREE_NOT_FOUND_MSG = "No such tree with identifier \"%1$s\".";
+
+    // A tree with identifier "%1$s" already exists.
+    private static final String DUPLICATE_TREE_MSG = "A tree with identifier \"%1$s\" already exists.";
+
+    // The folder name "%1$s" is reserved. Please choose another name.
+    private static final String RESERVED_NAME_MSG = "The folder name \"%1$s\" is reserved. Please choose another name.";
+
+    // Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two
+    // folders with the same name.
+    private static final String DUPLICATE_NAME_MSG = "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". Please rename one of the folders. There should be no two folders with the same name.";
+
+    // An unexpected error occurred: %1$s. Please try again.
+    private static final String TRY_AGAIN_MSG = "An unexpected error occurred: %1$s. Please try again.";
+
+    // Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
+    private static final String FOLDER_NOT_VISIBLE_MSG = "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\"";
+
+    // SQL error: %1$s
+    private static final String SQL_ERROR_MSG = "SQL error: %1$s";
+
+    // Missing session.
+    private static final String MISSING_SESSION_MSG = "Missing session.";
+
+    // Folder "%1$s" could not be found in tree "%2$s".
+    private static final String NOT_FOUND_MSG = "Folder \"%1$s\" could not be found in tree \"%2$s\".";
+
+    // Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
+    private static final String INVALID_CONTENT_TYPE_MSG = "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree \"%3$s\" for user %4$s in context %5$s.";
+
+    // Move operation not permitted.
+    private static final String MOVE_NOT_PERMITTED_MSG = "Move operation not permitted.";
+
+    // A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
+    private static final String EQUAL_NAME_MSG = "A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree \"%3$s\".";
+
+    // Folder "%1$s" must not be deleted by user "%2$s" in context "%3$s".
+    private static final String FOLDER_NOT_DELETEABLE_MSG = "Folder \"%1$s\" must not be deleted by user \"%2$s\" in context \"%3$s\".";
+
+    // Folder "%1$s" must not be moved by user "%2$s" in context "%3$s".
+    private static final String FOLDER_NOT_MOVEABLE_MSG = "Folder \"%1$s\" must not be moved by user \"%2$s\" in context \"%3$s\".";
+
+    // User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
+    private static final String NO_CREATE_SUBFOLDERS_MSG = "User \"%2$s\" must not create subfolders below folder \"%2$s\" in context \"%3$s\".";
+
+    // No mail folder allowed below a public folder.
+    private static final String NO_PUBLIC_MAIL_FOLDER_MSG = "No mail folder allowed below a public folder.";
 
     /**
      * The prefix for this error codes.
@@ -228,10 +333,35 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
 
     private final String message;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link FolderExceptionErrorMessage}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     */
     private FolderExceptionErrorMessage(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    /**
+     * Initializes a new {@link FolderExceptionErrorMessage}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     * @param displayMessage
+     */
+    private FolderExceptionErrorMessage(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -252,6 +382,14 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     @Override
@@ -289,20 +427,20 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
         return specials(OXExceptionFactory.getInstance().create(this, cause, args));
     }
 
-	private OXException specials(final OXException exc) {
-		switch(this) {
-		case NOT_FOUND:
-			exc.setGeneric(Generic.NOT_FOUND);
-		}
+    private OXException specials(final OXException exc) {
+        switch(this) {
+        case NOT_FOUND:
+            exc.setGeneric(Generic.NOT_FOUND);
+        }
 
-		if (exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {
-			exc.setGeneric(Generic.CONFLICT);
-		}
+        if (exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {
+            exc.setGeneric(Generic.CONFLICT);
+        }
 
-		if (exc.getCategories().contains(Category.CATEGORY_PERMISSION_DENIED)) {
-			exc.setGeneric(Generic.NO_PERMISSION);
-		}
-		return exc;
-	}
+        if (exc.getCategories().contains(Category.CATEGORY_PERMISSION_DENIED)) {
+            exc.setGeneric(Generic.NO_PERMISSION);
+        }
+        return exc;
+    }
 
 }

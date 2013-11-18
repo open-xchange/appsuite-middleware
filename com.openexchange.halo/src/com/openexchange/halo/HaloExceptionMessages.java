@@ -59,18 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class HaloExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Unknown provider: %1$s
-    public static final String UNKNOWN_PROVIDER_MSG = "Unknown provider: %1$s";
-
-    // Unavailable provider: %1$s
-    public static final String UNAVAILABLE_PROVIDER_MSG = "Unavailable provider: %1$s";
-
     // Cannot search a contact that is neither an internal user nor has an e-mail address.
     public static final String INVALID_CONTACT_MSG = "Cannot search a contact that is neither an internal user nor has an e-mail address.";
 

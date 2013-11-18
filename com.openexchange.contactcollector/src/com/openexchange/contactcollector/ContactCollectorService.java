@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,41 @@
  *
  */
 
-package com.openexchange.tokenlogin;
+package com.openexchange.contactcollector;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import javax.mail.internet.InternetAddress;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 
 /**
- * {@link TokenLoginExceptionMessages}
+ * {@link ContactCollectorService}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class TokenLoginExceptionMessages implements LocalizableStrings {
+public interface ContactCollectorService {
 
     /**
-     * Initializes a new {@link TokenLoginExceptionMessages}.
+     * Remembers specified addresses.
+     *
+     * @param addresses The addresses to remember
+     * @param session The user-session
      */
-    private TokenLoginExceptionMessages() {
-        super();
-    }
+    void memorizeAddresses(List<InternetAddress> addresses, Session session);
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // No such token: %1$s
-    public static final String NO_SUCH_TOKEN_MSG = "No such token: %1$s";
-
-    // Token login service is not available.
-    public static final String SERVICE_NOT_AVAILABLE_MSG = "Token login service is not available.";
-
-    // No such session for token: %1$s
-    public static final String NO_SUCH_SESSION_FOR_TOKEN_MSG = "No such session for token: %1$s";
-
-    // Token redeem denied.
-    public static final String TOKEN_REDEEM_DENIED_MSG = "Token redeem denied.";
+    /**
+     * Creates a contact collect folder if necessary.
+     *
+     * @param session
+     * @param ctx
+     * @param folderName
+     * @param con
+     * @throws SQLException
+     * @throws OXException
+     */
+    void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws SQLException, OXException;
 
 }

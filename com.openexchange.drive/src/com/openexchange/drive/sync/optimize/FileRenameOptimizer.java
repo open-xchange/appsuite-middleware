@@ -127,15 +127,17 @@ Actions for client:
                          */
                         optimizedActionsForClient.remove(clientAction);
                         optimizedActionsForClient.remove(matchingClientAction);
-                        optimizedActionsForClient.add(
-                            new AcknowledgeFileAction(session, matchingClientAction.getVersion(), clientAction.getNewVersion(), null, path, null));
                         optimizedActionsForServer.remove(matchingServerAction);
-                        EditFileAction editAction = new EditFileAction(matchingServerAction.getVersion(), clientAction.getNewVersion(), null, path);
+                        EditFileAction serverEdit = new EditFileAction(matchingServerAction.getVersion(), clientAction.getNewVersion(), null, path);
                         if (null != clientAction.getVersion()) {
                             // old version will be overwritten
-                            editAction.getParameters().put("targetVersion", clientAction.getVersion());
+                            serverEdit.getParameters().put("targetVersion", clientAction.getVersion());
                         }
-                        optimizedActionsForServer.add(editAction);
+                        AcknowledgeFileAction clientAcknowledge = new AcknowledgeFileAction(
+                            session, matchingClientAction.getVersion(), clientAction.getNewVersion(), null, path, null);
+                        clientAcknowledge.setDependingAction(serverEdit);
+                        optimizedActionsForClient.add(clientAcknowledge);
+                        optimizedActionsForServer.add(serverEdit);
                     }
                 }
             }
@@ -176,13 +178,21 @@ Actions for client:
                          */
                         FileVersion renamedVersion = getRenamedVersion(session, clientAction.getVersion());
                         optimizedActionsForServer.add(new EditFileAction(clientActionServerVersion, renamedVersion, null, path, 1));
-                        optimizedActionsForServer.add(new EditFileAction(matchingActionServerVersion, clientActionServerVersion, null, path, 2));
-                        optimizedActionsForServer.add(new EditFileAction(renamedVersion, matchingActionServerVersion, null, path, 3));
+                        EditFileAction serverEdit1 = new EditFileAction(matchingActionServerVersion, clientActionServerVersion, null, path, 2);
+                        optimizedActionsForServer.add(serverEdit1);
+                        EditFileAction serverEdit2 = new EditFileAction(renamedVersion, matchingActionServerVersion, null, path, 3);
+                        optimizedActionsForServer.add(serverEdit2);
                         /*
                          * acknowledge client renames
                          */
-                        optimizedActionsForClient.add(new AcknowledgeFileAction(session, clientAction.getVersion(), clientAction.getNewVersion(), null, path, null));
-                        optimizedActionsForClient.add(new AcknowledgeFileAction(session, matchingAction.getVersion(), matchingAction.getNewVersion(), null, path, null));
+                        AcknowledgeFileAction clientAcknowledge1 = new AcknowledgeFileAction(
+                            session, clientAction.getVersion(), clientAction.getNewVersion(), null, path, null);
+                        clientAcknowledge1.setDependingAction(serverEdit1);
+                        AcknowledgeFileAction clientAcknowledge2 = new AcknowledgeFileAction(
+                            session, matchingAction.getVersion(), matchingAction.getNewVersion(), null, path, null);
+                        clientAcknowledge2.setDependingAction(serverEdit2);
+                        optimizedActionsForClient.add(clientAcknowledge1);
+                        optimizedActionsForClient.add(clientAcknowledge2);
                     }
                 }
             }

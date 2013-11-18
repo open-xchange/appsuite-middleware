@@ -271,7 +271,7 @@ public class DispatcherServlet extends SessionServlet {
                 }
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
-                checkPublicSessionCookie(req, resp, session);
+                checkPublicSessionCookie(req, resp, session, sessiondService);
                 sessionParamFound = true;
             } else {
                 session = null;

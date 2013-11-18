@@ -862,7 +862,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     getUser(session),
                     session.getUserPermissionBits());
                 if (!(isperm.canCreateObjects())) {
-                    throw InfostoreExceptionCodes.NO_TARGET_CREATE_PERMISSION.create();
+                    throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
                 }
                 if (!infoPerm.canDeleteObject()) {
                     throw InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION.create();
@@ -898,8 +898,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             if (updatedCols.contains(Metadata.VERSION_LITERAL)) {
                 final String fname = load(document.getId(), document.getVersion(), context).getFileName();
                 if (!updatedCols.contains(Metadata.FILENAME_LITERAL)) {
-                	updatedCols.add(Metadata.FILENAME_LITERAL);
-                	document.setFileName(fname);
+                    updatedCols.add(Metadata.FILENAME_LITERAL);
+                    document.setFileName(fname);
                 }
             }
 
@@ -930,15 +930,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             final String oldTitle = oldDocument.getTitle();
             if (!updatedCols.contains(Metadata.TITLE_LITERAL) && oldFileName != null && oldTitle != null && oldFileName.equals(oldTitle)) {
-            	final String fileName = document.getFileName();
-            	if (null == fileName) {
-            	    document.setTitle(oldFileName);
-            	    document.setFileName(oldFileName);
+                final String fileName = document.getFileName();
+                if (null == fileName) {
+                    document.setTitle(oldFileName);
+                    document.setFileName(oldFileName);
                     updatedCols.add(Metadata.FILENAME_LITERAL);
                 } else {
                     document.setTitle(fileName);
                 }
-            	updatedCols.add(Metadata.TITLE_LITERAL);
+                updatedCols.add(Metadata.TITLE_LITERAL);
             }
 
             modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
@@ -1313,10 +1313,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         versions.append(')');
 
         List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
-                "infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ",
-                Metadata.VALUES_ARRAY,
-                this,
-                context).asList();
+            "infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ",
+            Metadata.VALUES_ARRAY,
+            this,
+            context).asList();
 
         final Date now = new Date();
 
@@ -1376,12 +1376,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             metadata = load(metadata.getId(), update.getVersion(), context);
             InfostoreFilenameReservation reservation = reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), context, true);
             if (reservation.wasAdjusted()) {
-            	update.setFileName(reservation.getFilename());
-            	updatedFields.add(Metadata.FILENAME_LITERAL);
+                update.setFileName(reservation.getFilename());
+                updatedFields.add(Metadata.FILENAME_LITERAL);
             }
             if (metadata.getTitle().equals(metadata.getFileName())) {
-            	update.setTitle(update.getFileName());
-            	updatedFields.add(Metadata.TITLE_LITERAL);
+                update.setTitle(update.getFileName());
+                updatedFields.add(Metadata.TITLE_LITERAL);
             }
         }
         final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
@@ -2181,7 +2181,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     attachment.setContent(file);
 
                     attachmentIndex.addDocument(new StandardIndexDocument<Attachment>(attachment));
-               }
+                }
             }
         });
     }

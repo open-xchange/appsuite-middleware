@@ -50,9 +50,10 @@
 package com.openexchange.tokenlogin;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link TokenLoginExceptionCodes} - Error codes for token-login module.
@@ -60,34 +61,52 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum TokenLoginExceptionCodes implements OXExceptionCode {
+public enum TokenLoginExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(TokenLoginExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(TokenLoginExceptionCodes.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(TokenLoginExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR(TokenLoginExceptionCodes.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * No such token: %1$s
      */
-    NO_SUCH_TOKEN(TokenLoginExceptionMessages.NO_SUCH_TOKEN_MSG, CATEGORY_ERROR, 3),
+    NO_SUCH_TOKEN(TokenLoginExceptionCodes.NO_SUCH_TOKEN_MSG, CATEGORY_ERROR, 3),
     /**
      * Token login service is not available.
      */
-    SERVICE_NOT_AVAILABLE(TokenLoginExceptionMessages.SERVICE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 4),
+    SERVICE_NOT_AVAILABLE(TokenLoginExceptionCodes.SERVICE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 4),
     /**
      * No such session for token: %1$s
      */
-    NO_SUCH_SESSION_FOR_TOKEN(TokenLoginExceptionMessages.NO_SUCH_SESSION_FOR_TOKEN_MSG, CATEGORY_ERROR, 5),
+    NO_SUCH_SESSION_FOR_TOKEN(TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN_MSG, CATEGORY_ERROR, 5),
     /**
      * Token redeem denied.
      */
-    TOKEN_REDEEM_DENIED(TokenLoginExceptionMessages.TOKEN_REDEEM_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 6),
+    TOKEN_REDEEM_DENIED(TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 6),
 
     ;
+
+    // An error occurred: %1$s
+    private static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    private static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // No such token: %1$s
+    private static final String NO_SUCH_TOKEN_MSG = "No such token: %1$s";
+
+    // Token login service is not available.
+    private static final String SERVICE_NOT_AVAILABLE_MSG = "Token login service is not available.";
+
+    // No such session for token: %1$s
+    private static final String NO_SUCH_SESSION_FOR_TOKEN_MSG = "No such session for token: %1$s";
+
+    // Token redeem denied.
+    private static final String TOKEN_REDEEM_DENIED_MSG = "Token redeem denied.";
 
     /**
      * The error code prefix for token-login module.
@@ -98,6 +117,11 @@ public enum TokenLoginExceptionCodes implements OXExceptionCode {
      * Message of the exception.
      */
     private final String message;
+
+    /**
+     * Human readable message.
+     */
+    private String displayableMessage;
 
     /**
      * Category of the exception.
@@ -113,7 +137,15 @@ public enum TokenLoginExceptionCodes implements OXExceptionCode {
      * Initializes a new {@link TokenLoginExceptionCodes}.
      */
     private TokenLoginExceptionCodes(String message, Category category, int detailNumber) {
+        this(message, OXExceptionStrings.MESSAGE, category, detailNumber);
+    }
+
+    /**
+     * Initializes a new {@link TokenLoginExceptionCodes}.
+     */
+    private TokenLoginExceptionCodes(String message, String displayableMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayableMessage = displayableMessage == null ? OXExceptionStrings.MESSAGE : displayableMessage;
         this.detailNumber = detailNumber;
         this.category = category;
     }
@@ -126,6 +158,11 @@ public enum TokenLoginExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayableMessage;
     }
 
     @Override

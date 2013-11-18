@@ -58,8 +58,8 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.fixtures.transformators.BigDecimalTransformator;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
-import com.openexchange.test.fixtures.transformators.FloatTransformator;
 import com.openexchange.test.fixtures.transformators.ParticipantTransformator;
 import com.openexchange.test.fixtures.transformators.PriorityTransformator;
 import com.openexchange.test.fixtures.transformators.StatusTransformator;
@@ -98,8 +98,8 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
             addTransformator(new PriorityTransformator(), "priority");
             addTransformator(new StatusTransformator(), "status");
             addTransformator(new BooleanTransformator(), "private_flag");
-            addTransformator(new FloatTransformator(), "target_costs");
-            addTransformator(new FloatTransformator(), "actual_costs");
+            addTransformator(new BigDecimalTransformator(), "target_costs");
+            addTransformator(new BigDecimalTransformator(), "actual_costs");
             addTransformator(new ParticipantTransformator(fixtureLoader), "participants");
         }
 

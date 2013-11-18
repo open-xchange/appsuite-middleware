@@ -52,7 +52,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,8 +67,13 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.eventsystem.Event;
+import com.openexchange.eventsystem.EventSystemService;
+import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
+import com.openexchange.log.LogFactory;
 
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
@@ -155,7 +159,20 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 ret.addLoginMapping(name);
             }
 
-            return createmaincall(ret, admin_user, db, access,auth);
+            final Context retval = createmaincall(ret, admin_user, db, access,auth);
+
+            final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+            if (null != eventSystemService) {
+                try {
+                    final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_CREATE);
+                    event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, retval.getId());
+                    eventSystemService.publish(event);
+                } catch (final Exception e) {
+                    log.warn("Could not distribute context event.", e);
+                }
+            }
+
+            return retval;
         } catch (final ContextExistsException e) {
             log.error(e.getMessage(),e);
             throw e;

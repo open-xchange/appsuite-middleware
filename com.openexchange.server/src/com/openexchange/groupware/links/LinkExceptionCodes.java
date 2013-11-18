@@ -49,35 +49,42 @@
 
 package com.openexchange.groupware.links;
 
-import static com.openexchange.groupware.links.LinkExceptionMessages.ALREADY_LINKED_MSG;
-import static com.openexchange.groupware.links.LinkExceptionMessages.NO_LINK_ACCESS_PERMISSION_MSG;
-import static com.openexchange.groupware.links.LinkExceptionMessages.SQL_PROBLEM_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link LinkExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum LinkExceptionCodes implements OXExceptionCode {
+public enum LinkExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
 
-    /** Unable to access link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d */
-    NO_LINK_ACCESS_PERMISSION(NO_LINK_ACCESS_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 100),
-    /** Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d */
-    ALREADY_LINKED(ALREADY_LINKED_MSG, CATEGORY_USER_INPUT, 101),
+    /** Unable to access link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder
+     *  %4$d Context %5$d */
+    NO_LINK_ACCESS_PERMISSION("Unable to access the link between these two objects. Insufficient rights. First object %1$d"
+        + " folder %2$d. Second object %3$d folder %4$d context %5$d.",
+        LinkExceptionMessages.NO_LINK_ACCESS_PERMISSION_DISPLAY, CATEGORY_PERMISSION_DENIED, 100),
+    /** Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2.
+     *  Object %3$d Folder %4$d Context %5$d */
+    ALREADY_LINKED("Unable to create a link between these two objects. This link already exists. First object"
+        + " %1$d folder %2$d. Second object %3$d folder %4$d context %5$d.", LinkExceptionMessages.ALREADY_LINKED_DISPLAY,
+        CATEGORY_USER_INPUT, 101),
     /** Invalid SQL Query: %s */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, CATEGORY_ERROR, 103),
+    SQL_PROBLEM("Invalid SQL query: %s", OXExceptionStrings.SQL_ERROR_MSG, CATEGORY_ERROR, 103),
     ;
 
     private String message;
+    private String displayMessage;
     private Category category;
     private int number;
 
-    private LinkExceptionCodes(final String message, final Category category, final int number) {
+    private LinkExceptionCodes(final String message, final String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
     }
@@ -95,6 +102,11 @@ public enum LinkExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     public String getHelp() {

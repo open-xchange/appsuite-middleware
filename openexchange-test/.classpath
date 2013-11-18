@@ -111,5 +111,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.0.1.v201105210651.jar"/>
 	<classpathentry kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contactcollector.impl"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

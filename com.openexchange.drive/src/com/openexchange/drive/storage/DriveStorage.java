@@ -173,6 +173,7 @@ public class DriveStorage {
         copiedFile.setFolderId(getFolderID(targetPath, true));
         copiedFile.setLastModified(new Date());
         copiedFile.setVersion("1");
+        copiedFile.setFileMIMEType(sourceFile.getFileMIMEType());
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID, Field.LAST_MODIFIED });
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
@@ -197,6 +198,7 @@ public class DriveStorage {
         copiedFile.setLastModified(new Date());
         copiedFile.setFileSize(sourceFile.getFileSize());
         copiedFile.setFileMD5Sum(sourceFile.getFileMD5Sum());
+        copiedFile.setFileMIMEType(sourceFile.getFileMIMEType());
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(getPath(copiedFile.getFolderId()), copiedFile.getFileName()));

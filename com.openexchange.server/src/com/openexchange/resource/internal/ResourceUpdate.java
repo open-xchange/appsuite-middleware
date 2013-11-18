@@ -193,7 +193,7 @@ public final class ResourceUpdate {
          * Check timestamp
          */
         if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
-            throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create();
+            throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create(resource.getSimpleName());
         }
         if (resource.isSimpleNameSet()) {
             if (isEmpty(resource.getSimpleName())) {

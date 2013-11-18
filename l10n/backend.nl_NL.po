@@ -48,7 +48,7 @@ msgstr ""
 "Project-Id-Version: errors.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-04 14:10+0100\n"
-"PO-Revision-Date: 2013-11-03 22:22+0100\n"
+"PO-Revision-Date: 2013-11-13 21:40+0100\n"
 "Last-Translator: Ivar Snaaijer <Ivar@bureau-cornavin.com >\n"
 "Language-Team: Dutch <kde-i18n-doc@kde.org>\n"
 "Language: nl\n"
@@ -246,8 +246,8 @@ msgid ""
 "There is a problem with your AWS account that prevents the operation from "
 "completing successfully."
 msgstr ""
-"Er is een probleem met uw AWS account waardoor de operatie niet afgemaakt kan "
-"worden."
+"Er is een probleem met uw AWS account waardoor de operatie niet afgemaakt "
+"kan worden."
 
 #. The e-mail address you provided is associated with more than one account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:77
@@ -268,8 +268,8 @@ msgid ""
 "The requested bucket name is not available. The bucket namespace is shared "
 "by all users of the system. Please select a different name and try again."
 msgstr ""
-"De gevraagde container is niet beschikbaar. De namen van containers "
-"worden in één lijst bijgehouden voor alle gebruikers van het systeem. Kies "
+"De gevraagde container is niet beschikbaar. De namen van containers worden "
+"in één lijst bijgehouden voor alle gebruikers van het systeem. Kies "
 "alstublieft een andere naam en probeer opnieuw."
 
 #. Your previous request to create the named bucket succeeded and you already own it.
@@ -326,8 +326,8 @@ msgid ""
 "You did not provide the number of bytes specified by the Content-Length HTTP "
 "header"
 msgstr ""
-"U heeft niet het aantal bytes gestuurd wat was opgegeven in de Content-Length "
-"HTTP kop."
+"U heeft niet het aantal bytes gestuurd wat was opgegeven in de Content-"
+"Length HTTP kop."
 
 #. POST requires exactly one file upload per request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:113
@@ -417,8 +417,8 @@ msgid ""
 "The content of the form does not meet the conditions specified in the policy "
 "document."
 msgstr ""
-"De inhoud van het formulier komt niet overeen met de eisen die gesteld worden "
-"in de voorwaarden."
+"De inhoud van het formulier komt niet overeen met de eisen die gesteld "
+"worden in de voorwaarden."
 
 #. The requested range cannot be satisfied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:158
@@ -482,8 +482,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:188
 msgid "The body of your POST request is not well-formed multipart/form-data."
 msgstr ""
-"De inhoud van uw POST aanvraag is een niet goed vormgegeven "
-"multipart/form-data."
+"De inhoud van uw POST aanvraag is een niet goed vormgegeven multipart/form-"
+"data."
 
 #. The XML was not well-formed or did not validate against our published schema.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:191
@@ -619,7 +619,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:254
 msgid "At least one of the preconditions you specified did not hold."
 msgstr ""
-"Minstens één van de voorwaarden welke u heeft vastgesteld worden niet gehaald."
+"Minstens één van de voorwaarden welke u heeft vastgesteld worden niet "
+"gehaald."
 
 #. Temporary redirect.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:257
@@ -1354,12 +1355,12 @@ msgstr "%1$s heeft een afspraak verwijderd of u bent geen deelnemer meer:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
-msgid "Change the description to %1$s."
-msgstr "Omschrijving aanpassen naar %1$s"
+msgid "Change the subject to %1$s."
+msgstr "Verander het onderwerp naar %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:200
-msgid "The appointment has a new description: %1$s."
-msgstr "De afspraak heeft een nieuwe omschrijving: %1$s."
+msgid "The appointment has a new subject: %1$s."
+msgstr "De afspraak heeft een nieuw onderwerp: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
@@ -1380,12 +1381,12 @@ msgstr "De afspraak vindt plaats op een nieuwe locatie: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:212
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:214
-msgid "Use the comments below."
-msgstr "Gebruik het onderstaande commentaar veld."
+msgid "Use the appointment description below."
+msgstr "Gebruik het onderstaande omschrijving veld."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:216
-msgid "The appointment comments have changed."
-msgstr "Het commentaar bij de afspraak is aangepast."
+msgid "The appointment description has changed."
+msgstr "De omschrijving bij de afspraak is aangepast."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:218
 msgid "Please invite %1$s to the appointment."
@@ -2358,6 +2359,14 @@ msgstr ""
 "De map \"%1$s\" met controlegetal \"%2$s\" veroorzaakt herhaaldelijk "
 "synchronisatieproblemen"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The client application you're using is outdated and no longer supported - "
+"please upgrade to a newer version"
+msgstr ""
+"De client-applicatie die u gebruikt is verouderd en wordt niet meer "
+"ondersteund - upgrade alstublieft naar een nieuwere versie"
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -3098,6 +3107,23 @@ msgid "Authentication failed for login %1$s to server %2$s (service: %3$s)."
 msgstr ""
 "Authenticatie voor login %1$s naar server %2$s (service: %3$s) is mislukt."
 
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
+msgid ""
+"In order to accomplish the search, %1$d or more characters are required."
+msgstr "Om de zoekactie uit te voeren zijn %1$d of meer tekens nodig."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr "Er zijn geen vrij/bezet aanbieders beschikbaar"
@@ -3381,8 +3407,8 @@ msgid ""
 "A temporary error occurred inside the server which prevented it from "
 "fulfilling the request.. Please try again later."
 msgstr ""
-"Er is een tijdelijke fout opgetreden in de server waardoor deze "
-"het verzoek niet kan uitvoeren. Probeer het later nog eens."
+"Er is een tijdelijke fout opgetreden in de server waardoor deze het verzoek "
+"niet kan uitvoeren. Probeer het later nog eens."
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
@@ -3571,8 +3597,8 @@ msgid ""
 "Client login IP changed from %1$s to %2$s and is not covered by IP white-"
 "list or netmask."
 msgstr ""
-"Het IP van de cliënt is veranderd van %1$s naar %2$s en dit wordt niet gedekt "
-"door de witte lijst of het netwerkmasker."
+"Het IP van de cliënt is veranderd van %1$s naar %2$s en dit wordt niet "
+"gedekt door de witte lijst of het netwerkmasker."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:103
 msgid "Your session was invalidated. Please try again."
@@ -3708,9 +3734,13 @@ msgstr "Kan de grizzly-server niet starten."
 
 #. * The following needed service is missing: \"%1$s\"
 #. The following needed service is missing: "%1$s"
+#. *
+#. * The following needed service is missing: \"%1$s\"
+#.
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -5127,7 +5157,7 @@ msgstr "Bevestigde spam map"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:161
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Concepten"
@@ -5149,7 +5179,7 @@ msgstr "Verzonden map"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:169
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Spam"
@@ -5163,7 +5193,7 @@ msgstr "Spam map"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Prullenbak"
@@ -5666,8 +5696,7 @@ msgid ""
 msgstr ""
 "Dit bericht kon niet naar de prullenbakmap verplaatst worden, mogelijk omdat "
 "uw postvak bijna vol is. In dat geval kunt u proberen om eerst uw prullenbak "
-"te legen, of eerst "
-"kleinere berichten te verwijderen."
+"te legen, of eerst kleinere berichten te verwijderen."
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -5864,8 +5893,8 @@ msgid ""
 "context=%4$s). Try again in %5$s seconds. Error message from server: %6$s"
 msgstr ""
 "Langzame aanmelding maakt het onmogelijk te verbinden naar server %1$s met "
-"aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s). Probeer het opnieuw over "
-"%5$s seconden. Foutbericht van de server: %6$s"
+"aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s). Probeer het opnieuw "
+"over %5$s seconden. Foutbericht van de server: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -6423,8 +6452,8 @@ msgstr "Het is niet mogelijk een RMI registratielijst te maken."
 msgid ""
 "Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s"
 msgstr ""
-"Ongeldige RSS URL -- Geen of onjuiste XML inhoud wordt geleverd door de URL: %"
-"1$s"
+"Ongeldige RSS URL -- Geen of onjuiste XML inhoud wordt geleverd door de URL: "
+"%1$s"
 
 #. Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:69
@@ -7468,21 +7497,6 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "U kunt een terugkerende afspraak niet verplaatsen naar een andere map."
 
 #. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#. In order to accomplish the search, %1$d or more characters are required.
-#. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
-msgid ""
-"In order to accomplish the search, %1$d or more characters are required."
-msgstr "Om de zoekactie uit te voeren zijn %1$d of meer tekens nodig."
-
-#. *
 #. * Redundant information.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:346
@@ -8011,12 +8025,12 @@ msgstr "Standaard groep"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:62
 msgid "Inbox"
-msgstr "Inbox"
+msgstr "Postvak IN"
 
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
 msgstr "Verzonden objecten"
 
@@ -8030,7 +8044,7 @@ msgstr "Sent items"
 #. The internationalized name for the archive mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:173
 msgid "Archive"
 msgstr "Archief"
 
@@ -8117,11 +8131,24 @@ msgstr "De bijlagen van deze e-mail zijn beschikbaar via deze links:"
 msgid "The links will be deleted on #DATE#"
 msgstr "De linkjes worden op #DATE# verwijderd."
 
+#. The text put into the description field of a published E-Mail attachment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+msgid ""
+"This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
+msgstr ""
+"Dit bestand is gepubliceerd voor het e-mailbericht \"#SUBJECT#\" verzonden op "
+" #DATE# naar #TO#"
+
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 msgid "Dear Sir or Madam"
 msgstr "Beste Mijnheer of Mevrouw"
+
+#. The name for "Unified Mail" root folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:177
+msgid "Unified mail"
+msgstr "Verzamelde mail"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -9538,9 +9565,9 @@ msgstr "Validatie mislukt: %1$s"
 msgid "File name must not contain slashes."
 msgstr "Bestandsnaam mag geen slashes hebben."
 
-#. File name contains illegal characters.
+#. File name contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:127
-msgid "File name contains illegal characters."
+msgid "File name contains invalid characters."
 msgstr "De bestandsnaam bevat ongeldige tekens."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
@@ -10704,8 +10731,7 @@ msgid ""
 msgstr ""
 "Dit bericht kon niet naar de prullenbakmap verplaatst worden, mogelijk omdat "
 "uw postvak bijna vol is. In dat geval kunt u proberen om eerst uw prullenbak "
-"te legen, of eerst "
-"kleinere berichten te verwijderen."
+"te legen, of eerst kleinere berichten te verwijderen."
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -12958,8 +12984,8 @@ msgid ""
 "Cookie \"%1$s\" cannot be found because requests do not have any cookies. "
 "Please re-login."
 msgstr ""
-"Cookie \"%1$s\" kan niet gevonden worden omdat het verzoek geen cookie heeft. "
-"Meld u opnieuw aan."
+"Cookie \"%1$s\" kan niet gevonden worden omdat het verzoek geen cookie "
+"heeft. Meld u opnieuw aan."
 
 #. *
 #. * Exception while writing JSON.
@@ -13897,7 +13923,7 @@ msgstr "Unified Mail ondersteund het aanmaken van mappen niet"
 #. Unified Mail does not support to clear INBOX folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:97
 msgid "Unified Mail does not support to clear INBOX folder."
-msgstr "Unified Mail ondersteund het opschonen van de INBOX map niet."
+msgstr "Unified Mail ondersteund het opschonen van de Postvak IN map niet."
 
 #. Unknown default folder fullname: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:103
@@ -16108,6 +16134,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zoeloe"
+
+#~ msgid "Change the description to %1$s."
+#~ msgstr "Omschrijving aanpassen naar %1$s"
 
 #~ msgid "IO error."
 #~ msgstr "IO fout."

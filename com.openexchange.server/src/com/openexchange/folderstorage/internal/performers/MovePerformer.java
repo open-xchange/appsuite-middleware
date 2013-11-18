@@ -440,7 +440,7 @@ final class MovePerformer extends AbstractPerformer {
                 /*
                  * (!parentChildEquality && !parentEquality) ?
                  */
-                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
+                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(folder.getName());
             }
         }
     }

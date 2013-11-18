@@ -51,6 +51,7 @@ package com.openexchange.push.ms;
 
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.log.LogFactory;
 import com.openexchange.ms.Topic;
+import com.openexchange.session.Session;
 
 /**
  * {@link PushMsHandler} - Listens for locally distributed OSGi events notifying about changes.
@@ -170,8 +172,8 @@ public class PushMsHandler implements EventHandler {
     }
 
     private void handleNonCommonEvent(final Event e) {
-        // Just pass to topic
-        if (e.getTopic().startsWith("com/openexchange/push")) {
+        // Just pass to topic if not remotely received before
+        if (e.getTopic().startsWith("com/openexchange/push") && !Boolean.TRUE.equals(e.getProperty("__is12Remote"))) {
             try {
                 publishTopic.publish(toPojo(e));
             } catch (final RuntimeException ex) {
@@ -186,6 +188,10 @@ public class PushMsHandler implements EventHandler {
             final Object value = e.getProperty(name);
             if (isPojo(value)) {
                 m.put(name, value);
+            } else if (Session.class.isInstance(value)) {
+                Map<String, Serializable> wrappedSession = PushMsSession.wrap((Session)value);
+                wrappedSession.put("__wrappedSessionName", name);
+                m.put("__wrappedSession", wrappedSession);
             }
         }
         m.put("__topic", e.getTopic());
