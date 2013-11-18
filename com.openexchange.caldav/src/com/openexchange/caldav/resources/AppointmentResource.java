@@ -202,7 +202,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 LOG.debug("No changes detected in " + appointmentToSave + ", skipping update.");
             } else {
                 getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified, checkPermissions);
-                clientLastModified = appointmentToSave.getLastModified();
+                if (null != appointmentToSave.getLastModified()) {
+                    clientLastModified = appointmentToSave.getLastModified();
+                }
             }
             /*
              * update change exceptions
