@@ -654,6 +654,8 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static final String PRIMARY_TEXT = "text/";
 
     private static final String TEXT_HTML = "text/htm";
+    
+    private static final String TEXT_JAVASCRIPT = "text/javascript";
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
@@ -669,6 +671,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             } else {
                 final ContentType contentType = part.getContentType();
                 if (contentType.startsWith(PRIMARY_TEXT)) {
+                    final String ct = MimeType2ExtMap.getContentType(part.getFileName());
                     // Check for special "text/comma-separated-values" Content-Type
                     if (contentType.startsWith("text/comma-separated-values")) {
                         fillBase64JSONString(part.getInputStream(), bodyObject, true);
@@ -692,6 +695,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                             }
                             mr.appendTail(replaceBuffer);
                             bodyObject.put(DATA, replaceBuffer.toString());
+                        } else if (contentType.getNameParameter() != null && contentType.startsWith(TEXT_JAVASCRIPT)) {
+                            fillBase64JSONString(part.getInputStream(), bodyObject, true);
+                            headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
                         } else {
                             bodyObject.put(DATA, readContent(part, contentType));
                         }
