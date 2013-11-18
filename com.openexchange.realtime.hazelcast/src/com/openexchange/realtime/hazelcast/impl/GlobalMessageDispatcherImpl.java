@@ -223,7 +223,31 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
     private final ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
 
-    private void ensureSequence(Stanza stanza, Member receiver) {
+    /**
+     *
+     * When delivering a Stanza to a different node, a new sequence number relative to that node is generated, so that stanza streams directed at different nodes still work. Consider:
+     * <pre>
+     * Seq 0 delivered via node 1
+     * Seq 1 delivered via node 1
+     * Seq 2 delivered via node 2
+     * Seq 3 delivered via node 1
+     * Seq 4 delivered via node 2
+     * </pre> 
+     * 
+     * Node 2 only sees messages 2 and 4 and would indefinetly wait for messages 0, 1 and 3. Therefore the system recasts sequence numbers:
+     * <pre>
+     * Seq 0 is recast as Seq 0 for node 1
+     * Seq 1 is recast as Seq 1 for node 1
+     * Seq 2 is recast as Seq 0 for node 2
+     * Seq 3 is recast as Seq 2 for node 1
+     * Seq 4 is recast as Seq 1 for node 2
+     * </pre>
+     * 
+     * @param stanza The Stanza to deliver to another node of the cluster
+     * @param receiver The receiving node of the cluster
+     * @throws OXException 
+     */
+    private void ensureSequence(Stanza stanza, Member receiver) throws OXException {
         if (stanza.getSequenceNumber() != -1) {
             ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
             if (peerMap == null) {
@@ -247,9 +271,16 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 nextNumber = new AtomicLong(0);
                 AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("nextNumber for receiver " + receiver.getUuid() + " was null, adding nextNumber: " + nextNumber);
+                }
             }
-            stanza.setSequenceNumber(nextNumber.incrementAndGet() - 1);
-            stanza.trace("Updating sequence number for " + receiver + ": " + stanza.getSequenceNumber());
+            Long ensuredSequence = nextNumber.incrementAndGet() - 1;
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Updating sequence number for " + receiver + ": " + ensuredSequence);
+            }
+            stanza.setSequenceNumber(ensuredSequence);
+            stanza.trace("Updating sequence number for " + receiver + ": " + ensuredSequence);
         }
     }
 }

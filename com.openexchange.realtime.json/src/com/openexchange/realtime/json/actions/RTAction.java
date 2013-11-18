@@ -89,13 +89,13 @@ public abstract class RTAction implements AJAXActionService {
 
     private final static Log LOG = com.openexchange.log.Log.loggerFor(RTAction.class);
 
-    protected final String ACKS = "acks";
+    public final static String ACKS = "acks";
 
-    protected final String RESULT = "result";
+    public final static String RESULT = "result";
 
-    protected final String STANZAS = "stanzas";
+    public final static String STANZAS = "stanzas";
 
-    protected final String ERROR = "error";
+    public final static String ERROR = "error";
 
     protected final StanzaWriter stanzaWriter = new StanzaWriter();
 

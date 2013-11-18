@@ -70,6 +70,7 @@ import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.json.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.json.stanza.StanzaBuilder;
+import com.openexchange.realtime.json.util.RTResultFormatter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.CustomGateAction;
@@ -166,6 +167,9 @@ public class QueryAction extends RTAction {
         stanza.transformPayloadsToInternal();
         stanza.initializeDefaults();
 
+        //Remember the original sequence as it might get changed for local or remote delivery
+        long sequenceNumber = stanza.getSequenceNumber();
+
         final Map<String, Object> customActionResults = new HashMap<String, Object>();
         final Map<String, Object> queryActionResults = new HashMap<String, Object>();
 
@@ -207,7 +211,6 @@ public class QueryAction extends RTAction {
                 /*
                  *  Stanza was handled by the gate. We have to return an ack if the Stanza carried a sequence number
                  */
-                long sequenceNumber = stanza.getSequenceNumber();
                 if (sequenceNumber >= 0) {
                     List<Long> ackList = Collections.singletonList(sequenceNumber);
                     queryActionResults.put(ACKS, ackList);
@@ -258,7 +261,9 @@ public class QueryAction extends RTAction {
         //additionally check for Stanzas that are addressed to the client and add them to the response
         List<JSONObject> stanzas = pollStanzas(stateEntry.state);
         queryActionResults.put(STANZAS, stanzas);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(RTResultFormatter.format(queryActionResults));
+        }
         return new AJAXRequestResult(queryActionResults, "native");
     }
 

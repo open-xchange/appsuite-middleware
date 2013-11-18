@@ -99,7 +99,7 @@ public abstract class RunLoop<E> implements Runnable {
             try {
                 currentElement = queue.take();
             } catch (InterruptedException ie) {
-                LOG.warn("Returning from RunLoop due to interruption", ie);
+                LOG.info("Returning from RunLoop due to interruption");
                 return;
             }
 
@@ -118,7 +118,7 @@ public abstract class RunLoop<E> implements Runnable {
                     handle(currentElement);
                 }
             } catch (InterruptedException e) {
-                LOG.warn("Returning from RunLoop due to interruption", e);
+                LOG.info("Returning from RunLoop due to interruption");
                 return;
             } catch (Throwable t) {
                 LOG.error(t.getMessage(), t);
