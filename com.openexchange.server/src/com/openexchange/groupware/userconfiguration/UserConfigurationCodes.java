@@ -51,70 +51,90 @@
 package com.openexchange.groupware.userconfiguration;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * User configuration error codes.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum UserConfigurationCodes implements OXExceptionCode {
+public enum UserConfigurationCodes implements OXExceptionCode, DisplayableOXExceptionCode {
 
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(UserConfigurationExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    SQL_ERROR("A SQL error occurred: %1$s", null, Category.CATEGORY_ERROR, 1),
+    
     /**
      * A DBPooling error occurred
      */
-    DBPOOL_ERROR(UserConfigurationExceptionMessage.DBPOOL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    DBPOOL_ERROR("A DBPooling error occurred", null, Category.CATEGORY_ERROR, 2),
+    
     /**
      * Configuration for user %1$s could not be found in context %2$d
      */
-    NOT_FOUND(UserConfigurationExceptionMessage.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 3),
+    NOT_FOUND("Configuration for user %1$s could not be found in context %2$d", UserConfigurationExceptionMessage.NOT_FOUND_MSG,
+        Category.CATEGORY_ERROR, 3),
+        
     /**
      * Missing property %1$s in system.properties.
      */
-    MISSING_SETTING(UserConfigurationExceptionMessage.MISSING_SETTING_MSG, Category.CATEGORY_CONFIGURATION, 4),
+    MISSING_SETTING("Missing property %1$s in system.properties.", null, Category.CATEGORY_CONFIGURATION, 4),
+    
     /**
      * Class %1$s can not be found.
      */
-    CLASS_NOT_FOUND(UserConfigurationExceptionMessage.CLASS_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 5),
+    CLASS_NOT_FOUND("Class %1$s can not be found.", null, Category.CATEGORY_CONFIGURATION, 5),
+    
     /**
      * Instantiating the class failed.
      */
-    INSTANTIATION_FAILED(UserConfigurationExceptionMessage.INSTANTIATION_FAILED_MSG, Category.CATEGORY_ERROR, 6),
+    INSTANTIATION_FAILED("Instantiating the class failed.", null, Category.CATEGORY_ERROR, 6),
+    
     /**
      * Cache initialization failed. Region: %1$s
      */
-    CACHE_INITIALIZATION_FAILED(UserConfigurationExceptionMessage.CACHE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 7),
+    CACHE_INITIALIZATION_FAILED("Cache initialization failed. Region: %1$s", null, Category.CATEGORY_ERROR, 7),
+    
     /**
      * User configuration could not be put into cache: %1$s
      */
-    CACHE_PUT_ERROR(UserConfigurationExceptionMessage.CACHE_PUT_ERROR_MSG, Category.CATEGORY_ERROR, 8),
+    CACHE_PUT_ERROR("User configuration could not be put into cache: %1$s", UserConfigurationExceptionMessage.CACHE_PUT_ERROR_MSG,
+        Category.CATEGORY_ERROR, 8),
+        
     /**
      * User configuration cache could not be cleared: %1$s
      */
-    CACHE_CLEAR_ERROR(UserConfigurationExceptionMessage.CACHE_CLEAR_ERROR_MSG, Category.CATEGORY_ERROR, 9),
+    CACHE_CLEAR_ERROR("User configuration cache could not be cleared: %1$s", UserConfigurationExceptionMessage.CACHE_CLEAR_ERROR_MSG,
+        Category.CATEGORY_ERROR, 9),
+        
     /**
      * User configuration could not be removed from cache: %1$s
      */
-    CACHE_REMOVE_ERROR(UserConfigurationExceptionMessage.CACHE_REMOVE_ERROR_MSG, Category.CATEGORY_ERROR, 9),
+    CACHE_REMOVE_ERROR("User configuration could not be removed from cache: %1$s", UserConfigurationExceptionMessage.CACHE_REMOVE_ERROR_MSG,
+        Category.CATEGORY_ERROR, 9),
+        
     /**
      * Mail settings for user %1$s could not be found in context %2$d
      */
-    MAIL_SETTING_NOT_FOUND(UserConfigurationExceptionMessage.MAIL_SETTING_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10);
+    MAIL_SETTING_NOT_FOUND("Mail settings for user %1$s could not be found in context %2$d",
+        UserConfigurationExceptionMessage.MAIL_SETTING_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10);
 
-    private final String message;
+    private String message;
+    
+    private String displayMessage;
 
-    private final int detailNumber;
+    private int detailNumber;
 
-    private final Category category;
+    private Category category;
 
-    private UserConfigurationCodes(final String message, final Category category, final int detailNumber) {
+    private UserConfigurationCodes(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.detailNumber = detailNumber;
         this.category = category;
     }
@@ -138,9 +158,14 @@ public enum UserConfigurationCodes implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -159,7 +184,7 @@ public enum UserConfigurationCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -170,7 +195,7 @@ public enum UserConfigurationCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 

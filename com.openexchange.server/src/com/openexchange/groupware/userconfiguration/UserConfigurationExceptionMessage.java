@@ -66,58 +66,28 @@ public class UserConfigurationExceptionMessage implements LocalizableStrings {
     }
 
     /**
-     * A SQL error occurred: %1$s
-     */
-    public final static String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
-
-    /**
-     * A DBPooling error occurred
-     */
-    public final static String DBPOOL_ERROR_MSG = "A DBPooling error occurred";
-
-    /**
      * Configuration for user %1$s could not be found in context %2$d
      */
-    public final static String NOT_FOUND_MSG = "Configuration for user %1$s could not be found in context %2$d";
-
-    /**
-     * Missing property %1$s in system.properties.
-     */
-    public final static String MISSING_SETTING_MSG = "Missing property %1$s in system.properties.";
-
-    /**
-     * Class %1$s can not be found.
-     */
-    public final static String CLASS_NOT_FOUND_MSG = "Class %1$s can not be found.";
-
-    /**
-     * Instantiating the class failed.
-     */
-    public final static String INSTANTIATION_FAILED_MSG = "Instantiating the class failed.";
-
-    /**
-     * Cache initialization failed. Region: %1$s
-     */
-    public final static String CACHE_INITIALIZATION_FAILED_MSG = "Cache initialization failed. Region: %1$s";
+    public final static String NOT_FOUND_MSG = "Configuration for user %1$s could not be found in context %2$d.";
 
     /**
      * User configuration could not be put into cache: %1$s
      */
-    public final static String CACHE_PUT_ERROR_MSG = "User configuration could not be put into cache: %1$s";
+    public final static String CACHE_PUT_ERROR_MSG = "User configuration could not be put into cache: \"%1$s\".";
 
     /**
      * User configuration cache could not be cleared: %1$s
      */
-    public final static String CACHE_CLEAR_ERROR_MSG = "User configuration cache could not be cleared: %1$s";
+    public final static String CACHE_CLEAR_ERROR_MSG = "User configuration cache could not be cleared: \"%1$s\".";
 
     /**
      * User configuration could not be removed from cache: %1$s
      */
-    public final static String CACHE_REMOVE_ERROR_MSG = "User configuration could not be removed from cache: %1$s";
+    public final static String CACHE_REMOVE_ERROR_MSG = "User configuration could not be removed from cache: \"%1$s\".";
 
     /**
      * Mail settings for user %1$s could not be found in context %2$d
      */
-    public final static String MAIL_SETTING_NOT_FOUND_MSG = "Mail settings for user %1$s could not be found in context %2$d";
+    public final static String MAIL_SETTING_NOT_FOUND_MSG = "Mail settings for user \"%1$s\" could not be found in context %2$d.";
 
 }
