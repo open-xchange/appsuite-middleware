@@ -1,3 +1,7 @@
+* 2013-11-18 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29866: Don't carry over empty last-modification timestamp if appointment was not updated 
+ 
 * 2013-11-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 29824: Don't re-distribute already remotely received events
