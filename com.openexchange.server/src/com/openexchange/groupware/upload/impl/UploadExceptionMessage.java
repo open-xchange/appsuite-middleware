@@ -100,9 +100,6 @@ public class UploadExceptionMessage implements LocalizableStrings {
     // Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
     public final static String INVALID_FILE_TYPE_MSG = "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"";
 
-    // An error occurred: %1$s
-    public final static String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
     // Request rejected because its size exceeds the maximum configured size of %1$s
     public static final String MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN_MSG = "Request rejected because its size exceeds the maximum configured size of %1$s";
 
