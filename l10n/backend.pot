@@ -111,7 +111,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:63
@@ -136,8 +135,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:104
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/passwordchange/PasswordChangeExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:63
@@ -166,7 +163,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eventsystem/src/com/openexchange/eventsystem/EventSystemExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:79
@@ -1435,7 +1431,6 @@ msgstr ""
 #. A JSON error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:65
@@ -1458,7 +1453,6 @@ msgstr ""
 #. A SQL error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:224
@@ -1798,7 +1792,6 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:78
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:82
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:399
 msgid "Missing parameter %1$s"
@@ -2692,148 +2685,38 @@ msgstr ""
 msgid "Versioning not supported by WebDAV."
 msgstr ""
 
-#. File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
+#. The folder you requested does not exist.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
+msgid "The folder you requested does not exist."
+msgstr ""
+
+#. The file you requested does not exist.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
+msgid "The file you requested does not exist."
+msgstr ""
+
+#. A folder named "%1$s" already exists below the parent folder "%2$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
 msgid ""
-"File storage account %1$s of service \"%2$s\" could not be found for user "
-"%3$s in context %4$s."
+"A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
 msgstr ""
 
-#. The operation is not supported by service %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:79
-msgid "The operation is not supported by service %1$s."
-msgstr ""
-
-#. The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:82
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:82
+#. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
+#. You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:86
 msgid ""
-"The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of "
-"user %4$s in context %5$s."
-msgstr ""
-
-#. Invalid file identifier: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
-msgid "Invalid file identifier: %1$s"
-msgstr ""
-
-#. Invalid header "%1$s": %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:88
-msgid "Invalid header \"%1$s\": %2$s"
-msgstr ""
-
-#. Unknown action to perform: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:91
-msgid "Unknown action to perform: %1$s."
-msgstr ""
-
-#. A file error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
-msgid "A file error occurred: %1$s"
-msgstr ""
-
-#. Wrongly formatted address: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:97
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:97
-msgid "Wrongly formatted address: %1$s."
-msgstr ""
-
-#. Unknown file content: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:100
-msgid "Unknown file content: %1$s."
-msgstr ""
-
-#. Unknown file storage service: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:103
-msgid "Unknown file storage service: %1$s."
-msgstr ""
-
-#. Missing parameter: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:106
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:106
-msgid "Missing parameter: %1$s."
-msgstr ""
-
-#. Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:109
-msgid "Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'."
-msgstr ""
-
-#. File part is read-only: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:112
-msgid "File part is read-only: %1$s"
-msgstr ""
-
-#. Unknown color label index: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:115
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:115
-msgid "Unknown color label index: %1$s"
-msgstr ""
-
-#. A duplicate folder named "%1$s" already exists below parent folder "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:118
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:118
-msgid ""
-"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
-"\"."
-msgstr ""
-
-#. No create access on folder %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:121
-msgid "No create access on folder %1$s."
-msgstr ""
-
-#. Not connected
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:124
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:124
-msgid "Not connected"
-msgstr ""
-
-#. Invalid sorting column. Cannot sort by %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:127
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:127
-msgid "Invalid sorting column. Cannot sort by %1$s."
-msgstr ""
-
-#. No attachment found with section identifier %1$s in file %2$s in folder %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:130
-msgid ""
-"No attachment found with section identifier %1$s in file %2$s in folder %3$s."
-msgstr ""
-
-#. File %1$s not found in folder %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:133
-msgid "File %1$s not found in folder %2$s."
-msgstr ""
-
-#. No account manager could be found for service: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:136
-msgid "No account manager could be found for service: %1$s."
-msgstr ""
-
-#. Invalid URL "%1$s". Error: %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
-msgid "Invalid URL \"%1$s\". Error: %2$s."
-msgstr ""
-
-#. No such folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
-msgid "No such folder."
-msgstr ""
-
-#. Authentication failed for login %1$s to server %2$s (service: %3$s).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
-msgid "Authentication failed for login %1$s to server %2$s (service: %3$s)."
+"You do not have the appropriate permissions to create a subfolder below the "
+"folder \"%1$s\"."
 msgstr ""
 
 #. In order to accomplish the search, %1$d or more characters are required.
 #. *
 #. * In order to accomplish the search, %1$d or more characters are required.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
@@ -4651,14 +4534,41 @@ msgid ""
 "in context %4$s."
 msgstr ""
 
+#. The operation is not supported by service %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:79
+msgid "The operation is not supported by service %1$s."
+msgstr ""
+
+#. The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:82
+msgid ""
+"The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of "
+"user %4$s in context %5$s."
+msgstr ""
+
 #. Invalid message identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:85
 msgid "Invalid message identifier: %1$s"
 msgstr ""
 
+#. Invalid header "%1$s": %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:88
+msgid "Invalid header \"%1$s\": %2$s"
+msgstr ""
+
+#. Unknown action to perform: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:91
+msgid "Unknown action to perform: %1$s."
+msgstr ""
+
 #. A messaging error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:94
 msgid "A messaging error occurred: %1$s"
+msgstr ""
+
+#. Wrongly formatted address: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:97
+msgid "Wrongly formatted address: %1$s."
 msgstr ""
 
 #. Unknown messaging content: %1$s.
@@ -4671,6 +4581,11 @@ msgstr ""
 msgid "Unknown messaging service: %1$s."
 msgstr ""
 
+#. Missing parameter: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:106
+msgid "Missing parameter: %1$s."
+msgstr ""
+
 #. Invalid parameter: %1$s with value '%2$s'.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:109
 msgid "Invalid parameter: %1$s with value '%2$s'."
@@ -4681,6 +4596,18 @@ msgstr ""
 msgid "Messaging part is read-only.: %1$s"
 msgstr ""
 
+#. Unknown color label index: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:115
+msgid "Unknown color label index: %1$s"
+msgstr ""
+
+#. A duplicate folder named "%1$s" already exists below parent folder "%2$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:118
+msgid ""
+"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
+"\"."
+msgstr ""
+
 #. No create access on mail folder %1$s.
 #. *
 #. * No create access on mail folder %1$s.
@@ -4688,6 +4615,16 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:121
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:407
 msgid "No create access on mail folder %1$s."
+msgstr ""
+
+#. Not connected
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:124
+msgid "Not connected"
+msgstr ""
+
+#. Invalid sorting column. Cannot sort by %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:127
+msgid "Invalid sorting column. Cannot sort by %1$s."
 msgstr ""
 
 #. No attachment found with section identifier %1$s in message %2$s in folder %3$s.
@@ -5825,17 +5762,6 @@ msgstr ""
 msgid "Move of the folder \"%1$s\" is not permitted."
 msgstr ""
 
-#. A folder named "%1$s" already exists below the parent folder "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-msgid ""
-"A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
-msgstr ""
-
-#. The folder you requested does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
-msgid "The folder you requested does not exist."
-msgstr ""
-
 #. You do not have the appropriate permissions to delete the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
 msgid ""
@@ -5846,13 +5772,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:83
 msgid ""
 "You do not have the appropriate permissions to move the folder \"%1$s\"."
-msgstr ""
-
-#. You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:86
-msgid ""
-"You do not have the appropriate permissions to create a subfolder below the "
-"folder \"%1$s\"."
 msgstr ""
 
 #. It is not allowed to create a mail folder allowed below a public folder.
@@ -8241,57 +8160,53 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:64
-msgid "A SQL problem occurred: %1$s."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:66
 msgid "Error loading update task \"%1$s\"."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:66
+msgid "Unknown schema name: \"%1$s\"."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:68
-msgid "Unknown schema name: %1$s."
+msgid ""
+"Update task \"%1$s\" returned an unknown concurrency level. Running as "
+"blocking task."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:70
 msgid ""
-"Update task %1$s returned an unknown concurrency level. Running as blocking "
-"task."
+"The version can not be set back if the update tasks handling has been "
+"migrated to the Remember Executed Update Tasks concept on schema \"%1$s\"."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:72
 msgid ""
-"The version can not be set back if the update tasks handling has been "
-"migrated to the Remember Executed Update Tasks concept on schema %1$s."
+"Unable to determine next update task to execute. Executed: \"%1$s\". "
+"Enqueued: \"%2$s\". Scheduled: \"%3$s\"."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
-msgid ""
-"Unable to determine next update task to execute. Executed: %1$s. Enqueued: "
-"%2$s. Scheduled: %3$s."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:76
 msgid ""
 "Processed a wrong number of rows in database. Expected %1$d rows but worked "
 "on %2$d rows."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:76
+msgid "Updating schema \"%1$s\" failed. Cause: \"%2$s\"."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:78
-msgid "Updating schema %1$s failed. Cause: %2$s."
+msgid ""
+"Blocking tasks (\"%1$s\") must be executed before background tasks can be "
+"executed (\"%2$s\")."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:80
-msgid ""
-"Blocking tasks (%1$s) must be executed before background tasks can be "
-"executed (%2$s)."
+msgid "Unknown task: \"%1$s\"."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:82
-msgid "Unknown task: %1$s."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:84
-msgid "Column \"%1$s\" not found in table %2$s."
+msgid "Column \"%1$s\" not found in table \"%2$s\"."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:64
@@ -8300,66 +8215,73 @@ msgstr ""
 
 #. File upload failed: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:70
-msgid "File upload failed: %1$s"
+msgid "File upload failed: \"%1$s\"."
 msgstr ""
 
 #. Missing affiliation id
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:73
-msgid "Missing affiliation id"
+msgid "Missing affiliation id."
 msgstr ""
 
 #. Unknown action value: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:76
-msgid "Unknown action value: %1$s"
+msgid "Unknown action value: \"%1$s\"."
 msgstr ""
 
 #. Header "content-type" does not indicate multipart content
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:79
-msgid "Header \"content-type\" does not indicate multipart content"
+msgid "Header \"content-type\" does not indicate multipart content."
 msgstr ""
 
 #. Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:82
 msgid ""
 "Request rejected because its size (%1$s) exceeds the maximum configured size "
-"of %2$s"
+"of %2$s."
+msgstr ""
+
+#. Missing parameter %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:85
+msgid "Missing parameter: \"%1$s\"."
 msgstr ""
 
 #. Unknown module: %1$d
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:88
-msgid "Unknown module: %1$d"
+msgid "Unknown module: %1$d."
 msgstr ""
 
 #. An uploaded file referenced by %1$s could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:91
-msgid "An uploaded file referenced by %1$s could not be found"
+msgid "An uploaded file referenced by \"%1$s\" could not be found."
 msgstr ""
 
 #. Invalid action value: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:94
-msgid "Invalid action value: %1$s"
+msgid "Invalid action value: \"%1$s\"."
 msgstr ""
 
 #. Upload file with id %1$s could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:97
-msgid "Upload file with id %1$s could not be found"
+msgid "Upload file with id \"%1$s\" could not be found."
 msgstr ""
 
 #. Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"
 #. Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:101
 msgid ""
-"Upload file's content type \"%1$s\" does not match given file filter \"%2$s\""
+"Upload file's content type \"%1$s\" does not match given file filter \"%2$s"
+"\"."
 msgstr ""
 
 #. Request rejected because its size exceeds the maximum configured size of %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:104
 msgid ""
-"Request rejected because its size exceeds the maximum configured size of %1$s"
+"Request rejected because its size exceeds the maximum configured size of "
+"%1$s."
 msgstr ""
 
 #. Connection has been closed unexpectedly. Please try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr ""
 
