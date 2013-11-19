@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "new", description = "Create a new mail account", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "A JSON object describing the new account to create. See mail account data.",
-responseDescription = "A JSON object representing the inserted mail account. See mail account data.")
+    responseDescription = "A JSON object representing the inserted mail account. See mail account data.")
 public final class NewAction extends AbstractMailAccountAction implements MailAccountFields {
 
     public static final String ACTION = AJAXServlet.ACTION_NEW;
@@ -106,7 +106,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             throw
-                MailAccountExceptionCodes.NOT_ENABLED.create(
+            MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
         }
@@ -120,7 +120,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         // Check if account denotes a Unified Mail account
         if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
             // Deny creation of Unified Mail account
-            throw MailAccountExceptionCodes.CREATION_FAILED.create();
+            throw MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_CREATION_FAILED.create(accountDescription.getId());
         }
 
         {

@@ -257,7 +257,7 @@ public final class MailAccountRequest {
         // Check if account denotes a Unified Mail account
         if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
             // Deny creation of Unified Mail account
-            throw MailAccountExceptionCodes.CREATION_FAILED.create();
+            throw MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_CREATION_FAILED.create(accountDescription.getId());
         }
 
         final MailAccountStorageService storageService =
@@ -309,7 +309,7 @@ public final class MailAccountRequest {
         checkNeededFields(accountDescription);
         if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
             // Deny validation of Unified Mail account
-            throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
+            throw MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED.create();
         }
         // Check for tree parameter
         final boolean tree = jsonObject.hasAndNotNull("tree") ? jsonObject.getBoolean("tree") : false;
