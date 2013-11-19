@@ -75,7 +75,6 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexProperties;
 import com.openexchange.index.solr.ModuleSet;
-import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.config.XMLBasedFieldConfiguration;
@@ -318,7 +317,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 if (mailBuilder == null) {
                     throw new IllegalStateException("QueryBuilder for module mail is not initialized.");
                 }
-                
+
                 ContextService contextService = Services.getService(ContextService.class);
                 UserService userService = Services.getService(UserService.class);
                 Context context = contextService.getContext(identifier.getContextId());
@@ -339,7 +338,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 return new SolrAttachmentIndexAccess(identifier, attachmentBuilder, attachmentFieldConfig);
 
             default:
-                throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
+                throw new IllegalArgumentException("No 'IndexAccess' implementation exists for module '" + module + "'");
 
         }
     }
