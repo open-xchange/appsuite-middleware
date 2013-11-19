@@ -52,7 +52,6 @@ package com.openexchange.groupware.update;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -61,7 +60,7 @@ import com.openexchange.exception.OXExceptionStrings;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum UpdateExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum UpdateExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Current version number %1$s is already lower than or equal to desired version number %2$s.

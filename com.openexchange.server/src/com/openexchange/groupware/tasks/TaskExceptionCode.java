@@ -53,7 +53,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -62,7 +61,7 @@ import com.openexchange.exception.OXExceptionStrings;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum TaskExceptionCode implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum TaskExceptionCode implements DisplayableOXExceptionCode {
 
     /** Error while inserting task: %s. */
     INSERT_FAILED("Error while inserting task: %s.", TaskExceptionMessage.INSERT_FAILED_MSG, Category.CATEGORY_ERROR, 1),

@@ -52,7 +52,6 @@ package com.openexchange.mail;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.upload.impl.UploadUtility;
@@ -68,7 +67,7 @@ import com.openexchange.groupware.upload.impl.UploadUtility;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum MailExceptionCode implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Unexpected error: %1$s
      */

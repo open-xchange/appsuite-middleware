@@ -53,7 +53,6 @@ package com.openexchange.groupware.userconfiguration;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -62,7 +61,7 @@ import com.openexchange.exception.OXExceptionStrings;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum UserConfigurationCodes implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum UserConfigurationCodes implements DisplayableOXExceptionCode {
 
     /**
      * A SQL error occurred: %1$s

@@ -53,7 +53,6 @@ package com.openexchange.groupware.ldap;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -62,7 +61,7 @@ import com.openexchange.exception.OXExceptionStrings;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum UserExceptionCode implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum UserExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * A property from the ldap.properties file is missing.

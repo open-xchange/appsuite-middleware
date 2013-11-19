@@ -52,7 +52,6 @@ package com.openexchange.groupware.links;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -61,7 +60,7 @@ import com.openexchange.exception.OXExceptionStrings;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum LinkExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum LinkExceptionCodes implements DisplayableOXExceptionCode {
 
     /** Unable to access link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder
      *  %4$d Context %5$d */

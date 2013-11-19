@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.internal;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -61,7 +60,7 @@ import com.openexchange.exception.OXExceptionStrings;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum SchemaExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum SchemaExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * No row found in table version in schema %1$s.

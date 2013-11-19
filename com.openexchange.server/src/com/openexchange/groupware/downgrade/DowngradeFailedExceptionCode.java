@@ -52,14 +52,13 @@ package com.openexchange.groupware.downgrade;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error code enumeration for a failed delete event.
  */
-public enum DowngradeFailedExceptionCode implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum DowngradeFailedExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * A SQL error occurred: %1$s

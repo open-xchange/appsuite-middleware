@@ -53,11 +53,10 @@ package com.openexchange.groupware.reminder;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
-public enum ReminderExceptionCode implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum ReminderExceptionCode implements DisplayableOXExceptionCode {
     /**
      * User is missing for the reminder.
      */
