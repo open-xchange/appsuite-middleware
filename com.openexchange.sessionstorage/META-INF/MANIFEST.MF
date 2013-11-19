@@ -11,5 +11,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.session,
  org.osgi.framework
-Export-Package: com.openexchange.sessionstorage,
- com.openexchange.sessionstorage.exceptions
+Export-Package: com.openexchange.sessionstorage
