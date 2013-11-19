@@ -19,7 +19,6 @@ Import-Package: com.openexchange.ajax,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
  org.osgi.framework,
  org.osgi.service.http
 Bundle-ActivationPolicy: lazy

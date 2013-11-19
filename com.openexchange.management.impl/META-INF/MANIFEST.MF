@@ -30,7 +30,6 @@ Import-Package: com.openexchange.config,
  javax.security.auth,
  org.apache.commons.codec.binary,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.management.console
