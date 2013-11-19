@@ -156,7 +156,6 @@ msgstr ""
 #.
 #. An I/O error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:75
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:80
@@ -603,71 +602,6 @@ msgstr ""
 msgid ""
 "The bucket POST must contain the specified field name. If it is specified, "
 "please check the order of the fields."
-msgstr ""
-
-#. A cache error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:69
-msgid "A cache error occurred: %1$s"
-msgstr ""
-
-#. Missing cache configuration file at location: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:72
-msgid "Missing cache configuration file at location: %1$s"
-msgstr ""
-
-#. Missing configuration property: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:78
-msgid "Missing configuration property: %1$s"
-msgstr ""
-
-#. The default element attributes could not be retrieved.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:81
-msgid "The default element attributes could not be retrieved."
-msgstr ""
-
-#. 'Put' into cache failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:84
-msgid "'Put' into cache failed."
-msgstr ""
-
-#. 'Safe put' into cache failed. An object bound to given key already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:87
-msgid ""
-"'Safe put' into cache failed. An object bound to given key already exists."
-msgstr ""
-
-#. Remove on cache failed
-#. *
-#. * Remove on cache failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:90
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:81
-msgid "Remove on cache failed"
-msgstr ""
-
-#. The default element attributes could not be assigned.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:93
-msgid "The default element attributes could not be assigned."
-msgstr ""
-
-#. No cache found for region name: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:96
-msgid "No cache found for region name: %1$s"
-msgstr ""
-
-#. Missing default auxiliary defined by property: jcs.default=<aux-name>
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:99
-msgid "Missing default auxiliary defined by property: jcs.default=<aux-name>"
-msgstr ""
-
-#. Invalid cache region name \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:102
-msgid "Invalid cache region name \"%1$s\"."
-msgstr ""
-
-#. Method not supported.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:105
-msgid "Method not supported."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
@@ -2899,6 +2833,13 @@ msgid "The default element attributes could not be retrieved"
 msgstr ""
 
 #. *
+#. * Remove on cache failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:81
+msgid "Remove on cache failed"
+msgstr ""
+
+#. *
 #. * Cache %s could not be initialized due to following error: %s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:86
@@ -2975,9 +2916,7 @@ msgid "Object not found. %1$s"
 msgstr ""
 
 #. The general message if a user has no access to a certain module (e.g. calendar)
-#. No permission for module: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:119
 msgid "No permission for module: %1$s."
 msgstr ""
 
@@ -5291,12 +5230,10 @@ msgstr ""
 #. *
 #. * Unexpected error: %1$s
 #.
-#. Unexpected error: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:103
 msgid "Unexpected error: %1$s"
 msgstr ""
 
@@ -10040,134 +9977,33 @@ msgid ""
 "permission"
 msgstr ""
 
-#. Unknown AJAX action: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
-msgid "Unknown AJAX action: %s."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
+msgid "The requested operation is not permitted via a non-secure connection."
 msgstr ""
 
-#. Unknown AJAX action %1$s in module %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:73
-msgid "Unknown AJAX action %1$s in module %2$s."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:63
+msgid "The requested operation is disabled."
 msgstr ""
 
-#. Missing the following request parameter: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:76
-msgid "Missing the following request parameter: %s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:64
+msgid "You do not have appropriate permissions for module %1$s."
 msgstr ""
 
-#. Missing upload image.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:79
-msgid "Missing upload image."
-msgstr ""
-
-#. Invalid parameter: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:82
-msgid "Invalid parameter: %s"
-msgstr ""
-
-#. I/O error while writing to Writer object: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:85
-msgid "I/O error while writing to Writer object: %s"
-msgstr ""
-
-#. Missing AJAX request handler for module %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:88
-msgid "Missing AJAX request handler for module %s"
-msgstr ""
-
-#. Unknown module: %s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:91
-msgid "Unknown module: %s."
-msgstr ""
-
-#. A harmful attachment was detected.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:94
-msgid "A harmful attachment was detected."
-msgstr ""
-
-#. JSON error: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:97
-msgid "JSON error: %s"
-msgstr ""
-
-#. Invalid parameter "%1$s": %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:100
-msgid "Invalid parameter \"%1$s\": %2$s"
-msgstr ""
-
-#. A parameter conflict occurred.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:106
-msgid "A parameter conflict occurred."
-msgstr ""
-
-#. Parameter "%1$s" conflicts with parameter "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:109
-msgid "Parameter \"%1$s\" conflicts with parameter \"%2$s\"."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:65
 msgid ""
-"Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure "
-"connection."
+"The object has been changed in the meantime. Please reload the view and try "
+"again."
 msgstr ""
 
-#. The action "%1$s" is disabled due to server configuration
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:116
-msgid "The action \"%1$s\" is disabled due to server configuration"
-msgstr ""
-
-#. Object has been changed in the meantime.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:122
-msgid "Object has been changed in the meantime."
-msgstr ""
-
-#. Unexpected result. Expected "%1$s", but is "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:125
-msgid "Unexpected result. Expected \"%1$s\", but is \"%2$s\"."
-msgstr ""
-
-#. Too many concurrent requests. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:128
-msgid "Too many concurrent requests. Please try again later."
-msgstr ""
-
-#. Bad request. The server is unable to handle the request.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:131
-msgid "Bad request. The server is unable to handle the request."
-msgstr ""
-
-#. The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:134
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:66
 msgid ""
 "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types "
 "(JPG, GIF, BMP or PNG) are supported."
 msgstr ""
 
-#. Missing request body.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:137
-msgid "Missing request body."
-msgstr ""
-
-#. An HTTP error occurred. Status %1$s. Message %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:140
-msgid "An HTTP error occurred. Status %1$s. Message %2$s."
-msgstr ""
-
-#. Unsupported format: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:143
-msgid "Unsupported format: %1$s"
-msgstr ""
-
-#. Missing cookie: %1$s. Please re-login.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
-msgid "Missing cookie: %1$s. Please re-login."
-msgstr ""
-
-#. Cookie "%1$s" cannot be found because requests do not have any cookies. Please re-login.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:67
 msgid ""
-"Cookie \"%1$s\" cannot be found because requests do not have any cookies. "
-"Please re-login."
+"The requested operation requires a valid session. Please login and try again."
 msgstr ""
 
 #. *
