@@ -60,69 +60,14 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class FacebookMessagingExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // A SQL error occurred: %1$s
-    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // Communication error with Facebook service: %1$s
-    public static final String COMMUNICATION_ERROR_MSG = "Communication error with Facebook service: %1$s";
-
-    // Login to Facebook failed for login %1$s.
-    public static final String FAILED_LOGIN_MSG = "Login to Facebook failed for login %1$s.";
-
-    // Login form not found on page: %1$s
-    public static final String LOGIN_FORM_NOT_FOUND_MSG = "Login form not found on page: %1$s";
-
-    // Element with attribute %1$s not found on page %2$s.
-    public static final String ELEMENT_NOT_FOUND_MSG = "Element with attribute %1$s not found on page %2$s.";
-
-    // Missing permission "%1$s" in Facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access: %3$s
-    public static final String MISSING_PERMISSION_MSG =
-        "Missing permission \"%1$s\" in Facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:\n%3$s";
-
-    // An error occurred during the processing of a script.
-    public static final String SCRIPT_ERROR_MSG = "An error occurred during the processing of a script.";
-
-    // Missing permission for the application associated with configured Facebook API key: %1$s
-    // Please grant access for that application in your Facebook account settings.
-    public static final String MISSING_APPLICATION_PERMISSION_MSG =
-        "Missing permission for the application associated with configured Facebook API key: %1$s\n" + "Please grant access for that application in your Facebook account settings.";
-
-    // FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).
-    public static final String FQL_QUERY_RESULT_MISMATCH_MSG = "FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).";
-
-    // Unsupported query type: %1$s.
-    public static final String UNSUPPORTED_QUERY_TYPE_MSG = "Unsupported query type: %1$s.";
-
-    // An OAuth error occurred: %1$s.
-    public static final String OAUTH_ERROR_MSG = "An OAuth error occurred: %1$s.";
-
-    // A FQL error of type %1$s occurred: %2$s.
-    public static final String FQL_ERROR_MSG = "A FQL error of type %1$s occurred: %2$s.";
-
-    // FQL response body cannot be parsed to a JSON value:
-    // %1$s
-    public static final String INVALID_RESPONSE_BODY_MSG = "FQL response body cannot be parsed to a JSON value:\n%1$s";
-
-    // XML parse error: %1$s.
-    public static final String XML_PARSE_ERROR_MSG = "XML parse error: %1$s.";
+    // Error while logging in to Facebook.
+    public static final String OAUTH_ERROR_MSG = "Error while logging in to Facebook.";
 
     // Missing Facebook configuration. Please re-create Facebook account.
     public static final String MISSING_CONFIG_MSG = "Missing Facebook configuration. Please re-create Facebook account.";
 
     // Missing Facebook configuration parameter "%1$s". Please re-create Facebook account.
     public static final String MISSING_CONFIG_PARAM_MSG = "Missing Facebook configuration parameter \"%1$s\". Please re-create Facebook account.";
-
-    // A Facebook API error occurred. Error code: %1$s. Error message: "%2$s". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.
-    public static final String FB_API_ERROR_MSG = "A Facebook API error occurred. Error code: %1$s. Error message: \"%2$s\". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.";
 
     /**
      * Initializes a new {@link FacebookMessagingExceptionMessages}.
