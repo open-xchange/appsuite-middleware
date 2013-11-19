@@ -50,9 +50,10 @@
 package com.openexchange.index;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -61,24 +62,24 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum IndexExceptionCodes implements OXExceptionCode {
+public enum IndexExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(IndexExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * An index entry does not exist for folder %1$s in account %2$s.
      */
-    MISSING_FOLDER_ENTRY(IndexExceptionMessages.MISSING_FOLDER_ENTRY_MSG, Category.CATEGORY_ERROR, 2),
+    MISSING_FOLDER_ENTRY("An index entry does not exist for folder %1$s in account %2$s.", Category.CATEGORY_ERROR, 2),
     /**
      * Index search for module %1$d is not enabled for user %2$d in context %3$d.
      */
-    INDEXING_NOT_ENABLED(IndexExceptionMessages.INDEXING_NOT_ENABLED, Category.CATEGORY_PERMISSION_DENIED, 3),
+    INDEXING_NOT_ENABLED("Index search for module %1$d is not enabled for user %2$d in context %3$d.", Category.CATEGORY_PERMISSION_DENIED, 3, IndexExceptionMessages.INDEXING_NOT_ENABLED),
     /**
      * The index for module %1$d for user %2$d in context %3$d is currently locked.
      */
-    INDEX_LOCKED(IndexExceptionMessages.INDEX_LOCKED, Category.CATEGORY_ERROR, 4),
+    INDEX_LOCKED("The index for module %1$d for user %2$d in context %3$d is currently locked.", Category.CATEGORY_ERROR, 4, IndexExceptionMessages.INDEX_LOCKED),
 
     ;
 
@@ -89,14 +90,21 @@ public enum IndexExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
+    private final String displayMessage;
+
     private final int number;
 
     private final Category category;
 
-    private IndexExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private IndexExceptionCodes(final String message, final Category category, final int number) {
+        this(message, category, number, null);
+    }
+
+    private IndexExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;
-        number = detailNumber;
+        this.number = number;
         this.category = category;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     /**
@@ -152,6 +160,11 @@ public enum IndexExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
 }

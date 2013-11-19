@@ -66,16 +66,10 @@ public final class IndexExceptionMessages implements LocalizableStrings {
         super();
     }
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
+    // You do not have the appropriate permissions to search within this module.
+    public static final String INDEXING_NOT_ENABLED = "You do not have the appropriate permissions to search within this module.";
 
-    // An index entry does not exist for folder %1$s in account %2$s.
-    public static final String MISSING_FOLDER_ENTRY_MSG = "An index entry does not exist for folder %1$s in account %2$s.";
-
-    // Index search for module %1$d is not enabled for user %2$d in context %3$d.
-    public static final String INDEXING_NOT_ENABLED = "Index search for module %1$d is not enabled for user %2$d in context %3$d.";
-
-    // The index for module %1$d for user %2$d in context %3$d is currently locked.
-    public static final String INDEX_LOCKED = "The index for module %1$d for user %2$d in context %3$d is currently locked.";
+    // The service you requested is currently not available. Please try again later.
+    public static final String INDEX_LOCKED = "The service you requested is currently not available. Please try again later.";
 
 }
