@@ -8,7 +8,7 @@ BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -58,14 +58,16 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Tue Nov 19 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fourth candidate for 7.4.1 release
 * Mon Nov 11 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-11
 * Thu Nov 07 2013 Carsten Hoeger <choeger@open-xchange.com>
-Third candidate for 7.4.1 release
-* Thu Nov 07 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-08
+* Thu Nov 07 2013 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.4.1 release
 * Tue Nov 05 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-12
 * Wed Oct 30 2013 Carsten Hoeger <choeger@open-xchange.com>
