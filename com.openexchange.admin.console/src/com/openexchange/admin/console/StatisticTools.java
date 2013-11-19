@@ -120,7 +120,7 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_DOCUMENTCONVERTER_STATS_SHORT = 'y';
     private static final String OPT_DOCUMENTCONVERTER_STATS_LONG = "documentconverterstats";
 
-    private static final char OPT_OFFICE_STATS_SHORT = 'q';
+    private static final char OPT_OFFICE_STATS_SHORT = 'f';
     private static final String OPT_OFFICE_STATS_LONG = "officestats";
 
     private CLIOption xchangestats = null;
