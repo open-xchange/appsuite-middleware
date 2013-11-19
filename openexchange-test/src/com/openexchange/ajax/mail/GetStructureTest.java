@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.mail;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,6 +60,7 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;
+import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,8 +71,8 @@ import com.openexchange.exception.OXException;
  */
 public class GetStructureTest extends AbstractMailTest {
     
-    private static final String attachment = 
-        "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBhQREBQPEBQVFRURFxUQFxQWEBUUEhgQFRIVGhQS\n" +
+    private static final String attachment = readFile("attachment.base64");
+        /*"/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBhQREBQPEBQVFRURFxUQFxQWEBUUEhgQFRIVGhQS\n" +
         "FRgbHCYeFxojGhIVHzEgIycpLCwsFR4xNTArNSYrLCkBCQoKBQUFDQUFDSkYEhgpKSkpKSkpKSkp\n" +
         "KSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKf/AABEIAOEA4QMBIgACEQED\n" +
         "EQH/xAAcAAEAAgMBAQEAAAAAAAAAAAAABwgEBQYDAQL/xABNEAABAwIBBwcGCQgKAwEAAAABAAID\n" +
@@ -168,7 +172,7 @@ public class GetStructureTest extends AbstractMailTest {
         "TzV8mmM/FVr29j6dr/eHtWuk5NU3m1kZ74Hj+IoIXRTMzk1T+dWRDuhef4gthS8mho+NrnHsZTBv\n" +
         "vMh+xBBK+2VlsN5PuGx2MnPzcQ+YNb6o2tPvXY4NkVRUljTUsMbh54jBk9t13e9BWLJ3NdiNbYxU\n" +
         "72sP6WUc1HbiC7W4eiCpZyV5PFPFaTEJTO4a+aZeOG/Au8t/7PcpfRBj0GHxwRtigjZGxuoMY0Na\n" +
-        "O4BZCIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIP/2Q==\n";
+        "O4BZCIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIP/2Q==\n";*/
 
     private static String eml =
         "Date: Tue, 27 Nov 2012 21:43:24 +0100 (CET)\n" +
@@ -224,5 +228,26 @@ public class GetStructureTest extends AbstractMailTest {
         
         String actualAttachment = ((JSONObject)newGetResponse.getData()).getJSONArray("body").getJSONObject(1).getJSONObject("body").getString("data");
         assertEquals("Attachment has been modified", attachment.replaceAll("(\\r|\\n)", ""), actualAttachment);
+    }
+    
+    private static String readFile(String fileName){
+        try {
+            @SuppressWarnings("resource")
+            BufferedReader br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
+            return sb.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

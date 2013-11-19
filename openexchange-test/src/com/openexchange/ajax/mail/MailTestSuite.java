@@ -87,6 +87,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(ViewTest.class);
         mailSuite.addTestSuite(AllAliasTest.class);
         mailSuite.addTestSuite(ListAliasTest.class);
+        mailSuite.addTestSuite(GetStructureTest.class);
 
         /*mailSuite.addTestSuite(AlwaysTest.class);*/
 
@@ -97,6 +98,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(Bug15901Test.class);
         mailSuite.addTestSuite(Bug16087Test.class);
         mailSuite.addTestSuite(Bug16141Test.class);
+        mailSuite.addTestSuite(Bug29865Test.class);
         mailSuite.addTestSuite(Bug19696Test.class);
         mailSuite.addTest(new JUnit4TestAdapter(Bug27708Test.class));
         mailSuite.addTest(new JUnit4TestAdapter(Bug28913Test.class));

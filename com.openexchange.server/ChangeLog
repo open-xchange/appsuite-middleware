@@ -1,3 +1,8 @@
+* 2013-11-18 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29391: Extend the size of the 'name' column in the 'infostoreReservedPaths' table 
+ - Fix for bug 29866: Don't carry over empty last-modification timestamp if appointment was not updated 
+
 * 2013-11-15 - marc.arens@open-xchange.com
 
  - Fix for bug 29794: Prevent cuncurrent cleanup via mutual exclusion

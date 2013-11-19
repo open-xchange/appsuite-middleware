@@ -27,7 +27,6 @@ Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Replaces: open-xchange-lang-community-da-dk (<< 6.21.0-0)
 Conflicts: open-xchange-lang-community-da-dk (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for da_DK
- This localization package are driven by the community.
 
 Package: open-xchange-l10n-de-ch
 Architecture: all

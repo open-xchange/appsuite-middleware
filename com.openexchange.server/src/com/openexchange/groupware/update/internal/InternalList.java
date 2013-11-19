@@ -700,6 +700,9 @@ public final class InternalList {
         // Extends the sizes of the 'filename', 'title' and 'file_size' columns in the 'infostore_document' table
         list.add(new com.openexchange.groupware.update.tasks.InfostoreExtendFilenameTitleAndFilesizeTask());
 
+        // Extends the size of the 'name' column in the 'infostoreReservedPaths' table.
+        list.add(new com.openexchange.groupware.update.tasks.InfostoreExtendReservedPathsNameTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
