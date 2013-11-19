@@ -76,16 +76,41 @@ public final class Event {
     }
 
     /**
+     * Initializes a new {@link EventImpl} with a random UUID.
+     *
+     * @param topic The topic
+     * @param props The properties associated with this event
+     */
+    public Event(final String topic, final Map<String, Object> props) {
+        this(UUID.randomUUID(), topic, props);
+    }
+
+    /**
      * Initializes a new {@link EventImpl}.
      *
      * @param uuid The event's UUID
      * @param topic The topic
      */
     public Event(final UUID uuid, final String topic) {
+        this(uuid, topic, null);
+    }
+
+    /**
+     * Initializes a new {@link EventImpl}.
+     *
+     * @param uuid The event's UUID
+     * @param topic The topic
+     * @param props The properties associated with this event
+     */
+    public Event(final UUID uuid, final String topic, final Map<String, Object> props) {
         super();
         this.uuid = uuid;
         this.topic = topic;
-        properties = new LinkedHashMap<String, Object>(6);
+        if (null == props) {
+            properties = new LinkedHashMap<String, Object>(6);
+        } else {
+            properties = new LinkedHashMap<String, Object>(props);
+        }
     }
 
     /**
@@ -122,7 +147,7 @@ public final class Event {
      * @return <code>true</code> if present; otherwise <code>false</code>
      */
     public boolean containsProperty(final String name) {
-        return properties.containsKey(name);
+        return null == name ? false : properties.containsKey(name);
     }
 
     /**
@@ -132,7 +157,7 @@ public final class Event {
      * @return The property value or <code>null</code>
      */
     public Object getProperty(final String name) {
-        return properties.get(name);
+        return null == name ? null : properties.get(name);
     }
 
     /**
@@ -142,7 +167,9 @@ public final class Event {
      * @param value The property value
      */
     public void setProperty(final String name, final Object value) {
-        properties.put(name, value);
+        if (null != name && null != value) {
+            properties.put(name, value);
+        }
     }
 
     /**
@@ -152,7 +179,7 @@ public final class Event {
      * @return The removed property value or <code>null</code> if absent
      */
     public Object removeProperty(final String name) {
-        return properties.remove(name);
+        return null == name ? null : properties.remove(name);
     }
 
     /**

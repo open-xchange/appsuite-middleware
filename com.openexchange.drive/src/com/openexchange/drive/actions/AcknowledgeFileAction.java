@@ -71,16 +71,14 @@ import com.openexchange.file.storage.File;
  * </ul>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AcknowledgeFileAction extends AbstractFileAction {
+public class AcknowledgeFileAction extends DynamicMetadataFileAction {
 
     public AcknowledgeFileAction(SyncSession session, FileVersion file, ServerFileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
         this(session, file, newFile, comparison, path, null != newFile ? newFile.getFile() : null);
     }
 
     public AcknowledgeFileAction(SyncSession session, FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
-        super(file, newFile, comparison);
-        parameters.put(PARAMETER_PATH, path);
-        applyMetadataParameters(serverFile, session);
+        super(session, file, newFile, comparison, path, serverFile);
     }
 
     @Override

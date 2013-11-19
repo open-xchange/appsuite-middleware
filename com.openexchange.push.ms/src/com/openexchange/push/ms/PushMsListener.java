@@ -49,6 +49,7 @@
 
 package com.openexchange.push.ms;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Dictionary;
@@ -146,13 +147,19 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
             return null;
         }
         final String topic = (String) m.get("__topic");
-        final Map<String, Object> props = new LinkedHashMap<String, Object>(8);
+        final Map<String, Object> props = new LinkedHashMap<String, Object>(12);
         for (final Entry<String, Object> entry : m.entrySet()) {
             final String key = entry.getKey();
-            if (!"__topic".equals(key) && !"__pure".equals(key)) {
+            if ("__wrappedSession".equals(key)) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Serializable> wrappedSession = (Map<String, Serializable>) entry.getValue();
+                props.put((String) wrappedSession.get("__wrappedSessionName"), PushMsSession.unwrap(wrappedSession));
+            } else if (!"__topic".equals(key) && !"__pure".equals(key)) {
                 props.put(key, entry.getValue());
             }
         }
+        // Mark that event as remotely received
+        props.put("__is12Remote", Boolean.TRUE);
         return new Event(topic, props);
     }
 

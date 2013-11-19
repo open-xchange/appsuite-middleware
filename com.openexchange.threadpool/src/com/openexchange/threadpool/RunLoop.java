@@ -134,11 +134,7 @@ public abstract class RunLoop<E> implements Runnable {
      * @return false if the Runloop was paused or is out of capacity
      */
     public boolean offer(final E element) {
-        if(isPaused.get()) {
-         return false;
-        } else {
-            return this.queue.offer(element);
-        }
+        return this.queue.offer(element);
     }
 
     /**

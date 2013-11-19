@@ -64,11 +64,21 @@ public enum ParamContainerExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Bad value %1$s in parameter %2$s
      */
-    BAD_PARAM_VALUE(CATEGORY_USER_INPUT, 1, ParamContainerExceptionMessage.BAD_PARAM_VALUE_MSG, ParamContainerExceptionMessage.BAD_PARAM_VALUE_MSG_DISPLAY),
+    BAD_PARAM_VALUE(CATEGORY_USER_INPUT, 1, ParamContainerExceptionCode.BAD_PARAM_VALUE_MSG, ParamContainerExceptionMessage.BAD_PARAM_VALUE_MSG_DISPLAY),
     /**
      * Missing parameter %1$s
      */
-    MISSING_PARAMETER(CATEGORY_ERROR, 2, ParamContainerExceptionMessage.MISSING_PARAMETER_MSG, ParamContainerExceptionMessage.MISSING_PARAMETER_MSG_DISPLAY);
+    MISSING_PARAMETER(CATEGORY_ERROR, 2, ParamContainerExceptionCode.MISSING_PARAMETER_MSG, ParamContainerExceptionMessage.MISSING_PARAMETER_MSG_DISPLAY);
+
+    /**
+     * Bad value %1$s in parameter %2$s
+     */
+    private final static String BAD_PARAM_VALUE_MSG = "Bad value %1$s in parameter %2$s";
+
+    /**
+     * Missing parameter %1$s
+     */
+    private final static String MISSING_PARAMETER_MSG = "Missing parameter %1$s";
 
     /**
      * Message of the exception.

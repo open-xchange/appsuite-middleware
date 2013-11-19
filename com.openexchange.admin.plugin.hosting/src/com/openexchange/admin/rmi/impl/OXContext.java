@@ -95,6 +95,7 @@ import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -104,6 +105,9 @@ import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.eventsystem.Event;
+import com.openexchange.eventsystem.EventSystemService;
+import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.log.LogFactory;
@@ -238,6 +242,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
+
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute context event.", e);
+            }
+        }
     }
 
     @Override
@@ -305,6 +320,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
         } catch (final OXException e) {
             log.error("Error invalidating cached infos of context "+ctx.getId()+" in context storage",e);
+        }
+
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute context event.", e);
+            }
         }
     }
 
@@ -429,6 +455,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error("Error invalidating context " + ctx.getId() + " in ox context storage", e);
         } catch (PoolException e) {
             log.info("Could not reset PoolMapping for context " + ctx.getId() + " while deleting it. Should not have been mapped then.");
+        }
+
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_DELETE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute context event.", e);
+            }
         }
     }
 
@@ -1129,6 +1166,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         }
 
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute context event.", e);
+            }
+        }
     }
 
     @Override
@@ -1190,6 +1237,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         }
 
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute context event.", e);
+            }
+        }
     }
 
     /**

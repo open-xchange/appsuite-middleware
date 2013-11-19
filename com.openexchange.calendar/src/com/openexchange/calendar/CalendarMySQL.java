@@ -542,7 +542,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(" AND pdm.confirm != ");
             sb.append(CalendarObject.DECLINE);
         } else {
-            sb.append(" AND pdm.confirm IN (");
+            sb.append(" AND pdm.confirm NOT IN (");
             sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(')');
         }
 
@@ -563,7 +563,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 sb.append(" AND pdm.confirm != ");
                 sb.append(CalendarObject.DECLINE);
             } else {
-                sb.append(" AND pdm.confirm IN (");
+                sb.append(" AND pdm.confirm NOT IN (");
                 sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(')');
             }
         } else {
@@ -1857,13 +1857,9 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         String mail;
-        try {
-            mail = UserStorage.getInstance().getUser(user, cal.getContext()).getMail();
-            if (cal.getOrganizer() != null && cal.getOrganizer().equals(mail)) {
-                return true;
-            }
-        } catch (final OXException e) {
-            throw OXCalendarExceptionCodes.EVENT_ERROR.create();
+        mail = UserStorage.getInstance().getUser(user, cal.getContext()).getMail();
+        if (cal.getOrganizer() != null && cal.getOrganizer().equals(mail)) {
+            return true;
         }
 
         return false;
@@ -4170,11 +4166,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         edao.setObjectID(oid);
         edao.setNumberOfAttachments(amount);
         final EventClient eventclient = new EventClient(session);
-        try {
-            eventclient.modify(edao);
-        } catch (final OXException e) {
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e);
-        }
+        eventclient.modify(edao);
         return last_modified;
     }
 

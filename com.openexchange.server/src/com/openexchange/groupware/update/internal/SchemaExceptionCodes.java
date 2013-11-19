@@ -49,68 +49,78 @@
 
 package com.openexchange.groupware.update.internal;
 
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.ALREADY_LOCKED_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.DATABASE_DOWN_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.LOCK_FAILED_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.MISSING_VERSION_ENTRY_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.MULTIPLE_VERSION_ENTRY_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.UNLOCK_FAILED_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.UPDATE_CONFLICT_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.WRONG_ROW_COUNT_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Exception codes for the {@link OXException}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum SchemaExceptionCodes implements OXExceptionCode {
+public enum SchemaExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
 
     /**
      * No row found in table version in schema %1$s.
      */
-    MISSING_VERSION_ENTRY(MISSING_VERSION_ENTRY_MSG, Category.CATEGORY_CONFIGURATION, 1),
+    MISSING_VERSION_ENTRY("No row found in table version in schema %1$s.", SchemaExceptionMessages.DATABASE_ERROR_DISPLAY,
+        Category.CATEGORY_CONFIGURATION, 1),
+        
     /**
      * Multiple rows found in table version in schema %1$s.
      */
-    MULTIPLE_VERSION_ENTRY(MULTIPLE_VERSION_ENTRY_MSG, Category.CATEGORY_CONFIGURATION, 2),
+    MULTIPLE_VERSION_ENTRY("Multiple rows found in table version in schema %1$s.", SchemaExceptionMessages.DATABASE_ERROR_DISPLAY,
+        Category.CATEGORY_CONFIGURATION, 2),
+        
     /**
      * Update conflict detected. Another process is currently updating schema %1$s.
      */
-    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.CATEGORY_PERMISSION_DENIED, 3),
+    ALREADY_LOCKED("Update conflict detected. Another process is currently updating schema %1$s.",
+        SchemaExceptionMessages.DATABASE_ERROR_DISPLAY,Category.CATEGORY_PERMISSION_DENIED, 3),
+        
     /**
      * Locking schema %1$s failed. Lock information could not be written to database.
      */
-    LOCK_FAILED(LOCK_FAILED_MSG, Category.CATEGORY_ERROR, 4),
+    LOCK_FAILED("Table update failed. Schema %1$s could not be locked.", SchemaExceptionMessages.DATABASE_ERROR_DISPLAY,
+        Category.CATEGORY_ERROR, 4),
+        
     /**
      * Update conflict detected. Schema %1$s is not marked as locked.
      */
-    UPDATE_CONFLICT(UPDATE_CONFLICT_MSG, Category.CATEGORY_ERROR, 5),
+    UPDATE_CONFLICT("Update conflict detected. Schema %1$s is not marked as locked.", SchemaExceptionMessages.DATABASE_ERROR_DISPLAY,
+        Category.CATEGORY_ERROR, 5),
+        
     /**
      * Schema %1$s could not be unlocked. Lock information could no be removed from database.
      */
-    UNLOCK_FAILED(UNLOCK_FAILED_MSG, Category.CATEGORY_ERROR, 6),
+    UNLOCK_FAILED("Schema %1$s could not be unlocked. Lock information could no be removed from database.",
+        SchemaExceptionMessages.DATABASE_ERROR_DISPLAY, Category.CATEGORY_ERROR, 6),
+        
     /**
      * A SQL problem occurred: %1$s.
      */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 7),
+    SQL_PROBLEM("A SQL problem occurred: %1$s.", SchemaExceptionMessages.DATABASE_ERROR_DISPLAY, Category.CATEGORY_ERROR, 7),
+    
     /**
      * Cannot get database connection.
      */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.CATEGORY_SERVICE_DOWN, 8),
+    DATABASE_DOWN("Cannot get database connection.", SchemaExceptionMessages.DATABASE_DOWN_DISPLAY, Category.CATEGORY_SERVICE_DOWN, 8),
+    
     /**
      * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
      */
-    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CATEGORY_ERROR, 9);
+    WRONG_ROW_COUNT("Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.",
+        SchemaExceptionMessages.DATABASE_ERROR_DISPLAY, Category.CATEGORY_ERROR, 9);
 
     /**
      * Message of the exception.
      */
     final String message;
+    
+    final String displayMessage;
 
     /**
      * Category of the exception.
@@ -129,8 +139,9 @@ public enum SchemaExceptionCodes implements OXExceptionCode {
      * @param category category.
      * @param number detail number.
      */
-    private SchemaExceptionCodes(final String message, final Category category, final int number) {
+    private SchemaExceptionCodes(final String message, final String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
     }
@@ -153,6 +164,11 @@ public enum SchemaExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

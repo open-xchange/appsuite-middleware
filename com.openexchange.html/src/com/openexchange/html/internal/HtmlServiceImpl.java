@@ -1792,6 +1792,9 @@ public final class HtmlServiceImpl implements HtmlService {
             if (buffer.indexOf("<!DOCTYPE") < 0) {
                 buffer.insert(0, DOCTYPE_DECL);
             }
+            /*
+             * Keep Unicode representation of 'copy' and 'reg' intact
+             */
             return P_HTMLE_REG.matcher(P_HTMLE_COPY.matcher(buffer.toString()).replaceAll("\u00a9")).replaceAll("\u00ae");
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur

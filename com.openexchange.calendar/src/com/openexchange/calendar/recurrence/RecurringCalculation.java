@@ -63,8 +63,10 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.RecurringResults;
 import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.CalendarObject;
 
 
@@ -386,14 +388,14 @@ public class RecurringCalculation {
 		}
 	}
 
-    private final void increaseCalculationCounter() throws RecurringException {
+    private final void increaseCalculationCounter() throws OXException {
         if (TTL > 0) {
             operationCounter++;
             if (operationCounter > TTL) {
-                final RecurringException exception = new RecurringException(RecurringException.PATTERN_TOO_COMPLEX, -1);
-                final Throwable t = exception.fillInStackTrace();
+                OXException oxException = OXCalendarExceptionCodes.RECURRENCE_PATTERN_TOO_COMPLEX.create();
+                Throwable t = oxException.fillInStackTrace();
                 LOG.error(getState(), t);
-                throw exception;
+                throw oxException;
             }
         }
     }
@@ -415,9 +417,9 @@ public class RecurringCalculation {
      *
      * @return The calculated occurrences kept by returned instance of {@link RecurringResults} or <code>null</code> if recurrence type is
      *         unknown.
-     * @throws RecurringException If recurrence cannot be calculated
+     * @throws OXException 
      */
-    public RecurringResults calculateRecurrence() throws RecurringException {
+    public RecurringResults calculateRecurrence() throws OXException {
 
         checkValues();
         switch (recurring_type) {
@@ -432,14 +434,14 @@ public class RecurringCalculation {
         case CalendarObject.NO_RECURRENCE:
             return null;
         default:
-            throw new RecurringException(RecurringException.UNKNOWN_RECURRENCE_TYPE, recurring_type);
+            throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_TYPE.create(recurring_type);
         }
     }
 
-    private final RecurringResults calculateDaily() throws RecurringException {
+    private final RecurringResults calculateDaily() throws OXException {
         RecurringResults rs = null;
         if (recurring_interval < 1) {
-            throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_DAILY_INTERVAL.create(recurring_interval);
         }
 
         int ds_count = 1;
@@ -515,10 +517,10 @@ public class RecurringCalculation {
         return rs;
     }
 
-    private final RecurringResults calculateWeekly() throws RecurringException {
+    private final RecurringResults calculateWeekly() throws OXException {
         RecurringResults rs = null;
         if (recurring_interval < 1) {
-            throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_DAILY_INTERVAL.create(recurring_interval);
         }
         final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
@@ -561,7 +563,7 @@ public class RecurringCalculation {
                         days[c++] = 6;
                         break;
                     default:
-                        throw new RecurringException(RecurringException.UNKOWN_DAYS_VALUE, days_int[x]);
+                        throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_DAY.create(days_int[x]);
                 }
                 u-=days_int[x];
             }
@@ -650,10 +652,10 @@ public class RecurringCalculation {
         return rs;
     }
 
-    private final RecurringResults calculateMonthly() throws RecurringException {
+    private final RecurringResults calculateMonthly() throws OXException {
         RecurringResults rs = null;
         if (recurring_interval < 1) {
-            throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_DAILY_INTERVAL.create(recurring_interval);
         }
         final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
@@ -667,10 +669,10 @@ public class RecurringCalculation {
         rs = new RecurringResults();
 
         if (day_or_type == 0) {
-            throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_INTERVAL, day_or_type);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL.create(day_or_type);
         }
         if (monthly <= 0) {
-            throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_INTERVAL_2, monthly);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL_2.create(monthly);
         }
 
         final boolean boundaries = hasBoundaries();
@@ -749,10 +751,10 @@ public class RecurringCalculation {
                  */
 
             if (a == -1) {
-                throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_DAY, a);
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY.create(a);
             }
             if (day_or_type < 1 || day_or_type > 5) {
-                throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_DAY_2, day_or_type);
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(day_or_type);
             }
 
             final Calendar helper = (Calendar) calc.clone();
@@ -912,10 +914,10 @@ public class RecurringCalculation {
         return rs;
     }
 
-    private final RecurringResults calculateYearly() throws RecurringException {
+    private final RecurringResults calculateYearly() throws OXException {
         RecurringResults rs = null;
         if (recurring_interval < 1) {
-            throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_DAILY_INTERVAL.create(recurring_interval);
         }
         final Calendar calc = Calendar.getInstance(Tools.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
@@ -929,7 +931,7 @@ public class RecurringCalculation {
         final int month = recurring_month;
 
         if (day_or_type == 0) {
-            throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_INTERVAL, day_or_type);
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(day_or_type);
         }
 
         final boolean boundaries = hasBoundaries();
@@ -1003,10 +1005,10 @@ public class RecurringCalculation {
                  */
 
             if (a == -1) {
-                throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_DAY, a);
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_DAY.create(a);
             }
             if (day_or_type < 1 || day_or_type > 5) {
-                throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_TYPE, day_or_type);
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_TYPE.create(day_or_type);
             }
 
             final Calendar helper = (Calendar) calc.clone();
@@ -1161,7 +1163,7 @@ public class RecurringCalculation {
         return cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY;
     }
 
-    private static int getDay(final int cd) throws RecurringException {
+    private static int getDay(final int cd) throws OXException {
         int ret = -1;
         switch (cd) {
             case CalendarObject.SATURDAY:
@@ -1195,7 +1197,7 @@ public class RecurringCalculation {
                 ret = CalendarObject.WEEKENDDAY;
                 break;
             default:
-                throw new RecurringException(RecurringException.UNKOWN_DAYS_VALUE, cd);
+                throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_DAY.create(cd);
         }
         return ret;
     }

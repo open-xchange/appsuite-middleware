@@ -49,36 +49,74 @@
 
 package com.openexchange.consistency;
 
-import static com.openexchange.consistency.ConsistencyExceptionMessages.*;
-
+import static com.openexchange.consistency.ConsistencyExceptionMessages.MALFORMED_POLICY_MSG_DISPLAY;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link ConsistencyExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ConsistencyExceptionCodes implements OXExceptionCode {
+public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
+
     /** Error communicating with mbean in server: %s */
-    COMMUNICATION_PROBLEM(COMMUNICATION_PROBLEM_MSG, CATEGORY_ERROR, 1),
+    COMMUNICATION_PROBLEM(ConsistencyExceptionCodes.COMMUNICATION_PROBLEM_MSG, CATEGORY_ERROR, 1),
+
     /** Registration of consistency MBean failed. */
-    REGISTRATION_FAILED(REGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 2),
+    REGISTRATION_FAILED(ConsistencyExceptionCodes.REGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 2),
+
     /** Unregistration of consistency MBean failed. */
-    UNREGISTRATION_FAILED(UNREGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 3),
+    UNREGISTRATION_FAILED(ConsistencyExceptionCodes.UNREGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 3),
+
     /** User entered malformed policy string. */
-    MALFORMED_POLICY(MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4);
+    MALFORMED_POLICY(ConsistencyExceptionCodes.MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4, MALFORMED_POLICY_MSG_DISPLAY);
+
+    private static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
+
+    private static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
+
+    private static final String REGISTRATION_FAILED_MSG = "Registration of consistency MBean failed.";
+
+    private static final String UNREGISTRATION_FAILED_MSG = "Unregistration of consistency MBean failed.";
 
     private final String message;
     private final Category category;
     private final int number;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link ConsistencyExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param number
+     */
     private ConsistencyExceptionCodes(final String message, final Category category, final int number) {
+        this(message, category, number, null);
+    }
+
+    /**
+     * Initializes a new {@link ConsistencyExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param number
+     * @param displayMessage
+     */
+    private ConsistencyExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -111,8 +149,16 @@ public enum ConsistencyExceptionCodes implements OXExceptionCode {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
+    }
+
+    /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

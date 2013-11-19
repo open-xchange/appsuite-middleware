@@ -54,7 +54,6 @@ import static com.openexchange.authorization.AuthorizationExceptionMessages.USER
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
@@ -62,14 +61,14 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link AuthorizationExceptionCodes}
  *
  */
-public enum AuthorizationExceptionCodes implements OXExceptionCode, DisplayableOXExceptionCode {
+public enum AuthorizationExceptionCodes implements DisplayableOXExceptionCode {
 
     /** User is deactivated */
     USER_DISABLED("User is deactivated", USER_DISABLED_DISPLAY, CATEGORY_PERMISSION_DENIED, 1),
     /** Unknown error */
-    UNKNOWN("Password expired", null, CATEGORY_ERROR, 2),
+    UNKNOWN("Unknown error", null, CATEGORY_ERROR, 2),
     /** Password expired */
-    PASSWORD_EXPIRED("Unknown error", PASSWORD_EXPIRED_DISPLAY, CATEGORY_PERMISSION_DENIED, 3);
+    PASSWORD_EXPIRED("Password expired", PASSWORD_EXPIRED_DISPLAY, CATEGORY_PERMISSION_DENIED, 3);
 
     private String message;
     private String displayMessage;

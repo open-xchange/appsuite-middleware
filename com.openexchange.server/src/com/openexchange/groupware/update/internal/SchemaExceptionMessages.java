@@ -59,23 +59,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class SchemaExceptionMessages implements LocalizableStrings {
 
-    public static final String MISSING_VERSION_ENTRY_MSG = "No row found in table version in schema %1$s.";
-
-    public static final String MULTIPLE_VERSION_ENTRY_MSG = "Multiple rows found in table version in schema %1$s.";
-
-    public static final String ALREADY_LOCKED_MSG = "Update conflict detected. Another process is currently updating schema %1$s.";
-
-    public static final String LOCK_FAILED_MSG = "Table update failed. Schema %1$s could not be locked.";
-
-    public static final String UPDATE_CONFLICT_MSG = "Update conflict detected. Schema %1$s is not marked as locked.";
-
-    public static final String UNLOCK_FAILED_MSG = "Schema %1$s could not be unlocked. Lock information could no be removed from database.";
-
-    public static final String SQL_PROBLEM_MSG = "A SQL problem occurred: %1$s.";
-
-    public static final String DATABASE_DOWN_MSG = "Cannot get database connection.";
-
-    public static final String WRONG_ROW_COUNT_MSG = "Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.";
+    public static final String DATABASE_DOWN_DISPLAY = "Cannot get database connection.";
+    
+    public static final String DATABASE_ERROR_DISPLAY = "Error while updating database.";
 
     /**
      * Prevent instantiation.

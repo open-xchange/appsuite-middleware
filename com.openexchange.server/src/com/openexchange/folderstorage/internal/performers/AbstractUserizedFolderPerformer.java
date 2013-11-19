@@ -311,6 +311,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             if (SharedType.getInstance().equals(type)) {
                 userizedFolder = new UserizedFolderImpl(f, storageParameters.getSession(), storageParameters.getUser(), storageParameters.getContext());
                 userizedFolder.setDefault(false);
+                userizedFolder.setDefaultType(0);
                 isShared = true;
             } else if ((createdBy >= 0) && (createdBy != getUserId()) && PrivateType.getInstance().equals(type)) {
                 /*
@@ -330,6 +331,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 f = curStorage.prepareFolder(treeId, f, storageParameters);
                 userizedFolder = new UserizedFolderImpl(f, storageParameters.getSession(), storageParameters.getUser(), storageParameters.getContext());
                 userizedFolder.setDefault(false);
+                userizedFolder.setDefaultType(0);
                 userizedFolder.setType(SharedType.getInstance());
                 isShared = true;
             } else {

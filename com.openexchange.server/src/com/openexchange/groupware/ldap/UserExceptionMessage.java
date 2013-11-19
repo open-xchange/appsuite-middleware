@@ -66,122 +66,92 @@ public class UserExceptionMessage implements LocalizableStrings {
     }
 
     /**
-     * A property from the ldap.properties file is missing.
-     */
-    public final static String PROPERTY_MISSING_MSG = "Cannot find property %s.";
-
-    /**
-     * A problem with distinguished names occurred.
-     */
-    public final static String DN_PROBLEM_MSG = "Cannot build distinguished name from %s.";
-
-    /**
-     * Class can not be found.
-     */
-    public final static String CLASS_NOT_FOUND_MSG = "Class %s can not be loaded.";
-
-    /**
-     * An implementation can not be instantiated.
-     */
-    public final static String INSTANTIATION_PROBLEM_MSG = "Cannot instantiate class %s.";
-
-    /**
-     * A database connection cannot be obtained.
-     */
-    public final static String NO_CONNECTION_MSG = "Cannot get database connection.";
-
-    /**
      * Cannot clone object %1$s.
      */
-    public final static String NOT_CLONEABLE_MSG = "Cannot clone object %1$s.";
-
-    /**
-     * SQL Problem: \"%s\".
-     */
-    public final static String SQL_ERROR_MSG = "SQL problem: \"%s\".";
+    public final static String NOT_CLONEABLE_DISPLAY = "Cannot clone object \"%1$s\".";
 
     /**
      * Hash algorithm %s isn't found.
      */
-    public final static String HASHING_MSG = "Hash algorithm %s could not be found.";
+    public final static String HASHING_DISPLAY = "Hash algorithm \"%s\" could not be found.";
 
     /**
      * Encoding %s cannot be used.
      */
-    public final static String UNSUPPORTED_ENCODING_MSG = "Encoding %s cannot be used.";
+    public final static String UNSUPPORTED_ENCODING_DISPLAY = "Encoding \"%s\" cannot be used.";
 
     /**
      * Cannot find user with identifier %1$s in context %2$d.
      */
-    public final static String USER_NOT_FOUND_MSG = "Cannot find user with identifier %1$s in context %2$d.";
+    public final static String USER_NOT_FOUND_DISPLAY = "Cannot find user with identifier \"%1$s\" in context %2$d.";
 
     /**
      * Found two user with same identifier %1$s in context %2$d.
      */
-    public final static String USER_CONFLICT_MSG = "Two users with same identifier %1$s in context %2$d found.";
+    public final static String USER_CONFLICT_DISPLAY = "Two users with same identifier \"%1$s\" in context %2$d found.";
 
     /**
      * Problem putting an object into the cache.
      */
-    public final static String CACHE_PROBLEM_MSG = "Problem putting/removing an object into/from the cache.";
+    public final static String CACHE_PROBLEM_DISPLAY = "Problem putting/removing an object into/from the cache.";
 
     /**
      * No permission to modify resources in context %1$s
      */
-    public final static String PERMISSION_MSG = "No permission to modify resources in context %1$s";
+    public final static String PERMISSION_DISPLAY = "No permission to modify resources in context \"%1$s\"";
 
     /**
      * Missing or unknown password mechanism %1$s
      */
-    public final static String MISSING_PASSWORD_MECH_MSG = "Missing or unknown password mechanism %1$s";
+    public final static String MISSING_PASSWORD_MECH_DISPLAY = "Missing or unknown password mechanism \"%1$s\"";
 
     /**
      * New password contains invalid characters
      */
-    public final static String INVALID_PASSWORD_MSG = "New password contains invalid characters";
+    public final static String INVALID_PASSWORD_DISPLAY = "New password contains invalid characters.";
 
     /**
      * Attributes of user %1$d in context %2$d have been erased.
      */
-    public final static String ERASED_ATTRIBUTES_MSG = "Attributes of user %1$d in context %2$d have been erased.";
+    public final static String ERASED_ATTRIBUTES_DISPLAY = "Attributes of user %1$d in context %2$d have been erased.";
 
     /**
      * Loading one or more users failed.
      */
-    public final static String LOAD_FAILED_MSG = "Loading one or more users failed.";
+    public final static String LOAD_FAILED_DISPLAY = "Loading one or more users failed.";
 
     /** Alias entries are missing for user %1$d in context %2$d. */
-    public final static String ALIASES_MISSING_MSG = "Alias entries are missing for user %1$d in context %2$d.";
+    public final static String ALIASES_MISSING_DISPLAY = "Alias entries are missing for user %1$d in context %2$d.";
 
     /** Updating attributes failed in context %1$d for user %2$d. */
-    public final static String UPDATE_ATTRIBUTES_FAILED_MSG = "Updating attributes failed in context %1$d for user %2$d.";
+    public final static String UPDATE_ATTRIBUTES_FAILED_DISPLAY = "Updating attributes failed in context %1$d for user %2$d.";
 
     /**
      * Invalid password length. The password must be of minimum length %1$d.
      */
-    public final static String INVALID_MIN_LENGTH_MSG = "Invalid password length. The password must have a minimum length of %1$d.";
+    public final static String INVALID_MIN_LENGTH_DISPLAY = "Invalid password length. The password must have a minimum length of %1$d.";
 
     /**
      * Invalid password length. The password must be of maximum length %1$d.
      */
-    public final static String INVALID_MAX_LENGTH_MSG = "Invalid password length. The password must have a maximum length of %1$d.";
+    public final static String INVALID_MAX_LENGTH_DISPLAY = "Invalid password length. The password must have a maximum length of %1$d.";
 
     /**
      * The parameter %s for this user is missing.
      */
-    public final static String MISSING_PARAMETER_MSG = "The parameter %s for this user is missing.";
+    public final static String MISSING_PARAMETER_DISPLAY = "The parameter \"%s\" for this user is missing.";
 
     /**
      * %s is not a valid locale.
      */
-    public final static String INVALID_LOCALE_MSG = "%s is not a valid locale.";
+    public final static String INVALID_LOCALE_DISPLAY = "\"%s\" is not a valid locale.";
 
     /**
      * %s is not a valid time zone.
      */
-    public final static String INVALID_TIMEZONE_MSG = "%s is not a valid timezone.";
+    public final static String INVALID_TIMEZONE_DISPLAY = "\"%s\" is not a valid timezone.";
 
     // This is an internal exception to detect coding problems. A user will never see this exception.
     // %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
-    public static final String LOCKING_NOT_ALLOWED_MSG = "Locking attributes of multiple users is not allowed. You tried to lock %1$d user's attributes.";
+    public static final String LOCKING_NOT_ALLOWED_DISPLAY = "Locking attributes of multiple users is not allowed. You tried to lock %1$d user's attributes.";
 }

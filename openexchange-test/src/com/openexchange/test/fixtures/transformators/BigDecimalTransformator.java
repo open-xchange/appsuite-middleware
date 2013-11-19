@@ -46,41 +46,23 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.test.fixtures.transformators;
 
-package com.openexchange.contactcollector;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-import javax.mail.internet.InternetAddress;
+import java.math.BigDecimal;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.session.Session;
-
 /**
- * {@link ContactCollectorService}
- *
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * @author Martin Braun <martin.braun@open-xchange.com>
  */
-public interface ContactCollectorService {
-
-    /**
-     * Remembers specified addresses.
-     *
-     * @param addresses The addresses to remember
-     * @param session The user-session
-     */
-    public void memorizeAddresses(List<InternetAddress> addresses, Session session);
-
-    /**
-     * Creates a contact collect folder if necessary.
-     *
-     * @param session
-     * @param ctx
-     * @param folderName
-     * @param con
-     * @throws SQLException
-     * @throws OXException
-     */
-    public void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws SQLException, OXException;
+public class BigDecimalTransformator implements Transformator{
+    @Override
+    public Object transform(final String value) throws OXException {
+        if(value == null) {
+            return 0;
+        }
+        try {
+            return new BigDecimal(value);
+        } catch (NumberFormatException x) {
+            throw new OXException(x);
+        }
+    }
 }

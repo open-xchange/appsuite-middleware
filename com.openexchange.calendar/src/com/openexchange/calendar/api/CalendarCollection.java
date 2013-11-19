@@ -83,7 +83,6 @@ import com.openexchange.calendar.CalendarSqlImp;
 import com.openexchange.calendar.RecurringResult;
 import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
-import com.openexchange.calendar.recurrence.RecurringException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -1047,38 +1046,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         if (cdao.containsMonth()) {
             rc.setMonth(cdao.getMonth());
         }
-        try {
-            return rc.calculateRecurrence();
-        } catch (final RecurringException re) {
-            if (re.getCode() == RecurringException.RECURRING_MISSING_INTERVAL) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_DAILY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.RECURRING_MISSING_INTERVAL) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_WEEKLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL_2) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_INTERVAL_2.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY_2) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_MONTLY_DAY_2.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_INTERVAL) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_DAY) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_DAY.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_TYPE) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_TYPE.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.UNEXPECTED_ERROR) {
-                throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.UNKOWN_DAYS_VALUE) {
-                throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_DAY.create(re, Integer.valueOf(re.getValue()));
-            } else if (re.getCode() == RecurringException.PATTERN_TOO_COMPLEX) {
-                LOG.error("Pattern too complex for "+cdao);
-                throw OXCalendarExceptionCodes.RECURRENCE_PATTERN_TOO_COMPLEX.create(re);
-            } else {
-                throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(re, Integer.valueOf(re.getValue()));
-            }
-        }
+        return rc.calculateRecurrence();
     }
 
     private static Map<Integer, Integer> DAY_MAP = new HashMap<Integer, Integer>(10);
@@ -1415,7 +1383,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             fillDAO(edao);
             final RecurringResultsInterface rss = calculateRecurring(edao, 0, 0, clone.getRecurrencePosition());
             if (rss == null) {
-                throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create();
+                throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create(clone.getRecurrencePosition());
             }
             final RecurringResultInterface rs = rss.getRecurringResult(0);
             clone.setStartDate(new Date(rs.getStart()));

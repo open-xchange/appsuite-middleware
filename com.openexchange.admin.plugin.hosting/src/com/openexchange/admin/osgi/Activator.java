@@ -58,6 +58,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
@@ -83,6 +84,7 @@ public class Activator extends HousekeepingActivator {
         track(I18nService.class, new I18nServiceCustomizer(context));
         track(ManagementService.class, new ManagementCustomizer(context));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
+        track(EventSystemService.class, new RegistryServiceTrackerCustomizer<EventSystemService>(context, AdminServiceRegistry.getInstance(), EventSystemService.class));
         openTrackers();
         this.starter = new PluginStarter();
         try {

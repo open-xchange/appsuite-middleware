@@ -51,66 +51,132 @@
 package com.openexchange.resource;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for the resource exception.
  */
-public enum ResourceExceptionCode implements OXExceptionCode {
+public enum ResourceExceptionCode implements DisplayableOXExceptionCode {
     /**
      * A database connection Cannot be obtained.
      */
-    NO_CONNECTION(ResourceExceptionMessage.NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 1),
+    NO_CONNECTION(ResourceExceptionCode.NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 1, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * SQL Problem: "%1$s".
      */
-    SQL_ERROR(ResourceExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    SQL_ERROR(ResourceExceptionCode.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * Cannot find resource group with identifier %1$d.
      */
-    RESOURCEGROUP_NOT_FOUND(ResourceExceptionMessage.RESOURCEGROUP_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 3),
+    RESOURCEGROUP_NOT_FOUND(ResourceExceptionCode.RESOURCEGROUP_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 3, ResourceExceptionMessage.RESOURCEGROUP_NOT_FOUND_MSG_DISPLAY),
     /**
      * Found resource groups with same identifier %1$d.
      */
-    RESOURCEGROUP_CONFLICT(ResourceExceptionMessage.RESOURCEGROUP_CONFLICT_MSG, Category.CATEGORY_USER_INPUT, 4),
+    RESOURCEGROUP_CONFLICT(ResourceExceptionCode.RESOURCEGROUP_CONFLICT_MSG, Category.CATEGORY_USER_INPUT, 4, ResourceExceptionMessage.RESOURCEGROUP_CONFLICT_MSG_DISPLAY),
     /**
      * Cannot find resource with identifier %1$d.
      */
-    RESOURCE_NOT_FOUND(ResourceExceptionMessage.RESOURCE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 5),
+    RESOURCE_NOT_FOUND(ResourceExceptionCode.RESOURCE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 5, ResourceExceptionMessage.RESOURCE_NOT_FOUND_MSG_DISPLAY),
     /**
      * Found resource(s) with same identifier %1$s.
      */
-    RESOURCE_CONFLICT(ResourceExceptionMessage.RESOURCE_CONFLICT_MSG, Category.CATEGORY_USER_INPUT, 6),
+    RESOURCE_CONFLICT(ResourceExceptionCode.RESOURCE_CONFLICT_MSG, Category.CATEGORY_USER_INPUT, 6, ResourceExceptionMessage.RESOURCE_CONFLICT_MSG_DISPLAY),
     /**
      * No resource given.
      */
-    NULL(ResourceExceptionMessage.NULL_MSG, Category.CATEGORY_USER_INPUT, 7),
+    NULL(ResourceExceptionCode.NULL_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * Missing mandatory field(s) in given resource.
      */
-    MANDATORY_FIELD(ResourceExceptionMessage.MANDATORY_FIELD_MSG, Category.CATEGORY_ERROR, 8),
+    MANDATORY_FIELD(ResourceExceptionCode.MANDATORY_FIELD_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * No permission to modify resources in context %1$s
      */
-    PERMISSION(ResourceExceptionMessage.PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 9),
+    PERMISSION(ResourceExceptionCode.PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 9, ResourceExceptionMessage.PERMISSION_MSG_DISPLAY),
     /**
      * Found resource(s) with same email address %1$s.
      */
-    RESOURCE_CONFLICT_MAIL(ResourceExceptionMessage.RESOURCE_CONFLICT_MAIL_MSG, Category.CATEGORY_ERROR, 10),
+    RESOURCE_CONFLICT_MAIL(ResourceExceptionCode.RESOURCE_CONFLICT_MAIL_MSG, Category.CATEGORY_ERROR, 10),
     /**
      * Invalid resource identifier: %1$s
      */
-    INVALID_RESOURCE_IDENTIFIER(ResourceExceptionMessage.INVALID_RESOURCE_IDENTIFIER_MSG, Category.CATEGORY_USER_INPUT, 11),
+    INVALID_RESOURCE_IDENTIFIER(ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER_MSG, Category.CATEGORY_USER_INPUT, 11, ResourceExceptionMessage.INVALID_RESOURCE_IDENTIFIER_MSG_DISPLAY),
     /**
      * Invalid resource email address: %1$s
      */
-    INVALID_RESOURCE_MAIL(ResourceExceptionMessage.INVALID_RESOURCE_MAIL_MSG, Category.CATEGORY_USER_INPUT, 12),
+    INVALID_RESOURCE_MAIL(ResourceExceptionCode.INVALID_RESOURCE_MAIL_MSG, Category.CATEGORY_USER_INPUT, 12, ResourceExceptionMessage.INVALID_RESOURCE_MAIL_MSG_DISPLAY),
     /**
      * The resource has been changed in the meantime
      */
-    CONCURRENT_MODIFICATION(ResourceExceptionMessage.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 13);
+    CONCURRENT_MODIFICATION(ResourceExceptionCode.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 13, ResourceExceptionMessage.CONCURRENT_MODIFICATION_MSG_DISPLAY);
+
+    /**
+     * A database connection Cannot be obtained.
+     */
+    private final static String NO_CONNECTION_MSG = "Cannot get database connection.";
+
+    /**
+     * SQL Problem: "%1$s".
+     */
+    private final static String SQL_ERROR_MSG = "SQL problem: \"%1$s\"";
+
+    /**
+     * Cannot find resource group with identifier %1$d.
+     */
+    private final static String RESOURCEGROUP_NOT_FOUND_MSG = "Cannot find resource group with identifier %1$d.";
+
+    /**
+     * Found resource groups with same identifier %1$d.
+     */
+    private final static String RESOURCEGROUP_CONFLICT_MSG = "Found resource groups with same identifier %1$d.";
+
+    /**
+     * Cannot find resource with identifier %1$d.
+     */
+    private final static String RESOURCE_NOT_FOUND_MSG = "Cannot find resource with identifier %1$d.";
+
+    /**
+     * Found resource(s) with same identifier %1$s.
+     */
+    private final static String RESOURCE_CONFLICT_MSG = "Found resource(s) with same identifier %1$s.";
+
+    /**
+     * No resource given.
+     */
+    private final static String NULL_MSG = "No resource given.";
+
+    /**
+     * Missing mandatory field(s) in given resource.
+     */
+    private final static String MANDATORY_FIELD_MSG = "Missing mandatory field(s) in given resource.";
+
+    /**
+     * No permission to modify resources in context %1$s
+     */
+    private final static String PERMISSION_MSG = "No permission to modify resources in context %1$s";
+
+    /**
+     * Found resource(s) with same email address %1$s.
+     */
+    private final static String RESOURCE_CONFLICT_MAIL_MSG = "Found resource(s) with same email address %1$s.";
+
+    /**
+     * Invalid resource identifier: %1$s
+     */
+    private final static String INVALID_RESOURCE_IDENTIFIER_MSG = "Invalid resource identifier: %1$s";
+
+    /**
+     * Invalid resource email address: %1$s
+     */
+    private final static String INVALID_RESOURCE_MAIL_MSG = "Invalid resource E-Mail address: %1$s";
+
+    /**
+     * The resource has been changed in the meantime: %1$s
+     */
+    private final static String CONCURRENT_MODIFICATION_MSG = "The resource has been changed in the meantime: %1$s";
 
     /**
      * Message of the exception.
@@ -128,17 +194,34 @@ public enum ResourceExceptionCode implements OXExceptionCode {
     final int detailNumber;
 
     /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
      * Default constructor.
      *
      * @param message message.
      * @param category category.
-     * @param detail detailed information for the exception.
      * @param detailNumber detail number.
      */
     private ResourceExceptionCode(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    /**
+     * Default constructor.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     * @param displayMessage
+     */
+    private ResourceExceptionCode(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -164,6 +247,14 @@ public enum ResourceExceptionCode implements OXExceptionCode {
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     /**

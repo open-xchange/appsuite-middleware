@@ -73,35 +73,59 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         /**
          * A WebDAV error occurred.
          */
-        GENERAL_ERROR(WebdavProtocolExceptionMessage.GENERAL_ERROR_MSG, CATEGORY_ERROR, 1000),
+        GENERAL_ERROR(Code.GENERAL_ERROR_MSG, CATEGORY_ERROR, 1000),
         /**
          * The folder %s doesn't exist.
          */
-        FOLDER_NOT_FOUND(WebdavProtocolExceptionMessage.FOLDER_NOT_FOUND_MSG, CATEGORY_ERROR, 1001),
+        FOLDER_NOT_FOUND(Code.FOLDER_NOT_FOUND_MSG, CATEGORY_ERROR, 1001),
         /**
          * The directory already exists.
          */
-        DIRECTORY_ALREADY_EXISTS(WebdavProtocolExceptionMessage.DIRECTORY_ALREADY_EXISTS_MSG, CATEGORY_ERROR, 1002),
+        DIRECTORY_ALREADY_EXISTS(Code.DIRECTORY_ALREADY_EXISTS_MSG, CATEGORY_ERROR, 1002),
         /**
          * No write permission.
          */
-        NO_WRITE_PERMISSION(WebdavProtocolExceptionMessage.NO_WRITE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 1003),
+        NO_WRITE_PERMISSION(Code.NO_WRITE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 1003),
         /**
          * File "%1$s" already exists
          */
-        FILE_ALREADY_EXISTS(WebdavProtocolExceptionMessage.FILE_ALREADY_EXISTS_MSG, CATEGORY_ERROR, 1004),
+        FILE_ALREADY_EXISTS(Code.FILE_ALREADY_EXISTS_MSG, CATEGORY_ERROR, 1004),
         /**
          * Collections must not have bodies.
          */
-        NO_BODIES_ALLOWED(WebdavProtocolExceptionMessage.NO_BODIES_ALLOWED_MSG, CATEGORY_ERROR, 1005),
+        NO_BODIES_ALLOWED(Code.NO_BODIES_ALLOWED_MSG, CATEGORY_ERROR, 1005),
         /**
          * File "%1$s" does not exist.
          */
-        FILE_NOT_FOUND(WebdavProtocolExceptionMessage.FILE_NOT_FOUND_MSG, CATEGORY_ERROR, 1006),
+        FILE_NOT_FOUND(Code.FILE_NOT_FOUND_MSG, CATEGORY_ERROR, 1006),
         /**
          * "%1$s" is a directory.
          */
-        FILE_IS_DIRECTORY(WebdavProtocolExceptionMessage.FILE_IS_DIRECTORY_MSG, CATEGORY_ERROR, 1007);
+        FILE_IS_DIRECTORY(Code.FILE_IS_DIRECTORY_MSG, CATEGORY_ERROR, 1007);
+
+        // A WebDAV error occurred.
+        public final static String GENERAL_ERROR_MSG = "A WebDAV error occurred.";
+
+        // The folder %s doesn't exist.
+        public final static String FOLDER_NOT_FOUND_MSG = "The folder %s doesn't exist.";
+
+        // The directory already exists.
+        public final static String DIRECTORY_ALREADY_EXISTS_MSG = "The directory already exists.";
+
+        // No write permission.
+        public final static String NO_WRITE_PERMISSION_MSG = "No write permission.";
+
+        // File "%1$s" already exists
+        public final static String FILE_ALREADY_EXISTS_MSG = "File \"%1$s\" already exists.";
+
+        // Collections must not have bodies.
+        public final static String NO_BODIES_ALLOWED_MSG = "Collections must not have bodies.";
+
+        // File "%1$s" does not exist.
+        public final static String FILE_NOT_FOUND_MSG = "File \"%1$s\" does not exist.";
+
+        // "%1$s" is a directory.
+        public final static String FILE_IS_DIRECTORY_MSG = "\"%1$s\" is a directory.";
 
         private final String message;
 
@@ -178,8 +202,8 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
                         url,
                         getNumber(),
                         Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                        cause,
-                        new Object[0]);
+                            cause,
+                            new Object[0]);
                 ret.setLogMessage(getMessage(), args);
             }
             ret.addCategory(category);

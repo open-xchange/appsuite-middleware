@@ -1,3 +1,24 @@
+* 2013-11-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29824: Don't re-distribute already remotely received events
+
+* 2013-11-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29817: Consider "If-Match" header on DELETE and PUT operations
+ - Fix for bug 29770: Use custom (de)serialization for session in distributed events 
+
+* 2013-11-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29790: Check availability of session event property
+
+* 2013-11-13 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29693: Use contact_id to search contact
+
+* 2013-11-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 29759: Respect com.openexchange.calendar.undefinedstatusconflict parameter.
+
 * 2013-11-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 29770: Only distribute Java POJOs

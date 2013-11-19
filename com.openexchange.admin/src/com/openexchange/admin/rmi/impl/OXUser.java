@@ -81,6 +81,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
@@ -90,6 +91,9 @@ import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.eventsystem.Event;
+import com.openexchange.eventsystem.EventSystemService;
+import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -191,6 +195,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log.error(e.getMessage(), e);
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+            }
+        }
+
+        // Signal changed user
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
+                //event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute user event.", e);
             }
         }
     }
@@ -351,6 +369,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
+
+        // Signal changed user
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, usrdata.getId());
+                // event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, usrdata.getName());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute user event.", e);
+            }
+        }
     }
 
     @Override
@@ -408,6 +440,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);
         }
         // END OF JCS
+
+        // Signal changed user
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
+                // event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute user event.", e);
+            }
+        }
     }
 
     @Override
@@ -483,11 +529,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         // END OF JCS
 
-
-
-
-
-
+        // Signal changed user
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute user event.", e);
+            }
+        }
     }
 
     @Override
@@ -770,6 +824,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
+
+        // Signal created user
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            try {
+                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_CREATE);
+                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, usr.getId());
+                event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, usr.getName());
+                eventSystemService.publish(event);
+            } catch (final Exception e) {
+                log.warn("Could not distribute user event.", e);
+            }
+        }
+
+        // Return created user
         return usr;
     }
 
@@ -930,6 +1000,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
         // END OF JCS
+
+        // Signal deleted user(s)
+        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+        if (null != eventSystemService) {
+            for (final User user : users) {
+                try {
+                    final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_DELETE);
+                    event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
+                    event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
+                    event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
+                    eventSystemService.publish(event);
+                } catch (final Exception e) {
+                    log.warn("Could not distribute user event.", e);
+                }
+            }
+        }
 
         if (!exceptionlist.isEmpty()) {
             final StringBuilder sb = new StringBuilder("The following exceptions occured in the plugins: ");
@@ -1477,6 +1563,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e;
         }
 
+        // TODO: How to notify via EventSystemService ?
     }
 
     @Override

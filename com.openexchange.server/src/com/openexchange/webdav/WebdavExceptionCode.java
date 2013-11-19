@@ -60,51 +60,111 @@ public enum WebdavExceptionCode implements OXExceptionCode {
     /**
      * Invalid value in element &quot;%1$s&quot;: %2$s.
      */
-    INVALID_VALUE(WebdavExceptionMessage.INVALID_VALUE_MSG, CATEGORY_ERROR, 1),
+    INVALID_VALUE(WebdavExceptionCode.INVALID_VALUE_MSG, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred.
      */
-    IO_ERROR(WebdavExceptionMessage.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR(WebdavExceptionCode.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * Missing field %1$s.
      */
-    MISSING_FIELD(WebdavExceptionMessage.MISSING_FIELD_MSG, CATEGORY_ERROR, 3),
+    MISSING_FIELD(WebdavExceptionCode.MISSING_FIELD_MSG, CATEGORY_ERROR, 3),
     /**
      * Missing header field %1$s.
      */
-    MISSING_HEADER_FIELD(WebdavExceptionMessage.MISSING_HEADER_FIELD_MSG, CATEGORY_ERROR, 4),
+    MISSING_HEADER_FIELD(WebdavExceptionCode.MISSING_HEADER_FIELD_MSG, CATEGORY_ERROR, 4),
     /**
      * Invalid action %1$s.
      */
-    INVALID_ACTION(WebdavExceptionMessage.INVALID_ACTION_MSG, CATEGORY_ERROR, 5),
+    INVALID_ACTION(WebdavExceptionCode.INVALID_ACTION_MSG, CATEGORY_ERROR, 5),
     /**
      * %1$s is not a number.
      */
-    NOT_A_NUMBER(WebdavExceptionMessage.NOT_A_NUMBER_MSG, CATEGORY_ERROR, 6),
+    NOT_A_NUMBER(WebdavExceptionCode.NOT_A_NUMBER_MSG, CATEGORY_ERROR, 6),
     /**
      * No principal found: %1$s.
      */
-    NO_PRINCIPAL(WebdavExceptionMessage.NO_PRINCIPAL_MSG, CATEGORY_ERROR, 7),
+    NO_PRINCIPAL(WebdavExceptionCode.NO_PRINCIPAL_MSG, CATEGORY_ERROR, 7),
     /**
      * Empty passwords are not allowed.
      */
-    EMPTY_PASSWORD(WebdavExceptionMessage.EMPTY_PASSWORD_MSG, CATEGORY_USER_INPUT, 8),
+    EMPTY_PASSWORD(WebdavExceptionCode.EMPTY_PASSWORD_MSG, CATEGORY_USER_INPUT, 8),
     /**
      * Unsupported authorization mechanism in "Authorization" header: %1$s.
      */
-    UNSUPPORTED_AUTH_MECH(WebdavExceptionMessage.UNSUPPORTED_AUTH_MECH_MSG, CATEGORY_ERROR, 9),
+    UNSUPPORTED_AUTH_MECH(WebdavExceptionCode.UNSUPPORTED_AUTH_MECH_MSG, CATEGORY_ERROR, 9),
     /**
      * Resolving user name "%1$s" failed.
      */
-    RESOLVING_USER_NAME_FAILED(WebdavExceptionMessage.RESOLVING_USER_NAME_FAILED_MSG, CATEGORY_ERROR, 10),
+    RESOLVING_USER_NAME_FAILED(WebdavExceptionCode.RESOLVING_USER_NAME_FAILED_MSG, CATEGORY_ERROR, 10),
     /**
      * Authentication failed for user name: %1$s
      */
-    AUTH_FAILED(WebdavExceptionMessage.AUTH_FAILED_MSG, CATEGORY_ERROR, 11),
+    AUTH_FAILED(WebdavExceptionCode.AUTH_FAILED_MSG, CATEGORY_ERROR, 11),
     /**
      * Unexpected error: %1$s
      */
-    UNEXPECTED_ERROR(WebdavExceptionMessage.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 11);
+    UNEXPECTED_ERROR(WebdavExceptionCode.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 11);
+
+    /**
+     * Invalid value in element &quot;%1$s&quot;: %2$s.
+     */
+    public final static String INVALID_VALUE_MSG = "Invalid value in element \"%1$s\": %2$s.";
+
+    /**
+     * An I/O error occurred.
+     */
+    public final static String IO_ERROR_MSG = "An I/O error occurred.";
+
+    /**
+     * Missing field %1$s.
+     */
+    public final static String MISSING_FIELD_MSG = "Missing field %1$s.";
+
+    /**
+     * Missing header field %1$s.
+     */
+    public final static String MISSING_HEADER_FIELD_MSG = "Missing header field %1$s.";
+
+    /**
+     * Invalid action %1$s.
+     */
+    public final static String INVALID_ACTION_MSG = "Invalid action %1$s.";
+
+    /**
+     * %1$s is not a number.
+     */
+    public final static String NOT_A_NUMBER_MSG = "%1$s is not a number.";
+
+    /**
+     * No principal found: %1$s.
+     */
+    public final static String NO_PRINCIPAL_MSG = "No principal found: %1$s.";
+
+    /**
+     * Empty passwords are not allowed.
+     */
+    public final static String EMPTY_PASSWORD_MSG = "Empty passwords are not allowed.";
+
+    /**
+     * Unsupported authorization mechanism in "Authorization" header: %1$s.
+     */
+    public final static String UNSUPPORTED_AUTH_MECH_MSG = "Unsupported authorization mechanism in \"Authorization\" header: %1$s.";
+
+    /**
+     * Resolving user name "%1$s" failed.
+     */
+    public final static String RESOLVING_USER_NAME_FAILED_MSG = "Resolving user name \"%1$s\" failed.";
+
+    /**
+     * Authentication failed for user name: %1$s
+     */
+    public final static String AUTH_FAILED_MSG = "Authentication failed for user name: %1$s";
+
+    /**
+     * Unexpected error: %1$s
+     */
+    public final static String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
 
     private final String message;
 

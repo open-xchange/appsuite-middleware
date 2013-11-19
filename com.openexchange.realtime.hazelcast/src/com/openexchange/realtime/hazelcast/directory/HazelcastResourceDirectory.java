@@ -61,6 +61,7 @@ import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.core.Transaction;
 import com.openexchange.exception.OXException;
@@ -140,10 +141,12 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             @Override
             public void entryEvicted(EntryEvent<String, Map<String, Serializable>> event) {
                 String id = event.getKey();
+                Object source = event.getSource();
+                Member member = event.getMember();
                 try {
                     if (getIDMapping().remove(new ID(id).toGeneralForm().toString(), id)) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Removed mapping for '" + id + "' due to eviction of according resource.");
+                            LOG.debug("Source " + source + " on Member: " + member + " fired event. " + "Removing mapping for '" + id + "' due to eviction of according resource.");
                         }
                     }
                 } catch (OXException e) {

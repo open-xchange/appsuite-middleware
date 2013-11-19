@@ -83,6 +83,9 @@ public final class OXExceptionStrings implements LocalizableStrings {
     // The general message for a missing field.
     public static final String MESSAGE_MISSING_FIELD = "Missing field: %s";
 
+    // Error while reading/writing data from/to the database.
+    public static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
+
     /**
      * Initializes a new {@link OXExceptionStrings}.
      */

@@ -71,7 +71,7 @@ public class MailPushEventEmitter implements RTEventEmitterService, EventHandler
 
     private static final HashSet<String> EVENTS = new HashSet<String>(Arrays.asList("new"));
     private static final String NAMESPACE = "mail";
-    
+
     private final ConcurrentHashMap<String, MailPushRegistration> registeredIDsPerSession = new ConcurrentHashMap<String, MailPushRegistration>();
 
     public MailPushEventEmitter(ServiceLookup services) {
@@ -94,22 +94,22 @@ public class MailPushEventEmitter implements RTEventEmitterService, EventHandler
         if (mailPushRegistration == null) {
             mailPushRegistration = new MailPushRegistration();
             MailPushRegistration meantime = registeredIDsPerSession.putIfAbsent(listener.getSession().getSessionID(), mailPushRegistration);
-            mailPushRegistration = meantime != null ? meantime : mailPushRegistration;            
+            mailPushRegistration = meantime != null ? meantime : mailPushRegistration;
         }
         mailPushRegistration.addListener(listener);
-        
+
     }
 
     @Override
     public void unregister(String eventName, RTListener listener) {
         MailPushRegistration mailPushRegistration = registeredIDsPerSession.get(listener.getSession().getSessionID());
-        
+
         if (mailPushRegistration == null) {
             return;
         }
-        
+
         mailPushRegistration.removeListener(listener);
-        
+
         if (mailPushRegistration.hasNoMoreListeners()) {
             registeredIDsPerSession.remove(listener.getSession().getSessionID());
         }
@@ -118,16 +118,17 @@ public class MailPushEventEmitter implements RTEventEmitterService, EventHandler
     @Override
     public void handleEvent(Event event) {
         // Dispatch a mail push event to rt event listeners
+        // There is no session available for remotely received events
         Session session = (Session) event.getProperty(PushEventConstants.PROPERTY_SESSION);
-        String folder = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
-        
-        MailPushRegistration mailPushRegistration = registeredIDsPerSession.get(session.getSessionID());
-        if (mailPushRegistration == null) {
-            return;
+        if (null != session) {
+            String folder = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+            MailPushRegistration mailPushRegistration = registeredIDsPerSession.get(session.getSessionID());
+            if (mailPushRegistration == null) {
+                return;
+            }
+            mailPushRegistration.triggerNewMailEvent(folder);
         }
-        
-        mailPushRegistration.triggerNewMailEvent(folder);
     }
-    
+
 
 }

@@ -305,7 +305,9 @@ public class AuditEventHandler implements EventHandler {
         if (oldAppointment != null) {
             log.append("OLD PARTICIPANTS: ").append(Arrays.toString(oldAppointment.getParticipants())).append("; ");
         }
-        log.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
+        if (commonEvent.getSession() != null) {
+            log.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
+        }
     }
 
     /**

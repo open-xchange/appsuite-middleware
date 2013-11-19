@@ -45,15 +45,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-10-31 11:11+0100\n"
-"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
+"PO-Revision-Date: 2013-11-05 09:17+0100\n"
+"Last-Translator: Kalman Kemenczy <kkemenczy@gmail.com>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 1.2\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -1334,12 +1334,12 @@ msgstr "%1$s törölt egy találkozót, vagy Ön már nem résztvevője az esem�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
-msgid "Change the description to %1$s."
-msgstr "Változtassa meg a leírást erre: %1$s."
+msgid "Change the subject to %1$s."
+msgstr "Változtassa meg a tárgyat erre: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:200
-msgid "The appointment has a new description: %1$s."
-msgstr "A találkozónak új leírása van: %1$s."
+msgid "The appointment has a new subject: %1$s."
+msgstr "A találkozónak új tárgya van: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
@@ -1360,12 +1360,12 @@ msgstr "A találkozó egy új helyszínen lesz: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:212
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:214
-msgid "Use the comments below."
-msgstr "Használja az alábbi megjegyzéseket."
+msgid "Use the appointment description below."
+msgstr "Használja az alábbi találkozó-leírásokat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:216
-msgid "The appointment comments have changed."
-msgstr "A találkozó megjegyzései megváltoztak."
+msgid "The appointment description has changed."
+msgstr "A találkozó leírása megváltozott."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:218
 msgid "Please invite %1$s to the appointment."
@@ -2315,6 +2315,14 @@ msgstr ""
 "A(z) „%2$s” ellenőrző-összegű „%1$s” könyvtár ismételt szinkronizálási "
 "problémákat okozott"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
+msgid ""
+"The client application you're using is outdated and no longer supported - "
+"please upgrade to a newer version"
+msgstr ""
+"A használt kliensprogram elavult és nem támogatott - frissítsen a legújabb "
+"verzióra"
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -3053,6 +3061,23 @@ msgstr ""
 "A hitelesítés sikertelen a(z) %1$s bejelentkezéshez a(z) %2$s kiszolgálón "
 "(szolgáltatás: %3$s)."
 
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#. In order to accomplish the search, %1$d or more characters are required.
+#. *
+#. * In order to accomplish the search, %1$d or more characters are required.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
+msgid ""
+"In order to accomplish the search, %1$d or more characters are required."
+msgstr "A keresés végrehajtásához legalább %1$d karakter szükséges."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr "Nem érhető el időbeosztás-szolgáltató"
@@ -3324,8 +3349,7 @@ msgid ""
 "An error occurred inside the server which prevented it from fulfilling the "
 "request."
 msgstr ""
-"Hiba történt a kiszolgálón belül, ami megakadályozta a kérés "
-"teljesítését."
+"Hiba történt a kiszolgálón belül, ami megakadályozta a kérés teljesítését."
 
 #. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
@@ -3333,8 +3357,8 @@ msgid ""
 "A temporary error occurred inside the server which prevented it from "
 "fulfilling the request.. Please try again later."
 msgstr ""
-"Átmeneti hiba történt a kiszolgálóban, ami megakadályozta a "
-"kérés teljesítését. Próbálja újra később."
+"Átmeneti hiba történt a kiszolgálóban, ami megakadályozta a kérés "
+"teljesítését. Próbálja újra később."
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
@@ -3523,8 +3547,8 @@ msgid ""
 "Client login IP changed from %1$s to %2$s and is not covered by IP white-"
 "list or netmask."
 msgstr ""
-"A kliens bejelentkezési IP-címe megváltozott: %1$s -> %2$s, és nem fedi le az "
-"IP-fehérlista vagy hálózati maszk."
+"A kliens bejelentkezési IP-címe megváltozott: %1$s -> %2$s, és nem fedi le "
+"az IP-fehérlista vagy hálózati maszk."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:103
 msgid "Your session was invalidated. Please try again."
@@ -3661,9 +3685,13 @@ msgstr "A grizzly kiszolgáló nem indul el"
 
 #. * The following needed service is missing: \"%1$s\"
 #. The following needed service is missing: "%1$s"
+#. *
+#. * The following needed service is missing: \"%1$s\"
+#.
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -5085,7 +5113,7 @@ msgstr "Elfogadott kéretlen mappa"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:161
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Piszkozatok"
@@ -5107,7 +5135,7 @@ msgstr "Elküldött mappa"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:169
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Levélszemét"
@@ -5121,7 +5149,7 @@ msgstr "Levélszemét mappa"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:157
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Törölt elemek"
@@ -5615,8 +5643,8 @@ msgid ""
 "mailbox is nearly full. In that case, please try to empty your deleted items "
 "first, or delete smaller messages first."
 msgstr ""
-"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges oka, "
-"hogy a postafiók majdnem megtelt. Ebben az esetben először próbálja meg "
+"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges "
+"oka, hogy a postafiók majdnem megtelt. Ebben az esetben először próbálja meg "
 "kiüríteni a törölt elemek mappát vagy letörölni a kisebb üzeneteket."
 
 #. *
@@ -5802,8 +5830,8 @@ msgid ""
 "context=%4$s). Error message from server: %5$s"
 msgstr ""
 "A bejelentkezési késleltetés megakadályozza a kapcsolódást a(z) %1$s "
-"levélkiszolgálóhoz a(z) %2$s bejelentkezéssel (felhasználó=%3$s, kontextus=%4"
-"$s). A levélkiszolgáló hibaüzenete: %5$s"
+"levélkiszolgálóhoz a(z) %2$s bejelentkezéssel (felhasználó=%3$s, kontextus="
+"%4$s). A levélkiszolgáló hibaüzenete: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -5815,8 +5843,9 @@ msgid ""
 "context=%4$s). Try again in %5$s seconds. Error message from server: %6$s"
 msgstr ""
 "A bejelentkezési késleltetés megakadályozza a kapcsolódást a(z) %1$s "
-"levélkiszolgálóhoz a(z) %2$s bejelentkezéssel (felhasználó=%3$s, kontextus=%4"
-"$s). Próbálja újra %6$s másodpercen belül. A levélkiszolgáló hibaüzenete: %6$s"
+"levélkiszolgálóhoz a(z) %2$s bejelentkezéssel (felhasználó=%3$s, kontextus="
+"%4$s). Próbálja újra %6$s másodpercen belül. A levélkiszolgáló hibaüzenete: "
+"%6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -7407,21 +7436,6 @@ msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "Ismétlődő találkozó másik mappába mozgatása nem támogatott."
 
 #. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#. In order to accomplish the search, %1$d or more characters are required.
-#. *
-#. * In order to accomplish the search, %1$d or more characters are required.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:435
-msgid ""
-"In order to accomplish the search, %1$d or more characters are required."
-msgstr "A keresés végrehajtásához legalább %1$d karakter szükséges."
-
-#. *
 #. * Redundant information.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:346
@@ -7946,7 +7960,7 @@ msgstr "Beérkezett üzenetek"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
 msgstr "Elküldött elemek"
 
@@ -7960,7 +7974,7 @@ msgstr "Elküldött elemek"
 #. The internationalized name for the archive mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:173
 msgid "Archive"
 msgstr "Archívum"
 
@@ -8049,11 +8063,24 @@ msgstr ""
 msgid "The links will be deleted on #DATE#"
 msgstr "A hivatkozások törlésre kerülnek: #DATE#"
 
+#. The text put into the description field of a published E-Mail attachment
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+msgid ""
+"This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#"
+msgstr ""
+"Ez fájl a \"#SUBJECT#\" tárgyú levélhez lett közzétéve, dátum: #DATE# "
+"címzett:  #TO#"
+
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 msgid "Dear Sir or Madam"
 msgstr "Tisztelt Hölgyem/Uram"
+
+#. The name for "Unified Mail" root folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:177
+msgid "Unified mail"
+msgstr "Egységes levelezés"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:61
 msgid ""
@@ -9408,9 +9435,9 @@ msgstr "Az ellenőrzés sikertelen: %1$s"
 msgid "File name must not contain slashes."
 msgstr "A fájlnév nem tartalmazhat / jelet."
 
-#. File name contains illegal characters.
+#. File name contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:127
-msgid "File name contains illegal characters."
+msgid "File name contains invalid characters."
 msgstr "A fájlnév nem megfelelő karaktereket tartalmaz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
@@ -11093,8 +11120,8 @@ msgid ""
 "%4$s, context=%5$s). Probably your request took too long."
 msgstr ""
 "A(z) „%1$s” mappa bezárva a(z) %2$s levélkiszolgálón a(z) %3$s "
-"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s). Valószínűleg a kérés túl "
-"sokáig tartott."
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s). Valószínűleg a kérés "
+"túl sokáig tartott."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -12454,8 +12481,7 @@ msgid ""
 "characters. Current length: %3$d characters."
 msgstr ""
 "A(z) %1$s attribútum értéke túl sok karaktert tartalmaz. A jelenlegi %3$d "
-"hossz "
-"nagyobb az engedélyezett %2$d karakternél."
+"hossz nagyobb az engedélyezett %2$d karakternél."
 
 #. *
 #. * Unable to map OCL permission value %1$s to a JSON permission value
@@ -15988,6 +16014,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Change the description to %1$s."
+#~ msgstr "Változtassa meg a leírást erre: %1$s."
 
 #~ msgid "IO error."
 #~ msgstr "IO-hiba."
