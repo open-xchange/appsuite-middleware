@@ -58,7 +58,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +79,6 @@ import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.Header;
-import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
@@ -245,7 +246,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         // Try public session
-        findPublicSessionId(req, session, sessiondService);
+        findPublicSessionId(req, session, sessiondService, false);
     }
 
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
@@ -258,16 +259,17 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param req The HTTP request
      * @param session The looked-up session
      * @param sessiondService The SessionD service
+     * @param mayUseFallbackSession <code>true</code> if request is allowed to use fall-back session, otherwise <code>false</code>
      * @throws OXException If public session cannot be created
      */
-    protected void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService) throws OXException {
+    protected void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies != null) {
             final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
             if (null != cookie) {
                 handlePublicSessionCookie(req, session, sessiondService, cookie);
             } else {
-                if (isSafariMediaPlayer(req.getHeader(USER_AGENT))) {
+                if (mayUseFallbackSession && isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
                     for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
                         if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
                             handlePublicSessionCookie(req, session, sessiondService, entry.getValue());
@@ -786,7 +788,7 @@ public abstract class SessionServlet extends AJAXServlet {
             if (null != cookie) {
                 return cookie.getValue();
             }
-            if (isSafariMediaPlayerAndSafari(req.getHeader(USER_AGENT), originalUserAgent)) {
+            if (isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
                 cookie = cookies.get(SECRET_PREFIX + hash);
                 if (null != cookie) {
                     return cookie.getValue();
@@ -801,14 +803,19 @@ public abstract class SessionServlet extends AJAXServlet {
         return null;
     }
 
-    private static final String SAFARI_MEDIA_PLAYER_PREFIX = "applecoremedia/";
+    private static final Set<String> MEDIA_AGENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("applecoremedia/", "stagefright/")));
 
-    private static boolean isSafariMediaPlayer(final String userAgent) {
-        return null != userAgent && toLowerCase(userAgent).startsWith(SAFARI_MEDIA_PLAYER_PREFIX);
-    }
-
-    private static boolean isSafariMediaPlayerAndSafari(final String currentUserAgent, final String sessionUserAgent) {
-        return null != currentUserAgent && null != sessionUserAgent && toLowerCase(currentUserAgent).startsWith(SAFARI_MEDIA_PLAYER_PREFIX) && new BrowserDetector(sessionUserAgent).isSafari();
+    private static boolean isMediaPlayerAgent(final String userAgent) {
+        if (null == userAgent) {
+            return false;
+        }
+        final String lcua = toLowerCase(userAgent);
+        for (final String agentPrefix : MEDIA_AGENTS) {
+            if (lcua.startsWith(agentPrefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

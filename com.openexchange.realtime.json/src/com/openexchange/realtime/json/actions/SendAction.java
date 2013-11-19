@@ -67,6 +67,7 @@ import com.openexchange.realtime.json.impl.JSONProtocolHandler;
 import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.protocol.RTClientState;
+import com.openexchange.realtime.json.util.RTResultFormatter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -189,7 +190,9 @@ public class SendAction extends RTAction  {
         //additionally check for Stanza that are addressed to the client and add them to the response
         List<JSONObject> stanzas = pollStanzas(clientState);
         resultMap.put(STANZAS, stanzas);
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(RTResultFormatter.format(resultMap));
+        }
         return new AJAXRequestResult(resultMap, "native");
     }
 

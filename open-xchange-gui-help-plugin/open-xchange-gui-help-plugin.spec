@@ -45,7 +45,7 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
-* Fri Nov 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+* Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.4.1 release
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12

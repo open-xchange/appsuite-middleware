@@ -67,6 +67,7 @@ import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.NextSequence;
 import com.openexchange.realtime.json.protocol.TracingDemand;
+import com.openexchange.realtime.json.util.RTResultFormatter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
@@ -119,7 +120,9 @@ public class EnrolAction extends RTAction {
             LOG.error(enrolException.getMessage(), enrolException);
             enrolActionResults.put(ERROR, exceptionToJSON(enrolException, session));
         }
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(RTResultFormatter.format(enrolActionResults));
+        }
         return new AJAXRequestResult(enrolActionResults, "native");
     }
 

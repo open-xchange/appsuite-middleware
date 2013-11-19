@@ -47,65 +47,71 @@
  *
  */
 
-package com.openexchange.realtime.json.actions;
+package com.openexchange.realtime.json.util;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.impl.StateEntry;
-import com.openexchange.realtime.json.impl.StateManager;
-import com.openexchange.realtime.json.util.RTResultFormatter;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.json.actions.RTAction;
+
 
 /**
- * {@link PollAction} - Action to poll the server for new messages directed to the client.
- * Response:
- * <pre>
- * data: { stanzas: [{stanza0}, {stanza1}, {stanza2}] }
- * </pre>
- * 
+ * {@link RTResultFormatter} Format a Realtime JSON Result.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PollAction extends RTAction {
+public class RTResultFormatter {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(PollAction.class);
+    @SuppressWarnings("unchecked")
+    public static String format(Map<String, Object> resultMap) {
+        StringBuilder formatter = new StringBuilder(1024);
 
-    private final StateManager stateManager;
+        formatter.append("Result: {").append("\n");
 
-    public PollAction(StateManager stateManager) {
-        this.stateManager = stateManager;
-    }
+        List<Long> acknowledgements = (List<Long>) resultMap.get(RTAction.ACKS);
+        formatter.append("\tacks:").append("\n");
+        if(acknowledgements == null) {
+            formatter.append("\t\t[]").append("\n");
+        } else {
+            formatter.append("\t\t").append(acknowledgements.toString()).append("\n");
+        }
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        ID id = constructID(requestData, session);
-        if(!stateManager.isConnected(id)) {
-            RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
-            if(LOG.isDebugEnabled()) {
-                LOG.debug(stateMissingException.getMessage(), stateMissingException);
+        JSONObject error = (JSONObject) resultMap.get(RTAction.ERROR);
+        formatter.append("\terror:").append("\n");
+        if(error == null) {
+            formatter.append("\t\t").append("none").append("\n");
+        } else {
+            formatter.append("\t\t").append(shortenOutput(error.toString())).append("\n");
+        }
+
+        JSONObject result = (JSONObject) resultMap.get(RTAction.RESULT);
+        formatter.append("\tresult:").append("\n");
+        if(error == null) {
+            formatter.append("\t\t").append("none").append("\n");
+        } else {
+            formatter.append("\t\t").append(shortenOutput(result.toString())).append("\n");
+        }
+
+        List<JSONObject> stanzas = (List<JSONObject>) resultMap.get(RTAction.STANZAS);
+        formatter.append("\tstanzas:").append("\n");
+        if(stanzas == null || stanzas.isEmpty()) {
+            formatter.append("\t\t{}").append("\n");
+        } else {
+            for (JSONObject stanza : stanzas) {
+                formatter.append("\t\t").append(shortenOutput(stanza.toString())).append("\n");
             }
-            Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
-            return new AJAXRequestResult(errorMap, "native");
         }
 
-        //check for Stanza that are addressed to the client and add them to the response
-        StateEntry stateEntry = stateManager.retrieveState(id);
-        List<JSONObject> stanzas = pollStanzas(stateEntry.state);
-        
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put(STANZAS, stanzas);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(RTResultFormatter.format(resultMap));
-        }
-        return new AJAXRequestResult(resultMap, "native");
+        formatter.append("}").append("\n");
+
+        return formatter.toString();
     }
 
+    public static String shortenOutput(String input) {
+        if(input.length() > 500) {
+            return input.substring(0, 500)+"...";
+        } else {
+            return input;
+        }
+    }
 }
