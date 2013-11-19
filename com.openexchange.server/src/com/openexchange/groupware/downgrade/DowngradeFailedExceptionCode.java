@@ -50,32 +50,41 @@
 package com.openexchange.groupware.downgrade;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error code enumeration for a failed delete event.
  */
-public enum DowngradeFailedExceptionCode implements OXExceptionCode {
+public enum DowngradeFailedExceptionCode implements OXExceptionCode, DisplayableOXExceptionCode {
 
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(DowngradeFailedExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    SQL_ERROR("A SQL error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * An error occurred: %1$s
      */
-    ERROR(DowngradeFailedExceptionMessage.ERROR_MSG, Category.CATEGORY_ERROR, 2);
+    ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 2);
 
-    private final String message;
+    private String message;
+    
+    private String displayMessage;
 
-    private final Category category;
+    private Category category;
 
-    private final int detailNumber;
+    private int detailNumber;
 
-    private DowngradeFailedExceptionCode(final String message, final Category category, final int detailNumber) {
+    private DowngradeFailedExceptionCode(String message, Category category, int detailNumber) {
+        this(message, null, category, detailNumber);
+    }
+    
+    private DowngradeFailedExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.detailNumber = detailNumber;
     }
@@ -86,22 +95,27 @@ public enum DowngradeFailedExceptionCode implements OXExceptionCode {
     }
 
     @Override
-    public final Category getCategory() {
+    public Category getCategory() {
         return category;
     }
 
     @Override
-    public final int getNumber() {
+    public int getNumber() {
         return detailNumber;
     }
 
     @Override
-    public final String getMessage() {
+    public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -120,7 +134,7 @@ public enum DowngradeFailedExceptionCode implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -131,7 +145,7 @@ public enum DowngradeFailedExceptionCode implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }
