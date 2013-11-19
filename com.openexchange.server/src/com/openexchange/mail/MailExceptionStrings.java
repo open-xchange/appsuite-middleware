@@ -73,8 +73,6 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String NO_MAIL_ACCESS_MSG = "No mail module access permitted.";
 
-    public final static String MESSAGING_ERROR_MSG = "Messaging error.";
-
     public final static String VERSIT_ERROR_MSG = "Error while converting contact to versit object.";
 
     public final static String NO_ATTACHMENT_FOUND_MSG = "No attachment was found with id \"%1$s\" in message.";
@@ -97,21 +95,21 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String COPY_TO_SENT_FOLDER_FAILED_MSG = "Message has been successfully sent. A copy could not be placed in your sent folder though.";
 
-    public final static String BAD_PARAM_VALUE_MSG = "Bad value \"%1$s\" in parameter \"%2$s\"";
+    public final static String BAD_PARAM_VALUE_MSG = "Bad value \"%1$s\" in parameter \"%2$s\".";
 
     public final static String NO_MULTIPLE_REPLY_MSG = "No reply on multiple message possible.";
 
-    public final static String ATTACHMENT_NOT_FOUND_MSG = "Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"";
+    public final static String ATTACHMENT_NOT_FOUND_MSG = "Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\".";
 
     public final static String FOLDER_DOES_NOT_HOLD_MESSAGES_MSG = "Folder \"%1$s\" does not hold messages and is therefore not selectable";
 
     public final static String NO_ROOT_FOLDER_MODIFY_DELETE_MSG = "Root folder must not be modified or deleted.";
 
-    public final static String IMAGE_ATTACHMENT_NOT_FOUND_MSG = "Image attachment with content id \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"";
+    public final static String IMAGE_ATTACHMENT_NOT_FOUND_MSG = "Image attachment with content id \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\".";
 
     public final static String INVALID_SENDER_MSG = "The specified E-Mail address \"%1$s\" is not covered by allowed E-Mail address aliases.";
 
-    public final static String DEFAULT_FOLDER_CHECK_FAILED_MSG = "Checking default folders for user %2$s.";
+    public final static String DEFAULT_FOLDER_CHECK_FAILED_MSG = "Checking default folders failed for user %2$s.";
 
     public final static String UNSUPPORTED_DATASOURCE_MSG = "The types of specified data source are not supported.";
 
@@ -135,13 +133,13 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String FOLDER_DELETION_DENIED_MSG = "Mail folder must not be deleted.";
 
-    public final static String NO_DELETE_ACCESS_MSG = "No delete access on mail folder.";
+    public final static String NO_DELETE_ACCESS_MSG = "No delete access on mail folder \"%1$s\".";
 
     public final static String FOLDER_MOVE_DENIED_MSG = "Mail folder must not be moved.";
 
     public final static String FOLDER_UPDATE_DENIED_MSG = "Mail folder must not be updated.";
 
-    public final static String NO_WRITE_ACCESS_MSG = "No write access on mail folder:.";
+    public final static String NO_WRITE_ACCESS_MSG = "No write access on mail folder \"%1$s\".";
 
     public final static String NOT_CONNECTED_MSG = "No connection available to access mailbox";
 
@@ -162,8 +160,6 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public final static String NON_SECURE_CREATION_MSG = "Your account has been created but will not use a secure connection.";
 
     public final static String FLAG_FAIL_MSG = "Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as \"replied\" and/or \"forwarded\".";
-
-    public final static String INVALID_FOLDER_NAME2_MSG = "Invalid folder name.";
 
     public final static String INVALID_FOLDER_NAME_TOO_LONG_MSG = "Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.";
 
