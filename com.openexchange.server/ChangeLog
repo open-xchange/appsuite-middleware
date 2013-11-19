@@ -1,3 +1,7 @@
+* 2013-11-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29855: Order EDIT-actions based on new directory version 
+ 
 * 2013-11-18 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29866: Don't carry over empty last-modification timestamp if appointment was not updated 
