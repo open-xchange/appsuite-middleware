@@ -76,6 +76,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -248,6 +249,8 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
+    private static final String PUBLIC_SESSION_PREFIX = LoginServlet.PUBLIC_SESSION_PREFIX;
+    private static final String USER_AGENT = Header.USER_AGENT;
 
     /**
      * Looks-up <code>"open-xchange-public-session"</code> cookie and remembers appropriate session if possible to validate it.
@@ -262,22 +265,35 @@ public abstract class SessionServlet extends AJAXServlet {
         if (cookies != null) {
             final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
             if (null != cookie) {
-                final String altId = cookie.getValue();
-                if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
-                    // same session (thus already verified)
-                    rememberPublicSession(req, session);
-                } else {
-                    // Lookup session by alternative id
-                    final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
-                    if (publicSession != null) {
-                        try {
-                            checkSecret(hashSource, req, publicSession, false);
-                            verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
-                            rememberPublicSession(req, publicSession);
-                        } catch (final OXException e) {
-                            // Verification of public session failed
+                handlePublicSessionCookie(req, session, sessiondService, cookie);
+            } else {
+                if (isSafariMediaPlayer(req.getHeader(USER_AGENT))) {
+                    for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                        if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
+                            handlePublicSessionCookie(req, session, sessiondService, entry.getValue());
+                            return;
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private void handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final Cookie cookie) throws OXException {
+        final String altId = cookie.getValue();
+        if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
+            // same session (thus already verified)
+            rememberPublicSession(req, session);
+        } else {
+            // Lookup session by alternative id
+            final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
+            if (publicSession != null) {
+                try {
+                    checkSecret(hashSource, req, publicSession, false);
+                    verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
+                    rememberPublicSession(req, publicSession);
+                } catch (final OXException e) {
+                    // Verification of public session failed
                 }
             }
         }
@@ -770,7 +786,7 @@ public abstract class SessionServlet extends AJAXServlet {
             if (null != cookie) {
                 return cookie.getValue();
             }
-            if (isSafariMediaPlayer(req.getHeader("User-Agent"), originalUserAgent)) {
+            if (isSafariMediaPlayerAndSafari(req.getHeader(USER_AGENT), originalUserAgent)) {
                 cookie = cookies.get(SECRET_PREFIX + hash);
                 if (null != cookie) {
                     return cookie.getValue();
@@ -785,8 +801,14 @@ public abstract class SessionServlet extends AJAXServlet {
         return null;
     }
 
-    private static boolean isSafariMediaPlayer(final String currentUserAgent, final String sessionUserAgent) {
-        return null != currentUserAgent && null != sessionUserAgent && toLowerCase(currentUserAgent).startsWith("applecoremedia/") && new BrowserDetector(sessionUserAgent).isSafari();
+    private static final String SAFARI_MEDIA_PLAYER_PREFIX = "applecoremedia/";
+
+    private static boolean isSafariMediaPlayer(final String userAgent) {
+        return null != userAgent && toLowerCase(userAgent).startsWith(SAFARI_MEDIA_PLAYER_PREFIX);
+    }
+
+    private static boolean isSafariMediaPlayerAndSafari(final String currentUserAgent, final String sessionUserAgent) {
+        return null != currentUserAgent && null != sessionUserAgent && toLowerCase(currentUserAgent).startsWith(SAFARI_MEDIA_PLAYER_PREFIX) && new BrowserDetector(sessionUserAgent).isSafari();
     }
 
     /**
