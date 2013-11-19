@@ -258,41 +258,52 @@ public final class MimeStructureFixer {
             final String prefixHtm = "text/htm";
             final String prefixText = "text/plain";
             int inlineCount = 0;
+            int inlineImageCount = 0;
             boolean isHtml = true;
             /*-
              * Check for multiple inline HTML parts
              *
              * (HTML)+
-             * Image
+             * (Image)+
              * (HTML)*
              */
             {
                 for (int i = 0; i < count; i++) {
                     final BodyPart bodyPart = multipart.getBodyPart(i);
                     final ContentType contentType = getContentType(bodyPart);
-                    if ((contentType.startsWith(prefixHtm) || contentType.startsWith(prefixImage)) && isInline(bodyPart, contentType)) {
-                        inlineCount++;
+                    if (isInline(bodyPart, contentType)) {
+                        if (contentType.startsWith(prefixHtm)) {
+                            inlineCount++;
+                        } else if (contentType.startsWith(prefixImage)) {
+                            inlineImageCount++;
+                        }
                     }
                 }
             }
-            if (inlineCount <= 1) {
+            if (inlineImageCount > 0 && inlineCount <= 1) {
                 /*-
                  * Check for multiple inline TEXT parts
                  *
                  * (TEXT)+
-                 * Image
+                 * (Image)+
                  * (TEXT)*
                  */
+                inlineCount = 0;
+                inlineImageCount = 0;
                 isHtml = false;
                 for (int i = 0; i < count; i++) {
                     final BodyPart bodyPart = multipart.getBodyPart(i);
                     final ContentType contentType = getContentType(bodyPart);
-                    if ((contentType.startsWith(prefixText) || contentType.startsWith(prefixImage)) && isInline(bodyPart, contentType)) {
-                        inlineCount++;
+                    if (isInline(bodyPart, contentType)) {
+                        if (contentType.startsWith(prefixText)) {
+                            inlineCount++;
+                        } else if (contentType.startsWith(prefixImage)) {
+                            inlineImageCount++;
+                        }
                     }
                 }
             }
-            if (inlineCount > 1) {
+            if (inlineImageCount > 0 && inlineCount > 1) {
                 String textContent = null;
                 String firstCharset = null;
                 final List<BodyPart> bodyParts = new ArrayList<BodyPart>(count);
