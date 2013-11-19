@@ -64,43 +64,67 @@ import com.openexchange.groupware.EnumComponent;
 public enum AttachmentExceptionCodes implements DisplayableOXExceptionCode {
 
     /** Attachment cannot be saved. File store limit is exceeded. */
-    OVER_LIMIT("Attachment cannot be saved. File store limit is exceeded.", CATEGORY_CAPACITY, 1),
+    OVER_LIMIT("Attachment cannot be saved. File store limit is exceeded.", AttachmentExceptionMessages.OVER_LIMIT_MSG,
+        CATEGORY_CAPACITY, 1),
+    
     /** Invalid SQL Query: %s */
-    SQL_PROBLEM("Invalid SQL Query: %s", CATEGORY_ERROR, 100),
+    SQL_PROBLEM("Invalid SQL Query: %s", OXExceptionStrings.SQL_ERROR_MSG, CATEGORY_ERROR, 100),
+    
     /** Could not save file to the file store. */
-    SAVE_FAILED("Could not save file to the file store.", CATEGORY_SERVICE_DOWN, 400),
+    SAVE_FAILED("Could not save file to the file store.", AttachmentExceptionMessages.SAVE_FAILED_MSG, CATEGORY_SERVICE_DOWN, 400),
+    
     /** Attachments must contain a file. */
-    FILE_MISSING("Attachments must contain a file.", CATEGORY_USER_INPUT, 401),
+    FILE_MISSING("Attachments must contain a file.", AttachmentExceptionMessages.FILE_MISSING_MSG, CATEGORY_USER_INPUT, 401),
+    
     /** Cannot generate ID for new attachment: %s */
-    GENERATIING_ID_FAILED("Cannot generate ID for new attachment: %s", CATEGORY_ERROR, 402),
+    GENERATIING_ID_FAILED("Cannot generate ID for new attachment: %s", null, CATEGORY_ERROR, 402),
+    
     /** Could not retrieve file: %s */
-    READ_FAILED("Could not retrieve file: %s", CATEGORY_SERVICE_DOWN, 404),
+    READ_FAILED("Could not retrieve file: %s", AttachmentExceptionMessages.READ_FAILED_MSG, CATEGORY_SERVICE_DOWN, 404),
+    
     /** The attachment you requested no longer exists. Please refresh the view. */
-    ATTACHMENT_NOT_FOUND("The attachment you requested no longer exists. Please refresh the view.", CATEGORY_USER_INPUT, 405),
+    ATTACHMENT_NOT_FOUND("The attachment you requested no longer exists. Please refresh the view.",
+        AttachmentExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 405),
+        
     /** Could not delete attachment. */
-    DELETE_FAILED("Could not delete attachment.", CATEGORY_ERROR, 407),
+    DELETE_FAILED("Could not delete attachment.", AttachmentExceptionMessages.DELETE_FAILED_MSG, CATEGORY_ERROR, 407),
+    
     /** Could not find an attachment with the file_id %s. Either the file is orphaned or belongs to another module. */
-    ATTACHMENT_WITH_FILEID_NOT_FOUND("Could not find an attachment with the file id %s. Either the file is orphaned or belongs to another module.", CATEGORY_ERROR, 408),
+    ATTACHMENT_WITH_FILEID_NOT_FOUND("Could not find an attachment with the file id %s. Either the file is orphaned or"
+        + " belongs to another module.", null, CATEGORY_ERROR, 408),
+        
     /** Could not delete files from filestore. Context: %d. */
-    FILE_DELETE_FAILED("Could not delete files from file store. Context: %d.", CATEGORY_SERVICE_DOWN, 416),
+    FILE_DELETE_FAILED("Could not delete files from file store. Context: %d.", AttachmentExceptionMessages.DELETE_FAILED_MSG,
+        CATEGORY_SERVICE_DOWN, 416),
+        
     /** Validation failed: %s */
-    INVALID_CHARACTERS("Validation failed: %s", CATEGORY_USER_INPUT, 418),
+    INVALID_CHARACTERS("Validation failed: %s", AttachmentExceptionMessages.INVALID_CHARACTERS_MSG, CATEGORY_USER_INPUT, 418),
+    
     /** An error occurred executing the search in the database. */
-    SEARCH_PROBLEM("An error occurred executing the search in the database.", CATEGORY_ERROR, 420),
+    SEARCH_PROBLEM("An error occurred executing the search in the database.", null, CATEGORY_ERROR, 420),
+    
     /** Unable to access the filestore. */
-    FILESTORE_DOWN("Unable to access the file store.", CATEGORY_SERVICE_DOWN, 421),
+    FILESTORE_DOWN("Unable to access the file store.", AttachmentExceptionMessages.FILESTORE_DOWN_MSG, CATEGORY_SERVICE_DOWN, 421),
+    
     /** Writing to filestore failed. */
-    FILESTORE_WRITE_FAILED("Writing to file store failed.", CATEGORY_SERVICE_DOWN, 422),
+    FILESTORE_WRITE_FAILED("Writing to file store failed.", AttachmentExceptionMessages.SAVE_FAILED_MSG, CATEGORY_SERVICE_DOWN, 422),
+    
     /** Changes done to the object this attachment was added to could not be undone. Your database is probably inconsistent, run the consistency tool. */
-    UNDONE_FAILED("Changes done to the object this attachment was added to could not be undone. Your database is probably inconsistent, run the consistency tool.", CATEGORY_ERROR, 600),
+    UNDONE_FAILED("Changes done to the object this attachment was added to could not be undone. Your database is probably"
+        + " inconsistent, run the consistency tool.", null, CATEGORY_ERROR, 600),
+        
     /** An error occurred attaching to the given object. */
-    ATTACH_FAILED("An error occurred attaching to the given object.", CATEGORY_ERROR, 601),
+    ATTACH_FAILED("An error occurred attaching to the given object.", null, CATEGORY_ERROR, 601),
+    
     /** The Object could not be detached because the update to an underlying object failed. */
-    DETACH_FAILED("The object could not be detached because the update to an underlying object failed.", CATEGORY_ERROR, 602),
+    DETACH_FAILED("The object could not be detached because the update to an underlying object failed.", null, CATEGORY_ERROR, 602),
+    
     /** Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number. */
-    INVALID_REQUEST_PARAMETER("Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number.", CATEGORY_USER_INPUT, 701),
+    INVALID_REQUEST_PARAMETER("Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number.",
+        AttachmentExceptionMessages.INVALID_REQUEST_PARAMETER_MSG, CATEGORY_USER_INPUT, 701),
+        
     /** Conflicting services registered for context %1$i and folder %2$i */
-    SERVICE_CONFLICT("Conflicting services registered for context %1$i and folder %2$i", CATEGORY_CONFIGURATION, 900);
+    SERVICE_CONFLICT("Conflicting services registered for context %1$i and folder %2$i", null, CATEGORY_CONFIGURATION, 900);
 
     private String message;
     private String displayMessage;

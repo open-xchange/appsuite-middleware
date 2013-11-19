@@ -64,23 +64,15 @@ public final class AttachmentExceptionMessages implements LocalizableStrings {
 
     public static final String FILE_MISSING_MSG = "Attachments must contain a file.";
 
-    public static final String READ_FAILED_MSG = "Could not retrieve file: %s";
+    public static final String READ_FAILED_MSG = "Could not retrieve file.";
 
     public static final String ATTACHMENT_NOT_FOUND_MSG = "The attachment you requested no longer exists. Please refresh the view.";
 
     public static final String DELETE_FAILED_MSG = "Could not delete attachment.";
 
-    public static final String FILE_DELETE_FAILED_MSG = "Could not delete files from file store. Context: %d.";
-
-    public static final String INVALID_CHARACTERS_MSG = "Validation failed: %s";
+    public static final String INVALID_CHARACTERS_MSG = "Attachment metadata contains invalid characters.";
 
     public static final String FILESTORE_DOWN_MSG = "Unable to access the file store.";
-
-    public static final String FILESTORE_WRITE_FAILED_MSG = "Writing to file store failed.";
-
-    public static final String ATTACH_FAILED_MSG = "An error occurred attaching to the given object.";
-
-    public static final String DETACH_FAILED_MSG = "The object could not be detached because the update to an underlying object failed.";
 
     public static final String INVALID_REQUEST_PARAMETER_MSG = "Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number.";
 
