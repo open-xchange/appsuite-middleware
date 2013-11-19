@@ -64,7 +64,6 @@ Obsoletes:      open-xchange-lang-community-da-dk <= %{version}
 
 %description da-dk
 Package containing Open-Xchange backend localization for da_DK
-This localization package are driven by the community.
 
 Authors:
 --------
