@@ -78,7 +78,7 @@ public class Publication {
     private String displayName;
 
     private Boolean enabled = null;
-    
+
     private long created = 0;
 
 
@@ -89,8 +89,8 @@ public class Publication {
     public void setId(final int id) {
         this.id = id;
     }
-    
-    
+
+
     public void setCreated(long created) {
         this.created = created;
     }
@@ -184,19 +184,33 @@ public class Publication {
     }
 
     public void create() throws OXException {
-        getTarget().getPublicationService().create(this);
+        final PublicationTarget target = getTarget();
+        if (null != target) {
+            final PublicationService service = target.getPublicationService();
+            if (null != service) {
+                service.create(this);
+            }
+        }
     }
 
     public void update() throws OXException {
-        getTarget().getPublicationService().update(this);
+        final PublicationTarget target = getTarget();
+        if (null != target) {
+            final PublicationService service = target.getPublicationService();
+            if (null != service) {
+                service.update(this);
+            }
+        }
     }
 
     public void destroy() throws OXException {
-        getTarget().getPublicationService().delete(this);
+        final PublicationTarget target = getTarget();
+        if (null != target) {
+            final PublicationService service = target.getPublicationService();
+            if (null != service) {
+                service.delete(this);
+            }
+        }
     }
-
-
-
-
 
 }

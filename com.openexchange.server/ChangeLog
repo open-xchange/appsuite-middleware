@@ -5,6 +5,7 @@
 * 2013-11-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 29438: Deal with changing User-Agent identifier when Apple Media Player jumps in
+ - Fix for bug 29887: Check service availability prior to using it
 
 * 2013-11-18 - tobias.friedrich@open-xchange.com
 
