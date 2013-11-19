@@ -49,9 +49,11 @@
 
 package com.openexchange.tools.file.external;
 
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
@@ -59,41 +61,46 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum FileStorageCodes implements OXExceptionCode {
+public enum FileStorageCodes implements DisplayableOXExceptionCode {
     /** An IO error occurred: %s */
-    IOERROR(FileStorageExceptionMessage.IOERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 3),
+    IOERROR("An IO error occurred: %s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 3),
     /** May be used to turn the IOException of getInstance into a proper OXException */
-    INSTANTIATIONERROR(FileStorageExceptionMessage.INSTANTIATIONERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 4),
+    INSTANTIATIONERROR("File store could not be accessed: %s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 4),
     /** Cannot create directory "%1$s" in file storage. */
-    CREATE_DIR_FAILED(FileStorageExceptionMessage.CREATE_DIR_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 6),
+    CREATE_DIR_FAILED("Cannot create directory \"%1$s\" in file storage.", MESSAGE, Category.CATEGORY_CONFIGURATION, 6),
     /** Unsupported encoding. */
-    ENCODING(FileStorageExceptionMessage.ENCODING_MSG, Category.CATEGORY_ERROR, 9),
+    ENCODING("Unsupported encoding.", MESSAGE, Category.CATEGORY_ERROR, 9),
     /** Number parsing problem. */
-    NO_NUMBER(FileStorageExceptionMessage.NO_NUMBER_MSG, Category.CATEGORY_ERROR, 10),
+    NO_NUMBER("Number parsing problem.", MESSAGE, Category.CATEGORY_ERROR, 10),
     /** File storage is full. */
-    STORE_FULL(FileStorageExceptionMessage.STORE_FULL_MSG, Category.CATEGORY_CAPACITY, 11),
+    STORE_FULL("File storage is full.", MESSAGE, Category.CATEGORY_CAPACITY, 11),
     /** Depth mismatch while computing next entry. */
-    DEPTH_MISMATCH(FileStorageExceptionMessage.DEPTH_MISMATCH_MSG, Category.CATEGORY_ERROR, 12),
+    DEPTH_MISMATCH("'Depth' mismatch while computing next entry.", MESSAGE, Category.CATEGORY_ERROR, 12),
     /** Cannot remove lock file. */
-    UNLOCK(FileStorageExceptionMessage.UNLOCK_MSG, Category.CATEGORY_SERVICE_DOWN, 13),
+    UNLOCK("Cannot remove lock file.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 13),
     /** Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time. */
-    LOCK(FileStorageExceptionMessage.LOCK_MSG, Category.CATEGORY_SERVICE_DOWN, 14),
+    LOCK("Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 14),
     /** Eliminating the file storage failed. */
-    NOT_ELIMINATED(FileStorageExceptionMessage.NOT_ELIMINATED_MSG, Category.CATEGORY_SERVICE_DOWN, 16),
+    NOT_ELIMINATED("Eliminating the file storage failed.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 16),
     /** File does not exist in file storage "%1$s". Consider running consistency tool. */
-    FILE_NOT_FOUND(FileStorageExceptionMessage.FILE_NOT_FOUND_MSG, Category.CATEGORY_SERVICE_DOWN, 17),
+    FILE_NOT_FOUND("File does not exist in file store \"%1$s\". Consider running the consistency tool.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 17),
     /** The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid. */
-    INVALID_RANGE(FileStorageExceptionMessage.INVALID_RANGE_MSG, Category.CATEGORY_USER_INPUT, 18),
+    INVALID_RANGE("The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 18),
     /** The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid. */
-    INVALID_OFFSET(FileStorageExceptionMessage.INVALID_OFFSET_MSG, Category.CATEGORY_USER_INPUT, 19),
+    INVALID_OFFSET("The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 19),
     /** The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid. */
-    INVALID_LENGTH(FileStorageExceptionMessage.INVALID_LENGTH_MSG, Category.CATEGORY_USER_INPUT, 20),
+    INVALID_LENGTH("The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 20),
     ;
 
     /**
-     * Message of the exception.
+     * (Log) Message of the exception.
      */
     private final String message;
+
+    /**
+     * Display message of the exception.
+     */
+    private final String displayMessage;
 
     /**
      * Category of the exception.
@@ -109,11 +116,13 @@ public enum FileStorageCodes implements OXExceptionCode {
      * Default constructor.
      *
      * @param message message.
+     * @param displayMessage The display message
      * @param category category.
      * @param detailNumber detail number.
      */
-    private FileStorageCodes(final String message, final Category category, final int detailNumber) {
+    private FileStorageCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = detailNumber;
     }
@@ -136,6 +145,11 @@ public enum FileStorageCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -172,4 +186,5 @@ public enum FileStorageCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }
