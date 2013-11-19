@@ -49,37 +49,45 @@
 
 package com.openexchange.groupware.filestore;
 
-import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.FILESTORE_MIXUP_MSG;
-import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.NO_SUCH_FILESTORE_MSG;
-import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.filestore.FilestoreExceptionMessages.URI_CREATION_FAILED_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link FilestoreExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum FilestoreExceptionCodes implements OXExceptionCode {
-    /** "Wrong filestore %1$d for context %2$d needing filestore %3$d. */
-    FILESTORE_MIXUP(FILESTORE_MIXUP_MSG, Category.CATEGORY_ERROR, 201),
-    /** Cannot find filestore with id %1$d. */
-    NO_SUCH_FILESTORE(NO_SUCH_FILESTORE_MSG, Category.CATEGORY_CONFIGURATION, 303),
-    /** Cannot create URI from "%1$s". */
-    URI_CREATION_FAILED(URI_CREATION_FAILED_MSG, Category.CATEGORY_ERROR, 304),
-    /** SQL Problem: "%s". */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 306),
+public enum FilestoreExceptionCodes implements DisplayableOXExceptionCode {
+
+    /**
+     * "Wrong filestore %1$d for context %2$d needing filestore %3$d.
+     */
+    FILESTORE_MIXUP("Wrong file store %1$d for context %2$d. Correct file store: %3$d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 201),
+    /**
+     * Cannot find filestore with id %1$d.
+     */
+    NO_SUCH_FILESTORE("Cannot find file store with id %1$d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_CONFIGURATION, 303),
+    /**
+     * Cannot create URI from "%1$s".
+     */
+    URI_CREATION_FAILED("Cannot create URI from \"%1$s\".", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 304),
+    /**
+     * SQL Problem: "%s".
+     */
+    SQL_PROBLEM("SQL problem: \"%s\".", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 306),
     ;
 
     private final String message;
+    private final String displayMessage;
     private final Category category;
     private final int number;
 
-    private FilestoreExceptionCodes(final String message, final Category category, final int number) {
+    private FilestoreExceptionCodes(final String message, String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = number;
     }
@@ -97,6 +105,11 @@ public enum FilestoreExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -138,4 +151,5 @@ public enum FilestoreExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }
