@@ -132,7 +132,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:124
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/passwordchange/PasswordChangeExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
@@ -1388,7 +1387,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:324
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:78
@@ -2708,7 +2706,7 @@ msgstr ""
 #. The authentication mechanism is completely replaceable. Some hoster need to ban users. This message is used therefore.
 #. %s is replaced with some login name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:64
-msgid "Account \"%s\" is locked."
+msgid "The account \"%s\" is locked."
 msgstr ""
 
 #. Provisioning of some account may take some time although the login is already possible. If creating the account has not finished on
@@ -2720,102 +2718,51 @@ msgid ""
 "try again later."
 msgstr ""
 
-#. If the problem could not be specified in some more detailed way this message can be used.
-#. %s is replaced by some own message that will not be translated.
-#. Unknown problem: "%s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
-msgid "Unknown problem: \"%s\"."
-msgstr ""
-
 #. This message can be used if the authentication systems are not reachable. The customer should try some time later again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:72
 msgid "Login not possible at the moment. Please try again later."
 msgstr ""
 
 #. The supplied credentials for the authentication are invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:79
-msgid "Invalid credentials."
-msgstr ""
-
-#. This message can be used if the configuration of the authentication mechanism is not complete and some configuration option is
-#. missing.
-#. %1$s is replaced with the name of the missing configuration option.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:84
-msgid "Missing property %1$s."
-msgstr ""
-
-#. If the authentication mechanism uses a database this message can be used if the database can not be read for authenticating the user.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:87
-msgid "Database down."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:75
+msgid "The user name or password is incorrect."
 msgstr ""
 
 #. This message is used if the password of the user expired and must be changed.
 #. %1$s is replaced by an URL for changing the password or by the name of the system that is able to do that.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:79
 msgid ""
 "Your password has expired. In order to change it, please log in to %1$s."
 msgstr ""
 
-#. Indicates an unresolvable user
-#. %1$s is replaced with the login name of the user.
-#. %2$s is replaced with the unique context identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:96
-msgid "User %1$s could not be found in context %2$s."
-msgstr ""
-
-#. Indicates a deactivated user
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:99
-msgid "User is not activated."
-msgstr ""
-
 #. Indicates whether indicated client is allowed to perform a login
 #. E.g. 'Client "OLOX20" is not activated.'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:103
-msgid "Client \"%1$s\" is not activated."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:83
+msgid ""
+"You do not have the appropriate permissions to login with client \"%1$s\"."
 msgstr ""
 
 #. This message is thrown when the login request with a HTTP authorization header contains a authorization method that is not supported.
 #. %1$s is replaved with the not supported HTTP authorization header method.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:87
 msgid "Method \"%1$s\" in HTTP header authorization is not supported."
 msgstr ""
 
 #. Missing client capabilities.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:90
 msgid "Missing client capabilities."
 msgstr ""
 
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:114
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
 msgid "%1$s"
-msgstr ""
-
-#. Used to indicate that session for autologin can not be found.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:117
-msgid "No session found."
 msgstr ""
 
 #. Thrown when an AuthenticationService implementation does not support the auto login method.
 #. %s is replaced with the implementations name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:121
-msgid "%s does not support an auto login authentication."
-msgstr ""
-
-#. This exception is an internal exception. It must not appear outside otherwise its token login is broken. This is covered by automatic
-#. tests. Therefore this message does not need to be translated.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:125
-msgid "Server side token for token login was not created."
-msgstr ""
-
-#. If some integration passes the User-Agent of the HTTP client as value for the client parameter of some login request, this is denied
-#. with this exception message. Instead the client parameter should identify the client using the backend. This can be something like
-#. com.openexchange.mobileapp identifying the Mobile Web Interface.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:130
-msgid ""
-"Value of User-Agent header must not be used as value for the client "
-"parameter. Please use a string identifying the client software."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:98
+msgid "Automatic login is not supported."
 msgstr ""
 
 #. *
@@ -2844,6 +2791,11 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:86
 msgid "Cache %s could not be initialized due to following error: %s"
+msgstr ""
+
+#. Unknown problem: "%s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
+msgid "Unknown problem: \"%s\"."
 msgstr ""
 
 #. Too few (%d) login attributes.
@@ -6125,11 +6077,6 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "The account \"%1$s\" was not found."
-msgstr ""
-
-#. Unknown delete event type: %1$d
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:70
-msgid "Unknown delete event type: %1$d"
 msgstr ""
 
 #. Name of the parent folder for the private user folders.

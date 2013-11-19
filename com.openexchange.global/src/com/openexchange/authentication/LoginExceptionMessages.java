@@ -61,46 +61,26 @@ public final class LoginExceptionMessages implements LocalizableStrings {
 
     // The authentication mechanism is completely replaceable. Some hoster need to ban users. This message is used therefore.
     // %s is replaced with some login name.
-    public static final String ACCOUNT_LOCKED_MSG = "Account \"%s\" is locked.";
+    public static final String ACCOUNT_LOCKED_MSG = "The account \"%s\" is locked.";
 
     // Provisioning of some account may take some time although the login is already possible. If creating the account has not finished on
     // OX side the login mechanism can use this message to prevent the login.
     // %s is replaced with some login name.
     public static final String ACCOUNT_NOT_READY_YET_MSG = "Account \"%1$s\" is currently being created. This can take a while. Please try again later.";
 
-    // If the problem could not be specified in some more detailed way this message can be used.
-    // %s is replaced by some own message that will not be translated.
-    public static final String UNKNOWN_MSG = "Unknown problem: \"%s\".";
-
     // This message can be used if the authentication systems are not reachable. The customer should try some time later again.
     public static final String COMMUNICATION_MSG = "Login not possible at the moment. Please try again later.";
 
     // The supplied credentials for the authentication are invalid.
-    public static final String INVALID_CREDENTIALS_MSG = "Invalid credentials.";
-
-    // This message can be used if the configuration of the authentication mechanism is not complete and some configuration option is
-    // missing.
-    // %1$s is replaced with the name of the missing configuration option.
-    public static final String MISSING_PROPERTY_MSG = "Missing property %1$s.";
-
-    // If the authentication mechanism uses a database this message can be used if the database can not be read for authenticating the user.
-    public static final String DATABASE_DOWN_MSG = "Database down.";
+    public static final String INVALID_CREDENTIALS_MSG = "The user name or password is incorrect.";
 
     // This message is used if the password of the user expired and must be changed.
     // %1$s is replaced by an URL for changing the password or by the name of the system that is able to do that.
     public static final String PASSWORD_EXPIRED_MSG = "Your password has expired. In order to change it, please log in to %1$s.";
 
-    // Indicates an unresolvable user
-    // %1$s is replaced with the login name of the user.
-    // %2$s is replaced with the unique context identifier.
-    public static final String USER_NOT_FOUND_MSG = "User %1$s could not be found in context %2$s.";
-
-    // Indicates a deactivated user
-    public static final String USER_NOT_ACTIVE_MSG = "User is not activated.";
-
     // Indicates whether indicated client is allowed to perform a login
     // E.g. 'Client "OLOX20" is not activated.'
-    public static final String CLIENT_DENIED_MSG = "Client \"%1$s\" is not activated.";
+    public static final String CLIENT_DENIED_MSG = "You do not have the appropriate permissions to login with client \"%1$s\".";
 
     // This message is thrown when the login request with a HTTP authorization header contains a authorization method that is not supported.
     // %1$s is replaved with the not supported HTTP authorization header method.
@@ -113,21 +93,9 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // all translations or remove it from the PO file.
     public static final String REDIRECT_MSG = "%1$s";
 
-    // Used to indicate that session for autologin can not be found.
-    public static final String NO_SESSION_FOUND_MSG = "No session found.";
-
     // Thrown when an AuthenticationService implementation does not support the auto login method.
     // %s is replaced with the implementations name.
-    public static final String NOT_SUPPORTED_MSG = "%s does not support an auto login authentication.";
-
-    // This exception is an internal exception. It must not appear outside otherwise its token login is broken. This is covered by automatic
-    // tests. Therefore this message does not need to be translated.
-    public static final String SERVER_TOKEN_NOT_CREATED_MSG = "Server side token for token login was not created.";
-
-    // If some integration passes the User-Agent of the HTTP client as value for the client parameter of some login request, this is denied
-    // with this exception message. Instead the client parameter should identify the client using the backend. This can be something like
-    // com.openexchange.mobileapp identifying the Mobile Web Interface.
-    public static final String DONT_USER_AGENT_MSG = "Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.";
+    public static final String NOT_SUPPORTED_MSG = "Automatic login is not supported.";
 
     private LoginExceptionMessages() {
         super();

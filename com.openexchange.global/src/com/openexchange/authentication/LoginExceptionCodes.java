@@ -49,10 +49,19 @@
 
 package com.openexchange.authentication;
 
-import static com.openexchange.authentication.LoginExceptionMessages.*;
+import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENIED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.NOT_SUPPORTED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.REDIRECT_MSG;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
@@ -60,58 +69,78 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum LoginExceptionCodes implements OXExceptionCode {
+public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
 
-    /** Account "%s" is locked. */
-    ACCOUNT_LOCKED(ACCOUNT_LOCKED_MSG, Category.CATEGORY_PERMISSION_DENIED, 1),
-    /** Account "%1$s" is currently being created. This can take a while. Please try again later. */
-    ACCOUNT_NOT_READY_YET(ACCOUNT_NOT_READY_YET_MSG, Category.CATEGORY_TRY_AGAIN, 2),
-    /** Unknown problem: "%s". */
-    UNKNOWN(UNKNOWN_MSG, Category.CATEGORY_ERROR, 3),
-    /** Login not possible at the moment. Please try again later. */
-    COMMUNICATION(COMMUNICATION_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
-    /** Invalid credentials. */
-    INVALID_CREDENTIALS(INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
-    /** Instantiating the class failed. */
-    /** Missing property %1$s. */
-    MISSING_PROPERTY(MISSING_PROPERTY_MSG, Category.CATEGORY_CONFIGURATION, 9),
-    /** database down. */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.CATEGORY_SERVICE_DOWN, 10),
-    /** Your password expired. */
-    PASSWORD_EXPIRED(PASSWORD_EXPIRED_MSG, Category.CATEGORY_PERMISSION_DENIED, 11),
-    /** User %1$s could not be found in context %2$s. */
-    USER_NOT_FOUND(USER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 12),
-    /** User is not activated. */
-    USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 13),
-    /** Client "%1$s" is not activated. */
-    CLIENT_DENIED(CLIENT_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 14),
-    /** Method "%1$s" in HTTP header authorization is not supported. */
-    UNKNOWN_HTTP_AUTHORIZATION(UNKNOWN_HTTP_AUTHORIZATION_MSG, Category.CATEGORY_TRY_AGAIN, 15),
-    /** Only used as workaround for a redirection, This is <b>no</b> real error. */
-    REDIRECT(REDIRECT_MSG, Category.CATEGORY_USER_INPUT, 16),
-    /** No session found. */
-    NO_SESSION_FOUND(NO_SESSION_FOUND_MSG, Category.CATEGORY_USER_INPUT, 17),
-    /** Missing client capabilities. */
-    MISSING_CAPABILITIES(MISSING_CAPABILITIES_MSG, Category.CATEGORY_WARNING, 18),
+    /**
+     * Account "%s" is locked.
+     */
+    ACCOUNT_LOCKED("Account \"%s\" is locked.", ACCOUNT_LOCKED_MSG, Category.CATEGORY_PERMISSION_DENIED, 1),
+    /**
+     * Account "%1$s" is currently being created. This can take a while. Please try again later.
+     */
+    ACCOUNT_NOT_READY_YET("Account \"%1$s\" is currently being created.", ACCOUNT_NOT_READY_YET_MSG, Category.CATEGORY_TRY_AGAIN, 2),
+    /**
+     * Unknown problem: "%s".
+     */
+    UNKNOWN("Unknown problem: \"%s\".", MESSAGE, Category.CATEGORY_ERROR, 3),
+    /**
+     * Login not possible at the moment. Please try again later.
+     */
+    COMMUNICATION("Login not possible at the moment.", COMMUNICATION_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
+    /**
+     * Invalid credentials.
+     */
+    INVALID_CREDENTIALS("Invalid credentials.", INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
+    /**
+     * Missing property %1$s.
+     */
+    MISSING_PROPERTY("Missing property %1$s.", MESSAGE, Category.CATEGORY_CONFIGURATION, 9),
+    /**
+     * database down.
+     */
+    DATABASE_DOWN("Database down.", MESSAGE_RETRY, Category.CATEGORY_SERVICE_DOWN, 10),
+    /**
+     * Your password expired.
+     */
+    PASSWORD_EXPIRED("Your password has expired. In order to change it, please log in to %1$s.", PASSWORD_EXPIRED_MSG, Category.CATEGORY_PERMISSION_DENIED, 11),
+    /**
+     * Client "%1$s" is not activated.
+     */
+    CLIENT_DENIED("Client \"%1$s\" is not activated.", CLIENT_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 14),
+    /**
+     * Method "%1$s" in HTTP header authorization is not supported.
+     */
+    UNKNOWN_HTTP_AUTHORIZATION("Method \"%1$s\" in HTTP header authorization is not supported.", MESSAGE, Category.CATEGORY_ERROR, 15),
+    /**
+     * Only used as workaround for a redirection, This is <b>no</b> real error.
+     */
+    REDIRECT("%1$s", REDIRECT_MSG, Category.CATEGORY_USER_INPUT, 16),
     /**
      * This exception code should be used for a not supported {@link AuthenticationService#handleAutoLoginInfo(LoginInfo)} method.
      * Message: %s does not support an auto login authentication.
      * Add class name as parameter when creating the exception.
      */
-    NOT_SUPPORTED(NOT_SUPPORTED_MSG, Category.CATEGORY_SERVICE_DOWN, 19),
-    /** Server side token for token login was not created. */
-    SERVER_TOKEN_NOT_CREATED(SERVER_TOKEN_NOT_CREATED_MSG, Category.CATEGORY_ERROR, 20),
-    /** Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software. */
-    DONT_USER_AGENT(DONT_USER_AGENT_MSG, Category.CATEGORY_USER_INPUT, 21);
+    NOT_SUPPORTED("%s does not support an auto login authentication.", NOT_SUPPORTED_MSG, Category.CATEGORY_SERVICE_DOWN, 19),
+    /**
+     * Server side token for token login was not created.
+     */
+    SERVER_TOKEN_NOT_CREATED("Server side token for token login was not created.", MESSAGE, Category.CATEGORY_ERROR, 20),
+    /**
+     * Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.
+     */
+    DONT_USER_AGENT("Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.", MESSAGE, Category.CATEGORY_USER_INPUT, 21);
 
     private final String message;
+
+    private final String displayMessage;
 
     private final Category category;
 
     private final int number;
 
-    private LoginExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private LoginExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         number = detailNumber;
     }
@@ -129,6 +158,11 @@ public enum LoginExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -170,4 +204,5 @@ public enum LoginExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }

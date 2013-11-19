@@ -49,10 +49,19 @@
 
 package com.openexchange.sessiond;
 
-import static com.openexchange.sessiond.SessionExceptionMessages.*;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
+import static com.openexchange.sessiond.SessionExceptionMessages.CONTEXT_LOCKED_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_EXCEPTION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER_CLIENT_EXCEPTION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER_USER_EXCEPTION_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.NO_SESSION_FOR_TOKENS_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.PASSWORD_UPDATE_FAILED_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_EXPIRED_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_INVALIDATED_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
@@ -60,79 +69,97 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum SessionExceptionCodes implements OXExceptionCode {
+public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Sessiond Exception
      */
-    SESSIOND_EXCEPTION(SESSIOND_EXCEPTION_MSG, Category.CATEGORY_ERROR, 1),
+    SESSIOND_EXCEPTION("Sessiond exception", MESSAGE, Category.CATEGORY_ERROR, 1),
     /**
      * Maximum number of sessions elapsed
      */
-    MAX_SESSION_EXCEPTION(MAX_SESSION_EXCEPTION_MSG, Category.CATEGORY_ERROR, 2),
+    MAX_SESSION_EXCEPTION("Maximum number of sessions elapsed", MAX_SESSION_EXCEPTION_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Sessiond Config Exception
      */
-    SESSIOND_CONFIG_EXCEPTION(SESSIOND_CONFIG_EXCEPTION_MSG, Category.CATEGORY_ERROR, 3),
+    SESSIOND_CONFIG_EXCEPTION("Sessiond Config Exception", MESSAGE, Category.CATEGORY_ERROR, 3),
     /**
      * Missing property '%s'
      */
-    MISSING_PROPERTY(MISSING_PROPERTY_MSG, Category.CATEGORY_CONFIGURATION, 4),
-    /** Unknown event topic %s */
-    UNKNOWN_EVENT_TOPIC(UNKNOWN_EVENT_TOPIC_MSG, Category.CATEGORY_ERROR, 5),
-    /** Password could not be changed */
-    PASSWORD_UPDATE_FAILED(PASSWORD_UPDATE_FAILED_MSG, Category.CATEGORY_ERROR, 6),
-    /** Max. number of sessions exceeded for user %1$s in context %2$s */
-    MAX_SESSION_PER_USER_EXCEPTION(MAX_SESSION_PER_USER_EXCEPTION_MSG, Category.CATEGORY_USER_INPUT, 7),
-    /** Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s. */
-    DUPLICATE_AUTHID(DUPLICATE_AUTHID_MSG, Category.CATEGORY_ERROR, 8),
-    /** SessionD returned wrong session with identifier %1$s for given session identifier %2$s. */
-    WRONG_SESSION(WRONG_SESSION_MSG, Category.CATEGORY_ERROR, 9),
+    MISSING_PROPERTY("Missing property '%s'", MESSAGE, Category.CATEGORY_CONFIGURATION, 4),
+    /**
+     * Unknown event topic %s
+     */
+    UNKNOWN_EVENT_TOPIC("Unknown event topic %s", MESSAGE, Category.CATEGORY_ERROR, 5),
+    /**
+     * Password could not be changed
+     */
+    PASSWORD_UPDATE_FAILED("Password could not be changed", PASSWORD_UPDATE_FAILED_MSG, Category.CATEGORY_ERROR, 6),
+    /**
+     * Max. number of sessions exceeded for user %1$s in context %2$s
+     */
+    MAX_SESSION_PER_USER_EXCEPTION("Max. number of sessions exceeded for user %1$s in context %2$s", MAX_SESSION_PER_USER_EXCEPTION_MSG, Category.CATEGORY_USER_INPUT, 7),
+    /**
+     * Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.
+     */
+    DUPLICATE_AUTHID("Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.", MESSAGE_RETRY, Category.CATEGORY_ERROR, 8),
+    /**
+     * SessionD returned wrong session with identifier %1$s for given session identifier %2$s.
+     */
+    WRONG_SESSION("SessionD returned wrong session with identifier %1$s for given session identifier %2$s.", MESSAGE, Category.CATEGORY_ERROR, 9),
     /**
      * Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s.
      */
-    SESSIONID_COLLISION(SESSIONID_COLLISION_MSG, Category.CATEGORY_ERROR, 10),
+    SESSIONID_COLLISION("Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s.", MESSAGE_RETRY, Category.CATEGORY_ERROR, 10),
     /**
      * Received wrong session %1$s having random %2$s when looking for random %3$s and session %4$s.
      */
-    WRONG_BY_RANDOM(WRONG_BY_RANDOM_MSG, Category.CATEGORY_ERROR, 11),
+    WRONG_BY_RANDOM("Received wrong session %1$s having random %2$s when looking for random %3$s and session %4$s.", MESSAGE, Category.CATEGORY_ERROR, 11),
     /**
      * The session parameter is missing.
      */
-    SESSION_PARAMETER_MISSING(SESSION_PARAMETER_MISSING_MSG, Category.CATEGORY_ERROR, 201),
+    SESSION_PARAMETER_MISSING("The session parameter is missing.", MESSAGE,Category.CATEGORY_ERROR, 201),
     /**
      * Your session %s expired. Please start a new browser session.
      */
-    SESSION_EXPIRED(SESSION_EXPIRED_MSG, Category.CATEGORY_TRY_AGAIN, 203),
+    SESSION_EXPIRED("Your session %s expired. Please start a new browser session.", SESSION_EXPIRED_MSG, Category.CATEGORY_TRY_AGAIN, 203),
     /**
-     * Context is locked.
+     * Context %1$d (%2$s) is currently not enabled.
      */
-    CONTEXT_LOCKED(CONTEXT_LOCKED_MSG, Category.CATEGORY_TRY_AGAIN, 204),
+    CONTEXT_LOCKED("Context %1$d (%2$s) is currently not enabled.", CONTEXT_LOCKED_MSG, Category.CATEGORY_TRY_AGAIN, 204),
     /**
      * Request to server was refused. Original client IP address changed. Please try again.<br>
      * Client login IP changed from %1$s to %2$s and is not covered by IP white-list or netmask.
      */
-    WRONG_CLIENT_IP(WRONG_CLIENT_IP_MSG, Category.CATEGORY_PERMISSION_DENIED, 205),
+    WRONG_CLIENT_IP("Request to server was refused. Original client IP address changed. Please try again." +
+        System.getProperty("line.separator") + "Client login IP changed from %1$s to %2$s and is not covered by IP white-list or netmask.",
+        SESSION_INVALIDATED_MSG, Category.CATEGORY_PERMISSION_DENIED, 205),
     /**
      * Your session was invalidated. Please try again.
      */
-    WRONG_SESSION_SECRET(WRONG_SESSION_SECRET_MSG, Category.CATEGORY_TRY_AGAIN, 206),
+    WRONG_SESSION_SECRET("Your session was invalidated. Please try again.", SESSION_INVALIDATED_MSG, Category.CATEGORY_TRY_AGAIN, 206),
     /**
      * Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s
      */
-    MAX_SESSION_PER_CLIENT_EXCEPTION(MAX_SESSION_PER_CLIENT_EXCEPTION_MSG, Category.CATEGORY_ERROR, 207),
+    MAX_SESSION_PER_CLIENT_EXCEPTION("Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s", MAX_SESSION_PER_CLIENT_EXCEPTION_MSG, Category.CATEGORY_ERROR, 207),
     /**
      * Session daemon is not initialized yet.
      * TODO Refactoring of the session daemon should make the service public only then, when it is completely initialized.
      */
-    NOT_INITIALIZED(NOT_INITIALIZED_MSG, Category.CATEGORY_ERROR, 208),
+    NOT_INITIALIZED("Session daemon is not initialized yet.", MESSAGE_RETRY, Category.CATEGORY_ERROR, 208),
     /**
      * Method not implemented.
      * Use this only internally for testing purposes.
      */
-    NOT_IMPLEMENTED(NOT_IMPLEMENTED_MSG, Category.CATEGORY_ERROR, 209),
-    NO_SESSION_FOR_SERVER_TOKEN(NO_SESSION_FOR_TOKENS_MSG, Category.CATEGORY_USER_INPUT, 210),
-    NO_SESSION_FOR_CLIENT_TOKEN(NO_SESSION_FOR_TOKENS_MSG, Category.CATEGORY_USER_INPUT, 211);
+    NOT_IMPLEMENTED("Method not implemented.", MESSAGE, Category.CATEGORY_ERROR, 209),
+    /**
+     * Can not find a session for server token %1$s and client token %2$s.
+     */
+    NO_SESSION_FOR_SERVER_TOKEN("Can not find a session for server token %1$s and client token %2$s.", NO_SESSION_FOR_TOKENS_MSG, Category.CATEGORY_USER_INPUT, 210),
+    /**
+     * Can not find a session for server token %1$s and client token %2$s.
+     */
+    NO_SESSION_FOR_CLIENT_TOKEN("Can not find a session for server token %1$s and client token %2$s.", NO_SESSION_FOR_TOKENS_MSG, Category.CATEGORY_USER_INPUT, 211);
 
     private static final String PREFIX = "SES";
 
@@ -160,12 +187,15 @@ public enum SessionExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
+    private final String displayMessage;
+
     private final Category category;
 
     private final int number;
 
-    private SessionExceptionCodes(final String message, final Category category, final int number) {
+    private SessionExceptionCodes(final String message, String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = number;
     }
@@ -173,6 +203,11 @@ public enum SessionExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -224,4 +259,5 @@ public enum SessionExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }
