@@ -620,7 +620,8 @@ public class FileResponseRenderer implements ResponseRenderer {
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
             } catch (final IOException e) {
-                if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
+                final String lcm = toLowerCase(e.getMessage());
+                if ("connection reset by peer".equals(lcm) || "broken pipe".equals(lcm)) {
                     /*-
                      * The client side has abruptly aborted the connection.
                      * That can have many causes which are not controllable by us.
