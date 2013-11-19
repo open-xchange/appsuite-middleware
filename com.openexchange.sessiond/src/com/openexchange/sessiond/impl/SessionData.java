@@ -188,8 +188,7 @@ final class SessionData {
         wlongTermLock.lock();
         try {
             longTermList.addFirst(new SessionMap(256));
-            final List<SessionControl> retval = new ArrayList<SessionControl>();
-            retval.addAll(longTermList.removeLast().values());
+            final List<SessionControl> retval = new ArrayList<SessionControl>(longTermList.removeLast().values());
             for (final SessionControl sessionControl : retval) {
                 final SessionImpl session = sessionControl.getSession();
                 longTermUserGuardian.remove(session.getUserId(), session.getContextId());
