@@ -1,5 +1,14 @@
+* 2013-11-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29855: Order EDIT-actions based on new directory version 
+ 
+* 2013-11-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29438: Deal with changing User-Agent identifier when Apple Media Player jumps in
+
 * 2013-11-18 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 29391: Extend the size of the 'name' column in the 'infostoreReservedPaths' table 
  - Fix for bug 29866: Don't carry over empty last-modification timestamp if appointment was not updated 
  
 * 2013-11-14 - thorben.betten@open-xchange.com

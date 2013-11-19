@@ -177,7 +177,7 @@ public class SyncTracker {
                     optimizedActionsForClient.clear();
                     for (DirectoryVersion directoryVersion : affectedDirectoryVersions) {
                         optimizedActionsForClient.add(new ErrorDirectoryAction(null, directoryVersion, null,
-                            DriveExceptionCodes.REPEATED_SYNC_PROBLEMS_MSG.create(directoryVersion.getPath(), directoryVersion.getChecksum()), false, true));
+                            DriveExceptionCodes.REPEATED_SYNC_PROBLEMS.create(directoryVersion.getPath(), directoryVersion.getChecksum()), false, true));
                     }
                 }
             } else {
