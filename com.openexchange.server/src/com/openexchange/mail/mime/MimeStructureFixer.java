@@ -264,7 +264,7 @@ public final class MimeStructureFixer {
              * Check for multiple inline HTML parts
              *
              * (HTML)+
-             * Image
+             * (Image)+
              * (HTML)*
              */
             {
@@ -285,7 +285,7 @@ public final class MimeStructureFixer {
                  * Check for multiple inline TEXT parts
                  *
                  * (TEXT)+
-                 * Image
+                 * (Image)+
                  * (TEXT)*
                  */
                 inlineCount = 0;
