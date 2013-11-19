@@ -291,8 +291,7 @@ public class DispatcherServlet extends SessionServlet {
         }
         // Try public session
         if (!mayOmitSession) {
-            req.setAttribute("mayUseFallbackSession", Boolean.valueOf(mayUseFallbackSession));
-            findPublicSessionId(req, session, sessiondService);
+            findPublicSessionId(req, session, sessiondService, mayUseFallbackSession);
         }
     }
 
