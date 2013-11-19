@@ -64,7 +64,7 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     public static final String NO_PERMISSION_FOR_MODULE = "You do not have appropriate permissions for module %1$s.";
     public static final String CONFLICT = "The object has been changed in the meantime. Please reload the view and try again.";
     public static final String NO_IMAGE_FILE_MSG = "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types (JPG, GIF, BMP or PNG) are supported.";
-    public static final String MISSING_COOKIE_MSG = "The requested operation requires a valid session. Please login again.";
+    public static final String MISSING_COOKIE_MSG = "The requested operation requires a valid session. Please login and try again.";
 
     /**
      * Initializes a new {@link AjaxExceptionMessages}
