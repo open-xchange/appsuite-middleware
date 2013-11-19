@@ -4789,9 +4789,7 @@ msgstr ""
 #. *
 #. * A SQL error occurred: %1$s.
 #.
-#. A SQL error occurred: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:257
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:74
 msgid "A SQL error occurred: %1$s."
 msgstr ""
 
@@ -6132,22 +6130,6 @@ msgstr ""
 #. Unknown delete event type: %1$d
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:70
 msgid "Unknown delete event type: %1$d"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/filestore/FilestoreExceptionMessages.java:61
-msgid "Wrong file store %1$d for context %2$d. Correct file store: %3$d."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/filestore/FilestoreExceptionMessages.java:63
-msgid "Cannot find file store with id %1$d."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/filestore/FilestoreExceptionMessages.java:65
-msgid "Cannot create URI from \"%1$s\"."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/filestore/FilestoreExceptionMessages.java:67
-msgid "SQL problem: \"%s\"."
 msgstr ""
 
 #. Name of the parent folder for the private user folders.
@@ -8524,10 +8506,7 @@ msgstr ""
 #. *
 #. * Unable to parse mail server URI "%1$s".
 #.
-#. Is thrown if the URI to the mail server can not be understood.
-#. %1$s is replaced with the not understandable mail server URI.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:485
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:117
 msgid "Unable to parse mail server URI \"%1$s\"."
 msgstr ""
 
@@ -9024,141 +9003,75 @@ msgid ""
 "%5$s"
 msgstr ""
 
-#. Unexpected error: %1$s.
+#. Cannot find mail account for user \"%2$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
-msgid "Unexpected error: %1$s."
+msgid "Cannot find mail account for user \"%2$s\"."
 msgstr ""
 
-#. Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
+#. You do not have the appropriate permissions to delete the default mail account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:65
 msgid ""
-"Cannot find mail account with identifier %1$s for user %2$s in context %3$s."
+"You do not have the appropriate permissions to delete the default mail "
+"account."
 msgstr ""
 
-#. Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
+#. You do not have the appropriate permissions to update the default mail account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
 msgid ""
-"Found two mail accounts with same identifier %1$s for user %2$s in context "
-"%3$s."
+"You do not have the appropriate permissions to update the default mail "
+"account."
 msgstr ""
 
-#. Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
+#. The default mail account already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:71
-msgid ""
-"Found two mail accounts with same E-Mail address %1$s for user %2$s in "
-"context %3$s."
+msgid "The default mail account already exists."
 msgstr ""
 
-#. A host could not be resolved: %1$s.
+#. The Unified Mail account already exists
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:74
+msgid "The Unified Mail account already exists."
+msgstr ""
+
+#. It is not allowed to create a new mail account for Unified Mail.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
-msgid "A host could not be resolved: %1$s."
+msgid "It is not allowed to create a new mail account for Unified Mail."
 msgstr ""
 
-#. Denied deletion of default mail account of user %1$s in context %2$s.
+#. Validation for Unified Mail failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
-msgid "Denied deletion of default mail account of user %1$s in context %2$s."
+msgid "Validation for Unified Mail failed."
 msgstr ""
 
-#. Denied update of default mail account of user %1$s in context %2$s.
+#. You do not have the appropriate permissions to create more than one mail account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
-msgid "Denied update of default mail account of user %1$s in context %2$s."
+msgid ""
+"You do not have the appropriate permissions to create more than one mail "
+"account."
 msgstr ""
 
-#. No duplicate default account allowed.
+#. A mail account with the given E-Mail address already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
-msgid "No duplicate default account allowed."
+msgid "A mail account with the given E-Mail address already exists."
 msgstr ""
 
-#. Password encryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
+#. The mail account name \"%1$s\" is not valid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:89
-msgid ""
-"Password encryption failed for login %1$s on server %2$s (user=%3$s, context="
-"%4$s)."
+msgid "The mail account name \"%1$s\" is not valid."
 msgstr ""
 
-#. Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
+#. The selected mail account name already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
-msgid ""
-"Password decryption failed for login %1$s on server %2$s (user=%3$s, context="
-"%4$s)."
+msgid "The selected mail account name already exists."
 msgstr ""
 
-#. The Unified Mail account already exists for user %1$s in context %2$s.
+#. Unable to connect to mail server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
-msgid "The Unified Mail account already exists for user %1$s in context %2$s."
+msgid "Unable to connect to mail server."
 msgstr ""
 
-#. Mail account creation failed.
+#. The given host name \"%1$s\" is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:98
-msgid "Mail account creation failed."
-msgstr ""
-
-#. Mail account validation failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:101
-msgid "Mail account validation failed."
-msgstr ""
-
-#. Multiple mail accounts not enabled for user %1$s in context %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:104
-msgid "Multiple mail accounts not enabled for user %1$s in context %2$s."
-msgstr ""
-
-#. Invalid mail account name: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:107
-msgid "Invalid mail account name: %1$s"
-msgstr ""
-
-#. Duplicate mail account for user %1$s in context %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:110
-msgid "Duplicate mail account for user %1$s in context %2$s."
-msgstr ""
-
-#. Duplicate transport account for user %1$s in context %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:113
-msgid "Duplicate transport account for user %1$s in context %2$s."
-msgstr ""
-
-#. Invalid host name: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:120
-msgid "Invalid host name: %1$s"
-msgstr ""
-
-#. Could not connect to mail server "%1$s" for login %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:123
-msgid "Could not connect to mail server \"%1$s\" for login %2$s"
-msgstr ""
-
-#. Could not connect to transport server "%1$s" for login %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:126
-msgid "Could not connect to transport server \"%1$s\" for login %2$s"
-msgstr ""
-
-#. Default port specified for mail protocol "%1$s", but SSL is enabled. Please review if appropriate.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:129
-msgid ""
-"Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
-"Please review if appropriate."
-msgstr ""
-
-#. Secure port specified for mail protocol "%1$s", but SSL is not enabled. Please review if appropriate.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:132
-msgid ""
-"Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. "
-"Please review if appropriate."
-msgstr ""
-
-#. Default port specified for transport protocol "%1$s", but SSL is enabled. Please review if appropriate.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:135
-msgid ""
-"Default port specified for transport protocol \"%1$s\", but SSL is enabled. "
-"Please review if appropriate."
-msgstr ""
-
-#. Secure port specified for transport protocol "%1$s", but SSL is not enabled. Please review if appropriate.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:138
-msgid ""
-"Secure port specified for transport protocol \"%1$s\", but SSL is not "
-"enabled. Please review if appropriate."
+msgid "The given host name \"%1$s\" is invalid."
 msgstr ""
 
 #. *
