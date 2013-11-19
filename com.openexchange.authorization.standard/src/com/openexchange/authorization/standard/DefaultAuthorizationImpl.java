@@ -51,13 +51,13 @@ package com.openexchange.authorization.standard;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.authorization.AuthorizationExceptionCodes;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.context.ContextExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.log.LogFactory;
 
 
 /**
@@ -95,7 +95,7 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
     public void authorizeUser(final Context ctx, final User user) throws OXException {
         try {
             if (!ctx.isEnabled()) {
-                final OXException e = ContextExceptionCodes.CONTEXT_DISABLED.create();
+                final OXException e = ContextExceptionCodes.CONTEXT_DISABLED.create(Integer.valueOf(ctx.getContextId()), ctx.getName());
                 LOG.debug(e.getMessage(), e);
                 throw AuthorizationExceptionCodes.USER_DISABLED.create(e);
             }
