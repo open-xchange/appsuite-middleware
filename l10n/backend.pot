@@ -4435,9 +4435,7 @@ msgstr ""
 #. *
 #. * A database connection cannot be obtained.
 #.
-#. A database connection Cannot be obtained.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:96
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:62
 msgid "Cannot get database connection."
 msgstr ""
@@ -5423,49 +5421,44 @@ msgid ""
 "same name."
 msgstr ""
 
-#. SQL Problem: "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:72
-msgid "SQL Problem: \"%1$s\""
-msgstr ""
-
 #. No group given.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 msgid "No group given."
 msgstr ""
 
 #. The mandatory field %1$s is not defined.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:78
-msgid "The mandatory field %1$s is not defined."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:72
+msgid "Required value \"%1$s\" was not supplied."
 msgstr ""
 
 #. The simple name contains invalid characters: "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:81
-msgid "The simple name contains invalid characters: \"%1$s\"."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:75
+msgid "The name contains invalid characters: \"%1$s\"."
 msgstr ""
 
 #. Another group with the same identifier name exists: %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:84
-msgid "Another group with the same identifier name exists: %1$d."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:78
+msgid "Another group with the same identifier name exists."
 msgstr ""
 
 #. Group contains a not existing member %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:87
-msgid "Group contains a not existing member %1$d."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:81
+msgid "Group contains a not existing member."
 msgstr ""
 
 #. Group contains invalid data: "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:90
-msgid "Group contains invalid data: \"%1$s\"."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:84
+msgid "Group contains invalid data."
 msgstr ""
 
 #. You are not allowed to create groups.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:87
 msgid "You are not allowed to create groups."
 msgstr ""
 
 #. Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh
 #. or synchronize and try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:91
 msgid ""
 "Edit Conflict. Your change cannot be completed because somebody else has "
 "made a conflicting change to the same item. Please refresh or synchronize "
@@ -5473,22 +5466,22 @@ msgid ""
 msgstr ""
 
 #. You are not allowed to change groups.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:95
 msgid "You are not allowed to change groups."
 msgstr ""
 
 #. You are not allowed to delete groups.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:98
 msgid "You are not allowed to delete groups."
 msgstr ""
 
 #. Group "%1$s" can not be deleted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:101
 msgid "Group \"%1$s\" can not be deleted."
 msgstr ""
 
 #. Group "%1$s" can not be changed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:104
 msgid "Group \"%1$s\" can not be changed."
 msgstr ""
 
