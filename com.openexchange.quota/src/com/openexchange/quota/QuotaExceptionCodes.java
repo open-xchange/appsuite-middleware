@@ -50,29 +50,30 @@
 package com.openexchange.quota;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link QuotaExceptionCodes} - Enumeration of all {@link OXException}s known in quota module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum QuotaExceptionCodes implements OXExceptionCode {
+public enum QuotaExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(QuotaExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(QuotaExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 2),
     /**
      * Quota exceeded. Please delete some items in order to create new ones.
      */
-    QUOTA_EXCEEDED(QuotaExceptionMessages.QUOTA_EXCEEDED_MSG, CATEGORY_USER_INPUT, 3),
+    QUOTA_EXCEEDED("Quota exceeded", QuotaExceptionMessages.QUOTA_EXCEEDED_MSG, CATEGORY_USER_INPUT, 3),
 
     ;
 
@@ -87,8 +88,11 @@ public enum QuotaExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private QuotaExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private final String displayMessage;
+
+    private QuotaExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.detailNumber = detailNumber;
         this.category = category;
     }
@@ -101,6 +105,11 @@ public enum QuotaExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -147,4 +156,5 @@ public enum QuotaExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }
