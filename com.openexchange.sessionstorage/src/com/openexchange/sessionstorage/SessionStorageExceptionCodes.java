@@ -50,88 +50,108 @@
 package com.openexchange.sessionstorage;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link SessionStorageExceptionCodes} - Error codes for <b><code>com.openexchange.sessionstorage</code></b>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SessionStorageExceptionCodes implements OXExceptionCode {
+public enum SessionStorageExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SessionStorageExceptionMessages.UNEXPECTED_ERROR, 1, CATEGORY_ERROR),
+    UNEXPECTED_ERROR("An error occurred: %1$s", 1, CATEGORY_ERROR),
+    
     /**
      * No session found for identifier: %1$s
      */
-    NO_SESSION_FOUND(SessionStorageExceptionMessages.NO_SESSION_FOUND, 2, CATEGORY_USER_INPUT),
+    NO_SESSION_FOUND("No session found for identifier: %1$s", SessionStorageExceptionMessages.NO_SESSION_FOUND, 2, CATEGORY_USER_INPUT),
+    
     /**
      * Saving session with session identifier %1$s failed.
      */
-    SAVE_FAILED(SessionStorageExceptionMessages.SAVE_FAILED_MSG, 3, Category.CATEGORY_ERROR),
+    SAVE_FAILED("Saving session with session identifier %1$s failed.", 3, Category.CATEGORY_ERROR),
+    
     /**
      * Lookup for session with session identifier %1$s failed.
      */
-    LOOKUP_FAILED(SessionStorageExceptionMessages.LOOKUP_FAILED_MSG, 4, Category.CATEGORY_ERROR),
+    LOOKUP_FAILED("Lookup for session with session identifier %1$s failed.", 4, Category.CATEGORY_ERROR),
+    
     /**
      * Removing session with session identifier %1$s failed.
      */
-    REMOVE_FAILED(SessionStorageExceptionMessages.REMOVE_FAILED_MSG, 5, Category.CATEGORY_ERROR),
+    REMOVE_FAILED("Removing session with session identifier %1$s failed.", 5, Category.CATEGORY_ERROR),
+    
     /**
      * Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.
      */
-    DUPLICATE_AUTHID(SessionStorageExceptionMessages.DUPLICATE_AUTHID_MSG, 6, Category.CATEGORY_ERROR),
+    DUPLICATE_AUTHID("Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.", 6,
+        Category.CATEGORY_ERROR),
+        
     /**
      * Operation %1$s not supported.
      */
-    UNSUPPORTED_OPERATION(SessionStorageExceptionMessages.UNSUPPORTED_OPERATION_MSG, 7, Category.CATEGORY_ERROR),
+    UNSUPPORTED_OPERATION("Operation %1$s not supported.", 7, Category.CATEGORY_ERROR),
+    
     /**
      * Lookup for session with alternative identifier %1$s failed.
      */
-    ALTID_NOT_FOUND(SessionStorageExceptionMessages.ALTID_NOT_FOUND_MSG, 8, Category.CATEGORY_ERROR),
+    ALTID_NOT_FOUND("Lookup for session with alternative identifier %1$s failed.", 8, Category.CATEGORY_ERROR),
+    
     /**
      * No sessions found for user %1$s in context %2$s.
      */
-    NO_USERSESSIONS(SessionStorageExceptionMessages.NO_USERSESSIONS_MSG, 9, Category.CATEGORY_ERROR),
+    NO_USERSESSIONS("No sessions found for user %1$s in context %2$s.", 9, Category.CATEGORY_ERROR),
+    
     /**
      * No sessions found for context %1$s.
      */
-    NO_CONTEXTESSIONS(SessionStorageExceptionMessages.NO_CONTEXTSESSIONS_MSG, 10, Category.CATEGORY_ERROR),
+    NO_CONTEXTESSIONS("No sessions found for context %1$s.", 10, Category.CATEGORY_ERROR),
+    
     /**
      * No sessions found by random token %1$s,
      */
-    RANDOM_NOT_FOUND(SessionStorageExceptionMessages.RANDOM_NOT_FOUND_MSG, 11, Category.CATEGORY_ERROR),
+    RANDOM_NOT_FOUND("No sessions found by random token %1$s.", 11, Category.CATEGORY_ERROR);
 
-    ;
-
-    private static final String PREFIX = "SST";
+    private static String PREFIX = "SST";
 
     /**
      * Message of the exception.
      */
-    private final String message;
+    private String message;
+    
+    /**
+     * Display message of the exception.
+     */
+    private String displayMessage;
 
     /**
      * Category of the exception.
      */
-    private final Category category;
+    private Category category;
 
     /**
      * Detail number of the exception.
      */
-    private final int detailNumber;
+    private int detailNumber;
 
     /**
      * Initializes a new {@link SessionStorageExceptionCodes}.
      */
-    private SessionStorageExceptionCodes(String message, int detailNumber, Category category) {
+    private SessionStorageExceptionCodes(String message, String displayMessage, int detailNumber, Category category) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.detailNumber = detailNumber;
         this.category = category;
+    }
+    
+    private SessionStorageExceptionCodes(String message, int detailNumber, Category category) {
+        this(message, null, detailNumber, category);
     }
 
     @Override
@@ -158,6 +178,11 @@ public enum SessionStorageExceptionCodes implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
@@ -174,7 +199,7 @@ public enum SessionStorageExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -185,7 +210,7 @@ public enum SessionStorageExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 

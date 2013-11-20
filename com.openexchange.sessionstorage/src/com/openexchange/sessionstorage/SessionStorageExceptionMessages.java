@@ -58,29 +58,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class SessionStorageExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR = "An error occurred: %1$s";
-
     // No session found for identifier: %1$s
     public static final String NO_SESSION_FOUND = "No session found for identifier: %1$s";
-
-    public final static String SAVE_FAILED_MSG = "Saving session with session identifier %1$s failed.";
-
-    public final static String LOOKUP_FAILED_MSG = "Lookup for session with session identifier %1$s failed.";
-
-    public final static String REMOVE_FAILED_MSG = "Removing session with session identifier %1$s failed.";
-
-    public final static String DUPLICATE_AUTHID_MSG = "Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s.";
-
-    public final static String UNSUPPORTED_OPERATION_MSG = "Operation %1$s not supported.";
-
-    public final static String ALTID_NOT_FOUND_MSG = "Lookup for session with alternative identifier %1$s failed.";
-
-    public final static String NO_USERSESSIONS_MSG = "No sessions found for user %1$s in context %2$s.";
-
-    public final static String NO_CONTEXTSESSIONS_MSG = "No sessions found for context %1$s.";
-
-    public final static String RANDOM_NOT_FOUND_MSG = "No sessions found by random token %1$s.";
 
     /**
      * Initializes a new {@link SessionStorageExceptionMessages}.
