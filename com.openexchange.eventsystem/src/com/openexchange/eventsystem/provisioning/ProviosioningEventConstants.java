@@ -49,8 +49,10 @@
 
 package com.openexchange.eventsystem.provisioning;
 
+import static com.openexchange.eventsystem.EventConstants.getIntProperty;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.eventsystem.Event;
 
 /**
  * {@link ProviosioningEventConstants} - Provides constants for provisioning-related events.
@@ -64,7 +66,7 @@ public final class ProviosioningEventConstants {
     }
 
     // ----------------------------------------------------------------------------------------------------- //
-    // --------------------------------------    TOPICS    ------------------------------------------------- //
+    // -------------------------------------- TOPICS ------------------------------------------------- //
     // ----------------------------------------------------------------------------------------------------- //
 
     /**
@@ -116,22 +118,42 @@ public final class ProviosioningEventConstants {
     }
 
     // ----------------------------------------------------------------------------------------------------- //
-    // --------------------------------------  PROPERTIES  ------------------------------------------------- //
+    // ---------------------------------------- PROPERTIES ------------------------------------------------- //
     // ----------------------------------------------------------------------------------------------------- //
 
     /**
-     * The name of the property providing the context identifier.
+     * The name of the property providing the context identifier; <code>java.lang.Integer</code>
      */
     public static final String PROP_CONTEXT_ID = "contextId";
 
     /**
-     * The name of the property providing the user identifier.
+     * The name of the property providing the user identifier; <code>java.lang.Integer</code>
      */
     public static final String PROP_USER_ID = "userId";
 
     /**
-     * The name of the property providing the user login name.
+     * The name of the property providing the user login name; <code>java.lang.String</code>
      */
     public static final String PROP_USER_NAME = "name";
+
+    /**
+     * Gets the context identifier from given event.
+     *
+     * @param event The event
+     * @return The context identifier or <code>-1</code>
+     */
+    public static int getContextId(final Event event) {
+        return getIntProperty(PROP_CONTEXT_ID, event);
+    }
+
+    /**
+     * Gets the user identifier from given event.
+     *
+     * @param event The event
+     * @return The user identifier or <code>-1</code>
+     */
+    public static int getUserId(final Event event) {
+        return getIntProperty(PROP_USER_ID, event);
+    }
 
 }

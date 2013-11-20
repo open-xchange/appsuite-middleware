@@ -51,7 +51,7 @@ package com.openexchange.eventsystem;
 
 
 /**
- * {@link EventConstants} - Defines standard names for {@code EventHandler} properties.
+ * {@link EventConstants} - Defines standard names for {@code EventHandler} properties and helper methods.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
@@ -87,5 +87,32 @@ public final class EventConstants {
      * The property name for context identifier.
      */
     public static final String PROP_CONTEXT_ID = "event.contextid";
+
+    // ---------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Gets the denoted <code>int</code> property.
+     *
+     * @param name The property name
+     * @param event The event
+     * @return The <code>int</code> property or <code>-1</code>
+     */
+    public static int getIntProperty(final String name, final Event event) {
+        if (null == event || null == name) {
+            return -1;
+        }
+        final Object property = event.getProperty(name);
+        if (null == property) {
+            return -1;
+        }
+        if (property instanceof Number) {
+            return ((Number) property).intValue();
+        }
+        try {
+            return Integer.parseInt(property.toString().trim());
+        } catch (final Exception e) {
+            return -1;
+        }
+    }
 
 }

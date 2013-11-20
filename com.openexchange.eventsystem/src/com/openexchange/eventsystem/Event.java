@@ -156,8 +156,15 @@ public final class Event {
      * @param name The property name
      * @return The property value or <code>null</code>
      */
-    public Object getProperty(final String name) {
-        return null == name ? null : properties.get(name);
+    public <V> V getProperty(final String name) {
+        if (null == name) {
+            return null;
+        }
+        try {
+            return (V) properties.get(name);
+        } catch (final ClassCastException e) {
+            return null;
+        }
     }
 
     /**
@@ -178,8 +185,15 @@ public final class Event {
      * @param name The property name
      * @return The removed property value or <code>null</code> if absent
      */
-    public Object removeProperty(final String name) {
-        return null == name ? null : properties.remove(name);
+    public <V> V removeProperty(final String name) {
+        if (null == name) {
+            return null;
+        }
+        try {
+            return (V) properties.remove(name);
+        } catch (final ClassCastException e) {
+            return null;
+        }
     }
 
     /**
