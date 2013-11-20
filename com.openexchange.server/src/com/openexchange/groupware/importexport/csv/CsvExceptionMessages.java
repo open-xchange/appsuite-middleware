@@ -54,17 +54,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 public class CsvExceptionMessages implements LocalizableStrings {
 
-    public static final String BROKEN_CSV_MSG = "Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file?";
-
-    public static final String DATA_AFTER_LAST_LINE_MSG = "Illegal state: Found data after presumed last line.";
-
-    public static final String LOADING_FOLDER_FAILED_MSG = "Could not load folder %s";
-
-    public static final String UTF8_ENCODE_FAILED_MSG = "Could not encode as UTF-8";
-
-    public static final String IOEXCEPTION_WHILE_CONVERTING_MSG = "Encountered IO error while trying to read stream";
-
-    public static final String NUMBER_FAILED_MSG = "Parsing %1$s to a number failed.";
+    public static final String BROKEN_CSV_MSG = "Broken CSV file.";
 
     private CsvExceptionMessages() {
         super();
