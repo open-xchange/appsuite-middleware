@@ -58,29 +58,14 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class QuotaFileStorageExceptionMessage implements LocalizableStrings {
 
+    /** The allowed Quota is reached. */
+    public final static String STORE_FULL_MSG = "The allowed quota is reached. Please delete some items in order to create new ones.";
+
     /**
      * Initializes a new {@link QuotaFileStorageExceptionMessage}.
      */
     private QuotaFileStorageExceptionMessage() {
         super();
     }
-
-    /** Couldn't reach the filestore */
-    public final static String INSTANTIATIONERROR_MSG = "File store could not be accessed.";
-
-    /** Database Query could not be realized */
-    public final static String SQLSTATEMENTERROR_MSG = "Database query failed.";
-
-    /** The allowed Quota is reached. */
-    public final static String STORE_FULL_MSG = "The allowed Quota is reached.";
-
-    /** Quota seems to be inconsistent. Please use consistency tool on context %1$d. */
-    public final static String QUOTA_UNDERRUN_MSG = "Quota seems to be inconsistent. Please use consistency tool on context %1$d.";
-
-    /** Quota usage is missing for context %1$d. */
-    public final static String NO_USAGE_MSG = "Quota usage is missing for context %1$d.";
-
-    /** Update of quota usage for context %1$d failed. */
-    public final static String UPDATE_FAILED_MSG = "Updating quota usage for context %1$d failed.";
 
 }
