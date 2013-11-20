@@ -68,7 +68,7 @@ public enum QuotaFileStorageExceptionCodes implements DisplayableOXExceptionCode
     /**
      * Database Query could not be realized
      */
-    SQLSTATEMENTERROR("Database query failed.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 23),
+    SQLSTATEMENTERROR("Database query failed.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 23),
     /**
      * The allowed Quota is reached.
      */
