@@ -51,46 +51,54 @@
 package com.openexchange.spamhandler.spamassassin.exceptions;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
-public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
+public enum SpamhandlerSpamassassinExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Spamd returned wrong exit code "%s"
      */
-    WRONG_SPAMD_EXIT(SpamhandlerSpamassassinExceptionMessage.WRONG_SPAMD_EXIT_MSG, CATEGORY_ERROR, 3000),
+    WRONG_SPAMD_EXIT("Spamd returned wrong exit code \"%s\"", CATEGORY_ERROR, 3000),
 
     /**
      * Internal error: Wrong arguments are given to the tell command: "%s"
      */
-    WRONG_TELL_CMD_ARGS(SpamhandlerSpamassassinExceptionMessage.WRONG_TELL_CMD_ARGS_MSG, CATEGORY_ERROR, 3001),
+    WRONG_TELL_CMD_ARGS("Internal error: Wrong arguments are given to the tell command: \"%s\"", CATEGORY_ERROR, 3001),
 
     /**
      * Error during communication with spamd: "%s"
      */
-    COMMUNICATION_ERROR(SpamhandlerSpamassassinExceptionMessage.COMMUNICATION_ERROR_MSG, CATEGORY_ERROR, 3002),
+    COMMUNICATION_ERROR("Error during communication with spamd: \"%s\"", CATEGORY_ERROR, 3002),
 
     /**
      * Can't handle spam because MailService isn't available
      */
-    MAILSERVICE_MISSING(SpamhandlerSpamassassinExceptionMessage.MAILSERVICE_MISSING_MSG, CATEGORY_ERROR, 3003),
+    MAILSERVICE_MISSING("Spam cannot be handled because MailService is not available", CATEGORY_ERROR, 3003),
 
     /**
      * Error while getting spamd provider from service: "%s"
      */
-    ERROR_GETTING_SPAMD_PROVIDER(SpamhandlerSpamassassinExceptionMessage.ERROR_GETTING_SPAMD_PROVIDER_MSG, CATEGORY_ERROR, 3004);
+    ERROR_GETTING_SPAMD_PROVIDER("Error while getting spamd provider from service: \"%s\"", CATEGORY_ERROR, 3004);
 
-    final Category category;
+    private Category category;
 
-    final int detailNumber;
+    private int detailNumber;
 
-    final String message;
+    private String message;
+    
+    private String displayMessage;
 
-    private SpamhandlerSpamassassinExceptionCode(final String message, final Category category, final int detailNumber) {
+    private SpamhandlerSpamassassinExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.detailNumber = detailNumber;
         this.category = category;
+    }
+    
+    private SpamhandlerSpamassassinExceptionCode(String message, Category category, int detailNumber) {
+        this(message, null, category, detailNumber);
     }
 
     @Override
@@ -107,6 +115,11 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     @Override
     public int getNumber() {
@@ -114,7 +127,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -133,7 +146,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -144,7 +157,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

@@ -51,65 +51,68 @@
 package com.openexchange.spamhandler.spamassassin.exceptions;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for permission exceptions.
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
  */
-public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExceptionCode {
+public enum SpamhandlerSpamassassinConfigurationExceptionCode implements DisplayableOXExceptionCode {
     /**
      * The given value for mode "%s" is not a possible one
      */
-    MODE_TYPE_WRONG(SpamhandlerSpamassassinExceptionMessage.MODE_TYPE_WRONG_MSG, CATEGORY_CONFIGURATION, 1),
+    MODE_TYPE_WRONG("The value given for mode \"%s\" is invalid.", CATEGORY_CONFIGURATION, 1),
 
     /**
      * The parameter "%s" is not set in the property file
      */
-    PARAMETER_NOT_SET(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NOT_SET_MSG, CATEGORY_CONFIGURATION, 2),
+    PARAMETER_NOT_SET("The parameter \"%s\" is not set in property file", CATEGORY_CONFIGURATION, 2),
 
     /**
      * The parameter "%s" must be set in the property file if spamd is true
      */
-    PARAMETER_NOT_SET_SPAMD(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NOT_SET_SPAMD_MSG, CATEGORY_CONFIGURATION, 3),
+    PARAMETER_NOT_SET_SPAMD("The parameter \"%s\" must be set in the property file if spamd is true", CATEGORY_CONFIGURATION, 3),
 
     /**
      * The parameter "%s" must be an integer value but is "%s"
      */
-    PARAMETER_NO_INTEGER(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NO_INTEGER_MSG, CATEGORY_CONFIGURATION, 4),
+    PARAMETER_NO_INTEGER("The parameter \"%s\" must be an integer value but is \"%s\"", CATEGORY_CONFIGURATION, 4),
 
     /**
      * The parameter "userSource" must be set in the property file if spamd is true
      */
-    USERSOURCE_NOT_SET(SpamhandlerSpamassassinExceptionMessage.USERSOURCE_NOT_SET_MSG, CATEGORY_CONFIGURATION, 5),
+    USERSOURCE_NOT_SET("The parameter \"userSource\" must be set in the property file if spamd is true", CATEGORY_CONFIGURATION, 5),
 
     /**
      * The given value for userSource "%s" is not a possible one
      */
-    USERSOURCE_WRONG(SpamhandlerSpamassassinExceptionMessage.USERSOURCE_WRONG_MSG, CATEGORY_CONFIGURATION, 6),
+    USERSOURCE_WRONG("The given value for userSource \"%s\" is not a possible one", CATEGORY_CONFIGURATION, 6),
 
     /**
      * The parameter "%s" must be numeric, but is "%s"
      */
-    PARAMETER_NO_LONG(SpamhandlerSpamassassinExceptionMessage.PARAMETER_NO_LONG_MSG, CATEGORY_CONFIGURATION, 7);
+    PARAMETER_NO_LONG("The parameter \"%s\" must be numeric, but is \"%s\"", CATEGORY_CONFIGURATION, 7);
+    
+    private String displayMessage;
 
     /**
      * Message of the exception.
      */
-    final String message;
+    private String message;
 
     /**
      * Category of the exception.
      */
-    final Category category;
+    private Category category;
 
     /**
      * Detail number of the exception.
      */
-    final int number;
+    private int number;
 
     /**
      * Default constructor.
@@ -118,10 +121,15 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
      * @param category category.
      * @param detailNumber detail number.
      */
-    private SpamhandlerSpamassassinConfigurationExceptionCode(final String message, final Category category, final int detailNumber) {
+    private SpamhandlerSpamassassinConfigurationExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = detailNumber;
+    }
+    
+    private SpamhandlerSpamassassinConfigurationExceptionCode(String message, Category category, int detailNumber) {
+        this(message, null, category, detailNumber);
     }
 
     @Override
@@ -143,9 +151,14 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
     public int getNumber() {
         return number;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -164,7 +177,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -175,7 +188,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }
