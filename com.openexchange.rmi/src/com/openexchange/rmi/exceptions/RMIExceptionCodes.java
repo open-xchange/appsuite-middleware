@@ -50,9 +50,10 @@
 package com.openexchange.rmi.exceptions;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -60,29 +61,36 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public enum RMIExceptionCodes implements OXExceptionCode {
-    RMI_START_FAILED(RMIExceptionMessage.RMI_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
+public enum RMIExceptionCodes implements DisplayableOXExceptionCode {
+    
+    RMI_START_FAILED("Start of RMI service failed.", 1, Category.CATEGORY_ERROR),
 
-    RMI_CREATE_REGISTRY_FAILED(RMIExceptionMessage.RMI_CREATE_REGISTRY_FAILED_MSG, 2, Category.CATEGORY_ERROR)
-    ;
+    RMI_CREATE_REGISTRY_FAILED("Could not create RMI registry.", 2, Category.CATEGORY_ERROR);
 
     /**
      * Message of the exception.
      */
-    private final String message;
+    private String message;
+    
+    private String displayMessage;
 
     /**
      * Category of the exception.
      */
-    private final Category category;
+    private Category category;
 
     /**
      * Detail number of the exception.
      */
-    private final int detailNumber;
-
+    private int detailNumber;
+    
     private RMIExceptionCodes(String message, int detailNumber, Category category) {
+        this(message, null, detailNumber, category);
+    }
+
+    private RMIExceptionCodes(String message, String displayMessage, int detailNumber, Category category) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.detailNumber = detailNumber;
     }
@@ -90,6 +98,11 @@ public enum RMIExceptionCodes implements OXExceptionCode {
     @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -127,7 +140,7 @@ public enum RMIExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -138,7 +151,7 @@ public enum RMIExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
