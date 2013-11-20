@@ -8486,35 +8486,11 @@ msgstr ""
 msgid "The selected resource \"%1$s\" has been changed in the meantime."
 msgstr ""
 
-#. * Couldn't reach the filestore
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:69
-msgid "File store could not be accessed."
-msgstr ""
-
-#. * Database Query could not be realized
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:72
-msgid "Database query failed."
-msgstr ""
-
 #. * The allowed Quota is reached.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:75
-msgid "The allowed Quota is reached."
-msgstr ""
-
-#. * Quota seems to be inconsistent. Please use consistency tool on context %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:62
 msgid ""
-"Quota seems to be inconsistent. Please use consistency tool on context %1$d."
-msgstr ""
-
-#. * Quota usage is missing for context %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:81
-msgid "Quota usage is missing for context %1$d."
-msgstr ""
-
-#. * Update of quota usage for context %1$d failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:84
-msgid "Updating quota usage for context %1$d failed."
+"The allowed quota is reached. Please delete some items in order to create "
+"new ones."
 msgstr ""
 
 #. *
