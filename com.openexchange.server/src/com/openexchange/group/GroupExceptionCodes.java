@@ -50,98 +50,131 @@
 package com.openexchange.group;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for the ldap exception.
  */
-public enum GroupExceptionCodes implements OXExceptionCode {
+public enum GroupExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A database connection Cannot be obtained.
      */
-    NO_CONNECTION(GroupExceptionMessage.NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 1),
+    NO_CONNECTION("Cannot get database connection.", Category.CATEGORY_SERVICE_DOWN, 1),
+    
     /**
      * SQL Problem: "%1$s".
      */
-    SQL_ERROR(GroupExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    SQL_ERROR("SQL Problem: \"%1$s\"", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    
     /**
      * No group given.
      */
-    NULL(GroupExceptionMessage.NULL_MSG, Category.CATEGORY_ERROR, 3),
+    NULL("No group given.", GroupExceptionMessage.NULL_MSG, Category.CATEGORY_ERROR, 3),
+    
     /**
      * The mandatory field %1$s is not defined.
      */
-    MANDATORY_MISSING(GroupExceptionMessage.MANDATORY_MISSING_MSG, Category.CATEGORY_USER_INPUT, 4),
+    MANDATORY_MISSING("The mandatory field %1$s is not defined.", GroupExceptionMessage.MANDATORY_MISSING_MSG, Category.CATEGORY_USER_INPUT,
+        4),
+        
     /**
      * The simple name contains invalid characters: "%1$s".
      */
-    NOT_ALLOWED_SIMPLE_NAME(GroupExceptionMessage.NOT_ALLOWED_SIMPLE_NAME_MSG, Category.CATEGORY_USER_INPUT, 5),
+    NOT_ALLOWED_SIMPLE_NAME("The simple name contains invalid characters: \"%1$s\".", GroupExceptionMessage.NOT_ALLOWED_SIMPLE_NAME_MSG,
+        Category.CATEGORY_USER_INPUT, 5),
+    
     /**
      * Another group with the same identifier name exists: %1$d.
      */
-    DUPLICATE(GroupExceptionMessage.DUPLICATE_MSG, Category.CATEGORY_USER_INPUT, 6),
+    DUPLICATE("Another group with the same identifier name exists: %1$d.", GroupExceptionMessage.DUPLICATE_MSG,
+        Category.CATEGORY_USER_INPUT, 6),
+        
     /**
      * Group contains a not existing member %1$d.
      */
-    NOT_EXISTING_MEMBER(GroupExceptionMessage.NOT_EXISTING_MEMBER_MSG, Category.CATEGORY_USER_INPUT, 7),
+    NOT_EXISTING_MEMBER("Group contains a not existing member %1$d.", GroupExceptionMessage.NOT_EXISTING_MEMBER_MSG,
+        Category.CATEGORY_USER_INPUT, 7),
+        
     /**
      * Group contains invalid data: "%1$s".
      */
-    INVALID_DATA(GroupExceptionMessage.INVALID_DATA_MSG, Category.CATEGORY_USER_INPUT, 8),
+    INVALID_DATA("Group contains invalid data: \"%1$s\".", GroupExceptionMessage.INVALID_DATA_MSG, Category.CATEGORY_USER_INPUT, 8),
+    
     /**
      * You are not allowed to create groups.
      */
-    NO_CREATE_PERMISSION(GroupExceptionMessage.NO_CREATE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 9),
+    NO_CREATE_PERMISSION("You are not allowed to create groups.", GroupExceptionMessage.NO_CREATE_PERMISSION_MSG,
+        Category.CATEGORY_PERMISSION_DENIED, 9),
+        
     /**
      * Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please
      * refresh or synchronize and try again.
      */
-    MODIFIED(GroupExceptionMessage.MODIFIED_MSG, Category.CATEGORY_CONFLICT, 10),
+    MODIFIED("Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. "
+        + "Please refresh or synchronize and try again.", GroupExceptionMessage.MODIFIED_MSG, Category.CATEGORY_CONFLICT, 10),
+        
     /**
      * You are not allowed to change groups.
      */
-    NO_MODIFY_PERMISSION(GroupExceptionMessage.NO_MODIFY_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 11),
+    NO_MODIFY_PERMISSION("You are not allowed to change groups.", GroupExceptionMessage.NO_MODIFY_PERMISSION_MSG,
+        Category.CATEGORY_PERMISSION_DENIED, 11),
+        
     /**
      * You are not allowed to delete groups.
      */
-    NO_DELETE_PERMISSION(GroupExceptionMessage.NO_DELETE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 12),
+    NO_DELETE_PERMISSION("You are not allowed to delete groups.", GroupExceptionMessage.NO_DELETE_PERMISSION_MSG,
+        Category.CATEGORY_PERMISSION_DENIED, 12),
+        
     /**
      * Group "%1$s" can not be deleted.
      */
-    NO_GROUP_DELETE(GroupExceptionMessage.NO_GROUP_DELETE_MSG, Category.CATEGORY_USER_INPUT, 13),
+    NO_GROUP_DELETE("Group \"%1$s\" can not be deleted.", GroupExceptionMessage.NO_GROUP_DELETE_MSG, Category.CATEGORY_USER_INPUT, 13),
+    
     /**
      * Group "%1$s" can not be changed.
      */
-    NO_GROUP_UPDATE(GroupExceptionMessage.NO_GROUP_UPDATE_MSG, Category.CATEGORY_USER_INPUT, 14);
+    NO_GROUP_UPDATE("Group \"%1$s\" can not be changed.", GroupExceptionMessage.NO_GROUP_UPDATE_MSG, Category.CATEGORY_USER_INPUT, 14);
 
     /**
      * Message of the exception.
      */
-    private final String message;
+    private String message;
+    
+    /**
+     * Display message of the exception.
+     */
+    private String displayMessage;
 
     /**
      * Category of the exception.
      */
-    private final Category category;
+    private Category category;
 
     /**
      * Detail number of the exception.
      */
-    private final int detailNumber;
+    private int detailNumber;
 
     /**
      * Default constructor.
      *
      * @param message message.
+     * @param displayMessage displayMessage
      * @param category category.
      * @param detailNumber detail number.
      */
-    private GroupExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private GroupExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.message = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.detailNumber = detailNumber;
+    }
+    
+    private GroupExceptionCodes(String message, Category category, int detailNumber) {
+        this(message, null, category, detailNumber);
     }
 
     @Override
@@ -163,9 +196,14 @@ public enum GroupExceptionCodes implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -184,7 +222,7 @@ public enum GroupExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -195,7 +233,7 @@ public enum GroupExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

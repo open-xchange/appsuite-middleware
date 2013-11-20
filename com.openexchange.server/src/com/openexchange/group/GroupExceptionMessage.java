@@ -65,29 +65,23 @@ public class GroupExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    // A database connection Cannot be obtained.
-    public final static String NO_CONNECTION_MSG = "Cannot get database connection.";
-
-    // SQL Problem: "%1$s".
-    public final static String SQL_ERROR_MSG = "SQL Problem: \"%1$s\"";
-
     // No group given.
     public final static String NULL_MSG = "No group given.";
 
     // The mandatory field %1$s is not defined.
-    public final static String MANDATORY_MISSING_MSG = "The mandatory field %1$s is not defined.";
+    public final static String MANDATORY_MISSING_MSG = "Required value \"%1$s\" was not supplied.";
 
     // The simple name contains invalid characters: "%1$s".
-    public final static String NOT_ALLOWED_SIMPLE_NAME_MSG = "The simple name contains invalid characters: \"%1$s\".";
+    public final static String NOT_ALLOWED_SIMPLE_NAME_MSG = "The name contains invalid characters: \"%1$s\".";
 
     // Another group with the same identifier name exists: %1$d.
-    public final static String DUPLICATE_MSG = "Another group with the same identifier name exists: %1$d.";
+    public final static String DUPLICATE_MSG = "Another group with the same identifier name exists.";
 
     // Group contains a not existing member %1$d.
-    public final static String NOT_EXISTING_MEMBER_MSG = "Group contains a not existing member %1$d.";
+    public final static String NOT_EXISTING_MEMBER_MSG = "Group contains a not existing member.";
 
     // Group contains invalid data: "%1$s".
-    public final static String INVALID_DATA_MSG = "Group contains invalid data: \"%1$s\".";
+    public final static String INVALID_DATA_MSG = "Group contains invalid data.";
 
     // You are not allowed to create groups.
     public final static String NO_CREATE_PERMISSION_MSG = "You are not allowed to create groups.";
@@ -95,7 +89,7 @@ public class GroupExceptionMessage implements LocalizableStrings {
     // Edit Conflict. Your change cannot be completed because somebody else has made a conflicting change to the same item. Please refresh
     // or synchronize and try again.
     public final static String MODIFIED_MSG = "Edit Conflict. Your change cannot be completed because somebody else has made a conflicting" +
-    		" change to the same item. " + "Please refresh or synchronize and try again.";
+    		" change to the same item. Please refresh or synchronize and try again.";
 
     // You are not allowed to change groups.
     public final static String NO_MODIFY_PERMISSION_MSG = "You are not allowed to change groups.";
