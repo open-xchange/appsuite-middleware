@@ -65,43 +65,10 @@ public class SettingExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    /** Cannot get connection to database. */
-    public final static String NO_CONNECTION_MSG = "Cannot get connection to database.";
-
-    /** An SQL problem occures while reading information from the config database. */
-    public final static String SQL_ERROR = null;
-
     /** Writing the setting %1$s is not permitted. */
     public final static String NO_WRITE_MSG = "Writing the setting %1$s is not permitted.";
 
-    /** Unknown setting path %1$s. */
-    public final static String UNKNOWN_PATH_MSG = "Unknown setting path %1$s.";
-
-    /** Setting "%1$s" is not a leaf one. */
-    public final static String NOT_LEAF_MSG = "Setting \"%1$s\" is not a leaf.";
-
-    /** Exception while parsing JSON. */
-    public final static String JSON_READ_ERROR_MSG = "Exception while parsing JSON.";
-
-    /** Problem while initialising configuration tree. */
-    public final static String INIT_MSG = "Problem while initialising configuration tree.";
-
     /** Invalid value %s written to setting %s. */
     public final static String INVALID_VALUE_MSG = "Invalid value %s written to setting %s.";
-
-    /** Found duplicate database identifier %d. Not adding preferences item. */
-    public final static String DUPLICATE_ID_MSG = "Found duplicate database identifier %d. Not adding preferences item.";
-
-    /** Found duplicate path %s. */
-    public final static String DUPLICATE_PATH_MSG = "Found duplicate path %s.";
-
-    /** Subsystem error. */
-    public final static String SUBSYSTEM_MSG = "Error during use of a subsystem";
-
-    /** Not allowed operation. */
-    public final static String NOT_ALLOWED_MSG = "Not allowed operation.";
-
-    /** Reached maximum retries writing setting %s. */
-    public final static String MAX_RETRY_MSG = "Reached maximum retries for writing the setting %s.";
 
 }
