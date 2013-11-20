@@ -127,7 +127,7 @@ public final class CapabilitySet implements Iterable<Capability> {
      * Adds given capability.
      *
      * @param capability The capability to add
-     * @return <code>true</code> if added; otherwise <code>false</code> if already contained
+     * @return <code>true</code> if set changed; otherwise <code>false</code> if already contained
      */
     public boolean add(final Capability capability) {
         if (null == capability) {
