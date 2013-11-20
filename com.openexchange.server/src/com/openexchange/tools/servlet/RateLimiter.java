@@ -467,7 +467,7 @@ public final class RateLimiter {
             return true;
         }
         final int maxRateTimeWindow = maxRateTimeWindow();
-        if (maxRatePerMinute <= 0) {
+        if (maxRateTimeWindow <= 0) {
             return true;
         }
         if (omitLocals() && LOCALS.contains(servletRequest.getServerName())) {
