@@ -99,10 +99,6 @@ public enum TransactionExceptionCodes implements OXExceptionCode {
         return message;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public Category getCategory() {
         return category;

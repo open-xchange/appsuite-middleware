@@ -231,10 +231,6 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
         return displayMessage;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);

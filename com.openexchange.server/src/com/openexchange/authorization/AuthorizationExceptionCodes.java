@@ -102,10 +102,6 @@ public enum AuthorizationExceptionCodes implements DisplayableOXExceptionCode {
         return displayMessage;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public Category getCategory() {
         return category;

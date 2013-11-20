@@ -162,11 +162,6 @@ public enum AttachmentExceptionCodes implements DisplayableOXExceptionCode {
         return displayMessage;
     }
 
-    public String getHelp() {
-        // Nothing to do
-        return null;
-    }
-
     @Override
     public Category getCategory() {
         return category;

@@ -142,10 +142,6 @@ public enum OAuthProviderExceptionCodes implements OXExceptionCode {
         return number;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);

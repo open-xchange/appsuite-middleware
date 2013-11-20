@@ -113,10 +113,6 @@ public enum DataRetentionExceptionMessages implements OXExceptionCode {
         return number;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public String getMessage() {
         return message;

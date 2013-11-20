@@ -49,7 +49,54 @@
 
 package com.openexchange.importexport.exceptions;
 
-import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.*;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.CALENDAR_DISABLED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.CANNOT_EXPORT_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.CANNOT_IMPORT_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.CONTACTS_DISABLED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.CONTACT_INTERFACE_MISSING_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.COULD_NOT_CREATE_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.COULD_NOT_WRITE_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.EMPTY_FILE_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.FILE_NOT_EXISTS_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.ICAL_CONVERSION_FAILED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.ICAL_EMITTER_SERVICE_MISSING_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.ICAL_PARSER_SERVICE_MISSING_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.IGNORE_FIELD_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.IOEXCEPTION_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.IOEXCEPTION_RETRY_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.IRREGULAR_COLUMN_ID_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.LIMIT_EXCEEDED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.LOADING_CONTACTS_FAILED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.LOADING_FOLDER_FAILED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NEED_FOLDER_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NOT_FOUND_FIELD_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_CONTENT_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_DATABASE_CONNECTION_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_EXPORTER_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_FIELD_FOR_NAMING_IN_LINE_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_FIELD_FOR_NAMING_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_FIELD_IMPORTED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_FILE_UPLOADED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_FOLDEROBJECT_CONSTANT_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_IMPORTER_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_TYPES_CONSTANT_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_VALID_CSV_COLUMNS_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NO_VCARD_FOUND_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.NUMBER_FAILED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.ONLY_ONE_FILE_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.ONLY_ONE_FOLDER_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.RESOURCE_HARD_CONFLICT_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.TASKS_DISABLED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.TEMP_FILE_NOT_FOUND_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.TRUNCATION_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.UNKNOWN_FORMAT_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.UNKNOWN_VCARD_FORMAT_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.UTF8_ENCODE_FAILED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.VCARD_CONVERSION_FAILED_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.VCARD_CONVERSION_PROBLEM_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.VCARD_PARSING_PROBLEM_MSG;
+import static com.openexchange.importexport.exceptions.ImportExportExceptionMessages.WARNINGS_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -176,10 +223,6 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
-    }
-
-    public String getHelp() {
-        return null;
     }
 
     @Override

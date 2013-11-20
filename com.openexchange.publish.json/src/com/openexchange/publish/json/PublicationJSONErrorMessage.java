@@ -50,36 +50,91 @@
 package com.openexchange.publish.json;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link PublicationJSONErrorMessage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public enum PublicationJSONErrorMessage implements OXExceptionCode {
-    THROWABLE(CATEGORY_ERROR, 1, PublicationJSONExceptionMessage.THROWABLE_HELP, PublicationJSONExceptionMessage.THROWABLE_MSG),
-    MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, PublicationJSONExceptionMessage.MISSING_PARAMETER_HELP, PublicationJSONExceptionMessage.MISSING_PARAMETER_MSG),
-    UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, PublicationJSONExceptionMessage.UNKNOWN_ACTION_HELP, PublicationJSONExceptionMessage.UNKNOWN_ACTION_MSG),
-    UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, PublicationJSONExceptionMessage.UNKOWN_ENTITY_MODULE_HELP, PublicationJSONExceptionMessage.UNKOWN_ENTITY_MODULE_MSG),
-    UNKNOWN_COLUMN(CATEGORY_USER_INPUT, 5, PublicationJSONExceptionMessage.UNKNOWN_COLUMN_HELP, PublicationJSONExceptionMessage.UNKNOWN_COLUMN_MSG),
-    UNKNOWN_TARGET(CATEGORY_USER_INPUT, 6, PublicationJSONExceptionMessage.UNKNOWN_TARGET_HELP, PublicationJSONExceptionMessage.UNKNOWN_TARGET_MSG);
+public enum PublicationJSONErrorMessage implements DisplayableOXExceptionCode {
+    /**
+     * An unexpected error occurred: %s
+     */
+    THROWABLE(CATEGORY_ERROR, 1, PublicationJSONErrorMessage.THROWABLE_MSG),
+    /**
+     * Missing value for parameter %s
+     */
+    MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, PublicationJSONErrorMessage.MISSING_PARAMETER_MSG),
+    /**
+     * Unknown action: %s
+     */
+    UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, PublicationJSONErrorMessage.UNKNOWN_ACTION_MSG),
+    /**
+     * Unknown entity module: %s
+     */
+    UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, PublicationJSONErrorMessage.UNKOWN_ENTITY_MODULE_MSG),
+    /**
+     * Unknown column: %s
+     */
+    UNKNOWN_COLUMN(CATEGORY_USER_INPUT, 5, PublicationJSONErrorMessage.UNKNOWN_COLUMN_MSG),
+    /**
+     * Unknown target: %s
+     */
+    UNKNOWN_TARGET(CATEGORY_USER_INPUT, 6, PublicationJSONErrorMessage.UNKNOWN_TARGET_MSG)
+
+    ;
+
+    private final static String THROWABLE_MSG = "An unexpected error occurred: %s";
+
+    private final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
+
+    private final static String UNKNOWN_ACTION_MSG = "Unknown action: %s";
+
+    private final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
+
+    private final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
+
+    private final static String UNKNOWN_TARGET_MSG = "Unknown target: %s";
 
     private Category category;
 
     private int errorCode;
 
-    private String help;
-
     private String message;
 
-    private PublicationJSONErrorMessage(final Category category, final int errorCode, final String help, final String message) {
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link PublicationJSONErrorMessage}.
+     * 
+     * @param category
+     * @param errorCode
+     * @param message
+     */
+    private PublicationJSONErrorMessage(final Category category, final int errorCode, final String message) {
+        this(category, errorCode, message, null);
+    }
+
+    /**
+     * Initializes a new {@link PublicationJSONErrorMessage}.
+     * 
+     * @param category
+     * @param errorCode
+     * @param message
+     * @param displayMessage
+     */
+    private PublicationJSONErrorMessage(final Category category, final int errorCode, final String message, final String displayMessage) {
         this.category = category;
         this.errorCode = errorCode;
-        this.help = help;
         this.message = message;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -97,10 +152,6 @@ public enum PublicationJSONErrorMessage implements OXExceptionCode {
         return errorCode;
     }
 
-    public String getHelp() {
-        return help;
-    }
-
     @Override
     public String getMessage() {
         return message;
@@ -112,8 +163,16 @@ public enum PublicationJSONErrorMessage implements OXExceptionCode {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
+    }
+
+    /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

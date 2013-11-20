@@ -295,10 +295,6 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
         return number;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public String getMessage() {
         return message;

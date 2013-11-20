@@ -313,10 +313,6 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
         return message;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public Category getCategory() {
         return category;
