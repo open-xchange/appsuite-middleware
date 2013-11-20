@@ -4897,42 +4897,19 @@ msgstr ""
 msgid "Publish Infostore document"
 msgstr ""
 
-#. A SQL Error occurred.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:66
-msgid "A SQL error occurred."
+#. Cannot find the requested publication site.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
+msgid "Cannot find the requested publication site."
 msgstr ""
 
-#. A parsing error occurred: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:72
-msgid "A parsing error occurred: %1$s."
-msgstr ""
-
+#. You do not have the appropriate permissions to perform the chosen action.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:66
-msgid "Could not load publications of type %1$s"
+msgid ""
+"You do not have the appropriate permissions to perform the chosen action."
 msgstr ""
 
-#. Unable to save a given ID.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:81
-msgid "Unable to save a given ID."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:70
-msgid "Cannot find the publication site."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:72
-msgid "%1$s has already been taken (field: %2$s)"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:74
-msgid "You do not have the permissions to perform the chosen action (%s)"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:76
+#. The published document has been deleted in the meantime and therefore is no longer available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:69
 msgid ""
 "The published document has been deleted in the meantime and therefore is no "
 "longer available."
@@ -9471,6 +9448,12 @@ msgstr ""
 msgid "Unknown subscription"
 msgstr ""
 
+#. A parsing error occurred: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:72
+msgid "A parsing error occurred: %1$s."
+msgstr ""
+
 #. Provide well-formed HTML.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:69
@@ -9552,6 +9535,11 @@ msgstr ""
 msgid "Versioning not supported by XING file storage."
 msgstr ""
 
+#. A SQL Error occurred.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:66
+msgid "A SQL error occurred."
+msgstr ""
+
 #. Parsing error.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:75
 msgid "Parsing error."
@@ -9560,6 +9548,11 @@ msgstr ""
 #. Do not set a ID when saving a publication
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:78
 msgid "Do not set a ID when saving a publication"
+msgstr ""
+
+#. Unable to save a given ID.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:81
+msgid "Unable to save a given ID."
 msgstr ""
 
 #. Provide a valid id.
