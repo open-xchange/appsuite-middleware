@@ -50,491 +50,516 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
+import static com.openexchange.exception.OXExceptionStrings.SQL_ERROR_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * The error code enumeration for folders.
  */
-public enum OXFolderExceptionCode implements OXExceptionCode {
+public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     /**
      * User %1$s has no access to module %2$s in context %3$s due to user configuration
      * <p>
      * Requested operation was canceled because underlying user configuration denies folder access due to module restrictions
      * </p>
      */
-    NO_MODULE_ACCESS(OXFolderExceptionMessage.NO_MODULE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 2, Generic.NO_PERMISSION),
+    NO_MODULE_ACCESS("User %1$s has no access to module %2$s in context %3$s due to user configuration",
+        OXFolderExceptionMessage.NO_MODULE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 2, Generic.NO_PERMISSION),
     /**
      * Folder \"%1$s\" not visible to user %2$s in context %3$s
      * <p>
      * Either underlying user configuration or folder CATEGORY_PERMISSION_DENIED setting denies visibility of folder in question
      * </p>
      */
-    NOT_VISIBLE(OXFolderExceptionMessage.NOT_VISIBLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 3, Generic.NO_PERMISSION),
+    NOT_VISIBLE("Folder \"%1$s\" not visible to user %2$s in context %3$s",
+        OXFolderExceptionMessage.NOT_VISIBLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 3, Generic.NO_PERMISSION),
     /**
      * User %1$s has no access on shared folder %2$s in context %3$s due to user configuration
      * <p>
      * Underlying user configuration denies access to shared folder(s)
      * </p>
      */
-    NO_SHARED_FOLDER_ACCESS(OXFolderExceptionMessage.NO_SHARED_FOLDER_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 4, Generic.NO_PERMISSION),
+    NO_SHARED_FOLDER_ACCESS("User %1$s has no access on shared folder %2$s in context %3$s due to user configuration",
+        OXFolderExceptionMessage.NO_SHARED_FOLDER_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 4, Generic.NO_PERMISSION),
     /**
      * User %1$s has no write access on public folder %2$s in context %3$s due to user configuration
      * <p>
      * Underlying user configuration denies write access to public folder(s)
      * </p>
      */
-    NO_PUBLIC_FOLDER_WRITE_ACCESS(OXFolderExceptionMessage.NO_PUBLIC_FOLDER_WRITE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 5, Generic.NO_PERMISSION),
+    NO_PUBLIC_FOLDER_WRITE_ACCESS("User %1$s has no write access on public folder %2$s in context %3$s due to user configuration",
+        OXFolderExceptionMessage.NO_PUBLIC_FOLDER_WRITE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 5, Generic.NO_PERMISSION),
     /**
      * User %1$s has no create-subfolder permission on folder %2$s in context %3$s
      * <p>
      * Folder CATEGORY_PERMISSION_DENIED setting denies subfolder creation beneath folder in question
      * </p>
      */
-    NO_CREATE_SUBFOLDER_PERMISSION(OXFolderExceptionMessage.NO_CREATE_SUBFOLDER_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 6, Generic.NO_PERMISSION),
+    NO_CREATE_SUBFOLDER_PERMISSION("User %1$s has no create-subfolder permission on folder %2$s in context %3$s",
+        OXFolderExceptionMessage.NO_CREATE_SUBFOLDER_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 6, Generic.NO_PERMISSION),
     /**
      * Missing field %1$s in folder %2$s in context %3$s
      * <p>
      * Operation was canceled due to a missing folder attribute
      * </p>
      */
-    MISSING_FOLDER_ATTRIBUTE(OXFolderExceptionMessage.MISSING_FOLDER_ATTRIBUTE_MSG, Category.CATEGORY_USER_INPUT, 7),
+    MISSING_FOLDER_ATTRIBUTE("Missing field %1$s in folder %2$s in context %3$s", MESSAGE, Category.CATEGORY_USER_INPUT, 7),
     /**
      * Folder %1$s does not exist in context %2$s
      * <p>
      * Folder does not exist
      * </p>
      */
-    NOT_EXISTS(OXFolderExceptionMessage.NOT_EXISTS_MSG, Category.CATEGORY_ERROR, 8, Generic.NOT_FOUND),
+    NOT_EXISTS("Folder %1$s does not exist in context %2$s", OXFolderExceptionMessage.NOT_EXISTS_MSG, Category.CATEGORY_ERROR, 8, Generic.NOT_FOUND),
     /**
      * Folder %1$s has been modified after last sync timestamp in context %2$s
      * <p>
      * Client timestamp is before folder's last-changed timestamp
      * </p>
      */
-    CONCURRENT_MODIFICATION(OXFolderExceptionMessage.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 9, Generic.CONFLICT),
+    CONCURRENT_MODIFICATION("Folder %1$s has been modified after last sync timestamp in context %2$s",
+        OXFolderExceptionMessage.CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 9, Generic.CONFLICT),
     /**
      * User %1$s has no admin access to folder %2$s in context %3$s
      * <p>
      * No necessary admin access granted for update operation
      * </p>
      */
-    NO_ADMIN_ACCESS(OXFolderExceptionMessage.NO_ADMIN_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 10, Generic.NO_PERMISSION),
+    NO_ADMIN_ACCESS("User %1$s has no admin access to folder %2$s in context %3$s",
+        OXFolderExceptionMessage.NO_ADMIN_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 10, Generic.NO_PERMISSION),
     /**
      * Default folder %1$s cannot be renamed in context %2$s
      * <p>
      * Default folder must not be renamed
      * </p>
      */
-    NO_DEFAULT_FOLDER_RENAME(OXFolderExceptionMessage.NO_DEFAULT_FOLDER_RENAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 11, Generic.NO_PERMISSION),
+    NO_DEFAULT_FOLDER_RENAME("Default folder %1$s cannot be renamed in context %2$s",
+        OXFolderExceptionMessage.NO_DEFAULT_FOLDER_RENAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 11, Generic.NO_PERMISSION),
     /**
      * A duplicate folder exists in parent folder %1$s in context %2$s
      * <p>
      * Rename aborted cause a duplicate folder exists beneath parent folder
      * </p>
      */
-    NO_DUPLICATE_FOLDER(OXFolderExceptionMessage.NO_DUPLICATE_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 12),
+    NO_DUPLICATE_FOLDER("A duplicate folder exists in parent folder %1$s in context %2$s",
+        OXFolderExceptionMessage.NO_DUPLICATE_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 12),
     /**
      * Parent folder %1$s does not allow type %2$s in context %3$s
      * <p>
      * Folder's type setting is invalid
      * </p>
      */
-    INVALID_TYPE(OXFolderExceptionMessage.INVALID_TYPE_MSG, Category.CATEGORY_ERROR, 13),
+    INVALID_TYPE("Parent folder %1$s does not allow type %2$s in context %3$s", OXFolderExceptionMessage.INVALID_TYPE_MSG, Category.CATEGORY_ERROR, 13),
     /**
      * Parent folder %1$s does not allow module %2$s in context %3$s
      * <p>
      * Folder's module setting is invalid
      * </p>
      */
-    INVALID_MODULE(OXFolderExceptionMessage.INVALID_MODULE_MSG, Category.CATEGORY_ERROR, 14),
+    INVALID_MODULE("Parent folder %1$s does not allow module %2$s in context %3$s", OXFolderExceptionMessage.INVALID_MODULE_MSG, Category.CATEGORY_ERROR, 14),
     /**
      * Only one admin CATEGORY_PERMISSION_DENIED is allowed on a private folder
      * <p>
      * Only one admin is allowed on a private folder
      * </p>
      */
-    ONLY_ONE_PRIVATE_FOLDER_ADMIN(OXFolderExceptionMessage.ONLY_ONE_PRIVATE_FOLDER_ADMIN_MSG, Category.CATEGORY_ERROR, 15),
+    ONLY_ONE_PRIVATE_FOLDER_ADMIN("Only one admin permission is allowed on a private folder",
+        OXFolderExceptionMessage.ONLY_ONE_PRIVATE_FOLDER_ADMIN_MSG, Category.CATEGORY_ERROR, 15),
     /**
      * A group must not hold admin CATEGORY_PERMISSION_DENIED on a private folder
      * <p>
      * No admin group CATEGORY_PERMISSION_DENIED is allowed on a private folder
      * </p>
      */
-    NO_PRIVATE_FOLDER_ADMIN_GROUP(OXFolderExceptionMessage.NO_PRIVATE_FOLDER_ADMIN_GROUP_MSG, Category.CATEGORY_ERROR, 16),
+    NO_PRIVATE_FOLDER_ADMIN_GROUP("A group must not hold admin permission on a private folder",
+        OXFolderExceptionMessage.NO_PRIVATE_FOLDER_ADMIN_GROUP_MSG, Category.CATEGORY_ERROR, 16),
     /**
      * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
      * <p>
      * Only folder owner may hold admin CATEGORY_PERMISSION_DENIED on a private folder
      * </p>
      */
-    ONLY_PRIVATE_FOLDER_OWNER_ADMIN(OXFolderExceptionMessage.ONLY_PRIVATE_FOLDER_OWNER_ADMIN_MSG, Category.CATEGORY_ERROR, 17),
+    ONLY_PRIVATE_FOLDER_OWNER_ADMIN("Only folder owner may hold admin permission on a private folder",
+        OXFolderExceptionMessage.ONLY_PRIVATE_FOLDER_OWNER_ADMIN_MSG, Category.CATEGORY_ERROR, 17),
     /**
      * Administration rights required. In the Rights tab add at least one user with administration rights.
      * <p>
      * No entity has been defined as admin
      * </p>
      */
-    NO_FOLDER_ADMIN(OXFolderExceptionMessage.NO_FOLDER_ADMIN_MSG, Category.CATEGORY_ERROR, 18),
+    NO_FOLDER_ADMIN("Administration rights required. In the Rights tab add at least one user with administration rights.",
+        OXFolderExceptionMessage.NO_FOLDER_ADMIN_MSG, Category.CATEGORY_ERROR, 18),
     /**
      * Invalid object ID %1$s
      * <p>
      * An invalid object ID
      * </p>
      */
-    INVALID_OBJECT_ID(OXFolderExceptionMessage.INVALID_OBJECT_ID_MSG, Category.CATEGORY_ERROR, 19),
+    INVALID_OBJECT_ID("Invalid object ID %1$s", MESSAGE, Category.CATEGORY_ERROR, 19),
     /**
      * Not allowed to change parent id of folder %1$s through an update call. Use move method instead
      * <p>
      * Folder's parent id is changed during an update operation
      * </p>
      */
-    NO_MOVE_THROUGH_UPDATE(OXFolderExceptionMessage.NO_MOVE_THROUGH_UPDATE_MSG, Category.CATEGORY_ERROR, 20),
+    NO_MOVE_THROUGH_UPDATE("Not allowed to change parent id of folder %1$s through an update call. Use move method instead.",
+        MESSAGE, Category.CATEGORY_ERROR, 20),
     /**
      * Not allowed to move default folder %1$s in context %2$s
      * <p>
      * Default folder must not be moved
      * </p>
      */
-    NO_DEFAULT_FOLDER_MOVE(OXFolderExceptionMessage.NO_DEFAULT_FOLDER_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 21),
-    /**
-     * Target folder %1$s contains a duplicate folder in context %2$s
-     * <p>
-     * Target folder contains a duplicate folder
-     * </p>
-     */
-    TARGET_FOLDER_CONTAINS_DUPLICATE(OXFolderExceptionMessage.TARGET_FOLDER_CONTAINS_DUPLICATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 22),
+    NO_DEFAULT_FOLDER_MOVE("Not allowed to move default folder %1$s in context %2$s",
+        OXFolderExceptionMessage.NO_DEFAULT_FOLDER_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 21),
     /**
      * Shared folder %1$s cannot be moved in context %2$s
      * <p>
      * A shared folder must not be moved
      * </p>
      */
-    NO_SHARED_FOLDER_MOVE(OXFolderExceptionMessage.NO_SHARED_FOLDER_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 23),
+    NO_SHARED_FOLDER_MOVE("Shared folder %1$s cannot be moved in context %2$s",
+        OXFolderExceptionMessage.NO_SHARED_FOLDER_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 23),
     /**
      * Shared folder %1$s cannot be target of move operation in context %2$s
      * <p>
      * A shared folder must not be target of a move operation
      * </p>
      */
-    NO_SHARED_FOLDER_TARGET(OXFolderExceptionMessage.NO_SHARED_FOLDER_TARGET_MSG, Category.CATEGORY_PERMISSION_DENIED, 24),
+    NO_SHARED_FOLDER_TARGET("Shared folder %1$s cannot be target of move operation in context %2$s",
+        OXFolderExceptionMessage.NO_SHARED_FOLDER_TARGET_MSG, Category.CATEGORY_PERMISSION_DENIED, 24),
     /**
      * System folder %1$s cannot be moved in context %2$s
      * <p>
      * A system folder must not be moved
      * </p>
      */
-    NO_SYSTEM_FOLDER_MOVE(OXFolderExceptionMessage.NO_SYSTEM_FOLDER_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 25),
+    NO_SYSTEM_FOLDER_MOVE("System folder %1$s cannot be moved in context %2$s",
+        OXFolderExceptionMessage.NO_SYSTEM_FOLDER_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 25),
     /**
      * Private folder %1$s can only be moved to a private folder in context %2$s
      * <p>
      * A private folder may only be moved to a private folder
      * </p>
      */
-    ONLY_PRIVATE_TO_PRIVATE_MOVE(OXFolderExceptionMessage.ONLY_PRIVATE_TO_PRIVATE_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 26),
+    ONLY_PRIVATE_TO_PRIVATE_MOVE("Private folder %1$s can only be moved to a private folder in context %2$s",
+        OXFolderExceptionMessage.ONLY_PRIVATE_TO_PRIVATE_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 26),
     /**
      * Public folder %1$s may only be moved to a public folder in context %2$s
      * <p>
      * A public folder may only be moved to a public folder
      * </p>
      */
-    ONLY_PUBLIC_TO_PUBLIC_MOVE(OXFolderExceptionMessage.ONLY_PUBLIC_TO_PUBLIC_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 27),
+    ONLY_PUBLIC_TO_PUBLIC_MOVE("Public folder %1$s can only be moved to a public folder in context %2$s",
+        OXFolderExceptionMessage.ONLY_PUBLIC_TO_PUBLIC_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 27),
     /**
      * Target and source folder must not be equal in context %1$s
      * <p>
      * Target and source folder must not be equal
      * </p>
      */
-    NO_EQUAL_MOVE(OXFolderExceptionMessage.NO_EQUAL_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 28),
+    NO_EQUAL_MOVE("Target and source folder cannot be equal in context %1$s",
+        OXFolderExceptionMessage.NO_EQUAL_MOVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 28),
     /**
      * User %1$s is not allowed to move all subfolders of folder %2$s in context %3$s
      * <p>
      * User is not allowed to move source folder's subfolder
      * </p>
      */
-    NO_SUBFOLDER_MOVE_ACCESS(OXFolderExceptionMessage.NO_SUBFOLDER_MOVE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 29),
+    NO_SUBFOLDER_MOVE_ACCESS("User %1$s is not allowed to move all subfolders of folder %2$s in context %3$s",
+        OXFolderExceptionMessage.NO_SUBFOLDER_MOVE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 29),
     /**
      * User %1$s is not allowed to delete shared folder %2$s in context %3$s
      * <p>
      * A shared folder must not be deleted
      * </p>
      */
-    NO_SHARED_FOLDER_DELETION(OXFolderExceptionMessage.NO_SHARED_FOLDER_DELETION_MSG, Category.CATEGORY_PERMISSION_DENIED, 30),
+    NO_SHARED_FOLDER_DELETION("User %1$s is not allowed to delete shared folder %2$s in context %3$s",
+        OXFolderExceptionMessage.NO_SHARED_FOLDER_DELETION_MSG, Category.CATEGORY_PERMISSION_DENIED, 30),
     /**
      * User %1$s is not allowed to delete default folder %2$s in context %3$s
      * <p>
      * Default folder(s) must not be deleted
      * </p>
      */
-    NO_DEFAULT_FOLDER_DELETION(OXFolderExceptionMessage.NO_DEFAULT_FOLDER_DELETION_MSG, Category.CATEGORY_PERMISSION_DENIED, 31),
+    NO_DEFAULT_FOLDER_DELETION("User %1$s is not allowed to delete default folder %2$s in context %3$s",
+        OXFolderExceptionMessage.NO_DEFAULT_FOLDER_DELETION_MSG, Category.CATEGORY_PERMISSION_DENIED, 31),
     /**
      * User %1$s is not allowed to delete all contained objects in folder %2$s in context %3$s
      * <p>
      * User is not allowed to delete all objects contained in folder in question
      * </p>
      */
-    NOT_ALL_OBJECTS_DELETION(OXFolderExceptionMessage.NOT_ALL_OBJECTS_DELETION_MSG, Category.CATEGORY_PERMISSION_DENIED, 32),
+    NOT_ALL_OBJECTS_DELETION("User %1$s is not allowed to delete all objects in folder %2$s in context %3$s",
+        OXFolderExceptionMessage.NOT_ALL_OBJECTS_DELETION_MSG, Category.CATEGORY_PERMISSION_DENIED, 32),
     /**
      * No admin user found in context %1$s
      * <p>
      * No admin user was found in context in question
      * </p>
      */
-    NO_ADMIN_USER_FOUND_IN_CONTEXT(OXFolderExceptionMessage.NO_ADMIN_USER_FOUND_IN_CONTEXT_MSG, Category.CATEGORY_ERROR, 33),
+    NO_ADMIN_USER_FOUND_IN_CONTEXT("No admin user found in context %1$s", MESSAGE, Category.CATEGORY_ERROR, 33),
     /**
      * No default folder could be found in module %1$s for user %2$s in context %3$s
      * <p>
      * No default folder was found for current user in given module and context
      * </p>
      */
-    NO_DEFAULT_FOLDER_FOUND(OXFolderExceptionMessage.NO_DEFAULT_FOLDER_FOUND_MSG, Category.CATEGORY_ERROR, 34),
+    NO_DEFAULT_FOLDER_FOUND("No default folder could be found in module %1$s for user %2$s in context %3$s",
+        MESSAGE, Category.CATEGORY_ERROR, 34),
     /**
      * Folder %1$s could not be loaded in context %2$s
      * <p>
      * Folder could not be loaded from storage
      * </p>
      */
-    FOLDER_COULD_NOT_BE_LOADED(OXFolderExceptionMessage.FOLDER_COULD_NOT_BE_LOADED_MSG, Category.CATEGORY_ERROR, 35),
+    FOLDER_COULD_NOT_BE_LOADED("Folder %1$s could not be loaded in context %2$s", SQL_ERROR_MSG, Category.CATEGORY_ERROR, 35),
     /**
      * Folder %1$s could not be put into cache in context %2$s
      * <p>
      * Folder could not be put into cache
      * </p>
      */
-    FOLDER_COULD_NOT_BE_PUT_INTO_CACHE(OXFolderExceptionMessage.FOLDER_COULD_NOT_BE_PUT_INTO_CACHE_MSG, Category.CATEGORY_ERROR, 36),
+    FOLDER_COULD_NOT_BE_PUT_INTO_CACHE("Folder %1$s could not be put into cache in context %2$s", MESSAGE, Category.CATEGORY_ERROR, 36),
     /**
      * Effective CATEGORY_PERMISSION_DENIED of folder %1$s could not be determined for user %2$s in context %3$s
      * <p>
      * User's effective CATEGORY_PERMISSION_DENIED on folder could not be determined
      * </p>
      */
-    NO_EFFECTIVE_PERMISSION(OXFolderExceptionMessage.NO_EFFECTIVE_PERMISSION_MSG, Category.CATEGORY_ERROR, 37),
+    NO_EFFECTIVE_PERMISSION("Effective permission of folder %1$s could not be determined for user %2$s in context %3$s",
+        MESSAGE, Category.CATEGORY_ERROR, 37),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(OXFolderExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 38),
+    SQL_ERROR("A SQL error occurred: %1$s", SQL_ERROR_MSG, Category.CATEGORY_ERROR, 38),
     /**
      * A DBPool error occurred in context %1$s
      */
-    DBPOOLING_ERROR(OXFolderExceptionMessage.DBPOOLING_ERROR_MSG, Category.CATEGORY_ERROR, 39),
+    DBPOOLING_ERROR("A DBPool error occurred in context %1$s", SQL_ERROR_MSG, Category.CATEGORY_ERROR, 39),
     /**
      * Delivered sequence id %1$s from database is less than allowed min. folder id of %2$s in context %3$s
      */
-    INVALID_SEQUENCE_ID(OXFolderExceptionMessage.INVALID_SEQUENCE_ID_MSG, Category.CATEGORY_ERROR, 41),
+    INVALID_SEQUENCE_ID("Delivered sequence id %1$s from database is less than allowed min. folder id of %2$s in context %3$s",
+        SQL_ERROR_MSG, Category.CATEGORY_ERROR, 41),
     /**
      * Module %1$s is unknown in context %2$s
      */
-    UNKNOWN_MODULE(OXFolderExceptionMessage.UNKNOWN_MODULE_MSG, Category.CATEGORY_ERROR, 42),
-    /**
-     * Folder %1$s could not be updated in context %2$s
-     * <p>
-     * Folder update failed for any reason
-     * </p>
-     */
-    UPDATE_FAILED(OXFolderExceptionMessage.UPDATE_FAILED_MSG, Category.CATEGORY_ERROR, 43),
+    UNKNOWN_MODULE("Module %1$s is unknown in context %2$s", MESSAGE, Category.CATEGORY_ERROR, 42),
     /**
      * Invalid entity id %1$s detected in permissions of folder %2$s in context %3$s
      */
-    INVALID_ENTITY(OXFolderExceptionMessage.INVALID_ENTITY_MSG, Category.CATEGORY_ERROR, 44),
+    INVALID_ENTITY("Invalid entity id %1$s detected in permissions of folder %2$s in context %3$s", MESSAGE, Category.CATEGORY_ERROR, 44),
     /**
      * Folder %1$s must not be moved to one of its subfolders in context %2$s
      */
-    NO_SUBFOLDER_MOVE(OXFolderExceptionMessage.NO_SUBFOLDER_MOVE_MSG, Category.CATEGORY_ERROR, 45),
+    NO_SUBFOLDER_MOVE("Folder %1$s must not be moved to one of its subfolders in context %2$s",
+        OXFolderExceptionMessage.NO_SUBFOLDER_MOVE_MSG, Category.CATEGORY_ERROR, 45),
     /**
      * An unexpected error occurred: %1$s
      * <p>
      * Inserted for those exception that will turn to an <code>OXException</code> in future
      */
-    UNKNOWN_EXCEPTION(OXFolderExceptionMessage.UNKNOWN_EXCEPTION_MSG, Category.CATEGORY_ERROR, 46),
+    UNKNOWN_EXCEPTION("An unexpected error occurred: %1$s", MESSAGE, Category.CATEGORY_ERROR, 46),
     /**
      * A LDAP error occurred in context %1$s
      */
-    LDAP_ERROR(OXFolderExceptionMessage.LDAP_ERROR_MSG, Category.CATEGORY_ERROR, 47),
+    LDAP_ERROR("A LDAP error occurred in context %1$s", MESSAGE, Category.CATEGORY_ERROR, 47),
     /**
      * Attribute \"%1$s\" is not set in FolderObject instance %2$s in context %3$s
      */
-    ATTRIBUTE_NOT_SET(OXFolderExceptionMessage.ATTRIBUTE_NOT_SET_MSG, Category.CATEGORY_ERROR, 48),
+    ATTRIBUTE_NOT_SET("Attribute \"%1$s\" is not set in FolderObject instance %2$s in context %3$s", MESSAGE, Category.CATEGORY_ERROR, 48),
     /**
      * A source folder of module %1$s must not be moved to a target folder of module %2$s
      */
-    INCOMPATIBLE_MODULES(OXFolderExceptionMessage.INCOMPATIBLE_MODULES_MSG, Category.CATEGORY_PERMISSION_DENIED, 49),
-    /**
-     * Operation not executable on folder %1$s in context %2$s
-     */
-    UNSUPPORTED_OPERATION(OXFolderExceptionMessage.UNSUPPORTED_OPERATION_MSG, Category.CATEGORY_ERROR, 50),
+    INCOMPATIBLE_MODULES("A source folder of module %1$s must not be moved to a target folder of module %2$s",
+        OXFolderExceptionMessage.INCOMPATIBLE_MODULES_MSG, Category.CATEGORY_PERMISSION_DENIED, 49),
     /**
      * Folder cache (region name = %1$s) could not be initialized due to following reason: %2$s
      */
-    FOLDER_CACHE_INITIALIZATION_FAILED(OXFolderExceptionMessage.FOLDER_CACHE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 51),
+    FOLDER_CACHE_INITIALIZATION_FAILED("Folder cache (region name = %1$s) could not be initialized due to the following reason: %2$s",
+        MESSAGE, Category.CATEGORY_ERROR, 51),
     /**
      * Folder cache has not been enabled in config file %1$s
      */
-    CACHE_NOT_ENABLED(OXFolderExceptionMessage.CACHE_NOT_ENABLED_MSG, Category.CATEGORY_ERROR, 52),
+    CACHE_NOT_ENABLED("Folder cache has not been enabled in config file %1$s", MESSAGE, Category.CATEGORY_ERROR, 52),
     /**
      * Folder %1$s could not be removed from folder cache
      */
-    CACHE_ERROR_ON_REMOVE(OXFolderExceptionMessage.CACHE_ERROR_ON_REMOVE_MSG, Category.CATEGORY_ERROR, 53),
-    /**
-     * User %1$s has no write permission on folder %2$s in context %3$s
-     */
-    NO_WRITE_PERMISSION(OXFolderExceptionMessage.NO_WRITE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 54, Generic.NO_PERMISSION),
+    CACHE_ERROR_ON_REMOVE("Folder %1$s could not be removed from folder cache", MESSAGE, Category.CATEGORY_ERROR, 53),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(OXFolderExceptionMessage.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 55),
+    JSON_ERROR("A JSON error occurred: %1$s", MESSAGE, Category.CATEGORY_ERROR, 55),
     /**
      * Unknown parameter container type: %1$s
      */
-    UNKNOWN_PARAMETER_CONTAINER_TYPE(OXFolderExceptionMessage.UNKNOWN_PARAMETER_CONTAINER_TYPE_MSG, Category.CATEGORY_ERROR, 56),
+    UNKNOWN_PARAMETER_CONTAINER_TYPE("Unknown parameter container type: %1$s", MESSAGE, Category.CATEGORY_ERROR, 56),
     /**
      * Missing parameter %1$s
      */
-    MISSING_PARAMETER(OXFolderExceptionMessage.MISSING_PARAMETER_MSG, Category.CATEGORY_ERROR, 57),
+    MISSING_PARAMETER("Missing parameter %1$s", MESSAGE, Category.CATEGORY_ERROR, 57),
     /**
      * Bad value %1$s in parameter %2$s
      */
-    BAD_PARAM_VALUE(OXFolderExceptionMessage.BAD_PARAM_VALUE_MSG, Category.CATEGORY_USER_INPUT, 58),
+    BAD_PARAM_VALUE("Bad value %1$s in parameter %2$s", MESSAGE, Category.CATEGORY_USER_INPUT, 58),
     /**
      * Unknown field: %1$s
      */
-    UNKNOWN_FIELD(OXFolderExceptionMessage.UNKNOWN_FIELD_MSG, Category.CATEGORY_ERROR, 59),
+    UNKNOWN_FIELD("Unknown field: %1$s", MESSAGE, Category.CATEGORY_ERROR, 59),
     /**
      * Parameter %1$s does not match JSON key %2$s
      */
-    PARAMETER_MISMATCH(OXFolderExceptionMessage.PARAMETER_MISMATCH_MSG, Category.CATEGORY_ERROR, 60),
+    PARAMETER_MISMATCH("Parameter %1$s does not match JSON key %2$s", MESSAGE, Category.CATEGORY_ERROR, 60),
     /**
      * Invalid CATEGORY_PERMISSION_DENIED values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s
      */
-    INVALID_PERMISSION(OXFolderExceptionMessage.INVALID_PERMISSION_MSG, Category.CATEGORY_ERROR, 61),
+    INVALID_PERMISSION("Invalid permission values: fp=%1$s orp=%2$s owp=%3$s odp=%4$s", MESSAGE, Category.CATEGORY_ERROR, 61),
     /**
      * Unknown action: %1$s
      */
-    UNKNOWN_ACTION(OXFolderExceptionMessage.UNKNOWN_ACTION_MSG, Category.CATEGORY_ERROR, 62),
+    UNKNOWN_ACTION("Unknown action: %1$s", MESSAGE, Category.CATEGORY_ERROR, 62),
     /**
      * Shared folder %1$s must not be updated in context %2$s
      */
-    NO_SHARED_FOLDER_UPDATE(OXFolderExceptionMessage.NO_SHARED_FOLDER_UPDATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 63),
+    NO_SHARED_FOLDER_UPDATE("Shared folder %1$s must not be updated in context %2$s",
+        OXFolderExceptionMessage.NO_SHARED_FOLDER_UPDATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 63),
     /**
      * The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.
      */
-    TRUNCATED(OXFolderExceptionMessage.TRUNCATED_MSG, Category.CATEGORY_TRUNCATED, 64),
+    TRUNCATED("The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.",
+        OXFolderExceptionMessage.TRUNCATED_MSG, Category.CATEGORY_TRUNCATED, 64),
+    /**
+     * The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.
+     */
+    TRUNCATED_FOLDERNAME("The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.",
+        OXFolderExceptionMessage.TRUNCATED_FOLDERNAME_MSG, Category.CATEGORY_TRUNCATED, 64), // same code as TRUNCATED
     /**
      * Unable to map OCL permission value %1$s to a JSON permission value
      */
-    MAP_PERMISSION_FAILED(OXFolderExceptionMessage.MAP_PERMISSION_FAILED_MSG, Category.CATEGORY_ERROR, 65),
+    MAP_PERMISSION_FAILED("Unable to map OCL permission value %1$s to a JSON permission value", MESSAGE, Category.CATEGORY_ERROR, 65),
     /**
      * Folder existence cannot be checked due to insufficient folder information
      */
-    UNSUFFICIENT_FOLDER_INFORMATION(OXFolderExceptionMessage.UNSUFFICIENT_FOLDER_INFORMATION_MSG, Category.CATEGORY_ERROR, 66),
+    UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to insufficient folder information", MESSAGE, Category.CATEGORY_ERROR, 66),
     /**
      * A runtime error occurred in context %1$s
      */
-    RUNTIME_ERROR(OXFolderExceptionMessage.RUNTIME_ERROR_MSG, Category.CATEGORY_ERROR, 67),
-    /**
-     * This method is not applicable to an IMAP permission.
-     */
-    ACL_PERMISSION_ERROR(OXFolderExceptionMessage.ACL_PERMISSION_ERROR_MSG, Category.CATEGORY_ERROR, 68),
-    /**
-     * No subfolder creation underneath shared folder %1$s in context %2$s
-     */
-    NO_SUBFOLDER_BELOW_SHARED_FOLDER(OXFolderExceptionMessage.NO_SUBFOLDER_BELOW_SHARED_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 69),
+    RUNTIME_ERROR("A runtime error occurred in context %1$s", MESSAGE, Category.CATEGORY_ERROR, 67),
     /**
      * User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.
      */
-    INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION(OXFolderExceptionMessage.INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 70),
+    INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION("User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.",
+        OXFolderExceptionMessage.INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 70),
     /**
      * Owner %1$s of default folder %2$s must keep the folder admin permission
      */
-    CREATOR_IS_NOT_ADMIN(OXFolderExceptionMessage.CREATOR_IS_NOT_ADMIN_MSG, Category.CATEGORY_USER_INPUT, 71),
+    CREATOR_IS_NOT_ADMIN("Owner %1$s of default folder %2$s must keep the folder admin permission",
+        OXFolderExceptionMessage.CREATOR_IS_NOT_ADMIN_MSG, Category.CATEGORY_USER_INPUT, 71),
     /**
      * User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration
      */
-    SHARE_FORBIDDEN(OXFolderExceptionMessage.SHARE_FORBIDDEN_MSG, Category.CATEGORY_PERMISSION_DENIED, 72),
+    SHARE_FORBIDDEN("User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration",
+        OXFolderExceptionMessage.SHARE_FORBIDDEN_MSG, Category.CATEGORY_PERMISSION_DENIED, 72),
     /**
      * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s in
      * context %3$s.
      */
-    UNAPPLICABLE_FOLDER_PERM(OXFolderExceptionMessage.UNAPPLICABLE_FOLDER_PERM_MSG, Category.CATEGORY_PERMISSION_DENIED, 73),
+    UNAPPLICABLE_FOLDER_PERM("The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s in context %3$s.",
+        OXFolderExceptionMessage.UNAPPLICABLE_FOLDER_PERM_MSG, Category.CATEGORY_PERMISSION_DENIED, 73),
     /**
      * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently cannot
      * delete its parent folder.
      */
-    HIDDEN_FOLDER_ON_DELETION(OXFolderExceptionMessage.HIDDEN_FOLDER_ON_DELETION_MSG, Category.CATEGORY_PERMISSION_DENIED, 74),
+    HIDDEN_FOLDER_ON_DELETION("Folder %1$s in context %2$s contains a hidden subfolder." + " User %3$s has no delete rights for this subfolder and consequently cannot delete its parent folder.",
+        OXFolderExceptionMessage.HIDDEN_FOLDER_ON_DELETION_MSG, Category.CATEGORY_PERMISSION_DENIED, 74),
     /**
      * An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s. Please choose another display name.
      */
-    NO_DEFAULT_INFOSTORE_CREATE(OXFolderExceptionMessage.NO_DEFAULT_INFOSTORE_CREATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 75),
+    NO_DEFAULT_INFOSTORE_CREATE("An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s." + " Please choose another display name.",
+        OXFolderExceptionMessage.NO_DEFAULT_INFOSTORE_CREATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 75),
     /**
      * Folder contains invalid data: "%1$s"
      */
-    INVALID_DATA(OXFolderExceptionMessage.INVALID_DATA_MSG, Category.CATEGORY_USER_INPUT, 76),
+    INVALID_DATA("Folder contains invalid data: \"%1$s\"", OXFolderExceptionMessage.INVALID_DATA_MSG, Category.CATEGORY_USER_INPUT, 76),
     /**
      * You already share a personal folder named "%1$s" with the same user. You can not share two folders with exactly the same name with a
      * user. Please rename the folder before sharing it with this user.
      */
-    SIMILAR_NAMED_SHARED_FOLDER(OXFolderExceptionMessage.SIMILAR_NAMED_SHARED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 77),
+    SIMILAR_NAMED_SHARED_FOLDER("You already share a personal folder named \"%1$s\" with the same user. You can not share two folders with exactly the same name with a user. Please rename the folder before sharing it with this user.",
+        OXFolderExceptionMessage.SIMILAR_NAMED_SHARED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 77),
     /**
      * Folder module cannot be updated since folder is not empty
      */
-    NO_FOLDER_MODULE_UPDATE(OXFolderExceptionMessage.NO_FOLDER_MODULE_UPDATE_MSG, Category.CATEGORY_USER_INPUT, 78),
+    NO_FOLDER_MODULE_UPDATE("Folder module cannot be updated since folder is not empty", MESSAGE, Category.CATEGORY_USER_INPUT, 78),
     /**
      * Duplicate permission defined for user %1$s. Only one permission per user is allowed.
      */
-    DUPLICATE_USER_PERMISSION(OXFolderExceptionMessage.DUPLICATE_USER_PERMISSION_MSG, Category.CATEGORY_USER_INPUT, 79),
+    DUPLICATE_USER_PERMISSION("Duplicate permission defined for user %1$s. Only one permission per user is allowed.",
+        OXFolderExceptionMessage.DUPLICATE_USER_PERMISSION_MSG, Category.CATEGORY_USER_INPUT, 79),
     /**
      * Duplicate permission defined for group %1$s. Only one permission per group is allowed.
      */
-    DUPLICATE_GROUP_PERMISSION(OXFolderExceptionMessage.DUPLICATE_GROUP_PERMISSION_MSG, Category.CATEGORY_USER_INPUT, 80),
+    DUPLICATE_GROUP_PERMISSION("Duplicate permission defined for group %1$s. Only one permission per group is allowed.",
+        OXFolderExceptionMessage.DUPLICATE_GROUP_PERMISSION_MSG, Category.CATEGORY_USER_INPUT, 80),
     /**
      * Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.
      */
-    FOLDER_VISIBILITY_PERMISSION_ONLY(OXFolderExceptionMessage.FOLDER_VISIBILITY_PERMISSION_ONLY_MSG, Category.CATEGORY_PERMISSION_DENIED, 81),
+    FOLDER_VISIBILITY_PERMISSION_ONLY("Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.",
+        OXFolderExceptionMessage.FOLDER_VISIBILITY_PERMISSION_ONLY_MSG, Category.CATEGORY_PERMISSION_DENIED, 81),
     /**
      * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
      */
-    NO_GROUP_PERMISSION(OXFolderExceptionMessage.NO_GROUP_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 82),
+    NO_GROUP_PERMISSION("Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.",
+        OXFolderExceptionMessage.NO_GROUP_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 82),
     /**
      * No individual user permissions are allowed for folder %1$s in context %2$s.
      */
-    NO_INDIVIDUAL_PERMISSION(OXFolderExceptionMessage.NO_INDIVIDUAL_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 83),
+    NO_INDIVIDUAL_PERMISSION("No individual user permissions are allowed for folder %1$s in context %2$s.",
+        OXFolderExceptionMessage.NO_INDIVIDUAL_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 83),
     /**
      * Folder module must not be updated.
      */
-    DENY_FOLDER_MODULE_UPDATE(OXFolderExceptionMessage.DENY_FOLDER_MODULE_UPDATE_MSG, Category.CATEGORY_USER_INPUT, 84),
+    DENY_FOLDER_MODULE_UPDATE("Folder module must not be updated.", MESSAGE, Category.CATEGORY_USER_INPUT, 84),
     /**
      * The module of a default folder must not be changed.
      */
-    NO_DEFAULT_FOLDER_MODULE_UPDATE(OXFolderExceptionMessage.NO_DEFAULT_FOLDER_MODULE_UPDATE_MSG, Category.CATEGORY_USER_INPUT, 85),
+    NO_DEFAULT_FOLDER_MODULE_UPDATE("The module of a default folder must not be changed.", MESSAGE, Category.CATEGORY_USER_INPUT, 85),
     /**
      * User %1$s must not rename folder %2$s in context %3$s
      * <p>
      * No necessary rename access granted for update operation
      * </p>
      */
-    NO_RENAME_ACCESS(OXFolderExceptionMessage.NO_RENAME_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 86),
+    NO_RENAME_ACCESS("User %1$s must not rename folder %2$s in context %3$s", OXFolderExceptionMessage.NO_RENAME_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 86),
     /**
      * Failed to create folder. Please retry.
      */
-    CREATE_FAILED(OXFolderExceptionMessage.CREATE_FAILED_MSG, Category.CATEGORY_TRY_AGAIN, 87),
+    CREATE_FAILED("Failed to create folder. Please retry.", MESSAGE_RETRY, Category.CATEGORY_TRY_AGAIN, 87),
     /**
      * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
      */
-    DELETE_FAILED_LOCKED_DOCUMENTS(OXFolderExceptionMessage.DELETE_FAILED_LOCKED_DOCUMENTS_MSG, Category.CATEGORY_PERMISSION_DENIED, 88),
+    DELETE_FAILED_LOCKED_DOCUMENTS("Delete cannot be performed because of locked documents in folder %1$s in context %2$s.",
+        OXFolderExceptionMessage.DELETE_FAILED_LOCKED_DOCUMENTS_MSG, Category.CATEGORY_PERMISSION_DENIED, 88),
     /**
      * Operation may only be performed for context administrator.
      */
-    ADMIN_OP_ONLY(OXFolderExceptionMessage.ADMIN_OP_ONLY_MSG, Category.CATEGORY_PERMISSION_DENIED, 89),
+    ADMIN_OP_ONLY("Operation may only be performed for context administrator.", MESSAGE, Category.CATEGORY_PERMISSION_DENIED, 89),
     /**
      * Folder %1$s must not be deleted in context %2$s.
      */
-    DELETE_DENIED(OXFolderExceptionMessage.DELETE_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 90),
+    DELETE_DENIED("Folder %1$s must not be deleted in context %2$s.", OXFolderExceptionMessage.DELETE_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 90),
     /**
      * Owner %1$s of folder %2$s has been restored to keep the folder admin permission
      */
-    CREATOR_STAYS_ADMIN(OXFolderExceptionMessage.CREATOR_STAYS_ADMIN_MSG, Category.CATEGORY_WARNING, 91),
+    CREATOR_STAYS_ADMIN("Owner %1$s of folder %2$s has been restored to keep the folder admin permission",
+        OXFolderExceptionMessage.CREATOR_STAYS_ADMIN_MSG, Category.CATEGORY_WARNING, 91),
 
     ;
 
@@ -549,9 +574,14 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
     }
 
     /**
-     * Message of the exception.
+     * (Log) Message of the exception.
      */
     private final String message;
+
+    /**
+     * Display message of the exception.
+     */
+    private final String displayMessage;
 
     /**
      * Category of the exception.
@@ -568,12 +598,13 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     private final Generic generic;
 
-    private OXFolderExceptionCode(final String message, final Category category, final int number) {
-        this(message, category, number, Generic.NONE);
+    private OXFolderExceptionCode(final String message, String displayMessage, final Category category, final int number) {
+        this(message, displayMessage, category, number, Generic.NONE);
     }
 
-    private OXFolderExceptionCode(final String message, final Category category, final int number, final Generic generic) {
+    private OXFolderExceptionCode(final String message, String displayMessage, final Category category, final int number, final Generic generic) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = number;
         this.generic = generic;
@@ -602,6 +633,11 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**
@@ -648,4 +684,5 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }

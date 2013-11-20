@@ -381,7 +381,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
             if (throwException) {
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(parentFolder),
-                    Integer.valueOf(ctx.getContextId()));
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
 
             OXFolderUtility.checki18nString(parentFolderID, folderName, user.getLocale(), ctx);
@@ -770,7 +770,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                      */
                     throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(new OXFolderAccess(
                         readCon,
-                        ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx.getContextId()));
+                        ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx.getContextId()), folderName);
                 }
                 /*
                  * Check i18n strings, too
@@ -1011,7 +1011,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
             if (throwException) {
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(new OXFolderAccess(readCon, ctx).getFolderObject(storageObj.getParentFolderID())),
-                    Integer.valueOf(ctx.getContextId()));
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
 
             /*
@@ -1126,8 +1126,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
 
             if (throwException) {
-                throw OXFolderExceptionCode.TARGET_FOLDER_CONTAINS_DUPLICATE.create(OXFolderUtility.getFolderName(storageDest),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(storageDest),
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
 
             /*
@@ -2057,10 +2057,17 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final OXException fe;
         if (truncateds.length > 0) {
             final OXException.Truncated truncated = truncateds[0];
-            fe = OXFolderExceptionCode.TRUNCATED.create(exc,
-                sFields.toString(),
-                Integer.valueOf(truncated.getMaxSize()),
-                Integer.valueOf(truncated.getLength()));
+            if (1 == truncateds.length && FolderObject.FOLDER_NAME == truncated.getId()) {
+                fe =  OXFolderExceptionCode.TRUNCATED_FOLDERNAME.create(exc,
+                    sFields.toString(),
+                    Integer.valueOf(truncated.getMaxSize()),
+                    Integer.valueOf(truncated.getLength()));
+            } else {
+                fe = OXFolderExceptionCode.TRUNCATED.create(exc,
+                    sFields.toString(),
+                    Integer.valueOf(truncated.getMaxSize()),
+                    Integer.valueOf(truncated.getLength()));
+            }
         } else {
             fe = OXFolderExceptionCode.TRUNCATED.create(exc,
                 sFields.toString(),

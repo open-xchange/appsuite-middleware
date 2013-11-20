@@ -145,7 +145,7 @@ public final class OXFolderUtility {
                  * A duplicate folder exists
                  */
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName,
-                    Integer.valueOf(ctx.getContextId()));
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
             if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(
                 FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
@@ -156,7 +156,7 @@ public final class OXFolderUtility {
                  * A duplicate folder exists
                  */
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName,
-                    Integer.valueOf(ctx.getContextId()));
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
         }
     }
