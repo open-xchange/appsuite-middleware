@@ -49,10 +49,9 @@
 
 package com.openexchange.drive.internal;
 
-import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -259,8 +258,8 @@ public class DirectLinkGenerator {
             CapabilityService capabilityService = DriveServiceLookup.getService(CapabilityService.class);
             if (null != capabilityService) {
                 try {
-                    Set<Capability> capabilities = capabilityService.getCapabilities(session.getServerSession());
-                    if (null != capabilities && capabilities.contains(new Capability("document_preview"))) {
+                    CapabilitySet capabilities = capabilityService.getCapabilities(session.getServerSession());
+                    if (null != capabilities && capabilities.contains("document_preview")) {
                         documentPreview = Boolean.TRUE;
                     }
                 } catch (OXException e) {

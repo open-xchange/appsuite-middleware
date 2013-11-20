@@ -1,6 +1,5 @@
 package com.openexchange.capabilities.internal;
 
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,12 +9,11 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.osgi.CapabilityCheckerRegistry;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
-import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 
@@ -52,7 +50,7 @@ public class CapabilityServiceImplTest {
     /**
      * The capabilities that should be filtered
      */
-    Set<Capability> capabilities = null;
+    CapabilitySet capabilities = null;
 
     /**
      * {@inheritDoc}
@@ -63,7 +61,7 @@ public class CapabilityServiceImplTest {
         this.capabilityCheckerRegistry = Mockito.mock(CapabilityCheckerRegistry.class);
         this.registry = PowerMockito.mock(PermissionAvailabilityServiceRegistry.class);
 
-        this.capabilities = new ConcurrentHashSet<Capability>(64);
+        this.capabilities = new CapabilitySet(64);
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.CALDAV.toString().toLowerCase()));
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.CARDDAV.toString().toLowerCase()));
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.INFOSTORE.toString().toLowerCase()));

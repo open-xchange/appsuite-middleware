@@ -51,7 +51,6 @@ package com.openexchange.apps.manifests.json;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -100,7 +100,7 @@ public class AllAction implements AJAXActionService {
                 }
 
             } else {
-                Set<Capability> capabilities = services.getService(CapabilityService.class).getCapabilities(
+                CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(
                     session.getUserId(),
                     session.getContextId(),
                     true);

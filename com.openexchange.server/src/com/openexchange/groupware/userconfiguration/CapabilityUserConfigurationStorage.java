@@ -58,6 +58,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -169,7 +170,7 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
         return stringify(capabilityService.getCapabilities(userId, cid));
     }
 
-    private static Set<String> stringify(Set<Capability> capabilities) {
+    private static Set<String> stringify(final CapabilitySet capabilities) {
         Set<String> set = new HashSet<String>(capabilities.size());
         for (Capability capability : capabilities) {
             set.add(toLowerCase(capability.getId()));
