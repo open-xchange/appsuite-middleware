@@ -1,3 +1,9 @@
+open-xchange-l10n (7.4.1-5) stable; urgency=low
+
+  * Fifth candidate for 7.4.1 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 20 Nov 2013 11:38:01 +0100
+
 open-xchange-l10n (7.4.1-4) stable; urgency=low
 
   * Fourth candidate for 7.4.1 release
