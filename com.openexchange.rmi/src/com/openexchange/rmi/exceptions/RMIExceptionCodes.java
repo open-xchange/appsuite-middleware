@@ -56,14 +56,14 @@ import com.openexchange.exception.OXExceptionFactory;
 
 
 /**
- * {@link OXRMIExceptionCodes}
+ * {@link RMIExceptionCodes}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public enum OXRMIExceptionCodes implements OXExceptionCode {
-    RMI_START_FAILED(OXRMIExceptionMessage.RMI_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
+public enum RMIExceptionCodes implements OXExceptionCode {
+    RMI_START_FAILED(RMIExceptionMessage.RMI_START_FAILED_MSG, 1, Category.CATEGORY_ERROR),
 
-    RMI_CREATE_REGISTRY_FAILED(OXRMIExceptionMessage.RMI_CREATE_REGISTRY_FAILED_MSG, 2, Category.CATEGORY_ERROR)
+    RMI_CREATE_REGISTRY_FAILED(RMIExceptionMessage.RMI_CREATE_REGISTRY_FAILED_MSG, 2, Category.CATEGORY_ERROR)
     ;
 
     /**
@@ -81,7 +81,7 @@ public enum OXRMIExceptionCodes implements OXExceptionCode {
      */
     private final int detailNumber;
 
-    private OXRMIExceptionCodes(String message, int detailNumber, Category category) {
+    private RMIExceptionCodes(String message, int detailNumber, Category category) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;

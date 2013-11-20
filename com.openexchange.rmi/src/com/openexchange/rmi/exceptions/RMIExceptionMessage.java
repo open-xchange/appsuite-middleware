@@ -53,20 +53,20 @@ import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link OXRMIExceptionMessage}
+ * {@link RMIExceptionMessage}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class OXRMIExceptionMessage implements LocalizableStrings {
+public class RMIExceptionMessage implements LocalizableStrings {
 
     public static final String RMI_START_FAILED_MSG = "Start of RMI service failed.";
 
     public static final String RMI_CREATE_REGISTRY_FAILED_MSG = "Could not create RMI registry.";
 
     /**
-     * Initializes a new {@link OXRMIExceptionMessage}.
+     * Initializes a new {@link RMIExceptionMessage}.
      */
-    private OXRMIExceptionMessage() {
+    private RMIExceptionMessage() {
         super();
     }
 

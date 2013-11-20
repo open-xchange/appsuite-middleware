@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.rmi.exceptions.OXRMIExceptionCodes;
+import com.openexchange.rmi.exceptions.RMIExceptionCodes;
 import com.openexchange.rmi.osgi.RMIActivator;
 
 /**
@@ -108,7 +108,7 @@ public class RMIRegistry {
             return registry;
         } catch (final RemoteException e) {
             log.error(e.getMessage(), e);
-            throw OXRMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
+            throw RMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
         } finally {
             lock.unlock();
         }
