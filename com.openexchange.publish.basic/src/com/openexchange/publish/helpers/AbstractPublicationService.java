@@ -157,16 +157,16 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     @Override
     public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
-    	List<Publication> publications;
-    	List<Publication> returnPublications = new ArrayList<Publication>();
-    	if (module == null) {
-    		publications = STORAGE.getPublicationsOfUser(ctx, userId);
-    	} else {
-    		publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
-    	}
+        List<Publication> publications;
+        List<Publication> returnPublications = new ArrayList<Publication>();
+        if (module == null) {
+            publications = STORAGE.getPublicationsOfUser(ctx, userId);
+        } else {
+            publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
+        }
 
-    	for (final Publication publication : publications) {
-    	    /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
+        for (final Publication publication : publications) {
+            /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
             try {
                 modifyOutgoing(publication);
                 returnPublications.add(publication);
@@ -271,10 +271,6 @@ public abstract class AbstractPublicationService implements PublicationService {
         // Empty method
     }
 
-    public OXException uniquenessConstraintViolation(final String key, final String value) {
-        return PublicationErrorMessage.UniquenessConstraintViolation.create(value, key);
-    }
-
     public void checkPermission(final Permission permission, final Publication publication) throws OXException {
         boolean allow = false;
         try {
@@ -293,7 +289,7 @@ public abstract class AbstractPublicationService implements PublicationService {
             throw x;
         }
         if (!allow) {
-            throw PublicationErrorMessage.AccessDenied.create(permission);
+            throw PublicationErrorMessage.ACCESS_DENIED_EXCEPTION.create(permission);
         }
     }
 

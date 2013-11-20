@@ -75,7 +75,7 @@ public class CompositeLoaderService implements PublicationDataLoaderService {
 
     private PublicationDataLoaderService getSubLoader(String module) throws OXException {
         if(!subLoaders.containsKey(module)) {
-            throw PublicationErrorMessage.NoLoaderFound.create(module);
+            throw PublicationErrorMessage.NO_LOADER_FOUND_EXCEPTION.create(module);
         }
         return subLoaders.get(module);
     }

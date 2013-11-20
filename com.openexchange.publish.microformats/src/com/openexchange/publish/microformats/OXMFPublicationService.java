@@ -72,6 +72,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
@@ -109,7 +110,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private String defaultTemplateName;
 
-	private FormElement templateChooser;
+    private FormElement templateChooser;
 
     public OXMFPublicationService() {
         super();
@@ -157,7 +158,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     public void setFolderType(final String string) {
-    	templateChooser.setOption("only", "publish,"+string);
+        templateChooser.setOption("only", "publish,"+string);
         target.setModule(string);
     }
 
@@ -251,7 +252,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
             siteName = normalizeSiteName(siteName);
             final Publication oldPub = getPublication(publication.getContext(), siteName);
             if (oldPub != null && oldPub.getId() != publication.getId()) {
-                throw uniquenessConstraintViolation(SITE, siteName);
+                throw PublicationErrorMessage.UNIQUENESS_CONSTRAINT_VIOLATION_EXCEPTION.create(SITE, siteName);
             }
             publication.getConfiguration().put(SITE, siteName);
         }

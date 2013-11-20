@@ -49,69 +49,103 @@
 
 package com.openexchange.publish;
 
-import static com.openexchange.publish.PublicationExceptionMessages.ACCESS_DENIED_MSG;
-import static com.openexchange.publish.PublicationExceptionMessages.ID_GIVEN_MSG;
-import static com.openexchange.publish.PublicationExceptionMessages.NOT_EXIST_MSG;
-import static com.openexchange.publish.PublicationExceptionMessages.NO_LOADER_FOUND_MSG;
-import static com.openexchange.publish.PublicationExceptionMessages.PARSE_EXCEPTION_MSG;
-import static com.openexchange.publish.PublicationExceptionMessages.PUBLICATION_NOT_FOUND_MSG;
-import static com.openexchange.publish.PublicationExceptionMessages.SQL_EXCEPTION_MSG;
-import static com.openexchange.publish.PublicationExceptionMessages.UNIQUENESS_CONSTRAINT_VIOLATION;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link PublicationErrorMessage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public enum PublicationErrorMessage implements OXExceptionCode {
+public enum PublicationErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * A SQL Error occurred.
      */
-    SQLException(CATEGORY_ERROR, 1, SQL_EXCEPTION_MSG),
+    SQL_ERROR(CATEGORY_ERROR, 1, PublicationErrorMessage.SQL_EXCEPTION_MSG, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(CATEGORY_ERROR, 2, PARSE_EXCEPTION_MSG),
+    PARSE_EXCEPTION(CATEGORY_ERROR, 2, PublicationErrorMessage.PARSE_EXCEPTION_MSG),
     /**
      * Could not load publications of type %1$s
      */
-    NoLoaderFound(CATEGORY_ERROR, 3, NO_LOADER_FOUND_MSG),
+    NO_LOADER_FOUND_EXCEPTION(CATEGORY_ERROR, 3, PublicationErrorMessage.NO_LOADER_FOUND_MSG),
     /**
      * Can not save a given ID.
      */
-    IDGiven(CATEGORY_ERROR, 4, ID_GIVEN_MSG),
+    ID_GIVEN_EXCEPTION(CATEGORY_ERROR, 4, PublicationErrorMessage.ID_GIVEN_MSG),
     /**
      * Cannot find the publication site (according ID and Context).
      */
-    PublicationNotFound(CATEGORY_USER_INPUT, 5, PUBLICATION_NOT_FOUND_MSG),
+    PUBLICATION_NOT_FOUND_EXCEPTION(CATEGORY_USER_INPUT, 5, PublicationErrorMessage.PUBLICATION_NOT_FOUND_MSG, PublicationExceptionMessages.PUBLICATION_NOT_FOUND_MSG_DISPLAY),
     /**
      * %s has already been taken (field: %s)
      */
-    UniquenessConstraintViolation(CATEGORY_USER_INPUT, 6, UNIQUENESS_CONSTRAINT_VIOLATION),
+    UNIQUENESS_CONSTRAINT_VIOLATION_EXCEPTION(CATEGORY_USER_INPUT, 6, PublicationErrorMessage.UNIQUENESS_CONSTRAINT_VIOLATION),
     /**
      * You do not have the permissions to perform the chosen action (%s)
      */
-    AccessDenied(CATEGORY_PERMISSION_DENIED, 7, ACCESS_DENIED_MSG),
+    ACCESS_DENIED_EXCEPTION(CATEGORY_PERMISSION_DENIED, 7, PublicationErrorMessage.ACCESS_DENIED_MSG, PublicationExceptionMessages.ACCESS_DENIED_MSG_DISPLAY),
     /**
      * Published document has been deleted in meantime and therefore is no longer available.
      */
-    NotExist(CATEGORY_PERMISSION_DENIED, 8, NOT_EXIST_MSG),
+    NOT_FOUND_EXCEPTION(CATEGORY_PERMISSION_DENIED, 8, PublicationErrorMessage.NOT_FOUND_MSG, PublicationExceptionMessages.NOT_FOUND_MSG_DISPLAY),
 
     ;
+
+    private static final String SQL_EXCEPTION_MSG = "A SQL error occurred.";
+
+    private static final String PARSE_EXCEPTION_MSG = "A parsing error occurred: %1$s.";
+
+    private static final String NO_LOADER_FOUND_MSG = "Could not load publications of type %1$s";
+
+    private static final String ID_GIVEN_MSG = "Unable to save a given ID.";
+
+    private static final String PUBLICATION_NOT_FOUND_MSG = "Cannot find the publication site.";
+
+    private static final String UNIQUENESS_CONSTRAINT_VIOLATION = "%1$s has already been taken (field: %2$s)";
+
+    private static final String ACCESS_DENIED_MSG = "You do not have the permissions to perform the chosen action (%s)";
+
+    private static final String NOT_FOUND_MSG = "The published document has been deleted in the meantime and therefore is no longer available.";
 
     private Category category;
     private int errorCode;
     private String message;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link PublicationErrorMessage}.
+     * 
+     * @param category
+     * @param errorCode
+     * @param message
+     */
     private PublicationErrorMessage(final Category category, final int errorCode, final String message) {
+        this(category, errorCode, message, null);
+    }
+
+    /**
+     * Initializes a new {@link PublicationErrorMessage}.
+     * 
+     * @param category
+     * @param errorCode
+     * @param message
+     * @param displayMessage
+     */
+    private PublicationErrorMessage(final Category category, final int errorCode, final String message, final String displayMessage) {
         this.category = category;
         this.errorCode = errorCode;
         this.message = message;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -137,6 +171,14 @@ public enum PublicationErrorMessage implements OXExceptionCode {
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     /**

@@ -73,9 +73,6 @@ import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
@@ -169,7 +166,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             return FileMetadata.getMetadata(fileAccess.getFileMetadata(String.valueOf(infoId), FileStorageFileAccess.CURRENT_VERSION));
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
-                throw PublicationErrorMessage.NotExist.create(e, new Object[0]);
+                throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create(e, new Object[0]);
             }
             throw e;
         }
