@@ -8671,6 +8671,13 @@ msgid ""
 "address and try again."
 msgstr ""
 
+#. The SMTP server %1$s cannot be accessed using a secure SSL connection for user %2$s. Please change configuration accordingly.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:115
+msgid ""
+"The SMTP server %1$s cannot be accessed using a secure SSL connection for "
+"user %2$s. Please change configuration accordingly."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:68
 msgid "Missing parameter %s"
 msgstr ""
