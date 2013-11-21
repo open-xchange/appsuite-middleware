@@ -61,8 +61,6 @@ import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
@@ -402,7 +400,7 @@ public class AbstractContactTest {
     public void cleanUpAfterTest() throws OXException {
         deleteTestFolder(folderId);
     }
-    
+
     @AfterClass
     public static void debrief() throws Exception {
         Init.stopServer();
@@ -422,7 +420,7 @@ public class AbstractContactTest {
     }
 
     protected boolean existsEntry(final int entryNumber) throws OXException {
-        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
         try {
             final Contact co = contactSql.getObjectById(entryNumber, folderId);
             return co != null;
@@ -432,7 +430,7 @@ public class AbstractContactTest {
     }
 
     protected Contact getEntry(final int entryNumber) throws OXException, OXException {
-        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
         return contactSql.getObjectById(entryNumber, folderId);
     }
 

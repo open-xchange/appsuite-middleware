@@ -62,8 +62,6 @@ import java.util.List;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -138,7 +136,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertTrue( res.isCorrect() );
 
         //basic check: 1 entry in folder
-        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
         assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
 
         //detailed check:
@@ -151,7 +149,7 @@ public class CSVContactImportTest extends AbstractContactTest {
     }
 
     @Test public void importEmpty() throws NumberFormatException, Exception{
-        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
         final int numberOfContactsBefore = contactSql.getNumberOfContacts(folderId);
         final List<ImportResult> results = importStuff(IMPORT_EMPTY);
         assertTrue("One result?" , 1 == results.size());
@@ -176,7 +174,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         }
 
         //basic check
-        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
         assertEquals("Two contacts in folder?", 2 , contactSql.getNumberOfContacts(folderId));
 
         //cleaning up
@@ -224,7 +222,7 @@ public class CSVContactImportTest extends AbstractContactTest {
             assertTrue( res.isCorrect() );
         }
 
-        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+        final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
         assertEquals("Three contacts in folder?", 3 , contactSql.getNumberOfContacts(folderId));
 
         //cleaning up

@@ -61,8 +61,6 @@ import java.util.Map;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -115,7 +113,7 @@ public class CSVContactExportTest extends AbstractContactTest {
     public void TearUp() throws OXException {
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
-	
+
 	@Test public void canExport() throws OXException, IOException{
 		assertTrue(
 			"Can export?" ,
@@ -144,7 +142,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
 
 		//cleaning up
-		final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+		final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
 		for(final ImportResult res : results){
 			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 		}
