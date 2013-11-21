@@ -61,13 +61,13 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
-     * Unknown AJAX action: %s.
+     * Unknown AJAX action: %1$s.
      */
-    UNKNOWN_ACTION("Unknown AJAX action: %s.", MESSAGE, Category.CATEGORY_ERROR, 1),
+    UNKNOWN_ACTION("Unknown AJAX action: %1$s.", MESSAGE, Category.CATEGORY_ERROR, 1),
     /**
-     * Missing the following request parameter: %s
+     * Missing the following request parameter: %1$s
      */
-    MISSING_PARAMETER("Unknown AJAX action %1$s in module %2$s.", MESSAGE, Category.CATEGORY_ERROR, 2),
+    MISSING_PARAMETER("Missing the following request parameter: %1$s", MESSAGE, Category.CATEGORY_ERROR, 2),
     /**
      * Missing upload image.
      */
