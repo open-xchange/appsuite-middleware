@@ -60,7 +60,9 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
@@ -73,169 +75,112 @@ import org.osgi.framework.ServiceRegistration;
 public class SimBundleContext implements BundleContext {
 
     public SimBundleContext(){
-
+        super();
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#addBundleListener(org.osgi.framework.BundleListener)
-     */
     @Override
     public void addBundleListener(final BundleListener arg0) {
         // Nothing to do
 
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#addFrameworkListener(org.osgi.framework.FrameworkListener)
-     */
     @Override
     public void addFrameworkListener(final FrameworkListener arg0) {
         // Nothing to do
 
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener)
-     */
     @Override
     public void addServiceListener(final ServiceListener arg0) {
         // Nothing to do
 
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
-     */
     @Override
     public void addServiceListener(final ServiceListener arg0, final String arg1) throws InvalidSyntaxException {
         // Nothing to do
 
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
-     */
     @Override
     public Filter createFilter(final String arg0) throws InvalidSyntaxException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#getAllServiceReferences(java.lang.String, java.lang.String)
-     */
     @Override
     public ServiceReference[] getAllServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#getBundle()
-     */
     @Override
     public Bundle getBundle() {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#getBundle(long)
-     */
     @Override
     public Bundle getBundle(final long arg0) {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#getBundles()
-     */
     @Override
     public Bundle[] getBundles() {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#getDataFile(java.lang.String)
-     */
     @Override
     public File getDataFile(final String arg0) {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#getProperty(java.lang.String)
-     */
     @Override
     public String getProperty(final String arg0) {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#getServiceReference(java.lang.String)
-     */
     @Override
     public ServiceReference getServiceReference(final String arg0) {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#getServiceReferences(java.lang.String, java.lang.String)
-     */
     @Override
     public ServiceReference[] getServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
-     */
     @Override
     public Bundle installBundle(final String arg0) throws BundleException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
-     */
     @Override
     public Bundle installBundle(final String arg0, final InputStream arg1) throws BundleException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#removeBundleListener(org.osgi.framework.BundleListener)
-     */
     @Override
     public void removeBundleListener(final BundleListener arg0) {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#removeFrameworkListener(org.osgi.framework.FrameworkListener)
-     */
     @Override
     public void removeFrameworkListener(final FrameworkListener arg0) {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleContext#removeServiceListener(org.osgi.framework.ServiceListener)
-     */
     @Override
     public void removeServiceListener(final ServiceListener arg0) {
         // Nothing to do
-
     }
 
     @Override
@@ -286,4 +231,11 @@ public class SimBundleContext implements BundleContext {
         return null;
     }
 
+    public <S> ServiceRegistration<S> registerService(final Class<S> clazz, final ServiceFactory<S> factory, final Dictionary<String, ?> properties) {
+        return null;
+    }
+    
+    public <S> ServiceObjects<S> getServiceObjects(final ServiceReference<S> reference) {
+        return null;
+    }
 }
