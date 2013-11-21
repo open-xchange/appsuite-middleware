@@ -106,6 +106,11 @@ public final class ResponseFields {
     public static final String ERROR_STACK = "error_stack";
 
     /**
+     * Name of the JSON attribute containing the rather technical error description.
+     */
+    public static final String ERROR_DESC = "error_desc";
+
+    /**
      * Name of the JSON attribute containing the array of actual length of the truncated attributes.
      */
     public static final String LENGTHS = "lengths";
@@ -142,6 +147,7 @@ public final class ResponseFields {
         ERROR_ID,
         ERROR_PARAMS,
         ERROR_STACK,
+        ERROR_DESC,
         LENGTHS,
         MAX_SIZES,
         PROBLEMATIC,

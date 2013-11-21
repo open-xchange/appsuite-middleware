@@ -400,16 +400,8 @@ public final class ResponseWriter {
             if ((null == args) || (0 == args.length)) {
                 args = exception.getDisplayArgs();
             }
-            // Enforce first condition; review later on
-            if ((null == args) || (0 == args.length)) {
-                json.put(ERROR_PARAMS, new JSONArray(0));
-            } else {
-                final JSONArray jArray = new JSONArray(args.length);
-                for (final Object arg : args) {
-                    jArray.put(arg);
-                }
-                json.put(ERROR_PARAMS, jArray);
-            }
+            // For compatibility
+            json.put(ERROR_PARAMS, new JSONArray(0));
         }
         /*
          * Categories
@@ -435,6 +427,7 @@ public final class ResponseWriter {
         }
         json.put(ERROR_CODE, exception.getErrorCode());
         json.put(ERROR_ID, exception.getExceptionId());
+        json.put(ERROR_DESC, exception.getSoleMessage());
         toJSON(json, exception.getProblematics());
         if (Category.CATEGORY_TRUNCATED.equals(exception.getCategory())) {
             addTruncated(json, exception.getProblematics());
@@ -705,26 +698,14 @@ public final class ResponseWriter {
             if ((null == args) || (0 == args.length)) {
                 args = exc.getDisplayArgs();
             }
-            // Enforce first condition; review later on
-            if ((null == args) || (0 == args.length)) {
-                writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray());
-            } else {
-                final JSONArray jArray = new JSONArray();
-                for (final Object arg : args) {
-                    jArray.put(arg);
-                }
-                writer.key(ResponseFields.ERROR_PARAMS).value(jArray);
-            }
+            // For compatibility
+            writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(0));
         }
         {
             final List<Category> categories = exc.getCategories();
             if (1 == categories.size()) {
                 final Category category = categories.get(0);
                 writer.key(ERROR_CATEGORIES).value(category.toString());
-                final int number = Categories.getFormerCategoryNumber(category);
-                if (number > 0) {
-                    writer.key(ERROR_CATEGORY).value(number);
-                }
             } else {
                 writer.key(ERROR_CATEGORIES);
                 writer.array();
@@ -746,6 +727,7 @@ public final class ResponseWriter {
         }
         writer.key(ERROR_CODE).value(exc.getErrorCode());
         writer.key(ERROR_ID).value(exc.getExceptionId());
+        writer.key(ERROR_DESC).value(exc.getSoleMessage());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
         if (exc.getLogArgs() != null) {
