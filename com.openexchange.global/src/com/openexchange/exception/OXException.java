@@ -51,6 +51,7 @@ package com.openexchange.exception;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
@@ -478,10 +479,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         } catch (final NullPointerException e) {
             this.logMessage = null;
         } catch (final IllegalFormatException e) {
-            LOG.error(e.getMessage(), e);
-            final Exception logMe = new Exception(super.getMessage());
-            logMe.setStackTrace(super.getStackTrace());
-            LOG.error("Illegal message format.", logMe);
+            LOG.error("Illegal format: >>" + displayFormat + "<<, params: " + (null == args || 0 == args.length ? "<none>" : Arrays.toString(args)) + ", code: " + getErrorCode(), e);
             this.logMessage = null;
         }
         return this;
