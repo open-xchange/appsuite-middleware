@@ -90,6 +90,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
     private static final String accessTokenGrabber = "https://login.live.com/oauth20_token.srf";
 
     private static final String REFRESH_TOKEN_KEY = "refresh_token";
+    private static final String REFRESH_TOKEN_KEY_ALT = "authorization_code";
 
     private final DeferringURLService deferrer;
 
@@ -186,10 +187,18 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             httpClient.executeMethod(postMethod);
 
             DefaultOAuthToken token = new DefaultOAuthToken();
-            token.setSecret(new JSONObject().put("callback", callback).toString());
-            String response = postMethod.getResponseBodyAsString();
-            JSONObject responseObj = new JSONObject(response);
-            token.setToken(responseObj.getString(REFRESH_TOKEN_KEY));
+            token.setSecret(new JSONObject(2).put("callback", callback).toString());
+            {
+                JSONObject responseObj = new JSONObject(postMethod.getResponseBodyAsString());
+                String sToken = responseObj.optString(REFRESH_TOKEN_KEY, null);
+                if (null == sToken) {
+                    sToken = responseObj.optString(REFRESH_TOKEN_KEY_ALT, null);
+                    if (null == sToken) {
+                        throw OAuthExceptionCodes.OAUTH_ERROR.create("Missing field \"refresh_token\" in JSON response: " + responseObj.toString(true));
+                    }
+                }
+                token.setToken(sToken);
+            }
             return token;
         } catch (UnsupportedEncodingException x) {
             LOG.error(x.getMessage(), x);
