@@ -508,7 +508,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             final String[] maildIds;
             if (move) {
                 maildIds = messageStorage.moveMessages(sourceFullname, destFullname, msgUIDs, false);
-                postEvent(sourceAccountId, sourceFullname, true);
+                postEvent(sourceAccountId, sourceFullname, true, true);
             } else {
                 maildIds = messageStorage.copyMessages(sourceFullname, destFullname, msgUIDs, false);
             }
@@ -524,7 +524,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 messageStorage.updateMessageFlags(destFullname, list.toArray(new String[list.size()]), MailMessage.FLAG_SEEN, false);
             }
-            postEvent(sourceAccountId, destFullname, true);
+            postEvent(sourceAccountId, destFullname, true, true);
             try {
                 /*
                  * Update message cache
@@ -613,7 +613,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 // Delete source messages if a move shall be performed
                 if (move) {
                     mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
-                    postEvent(sourceAccountId, sourceFullname, true);
+                    postEvent(sourceAccountId, sourceFullname, true, true);
                 }
                 // Restore \Seen flags
                 if (null != flagInfo) {
@@ -629,7 +629,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         MailMessage.FLAG_SEEN,
                         false);
                 }
-                postEvent(destAccountId, destFullname, true);
+                postEvent(destAccountId, destFullname, true, true);
                 try {
                     if (move) {
                         /*
