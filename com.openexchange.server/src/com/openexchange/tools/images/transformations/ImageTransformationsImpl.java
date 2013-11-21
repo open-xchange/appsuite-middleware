@@ -245,7 +245,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      */
     private BufferedImage getSourceImage(String formatName) throws IOException {
         if (null == this.sourceImage && null != this.sourceImageStream) {
-            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream) : read(sourceImageStream);
+            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream, formatName) : read(sourceImageStream, formatName);
         }
         return sourceImage;
     }
@@ -393,14 +393,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * Reads a buffered image from the supplied stream and closes the stream afterwards.
      *
      * @param inputStream The stream to read the image from
+     * @param formatName The format name
      * @return The buffered image
      * @throws IOException
      */
-    private BufferedImage read(InputStream inputStream) throws IOException {
+    private BufferedImage read(InputStream inputStream, String formatName) throws IOException {
         try {
             return ImageIO.read(inputStream);
         } catch (final RuntimeException e) {
-            LOG.debug("error reading image from stream", e);
+            LOG.debug("error reading image from stream for " + formatName, e);
             return null;
         } finally {
             Streams.close(inputStream);
@@ -411,10 +412,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * Reads a buffered image from the supplied stream and closes the stream afterwards, trying to extract metadata information.
      *
      * @param inputStream The stream to read the image from
+     * @param formatName The format name
      * @return The buffered image
      * @throws IOException
      */
-    private BufferedImage readAndExtractMetadata(InputStream inputStream) throws IOException {
+    private BufferedImage readAndExtractMetadata(InputStream inputStream, String formatName) throws IOException {
         ManagedFile managedFile = null;
         try {
             ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
@@ -422,13 +424,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
             try {
                 metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
             } catch (ImageProcessingException e) {
-                LOG.warn("error getting metadata", e);
+                LOG.warn("error getting metadata for " + formatName, e);
             }
             return ImageIO.read(managedFile.getInputStream());
         } catch (OXException e) {
             throw new IOException("error accessing managed file", e);
         } catch (IllegalArgumentException e) {
-            LOG.debug("error reading image from stream", e);
+            LOG.debug("error reading image from stream for " + formatName, e);
             return null;
         } finally {
             if (managedFile != null) {

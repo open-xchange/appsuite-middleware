@@ -750,6 +750,9 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
             final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
             if (null != cachedResource) {
+
+                System.out.println("ResourceCache HIT for " + cacheKey);
+
                 // Scaled version already cached
                 // Create appropriate IFileHolder
                 String contentType = cachedResource.getFileType();
@@ -770,6 +773,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                     }
                 }
                 return ret;
+            } else {
+                System.out.println("ResourceCache MISS for " + cacheKey);
             }
         }
 
@@ -898,12 +903,12 @@ public class FileResponseRenderer implements ResponseRenderer {
             if (DEBUG && file.repetitive()) {
                 try {
                     final File tmpFile = writeBrokenImage2Disk(file);
-                    LOG.error("Unable to transform image from " + file + ". Unparseable image file is written to disk at: " + tmpFile.getPath());
+                    LOG.error("Unable to transform image from " + file.getName() + ". Unparseable image file is written to disk at: " + tmpFile.getPath());
                 } catch (final Exception x) {
-                    LOG.error("Unable to transform image from " + file);
+                    LOG.error("Unable to transform image from " + file.getName());
                 }
             } else {
-                LOG.error("Unable to transform image from " + file);
+                LOG.error("Unable to transform image from " + file.getName());
             }
             return file.repetitive() ? file : null;
         }

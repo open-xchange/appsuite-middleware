@@ -67,6 +67,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.infostore.FileMetadata;
@@ -80,6 +81,7 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -173,10 +175,24 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     }
 
     private void writeFile(final Session session, final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
-        final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/infostore", resp);
+        final FileResponseRenderer renderer = fileResponseRenderer;
+        if (null == fileResponseRenderer) {
+            throw new IOException("Missing " + FileResponseRenderer.class.getName());
+        }
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, serverSession, "/publications/infostore", resp);
+        request.setModule("files");
+        request.setAction("document");
+        request.setSession(serverSession);
         final AJAXRequestResult result = new AJAXRequestResult(new FileHolder(fileData, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName()), "file");
-
-        fileResponseRenderer.write(request, result, req, resp);
+        // Set ETag
+        final String eTag = FileStorageUtility.getETagFor(Integer.toString(metadata.getId()), Integer.toString(metadata.getVersion()), metadata.getLastModified());
+        result.setExpires(0);
+        if (eTag != null) {
+            result.setHeader("ETag", eTag);
+        }
+        // Trigger renderer
+        renderer.write(request, result, req, resp);
     }
 
     private InputStream loadFile(final Publication publication, final int infoId) throws OXException {

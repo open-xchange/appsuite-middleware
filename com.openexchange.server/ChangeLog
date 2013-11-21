@@ -2,6 +2,7 @@
 
  - Fix for bug 29816: Handle possible 'javax.net.ssl.SSLHandshakeException' that indicates SMTP cannot be accessed with a secure connection.
                       Return an appropriate error message to the user and beg him to change SMTP configuration accordingly.
+ - Fix for bug 29071: Properly query preview/resource cache when accessing published images
 
 * 2013-11-21 - marcus.klein@open-xchange.com
 
