@@ -1,3 +1,8 @@
+* 2013-11-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29816: Handle possible 'javax.net.ssl.SSLHandshakeException' that indicates SMTP cannot be accessed with a secure connection.
+                      Return an appropriate error message to the user and beg him to change SMTP configuration accordingly.
+
 * 2013-11-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 26354: Use storage methods that to not rely on cached user attributes causing wrong attributes to be saved.

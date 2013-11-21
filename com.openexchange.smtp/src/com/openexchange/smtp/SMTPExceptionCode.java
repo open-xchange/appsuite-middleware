@@ -120,6 +120,10 @@ public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
      * The following recipient is not allowed: %1$s. Please remove associated address and try again.
      */
     RECIPIENT_NOT_ALLOWED(SMTPExceptionMessage.RECIPIENT_NOT_ALLOWED, CATEGORY_USER_INPUT, 3014),
+    /**
+     * The SMTP server %1$s cannot be accessed using a secure SSL connection for user %2$s. Please change configuration accordingly.
+     */
+    SECURE_CONNECTION_NOT_POSSIBLE(SMTPExceptionMessage.SECURE_CONNECTION_NOT_POSSIBLE, CATEGORY_USER_INPUT, 3015),
     ;
 
     private final String message;

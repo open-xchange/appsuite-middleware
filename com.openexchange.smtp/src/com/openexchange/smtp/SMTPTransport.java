@@ -826,19 +826,26 @@ public final class SMTPTransport extends MailTransport {
     private void connectTransport(final Transport transport, final SMTPConfig smtpConfig) throws OXException, MessagingException {
         final String server = IDNA.toASCII(smtpConfig.getServer());
         final int port = smtpConfig.getPort();
-        if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-            final String encodedPassword = encodePassword(smtpConfig.getPassword());
-            if (isKerberosAuth()) {
-                try {
-                    Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, smtpConfig.getLogin(), encodedPassword));
-                } catch (final PrivilegedActionException e) {
-                    handlePrivilegedActionException(e);
+        try {
+            if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                final String encodedPassword = encodePassword(smtpConfig.getPassword());
+                if (isKerberosAuth()) {
+                    try {
+                        Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, smtpConfig.getLogin(), encodedPassword));
+                    } catch (final PrivilegedActionException e) {
+                        handlePrivilegedActionException(e);
+                    }
+                } else {
+                    transport.connect(server, port, smtpConfig.getLogin(), encodedPassword);
                 }
             } else {
-                transport.connect(server, port, smtpConfig.getLogin(), encodedPassword);
+                transport.connect(server, port, null, null);
             }
-        } else {
-            transport.connect(server, port, null, null);
+        } catch (final MessagingException e) {
+            if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {
+                throw SMTPExceptionCode.SECURE_CONNECTION_NOT_POSSIBLE.create(e.getNextException(), server, smtpConfig.getLogin());
+            }
+            throw e;
         }
     }
 
