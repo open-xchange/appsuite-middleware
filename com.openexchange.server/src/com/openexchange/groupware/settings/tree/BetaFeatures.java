@@ -50,16 +50,12 @@
 package com.openexchange.groupware.settings.tree;
 
 import static com.openexchange.java.Autoboxing.B;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
@@ -112,15 +108,12 @@ public final class BetaFeatures implements PreferencesItemService {
                 return true;
             }
             @Override
-            protected void setValue(final UserImpl newUser, final String value, final User originalUser) throws OXException {
+            public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
+                String value = setting.getSingleValue().toString();
                 if (!("true".equalsIgnoreCase(value)) && !("false".equalsIgnoreCase(value))) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(value, NAME);
                 }
-                final Map<String, Set<String>> clonedAttrs = new HashMap<String, Set<String>>(originalUser.getAttributes());
-                final Set<String> beta = new HashSet<String>(1);
-                beta.add(value);
-                clonedAttrs.put(NAME, Collections.unmodifiableSet(beta));
-                newUser.setAttributes(Collections.unmodifiableMap(clonedAttrs));
+                UserStorage.getInstance().setAttribute(NAME, value, user.getId(), ctx);
             }
         };
     }

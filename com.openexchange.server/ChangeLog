@@ -1,3 +1,7 @@
+* 2013-11-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26354: Use storage methods that to not rely on cached user attributes causing wrong attributes to be saved.
+
 * 2013-11-19 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29855: Order EDIT-actions based on new directory version 

@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
@@ -217,25 +215,6 @@ public final class UserAttributeAccess {
      * @throws OXException If setting attribute fails
      */
     public void setAttribute(final String name, final String value, final User user, final Context context) throws OXException {
-        final Map<String, Set<String>> attributes = user.getAttributes();
-        final Map<String, Set<String>> newAttributes = new HashMap<String, Set<String>>(attributes.size());
-        for (Map.Entry<String, Set<String>> entry : attributes.entrySet()) {
-            newAttributes.put(entry.getKey(), new HashSet<String>(entry.getValue()));
-        }
-        // Add specified boolean value
-        Set<String> set = newAttributes.get(name);
-        if (null == set) {
-            set = new HashSet<String>();
-            newAttributes.put(name, set);
-        } else {
-            set.clear();
-        }
-        set.add(value);
-        // Save modification
-        final UserImpl userImpl = new UserImpl();
-        userImpl.setId(user.getId());
-        userImpl.setAttributes(newAttributes);
-        userStorage.updateUser(userImpl, context);
+        userStorage.setAttribute(name, value, user.getId(), context);
     }
-
 }

@@ -129,6 +129,9 @@ public abstract class UserStorage {
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
      * change. Every attribute with value <code>null</code> will not be touched.
      * <p>
+     * WARNING: Do not use this method to update user attributes. It happens under high load situations that too old user attributes are
+     * used to generate the new attributes for this method call causing wrong attributes to be written.
+     * <p>
      * Currently supported values for update:
      * <ul>
      * <li>Time zone</li>

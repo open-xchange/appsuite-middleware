@@ -49,17 +49,11 @@
 
 package com.openexchange.report.internal;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -124,15 +118,9 @@ public class LastLoginRecorder implements LoginHandlerService {
         if (context.isReadOnly()) {
             return;
         }
-        // Set attribute
-        final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>(origUser.getAttributes());
-        // Add current time stamp
-        attributes.put("client:" + client, new HashSet<String>(Arrays.asList(Long.toString(System.currentTimeMillis()))));
-        final UserImpl newUser = new UserImpl();
-        newUser.setId(origUser.getId());
-        newUser.setAttributes(attributes);
+        // Set attribute and add current time stamp
         try {
-            userService.updateUser(newUser, context);
+            userService.setAttribute("client:" + client, Long.toString(System.currentTimeMillis()), origUser.getId(), context);
         } catch (final OXException e) {
             throw e;
         }

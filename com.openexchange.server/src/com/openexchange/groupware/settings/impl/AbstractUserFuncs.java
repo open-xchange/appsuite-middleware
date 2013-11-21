@@ -70,9 +70,6 @@ public abstract class AbstractUserFuncs implements IValueHandler {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
         /*
@@ -90,9 +87,6 @@ public abstract class AbstractUserFuncs implements IValueHandler {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getId() {
         return -1;
@@ -106,7 +100,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
      * @param originalUser The original user fetched from storage
      * @throws OXException If writing of the value fails.
      */
-    protected abstract void setValue(UserImpl newUser, String value, User originalUser)
-        throws OXException;
-
+    protected void setValue(UserImpl newUser, String value, User originalUser) throws OXException {
+        // Can be overwritten.
+    }
 }
