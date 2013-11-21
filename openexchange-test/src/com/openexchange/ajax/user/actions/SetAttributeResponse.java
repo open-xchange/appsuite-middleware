@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class SetAttributeResponse extends AbstractAJAXResponse {
 
-    private boolean success;
+    private boolean success = false;
 
     public SetAttributeResponse(Response response) {
         super(response);

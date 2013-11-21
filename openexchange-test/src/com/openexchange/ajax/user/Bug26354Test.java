@@ -62,6 +62,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.user.actions.SetAttributeRequest;
 import com.openexchange.ajax.user.actions.SetAttributeResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.RandomString;
 
 /**
@@ -121,11 +122,16 @@ public final class Bug26354Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testSetAttribute() throws Throwable {
+    public void testForDeadlocks() throws Throwable {
         boolean stop = false;
         for (int i = 0; i < ITERATIONS && !stop; i++) {
             String value = RandomString.generateChars(64);
-            SetAttributeResponse response = client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, value, false));
+            SetAttributeResponse response = client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, value, false, false));
+            if (response.hasError()) {
+                OXException e = response.getException();
+                String logMessage = e.getLogMessage();
+                assertFalse("Bug 26354 appears again. Deadlock in database detected.", logMessage.contains("Deadlock"));
+            }
             assertTrue("Setting the attribute was not successful.", response.isSuccess());
             for (int j = 0; j < writer.length; j++) {
                 stop = stop || null != writer[j].getThrowable();
