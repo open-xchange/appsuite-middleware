@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal;
 
+import static com.openexchange.java.Strings.isEmpty;
 import gnu.inet.encoding.IDNAException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -641,10 +642,6 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String html2text(final String htmlContent, final boolean appendHref) {
-//        final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
-//        HTMLParser.parse(htmlContent, handler);
-//        return handler.getText();
-
         if (isEmpty(htmlContent)) {
             return htmlContent;
         }
@@ -652,6 +649,7 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String prepared = prepareSignatureStart(htmlContent);
             prepared = prepareHrTag(prepared);
+            prepared = prepareAnchorTag(prepared);
             prepared = insertBlockquoteMarker(prepared);
             prepared = insertSpaceMarker(prepared);
             String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
@@ -686,6 +684,23 @@ public final class HtmlServiceImpl implements HtmlService {
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
+    }
+
+    private static final Pattern PATTERN_ANCHOR = Pattern.compile("<a[^>]+href=[\"']([^\"']+)[\"'][^>]*>(.*?)</a>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static String prepareAnchorTag(final String htmlContent) {
+        final Matcher m = PATTERN_ANCHOR.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        do {
+            final String href = m.group(1);
+            if (href.equals(m.group(2))) { // href attribute equals anchor's text
+                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(href));
+            }
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_HR = Pattern.compile("<hr[^>]*>(.*?</hr>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -793,18 +808,6 @@ public final class HtmlServiceImpl implements HtmlService {
             sb.append("> ");
         }
         return sb.toString();
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final Pattern PATTERN_BLOCKQUOTE_START = Pattern.compile("(<blockquote.*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
