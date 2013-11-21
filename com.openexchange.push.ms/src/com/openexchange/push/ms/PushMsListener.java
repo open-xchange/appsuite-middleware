@@ -159,7 +159,7 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
             }
         }
         // Mark that event as remotely received
-        props.put("__is12Remote", Boolean.TRUE);
+        props.put("__isRemoteEvent", Boolean.TRUE);
         return new Event(topic, props);
     }
 

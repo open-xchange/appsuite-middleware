@@ -173,7 +173,7 @@ public class PushMsHandler implements EventHandler {
 
     private void handleNonCommonEvent(final Event e) {
         // Just pass to topic if not remotely received before
-        if (e.getTopic().startsWith("com/openexchange/push") && !Boolean.TRUE.equals(e.getProperty("__is12Remote"))) {
+        if (e.getTopic().startsWith("com/openexchange/push") && !Boolean.TRUE.equals(e.getProperty("__isRemoteEvent"))) {
             try {
                 publishTopic.publish(toPojo(e));
             } catch (final RuntimeException ex) {
