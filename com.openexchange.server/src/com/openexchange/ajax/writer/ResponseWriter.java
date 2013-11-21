@@ -395,14 +395,7 @@ public final class ResponseWriter {
         /*
          * Put argument JSON array for compatibility reasons
          */
-        {
-            Object[] args = exception.getLogArgs();
-            if ((null == args) || (0 == args.length)) {
-                args = exception.getDisplayArgs();
-            }
-            // For compatibility
-            json.put(ERROR_PARAMS, new JSONArray(0));
-        }
+        json.put(ERROR_PARAMS, new JSONArray(0));
         /*
          * Categories
          */
@@ -693,14 +686,7 @@ public final class ResponseWriter {
         /*
          * Put argument JSON array for compatibility reasons
          */
-        {
-            Object[] args = exc.getLogArgs();
-            if ((null == args) || (0 == args.length)) {
-                args = exc.getDisplayArgs();
-            }
-            // For compatibility
-            writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(0));
-        }
+        writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(0));
         {
             final List<Category> categories = exc.getCategories();
             if (1 == categories.size()) {
