@@ -58,12 +58,15 @@ import javax.activation.DataContentHandler;
 import javax.activation.DataSource;
 import org.apache.commons.logging.Log;
 import com.openexchange.conversion.DataHandler;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link DataContentHandlerDataSource} - A {@link DataSource} backed by a {@link DataContentHandler}.
  * <p>
  * This bypasses the need for {@link DataHandler} to look-up an appropriate {@link DataContentHandler}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DataContentHandlerDataSource implements DataSource {
@@ -93,7 +96,7 @@ public final class DataContentHandlerDataSource implements DataSource {
         final DataContentHandler dch = this.dch;
         final Object object = this.object;
         final String objectMimeType = this.objectMimeType;
-        new Thread(new Runnable() {
+        final Runnable r = new Runnable() {
 
             @Override
             public void run() {
@@ -110,7 +113,13 @@ public final class DataContentHandlerDataSource implements DataSource {
                     }
                 }
             }
-        }, "DataContentHandlerDataSource.getInputStream").start();
+        };
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        if (null == threadPool) {
+            new Thread(r, "DataContentHandlerDataSource.getInputStream").start();
+        } else {
+            threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+        }
         return pin;
     }
 
