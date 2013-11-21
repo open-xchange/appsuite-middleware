@@ -28,6 +28,5 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.service.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.push.ms.osgi.PushMsActivator
