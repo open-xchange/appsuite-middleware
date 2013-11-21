@@ -120,14 +120,14 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         try {
             // Check cache first
-            final ResourceCache previewCache = ResourceCaches.getResourceCache();
+            final ResourceCache resourceCache = ResourceCaches.getResourceCache();
 
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !Strings.isEmpty(eTag);
-            if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
+            if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
-                final CachedResource cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
+                final CachedResource cachedPreview = resourceCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
                     // Create appropriate IFileHolder
@@ -206,7 +206,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // (Asynchronously) Put to cache if ETag is available
             final String fileName = previewDocument.getMetaData().get("resourcename");
             int size = -1;
-            if (null != previewCache && isValidEtag) {
+            if (null != resourceCache && isValidEtag) {
                 final byte[] bytes = Streams.stream2bytes(thumbnail);
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;
@@ -217,7 +217,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     @Override
                     public Void call() throws OXException {
                         final CachedResource preview = new CachedResource(bytes, fileName, "image/jpeg", bytes.length);
-                        previewCache.save(cacheKey, preview, 0, session.getContextId());
+                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
                         return null;
                     }
                 };

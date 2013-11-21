@@ -136,12 +136,12 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         IFileHolder fileHolder = null;
         try {
             // Check cache first
-            final ResourceCache previewCache = ResourceCaches.getResourceCache();
+            final ResourceCache resourceCache = ResourceCaches.getResourceCache();
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !Strings.isEmpty(eTag);
-            if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
+            if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
-                final CachedResource cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
+                final CachedResource cachedPreview = resourceCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     /*
                      * Get content according to output format
@@ -232,7 +232,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 }
                 previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, pages);
                 // Put to cache
-                if (null != previewCache && isValidEtag) {
+                if (null != resourceCache && isValidEtag) {
                     final List<String> content = previewDocument.getContent();
                     if (null != content) {
                         final int size = content.size();
@@ -259,7 +259,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                                 @Override
                                 public Void call() throws OXException {
                                     final CachedResource preview = new CachedResource(bytes, fileName, fileType, bytes.length);
-                                    previewCache.save(cacheKey, preview, 0, session.getContextId());
+                                    resourceCache.save(cacheKey, preview, 0, session.getContextId());
                                     return null;
                                 }
                             };

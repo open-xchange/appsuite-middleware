@@ -742,13 +742,13 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         // Check cache first
-        final ResourceCache previewCache = ResourceCaches.getResourceCache();
+        final ResourceCache resourceCache = ResourceCaches.getResourceCache();
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
         final boolean isValidEtag = !isEmpty(eTag);
-        if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
+        if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
-            final CachedResource cachedResource = previewCache.get(cacheKey, 0, request.getSession().getContextId());
+            final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
             if (null != cachedResource) {
                 // Scaled version already cached
                 // Create appropriate IFileHolder
@@ -850,7 +850,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 return handleFailure(file, stream, markSupported);
             }
             // Return immediately if not cacheable
-            if (null == previewCache || !isValidEtag) {
+            if (null == resourceCache || !isValidEtag) {
                 return new FileHolder(transformed, -1, file.getContentType(), file.getName());
             }
             // (Asynchronously) Add to cache if possible
@@ -866,7 +866,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 @Override
                 public Void call() throws OXException {
                     final CachedResource preview = new CachedResource(bytes, fileName, contentType, bytes.length);
-                    previewCache.save(cacheKey, preview, 0, session.getContextId());
+                    resourceCache.save(cacheKey, preview, 0, session.getContextId());
                     return null;
                 }
             };
