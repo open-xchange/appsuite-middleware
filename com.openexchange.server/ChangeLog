@@ -28,8 +28,8 @@
 
 * 2013-11-15 - marc.arens@open-xchange.com
 
- - Fix for bug 29794: Prevent cuncurrent cleanup via mutual exclusion
- - Fix for bug 29795: Prevent cuncurrent cleanup via mutual exclusion
+ - Fix for bug 29794: Prevent concurrent cleanup via mutual exclusion
+ - Fix for bug 29795: Prevent concurrent cleanup via mutual exclusion
  
 * 2013-11-14 - thorben.betten@open-xchange.com
 
