@@ -1,3 +1,7 @@
+* 2013-11-22- tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29904: Validate numerical identifiers for infostore file metadata 
+
 * 2013-11-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 29816: Handle possible 'javax.net.ssl.SSLHandshakeException' that indicates SMTP cannot be accessed with a secure connection.

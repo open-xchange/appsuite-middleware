@@ -178,7 +178,11 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * In order to accomplish the search, %1$d or more characters are required.
      */
-    PATTERN_NEEDS_MORE_CHARACTERS(FileStorageExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602, FileStorageExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG)
+    PATTERN_NEEDS_MORE_CHARACTERS(FileStorageExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602, FileStorageExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG),
+    /**
+     * Invalid folder identifier: %1$s
+     */
+    INVALID_FOLDER_IDENTIFIER("Invalid folder identifier: %1$s", Category.CATEGORY_ERROR, 31, FileStorageExceptionMessages.FOLDER_NOT_EXISTS_MSG),
 
     ;
 
