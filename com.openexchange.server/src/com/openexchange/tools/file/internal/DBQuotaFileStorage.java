@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
@@ -237,9 +238,17 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         final SortedSet<String> set = new TreeSet<String>();
         for (final String identifier : identifiers) {
             boolean deleted;
-            final Long size = L(getFileSize(identifier)); // Get size before attempting delete. File is not found afterwards
-            deleted = fileStorage.deleteFile(identifier);
-            fileSizes.put(identifier, size);
+            try {
+                // Get size before attempting delete. File is not found afterwards
+                final Long size = L(getFileSize(identifier));
+                deleted = fileStorage.deleteFile(identifier);
+                fileSizes.put(identifier, size);
+            } catch (final OXException e) {
+                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                deleted = false;
+            }
             if (!deleted) {
                 set.add(identifier);
             }

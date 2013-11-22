@@ -104,7 +104,7 @@ public abstract class DefaultFileStorage implements FileStorage {
      * @param name The filename, relative to the storage's parent directory
      * @param readOnly <code>true</code> if read-only access is sufficient, <code>false</code> to use read-write access
      * @return A new {@link EnhancedRandomAccessFile} instance
-     * @throws OXException If the denoted file was not found or an I/O-error occured
+     * @throws OXException If the denoted file was not found or an I/O-error occurred
      */
     protected EnhancedRandomAccessFile eraf(String name, boolean readOnly) throws OXException {
         File file = file(name);

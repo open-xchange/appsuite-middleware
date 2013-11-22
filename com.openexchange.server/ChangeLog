@@ -1,6 +1,7 @@
 * 2013-11-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 29854: orderly signal OAuth provider error to client
+ - Fix for bug 29860: Tolerate non-deletable file from file storage on user delete attempt
 
 * 2013-11-22- tobias.friedrich@open-xchange.com
 

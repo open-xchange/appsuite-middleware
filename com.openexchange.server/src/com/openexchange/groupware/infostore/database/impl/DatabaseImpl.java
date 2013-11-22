@@ -1166,8 +1166,9 @@ public class DatabaseImpl extends DBService {
 
         while (allVersions.hasNext()) {
             final DocumentMetadata version = allVersions.next();
-            if (version.getFilestoreLocation() != null) {
-                files.add(version.getFilestoreLocation());
+            final String filestoreLocation = version.getFilestoreLocation();
+            if (filestoreLocation != null) {
+                files.add(filestoreLocation);
             }
         }
     }
