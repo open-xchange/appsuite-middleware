@@ -60,11 +60,9 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-
 
 /**
  * {@link SimBundleContext}
@@ -80,25 +78,21 @@ public class SimBundleContext implements BundleContext {
     @Override
     public void addBundleListener(final BundleListener arg0) {
         // Nothing to do
-
     }
 
     @Override
     public void addFrameworkListener(final FrameworkListener arg0) {
         // Nothing to do
-
     }
 
     @Override
     public void addServiceListener(final ServiceListener arg0) {
         // Nothing to do
-
     }
 
     @Override
     public void addServiceListener(final ServiceListener arg0, final String arg1) throws InvalidSyntaxException {
         // Nothing to do
-
     }
 
     @Override
@@ -108,7 +102,7 @@ public class SimBundleContext implements BundleContext {
     }
 
     @Override
-    public ServiceReference[] getAllServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
+    public ServiceReference<?>[] getAllServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
         // Nothing to do
         return null;
     }
@@ -144,13 +138,13 @@ public class SimBundleContext implements BundleContext {
     }
 
     @Override
-    public ServiceReference getServiceReference(final String arg0) {
+    public ServiceReference<?> getServiceReference(final String arg0) {
         // Nothing to do
         return null;
     }
 
     @Override
-    public ServiceReference[] getServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
+    public ServiceReference<?>[] getServiceReferences(final String arg0, final String arg1) throws InvalidSyntaxException {
         // Nothing to do
         return null;
     }
@@ -227,14 +221,6 @@ public class SimBundleContext implements BundleContext {
     @Override
     public Bundle getBundle(final String location) {
         // Nothing to do
-        return null;
-    }
-
-    public <S> ServiceRegistration<S> registerService(final Class<S> clazz, final ServiceFactory<S> factory, final Dictionary<String, ?> properties) {
-        return null;
-    }
-
-    public <S> Object getServiceObjects(final ServiceReference<S> reference) {
         return null;
     }
 }
