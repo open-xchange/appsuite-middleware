@@ -333,7 +333,6 @@ public class FileMetadata implements DocumentMetadata {
      */
     private static void validate(File file) throws OXException {
         if (null != file) {
-
             /*
              * check for numerical identifiers if set
              */
@@ -348,9 +347,9 @@ public class FileMetadata implements DocumentMetadata {
             String folderID = file.getFolderId();
             if (null != folderID) {
                 try {
-                    Integer.valueOf(id);
+                    Integer.valueOf(folderID);
                 } catch (NumberFormatException e) {
-                    throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, id);
+                    throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderID);
                 }
             }
         }
