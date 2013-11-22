@@ -1,9 +1,29 @@
 require 'pathname'
 require 'cgi'
 
-excludes = [/\/open-xchange-development\//, /\/tmp\//, /\/adminTmp\//, /\/build.properties$/, /\/buildservice.properties$/, /\/open[-e]xchange-test\//]
+excludes = [
+  /\/open-xchange-development\//,
+  /\/tmp\//,
+  /\/adminTmp\//,
+  /\/open[-e]xchange-test\//,
+  /build.properties$/,
+  /buildservice.properties$/,
+  /3rdPartyLibs\.properties$/,
+  /HTMLEntities\.properties$/,
+  /whitelist.properties$/,
+  /ldap\.properties$/,
+  /language-codes\.properties$/,
+  /mail-querybuilder\.properties$/,
+  /microformatWhitelist\.properties$/,
+  /open-xchange\.properties$/,
+  /outlook\d+\..+?\.properties/]
+
+$fixed = ["ModuleAccessDefinitions.properties", "Group.properties", "Resource.properties",
+    "RMI.properties", "Sql.properties", "AdminUser.properties", "filestorage.properties",
+    "mailfilter.properties", "recaptcha.properties", "recaptcha_options.properties"]
+
 class Prop
-  attr_accessor :key, :value, :comment, :file, :line
+  attr_accessor :key, :value, :comment, :file, :line, :isFixed
 
   def initialize(init)
      init.each_pair do |key, val|
@@ -12,15 +32,19 @@ class Prop
    end
 end
 
-input = ARGF.read
-properties = {}
+#
+# READING
+#
+startPath = ARGV.first
 
+abort "usage: ruby analyze.rb $path" unless startPath
 
-input.each_line do |filepath|
+properties = []
+
+Dir.glob(startPath + "/**/*.properties") do |filepath|
   next if excludes.any?{|exclude| filepath =~ exclude}
   filepath.chomp!
   filename = Pathname.new(filepath).basename
-  props = []
   buffer = nil
   data = {}
   key = "THIS IS WEIRD"
@@ -37,93 +61,57 @@ input.each_line do |filepath|
       state = :COMMENT if line =~ /^[!#]/
       state = :EMPTY_LINE if line.chomp == ""
       next unless state
-      
+
       case state
       when :COMMENT
-        comment += line.chomp
+        comment += line.chomp.reverse.chop.reverse.strip + " " #remove line break from back, comment hash from front, empty whitespace from both sides, then add single whitespace for next line
       when :EMPTY_LINE
         comment = "" #assume that an empty line between comment and k/v pair means this comment is unrelated to the pair
       when :KV_WITH_COLON
         line =~ /(.+?):(.*)/
-        props.push Prop.new(:key => $1, :value => $2, :file => filename, :comment => "", :line => line_num)
+        properties.push Prop.new(:key => $1, :value => $2, :file => filename, :comment => comment, :line => line_num)
         comment = ""
       when :KV_WITH_EQUAL
         line =~ /(.+?)=(.*)/
-        props.push Prop.new(:key => $1, :value => $2, :file => filename, :comment => "", :line => line_num)
+        properties.push Prop.new(:key => $1, :value => $2, :file => filename, :comment => comment, :line => line_num)
         comment = ""
       end
-      
+
       state = nil
     end #lines
   end #file
-  puts "<!-- Duplicate file #{filename} in #{filepath} -->" if(properties.key?(filename))
-  properties[filename] = props
 end #files
 
+#
+# SORTING
+#
+properties = properties.sort_by{|prop| "#{prop.file}:#{prop.line}"} #wtf is .sort_by! undefined for arrays?
+
+#
+# PRINTING
+#
+pagecontent = <<EOL
+{{Version|missing}}
+This is an overview of all configuration parameters for the AppSuite backend. By default, this list is sorted by the .properties files they appear in.
+Yet for most parameters, it does not really matter in which file are found. This does not apply to some core configuration files which are explicitly loaded by name. For these, you cannot re-define the value in another file:
+
+<code>AdminUser.properties, filestorage.properties, Group.properties, mailfilter.properties, ModuleAccessDefinitions.properties, recaptcha.properties, recaptcha_options.properties, Resource.properties, RMI.properties, Sql.properties</code>
 
 
-preface = <<END
-<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.5/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.5/ http://www.mediawiki.org/xml/export-0.5.xsd" version="0.5" xml:lang="en">
-  <siteinfo>
-    <sitename>Open-Xchange</sitename>
-    <base>http://oxpedia.org/wiki/index.php?title=Main_Page</base>
-    <generator>MediaWiki 1.18.1</generator>
-    <case>first-letter</case>
-    <namespaces>
-      <namespace key="-2" case="first-letter">Media</namespace>
-      <namespace key="-1" case="first-letter">Special</namespace>
-      <namespace key="0" case="first-letter" />
-      <namespace key="1" case="first-letter">Talk</namespace>
-      <namespace key="2" case="first-letter">User</namespace>
-      <namespace key="3" case="first-letter">User talk</namespace>
-      <namespace key="4" case="first-letter">Open-Xchange</namespace>
-      <namespace key="5" case="first-letter">Open-Xchange talk</namespace>
-      <namespace key="6" case="first-letter">File</namespace>
-      <namespace key="7" case="first-letter">File talk</namespace>
-      <namespace key="8" case="first-letter">MediaWiki</namespace>
-      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
-      <namespace key="10" case="first-letter">Template</namespace>
-      <namespace key="11" case="first-letter">Template talk</namespace>
-      <namespace key="12" case="first-letter">Help</namespace>
-      <namespace key="13" case="first-letter">Help talk</namespace>
-      <namespace key="14" case="first-letter">Category</namespace>
-      <namespace key="15" case="first-letter">Category talk</namespace>
-      <namespace key="200" case="first-letter">Development</namespace>
-    </namespaces>
-  </siteinfo>
-END
-footer = <<END
-</mediawiki>
-END
-
-middle = ""
-now = Time.now
-timestamp = now.strftime("%FT%TZ")
-rev_id = now.to_i
-
-properties.each do |filename, props|
-  pagecontent = "\n{|\n!Key\n!Default value\n!Comment\n"
-  props.each {|prop| pagecontent += "|-\n|#{CGI::escapeHTML(prop.key)}\n|#{CGI::escapeHTML(prop.value)}\n|#{CGI::escapeHTML(prop.comment)}\n"}
-  pagecontent += "|}\n"
-  title = filename
-  
-  template = <<END
-  <page>
-    <title>#{title}</title>
-    <revision>
-      <timestamp>#{timestamp}</timestamp>
-      <contributor>
-        <username>Tierlieb</username>
-        <id>5</id>
-      </contributor>
-      <comment>Automatic update</comment>
-      <text xml:space="preserve">{{Generated}}{{Properties}}
-      #{pagecontent}
-      [[Category:Config]] [[Category:Generated]]</text>
-    </revision>
-  </page>  
-END
-  middle += template
+{|width="100%" style="table-layout: fixed" class='wikitable sortable properties-table' border='1'
+! scope="col" width="30%" class="key" | Key
+! scope="col" width="20%" class="value"| Default value
+! scope="col" width="35%" class="comment"| Comment
+! scope="col" width="15%" class="location"| File
+EOL
+properties.each do |prop|
+  pagecontent += "|-\n"
+  pagecontent += "| style='color:red'" if prop.isFixed
+  pagecontent += "| <nowiki>#{CGI::escapeHTML(prop.key)}</nowiki>\n"
+  pagecontent += "| <nowiki>#{CGI::escapeHTML(prop.value)}</nowiki>\n"
+  pagecontent += "| <nowiki>#{CGI::escapeHTML(prop.comment)}</nowiki>\n"
+  pagecontent += "| #{prop.file}:#{prop.line}\n"
 end
+pagecontent += "|}\n[[Category:OX6]] [[Category:AppSuite]] [[Category:Administrator]] [[Category:Configuration]] [[Category:Generated]]"
 
-puts preface + middle + footer
+print pagecontent
