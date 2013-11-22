@@ -376,7 +376,7 @@ public class DispatcherServlet extends SessionServlet {
             if (NOT_FOUND.equals(result.getType())) {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
-            };
+            }
 
             if (DIRECT.equals(result.getType())) {
                 // No further processing
