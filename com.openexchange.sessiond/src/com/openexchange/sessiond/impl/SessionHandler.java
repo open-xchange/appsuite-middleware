@@ -1090,16 +1090,23 @@ public final class SessionHandler {
             return;
         }
         final List<SessionControl> controls = sessionData.rotateShort();
-        final String message;
         if (config.isAutoLogin()) {
-            message = "Session is moved to long life time container. All temporary session data will be cleaned up. ID: ";
+            if (LOG.isInfoEnabled()) {
+                final String message = "Session is moved to long life time container. All temporary session data will be cleaned up. ID: ";
+                for (final SessionControl sessionControl : controls) {
+                    LOG.info(message + sessionControl.getSession().getSessionID());
+                }
+            }
+            postSessionDataRemoval(controls);
         } else {
-            message = "Session timed out. ID: ";
+            if (LOG.isInfoEnabled()) {
+                final String message = "Session timed out. ID: ";
+                for (final SessionControl sessionControl : controls) {
+                    LOG.info(message + sessionControl.getSession().getSessionID());
+                }
+            }
+            postContainerRemoval(controls, true);
         }
-        for (final SessionControl sessionControl : controls) {
-            LOG.info(message + sessionControl.getSession().getSessionID());
-        }
-        postSessionDataRemoval(controls);
     }
 
     protected static void cleanUpLongTerm() {
