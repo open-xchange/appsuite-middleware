@@ -62,7 +62,6 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
@@ -234,8 +233,8 @@ public class SimBundleContext implements BundleContext {
     public <S> ServiceRegistration<S> registerService(final Class<S> clazz, final ServiceFactory<S> factory, final Dictionary<String, ?> properties) {
         return null;
     }
-    
-    public <S> ServiceObjects<S> getServiceObjects(final ServiceReference<S> reference) {
+
+    public <S> Object getServiceObjects(final ServiceReference<S> reference) {
         return null;
     }
 }
