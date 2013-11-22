@@ -303,10 +303,6 @@ public final class IMAPSearch {
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 try {
-                    final int messageCount = imapFolder.getMessageCount();
-                    if (messageCount <= 0) {
-                        return new int[0];
-                    }
                     final List<MessageSet> sets = new LinkedList<MessageSet>();
                     {
                         int chunkSize = MailProperties.getInstance().getMailFetchLimit();
