@@ -3,13 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#. *
-#. * Mail(s) could not be found in folder
-#. * <p>
-#. * The exception thrown when an invalid method is invoked on an expunged Message. The only valid methods on an expunged Message are
-#. * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
-#. * </p>
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:68
@@ -31,7 +24,6 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:88
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:127
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:82
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:86
@@ -2602,6 +2594,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
+msgstr ""
+
+#. Invalid URL \"%1$s\". Please correct the value and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
+msgid "Invalid URL \"%1$s\". Please correct the value and try again."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
@@ -7779,415 +7776,172 @@ msgid ""
 msgstr ""
 
 #. *
-#. * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
-#. * now and then log back in with your most current password. (server=%1$s | user=%2$s)
+#. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
+#. * your most current password.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:65
 msgid ""
-"There was an issue in authenticating your E-Mail password. This may be due "
-"to a recent password change. To continue please log out now and then log "
-"back in with your most current password. (server=%1$s | user=%2$s)"
+"There was an issue while authenticating. This may be due to a recent "
+"password change. To continue please log out and log back in with your most "
+"current password."
 msgstr ""
 
 #. *
-#. * Wrong or missing login data to access mail server %1$s. Error message from mail server: %2$s
+#. * The provided login information seem to be wrong. Please try again.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:78
-msgid ""
-"Wrong or missing login data to access mail server %1$s. Error message from "
-"mail server: %2$s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
+msgid "The provided login information seem to be wrong. Please try again."
 msgstr ""
 
 #. *
-#. * Wrong or missing login data to access mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail server:
-#. * %5$s
+#. * The provided login information to access mail server %1$s seem to be wrong. Please try again.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:75
 msgid ""
-"Wrong or missing login data to access mail server %1$s with login %2$s (user="
-"%3$s, context=%4$s). Error message from mail server: %5$s"
+"The provided login information to access mail server %1$s seem to be wrong. "
+"Please try again."
 msgstr ""
 
 #. *
 #. * Mail folder "%1$s" could not be found.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:80
 msgid "Mail folder \"%1$s\" could not be found."
 msgstr ""
 
 #. *
-#. * Mail folder "%1$s" could not be found on mail server %2$s with login %3$s (user=%4$s, context=%5$s).
+#. * Mail folder "%1$s" could not be found on mail server %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:94
-msgid ""
-"Mail folder \"%1$s\" could not be found on mail server %2$s with login %3$s "
-"(user=%4$s, context=%5$s)."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:85
+msgid "Mail folder \"%1$s\" could not be found on mail server %2$s."
 msgstr ""
 
 #. *
-#. * Folder "%1$s" has been closed due to some reason.<br>
-#. * Probably your request took too long.
-#. * <p>
-#. * This exception is thrown when a method is invoked on a Messaging object and the Folder that owns that object has died due to some
-#. * reason. Following the exception, the Folder is reset to the "closed" state.
-#. * </p>
+#. * Folder "%1$s" has been closed. Probably your request took too long.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:90
 msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
 msgstr ""
 
 #. *
-#. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
-#. * Probably your request took too long.
+#. * Folder "%1$s" has been closed on mail server %2$s. Probably your request took too long.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:95
+msgid ""
+"Folder \"%1$s\" has been closed on mail server %2$s. Probably your request "
+"took too long."
+msgstr ""
+
+#. *
+#. * Mail(s) could not be found in the given folder.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:100
+msgid "Mail(s) could not be found in the given folder."
+msgstr ""
+
+#. *
+#. * The given E-Mail address "%1$s" is invalid.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:105
+msgid "The given E-Mail address \"%1$s\" is invalid."
+msgstr ""
+
+#. *
+#. * You do not have the appropriate permissions to change the content of folder "%1$s".
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-"%4$s, context=%5$s). Probably your request took too long."
-msgstr ""
-
-#. *
-#. * Illegal write attempt: %1$s
-#. * <p>
-#. * The exception thrown when a write is attempted on a read-only attribute of any Messaging object.
-#. * </p>
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:118
-msgid "Illegal write attempt: %1$s"
-msgstr ""
-
-#. *
-#. * Method not supported: %1$s
-#. * <p>
-#. * The exception thrown when a method is not supported by the implementation
-#. * </p>
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:135
-msgid "Method not supported: %1$s"
-msgstr ""
-
-#. *
-#. * Session attempts to instantiate a provider that doesn't exist: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:140
-msgid "Session attempts to instantiate a provider that does not exist: %1$s"
-msgstr ""
-
-#. *
-#. * Invalid email address %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
-msgid "Invalid E-Mail address %1$s"
-msgstr ""
-
-#. *
-#. * Wrong message header: %1$s
-#. * <p>
-#. * The exception thrown due to an error in parsing RFC822 or MIME headers
-#. * </p>
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:153
-msgid "Wrong message header: %1$s"
-msgstr ""
-
-#. *
-#. * An attempt was made to open a read-only folder with read-write "%1$s"
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:158
-msgid "An attempt was made to open a read-only folder with read-write \"%1$s\""
+"You do not have the appropriate permissions to change the content of folder "
+"\"%1$s\"."
 msgstr ""
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:163
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:115
 msgid ""
-"An attempt was made to open a read-only folder with read-write \"%1$s\" on "
-"mail server %2$s with login %3$s (user=%4$s, context=%5$s)"
+"You do not have the appropriate permissions to change the content of folder "
+"\"%1$s\" on mail server %2$s."
 msgstr ""
 
 #. *
 #. * Invalid search expression: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:168
-msgid "Invalid search expression: %1$s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:120
+msgid "The search expression \"%1$s\" you entered is invalid."
 msgstr ""
 
 #. *
-#. * Message could not be sent because it is too large
+#. * Message could not be sent because it is too large.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:173
-msgid "Message could not be sent because it is too large"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:125
+msgid "Message could not be sent because it is too large."
 msgstr ""
 
 #. *
-#. * Message could not be sent to following recipients: %1$s
-#. * <p>
-#. * The exception includes those addresses to which the message could not be sent as well as the valid addresses to which the message was
-#. * sent and valid addresses to which the message was not sent.
-#. * </p>
+#. * Message could not be sent to following recipients: %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:182
-msgid "Message could not be sent to the following recipients: %1$s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:130
+msgid "Message could not be sent to the following recipients: %1$s."
 msgstr ""
 
 #. *
-#. * Message could not be sent to following recipients: %1$s %2$s (arbitrary server information)
+#. * Message could not be sent to following recipients: %1$s %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:187
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:135
 msgid "Message could not be sent to the following recipients: %1$s %2$s"
 msgstr ""
 
 #. *
 #. * Lost connection to mail server.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:192
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:140
 msgid "Lost connection to mail server."
 msgstr ""
 
 #. *
-#. * Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s).
+#. * Connection closed to mail server %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:197
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
+msgid "Connection closed to mail server %1$s."
+msgstr ""
+
+#. *
+#. * The connection to remote server %1$s was refused or timed out while attempting to connect.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
 msgid ""
-"Connection closed to mail server %1$s with login %2$s (user=%3$s, context="
-"%4$s)."
+"The connection to remote server %1$s was refused or timed out while "
+"attempting to connect."
 msgstr ""
 
 #. *
-#. * Could not bind mail connection to local port %1$s
-#. * <p>
-#. * Signals that an error occurred while attempting to bind a socket to a local address and port. Typically, the port is in use, or the
-#. * requested local address could not be assigned.
-#. * </p>
+#. * The allowed quota on mail server exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:206
-msgid "Could not bind connection to local port %1$s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
+msgid "The allowed quota on mail server exceeded."
 msgstr ""
 
 #. *
-#. * Connection was refused or timed out while attempting to connect to remote mail server %1$s for user %2$s.
-#. * <p>
-#. * An error occurred while attempting to connect to remote mail server. Typically, the connection was refused remotely (e.g., no process
-#. * is listening on the remote address/port).
-#. * </p>
+#. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:215
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
+msgid "The allowed quota on mail server \"%1$s\" exceeded."
+msgstr ""
+
+#. *
+#. * The mailbox is already in use. Please try again later.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
+msgid "The mailbox is already in use. Please try again later."
+msgstr ""
+
+#. *
+#. * The mailbox on mail server %1$s is already in use. Please try again later.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid ""
-"Connection was refused or timed out while attempting to connect to remote "
-"server %1$s for user %2$s."
-msgstr ""
-
-#. *
-#. * Connection was reset
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:220
-msgid "Connection was reset. Please try again."
-msgstr ""
-
-#. *
-#. * No route to host: mail server %1$s cannot be reached
-#. * <p>
-#. * Signals that an error occurred while attempting to connect to remote mail server. Typically, the remote mail server cannot be reached
-#. * because of an intervening firewall, or if an intermediate router is down.
-#. * </p>
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:229
-msgid "No route to host: server (%1$s) cannot be reached"
-msgstr ""
-
-#. *
-#. * Port %1$s was unreachable on remote mail server
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:234
-msgid "Port %1$s was unreachable on remote server"
-msgstr ""
-
-#. *
-#. * Connection is broken due to a socket exception on remote mail server: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:239
-msgid "Connection is broken due to a socket exception on remote server: %1$s"
-msgstr ""
-
-#. *
-#. * A socket error occurred: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:244
-msgid "A socket error occurred: %1$s"
-msgstr ""
-
-#. *
-#. * The IP address of host "%1$s" could not be determined
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:249
-msgid "The IP address of host \"%1$s\" could not be determined"
-msgstr ""
-
-#. *
-#. * Messaging error: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:254
-msgid "Messaging error: %1$s"
-msgstr ""
-
-#. *
-#. * The quota on mail server exceeded. Error message: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:259
-msgid "The quota on mail server exceeded. Error message: %1$s"
-msgstr ""
-
-#. *
-#. * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:264
-msgid ""
-"The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, "
-"context=%4$s). Error message: %5$s"
-msgstr ""
-
-#. A command sent to mail server failed. Server response: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:267
-msgid "A command sent to mail server failed. Server response: %1$s"
-msgstr ""
-
-#. *
-#. * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:272
-msgid ""
-"A command failed on mail server %1$s with login %2$s (user=%3$s, context="
-"%4$s). Server response: %5$s"
-msgstr ""
-
-#. *
-#. * Mail server indicates a bad command. Server response: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:277
-msgid "Mail server indicates a bad command. Server response: %1$s"
-msgstr ""
-
-#. *
-#. * Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:282
-msgid ""
-"Bad command indicated by mail server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Server response: %5$s"
-msgstr ""
-
-#. *
-#. * Error in mail server protocol. Error message: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:287
-msgid "Error in mail server protocol. Error message: %1$s"
-msgstr ""
-
-#. Protocol error in data sent to the mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:290
-msgid ""
-"Protocol error in data sent to the mail server %1$s with login %2$s (user="
-"%3$s, context=%4$s). Error message: %5$s"
-msgstr ""
-
-#. *
-#. * Message could not be sent: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:295
-msgid "Message could not be sent: %1$s"
-msgstr ""
-
-#. *
-#. * Message could not be sent: %1$s %2$s (arbitrary server information)
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:300
-msgid "Message could not be sent: %1$s %2$s"
-msgstr ""
-
-#. *
-#. * Message cannot be displayed.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:305
-msgid "Message cannot be displayed."
-msgstr ""
-
-#. *
-#. * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:310
-msgid ""
-"Wrong or missing login data to access mail transport server %1$s. Error "
-"message from mail transport server: %2$s"
-msgstr ""
-
-#. *
-#. * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail
-#. * transport server: %5$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:316
-msgid ""
-"Wrong or missing login data to access mail transport server %1$s with login "
-"%2$s (user=%3$s, context=%4$s). Error message from mail transport server: "
-"%5$s"
-msgstr ""
-
-#. *
-#. * Error processing mail server response. The administrator has been informed.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:321
-msgid ""
-"Error processing mail server response. The administrator has been informed."
-msgstr ""
-
-#. *
-#. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:326
-msgid ""
-"Error processing %1$s mail server response for login %2$s (user=%3$s, "
-"context=%4$s). The administrator has been informed."
-msgstr ""
-
-#. *
-#. * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:336
-msgid ""
-"I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for "
-"login %3$s (user=%4$s, context=%5$s)."
-msgstr ""
-
-#. *
-#. * Error processing mail server response. The administrator has been informed. Error message: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:341
-msgid ""
-"Error processing mail server response. The administrator has been informed. "
-"Error message: %1$s"
-msgstr ""
-
-#. *
-#. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error
-#. * message: %5$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:347
-msgid ""
-"Error processing %1$s mail server response for login %2$s (user=%3$s, "
-"context=%4$s). The administrator has been informed. Error message: %5$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:349
-msgid ""
-"That mailbox is already in use by another process. Please try again later. "
-"Error message: %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
-msgid ""
-"That mailbox is already in use by another process on %1$s mail server for "
-"login %2$s (user=%3$s, context=%4$s). Please try again later. Error message: "
-"%5$s"
+"The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr ""
 
 #. Cannot find mail account for user \"%2$s\".
