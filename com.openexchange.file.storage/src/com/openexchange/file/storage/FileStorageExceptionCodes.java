@@ -166,7 +166,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid URL "%1$s". Error: %2$s.
      */
-    INVALID_URL("Invalid URL \"%1$s\". Error: %2$s.", Category.CATEGORY_USER_INPUT, 28),
+    INVALID_URL("Invalid URL \"%1$s\". Error: %2$s.", Category.CATEGORY_USER_INPUT, 28, FileStorageExceptionMessages.INVALID_URL_MSG),
     /**
      * No such folder.
      */

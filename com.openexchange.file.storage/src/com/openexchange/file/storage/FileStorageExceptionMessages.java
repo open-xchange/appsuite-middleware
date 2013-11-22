@@ -75,6 +75,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // In order to accomplish the search, %1$d or more characters are required.
     public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 
+    // Invalid URL \"%1$s\". Please correct the value and try again.
+    public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Please correct the value and try again.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */
