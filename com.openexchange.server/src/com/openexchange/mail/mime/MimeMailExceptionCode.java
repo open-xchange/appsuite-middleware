@@ -55,7 +55,6 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
-import com.openexchange.mail.MailExceptionCode;
 
 /**
  * For MIME related errors.
@@ -120,7 +119,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
      * </p>
      */
-    MESSAGE_REMOVED(MimeMailExceptionCode.MESSAGE_REMOVED_MSG, MailExceptionCode.MAIL_NOT_FOUND.getCategory(), MailExceptionCode.MAIL_NOT_FOUND.getNumber(), MimeMailExceptionMessage.MESSAGE_REMOVED_DISPLAY),
+    MESSAGE_REMOVED(MimeMailExceptionCode.MESSAGE_REMOVED_MSG, CATEGORY_USER_INPUT, 32, MimeMailExceptionMessage.MESSAGE_REMOVED_DISPLAY),
     /**
      * Method not supported: %1$s
      * <p>
@@ -291,11 +290,11 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MailExceptionCode.IO_ERROR.getMessage(), MailExceptionCode.IO_ERROR.getCategory(), MailExceptionCode.IO_ERROR.getNumber()),
+    IO_ERROR(MimeMailExceptionCode.IO_ERROR_MSG, CATEGORY_ERROR, 8),
     /**
      * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
      */
-    IO_ERROR_EXT(MimeMailExceptionCode.IO_ERROR_EXT_MSG, MailExceptionCode.IO_ERROR.getCategory(), MailExceptionCode.IO_ERROR.getNumber()),
+    IO_ERROR_EXT(MimeMailExceptionCode.IO_ERROR_EXT_MSG, CATEGORY_ERROR, 8),
     /**
      * Error processing mail server response. The administrator has been informed. Error message: %1$s
      */
@@ -376,7 +375,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
      * </p>
      */
-    private final static String MESSAGE_REMOVED_MSG = String.format(MailExceptionCode.MAIL_NOT_FOUND.getMessage(), "", "");
+    private final static String MESSAGE_REMOVED_MSG = "Mail(s) %1$s could not be found in folder %2$s";
 
     /**
      * Method not supported: %1$s
@@ -572,7 +571,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * An I/O error occurred: %1$s
      */
-    private final static String IO_ERROR_MSG = MailExceptionCode.IO_ERROR.getMessage();
+    private final static String IO_ERROR_MSG = "An I/O error occurred: %1$s.";
 
     /**
      * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
