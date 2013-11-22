@@ -70,7 +70,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import com.openexchange.java.Streams;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 import com.openexchange.report.Constants;
 
@@ -240,9 +239,16 @@ public final class LastLoginTimeStampTool {
         } catch (final InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());
         } catch (final MBeanException e) {
-            final Throwable t = e.getCause();
-            final String message = null == t ? e.getMessage() : t.getMessage();
-            System.err.println(null == message ? "Unexpected error." : "Unexpected error: " + message);
+            String message = e.getMessage();
+
+            if (e.getCause() != null) {
+                final Throwable t = e.getCause().getCause();
+                if (t != null) {
+                    message = t.getMessage();
+                }
+            }
+
+            System.err.println(null == message ? "Unexpected error." : message);
         } catch (final ReflectionException e) {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
         } catch (final RuntimeException e) {

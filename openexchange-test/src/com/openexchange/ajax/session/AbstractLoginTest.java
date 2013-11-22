@@ -50,7 +50,7 @@
 package com.openexchange.ajax.session;
 
 import org.apache.commons.httpclient.Cookie;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 
 
@@ -68,7 +68,7 @@ public class AbstractLoginTest extends AbstractSimpleClientTest {
     protected void assertNoOXCookies() {
         Cookie[] cookies2 = currentClient.getClient().getState().getCookies();
         for (Cookie cookie : cookies2) {
-            if (cookie.getName().startsWith(Login.SESSION_PREFIX) || cookie.getName().startsWith(Login.SECRET_PREFIX)) {
+            if (cookie.getName().startsWith(LoginServlet.SESSION_PREFIX) || cookie.getName().startsWith(LoginServlet.SECRET_PREFIX)) {
                 fail("Found cookie that should have been deleted: " + cookie.getName());
             }
         }

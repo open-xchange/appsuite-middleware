@@ -144,6 +144,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Authentication failed for login %1$s to server %2$s (service: %3$s).
     public static final String LOGIN_FAILED_MSG = "Authentication failed for login %1$s to server %2$s (service: %3$s).";
 
+    // In order to accomplish the search, %1$d or more characters are required.
+    public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

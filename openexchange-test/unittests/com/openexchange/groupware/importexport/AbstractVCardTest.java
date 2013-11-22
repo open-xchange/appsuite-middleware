@@ -50,12 +50,9 @@
 package com.openexchange.groupware.importexport;
 
 import junit.framework.JUnit4TestAdapter;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.importexport.formats.Format;
@@ -69,7 +66,6 @@ public class AbstractVCardTest extends AbstractContactTest {
 	public final Format format = Format.VCARD;
 	@SuppressWarnings("hiding")
 	public final Importer imp = new VCardImporter(null);
-    protected static Context ctx;
 
     public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(VCardImportTest.class);
@@ -102,11 +98,6 @@ public class AbstractVCardTest extends AbstractContactTest {
 
     public AbstractVCardTest() {
 		super();
-	}
-
-	@After
-	public void cleanUpAfterTest() throws OXException {
-		deleteTestFolder(folderId);
 	}
 
 }

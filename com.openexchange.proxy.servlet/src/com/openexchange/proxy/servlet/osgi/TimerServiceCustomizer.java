@@ -71,7 +71,7 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer<Ti
 
     private final BundleContext context;
 
-    private ScheduledTimerTask scheduledTimerTask;
+    private volatile ScheduledTimerTask scheduledTimerTask;
 
     /**
      * Initializes a new {@link TimerServiceCustomizer}.
@@ -137,9 +137,10 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer<Ti
     }
 
     private void dropTask(final TimerService timerService) {
+        final ScheduledTimerTask scheduledTimerTask = this.scheduledTimerTask;
         if (null != scheduledTimerTask) {
             scheduledTimerTask.cancel(false);
-            scheduledTimerTask = null;
+            this.scheduledTimerTask = null;
             timerService.purge();
         }
     }

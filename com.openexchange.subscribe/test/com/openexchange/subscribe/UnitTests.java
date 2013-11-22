@@ -68,17 +68,12 @@ public final class UnitTests {
 
     public static Test suite() {
         final TestSuite pubSuite = new TestSuite();
-//        pubSuite.addTestSuite(SubscriptionUserDeleteListenerTest.class);
         pubSuite.addTestSuite(ContactFolderUpdaterStrategyTest.class);
         pubSuite.addTestSuite(ContactFolderMultipleUpdaterStrategyTest.class);
         pubSuite.addTestSuite(SubscriptionExecutionServiceImplTest.class);
-//        pubSuite.addTestSuite(SubscriptionSQLStorageTest.class);
-        //pubSuite.addTestSuite(AbstractSubscribeServiceTest.class);
+        // pubSuite.addTestSuite(SubscriptionSQLStorageTest.class);
         pubSuite.addTestSuite(CompositeSubscriptionSourceDiscoveryServiceTest.class);
-        //pubSuite.addTestSuite(FacebookContactParserTest.class);
-        //pubSuite.addTestSuite(LinkedInContactParserTest.class);
         pubSuite.addTestSuite(MicroformatAppointmentParserTest.class);
-        //pubSuite.addTestSuite(MicroformatContactParserTest.class);
         pubSuite.addTestSuite(StrategyFolderUpdaterTest.class);
         pubSuite.addTestSuite(SubscriptionSourceCollectorTest.class);
         return pubSuite;

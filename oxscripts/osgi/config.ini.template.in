@@ -1,6 +1,6 @@
 # Open-Xchange OSGi Configuration File
 osgi.bundles.defaultStartLevel=4
-osgi.framework=file\:@bundlesdir@/org.eclipse.osgi_3.8.1.v20120830-144521.jar
+osgi.framework=file\:@bundlesdir@/org.eclipse.osgi_3.9.0.v20130529-1710.jar
 osgi.configuration.cascaded=false
 eclipse.ignoreApp=true
 osgi.classloader.singleThreadLoads=true

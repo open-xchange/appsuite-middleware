@@ -50,10 +50,15 @@
 package com.openexchange.halo.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -67,8 +72,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.HaloExceptionCodes;
+import com.openexchange.halo.Picture;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -83,8 +90,12 @@ import com.openexchange.user.UserService;
 public class ContactHaloImpl implements ContactHalo {
 
     private final Map<String, HaloContactDataSource> contactDataSources;
+    private final List<HaloContactImageSource> imageSources; 
+    
+    private final Lock imageSourcesLock = new ReentrantLock();
+    
     private final ServiceLookup services;
-
+    
     /**
      * Initializes a new {@link ContactHaloImpl}.
      *
@@ -93,6 +104,7 @@ public class ContactHaloImpl implements ContactHalo {
     public ContactHaloImpl(final ServiceLookup services) {
         super();
         contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>(8);
+        imageSources = new ArrayList<HaloContactImageSource>();
         this.services = ExceptionOnAbsenceServiceLookup.valueOf(services);
     }
 
@@ -110,12 +122,42 @@ public class ContactHaloImpl implements ContactHalo {
         }
         return dataSource.investigate(buildQuery(contact, session), req, session);
     }
-
-    private HaloContactQuery buildQuery(Contact contact, final ServerSession session) throws OXException {
+    
+    @Override
+    public Picture getPicture(Contact contact, ServerSession session) throws OXException {
+        HaloContactQuery contactQuery = buildQuery(contact, session);
+        
+        for (HaloContactImageSource source : imageSources) {
+            if (!source.isAvailable(session)) {
+                continue;
+            }
+            Picture picture = source.getPicture(contactQuery, session);
+            if (picture != null){
+                StringBuilder etagBuilder = new StringBuilder();
+                etagBuilder.append(source.getClass().getName()).append("://").append(picture.getEtag());
+                
+                picture.setEtag(etagBuilder.toString());
+                
+                return picture;
+            }
+        }
+        return null;
+    }
+    
+    // Friendly for testing
+    HaloContactQuery buildQuery(Contact contact, final ServerSession session) throws OXException {
         final UserService userService = services.getService(UserService.class);
         final ContactService contactService = services.getService(ContactService.class);
 
         final HaloContactQuery contactQuery = new HaloContactQuery();
+
+        if (contact.getObjectID() > 0 && contact.getParentFolderID() > 0) {
+            Contact loaded = contactService.getContact(session, "" + contact.getParentFolderID(), "" + contact.getInternalUserId());
+            contactQuery.setContact(loaded);
+            contactQuery.setMergedContacts(Arrays.asList(loaded));
+            return contactQuery;
+        }
+
 
         // Try to find a user with a given eMail address
 
@@ -206,6 +248,33 @@ public class ContactHaloImpl implements ContactHalo {
 
     public void removeContactDataSource(final HaloContactDataSource ds) {
         contactDataSources.remove(ds.getId());
+    }
+    
+    public void addContactImageSource(final HaloContactImageSource is) {
+        try {
+            imageSourcesLock.lock();
+            imageSources.add(is);
+            Collections.sort(imageSources, new Comparator<HaloContactImageSource>() {
+
+                @Override
+                public int compare(HaloContactImageSource o1, HaloContactImageSource o2) {
+                    return o2.getPriority() - o1.getPriority();
+                }
+                
+            });
+        } finally {
+            imageSourcesLock.unlock();
+        }
+    }
+    
+    public void removeContactImageSource(final HaloContactImageSource is) {
+        try {
+            imageSourcesLock.lock();
+            imageSources.remove(is);
+            
+        } finally {
+            imageSourcesLock.unlock();
+        }
     }
 
 }

@@ -52,7 +52,7 @@ package com.openexchange.ajax.contact.action;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.Contact;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContactUpdatesResponse extends AbstractColumnsResponse {
+public class ContactUpdatesResponse extends CommonUpdatesResponse {
 
     private List<Contact> contacts = new ArrayList<Contact>();
 

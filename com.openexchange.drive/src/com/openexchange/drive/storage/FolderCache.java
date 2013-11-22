@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.file.storage.FileStorageFolder;
 
 /**
@@ -94,7 +95,7 @@ public class FolderCache {
      * @return The folder, or <code>null</code> if unknown
      */
     public FileStorageFolder getFolder(String path)  {
-        return knownFolders.get(path);
+        return knownFolders.get(PathNormalizer.normalize(path));
     }
 
     /**
@@ -104,8 +105,8 @@ public class FolderCache {
      * @param folder The folder to remember
      */
     public void remember(String path, FileStorageFolder folder) {
-        knownPaths.put(folder.getId(), path);
-        knownFolders.put(path, folder);
+        knownPaths.put(folder.getId(), PathNormalizer.normalize(path));
+        knownFolders.put(PathNormalizer.normalize(path), folder);
     }
 
     /**
@@ -117,12 +118,12 @@ public class FolderCache {
      */
     public void forget(String path, FileStorageFolder folder, boolean forgetSubfolders) {
         knownPaths.remove(folder.getId());
-        knownFolders.remove(path);
+        knownFolders.remove(PathNormalizer.normalize(path));
         if (forgetSubfolders) {
             Iterator<Entry<String, FileStorageFolder>> iterator = knownFolders.entrySet().iterator();
             while (iterator.hasNext()) {
                 Entry<String, FileStorageFolder> knownFolder = iterator.next();
-                if (knownFolder.getKey().startsWith(path)) {
+                if (knownFolder.getKey().startsWith(PathNormalizer.normalize(path))) {
                     knownPaths.remove(knownFolder.getValue().getId());
                     iterator.remove();
                 }

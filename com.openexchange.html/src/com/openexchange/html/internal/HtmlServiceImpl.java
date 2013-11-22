@@ -57,6 +57,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -87,6 +88,7 @@ import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
@@ -100,6 +102,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
+import com.openexchange.java.Strings;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -123,6 +126,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String TAG_S_HEAD = "<head>";
 
+    private final static char[]     IMMUNE_EMPTY = new char[0];
     private final static char[]     IMMUNE_HTML = { ',', '.', '-', '_', ' ' };
     private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_' };
 
@@ -317,12 +321,15 @@ public final class HtmlServiceImpl implements HtmlService {
             final StringBuilder sb = new StringBuilder(256);
             int lastMatch = 0;
             while (m.find()) {
-                final int startOpeningPos = m.start();
-                targetBuilder.append(content.substring(lastMatch, startOpeningPos));
-                sb.setLength(0);
-                appendLink(m.group(), sb);
-                targetBuilder.append("<!--").append(comment).append(' ').append(sb.toString()).append("-->");
-                lastMatch = m.end();
+                final String url = m.group();
+                if (HtmlServices.isNonJavaScriptURL(url)) {
+                    final int startOpeningPos = m.start();
+                    targetBuilder.append(content.substring(lastMatch, startOpeningPos));
+                    sb.setLength(0);
+                    appendLink(url, sb);
+                    targetBuilder.append("<!--").append(comment).append(' ').append(sb.toString()).append("-->");
+                    lastMatch = m.end();
+                }
             }
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
@@ -476,6 +483,24 @@ public final class HtmlServiceImpl implements HtmlService {
         HtmlParser.parse(htmlContent, handler);
         modified[0] |= handler.isImageURLFound();
         return handler.getHTML();
+    }
+
+    @Override
+    public String encodeForHTML(final char[] candidates, final String input) {
+        if (input == null) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder(input.length() << 1);
+        Arrays.sort(candidates);
+        for (int i = 0; i < input.length(); i++) {
+            final char c = input.charAt(i);
+            if (Arrays.binarySearch(candidates, c) >= 0) {
+                sb.append(htmlCodec.encodeCharacter(IMMUNE_EMPTY, Character.valueOf(c)));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     @Override
@@ -1004,7 +1029,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String prettyPrint(final String htmlContent) {
-        if (null == htmlContent) {
+        if (Strings.isEmpty(htmlContent)) {
             return htmlContent;
         }
         try {
@@ -1039,7 +1064,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed) {
-        if (null == htmlContent) {
+        if (Strings.isEmpty(htmlContent)) {
             return htmlContent;
         }
         /*
@@ -1102,7 +1127,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         href = imgTag.substring(pos+4, epos);
                     }
                     if (!href.startsWith("cid") && !href.startsWith("http")) {
-                        if (href.charAt(0) != '/') {
+                        if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
                         final String replacement = imgTag.substring(0, pos) + "src=\"" + base + href + "\"" + imgTag.substring(epos);
@@ -1138,7 +1163,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         href = hrefTag.substring(pos+11, epos);
                     }
                     if (!href.startsWith("cid") && !href.startsWith("http")) {
-                        if (href.charAt(0) != '/') {
+                        if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
                         final String replacement = hrefTag.substring(0, pos) + "background=\"" + base + href + "\"" + hrefTag.substring(epos);
@@ -1174,7 +1199,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         href = hrefTag.substring(pos+5, epos);
                     }
                     if (!href.startsWith("cid") && !href.startsWith("http")) {
-                        if (href.charAt(0) != '/') {
+                        if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
                         final String replacement = hrefTag.substring(0, pos) + "href=\"" + base + href + "\"" + hrefTag.substring(epos);

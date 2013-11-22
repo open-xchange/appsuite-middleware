@@ -114,7 +114,20 @@ public class SimpleOXClient {
         return new SimpleResponse(raw(module, action, parameters));
     }
 
-    public JSONObject raw(String module, String action, Object...parameters) throws JSONException, IOException {
+    public JSONObject raw(String module, String action, Object... parameters) throws JSONException, IOException {
+        HttpMethod method = rawMethod(module, action, parameters);
+        int statusCode= method.getStatusCode();
+        if(statusCode != 200) {
+            throw new IllegalStateException("Expected a return code of 200 but was " + statusCode);
+        }
+        String response = method.getResponseBodyAsString();
+        if (debug) {
+            System.out.println("Response: " + response);
+        }
+        return new JSONObject(response);
+    }
+
+    public HttpMethod rawMethod(String module, String action, Object...parameters) throws JSONException, IOException {
         Map<String, Object> params = M(parameters);
         params.put("action", action);
         if(!params.containsKey("session") && isLoggedIn()) {
@@ -146,17 +159,9 @@ public class SimpleOXClient {
 
         method.setQueryString(pairs);
 
-        int rc = client.executeMethod(method);
+        client.executeMethod(method);
 
-        if(rc != 200) {
-            throw new IllegalStateException("Expected a return code of 200 but was "+rc);
-        }
-
-        String response = method.getResponseBodyAsString();
-        if(debug) {
-            System.out.println("Response: "+response);
-        }
-        return new JSONObject(response);
+        return method;
     }
 
     private Map<String, Object> M(Object...parameters) {

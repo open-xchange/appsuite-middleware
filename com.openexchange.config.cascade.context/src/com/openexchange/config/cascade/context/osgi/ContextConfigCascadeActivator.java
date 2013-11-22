@@ -57,7 +57,6 @@ import com.openexchange.config.cascade.context.ContextConfigProvider;
 import com.openexchange.config.cascade.context.ContextSetConfigProvider;
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
 public class ContextConfigCascadeActivator extends HousekeepingActivator {

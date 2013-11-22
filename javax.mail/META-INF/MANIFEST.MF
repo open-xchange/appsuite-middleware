@@ -9,8 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.tools.ssl,
  com.sun.net,
  com.sun.net.ssl,
- gnu.inet.encoding,
- javax.activation,
+ javax.activation;version="1.1.0",
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
@@ -31,7 +30,7 @@ Import-Package: com.openexchange.tools.ssl,
  javax.xml.transform.stax,
  javax.xml.transform.stream,
  org.apache.commons.logging,
- org.osgi.framework;version="1.7.0",
+ org.osgi.framework,
  sun.security.util
 Export-Package: com.sun.mail.auth;version="1.4.7",
  com.sun.mail.handlers;version="1.4.7";
@@ -86,6 +85,7 @@ Export-Package: com.sun.mail.auth;version="1.4.7",
    javax.mail.util,
    javax.activation,
    com.sun.mail.smtp",
+ gnu.inet.encoding,
  javax.mail;version="1.4",
  javax.mail.event;version="1.4";uses:="javax.mail",
  javax.mail.internet;version="1.4";
@@ -99,6 +99,7 @@ Export-Package: com.sun.mail.auth;version="1.4.7",
  net.freeutils.tnef,
  net.freeutils.tnef.mime,
  net.freeutils.tnef.msg
-Bundle-ClassPath: lib/tnef-1.8.0.jar,
+Bundle-ClassPath: lib/libidn-1.9.jar,
+ lib/tnef-1.8.0.jar,
  .
 Bundle-Activator: javax.mail.osgi.JavaMailActivator

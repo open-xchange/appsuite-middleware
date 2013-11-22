@@ -62,6 +62,8 @@ public class FileStorageEventConstants {
     public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
 
     public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
+    
+    public static final String ACCESS_TOPIC = "com/openexchange/groupware/infostore/access";
 
     public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
 

@@ -60,6 +60,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
+    com.openexchange.ajax.ProcessUploadStaticTest.class,
     com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class,
     com.openexchange.ajax.parser.TaskLastModifiedTest.class,
     com.openexchange.ajax.LoginAddFragmentTest.class,
@@ -77,6 +78,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.mail.mime.MimeStructureFixerTest.class,
     com.openexchange.mail.mime.MimeSmilFixerTest.class,
     com.openexchange.groupware.notify.ParticipantNotifyTest.class
+
 })
 public class UnitTests {
 

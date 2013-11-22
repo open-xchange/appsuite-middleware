@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Atmosphere Realtime Channel Implementation
 Bundle-SymbolicName: com.openexchange.realtime.json
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Activator: com.openexchange.realtime.json.osgi.RTJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -24,6 +24,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.java.util,
  com.openexchange.json,
  com.openexchange.log,
+ com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.realtime,
  com.openexchange.realtime.directory,
@@ -43,6 +44,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.timer,
  com.openexchange.tools,
  com.openexchange.tools.session,
+ javax.management,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.lang,
@@ -53,4 +55,5 @@ Import-Package: com.openexchange.ajax,
 Export-Package: com.openexchange.realtime.json,
  com.openexchange.realtime.json.impl,
  com.openexchange.realtime.json.impl.stanza.builder,
+ com.openexchange.realtime.json.impl.stanza.writer,
  com.openexchange.realtime.json.stanza

@@ -118,14 +118,14 @@ public final class SystemInfostoreFolder {
      * Gets the subfolder identifiers of database folder representing system infostore folder. <code>false</code>.
      *
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPerm The user permission bits
      * @param ctx The context
      * @param altNames Whether to prefer alternative names for infostore folders
      * @param con The connection
      * @return The database folder representing system infostore folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserPermissionBits userConfiguration, final Context ctx, final boolean altNames, final Session session, final Connection con) throws OXException {
+    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserPermissionBits userPerm, final Context ctx, final boolean altNames, final Session session, final Connection con) throws OXException {
         try {
             /*
              * The system infostore folder
@@ -139,7 +139,7 @@ public final class SystemInfostoreFolder {
                         user.getId(),
                         user.getGroups(),
                         ctx,
-                        userConfiguration,
+                        userPerm,
                         null,
                         con)).asQueue();
                 size = q.size();
@@ -166,7 +166,7 @@ public final class SystemInfostoreFolder {
                 if (fuid == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
                     if (showPersonalBelowInfoStore(session, altNames)) {
                         // Check if there are shared files -- discard if there are none
-                        final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(fuid, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, null);
+                        final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(fuid, user.getId(), user.getGroups(), userPerm.getAccessibleModules(), ctx, null);
                         subfolders.remove(getDefaultInfoStoreFolderId(session, ctx));
                         if (!subfolders.isEmpty()) {
                             subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME)));
@@ -189,7 +189,7 @@ public final class SystemInfostoreFolder {
                 FolderObject.INFOSTORE,
                 user.getId(),
                 user.getGroups(),
-                userConfiguration,
+                userPerm,
                 ctx,
                 con);
             if (hasNonTreeVisibleFolders) {

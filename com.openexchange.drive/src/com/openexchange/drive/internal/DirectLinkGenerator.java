@@ -49,8 +49,6 @@
 
 package com.openexchange.drive.internal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.Capability;
@@ -58,8 +56,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 
 /**
@@ -74,7 +70,6 @@ public class DirectLinkGenerator {
     private final SyncSession session;
     private final ConfigurationService configService;
 
-    private String hostName;
     private Boolean documentPreview;
 
     /**
@@ -94,8 +89,9 @@ public class DirectLinkGenerator {
      * @return The quota link
      */
     public String getQuotaLink() {
-        return getProperty("com.openexchange.drive.directLinkQuota", "https://[hostname]")
-            .replaceAll("\\[hostname\\]", getHostName())
+        return getProperty("com.openexchange.drive.directLinkQuota", "[protocol]://[hostname]")
+            .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
+            .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[contextid\\]", String.valueOf(session.getServerSession().getContextId()))
             .replaceAll("\\[userid\\]", String.valueOf(session.getServerSession().getUserId()))
@@ -145,8 +141,9 @@ public class DirectLinkGenerator {
      * @return The direct link
      */
     public String getFileLink(String folderID, String objectID) {
-        return getProperty("com.openexchange.drive.directLinkFile", "https://[hostname]/[uiwebpath]#[filefragments]")
-            .replaceAll("\\[hostname\\]", getHostName())
+        return getProperty("com.openexchange.drive.directLinkFile", "[protocol]://[hostname]/[uiwebpath]#[filefragments]")
+            .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
+            .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[filefragments\\]", getFileLinkFragments(folderID, objectID))
         ;
@@ -179,9 +176,11 @@ public class DirectLinkGenerator {
         if (false == Strings.isEmpty(mimeType)) {
             // patterns borrowed from web interface
             if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$")) {
-                return getProperty("com.openexchange.drive.imageLinkImageFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
-                    "document&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]")
-                    .replaceAll("\\[hostname\\]", getHostName())
+                return getProperty("com.openexchange.drive.imageLinkImageFile", "[protocol]://[hostname]/[dispatcherPrefix]/files" +
+                    "?action=document&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
+                    "&width=[width]&height=[height]&rotate=true")
+                    .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
+                    .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
                     .replaceAll("\\[folder\\]", file.getFolderId())
                     .replaceAll("\\[object\\]", file.getId())
@@ -191,9 +190,10 @@ public class DirectLinkGenerator {
                 ;
             }
             if (mimeType.matches("(?i)^audio\\/(mpeg|m4a|m4b|mp3|ogg|oga|opus|x-m4a)$")) {
-                return getProperty("com.openexchange.drive.imageLinkAudioFile", "https://[hostname]/[dispatcherPrefix]/image/file/" +
+                return getProperty("com.openexchange.drive.imageLinkAudioFile", "[protocol]://[hostname]/[dispatcherPrefix]/image/file/" +
                     "mp3Cover?folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]")
-                    .replaceAll("\\[hostname\\]", getHostName())
+                    .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
+                    .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
                     .replaceAll("\\[folder\\]", file.getFolderId())
                     .replaceAll("\\[object\\]", file.getId())
@@ -202,13 +202,14 @@ public class DirectLinkGenerator {
                     .replaceAll("\\[height\\]", String.valueOf(height))
                 ;
             }
-            if (mimeType.matches(
+            if ((mimeType.matches(
                 "(?i)^application\\/.*(ms-word|ms-excel|ms-powerpoint|msword|msexcel|mspowerpoint|openxmlformats|opendocument|pdf|rtf).*$")
-                && hasDocumentPreview()) {
-                return getProperty("com.openexchange.drive.imageLinkDocumentFile", "https://[hostname]/[dispatcherPrefix]/files?action=" +
+                || mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) && hasDocumentPreview()) {
+                return getProperty("com.openexchange.drive.imageLinkDocumentFile", "[protocol]://[hostname]/[dispatcherPrefix]/files?action=" +
                     "document&format=preview_image&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
                     "&width=[width]&height=[height]")
-                    .replaceAll("\\[hostname\\]", getHostName())
+                    .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
+                    .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
                     .replaceAll("\\[folder\\]", file.getFolderId())
                     .replaceAll("\\[object\\]", file.getId())
@@ -240,8 +241,9 @@ public class DirectLinkGenerator {
      * @return The direct link
      */
     public String getDirectoryLink(String folderID) {
-        return getProperty("com.openexchange.drive.directLinkDirectory", "https://[hostname]/[uiwebpath]#[directoryfragments]")
-            .replaceAll("\\[hostname\\]", getHostName())
+        return getProperty("com.openexchange.drive.directLinkDirectory", "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]")
+            .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
+            .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[directoryfragments\\]", getDirectoryLinkFragments(folderID))
         ;
@@ -284,46 +286,6 @@ public class DirectLinkGenerator {
             }
         }
         return new int[] { defaultWidth, defaultHeight };
-    }
-
-    private String getHostName() {
-        if (null == hostName) {
-            /*
-             * Try host data parameter first
-             */
-            Object parameter = session.getServerSession().getParameter(HostnameService.PARAM_HOST_DATA);
-            if (null != parameter && HostData.class.isInstance(parameter)) {
-                hostName = ((HostData)parameter).getHost();
-            }
-            /*
-             * Ask hostname service if available
-             */
-            if (Strings.isEmpty(hostName)) {
-                HostnameService hostnameService = DriveServiceLookup.getOptionalService(HostnameService.class);
-                if (null != hostnameService) {
-                    hostName = hostnameService.getHostname(
-                        session.getServerSession().getUserId(), session.getServerSession().getContextId());
-                }
-            }
-            /*
-             * Get hostname from java
-             */
-            if (Strings.isEmpty(hostName)) {
-                try {
-                    hostName = InetAddress.getLocalHost().getCanonicalHostName();
-                } catch (UnknownHostException e) {
-                    LOG.debug("error getting canonical hostname", e);
-                }
-            }
-            /*
-             * Fall back to localhost as last resort
-             */
-            if (Strings.isEmpty(hostName)) {
-                LOG.warn("unable to get hostname, falling back to 'localhost'");
-                hostName = "localhost";
-            }
-        }
-        return hostName;
     }
 
     private String getWebpath() {

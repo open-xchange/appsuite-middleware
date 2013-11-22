@@ -133,6 +133,7 @@ import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
+import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -650,13 +651,18 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Register Infostore
         registerService(InfostoreFacade.class, Infostore.FACADE);
+        registerService(EventFiringInfostoreFacade.class, Infostore.EVENT_FIRING_FACADE);
         registerService(InfostoreSearchEngine.class, Infostore.SEARCH_ENGINE);
 
         // Register AttachmentBase
         registerService(AttachmentBase.class, Attachment.ATTACHMENT_BASE);
 
         // Register event factory service
-        registerService(EventFactoryService.class, new EventFactoryServiceImpl());
+        {
+            final EventFactoryServiceImpl eventFactoryServiceImpl = new EventFactoryServiceImpl();
+            registerService(EventFactoryService.class, eventFactoryServiceImpl);
+            ServerServiceRegistry.getInstance().addService(EventFactoryService.class, eventFactoryServiceImpl);
+        }
 
         // Register folder service
         final FolderService folderService = new FolderServiceImpl();
@@ -742,6 +748,7 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/servlet/webdav.groupuser", new com.openexchange.webdav.groupuser(), null, null);
         http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
+        http.registerServlet("/servlet/webdav.drive", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);

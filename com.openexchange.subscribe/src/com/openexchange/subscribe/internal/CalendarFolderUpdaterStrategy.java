@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -72,6 +73,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<CalendarDataObject> {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarFolderUpdaterStrategy.class);
 
     private static final int SQL_INTERFACE = 1;
 
@@ -139,7 +142,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
                 retval.add((CalendarDataObject) appointmentsInFolder.next());
             }
         } catch (final SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
 
         return retval;
@@ -176,14 +179,14 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         userInfo.put(SQL_INTERFACE, calendarSql);
         userInfo.put(TARGET, target);
         // Clear Folder
-        
+
         try {
             calendarSql.deleteAppointmentsInFolder(target.getFolderIdAsInt());
         } catch (SQLException e) {
-            
+
         }
-        
-        
+
+
         return userInfo;
     }
 

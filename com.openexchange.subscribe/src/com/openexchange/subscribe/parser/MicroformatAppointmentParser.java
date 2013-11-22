@@ -52,6 +52,7 @@ package com.openexchange.subscribe.parser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Collection;
+import org.apache.commons.logging.Log;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -67,6 +68,8 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
  */
 public class MicroformatAppointmentParser {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MicroformatAppointmentParser.class);
+
     private Collection<CalendarDataObject> appointments;
 
     public void parse(String text) {
@@ -79,11 +82,9 @@ public class MicroformatAppointmentParser {
             xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes()) ) );
             appointments = handler.getObjects();
         } catch (SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
 

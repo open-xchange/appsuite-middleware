@@ -1168,7 +1168,7 @@ public final class OXFolderSQL {
         delOXFolder(folderId, userId, lastModified, true, true, ctx, writeConArg);
     }
 
-    private static final String SQL_DELETE_INSERT_OT = "INSERT INTO del_oxfolder_tree SELECT * FROM oxfolder_tree WHERE cid = ? AND fuid = ?";
+    private static final String SQL_DELETE_INSERT_OT = "INSERT INTO del_oxfolder_tree (cid, fuid, parent, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag) SELECT oxfolder_tree.cid, oxfolder_tree.fuid, oxfolder_tree.parent, oxfolder_tree.module, oxfolder_tree.type, oxfolder_tree.creating_date, oxfolder_tree.created_from, oxfolder_tree.changing_date, oxfolder_tree.changed_from, oxfolder_tree.permission_flag, oxfolder_tree.subfolder_flag, oxfolder_tree.default_flag FROM oxfolder_tree WHERE oxfolder_tree.cid = ? AND oxfolder_tree.fuid = ?";
 
     private static final String SQL_DELETE_INSERT_OP = "INSERT INTO del_oxfolder_permissions SELECT * FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
 

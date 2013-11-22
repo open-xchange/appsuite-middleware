@@ -51,7 +51,6 @@ package com.openexchange.printing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +59,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tasks.TaskField;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
@@ -88,8 +86,9 @@ public class EnhancedTaskOrAppointment {
 		this.services = services;
 		this.taskOrAppointment = taskOrAppointment;
 		this.ctx = ctx;
-		if (taskOrAppointment != null)
-			initialize(taskOrAppointment);
+		if (taskOrAppointment != null) {
+            initialize(taskOrAppointment);
+        }
 
 	}
 

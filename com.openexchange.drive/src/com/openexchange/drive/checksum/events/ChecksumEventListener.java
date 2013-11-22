@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.checksum.events;
 
+import static com.openexchange.file.storage.FileStorageEventConstants.CREATE_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_FOLDER_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOLDER_TOPIC;
@@ -72,8 +73,13 @@ import com.openexchange.session.Session;
  */
 public class ChecksumEventListener implements EventHandler {
 
+    /**
+     * Gets the event topics handled by the checksum event listener.
+     *
+     * @return An array of handled event topics.
+     */
     public static String[] getHandledTopics() {
-        return new String[] { DELETE_TOPIC, UPDATE_TOPIC, DELETE_FOLDER_TOPIC, UPDATE_FOLDER_TOPIC };
+        return new String[] { DELETE_TOPIC, UPDATE_TOPIC, CREATE_TOPIC, DELETE_FOLDER_TOPIC, UPDATE_FOLDER_TOPIC };
     }
 
     private static final List<String> DRIVE_CLIENTS = Arrays.asList(new String[] {
@@ -104,22 +110,39 @@ public class ChecksumEventListener implements EventHandler {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
             }
+            RdbChecksumStore checksumStore = new RdbChecksumStore(session.getContextId());
             String topic = event.getTopic();
-            if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic)) {
-                FileID fileID = new FileID(
-                    FileStorageEventHelper.extractService(event),
-                    FileStorageEventHelper.extractAccountId(event),
-                    FileStorageEventHelper.extractFolderId(event),
-                    FileStorageEventHelper.extractObjectId(event)
-                );
-                invalidateFile(session, fileID);
+            if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic) || CREATE_TOPIC.equals(topic)) {
+                /*
+                 * extract event properties
+                 */
+                String serviceID = FileStorageEventHelper.extractService(event);
+                String accountID = FileStorageEventHelper.extractAccountId(event);
+                String folderID = FileStorageEventHelper.extractFolderId(event);
+                /*
+                 * invalidate checksum of parent directory
+                 */
+                checksumStore.removeDirectoryChecksum(new FolderID(serviceID, accountID, folderID));
+                /*
+                 * invalidate checksum of file in case of deletion or update
+                 */
+                if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic)) {
+                    String objectID = FileStorageEventHelper.extractObjectId(event);
+                    checksumStore.removeFileChecksums(new FileID(serviceID, accountID, folderID, objectID));
+                }
             } else if (DELETE_FOLDER_TOPIC.equals(topic) || UPDATE_FOLDER_TOPIC.equals(topic)) {
-                FolderID folderID = new FolderID(
-                    FileStorageEventHelper.extractService(event),
-                    FileStorageEventHelper.extractAccountId(event),
-                    FileStorageEventHelper.extractFolderId(event)
-                );
-                invalidateFolder(session, folderID);
+                /*
+                 * extract event properties
+                 */
+                String serviceID = FileStorageEventHelper.extractService(event);
+                String accountID = FileStorageEventHelper.extractAccountId(event);
+                String folderID = FileStorageEventHelper.extractFolderId(event);
+                /*
+                 * invalidate checksums of directory and contained files
+                 */
+                FolderID id = new FolderID(serviceID, accountID, folderID);
+                checksumStore.removeDirectoryChecksum(id);
+                checksumStore.removeFileChecksumsInFolder(id);
             }
         } catch (OXException e) {
             LOG.warn("unexpected error during event handling", e);
@@ -128,29 +151,6 @@ public class ChecksumEventListener implements EventHandler {
 
     private static boolean isDriveSession(Session session) {
         return null != session && DRIVE_CLIENTS.contains(session.getClient());
-    }
-
-    private static void invalidateFolder(Session session, FolderID folderID) throws OXException {
-        if (null == folderID) {
-            LOG.warn("No folder ID specified, unable to invalidate checksums.");
-        } else if (null == session) {
-            LOG.warn("Unable to invalidate checksums for folder '" + folderID + "' due to missing session.");
-        } else {
-            RdbChecksumStore checksumStore = new RdbChecksumStore(session.getContextId());
-            checksumStore.removeDirectoryChecksum(folderID);
-            checksumStore.removeFileChecksumsInFolder(folderID);
-        }
-    }
-
-    private static void invalidateFile(Session session, FileID fileID) throws OXException {
-        if (null == fileID) {
-            LOG.warn("No file ID specified, unable to invalidate checksums.");
-        } else if (null == session) {
-            LOG.warn("Unable to invalidate checksums for file '" + fileID + "' due to missing session.");
-        } else {
-            RdbChecksumStore checksumStore = new RdbChecksumStore(session.getContextId());
-            checksumStore.removeFileChecksums(fileID);
-        }
     }
 
 }

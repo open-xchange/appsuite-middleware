@@ -67,4 +67,5 @@ public interface Assignment {
 
     String getSchema();
 
+    boolean isToConfigDB();
 }

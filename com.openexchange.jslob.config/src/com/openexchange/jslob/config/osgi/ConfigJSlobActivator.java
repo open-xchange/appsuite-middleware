@@ -49,9 +49,11 @@
 
 package com.openexchange.jslob.config.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.config.ConfigJSlobService;
 import com.openexchange.jslob.shared.SharedJSlobService;
@@ -75,16 +77,19 @@ public final class ConfigJSlobActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
+        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ConfigJSlobService service = new ConfigJSlobService(this);
-        registerService(JSlobService.class, service);
+        final BundleContext context = this.context;
+        final ConfigJSlobService service = new ConfigJSlobService(this);
+        // Trackers
         track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
+        track(ConfigTreeEquivalent.class, new ConfigTreeEquivalentTracker(service, context));
         openTrackers();
+        // Register service
+        registerService(JSlobService.class, service);
     }
 
 }

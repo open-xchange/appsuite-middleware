@@ -52,22 +52,26 @@ package com.openexchange.drive.internal.tracking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveConstants;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.actions.ErrorDirectoryAction;
 import com.openexchange.drive.actions.SyncDirectoriesAction;
 import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.DirectoryChecksum;
-import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.internal.SyncSession;
-import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.sync.IntermediateSyncResult;
+import com.openexchange.drive.sync.SimpleDirectoryVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.StringAllocator;
@@ -90,6 +94,11 @@ public class SyncTracker {
     private static final int MIN_SEQUENCE_LENGTH = 1;
 
     /**
+     * The maximum number of tries to send reset-actions before blacklisting affected folders.
+     */
+    private static final int MAX_RESET_ATTEMPTS = 3;
+
+    /**
      * The sequence when the synchronization is idle, i.e. client and server are in-sync.
      */
     private static final List<HistoryEntry> IDLE_SEQUENCE = Arrays.asList(new HistoryEntry(new IntermediateSyncResult<DirectoryVersion>(
@@ -104,11 +113,6 @@ public class SyncTracker {
      * The maximum number of actions to be stored per history entry; others will be compacted implicitly.
      */
     private static final int MAX_HISTORY_ENTRY_LENGTH = 10;
-
-    /**
-     * Enable this after the first server bug :)
-     */
-    private static final boolean RESET_SERVER_DIRECTORIES = false;
 
     private static final String PARAM_RESULT_HISTORY = "com.openexchange.drive.resultHistory";
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SyncTracker.class);
@@ -140,37 +144,67 @@ public class SyncTracker {
         insert(syncResult, null);
         RepeatedSequence<HistoryEntry> cycle = findCycle();
         if (null != cycle) {
-            clearHistory();
             trace(session, cycle);
             List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>();
             List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>();
-            Collection<DirectoryVersion> directoryVersions = getAffectedDirectoryVersions(session, cycle);
-            if (0 < directoryVersions.size()) {
+            Collection<DirectoryVersion> affectedDirectoryVersions = getAffectedDirectoryVersions(session, cycle);
+            if (0 < affectedDirectoryVersions.size()) {
                 /*
                  * add 'reset' sync actions for affected directories
                  */
-                for (DirectoryVersion directoryVersion : directoryVersions) {
+                for (DirectoryVersion directoryVersion : affectedDirectoryVersions) {
                     SyncDirectoryAction action = new SyncDirectoryAction(directoryVersion, null, true);
                     optimizedActionsForClient.add(action);
-                    if (RESET_SERVER_DIRECTORIES) {
-                        optimizedActionsForServer.add(action);
+                }
+                /*
+                 * check if history already contains a (therefore probably failed) reset-attempt of individual directories
+                 */
+                int resetAttempts = getFrequency(
+                    new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient));
+                if (1 == resetAttempts) {
+                    /*
+                     * reset server checksums as well for affected directories to be sure
+                     */
+                    session.trace("Cycle still detected after first attempt to reset directory checksums " +
+                        "-resetting affected server checksums as well...");
+                    resetServerChecksums(session, affectedDirectoryVersions);
+                } else if (MAX_RESET_ATTEMPTS <= resetAttempts) {
+                    /*
+                     * gave client enough chances to reset his directory checksums, request client to stop for self protection
+                     */
+                    session.trace("Already tried to reset checksums " + resetAttempts +
+                        " times - adding 'qurantine' action for affected directories to interrupt further processing.");
+                    optimizedActionsForClient.clear();
+                    for (DirectoryVersion directoryVersion : affectedDirectoryVersions) {
+                        optimizedActionsForClient.add(new ErrorDirectoryAction(null, directoryVersion, null,
+                            DriveExceptionCodes.REPEATED_SYNC_PROBLEMS_MSG.create(directoryVersion.getPath(), directoryVersion.getChecksum()), false, true));
                     }
                 }
             } else {
                 /*
                  * add 'reset' sync actions for whole directory structure
                  */
-                SyncDirectoriesAction action = new SyncDirectoriesAction(true);
-                optimizedActionsForClient.add(action);
-                if (RESET_SERVER_DIRECTORIES) {
-                    optimizedActionsForServer.add(action);
+                optimizedActionsForClient.add(new SyncDirectoriesAction(true));
+                /*
+                 * check if history already contains a (therefore probably failed) reset-attempt of all directories
+                 */
+                int resetAttempts = getFrequency(
+                    new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient));
+                if (1 == resetAttempts) {
+                    session.trace("Cycle still detected after first attempt to reset directory checksums " +
+                        "-resetting affected server checksums as well...");
+                    resetServerChecksums(session, affectedDirectoryVersions);
                 }
             }
             /*
-             * pass 'reset' actions as new sync result
+             * prepare new sync result containing 'reset' actions
              */
             IntermediateSyncResult<DirectoryVersion> newResult =
                 new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+            /*
+             * track & return new sync result
+             */
+            insert(newResult, null);
             if (session.isTraceEnabled()) {
                 session.trace(newResult);
             }
@@ -244,10 +278,13 @@ public class SyncTracker {
     }
 
     /**
-     * Clears the result history
+     * Gets the number of occurrences of the supplied result in the result history.
+     *
+     * @param result The result to count
+     * @return The number of occurrences
      */
-    private void clearHistory() {
-        getResultHistory().clear();
+    private int getFrequency(IntermediateSyncResult<DirectoryVersion> result) {
+        return Collections.frequency(getResultHistory(), new HistoryEntry(result, null));
     }
 
     private static Collection<DirectoryVersion> getAffectedDirectoryVersions(SyncSession session, RepeatedSequence<HistoryEntry> cycle) {
@@ -262,33 +299,33 @@ public class SyncTracker {
         return directoryVersions.values();
     }
 
+    /**
+     * Creates a directory version representing the supplied path. If possible, the directory version uses the server's checksum,
+     * if not, it falls back to a placeholder checksum.
+     *
+     * @param session The sync session
+     * @param path The path
+     * @return A directory checksum to be used in error actions
+     */
     private static DirectoryVersion getDirectoryVersion(SyncSession session, final String path) {
+        /*
+         * try to use current server checksum if possible
+         */
         try {
             FileStorageFolder folder = session.getStorage().optFolder(path, false);
             if (null != folder) {
                 List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, Arrays.asList(new String[] { folder.getId() }));
                 if (null != checksums && 1 == checksums.size()) {
-                    return new ServerDirectoryVersion(path, checksums.get(0));
+                    return new SimpleDirectoryVersion(path, checksums.get(0).getChecksum());
                 }
             }
         } catch (OXException e) {
             LOG.warn("Error getting directory version", e);
         }
         /*
-         * fallback to simple directory version
+         * use empty checksum as fallback
          */
-        return new DirectoryVersion() {
-
-            @Override
-            public String getChecksum() {
-                return DriveConstants.EMPTY_MD5;
-            }
-
-            @Override
-            public String getPath() {
-                return path;
-            }
-        };
+        return new SimpleDirectoryVersion(path, DriveConstants.EMPTY_MD5);
     }
 
     private static void trace(SyncSession session, RepeatedSequence<HistoryEntry> cycle) {
@@ -394,6 +431,28 @@ public class SyncTracker {
             session.getServerSession().setParameter(PARAM_RESULT_HISTORY, history);
         }
         return history;
+    }
+
+    private static void resetServerChecksums(SyncSession session, Collection<DirectoryVersion> directoryVersions) {
+        /*
+         * generate adequate reset actions...
+         */
+        List<AbstractAction<DirectoryVersion>> resetActions = new ArrayList<AbstractAction<DirectoryVersion>>();
+        if (null == directoryVersions || 0 == directoryVersions.size()) {
+            resetActions.add(new SyncDirectoriesAction(true));
+        } else {
+            for (DirectoryVersion directoryVersion : directoryVersions) {
+                resetActions.add(new SyncDirectoryAction(directoryVersion, null, true));
+            }
+        }
+        /*
+         * ... and execute them
+         */
+        try {
+            new DirectoryActionExecutor(session, true, true).execute(resetActions);
+        } catch (OXException e) {
+            LOG.warn("Error resetting server checksums", e);
+        }
     }
 
 }

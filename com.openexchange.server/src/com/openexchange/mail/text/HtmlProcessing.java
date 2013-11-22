@@ -49,12 +49,16 @@
 
 package com.openexchange.mail.text;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.isWhitespace;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -77,6 +81,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
@@ -234,6 +239,14 @@ public final class HtmlProcessing {
             }
         }
         return retval;
+    }
+
+    private static String getMarkerFor(final Session session) throws URISyntaxException {
+        final StringAllocator sb = new StringAllocator(64);
+        sb.append(Strings.getLineSeparator());
+        sb.append("<!-- ").append(new URI("ox", session.getLogin(), "open-xchange.com", 57462, null, null, null).toString()).append(" -->");
+        sb.append(Strings.getLineSeparator());
+        return sb.toString();
     }
 
     private static volatile Boolean useSanitize;
@@ -439,18 +452,6 @@ public final class HtmlProcessing {
             }
         }
         return retval;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final Pattern PATTERN_STYLE = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -747,14 +748,57 @@ public final class HtmlProcessing {
         return sb.toString();
     }
 
-    private static final Pattern PAT_STARTS_WITH_QUOTE = Pattern.compile("\\s*&gt;\\s*", Pattern.CASE_INSENSITIVE);
+    // private static final Pattern PAT_STARTS_WITH_QUOTE = Pattern.compile("\\s*&gt;\\s*", Pattern.CASE_INSENSITIVE);
 
+    /**
+     * Checks if passed String matches (ignore-case) to <code>"\s*&amp;gt;\s*"</code>.
+     *
+     * @param str The String to check
+     * @return <code>true</code> if String matches (ignore-case) to <code>"\s*&amp;gt;\s*"</code>; otherwise <code>false</code>
+     */
     private static int startsWithQuote(final String str) {
-        final Matcher m = PAT_STARTS_WITH_QUOTE.matcher(str);
-        if (m.find() && (m.start() == 0)) {
-            return m.end();
+        if (isEmpty(str)) {
+            return -1;
         }
-        return -1;
+        // Detect starting "> "
+        final int mlen = str.length() - 1;
+        if (mlen < 3) {
+            return -1;
+        }
+        int i = 0;
+        char c = str.charAt(i);
+        while (isWhitespace(c)) {
+            if (i >= mlen) {
+                return -1;
+            }
+            c = str.charAt(++i);
+        }
+        if ((c != '&') || (i >= mlen)) {
+            return -1;
+        }
+        c = str.charAt(++i);
+        if (((c != 'g') && (c != 'G')) || (i >= mlen)) {
+            return -1;
+        }
+        c = str.charAt(++i);
+        if (((c != 't') && (c != 'T')) || (i >= mlen)) {
+            return -1;
+        }
+        c = str.charAt(++i);
+        if (c != ';') {
+            return -1;
+        }
+        if (i >= mlen) {
+            return i;
+        }
+        c = str.charAt(++i);
+        while (isWhitespace(c)) {
+            if (i >= mlen) {
+                return i;
+            }
+            c = str.charAt(++i);
+        }
+        return i;
     }
 
     private static final Pattern BACKGROUND_PATTERN = Pattern.compile(

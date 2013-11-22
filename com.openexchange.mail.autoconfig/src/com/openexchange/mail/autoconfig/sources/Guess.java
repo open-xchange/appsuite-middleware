@@ -75,7 +75,7 @@ public class Guess extends AbstractConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) {
-        Autoconfig config = new Autoconfig();
+        Autoconfig config = new Autoconfig(getRanking());
         boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config);
         boolean generalSuccess = imapSuccess;
         if (!imapSuccess) {

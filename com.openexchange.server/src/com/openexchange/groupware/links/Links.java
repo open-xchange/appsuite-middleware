@@ -74,7 +74,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
@@ -83,6 +82,8 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link Links} - Provides static access to link module
@@ -217,11 +218,11 @@ public class Links {
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
-                final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
-                if (!userConfig.hasTask()) {
+                final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
+                if (!userPermissionBits.hasTask()) {
                     return false;
                 }
-                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userConfig, oid, fid);
+                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userPermissionBits, oid, fid);
             }
 
             @Override
@@ -236,11 +237,11 @@ public class Links {
             @Override
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
-                final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
-                if (!userConfig.hasTask()) {
+                final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
+                if (!userPermissionBits.hasTask()) {
                     return false;
                 }
-                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userConfig, oid);
+                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userPermissionBits, oid);
             }
         });
         modules.put(Integer.valueOf(Types.CONTACT), new ModuleAccess() {
@@ -293,9 +294,8 @@ public class Links {
                 final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 try {
-                    return DATABASE.exists(oid, InfostoreFacade.CURRENT_VERSION, ct, UserStorage.getStorageUser(so
-                            .getUserId(), ct), UserPermissionBitsStorage.getInstance().getUserPermissionBits(
-                            so.getUserId(), ct));
+                    ServerSession session = ServerSessionAdapter.valueOf(so, ct);
+                    return DATABASE.exists(oid, InfostoreFacade.CURRENT_VERSION, session);
                 } catch (final OXException e) {
                     LOG.error("UNABLE TO CHECK INFOSTORE READRIGHT FOR LINK", e);
                     return false;

@@ -49,8 +49,8 @@
 
 package javax.mail.internet.idn;
 
-import javax.mail.internet.AddressException;
 import gnu.inet.encoding.IDNAException;
+import javax.mail.internet.AddressException;
 import org.apache.commons.logging.LogFactory;
 
 /**
@@ -103,7 +103,9 @@ public final class IDNA {
             }
             return sb.toString();
         } catch (final gnu.inet.encoding.IDNAException e) {
-            throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
+            final AddressException ae = new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
+            ae.setNextException(e);
+            throw ae;
         }
     }
 

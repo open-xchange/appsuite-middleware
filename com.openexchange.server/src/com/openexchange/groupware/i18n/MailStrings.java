@@ -89,6 +89,10 @@ public class MailStrings implements LocalizableStrings {
     public static final String SPAM = "Spam"
         .intern();
 
+    // The internationalized name for the archive mail folder
+    public static final String ARCHIVE = "Archive"
+        .intern();
+
     // The internationalized name for the confirmed-spam mail folder
     public static final String CONFIRMED_SPAM = "Confirmed spam"
         .intern();
@@ -142,6 +146,9 @@ public class MailStrings implements LocalizableStrings {
     // Indicates the elapsed date for affected message's attachments
     public static final String PUBLISHED_ATTACHMENTS_APPENDIX = "The links will be deleted on #DATE#";
 
+    // The text put into the description field of a published E-Mail attachment
+    public static final String PUBLISHED_ATTACHMENT_INFO = "This file has been published for E-Mail \"#SUBJECT#\" sent on #DATE# to #TO#";
+
     // The greeting used for form mails. E.g.
     // "Dear Sir or Madam Jane Doe"
     public static final String GREETING = "Dear Sir or Madam";
@@ -160,6 +167,14 @@ public class MailStrings implements LocalizableStrings {
 
     // The name for trash folder
     public static final String DEFAULT_SPAM = "Spam"
+        .intern();
+
+    // The name for trash folder
+    public static final String DEFAULT_ARCHIVE = "Archive"
+        .intern();
+
+    // The name for "Unified Mail" root folder
+    public static final String UNIFIED_MAIL = "Unified mail"
         .intern();
 
 }

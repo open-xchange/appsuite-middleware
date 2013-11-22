@@ -69,7 +69,7 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
@@ -227,7 +227,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         if (isEmpty(site)) {
             return site;
         }
-        return AJAXServlet.encodeUrl(site, true, true);
+        return AJAXServlet.encodeUrl(site, true, false);
     }
 
     protected String normalizeSiteName(final String siteName) {
@@ -327,8 +327,8 @@ public class OXMFPublicationService extends AbstractPublicationService {
         }
 
         @Override
-        public DynamicFormDescription getUserSpecificDescription(final User user, final UserConfiguration configuration) {
-            if (configuration.hasInfostore()) {
+        public DynamicFormDescription getUserSpecificDescription(final User user, final UserPermissionBits permissionBits) {
+            if (permissionBits.hasInfostore()) {
                 return getFormDescription();
             }
             return withoutInfostore;

@@ -56,10 +56,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveFileMetadata;
@@ -73,16 +75,17 @@ import com.openexchange.drive.actions.AbstractFileAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.EditFileAction;
+import com.openexchange.drive.actions.ErrorDirectoryAction;
 import com.openexchange.drive.actions.ErrorFileAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.DirectoryChecksum;
 import com.openexchange.drive.checksum.FileChecksum;
+import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.internal.tracking.SyncTracker;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.storage.execute.FileActionExecutor;
 import com.openexchange.drive.sync.DefaultSyncResult;
@@ -96,7 +99,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.StringAllocator;
 
@@ -120,6 +122,16 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions,
         List<DirectoryVersion> clientVersions) throws OXException {
+        /*
+         * check api version first
+         */
+        if (session.getApiVersion() < DriveServiceLookup.getService(ConfigurationService.class)
+            .getIntProperty("com.openexchange.drive.minApiVersion", DriveConstants.DEFAULT_MIN_API_VERSION)) {
+            OXException error = DriveExceptionCodes.CLIENT_OUTDATED.create();
+            List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
+            actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
+            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
+        }
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateDirectoryVersions(originalVersions);
         DriveVersionValidator.validateDirectoryVersions(clientVersions);
@@ -152,6 +164,8 @@ public class DriveServiceImpl implements DriveService {
                     delay(delay);
                     continue;
                 }
+                driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + ")");
+                LOG.debug("Got exception during execution of server actions (" + e.getMessage() + ")", e);
                 throw e;
             }
             /*
@@ -289,6 +303,11 @@ public class DriveServiceImpl implements DriveService {
                      */
                     syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, quotaException, true));
                 }
+            } else if ("IFO-0100".equals(e.getErrorCode())) {
+                /*
+                 * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
+                 */
+                syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, e, true));
             } else {
                 throw e;
             }
@@ -297,20 +316,14 @@ public class DriveServiceImpl implements DriveService {
             /*
              * store checksum, invalidate parent directory checksum
              */
-            FileID fileID = new FileID(createdFile.getId());
-            FolderID folderID = new FolderID(createdFile.getFolderId());
-            if (null == fileID.getFolderId()) {
-                // TODO: check
-                fileID.setFolderId(folderID.getFolderId());
-            }
             FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(
-                fileID, createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
-            driveSession.getChecksumStore().removeDirectoryChecksum(folderID);
+                IDUtil.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
+            driveSession.getChecksumStore().removeDirectoryChecksum(new FolderID(createdFile.getFolderId()));
             /*
              * check if created file still equals uploaded one
              */
             ServerFileVersion createdVersion = new ServerFileVersion(createdFile, fileChecksum);
-            if (newVersion.getName().equals(createdVersion.getName())) {
+            if (newVersion.getName().equals(createdFile.getFileName())) {
                 syncResult.addActionForClient(new AcknowledgeFileAction(driveSession, originalVersion, createdVersion, null, path));
             } else {
                 syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion, null, path));
@@ -365,8 +378,7 @@ public class DriveServiceImpl implements DriveService {
             for (FileVersion requestedVersion : fileVersions) {
                 ServerFileVersion matchingVersion = null;
                 for (ServerFileVersion serverFileVersion : serverFiles) {
-                    if (serverFileVersion.getName().equals(requestedVersion.getName()) &&
-                        serverFileVersion.getChecksum().equals(requestedVersion.getChecksum())) {
+                    if (Change.NONE.equals(Change.get(serverFileVersion, requestedVersion))) {
                         matchingVersion = serverFileVersion;
                         break;
                     }

@@ -226,6 +226,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
         } catch (final AJPv13Exception e) {
             // Cannot occur
         }
+        startTime = System.currentTimeMillis();
     }
 
     /**
@@ -310,7 +311,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
         requestedSessionIdFromCookie = true;
         requestedSessionIdFromURL = false;
         servletInstance = null;
-        startTime = 0L;
+        startTime = System.currentTimeMillis();
         contentLength = -1L;
     }
 

@@ -69,7 +69,7 @@ import com.openexchange.tools.update.Tools;
  */
 public final class TasksModifyCostColumnTask extends UpdateTaskAdapter {
 
-    private DatabaseService service;
+    private final DatabaseService service;
 
     public TasksModifyCostColumnTask(DatabaseService service) {
         super();

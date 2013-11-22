@@ -63,26 +63,94 @@ import com.openexchange.session.Session;
  */
 public class FileStorageEventHelper {
 
-    public static Event buildUpdateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName) {
-        return new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName));
+    public static final class EventProperty {
+
+        private final String key;
+
+        private final Object value;
+
+        /**
+         * Initializes a new {@link EventProperty}.
+         * @param key
+         * @param value
+         */
+        public EventProperty(final String key, final Object value) {
+            super();
+            if (key == null) {
+                throw new IllegalArgumentException("Argument 'key' must not be null!");
+            }
+            if (value == null) {
+                throw new IllegalArgumentException("Argument 'value' must not be null!");
+            }
+            this.key = key;
+            this.value = value;
+        }
+
+
+        public String getKey() {
+            return key;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((key == null) ? 0 : key.hashCode());
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            EventProperty other = (EventProperty) obj;
+            if (key == null) {
+                if (other.key != null)
+                    return false;
+            } else if (!key.equals(other.key))
+                return false;
+            if (value == null) {
+                if (other.value != null)
+                    return false;
+            } else if (!value.equals(other.value))
+                return false;
+            return true;
+        }
     }
 
-    public static Event buildCreateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName) {
-        return new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName));
+    public static Event buildUpdateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName, final EventProperty... properties) {
+        return new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName, properties));
     }
 
-    public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName, final Set<String> versions) {
-        final Dictionary<String, Object> properties = buildProperties(session, service, accountId, folderId, objectId, optFileName);
+    public static Event buildCreateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName, final EventProperty... properties) {
+        return new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName, properties));
+    }
+
+    public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName, final Set<String> versions, final EventProperty... properties) {
+        final Dictionary<String, Object> props = buildProperties(session, service, accountId, folderId, objectId, optFileName, properties);
         /*
          * version may be null to indicate a complete deletion of a document.
          */
         if (versions != null) {
-            properties.put(FileStorageEventConstants.VERSIONS, versions);
+            props.put(FileStorageEventConstants.VERSIONS, versions);
         }
-        return new Event(FileStorageEventConstants.DELETE_TOPIC, properties);
+        return new Event(FileStorageEventConstants.DELETE_TOPIC, props);
     }
 
-    private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName) {
+    public static Event buildAccessEvent(Session session, String service, String accountId, String folderId, final String objectId, final String optFileName, final EventProperty... properties) {
+        return new Event(FileStorageEventConstants.ACCESS_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName, properties));
+    }
+
+    private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName, final EventProperty... properties) {
         final Dictionary<String, Object> ht = new Hashtable<String, Object>(8);
         if (null != session) {
             ht.put(FileStorageEventConstants.SESSION, session);
@@ -95,13 +163,20 @@ public class FileStorageEventHelper {
         }
         if (null != objectId) {
             ht.put(FileStorageEventConstants.OBJECT_ID, objectId);
-            ht.put(FileStorageEventConstants.E_TAG, FileStorageUtility.getETagFor(objectId, FileStorageFileAccess.CURRENT_VERSION));
+            ht.put(FileStorageEventConstants.E_TAG, FileStorageUtility.getETagFor(objectId, FileStorageFileAccess.CURRENT_VERSION, null));
         }
         if (null != folderId) {
             ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
         }
         if (null != optFileName) {
             ht.put(FileStorageEventConstants.FILE_NAME, optFileName);
+        }
+        if (null != properties && 0 != properties.length) {
+            for (EventProperty property : properties) {
+                if (property != null) {
+                    ht.put(property.getKey(), property.getValue());
+                }
+            }
         }
         return ht;
     }

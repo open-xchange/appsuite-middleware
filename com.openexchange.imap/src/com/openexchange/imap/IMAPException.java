@@ -1019,11 +1019,8 @@ public final class IMAPException extends OXException {
                 if (DISPLAYABLE.contains(category.getType())) {
                     ret = new OXException(detailNumber, message, cause, args).setLogMessage(message, args);
                 } else {
-                    ret = new OXException(
-                        detailNumber,
-                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                        cause,
-                        new Object[0]).setLogMessage(message, args);
+                    final String displayMessage = Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
+                    ret = new OXException(detailNumber, displayMessage, cause, new Object[0]).setLogMessage(message, args);
                 }
             }
             return ret.addCategory(category).setPrefix(PREFIX);
@@ -1089,29 +1086,29 @@ public final class IMAPException extends OXException {
                 }
             }
         }
-        final IMAPCode imapCode = code.getImapCode();
-        if (null != imapConfig && null != session) {
-            final IMAPCode extendedCode = IMAPCode.getExtendedCode(imapCode);
-            if (null == extendedCode) {
-                return code.create(cause, messageArgs);
-            }
-            final Object[] newArgs;
-            int k;
-            if (null == messageArgs) {
-                newArgs = new Object[EXT_LENGTH];
-                k = 0;
-            } else {
-                newArgs = new Object[messageArgs.length + EXT_LENGTH];
-                System.arraycopy(messageArgs, 0, newArgs, 0, messageArgs.length);
-                k = messageArgs.length;
-            }
-            newArgs[k++] = imapConfig.getServer();
-            newArgs[k++] = imapConfig.getLogin();
-            newArgs[k++] = Integer.valueOf(session.getUserId());
-            newArgs[k++] = Integer.valueOf(session.getContextId());
-            return extendedCode.create(cause, newArgs);
+        if (null == imapConfig || null == session) {
+            return code.create(cause, messageArgs);
         }
-        return code.create(cause, messageArgs);
+        final IMAPCode imapCode = code.getImapCode();
+        final IMAPCode extendedCode = IMAPCode.getExtendedCode(imapCode);
+        if (null == extendedCode) {
+            return code.create(cause, messageArgs);
+        }
+        final Object[] newArgs;
+        int k;
+        if (null == messageArgs) {
+            newArgs = new Object[EXT_LENGTH];
+            k = 0;
+        } else {
+            newArgs = new Object[messageArgs.length + EXT_LENGTH];
+            System.arraycopy(messageArgs, 0, newArgs, 0, messageArgs.length);
+            k = messageArgs.length;
+        }
+        newArgs[k++] = imapConfig.getServer();
+        newArgs[k++] = imapConfig.getLogin();
+        newArgs[k++] = Integer.valueOf(session.getUserId());
+        newArgs[k++] = Integer.valueOf(session.getContextId());
+        return extendedCode.create(cause, newArgs);
     }
 
     /**
@@ -1154,12 +1151,14 @@ public final class IMAPException extends OXException {
      * @return An appropriate instance of {@link OXException}
      */
     public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final Folder folder, final int accountId, final Map<String, Object> optProps) {
+        // Check for com.sun.mail.iap.ConnectQuotaExceededException
+        if (e.getNextException() instanceof ConnectQuotaExceededException) {
+            final String server = null == mailConfig ? "<unknown>" : mailConfig.getServer();
+            final String login = null == mailConfig ? "<unknown>" : mailConfig.getLogin();
+            return IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, e.getNextException(), server, login);
+        }
+        // Check for session
         if (null == session) {
-            if (e.getNextException() instanceof ConnectQuotaExceededException) {
-                final String server = null == mailConfig ? "<unknown>" : mailConfig.getServer();
-                final String login = null == mailConfig ? "<unknown>" : mailConfig.getLogin();
-                return IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, e.getNextException(), server, login);
-            }
             // Delegate to MIME handling
             return MimeMailException.handleMessagingException(e, mailConfig, session, folder);
         }
@@ -1193,11 +1192,6 @@ public final class IMAPException extends OXException {
                 }
                 return MailExceptionCode.FOLDER_NOT_FOUND.create(e, fullName);
             }
-        }
-        if (e.getNextException() instanceof ConnectQuotaExceededException) {
-            final String server = null == mailConfig ? "<unknown>" : mailConfig.getServer();
-            final String login = null == mailConfig ? "<unknown>" : mailConfig.getLogin();
-            return IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, e.getNextException(), server, login);
         }
         // Delegate to MIME handling
         return MimeMailException.handleMessagingException(e, mailConfig, session, folder);

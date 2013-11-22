@@ -54,12 +54,12 @@
 package com.openexchange.proxy.servlet.osgi;
 
 import javax.servlet.ServletException;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.log.LogFactory;
 import com.openexchange.proxy.servlet.Constants;
 import com.openexchange.proxy.servlet.ProxyServlet;
 
@@ -68,7 +68,7 @@ import com.openexchange.proxy.servlet.ProxyServlet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServletRegisterer implements ServiceTrackerCustomizer {
+public class ServletRegisterer implements ServiceTrackerCustomizer<HttpService,HttpService> {
 
     private final BundleContext context;
 
@@ -83,9 +83,9 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        tryRegistering((HttpService) service);
+    public HttpService addingService(final ServiceReference<HttpService> reference) {
+        final HttpService service = context.getService(reference);
+        tryRegistering(service);
         return service;
     }
 
@@ -104,13 +104,13 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<HttpService> reference, final HttpService service) {
         // Nope
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        ((HttpService) service).unregister(Constants.PATH);
+    public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
+        service.unregister(Constants.PATH);
         context.ungetService(reference);
     }
 }

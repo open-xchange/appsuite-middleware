@@ -254,11 +254,12 @@ public final class EffectivePermission implements Permission {
     }
 
     private UserPermissionBits getUserPermissionBits() {
+        UserPermissionBits userPermissionBits = this.userPermissionBits;
         if (null == userPermissionBits) {
             try {
-                userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(getEntity(), context);
+                userPermissionBits = this.userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(getEntity(), context);
             } catch (final OXException e) {
-                userPermissionBits = new AllowAllUserPermissionBits(getEntity(), null, context.getContextId());
+                userPermissionBits = this.userPermissionBits = new AllowAllUserPermissionBits(getEntity(), null, context.getContextId());
             }
         }
         return userPermissionBits;
@@ -300,7 +301,8 @@ public final class EffectivePermission implements Permission {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
             if ((getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {
-                return underlyingPerm.getFolderPermission() > READ_FOLDER ? READ_FOLDER : underlyingPerm.getFolderPermission();
+                final int folderPermission = underlyingPerm.getFolderPermission();
+                return folderPermission > READ_FOLDER ? READ_FOLDER : folderPermission;
             }
         } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
             return NO_PERMISSIONS;
@@ -314,7 +316,8 @@ public final class EffectivePermission implements Permission {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
             if ((getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {
-                return underlyingPerm.getReadPermission() > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : underlyingPerm.getReadPermission();
+                final int readPermission = underlyingPerm.getReadPermission();
+                return readPermission > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : readPermission;
             }
         } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
             return NO_PERMISSIONS;

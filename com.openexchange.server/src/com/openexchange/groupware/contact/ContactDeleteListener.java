@@ -261,8 +261,7 @@ public final class ContactDeleteListener implements DeleteListener {
                         final int admin_folder = xx.getObjectID();
                         iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
                     } catch (final Exception oxee) {
-                        oxee.printStackTrace();
-                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid);
+                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid, oxee);
 
                         folder_error = false;
                     }

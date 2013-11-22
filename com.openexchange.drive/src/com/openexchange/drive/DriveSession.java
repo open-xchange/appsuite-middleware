@@ -51,6 +51,7 @@ package com.openexchange.drive;
 
 import java.util.List;
 import java.util.Locale;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -96,11 +97,24 @@ public interface DriveSession {
     Locale getLocale();
 
     /**
+     * Gets the host data of the underlying request.
+     *
+     * @return The hostname
+     */
+    HostData getHostData();
+
+    /**
      * Gets the file metadata fields relevant for the client.
      *
      * @return The file metadata fields, or <code>null</code> if not specified
      */
     List<DriveFileField> getFields();
 
-}
+    /**
+     * Gets the API version targeted by the client
+     *
+     * @return The API version, or <code>0</code> if using the initial version
+     */
+    int getApiVersion();
 
+}

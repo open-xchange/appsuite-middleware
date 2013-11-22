@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive Events Bundle for APN
 Bundle-SymbolicName: com.openexchange.drive.events.apn
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.drive.events.apn.osgi.APNDriveEventsActivator
@@ -21,6 +21,9 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.server,
  com.openexchange.timer,
  com.openexchange.tools.strings,
+ javax.crypto,
+ javax.crypto.interfaces,
+ javax.crypto.spec,
  javax.net.ssl,
  org.apache.commons.logging,
  org.apache.log4j,

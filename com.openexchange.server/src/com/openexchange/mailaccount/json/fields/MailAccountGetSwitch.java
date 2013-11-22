@@ -63,7 +63,7 @@ public class MailAccountGetSwitch implements AttributeSwitch {
 
     /**
      * Initializes a new {@link MailAccountGetSwitch}.
-     * 
+     *
      * @param account The account to read from
      * @throws IllegalArgumentException If passed account is <code>null</code>
      */
@@ -156,6 +156,11 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     }
 
     @Override
+    public Object archive() {
+        return account.getArchive();
+    }
+
+    @Override
     public Object mailPort() {
         return Integer.valueOf(account.getMailPort());
     }
@@ -238,6 +243,11 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     @Override
     public Object trashFullname() {
         return account.getTrashFullname();
+    }
+
+    @Override
+    public Object archiveFullname() {
+        return account.getArchiveFullname();
     }
 
     @Override

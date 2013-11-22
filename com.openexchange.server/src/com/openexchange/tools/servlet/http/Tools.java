@@ -67,7 +67,7 @@ import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
@@ -353,7 +353,7 @@ public final class Tools {
 
         @Override
         public boolean matches(final String cookieName) {
-            return (null != cookieName && (cookieName.startsWith(Login.SESSION_PREFIX) || JSESSIONID_COOKIE.equals(cookieName)));
+            return (null != cookieName && (cookieName.startsWith(LoginServlet.SESSION_PREFIX) || JSESSIONID_COOKIE.equals(cookieName)));
         }
     };
 

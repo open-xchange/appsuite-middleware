@@ -66,6 +66,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
+import com.openexchange.java.StringAllocator;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -81,7 +82,7 @@ public final class Entity2ACLAutoDetector {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static ConcurrentMap<InetSocketAddress, Future<Entity2ACL>> map;
+    private static ConcurrentMap<String, Future<Entity2ACL>> map;
 
     /**
      * Prevent instantiation
@@ -94,7 +95,7 @@ public final class Entity2ACLAutoDetector {
      * Initializes the auto-detector
      */
     static void initEntity2ACLMappings() {
-        map = new NonBlockingHashMap<InetSocketAddress, Future<Entity2ACL>>();
+        map = new NonBlockingHashMap<String, Future<Entity2ACL>>();
     }
 
     /**
@@ -117,7 +118,7 @@ public final class Entity2ACLAutoDetector {
      * @throws OXException - if a server greeting could not be mapped to a supported IMAP server
      */
     public static Entity2ACL getEntity2ACLImpl(final IMAPConfig imapConfig) throws IOException, OXException {
-        final InetSocketAddress key = new InetSocketAddress(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort());
+        final String key = new StringAllocator(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString();
         Future<Entity2ACL> cached = map.get(key);
         if (null == cached) {
             final FutureTask<Entity2ACL> ft = new FutureTask<Entity2ACL>(new Entity2ACLCallable(key, imapConfig));
@@ -155,19 +156,18 @@ public final class Entity2ACLAutoDetector {
 
     private static final class Entity2ACLCallable implements Callable<Entity2ACL> {
 
-        private final InetSocketAddress key;
-
+        private final String serverUrl;
         private final IMAPConfig imapConfig;
 
-        public Entity2ACLCallable(final InetSocketAddress key, final IMAPConfig imapConfig) {
+        public Entity2ACLCallable(final String serverUrl, final IMAPConfig imapConfig) {
             super();
             this.imapConfig = imapConfig;
-            this.key = key;
+            this.serverUrl = serverUrl;
         }
 
         @Override
         public Entity2ACL call() throws Exception {
-            final String greeting = IMAPCapabilityAndGreetingCache.getGreeting(key, imapConfig.isSecure(), imapConfig.getIMAPProperties());
+            final String greeting = IMAPCapabilityAndGreetingCache.getGreeting(serverUrl, imapConfig.isSecure(), imapConfig.getIMAPProperties());
             return implFor(greeting, imapConfig);
         }
 

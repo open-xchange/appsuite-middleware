@@ -131,6 +131,9 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
         accountDescription.setTrash(optString(MailConstants.MAIL_TRASH, configuration));
         accountDescription.setTrashFullname(optString(MailConstants.MAIL_TRASH_FULLNAME, configuration));
 
+        accountDescription.setTrash(optString(MailConstants.MAIL_ARCHIVE, configuration));
+        accountDescription.setTrashFullname(optString(MailConstants.MAIL_ARCHIVE_FULLNAME, configuration));
+
         accountDescription.setMailPort(getInt(MailConstants.MAIL_PORT, configuration));
         accountDescription.setMailProtocol(getString(MailConstants.MAIL_PROTOCOL, configuration));
         {
@@ -369,6 +372,20 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 if (null != trashFullname) {
                     accountDescription.setTrashFullname(trashFullname);
                     attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
+                }
+            }
+            {
+                final String archive = optString(MailConstants.MAIL_ARCHIVE, configuration);
+                if (null != archive) {
+                    accountDescription.setArchive(archive);
+                    attributes.add(Attribute.ARCHIVE_LITERAL);
+                }
+            }
+            {
+                final String archiveFullname = optString(MailConstants.MAIL_ARCHIVE_FULLNAME, configuration);
+                if (null != archiveFullname) {
+                    accountDescription.setArchiveFullname(archiveFullname);
+                    attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
                 }
             }
             {

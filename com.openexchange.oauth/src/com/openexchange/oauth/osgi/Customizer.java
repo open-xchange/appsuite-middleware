@@ -59,10 +59,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Customizer<S> implements ServiceTrackerCustomizer {
+public final class Customizer<S> implements ServiceTrackerCustomizer<S,S> {
 
     private final AtomicReference<S> reference;
-
     private final BundleContext context;
 
     /**
@@ -78,20 +77,19 @@ public final class Customizer<S> implements ServiceTrackerCustomizer {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        this.reference.set((S) service);
+    public S addingService(final ServiceReference<S> reference) {
+        final S service = context.getService(reference);
+        this.reference.set(service);
         return service;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<S> reference, final S service) {
         // Nope
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<S> reference, final S service) {
         this.reference.set(null);
         context.ungetService(reference);
     }

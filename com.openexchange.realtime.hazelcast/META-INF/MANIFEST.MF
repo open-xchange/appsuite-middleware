@@ -3,7 +3,7 @@ Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Hazelcast Realtime Components
 Bundle-SymbolicName: com.openexchange.realtime.hazelcast
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Activator: com.openexchange.realtime.hazelcast.osgi.HazelcastRealtimeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -16,6 +16,7 @@ Import-Package: com.hazelcast.config,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
+ com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.realtime,
  com.openexchange.realtime.directory,
@@ -26,7 +27,9 @@ Import-Package: com.hazelcast.config,
  com.openexchange.realtime.util,
  com.openexchange.server,
  com.openexchange.threadpool,
+ com.openexchange.timer,
  com.openexchange.tools.session,
+ javax.management,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,

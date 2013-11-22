@@ -468,7 +468,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * @param contactId the contactId to set
      */
-    void setContactId(final int contactId) {
+    public void setContactId(final int contactId) {
         this.contactId = contactId;
     }
 

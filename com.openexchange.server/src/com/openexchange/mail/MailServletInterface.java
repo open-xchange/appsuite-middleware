@@ -49,12 +49,15 @@
 
 package com.openexchange.mail;
 
+import static com.openexchange.java.Strings.isEmpty;
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.importexport.MailImportResult;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -78,7 +81,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailServletInterface {
+public abstract class MailServletInterface implements Closeable {
 
     /**
      * The constant for quota storage resource
@@ -116,6 +119,59 @@ public abstract class MailServletInterface {
      * Mail monitor
      */
     public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
+
+    /**
+     * Prepares given subject for being used as file name.
+     *
+     * @param subject The subject
+     * @return The appropriate file name
+     */
+    public static String saneForFileName(final String subject) {
+        if (isEmpty(subject)) {
+            return subject;
+        }
+        final int len = subject.length();
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
+        char prev = '\0';
+        for (int i = 0; i < len; i++) {
+            final char c = subject.charAt(i);
+            if (Strings.isWhitespace(c)) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('/' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('\\' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else {
+                prev = '\0';
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link MailServletInterface}.
+     */
+    protected MailServletInterface() {
+        super();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
+    }
 
     /**
      * Gets a mail's ID by specified "Message-Id" header.
@@ -426,6 +482,11 @@ public abstract class MailServletInterface {
      * Returns an instance of <code>SearchIterator</code> containing all antecessor folders on path to mailbox's default folder
      */
     public abstract SearchIterator<MailFolder> getPathToDefaultFolder(final String folder) throws OXException;
+
+    @Override
+    public void close() {
+        try { close(true); } catch (final Exception x) { /**/ }
+    }
 
     /**
      * Closes the interface and releases all resources

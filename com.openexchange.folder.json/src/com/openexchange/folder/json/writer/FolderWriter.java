@@ -55,15 +55,16 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import java.io.Closeable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,6 +83,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.session.ServerSession;
 
@@ -170,16 +172,23 @@ public final class FolderWriter {
          * @return The parameter names
          */
         Set<String> getParamterNames();
+
+        /**
+         * Gets the parameters reference.
+         *
+         * @return The parameters reference.
+         */
+        ConcurrentMap<String, Object> parameters();
     }
 
     private static abstract class AbstractJSONValuePutter implements JSONValuePutter {
 
         /** The parameters map */
-        protected final Map<String, Object> parameters;
+        protected final ConcurrentMap<String, Object> parameters;
 
         protected AbstractJSONValuePutter() {
             super();
-            parameters = new HashMap<String, Object>(4);
+            parameters = new ConcurrentHashMap<String, Object>(4);
         }
 
         @Override
@@ -200,6 +209,11 @@ public final class FolderWriter {
             } else {
                 parameters.put(name, value);
             }
+        }
+
+        @Override
+        public ConcurrentMap<String, Object> parameters() {
+            return parameters;
         }
     }
 
@@ -560,39 +574,6 @@ public final class FolderWriter {
     }
 
     /**
-     * Writes requested fields of given folder into a JSON array.
-     *
-     * @param fields The fields to write or <code>null</code> to write all
-     * @param folder The folder
-     * @return The JSON array carrying requested fields of given folder
-     * @throws OXException If writing JSON array fails
-     */
-    public static JSONArray writeSingle2Array(final int[] fields, final UserizedFolder folder, final Map<String, Object> parameters) throws OXException {
-        final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
-        final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
-        for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
-            if (null == ffw) {
-                ffw = getPropertyByField(cols[i], fieldSet);
-            }
-            ffws[i] = ffw;
-        }
-        try {
-            final JSONArray jsonArray = new JSONArray(ffws.length);
-            final JSONValuePutter jsonPutter = new JSONArrayPutter(jsonArray, parameters);
-            for (final FolderFieldWriter ffw : ffws) {
-                ffw.writeField(jsonPutter, folder);
-            }
-            return jsonArray;
-        } catch (final JSONException e) {
-            throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
-        } catch (final NecessaryValueMissingException e) {
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
      * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
      *
      * @param fields The fields to write to each JSON array or <code>null</code> to write all
@@ -600,7 +581,7 @@ public final class FolderWriter {
      * @return The JSON array carrying JSON arrays of given folders
      * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList, final Map<String, Object> parameters) throws OXException {
+    public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
@@ -618,10 +599,13 @@ public final class FolderWriter {
             }
             ffws[i] = ffw;
         }
+        ConcurrentMap<String, Object> params = null;
         try {
             final JSONArray jsonArray = new JSONArray(folders.length);
-            final JSONArrayPutter jsonPutter = new JSONArrayPutter(parameters);
+            final JSONArrayPutter jsonPutter = new JSONArrayPutter(null);
+            // params = jsonPutter.parameters();
             for (final UserizedFolder folder : folders) {
+                // folder.setParameters(params);
                 try {
                     final JSONArray folderArray = new JSONArray(ffws.length);
                     jsonPutter.setJSONArray(folderArray);
@@ -636,47 +620,14 @@ public final class FolderWriter {
             return jsonArray;
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
-     *
-     * @param fields The fields to write to each JSON array or <code>null</code> to write all
-     * @param folders The folders
-     * @param parameters The optional parameters
-     * @return The JSON array carrying JSON arrays of given folders
-     * @throws OXException If writing JSON array fails
-     */
-    public static JSONArray writeMultiple2Array(final int[] fields, final Collection<UserizedFolder> folders, final Map<String, Object> parameters) throws OXException {
-        final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
-        final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
-        for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
-            if (null == ffw) {
-                ffw = getPropertyByField(cols[i], fieldSet);
-            }
-            ffws[i] = ffw;
-        }
-        try {
-            final JSONArray jsonArray = new JSONArray(folders.size());
-            final JSONArrayPutter jsonPutter = new JSONArrayPutter(parameters);
-            for (final UserizedFolder folder : folders) {
-                try {
-                    final JSONArray folderArray = new JSONArray(ffws.length);
-                    jsonPutter.setJSONArray(folderArray);
-                    for (final FolderFieldWriter ffw : ffws) {
-                        ffw.writeField(jsonPutter, folder);
+        } finally {
+            if (params != null) {
+                for (final Object param : params.values()) {
+                    if (param instanceof Closeable) {
+                        Streams.close((Closeable) param);
                     }
-                    jsonArray.put(folderArray);
-                } catch (final NecessaryValueMissingException e) {
-                    LOG.warn(e.getMessage());
                 }
             }
-            return jsonArray;
-        } catch (final JSONException e) {
-            throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -688,7 +639,7 @@ public final class FolderWriter {
      * @return The JSON object carrying requested fields of given folder
      * @throws OXException If writing JSON object fails
      */
-    public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList, final Map<String, Object> parameters) throws OXException {
+    public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
         final int[] cols = null == fields ? getAllFields(additionalFolderFieldList) : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
@@ -705,10 +656,13 @@ public final class FolderWriter {
             }
             ffws[i] = ffw;
         }
+        ConcurrentMap<String, Object> params = null;
         try {
             final JSONObject jsonObject = new JSONObject(ffws.length);
-            final JSONValuePutter jsonPutter = new JSONObjectPutter(jsonObject, parameters);
+            final JSONValuePutter jsonPutter = new JSONObjectPutter(jsonObject, null);
+            // params = jsonPutter.parameters();
             for (final FolderFieldWriter ffw : ffws) {
+                // folder.setParameters(params);
                 ffw.writeField(jsonPutter, folder);
             }
             return jsonObject;
@@ -716,6 +670,14 @@ public final class FolderWriter {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
         } catch (final NecessaryValueMissingException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (params != null) {
+                for (final Object param : params.values()) {
+                    if (param instanceof Closeable) {
+                        Streams.close((Closeable) param);
+                    }
+                }
+            }
         }
     }
 
@@ -724,46 +686,6 @@ public final class FolderWriter {
         list.add(ALL_FIELDS);
         list.add(additionalFolderFieldList.getKnownFields());
         return list.toArray();
-    }
-
-    /**
-     * Writes requested fields of given folders into a JSON array consisting of JSON objects.
-     *
-     * @param fields The fields to write to each JSON object or <code>null</code> to write all
-     * @param folders The folders
-     * @return The JSON array carrying JSON objects of given folders
-     * @throws OXException If writing JSON array fails
-     */
-    public static JSONArray writeMultiple2Object(final int[] fields, final UserizedFolder[] folders, final Map<String, Object> parameters) throws OXException {
-        final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
-        final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
-        for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
-            if (null == ffw) {
-                ffw = getPropertyByField(cols[i], fieldSet);
-            }
-            ffws[i] = ffw;
-        }
-        try {
-            final JSONArray jsonArray = new JSONArray(folders.length);
-            final JSONObjectPutter jsonPutter = new JSONObjectPutter(parameters);
-            for (final UserizedFolder folder : folders) {
-                try {
-                    final JSONObject folderObject = new JSONObject(ffws.length);
-                    jsonPutter.setJSONObject(folderObject);
-                    for (final FolderFieldWriter ffw : ffws) {
-                        ffw.writeField(jsonPutter, folder);
-                    }
-                    jsonArray.put(folderObject);
-                } catch (final NecessaryValueMissingException e) {
-                    LOG.warn(e.getMessage());
-                }
-            }
-            return jsonArray;
-        } catch (final JSONException e) {
-            throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
-        }
     }
 
     /*

@@ -88,6 +88,7 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -107,8 +108,8 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
+import com.openexchange.mail.structure.StructureJSONBinary;
 import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -427,7 +428,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             public InputStream getInputStream() throws IOException {
                 return part.getInputStream();
             }
-        }, new ContentType(contentType), id, headers.entrySet().iterator());
+        }, new ContentType(contentType), filename, id, headers.entrySet().iterator());
         return true;
     }
 
@@ -448,7 +449,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             public InputStream getInputStream() throws IOException {
                 return new UnsynchronizedByteArrayInputStream(decodedTextContent.getBytes(com.openexchange.java.Charsets.UTF_8));
             }
-        }, contentType, id, headers.entrySet().iterator());
+        }, contentType, fileName, id, headers.entrySet().iterator());
         return true;
     }
 
@@ -630,7 +631,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void addBodyPart(final long size, final InputStreamProvider isp, final ContentType contentType, final String id, final Iterator<Entry<String, String>> iter) throws OXException {
+    private void addBodyPart(final long size, final InputStreamProvider isp, final ContentType contentType, final String filename, final String id, final Iterator<Entry<String, String>> iter) throws OXException {
         try {
             final JSONObject bodyObject = new JSONObject();
             if (multipartCount > 0) {
@@ -638,12 +639,12 @@ public final class MIMEStructureHandler implements StructureHandler {
                 final JSONObject headersObject = generateHeadersObject(iter, bodyObject);
                 // Put body
                 final JSONObject body = new JSONObject();
-                fillBodyPart(body, size, isp, contentType, headersObject, id);
+                fillBodyPart(body, size, isp, contentType, filename, headersObject, id);
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
                 final JSONObject headersJSONObject = currentMailObject.optJSONObject(KEY_HEADERS);
-                fillBodyPart(bodyObject, size, isp, contentType, null == headersJSONObject ? new JSONObject() : headersJSONObject, id);
+                fillBodyPart(bodyObject, size, isp, contentType, filename, null == headersJSONObject ? new JSONObject() : headersJSONObject, id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
@@ -654,6 +655,8 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static final String PRIMARY_TEXT = "text/";
 
     private static final String TEXT_HTML = "text/htm";
+
+    private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
@@ -668,7 +671,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                 bodyObject.put("exact_size", Streams.countInputStream(part.getInputStream()));
             } else {
                 final ContentType contentType = part.getContentType();
-                if (contentType.startsWith(PRIMARY_TEXT)) {
+                final TextResult tr = isText(contentType, part.getFileName());
+                if (tr.text) {
                     // Check for special "text/comma-separated-values" Content-Type
                     if (contentType.startsWith("text/comma-separated-values")) {
                         fillBase64JSONString(part.getInputStream(), bodyObject, true);
@@ -704,6 +708,12 @@ public final class MIMEStructureHandler implements StructureHandler {
                     fillBase64JSONString(part.getInputStream(), bodyObject, true);
                     // Set Transfer-Encoding to base64
                     headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
+                    // Reset Content-Type if applicable
+                    final String typeByFileExtension = tr.typeByFileExtension;
+                    if (null != typeByFileExtension) {
+                        contentType.setBaseType(typeByFileExtension);
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
+                    }
                 }
             }
         } catch (final JSONException e) {
@@ -716,14 +726,15 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final ContentType contentType, final JSONObject headerObject, final String id) throws OXException {
+    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final ContentType contentType, final String filename, final JSONObject headerObject, final String id) throws OXException {
         try {
             bodyObject.put(KEY_ID, id);
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
                 bodyObject.put("exact_size", Streams.countInputStream(isp.getInputStream()));
             } else {
-                if (contentType.startsWith(PRIMARY_TEXT)) {
+                final TextResult tr = isText(contentType, filename);
+                if (tr.text) {
                     // Check for special "text/comma-separated-values" Content-Type
                     if (contentType.startsWith("text/comma-separated-values")) {
                         fillBase64JSONString(isp.getInputStream(), bodyObject, true);
@@ -743,6 +754,12 @@ public final class MIMEStructureHandler implements StructureHandler {
                     fillBase64JSONString(isp.getInputStream(), bodyObject, true);
                     // Set Transfer-Encoding to base64
                     headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
+                    // Reset Content-Type if applicable
+                    final String typeByFileExtension = tr.typeByFileExtension;
+                    if (null != typeByFileExtension) {
+                        contentType.setBaseType(typeByFileExtension);
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
+                    }
                 }
             }
         } catch (final JSONException e) {
@@ -758,7 +775,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static void fillBase64JSONString(final InputStream inputStream, final JSONObject bodyObject, final boolean streaming) throws OXException {
         try {
             if (streaming) {
-                bodyObject.put(DATA, new Base64JSONString(inputStream));
+                bodyObject.put(DATA, new StructureJSONBinary(inputStream));
             } else {
                 final byte[] bytes;
                 {
@@ -785,6 +802,26 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static TextResult isText(final ContentType contentType, final String fileName) {
+        if (null == contentType) {
+            return new TextResult(false);
+        }
+        if (null == fileName) {
+            return new TextResult(contentType.startsWith(PRIMARY_TEXT));
+        }
+        if (!contentType.startsWith(PRIMARY_TEXT)) {
+            // No text/* at all
+            return new TextResult(false);
+        }
+        final String ctbf = Strings.toLowerCase(MimeType2ExtMap.getContentType(fileName));
+        if (ctbf.startsWith(APPL_OCTET)) {
+            // Unknown
+            return new TextResult(contentType.startsWith(PRIMARY_TEXT));
+        }
+        // Check file extension also implies text/*
+        return new TextResult(ctbf.startsWith(PRIMARY_TEXT), ctbf);
     }
 
     private static final HeaderName HN_CONTENT_TYPE = HeaderName.valueOf(CONTENT_TYPE);
@@ -1103,5 +1140,20 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
         return builder.toString();
     }
+
+    private static final class TextResult {
+        final boolean text;
+        final String typeByFileExtension;
+
+        TextResult(final boolean text) {
+            this(text, null);
+        }
+
+        TextResult(final boolean text, final String typeByFileExtension) {
+            super();
+            this.text = text;
+            this.typeByFileExtension = typeByFileExtension;
+        }
+    } //  End of class TextResult
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.calendar.printing;
 
 import java.util.Calendar;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 
 /**
@@ -72,6 +73,7 @@ public class CPCalendarTest extends TestCase {
         super.tearDown();
     }
 
+    @Test
     public void testShouldWrapAroundProperlyForLastDayOfTheWeek(){
         int[] days = new int[]{Calendar.SATURDAY, Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY};
 
@@ -81,6 +83,7 @@ public class CPCalendarTest extends TestCase {
         }
     }
 
+    @Test
     public void testShouldListAllWorkDays(){
         int[] workDays = new int[]{Calendar.SATURDAY, Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY};
         calendar.setWorkWeekStartingDay(Calendar.SATURDAY);
@@ -92,6 +95,7 @@ public class CPCalendarTest extends TestCase {
         assertEquals("Should contain only the given days, not more: "+workDays, workDays.length , calendar.getWorkWeekDurationInDays());
     }
 
+    @Test
     public void testShouldKnowFirstAndLastDayOfTheWeek(){
         calendar.setFirstDayOfWeek(Calendar.WEDNESDAY);
         assertEquals("First week day", Calendar.WEDNESDAY, calendar.getFirstDayOfWeek());
@@ -107,6 +111,7 @@ public class CPCalendarTest extends TestCase {
         assertFalse(calendar.isOnFirstDayOfWeek(date.getTime()));
     }
 
+    @Test
     public void testShouldKnowFirstAndLastWorkingDayOfTheWeek(){
         calendar.setWorkWeekStartingDay(Calendar.WEDNESDAY);
         calendar.setWorkWeekDurationInDays(5);

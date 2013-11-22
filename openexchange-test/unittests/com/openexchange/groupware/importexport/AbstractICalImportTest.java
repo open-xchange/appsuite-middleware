@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSessionFactory;
 public abstract class AbstractICalImportTest extends AbstractContactTest {
 
 	public final Format format = Format.ICAL;
-    protected static Context ctx;
+	
 
     @BeforeClass
 	public static void initialize() throws Exception {
@@ -85,11 +85,6 @@ public abstract class AbstractICalImportTest extends AbstractContactTest {
 
     public AbstractICalImportTest() {
 		super();
-	}
-
-	@After
-	public void cleanUpAfterTest() throws OXException {
-		deleteTestFolder(folderId);
 	}
 
 	public String generateRecurringICAL(final int interval, final String frequency) {

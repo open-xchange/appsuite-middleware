@@ -61,6 +61,7 @@ import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
+import com.openexchange.realtime.json.util.RTResultFormatter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
@@ -101,6 +102,9 @@ public class PollAction extends RTAction {
         
         Map<String, Object> resultMap = new HashMap<String, Object>();
         resultMap.put(STANZAS, stanzas);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(RTResultFormatter.format(resultMap));
+        }
         return new AJAXRequestResult(resultMap, "native");
     }
 

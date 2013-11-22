@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,27 +53,23 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Locale;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mozilla.intl.chardet.nsDetector;
-import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
-import org.mozilla.intl.chardet.nsPSMDetector;
+import org.mozilla.universalchardet.UniversalDetector;
 
 /**
- * {@link CharsetDetector} - A charset detector based on <a href="http://jchardet.sourceforge.net/">jchardet</a> library.
+ * {@link CharsetDetector} - A charset detector based on <a href="https://code.google.com/p/juniversalchardet/">juniversalchardet</a>
+ * library, as included in Apache Tika bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CharsetDetector {
 
     private static final Log LOG = LogFactory.getLog(CharsetDetector.class);
-
-    private static final String STR_US_ASCII = "US-ASCII";
 
     private static final String FALLBACK = "ISO-8859-1";
 
@@ -233,54 +229,10 @@ public final class CharsetDetector {
         if (null == in) {
             throw new NullPointerException("byte array input stream is null");
         }
-        final nsDetector det = new nsDetector(nsPSMDetector.ALL);
-        /*
-         * Set an observer: The Notify() will be called when a matching charset is found.
-         */
-        final CharsetDetectionObserver observer = new CharsetDetectionObserver();
-        det.Init(observer);
-
-        final boolean isAscii = det.isAscii(in, len);
-        if (!isAscii) {
-            det.DoIt(in, len, false);
-        }
-
-        det.DataEnd();
-        /*
-         * Check if content is ascii
-         */
-        if (isAscii) {
-            return STR_US_ASCII;
-        }
-        {
-            /*
-             * Check observer
-             */
-            final String charset = observer.getCharset();
-            if (null != charset && Charset.isSupported(charset)) {
-                return charset;
-            }
-        }
-        /*-
-         * Choose first possible charset but prefer:
-         * 1. UTF-8
-         * 2. WINDOWS-1252
-         */
-        final String prob[] = det.getProbableCharsets();
-        String firstPossibleCharset = null;
-        for (int i = 0; i < prob.length; i++) {
-            if (Charset.isSupported(prob[i])) {
-                if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
-                    return prob[i];
-                } else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
-                    return prob[i];
-                }
-                if (null == firstPossibleCharset) {
-                    firstPossibleCharset = prob[i];
-                }
-            }
-        }
-        return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
+        UniversalDetector detector = new UniversalDetector(null);
+        detector.handleData(in, 0, len);
+        detector.dataEnd();
+        return getResultingCharset(detector);
     }
 
     /**
@@ -293,71 +245,7 @@ public final class CharsetDetector {
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
      */
     public static String detectCharset(final ByteArrayInputStream in) {
-        if (null == in) {
-            throw new NullPointerException("byte array input stream is null");
-        }
-        final nsDetector det = new nsDetector(nsPSMDetector.ALL);
-        /*
-         * Set an observer: The Notify() will be called when a matching charset is found.
-         */
-        final CharsetDetectionObserver observer = new CharsetDetectionObserver();
-        det.Init(observer);
-
-        final byte[] buf = new byte[1024];
-        int len;
-        boolean done = false;
-        boolean isAscii = true;
-
-        while ((len = in.read(buf, 0, buf.length)) != -1) {
-            /*
-             * Check if the stream is only ascii.
-             */
-            if (isAscii) {
-                isAscii = det.isAscii(buf, len);
-            }
-            /*
-             * DoIt if non-ascii and not done yet.
-             */
-            if (!isAscii && !done) {
-                done = det.DoIt(buf, len, false);
-            }
-        }
-        det.DataEnd();
-        /*
-         * Check if content is ascii
-         */
-        if (isAscii) {
-            return STR_US_ASCII;
-        }
-        {
-            /*
-             * Check observer
-             */
-            final String charset = observer.getCharset();
-            if (null != charset && Charset.isSupported(charset)) {
-                return charset;
-            }
-        }
-        /*-
-         * Choose first possible charset but prefer:
-         * 1. UTF-8
-         * 2. WINDOWS-1252
-         */
-        final String prob[] = det.getProbableCharsets();
-        String firstPossibleCharset = null;
-        for (int i = 0; i < prob.length; i++) {
-            if (Charset.isSupported(prob[i])) {
-                if ("utf-8".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
-                    return prob[i];
-                } else if ("windows-1252".equals(prob[i].toLowerCase(Locale.ENGLISH))) {
-                    return prob[i];
-                }
-                if (null == firstPossibleCharset) {
-                    firstPossibleCharset = prob[i];
-                }
-            }
-        }
-        return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
+        return detectCharset((InputStream)in);
     }
 
     /**
@@ -392,109 +280,28 @@ public final class CharsetDetector {
         if (null == in) {
             throw new NullPointerException("input stream is null");
         }
-        final nsDetector det = new nsDetector(nsPSMDetector.ALL);
-        /*
-         * Set an observer: The Notify() will be called when a matching charset is found.
-         */
-        final CharsetDetectionObserver observer = new CharsetDetectionObserver();
-        det.Init(observer);
+        UniversalDetector detector = new UniversalDetector(null);
         try {
-            final byte[] buf = new byte[1024];
-            int len;
-            boolean done = false;
-            boolean isAscii = true;
-
-            while ((len = in.read(buf, 0, buf.length)) > 0) {
-                /*
-                 * Check if the stream is only ascii.
-                 */
-                if (isAscii) {
-                    isAscii = det.isAscii(buf, len);
-                }
-                /*
-                 * DoIt if non-ascii and not done yet.
-                 */
-                if (!isAscii && !done) {
-                    done = det.DoIt(buf, len, false);
-                }
+            byte[] buffer = new byte[4096];
+            int read;
+            while (0 < (read = in.read(buffer)) && false == detector.isDone()) {
+                detector.handleData(buffer, 0, read);
             }
-            det.DataEnd();
-            /*
-             * Check if content is ascii
-             */
-            if (isAscii) {
-                return STR_US_ASCII;
-            }
-            {
-                /*
-                 * Check observer
-                 */
-                final String charset = observer.getCharset();
-                if (null != charset && Charset.isSupported(charset)) {
-                    return charset;
-                }
-            }
-            /*-
-             * Choose first possible charset but prefer:
-             * 1. UTF-8
-             * 2. WINDOWS-1252
-             */
-            final String prob[] = det.getProbableCharsets();
-            String firstPossibleCharset = null;
-            for (int i = 0; i < prob.length; i++) {
-                final String lcs = prob[i].toLowerCase(Locale.US);
-                if (Charset.isSupported(lcs)) {
-                    if ("utf-8".equals(lcs)) {
-                        return prob[i];
-                    } else if ("windows-1252".equals(lcs)) {
-                        return prob[i];
-                    }
-                    if (null == firstPossibleCharset) {
-                        firstPossibleCharset = prob[i];
-                    }
-                } else if ("nomatch".equals(lcs)) {
-                    /*
-                     * Non-ASCII and nomatch
-                     */
-                    return FALLBACK;
-                }
-            }
-            /*
-             * Non-ASCII
-             */
-            return null == firstPossibleCharset ? FALLBACK : firstPossibleCharset;
+        } catch (IOException e) {
+            LOG.warn(e.getMessage(), e);
         } finally {
             Streams.close(in);
         }
+        detector.dataEnd();
+        return getResultingCharset(detector);
     }
 
-    /**
-     * {@link CharsetDetectionObserver} - A charset detection observer according to <a href="http://jchardet.sourceforge.net/">jcharset</a>
-     * API
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    private static final class CharsetDetectionObserver implements nsICharsetDetectionObserver {
-
-        private String charset;
-
-        /**
-         * Initializes a new {@link CharsetDetectionObserver}
-         */
-        public CharsetDetectionObserver() {
-            super();
+    private static String getResultingCharset(UniversalDetector detector) {
+        String detectedCharset = detector.getDetectedCharset();
+        if (null == detectedCharset || false == isValid(detectedCharset)) {
+            return FALLBACK;
         }
-
-        @Override
-        public void Notify(final String charset) {
-            this.charset = charset;
-        }
-
-        /**
-         * @return The charset applied to this observer
-         */
-        public String getCharset() {
-            return charset;
-        }
+        return detectedCharset;
     }
+
 }

@@ -284,8 +284,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final HttpHandler httpHandlerLocal = httpHandler;
                         if (httpHandlerLocal != null) {
                             // Initiate ping
-                            initiatePing(handlerResponse, ctx);
-                            pingInitiated = true;
+                            pingInitiated = initiatePing(handlerResponse, ctx);
                             // Handle HTTP message
                             httpHandlerLocal.doHandle(handlerRequest, handlerResponse);
                         }
@@ -314,10 +313,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final WatchInfo watchInfo = pingMap.remove(ctx);
                         if (null != watchInfo) {
                             watchInfo.timerTask.cancel(false);
-                            final TimerService timerService = Services.optService(TimerService.class);
-                            if (null != timerService) {
-                                timerService.purge();
-                            }
+                            // Canceled timer task gets purged by CustomThreadPoolExecutorTimerService.PurgeRunnable
                         }
                     }
                 }
@@ -359,7 +355,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         return ctx.getStopAction();
     }
 
-    private void initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
+    private boolean initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
         final Ping ping = this.ping;
         if (ping != Ping.NONE) {
             final TimerService timerService = Services.optService(TimerService.class);
@@ -425,6 +421,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                                         pingIssued = true;
                                     }
                                 }
+                                pingIssued = true;
                             }
                             if (false == pingIssued) {
                                 pingCount.set(maxPingCount);
@@ -439,7 +436,9 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 ref.set(timerTask);
                 cm.put(ctx, new WatchInfo(timerTask, handlerResponse));
             }
-        }
+        };
+
+        return true;
     }
 
     /**

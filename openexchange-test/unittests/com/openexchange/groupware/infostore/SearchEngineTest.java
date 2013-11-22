@@ -82,8 +82,8 @@ public class SearchEngineTest extends TestCase {
     private User user = null;
     private User user2 = null;
 
-    private UserPermissionBits userConfig = null;
-    private UserPermissionBits userConfig2 = null;
+    private UserPermissionBits permissionBits = null;
+    private UserPermissionBits permissionBits2 = null;
 
     private int folderId;
     private int folderId2;
@@ -117,8 +117,8 @@ public class SearchEngineTest extends TestCase {
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
         session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
 
-        userConfig = userConfigStorage.getUserPermissionBits(session.getUserId(), ctx);
-        userConfig2 = userConfigStorage.getUserPermissionBits(session2.getUserId(), ctx);
+        permissionBits = userConfigStorage.getUserPermissionBits(session.getUserId(), ctx);
+        permissionBits2 = userConfigStorage.getUserPermissionBits(session2.getUserId(), ctx);
 
         folderId = _getPrivateInfostoreFolder(ctx,user,session);
         folderId2 = _getPrivateInfostoreFolder(ctx, user2, session2);
@@ -150,7 +150,7 @@ public class SearchEngineTest extends TestCase {
                                 createWithTitle("Hallo");
 
 
-        final SearchIterator iter = searchEngine.search("%",new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, folderId, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC,0,10,ctx, user, userConfig);
+        final SearchIterator iter = searchEngine.search("%",new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, folderId, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC,0,10,ctx, user, permissionBits);
 
         assertTrue(iter.hasNext());
         final DocumentMetadata gotDoc = (DocumentMetadata) iter.next();
@@ -189,7 +189,7 @@ public class SearchEngineTest extends TestCase {
 
     private void assertSurvivesOrder(final Metadata[] metadata) {
         try {
-           searchEngine.search("*",metadata,folderId,metadata[0],InfostoreSearchEngine.ASC, 0, 10, ctx, user, userConfig);
+           searchEngine.search("*",metadata,folderId,metadata[0],InfostoreSearchEngine.ASC, 0, 10, ctx, user, permissionBits);
         } catch (final Exception x) {
             fail(x.getMessage());
             x.printStackTrace();

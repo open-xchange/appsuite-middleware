@@ -89,6 +89,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link IMAPDefaultFolderChecker} - The IMAP default folder checker.
@@ -109,8 +110,9 @@ public class IMAPDefaultFolderChecker {
 
     protected final Session session;
     protected final int accountId;
-    protected final AccessedIMAPStore imapStore;
+    protected final IMAPStore imapStore;
     protected final Context ctx;
+    protected final IMAPAccess imapAccess;
     protected final IMAPConfig imapConfig;
     protected boolean retry;
 
@@ -123,14 +125,15 @@ public class IMAPDefaultFolderChecker {
      * @param imapStore The (connected) IMAP store
      * @param imapConfig The IMAP configuration
      */
-    public IMAPDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final AccessedIMAPStore imapStore, final IMAPConfig imapConfig) {
+    public IMAPDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final IMAPStore imapStore, final IMAPAccess imapAccess) {
         super();
         retry = true;
         this.accountId = accountId;
         this.session = session;
         this.imapStore = imapStore;
         this.ctx = ctx;
-        this.imapConfig = imapConfig;
+        this.imapAccess = imapAccess;
+        imapConfig = imapAccess.getIMAPConfig();
     }
 
     /**
@@ -278,7 +281,7 @@ public class IMAPDefaultFolderChecker {
                         /*
                          * Get prefix for default folder names, NOT full names!
                          */
-                        String prefix = imapStore.getImapAccess().getFolderStorage().getDefaultFolderPrefix();
+                        String prefix = imapAccess.getFolderStorage().getDefaultFolderPrefix();
                         /*
                          * Check for mbox
                          */
@@ -469,7 +472,7 @@ public class IMAPDefaultFolderChecker {
             }
             setDefaultMailFolder(index, null, cache);
             e.setCategory(Category.CATEGORY_WARNING);
-            imapStore.getImapAccess().addWarnings(Collections.singleton(e));
+            imapAccess.addWarnings(Collections.singleton(e));
         } catch (final FolderClosedException e) {
             /*
              * Not possible to retry since connection is broken
@@ -500,7 +503,7 @@ public class IMAPDefaultFolderChecker {
             }
             setDefaultMailFolder(index, null, cache);
             final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
-            imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
+            imapAccess.addWarnings(Collections.singleton(warning));
         }
         return null;
     }

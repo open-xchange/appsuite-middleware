@@ -66,6 +66,8 @@ import org.quartz.service.QuartzService;
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexExceptionCodes;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
@@ -77,7 +79,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link IndexingServiceImpl}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexingServiceImpl implements IndexingService {
@@ -113,14 +115,14 @@ public class IndexingServiceImpl implements IndexingService {
         JobInfoWrapper infoWrapper = new JobInfoWrapper(info, timeout, initialInterval, progressionRate);
         JobKey jobKey = Tools.generateJobKey(info, null);
         JobInfoWrapper old = RecurringJobsManager.addOrUpdateJob(jobKey.toString(), infoWrapper);
-        
+
         boolean scheduleJob = false;
         if (old == null) {
             scheduleJob = true;
         } else {
             if (onlyResetProgression) {
                 /*
-                 * If a node dies, all locally scheduled triggers are lost. 
+                 * If a node dies, all locally scheduled triggers are lost.
                  * Despite the jobInfo stays in the distributed collection.
                  * In those cases the next scheduled run of a job doesn't get fired.
                  * We can detect such a "misfire" and restore the according trigger.
@@ -135,7 +137,7 @@ public class IndexingServiceImpl implements IndexingService {
             scheduleProgressiveJob(jobKey, info, startDate, priority);
         }
     }
-    
+
     private boolean wasMisfired(JobInfoWrapper old) {
         long lastRun = old.getLastRun();
         long interval = old.getInterval();
@@ -143,22 +145,22 @@ public class IndexingServiceImpl implements IndexingService {
         long diff = now - (lastRun + interval);
         if (diff > 0) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Job " + old.getJobInfo().toString() + " was misfired for " + diff + 
+                LOG.debug("Job " + old.getJobInfo().toString() + " was misfired for " + diff +
                     "ms. Re-adding trigger and job on session reactivation.");
             }
             return true;
         }
-        
+
         return false;
     }
-    
+
     private void scheduleProgressiveJob(JobKey jobKey, JobInfo info, Date startDate, int priority) throws OXException {
         QuartzService quartzService = Services.getService(QuartzService.class);
         Scheduler scheduler = quartzService.getScheduler(
             SchedulerConfig.getSchedulerName(),
             SchedulerConfig.start(),
             SchedulerConfig.getThreadCount());
-        
+
         JobDetail jobDetail = JobBuilder.newJob(ProgressiveRecurringJob.class)
             .withIdentity(jobKey)
             .build();
@@ -171,7 +173,7 @@ public class IndexingServiceImpl implements IndexingService {
             .withPriority(priority)
             .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
             .build();
-        
+
         try {
             scheduler.addJob(jobDetail, true);
             if (scheduler.checkExists(trigger.getKey())) {
@@ -197,10 +199,31 @@ public class IndexingServiceImpl implements IndexingService {
                 ThreadPoolService threadPoolService = getThreadPoolService();
                 threadPoolService.submit(task);
             } else {
-                task.call();
+                call(task);
             }
         } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error(t.getMessage(), t);
+        }
+    }
+
+    private <V> V call(final Task<V> task) throws OXException {
+        final Thread thread = Thread.currentThread();
+        boolean ran = false;
+        task.beforeExecute(thread);
+        try {
+            final V retval = task.call();
+            ran = true;
+            task.afterExecute(null);
+            return retval;
+        } catch (final Exception ex) {
+            if (!ran) {
+                task.afterExecute(ex);
+            }
+            // Else the exception occurred within
+            // afterExecute itself in which case we don't
+            // want to call it again.
+            throw (ex instanceof OXException ? (OXException) ex : IndexExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage()));
         }
     }
 

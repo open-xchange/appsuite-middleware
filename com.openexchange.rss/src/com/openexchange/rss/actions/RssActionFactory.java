@@ -46,25 +46,37 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.rss.actions;
 
 import java.util.Arrays;
 import java.util.Collection;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 
+/**
+ * {@link RssActionFactory} - The action factory for RSS module.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class RssActionFactory implements AJAXActionServiceFactory {
 
-	@Override
-	public Collection<?> getSupportedServices() {
-		return Arrays.asList(new RssAction());
-	}
+    /**
+     * Initializes a new {@link RssActionFactory}.
+     */
+    public RssActionFactory() {
+        super();
+    }
 
-	@Override
-	public AJAXActionService createActionService(String action) throws OXException {
-		return new RssAction();
-	}
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList(new RssAction());
+    }
+
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return new RssAction();
+    }
 
 }

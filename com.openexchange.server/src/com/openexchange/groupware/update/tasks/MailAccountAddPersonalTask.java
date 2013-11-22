@@ -82,11 +82,9 @@ public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    private static final String[] DEPENDENCIES = { GlobalAddressBookPermissionsResolverTask.class.getName() };
-
     @Override
     public String[] getDependencies() {
-        return DEPENDENCIES;
+        return new String[] { GlobalAddressBookPermissionsResolverTask.class.getName() };
     }
 
     @Override

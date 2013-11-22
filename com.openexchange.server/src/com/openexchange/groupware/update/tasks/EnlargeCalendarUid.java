@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
@@ -59,9 +57,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
@@ -83,11 +79,6 @@ public final class EnlargeCalendarUid extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[0];
-    }
-
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(BACKGROUND, SCHEMA);
     }
 
     @Override

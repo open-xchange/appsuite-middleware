@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount.internal;
 
 import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.groupware.update.tasks.MailAccountCreateTablesTask;
 
 /**
  * {@link CreateMailAccountTables}
@@ -82,6 +83,15 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
     private static final String[] createdTables = { "user_mail_account", "user_mail_account_properties", "user_transport_account", "user_transport_account_properties", "pop3_storage_ids", "pop3_storage_deleted" };
 
     private static final String[] createStatements = {
+
+        MailAccountCreateTablesTask.getCreateMailAccount(),
+
+        MailAccountCreateTablesTask.getCreateMailAccountProperties(),
+
+        MailAccountCreateTablesTask.getCreateTransportAccount(),
+
+        MailAccountCreateTablesTask.getCreateTransportAccountProperties(),
+
         "CREATE TABLE user_mail_account ("
         + "id INT4 UNSIGNED NOT NULL,"
         + "cid INT4 UNSIGNED NOT NULL,"

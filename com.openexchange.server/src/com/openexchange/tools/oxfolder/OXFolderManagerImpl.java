@@ -89,7 +89,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -103,9 +102,10 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tasks.Tasks;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -116,6 +116,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnInsert;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnRemove;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -143,7 +144,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private final Connection readCon;
     private final Connection writeCon;
     private final Context ctx;
-    private final UserConfiguration userConfig;
+    private final UserPermissionBits userPerms;
     private final User user;
     private final Session session;
     private final List<OXException> warnings;
@@ -206,13 +207,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXException {
         super();
         this.session = session;
-        try {
+        if (session instanceof ServerSession) {
+            final ServerSession serverSession = (ServerSession) session;
+            ctx = serverSession.getContext();
+            userPerms = serverSession.getUserPermissionBits();
+            user = serverSession.getUser();
+        } else {
             ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw e;
+            userPerms = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
+            user = UserStorage.getStorageUser(session.getUserId(), ctx);
         }
-        userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
-        user = UserStorage.getStorageUser(session.getUserId(), ctx);
         this.readCon = readCon;
         this.writeCon = writeCon;
         this.oxfolderAccess = oxfolderAccess;
@@ -270,7 +274,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              * Check, if user holds right to create a sub-folder in given parent folder
              */
             try {
-                final EffectivePermission p = parentFolder.getEffectiveUserPermission(user.getId(), userConfig, readCon);
+                final EffectivePermission p = parentFolder.getEffectiveUserPermission(user.getId(), userPerms, readCon);
                 if (!p.canCreateSubfolders()) {
                     final OXException fe = OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(OXFolderUtility.getUserName(user.getId(), ctx),
                         OXFolderUtility.getFolderName(parentFolder),
@@ -280,12 +284,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     }
                     throw fe;
                 }
-                if (!userConfig.hasModuleAccess(folderObj.getModule())) {
+                if (!userPerms.hasModuleAccess(folderObj.getModule())) {
                     throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
                         user.getId(),
                         ctx), OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
                 }
-                if ((parentFolder.getType() == FolderObject.PUBLIC) && !userConfig.hasFullPublicFolderAccess() && (folderObj.getModule() != FolderObject.INFOSTORE)) {
+                if ((parentFolder.getType() == FolderObject.PUBLIC) && !userPerms.hasFullPublicFolderAccess() && (folderObj.getModule() != FolderObject.INFOSTORE)) {
                     throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(OXFolderUtility.getUserName(user.getId(), ctx),
                         OXFolderUtility.getFolderName(parentFolder),
                         Integer.valueOf(ctx.getContextId()));
@@ -331,7 +335,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 OXFolderUtility.folderModule2String(folderObj.getModule()),
                 Integer.valueOf(ctx.getContextId()));
         }
-        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, ctx);
+        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(folderObj, userPerms, ctx);
         /*
          * Check if admin exists and permission structure
          */
@@ -499,9 +503,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     public FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final boolean handDown, final long lastModified) throws OXException {
         final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, getFolderFromMaster(fo.getObjectID()));
         if (checkPermissions) {
-            if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && !UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-                session.getUserId(),
-                ctx).hasFullPublicFolderAccess()) {
+            if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && fo.getModule() != FolderObject.INFOSTORE && !userPerms.hasFullPublicFolderAccess()) {
                 throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(OXFolderUtility.getUserName(session, user),
                     OXFolderUtility.getFolderName(fo),
                     Integer.valueOf(ctx.getContextId()));
@@ -509,7 +511,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Fetch effective permission from storage
              */
-            final EffectivePermission perm = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
+            final EffectivePermission perm = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userPerms);
             if (!perm.isFolderVisible()) {
                 if (!perm.getUnderlyingPermission().isFolderVisible()) {
                     throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(fo.getObjectID()),
@@ -523,7 +525,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
             {
                 if (isRenameOnly) {
-                    final EffectivePermission parentPerm = getOXFolderAccess().getFolderPermission(getFolderFromMaster(fo.getObjectID()).getParentFolderID(), user.getId(), userConfig);
+                    final EffectivePermission parentPerm = getOXFolderAccess().getFolderPermission(getFolderFromMaster(fo.getObjectID()).getParentFolderID(), user.getId(), userPerms);
                     if (!perm.isFolderAdmin() && !parentPerm.canCreateSubfolders()) {
                         if (!perm.getUnderlyingPermission().isFolderAdmin() && !parentPerm.getUnderlyingPermission().canCreateSubfolders()) {
                             throw OXFolderExceptionCode.NO_RENAME_ACCESS.create(OXFolderUtility.getUserName(session, user),
@@ -545,6 +547,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                             session,
                             user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
                     }
+                }
+            }
+            {
+                if (fo.getObjectID() == getPublishedMailAttachmentsFolder(session)) {
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
+                        session,
+                        user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
                 }
             }
         }
@@ -715,7 +724,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         fo.setType(storageObj.getType());
         fo.setCreatedBy(storageObj.getCreatedBy());
         fo.setDefaultFolder(storageObj.isDefaultFolder());
-        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(fo, userConfig, ctx);
+        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(fo, userPerms, ctx);
         OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
         OXFolderUtility.checkPermissionsAgainstUserConfigs(fo, ctx);
         OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), fo.getNonSystemPermissionsAsArray(), user, ctx);
@@ -931,10 +940,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         } else if (module == FolderObject.CONTACT) {
-            return readCon == null ? !Contacts.containsAnyObjectInFolder(folderId, ctx) : !Contacts.containsAnyObjectInFolder(
-                folderId,
-                readCon,
-                ctx);
+            ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+            return contactService.isFolderEmpty(session, String.valueOf(folderId));
         } else if (module == FolderObject.INFOSTORE) {
             final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
             return db.isFolderEmpty(folderId, ctx);
@@ -1157,7 +1164,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             } else if (storageSrc.getModule() != FolderObject.INFOSTORE && storageDest.getModule() == FolderObject.INFOSTORE) {
                 throw OXFolderExceptionCode.INCOMPATIBLE_MODULES.create(OXFolderUtility.folderModule2String(storageSrc.getModule()),
                     OXFolderUtility.folderModule2String(storageDest.getModule()));
-            } else if (storageDest.getEffectiveUserPermission(user.getId(), userConfig).getFolderPermission() < OCLPermission.CREATE_SUB_FOLDERS) {
+            } else if (storageDest.getEffectiveUserPermission(user.getId(), userPerms).getFolderPermission() < OCLPermission.CREATE_SUB_FOLDERS) {
                 throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(OXFolderUtility.getUserName(
                     user.getId(),
                     ctx), OXFolderUtility.getFolderName(storageDest), Integer.valueOf(ctx.getContextId()));
@@ -1313,7 +1320,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Check permissions
              */
-            final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userConfig);
+            final EffectivePermission p = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userPerms);
             if (!p.isFolderVisible()) {
                 if (p.getUnderlyingPermission().isFolderVisible()) {
                     throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(fo.getObjectID()),
@@ -1395,7 +1402,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Check permissions
              */
-            final EffectivePermission p = getOXFolderAccess().getFolderPermission(folderId, user.getId(), userConfig);
+            final EffectivePermission p = getOXFolderAccess().getFolderPermission(folderId, user.getId(), userPerms);
             if (!p.isFolderVisible()) {
                 if (p.getUnderlyingPermission().isFolderVisible()) {
                     throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId),
@@ -1430,7 +1437,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             deleteableFolders = gatherDeleteableFolders(
                 folderId,
                 user.getId(),
-                userConfig,
+                userPerms,
                 StringCollection.getSqlInString(user.getId(), user.getGroups()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1818,7 +1825,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     /**
      * Gathers all folders which are allowed to be deleted
      */
-    private TIntObjectMap<TIntObjectMap<?>> gatherDeleteableFolders(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs) throws OXException, OXException, SQLException {
+    private TIntObjectMap<TIntObjectMap<?>> gatherDeleteableFolders(final int folderID, final int userId, final UserPermissionBits userPerms, final String permissionIDs) throws OXException, OXException, SQLException {
         final TIntObjectMap<TIntObjectMap<?>> deleteableIDs = new TIntObjectHashMap<TIntObjectMap<?>>();
         final Integer[] specials = new Integer[1];
         // Initialize special folders that must not be deleted
@@ -1830,7 +1837,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
             specials[SPECIAL_CONTACT_COLLECT_FOLDER] = i;
         }
-        gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, folderID, specials);
+        gatherDeleteableSubfoldersRecursively(folderID, userId, userPerms, permissionIDs, deleteableIDs, folderID, specials);
         return deleteableIDs;
     }
 
@@ -1838,7 +1845,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * Gathers all folders which are allowed to be deleted in a recursive manner
      * @param specials
      */
-    private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs, final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final int initParent, final Integer[] specials) throws OXException, OXException, SQLException {
+    private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserPermissionBits userPerms, final String permissionIDs, final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final int initParent, final Integer[] specials) throws OXException, OXException, SQLException {
         final FolderObject delFolder = getOXFolderAccess().getFolderObject(folderID);
         /*
          * Check if shared
@@ -1859,7 +1866,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Check user's effective permission
          */
-        final EffectivePermission effectivePerm = getOXFolderAccess().getFolderPermission(folderID, userId, userConfig);
+        final EffectivePermission effectivePerm = getOXFolderAccess().getFolderPermission(folderID, userId, userPerms);
         if (!effectivePerm.isFolderVisible()) {
             if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
                 if (initParent == folderID) {
@@ -1919,7 +1926,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final TIntObjectMap<TIntObjectMap<?>> subMap = new TIntObjectHashMap<TIntObjectMap<?>>();
         final int size = subfolders.size();
         for (int i = 0; i < size; i++) {
-            gatherDeleteableSubfoldersRecursively(subfolders.get(i), userId, userConfig, permissionIDs, subMap, initParent, specials);
+            gatherDeleteableSubfoldersRecursively(subfolders.get(i), userId, userPerms, permissionIDs, subMap, initParent, specials);
         }
         deleteableIDs.put(folderID, subMap);
     }
@@ -2074,6 +2081,14 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             super(cause);
         }
 
+    }
+
+    private static int getPublishedMailAttachmentsFolder(final Session session) {
+        if (null == session) {
+            return -1;
+        }
+        final Integer i = (Integer) session.getParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID());
+        return null == i ? -1 : i.intValue();
     }
 
 }

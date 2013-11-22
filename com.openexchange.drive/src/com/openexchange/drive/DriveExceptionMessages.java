@@ -83,6 +83,10 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String INVALID_DIRECTORYVERSION_MSG = "The directory version \"%1$s\" with checksum \"%2$s\" is invalid";
     public static final String LONG_POLLING_NOT_AVAILABLE_MSG = "Push via long polling is not available";
     public static final String SERVER_BUSY_MSG = "The server is too busy at the moment - please try again later.";
+    public static final String IGNORED_PATH_MSG = "The path \"%1$s\" is ignored";
+    public static final String CONFLICTING_FILENAME_MSG = "The file name \"%1$s\" is conflicting";
+    public static final String REPEATED_SYNC_PROBLEMS_MSG = "The directory \"%1$s\" with checksum \"%2$s\" caused repeated synchronization problems";
+    public static final String CLIENT_OUTDATED_MSG = "The client application you're using is outdated and no longer supported - please upgrade to a newer version";
 
     /**
      * Prevent instantiation.

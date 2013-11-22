@@ -50,6 +50,7 @@
 package com.openexchange.tasks.json.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
@@ -159,7 +160,7 @@ public class SearchAction extends TaskAction {
         System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
         internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
-        final List<Task> taskList = new ArrayList<Task>();
+        List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
@@ -173,6 +174,29 @@ public class SearchAction extends TaskAction {
 
                 if (timestamp.getTime() < lastModified.getTime()) {
                     timestamp = lastModified;
+                }
+            }
+
+            final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+            final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
+
+            if (leftHandLimit >= 0 || rightHandLimit > 0) {
+                final int size = taskList.size();
+                final int fromIndex = leftHandLimit > 0 ? leftHandLimit : 0;
+                final int toIndex = rightHandLimit > 0 ? (rightHandLimit > size ? size : rightHandLimit) : size;
+                if ((fromIndex) > size) {
+                    taskList = Collections.<Task> emptyList();
+                } else if (fromIndex >= toIndex) {
+                    taskList = Collections.<Task> emptyList();
+                } else {
+                    /*
+                     * Check if end index is out of range
+                     */
+                    if (toIndex < size) {
+                        taskList = taskList.subList(fromIndex, toIndex);
+                    } else if (fromIndex > 0) {
+                        taskList = taskList.subList(fromIndex, size);
+                    }
                 }
             }
 

@@ -68,7 +68,7 @@ public class SetSwitch implements AttributeSwitch {
 
     /**
      * Initializes a new {@link SetSwitch}.
-     * 
+     *
      * @param desc The account description
      */
     public SetSwitch(final MailAccountDescription desc) {
@@ -173,6 +173,12 @@ public class SetSwitch implements AttributeSwitch {
     @Override
     public Object trash() {
         desc.setTrash((String) value);
+        return null;
+    }
+
+    @Override
+    public Object archive() {
+        desc.setArchive((String) value);
         return null;
     }
 
@@ -289,6 +295,12 @@ public class SetSwitch implements AttributeSwitch {
     @Override
     public Object trashFullname() {
         desc.setTrashFullname((String) value);
+        return null;
+    }
+
+    @Override
+    public Object archiveFullname() {
+        desc.setArchiveFullname((String) value);
         return null;
     }
 

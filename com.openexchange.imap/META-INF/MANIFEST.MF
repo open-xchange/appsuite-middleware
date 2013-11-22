@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange IMAP
 Bundle-SymbolicName: com.openexchange.imap
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.googlecode.concurrentlinkedhashmap,
  com.javacodegeeks.concurrent,
@@ -78,10 +78,13 @@ Import-Package: com.googlecode.concurrentlinkedhashmap,
  gnu.trove.procedure,
  gnu.trove.set,
  gnu.trove.set.hash,
- javax.activation,
+ javax.activation;version="1.1.0",
  javax.annotation,
  javax.annotation.concurrent,
  javax.annotation.meta,
+ javax.crypto,
+ javax.crypto.interfaces,
+ javax.crypto.spec,
  javax.mail,
  javax.mail.event,
  javax.mail.internet,

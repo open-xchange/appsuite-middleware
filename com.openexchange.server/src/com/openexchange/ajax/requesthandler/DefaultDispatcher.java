@@ -121,6 +121,7 @@ public class DefaultDispatcher implements Dispatcher {
         if (null == session) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
+        addLogProperties(requestData, false);
         try {
             List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
             final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
@@ -207,7 +208,7 @@ public class DefaultDispatcher implements Dispatcher {
                 result = action.perform(modifiedRequestData, session);
                 if (null == result) {
                     // Huh...?!
-                    addLogProperties(modifiedRequestData);
+                    addLogProperties(modifiedRequestData, true);
                     throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(AJAXRequestResult.class.getSimpleName(), "null");
                 }
             } catch (final IllegalStateException e) {
@@ -249,33 +250,35 @@ public class DefaultDispatcher implements Dispatcher {
             }
             return result;
         } catch (final RuntimeException e) {
-            addLogProperties(requestData);
+            addLogProperties(requestData, true);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void addLogProperties(final AJAXRequestData requestData) {
+    private void addLogProperties(final AJAXRequestData requestData, final boolean withQueryString) {
         if (null != requestData && LogProperties.isEnabled()) {
             final Props props = LogProperties.getLogProperties();
             props.put(LogProperties.Name.AJAX_ACTION, ForceLog.valueOf(requestData.getAction()));
             props.put(LogProperties.Name.AJAX_MODULE, ForceLog.valueOf(requestData.getModule()));
 
-            final Map<String, String> parameters = requestData.getParameters();
-            if (null != parameters) {
-                final StringAllocator sb = new StringAllocator(256);
-                sb.append('"');
-                boolean first = true;
-                for (final Entry<String, String> entry : parameters.entrySet()) {
-                    if (first) {
-                        sb.append('?');
-                        first = false;
-                    } else {
-                        sb.append('&');
+            if (withQueryString) {
+                final Map<String, String> parameters = requestData.getParameters();
+                if (null != parameters) {
+                    final StringAllocator sb = new StringAllocator(256);
+                    sb.append('"');
+                    boolean first = true;
+                    for (final Entry<String, String> entry : parameters.entrySet()) {
+                        if (first) {
+                            sb.append('?');
+                            first = false;
+                        } else {
+                            sb.append('&');
+                        }
+                        sb.append(entry.getKey()).append('=').append(entry.getValue());
                     }
-                    sb.append(entry.getKey()).append('=').append(entry.getValue());
+                    sb.append('"');
+                    props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(sb.toString()));
                 }
-                sb.append('"');
-                props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(sb.toString()));
             }
         }
     }

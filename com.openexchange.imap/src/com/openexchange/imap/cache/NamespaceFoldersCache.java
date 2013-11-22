@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.cache;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.Folder;
@@ -201,7 +202,7 @@ public final class NamespaceFoldersCache {
      */
     public static boolean startsWithAnyOfUserNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
         for (final String userNamespace : getUserNamespaces(imapStore, load, session, accountId)) {
-            if (fullname.startsWith(userNamespace)) {
+            if (!isEmpty(userNamespace) && fullname.startsWith(userNamespace)) {
                 return true;
             }
         }
@@ -267,7 +268,7 @@ public final class NamespaceFoldersCache {
      */
     public static boolean startsWithAnyOfSharedNamespaces(final String fullname, final IMAPStore imapStore, final boolean load, final Session session, final int accountId) throws MessagingException {
         for (final String sharedNamespace : getSharedNamespaces(imapStore, load, session, accountId)) {
-            if (fullname.startsWith(sharedNamespace)) {
+            if (!isEmpty(sharedNamespace) && fullname.startsWith(sharedNamespace)) {
                 return true;
             }
         }

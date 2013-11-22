@@ -51,11 +51,11 @@ package com.openexchange.push.malpoll.osgi;
 
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.push.malpoll.MALPollPushListener;
 import com.openexchange.push.malpoll.MALPollPushListenerRegistry;
 
@@ -64,7 +64,7 @@ import com.openexchange.push.malpoll.MALPollPushListenerRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
+public final class IMAPNotifierTracker implements ServiceTrackerCustomizer<IMAPNotifierRegistryService,IMAPNotifierRegistryService> {
 
     private final AtomicReference<IMAPNotifierRegistryService> reference;
 
@@ -80,9 +80,9 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference serviceReference) {
-        final Object service = context.getService(serviceReference);
-        final IMAPNotifierRegistryService registryService = (IMAPNotifierRegistryService) service;
+    public IMAPNotifierRegistryService addingService(final ServiceReference<IMAPNotifierRegistryService> serviceReference) {
+        final IMAPNotifierRegistryService service = context.getService(serviceReference);
+        final IMAPNotifierRegistryService registryService = service;
         if (reference.compareAndSet(null, registryService)) {
             /*
              * No IDLE-bases push needed anymore. Orderly close existing ones and add an appropriate notifier task instead.
@@ -104,16 +104,16 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<IMAPNotifierRegistryService> reference, final IMAPNotifierRegistryService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference serviceReference, final Object service) {
+    public void removedService(final ServiceReference<IMAPNotifierRegistryService> serviceReference, final IMAPNotifierRegistryService service) {
         if (null == service) {
             return;
         }
-        reference.compareAndSet((IMAPNotifierRegistryService) service, null);
+        reference.compareAndSet(service, null);
         context.ungetService(serviceReference);
     }
 

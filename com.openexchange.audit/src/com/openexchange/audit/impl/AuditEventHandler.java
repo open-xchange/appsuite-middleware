@@ -49,21 +49,18 @@
 
 package com.openexchange.audit.impl;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.commons.lang.Validate;
+import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
-import com.openexchange.audit.logging.AuditFileHandler;
-import com.openexchange.audit.logging.AuditFilter;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -78,242 +75,325 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a> - refactoring
  */
 public class AuditEventHandler implements EventHandler {
 
-    private static final Logger LOG = Logger.getLogger(AuditEventHandler.class.getName());
-
-    private static final AuditEventHandler instance = new AuditEventHandler();
+    private static Log LOG = com.openexchange.log.Log.loggerFor(AuditEventHandler.class);
 
     private static final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public static AuditEventHandler getInstance() {
-        return instance;
-    }
 
     /**
      * Initializes a new {@link AuditEventHandler}.
      */
-    private AuditEventHandler() {
+    public AuditEventHandler() {
         super();
         try {
-            /*
-             * Find out if the custom FileHandler should be used to log into a seperate logfile. If so, add a filter to the root logger to
-             * avoid that the messages will also be written to the master logfile.
-             */
             if (AuditConfiguration.getEnabled() == true) {
-                try {
-                    final Logger rootLogger = Logger.getLogger("");
-                    final Handler[] handlers = rootLogger.getHandlers();
-                    for (final Handler handler : handlers) {
-                        handler.setFilter(new AuditFilter());
-                    }
-                    LOG.addHandler(new AuditFileHandler());
-                } catch (final SecurityException e) {
-                    LOG.log(Level.SEVERE, e.getMessage(), e);
-                } catch (final IOException e) {
-                    LOG.log(Level.SEVERE, e.getMessage(), e);
-                }
                 LOG.info("Using own Logging instance.");
             } else {
                 LOG.info("Using global Logging instance.");
             }
         } catch (final OXException e) {
-            LOG.log(Level.SEVERE, e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handleEvent(final Event event) {
-        if (!LOG.isLoggable(Level.INFO)) {
+        Validate.notNull(event, "Event mustn't be null.");
+
+        if (!LOG.isInfoEnabled()) {
             // Not allowed to log
             return;
         }
         try {
             final StringBuilder log = new StringBuilder(2048);
             final String topic = event.getTopic();
+
             if (topic.startsWith("com/openexchange/groupware/infostore/")) {
-                if (topic.equals(FileStorageEventConstants.CREATE_TOPIC)) {
-                    log.append("EVENT TYPE: INSERT; ");
-                } else if (topic.equals(FileStorageEventConstants.UPDATE_TOPIC)) {
-                    log.append("EVENT TYPE: UPDATE; ");
-                } else if (topic.equals(FileStorageEventConstants.DELETE_TOPIC)) {
-                    log.append("EVENT TYPE: DELETE; ");
-                }
-
-                synchronized (logDateFormat) {
-                    log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
-                }
-                log.append("OBJECT TYPE: FILE; ");
-                final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-                appendUserInformation(session.getUserId(), session.getContextId(), log);
-                log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
-                log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
-                {
-                    final Object fileName = event.getProperty(FileStorageEventConstants.FILE_NAME);
-                    if (null != fileName) {
-                        log.append("FILE NAME: ").append(fileName).append("; ");
-                    }
-                }
-                log.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
-                log.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
-                {
-                    final String folderId = (String) event.getProperty(FileStorageEventConstants.FOLDER_ID);
-                    if (null != folderId) {
-                        try {
-                            final int iFolderId = Integer.parseInt(folderId);
-                            log.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
-                        } catch (NumberFormatException e) {
-                            log.append("FOLDER: ").append(folderId).append(';');
-                        }
-                    }
-                }
+                handleInfostoreEvent(event, log);
             } else if (topic.startsWith("com/openexchange/groupware/")) {
-                final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
-                if (null != commonEvent) {
-                    final int contextId = commonEvent.getContextId();
-                    final Context context = ContextStorage.getInstance().getContext(contextId);
-
-                    ModuleSwitch:switch (commonEvent.getModule()) {
-                    default:
-                        break ModuleSwitch;
-                    case Types.APPOINTMENT:
-                        final Appointment appointment = (Appointment) commonEvent.getActionObj();
-
-                        if (commonEvent.getAction() == CommonEvent.INSERT) {
-                            log.append("EVENT TYPE: INSERT; ");
-                        } else if (commonEvent.getAction() == CommonEvent.UPDATE) {
-                            log.append("EVENT TYPE: UPDATE; ");
-                        } else if (commonEvent.getAction() == CommonEvent.DELETE) {
-                            log.append("EVENT TYPE: DELETE; ");
-                        }
-
-                        synchronized (logDateFormat) {
-                            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
-                        }
-                        log.append("OBJECT TYPE: APPOINTMENT; ");
-                        appendUserInformation(commonEvent.getUserId(), contextId, log);
-                        log.append("CONTEXT ID: ").append(contextId).append("; ");
-                        log.append("OBJECT ID: ").append(appointment.getObjectID()).append("; ");
-                        log.append("CREATED BY: ").append(
-                            UserStorage.getInstance().getUser(appointment.getCreatedBy(), context).getDisplayName()).append("; ");
-                        log.append("MODIFIED BY: ").append(
-                            UserStorage.getInstance().getUser(appointment.getModifiedBy(), context).getDisplayName()).append("; ");
-                        log.append("TITLE: ").append(appointment.getTitle()).append("; ");
-                        log.append("START DATE: ").append(appointment.getStartDate()).append("; ");
-                        log.append("END DATE: ").append(appointment.getEndDate()).append("; ");
-                        log.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append(';');
-
-                        break ModuleSwitch;
-                    case Types.CONTACT:
-                        /*
-                         * get as much contact data as possible for log
-                         */
-                        Contact contact = null;
-                        if (null != commonEvent.getActionObj() && Contact.class.isInstance(commonEvent.getActionObj())) {
-                            contact = (Contact) commonEvent.getActionObj();
-                        }
-                        if (CommonEvent.DELETE != commonEvent.getAction() && (null == contact || false == contact.containsDisplayName() || false == contact.containsCreatedBy() || false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
-                            contact = Contacts.getContactById(((Contact) commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
-                        }
-
-                        if (commonEvent.getAction() == CommonEvent.INSERT) {
-                            log.append("EVENT TYPE: INSERT; ");
-                        } else if (commonEvent.getAction() == CommonEvent.UPDATE) {
-                            log.append("EVENT TYPE: UPDATE; ");
-                        } else if (commonEvent.getAction() == CommonEvent.DELETE) {
-                            log.append("EVENT TYPE: DELETE; ");
-                        }
-
-                        synchronized (logDateFormat) {
-                            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
-                        }
-                        log.append("OBJECT TYPE: CONTACT; ");
-                        appendUserInformation(commonEvent.getUserId(), contextId, log);
-                        log.append("CONTEXT ID: ").append(contextId).append("; ");
-                        if (null != contact) {
-                            log.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
-                            if (contact.containsCreatedBy()) {
-                                log.append("CREATED BY: ").append(
-                                    UserStorage.getInstance().getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
-                            }
-                            if (contact.containsModifiedBy()) {
-                                log.append("MODIFIED BY: ").append(
-                                    UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
-                            }
-                            log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
-                            log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
-                        }
-                        break ModuleSwitch;
-                    case Types.TASK:
-                        final Task task = (Task) commonEvent.getActionObj();
-
-                        if (commonEvent.getAction() == CommonEvent.INSERT) {
-                            log.append("EVENT TYPE: INSERT; ");
-                        } else if (commonEvent.getAction() == CommonEvent.UPDATE) {
-                            log.append("EVENT TYPE: UPDATE; ");
-                        } else if (commonEvent.getAction() == CommonEvent.DELETE) {
-                            log.append("EVENT TYPE: DELETE; ");
-                        }
-
-                        synchronized (logDateFormat) {
-                            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
-                        }
-                        log.append("OBJECT TYPE: TASK; ");
-                        appendUserInformation(commonEvent.getUserId(), contextId, log);
-                        log.append("CONTEXT ID: ").append(contextId).append("; ");
-                        log.append("OBJECT ID: ").append(task.getObjectID()).append("; ");
-                        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(task.getCreatedBy(), context).getDisplayName()).append(
-                            "; ");
-                        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName()).append(
-                            "; ");
-                        log.append("TITLE: ").append(task.getTitle()).append("; ");
-                        log.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(';');
-
-                        break ModuleSwitch;
-                    case Types.INFOSTORE:
-                        final DocumentMetadata document = (DocumentMetadata) commonEvent.getActionObj();
-
-                        if (commonEvent.getAction() == CommonEvent.INSERT) {
-                            log.append("EVENT TYPE: INSERT; ");
-                        } else if (commonEvent.getAction() == CommonEvent.UPDATE) {
-                            log.append("EVENT TYPE: UPDATE; ");
-                        } else if (commonEvent.getAction() == CommonEvent.DELETE) {
-                            log.append("EVENT TYPE: DELETE; ");
-                        }
-
-                        synchronized (logDateFormat) {
-                            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
-                        }
-                        log.append("OBJECT TYPE: INFOSTORE; ");
-                        appendUserInformation(commonEvent.getUserId(), contextId, log);
-                        log.append("CONTEXT ID: ").append(contextId).append("; ");
-                        log.append("OBJECT ID: ").append(document.getId()).append("; ");
-                        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(document.getCreatedBy(), context).getDisplayName()).append(
-                            "; ");
-                        log.append("MODIFIED BY: ").append(
-                            UserStorage.getInstance().getUser(document.getModifiedBy(), context).getDisplayName()).append("; ");
-                        log.append("TITLE: ").append(document.getTitle()).append("; ");
-                        log.append("TITLE: ").append(document.getFileName()).append("; ");
-                        log.append("FOLDER: ").append(getPathToRoot((int) document.getFolderId(), commonEvent.getSession())).append(';');
-
-                        break ModuleSwitch;
-                    }
-                }
+                handleGroupwareEvent(event, log);
             }
 
             final String infoMsg = log.toString();
-            if (!isEmpty(infoMsg)) {
-                LOG.log(Level.INFO, infoMsg);
+            if (!Strings.isEmpty(infoMsg)) {
+                LOG.info(infoMsg);
             }
         } catch (final Exception e) {
-            LOG.log(Level.SEVERE, e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Handles events that belong to the infostore.
+     *
+     * @param event - the {@link Event} that was received
+     * @param log - the log to add information
+     * @throws OXException
+     */
+    protected void handleInfostoreEvent(Event event, StringBuilder log) throws OXException {
+        Validate.notNull(event, "Event mustn't be null.");
+        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+
+        String topic = event.getTopic();
+
+        if (topic.equals(FileStorageEventConstants.ACCESS_TOPIC)) {
+            if (AuditConfiguration.getFileAccessLogging()) {
+                log.append("EVENT TYPE: ACCESS; ");
+            } else {
+                return;
+            }
+        }
+        if (topic.equals(FileStorageEventConstants.CREATE_TOPIC)) {
+            log.append("EVENT TYPE: INSERT; ");
+        } else if (topic.equals(FileStorageEventConstants.UPDATE_TOPIC)) {
+            log.append("EVENT TYPE: UPDATE; ");
+        } else if (topic.equals(FileStorageEventConstants.DELETE_TOPIC)) {
+            log.append("EVENT TYPE: DELETE; ");
+        }
+        synchronized (logDateFormat) {
+            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
+        }
+        log.append("OBJECT TYPE: FILE; ");
+
+        final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_PUBLICATION))) {
+            String remoteAddress = null;
+            try {
+                remoteAddress = (String) event.getProperty("remoteAddress");
+            } catch (ClassCastException e) {
+                remoteAddress = "unknown";
+            }
+
+            if (remoteAddress == null) {
+                remoteAddress = "unknown";
+            }
+
+            log.append("PUBLISH: ");
+            log.append(remoteAddress);
+            log.append("; ");
+        } else {
+            appendUserInformation(session.getUserId(), session.getContextId(), log);
+        }
+        log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
+        log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
+        {
+            final Object fileName = event.getProperty(FileStorageEventConstants.FILE_NAME);
+            if (null != fileName) {
+                log.append("FILE NAME: ").append(fileName).append("; ");
+            }
+        }
+        log.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
+        log.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
+        {
+            final String folderId = (String) event.getProperty(FileStorageEventConstants.FOLDER_ID);
+            if (null != folderId) {
+                try {
+                    final int iFolderId = Integer.parseInt(folderId);
+                    log.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
+                } catch (NumberFormatException e) {
+                    log.append("FOLDER: ").append(folderId).append(';');
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles events that belong to other server parts
+     *
+     * @param event - the {@link Event} that was received
+     * @param log - the log to add information
+     * @throws OXException
+     */
+    protected void handleGroupwareEvent(Event event, StringBuilder log) throws OXException {
+        Validate.notNull(event, "Event mustn't be null.");
+        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+
+        final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+
+        if (null != commonEvent) {
+            final int contextId = commonEvent.getContextId();
+            final Context context = ContextStorage.getInstance().getContext(contextId);
+
+            handleMainCommmonEvent(commonEvent, log);
+
+            ModuleSwitch: switch (commonEvent.getModule()) {
+            default:
+                break ModuleSwitch;
+
+            case Types.APPOINTMENT:
+                handleAppointmentCommonEvent(commonEvent, context, log);
+                break ModuleSwitch;
+
+            case Types.CONTACT:
+                handleContactCommonEvent(commonEvent, context, log);
+                break ModuleSwitch;
+
+            case Types.TASK:
+                handleTaskCommonEvent(commonEvent, context, log);
+                break ModuleSwitch;
+
+            case Types.INFOSTORE:
+                handleInfostoreCommonEvent(commonEvent, context, log);
+                break ModuleSwitch;
+            }
+        }
+    }
+
+    /**
+     * Handles the general information of a CommonEvent that should be logged for all action objects.
+     *
+     * @param commonEvent
+     * @param log
+     */
+    protected void handleMainCommmonEvent(CommonEvent commonEvent, StringBuilder log) {
+        Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
+        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+
+        if (commonEvent.getAction() == CommonEvent.INSERT) {
+            log.append("EVENT TYPE: INSERT; ");
+        } else if (commonEvent.getAction() == CommonEvent.UPDATE) {
+            log.append("EVENT TYPE: UPDATE; ");
+        } else if (commonEvent.getAction() == CommonEvent.DELETE) {
+            log.append("EVENT TYPE: DELETE; ");
+        }
+
+        synchronized (logDateFormat) {
+            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
+        }
+    }
+
+    /**
+     * Handles appointment events.
+     *
+     * @param event - the {@link CommonEvent} that was received
+     * @param context - the {@link Context}
+     * @param log - the log to add information
+     * @throws OXException
+     */
+    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+        Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
+        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+
+        final Appointment appointment = (Appointment) commonEvent.getActionObj();
+        Appointment oldAppointment = (Appointment) commonEvent.getOldObj();
+
+        log.append("OBJECT TYPE: APPOINTMENT; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
+        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        log.append("OBJECT ID: ").append(appointment.getObjectID()).append("; ");
+        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(appointment.getCreatedBy(), context).getDisplayName()).append(
+            "; ");
+        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(appointment.getModifiedBy(), context).getDisplayName()).append(
+            "; ");
+        log.append("TITLE: ").append(appointment.getTitle()).append("; ");
+        log.append("START DATE: ").append(appointment.getStartDate()).append("; ");
+        log.append("END DATE: ").append(appointment.getEndDate()).append("; ");
+        log.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append("; ");
+        log.append("PARTICIPANTS: ").append(Arrays.toString(appointment.getParticipants())).append("; ");
+        if (oldAppointment != null) {
+            log.append("OLD PARTICIPANTS: ").append(Arrays.toString(oldAppointment.getParticipants())).append("; ");
+        }
+        if (commonEvent.getSession() != null) {
+            log.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
+        }
+    }
+
+    /**
+     * Handles contact events.
+     *
+     * @param event - the {@link CommonEvent} that was received
+     * @param context - the {@link Context}
+     * @param log - the log to add information
+     * @throws OXException
+     */
+    protected void handleContactCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+        Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
+        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+
+        Contact contact = (Contact) commonEvent.getActionObj();
+
+        if (CommonEvent.DELETE != commonEvent.getAction() && (null == contact || false == contact.containsDisplayName() || false == contact.containsCreatedBy() || false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
+            contact = Contacts.getContactById(((Contact) commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
+        }
+
+        log.append("OBJECT TYPE: CONTACT; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
+        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        if (null != contact) {
+            log.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
+            if (contact.containsCreatedBy()) {
+                log.append("CREATED BY: ").append(
+                    UserStorage.getInstance().getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
+            }
+            if (contact.containsModifiedBy()) {
+                log.append("MODIFIED BY: ").append(
+                    UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
+            }
+            log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
+            log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
+        }
+    }
+
+    /**
+     * Handles task events.
+     *
+     * @param event - the {@link CommonEvent} that was received
+     * @param context - the {@link Context}
+     * @param log - the log to add information
+     * @throws OXException
+     */
+    protected void handleTaskCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+        Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
+        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+
+        final Task task = (Task) commonEvent.getActionObj();
+
+        log.append("OBJECT TYPE: TASK; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
+        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        log.append("OBJECT ID: ").append(task.getObjectID()).append("; ");
+        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(task.getCreatedBy(), context).getDisplayName()).append("; ");
+        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName()).append("; ");
+        log.append("TITLE: ").append(task.getTitle()).append("; ");
+        log.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(';');
+    }
+
+    /**
+     * Handles infostore events.
+     *
+     * @param event - the {@link CommonEvent} that was received
+     * @param context - the {@link Context}
+     * @param log - the log to add information
+     * @throws OXException
+     */
+    protected void handleInfostoreCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+        Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
+        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+
+        final DocumentMetadata document = (DocumentMetadata) commonEvent.getActionObj();
+
+        log.append("OBJECT TYPE: INFOSTORE; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
+        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        log.append("OBJECT ID: ").append(document.getId()).append("; ");
+        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(document.getCreatedBy(), context).getDisplayName()).append("; ");
+        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(document.getModifiedBy(), context).getDisplayName()).append(
+            "; ");
+        log.append("TITLE: ").append(document.getTitle()).append("; ");
+        log.append("TITLE: ").append(document.getFileName()).append("; ");
+        log.append("FOLDER: ").append(getPathToRoot((int) document.getFolderId(), commonEvent.getSession())).append(';');
     }
 
     /**
@@ -323,7 +403,7 @@ public class AuditEventHandler implements EventHandler {
      * @param sessionObj
      * @return String fullFolderPath
      */
-    private String getPathToRoot(final int folderId, final Session sessionObj) {
+    protected String getPathToRoot(final int folderId, final Session sessionObj) {
         String retval = "";
 
         try {
@@ -335,13 +415,13 @@ public class AuditEventHandler implements EventHandler {
                 retval = iter.next().getFolderName() + "/" + retval;
             }
         } catch (final OXException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
 
         return retval;
     }
 
-    private static void appendUserInformation(final int userId, final int contextId, final StringBuilder log) {
+    private void appendUserInformation(final int userId, final int contextId, final StringBuilder log) {
         String displayName;
         try {
             displayName = UserStorage.getInstance().getUser(userId, ContextStorage.getInstance().getContext(contextId)).getDisplayName();
@@ -357,18 +437,6 @@ public class AuditEventHandler implements EventHandler {
             log.append(" (").append(userId).append(')');
         }
         log.append("; ");
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }

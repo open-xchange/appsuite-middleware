@@ -222,7 +222,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     private Locale locale;
 
-    private boolean committed;
+    private volatile boolean committed;
 
     private int bufferSize;
 
@@ -324,7 +324,11 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void setContentLength(final int contentLength) {
-        headers.put(CONTENT_LENGTH, Collections.singletonList(Integer.toString(contentLength)));
+        if (contentLength < 0) {
+            headers.remove(CONTENT_LENGTH);
+        } else {
+            headers.put(CONTENT_LENGTH, Collections.singletonList(Integer.toString(contentLength)));
+        }
     }
 
     public int getContentLength() {

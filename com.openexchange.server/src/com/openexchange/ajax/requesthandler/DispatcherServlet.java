@@ -53,19 +53,22 @@ import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -149,7 +152,7 @@ public class DispatcherServlet extends SessionServlet {
         return PREFIX.get();
     }
 
-    private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
+    private static final AtomicReference<List<ResponseRenderer>> RESPONSE_RENDERERS = new AtomicReference<List<ResponseRenderer>>(Collections.<ResponseRenderer> emptyList());
 
     /**
      * The default <code>AJAXRequestDataTools</code>.
@@ -185,7 +188,23 @@ public class DispatcherServlet extends SessionServlet {
      * @param renderer The renderer
      */
     public static void registerRenderer(final ResponseRenderer renderer) {
-        RESPONSE_RENDERERS.add(renderer);
+        List<ResponseRenderer> expect;
+        List<ResponseRenderer> update;
+        do {
+            expect = RESPONSE_RENDERERS.get();
+            update = new ArrayList<ResponseRenderer>(expect);
+            update.add(renderer);
+            Collections.sort(update, new Comparator<ResponseRenderer>() {
+
+                @Override
+                public int compare(ResponseRenderer responseRenderer, ResponseRenderer anotherResponseRenderer) {
+                    // Higher ranked first
+                    int thisRanking = responseRenderer.getRanking();
+                    int anotherRanking = anotherResponseRenderer.getRanking();
+                    return (thisRanking<anotherRanking ? 1 : (thisRanking==anotherRanking ? 0 : -1));
+                }
+            });
+        } while (!RESPONSE_RENDERERS.compareAndSet(expect, update));
     }
 
     /**
@@ -193,19 +212,35 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param renderer The renderer
      */
-    public static void unregisterRenderer(final ResponseRenderer renderer) {
-        RESPONSE_RENDERERS.remove(renderer);
+    public static synchronized void unregisterRenderer(final ResponseRenderer renderer) {
+        List<ResponseRenderer> expect;
+        List<ResponseRenderer> update;
+        do {
+            expect = RESPONSE_RENDERERS.get();
+            update = new ArrayList<ResponseRenderer>(expect);
+            update.remove(renderer);
+            Collections.sort(update, new Comparator<ResponseRenderer>() {
+
+                @Override
+                public int compare(ResponseRenderer responseRenderer, ResponseRenderer anotherResponseRenderer) {
+                    // Higher ranked first
+                    int thisRanking = responseRenderer.getRanking();
+                    int anotherRanking = anotherResponseRenderer.getRanking();
+                    return (thisRanking<anotherRanking ? 1 : (thisRanking==anotherRanking ? 0 : -1));
+                }
+            });
+        } while (!RESPONSE_RENDERERS.compareAndSet(expect, update));
     }
 
     /**
      * Clears all registered renderer.
      */
     public static void clearRenderer() {
-        RESPONSE_RENDERERS.clear();
+        RESPONSE_RENDERERS.set(Collections.<ResponseRenderer> emptyList());
     }
 
     @Override
-    protected void initializeSession(final HttpServletRequest req) throws OXException {
+    protected void initializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
         if (null != getSessionObject(req, true)) {
             return;
         }
@@ -236,6 +271,7 @@ public class DispatcherServlet extends SessionServlet {
                 }
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
+                checkPublicSessionCookie(req, resp, session, sessiondService);
                 sessionParamFound = true;
             } else {
                 session = null;
@@ -244,15 +280,18 @@ public class DispatcherServlet extends SessionServlet {
         }
         // Check if associated request allows no session (if no "session" parameter was found)
         boolean mayOmitSession = false;
+        boolean mayUseFallbackSession = false;
         if (!sessionParamFound) {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
             final String module = requestDataTools.getModule(PREFIX.get(), req);
             final String action = requestDataTools.getAction(req);
-            mayOmitSession = DISPATCHER.get().mayOmitSession(module, action);
+            final Dispatcher dispatcher = DISPATCHER.get();
+            mayOmitSession = dispatcher.mayOmitSession(module, action);
+            mayUseFallbackSession = dispatcher.mayUseFallbackSession(module, action);
         }
         // Try public session
         if (!mayOmitSession) {
-            findPublicSessionId(req, session, sessiondService);
+            findPublicSessionId(req, session, sessiondService, mayUseFallbackSession);
         }
     }
 
@@ -276,6 +315,8 @@ public class DispatcherServlet extends SessionServlet {
      */
     private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
 
+    private static final AJAXRequestResult.ResultType NOT_FOUND = AJAXRequestResult.ResultType.NOT_FOUND;
+
     /**
      * The <code>direct</code> result type.
      */
@@ -290,7 +331,7 @@ public class DispatcherServlet extends SessionServlet {
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    protected void handle(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, final boolean preferStream) throws IOException {
+    public void handle(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, final boolean preferStream) throws IOException {
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(httpResponse);
@@ -331,6 +372,12 @@ public class DispatcherServlet extends SessionServlet {
                 Tools.setETag(requestData.getETag(), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, httpResponse);
                 return;
             }
+
+            if (NOT_FOUND.equals(result.getType())) {
+                httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            };
+
             if (DIRECT.equals(result.getType())) {
                 // No further processing
                 return;
@@ -437,7 +484,8 @@ public class DispatcherServlet extends SessionServlet {
             if (!dispatcher.mayOmitSession(module, action)) {
                 if (dispatcher.mayUseFallbackSession(module, action)) {
                     // "open-xchange-public-session" allowed, but missing for associated action
-                    throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(Login.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_COOKIE.create(Login.PUBLIC_SESSION_NAME);
+                    final String name = LoginServlet.getPublicSessionCookieName(httpRequest);
+                    throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(name) : AjaxExceptionCodes.MISSING_COOKIE.create(name);
                 }
                 // "open-xchange-public-session" NOT allowed for associated action, therefore complain about missing "session" parameter
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
@@ -462,20 +510,17 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpResponse The associated HTTP Servlet response
      */
     protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-        int highest = 0;
-        boolean first = true;
-        ResponseRenderer candidate = null;
-        for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if ((first || highest <= renderer.getRanking()) && renderer.handles(requestData, result)) {
-                first = false;
-                highest = renderer.getRanking();
-                candidate = renderer;
+        final List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
+        final Iterator<ResponseRenderer> iter = responseRenderers.iterator();
+        for (int i = responseRenderers.size(); i-- > 0;) {
+            final ResponseRenderer renderer = iter.next();
+            if (renderer.handles(requestData, result)) {
+                renderer.write(requestData, result, httpRequest, httpResponse);
+                return;
             }
         }
-        if (null == candidate) {
-            throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
-        }
-        candidate.write(requestData, result, httpRequest, httpResponse);
+        // None found
+        throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
     }
 
     /** ASCII-wise to upper-case */

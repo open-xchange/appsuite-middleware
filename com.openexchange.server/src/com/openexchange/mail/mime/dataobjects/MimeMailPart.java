@@ -55,10 +55,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -94,7 +97,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     private static final long serialVersionUID = -1142595512657302179L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailPart.class));
+    static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailPart.class));
 
     /**
      * The max. in-memory size in bytes.
@@ -193,8 +196,10 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     /**
      * Constructor - Only applies specified part, but does not set any attributes.
+     *
+     * @throws OXException If setting part as content fails
      */
-    public MimeMailPart(final Part part) {
+    public MimeMailPart(final Part part) throws OXException {
         super();
         applyPart(part);
     }
@@ -239,14 +244,15 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * Sets this mail part's content.
      *
      * @param part The part
+     * @throws OXException If part cannot be applied to this MIME mail part
      */
-    public void setContent(final Part part) {
+    public void setContent(final Part part) throws OXException {
         applyPart(part);
     }
 
     private static final String MULTIPART = "multipart/";
 
-    private void applyPart(final Part part) {
+    private void applyPart(final Part part) throws OXException {
         this.part = part;
         if (null == part) {
             isMulti = false;
@@ -265,6 +271,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 tmp = getContentType().startsWith(MULTIPART);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
+            } catch (final MessageRemovedException e) {
+                // Message has been removed in the meantime
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
             } catch (final MessagingException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -380,12 +389,18 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             try {
                 // Try to read first byte and push back immediately
                 final PushbackInputStream in = new PushbackInputStream(part.getInputStream());
-                in.unread(in.read());
+                final int read = in.read();
+                if (read < 0) {
+                    return Streams.EMPTY_INPUT_STREAM;
+                }
+                in.unread(read);
                 return in;
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             } catch (final IOException e) {
                 return getRawInputStream(e);
+            } catch (final MessageRemovedException e) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             } catch (final MessagingException e) {
                 return getRawInputStream(e);
             } catch (final NullPointerException e) {
@@ -828,12 +843,25 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @param part Either a message or a body part
      * @return The stream of specified part's raw data (with the optional empty starting line omitted)
      * @throws IOException If an I/O error occurs
-     * @throws MessagingException If a messaging error occurs
      */
-    private static InputStream getStreamFromPart(final Part part) throws IOException, MessagingException {
-        final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
-        part.writeTo(out);
-        return stripEmptyStartingLine(Streams.asInputStream(out));
+    private static InputStream getStreamFromPart(final Part part) throws IOException {
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pin = new PipedInputStream(pos);
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    part.writeTo(pos);
+                } catch (final Exception e) {
+                    // Ignore
+                    LOG.warn("Error while writing part to stream", e);
+                } finally {
+                    Streams.close(pos);
+                }
+            }
+        }, "MimeMailPart.getStreamFromPart").start();
+        return stripEmptyStartingLine(pin);
     }
 
     /**
@@ -842,12 +870,25 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @param multipart A multipart object
      * @return The stream of specified multipart's raw data (with the optional empty starting line omitted)
      * @throws IOException If an I/O error occurs
-     * @throws MessagingException If a messaging error occurs
      */
-    private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException, MessagingException {
-        final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
-        multipart.writeTo(out);
-        return stripEmptyStartingLine(Streams.asInputStream(out));
+    private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException {
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pin = new PipedInputStream(pos);
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    multipart.writeTo(pos);
+                } catch (final Exception e) {
+                    // Ignore
+                    LOG.warn("Error while writing part to stream", e);
+                } finally {
+                    Streams.close(pos);
+                }
+            }
+        }, "MimeMailPart.getStreamFromMultipart").start();
+        return stripEmptyStartingLine(pin);
     }
 
     /**
@@ -952,7 +993,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                             /*
                              * If size is less than or equal to 1MB, use the in-memory implementation
                              */
-                            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size);
+                            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(size);
                             part.writeTo(out);
                             multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
                             this.multipart = multipart;

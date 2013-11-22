@@ -189,12 +189,20 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     }
 
     private void pushConnectionforContext(Connection con, int ctxId) {
-        try {
-            if (null != con) {
-                cache.pushConnectionForContext(ctxId, con);
+        pushConnectionforContext(con, ctxId, false);
+    }
+
+    private void pushConnectionforContext(Connection con, int ctxId, boolean afterReading) {
+        if (null != con) {
+            try {
+                if (afterReading) {
+                    cache.pushConnectionForContextAfterReading(ctxId, con);
+                } else {
+                    cache.pushConnectionForContext(ctxId, con);
+                }
+            } catch (PoolException e) {
+                log.error("Error pushing ox connection to pool!", e);
             }
-        } catch (PoolException e) {
-            log.error("Error pushing ox connection to pool!", e);
         }
     }
 
@@ -544,7 +552,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         try {
             return get(ctx, group, con);
         } finally {
-            pushConnectionforContext(con, i(ctx.getId()));
+            pushConnectionforContext(con, i(ctx.getId()), true);
         }
     }
 
@@ -573,7 +581,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             throw new StorageException(e.toString());
         } finally {
             closeSQLStuff(stmt);
-            pushConnectionforContext(con, i(ctx.getId()));
+            pushConnectionforContext(con, i(ctx.getId()), true);
         }
     }
 
@@ -595,7 +603,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             }
             return members;
         } finally {
-            pushConnectionforContext(con, ctxId);
+            pushConnectionforContext(con, ctxId, true);
         }
     }
 
@@ -637,7 +645,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } finally {
             closeSQLStuff(result);
             closeSQLStuff(stmt);
-            pushConnectionforContext(con, ctxId);
+            pushConnectionforContext(con, ctxId, true);
         }
     }
 

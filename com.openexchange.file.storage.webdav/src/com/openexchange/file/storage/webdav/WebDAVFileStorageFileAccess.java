@@ -376,7 +376,10 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, final String destFolder, final File update, final InputStream newFile, final List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFile, final List<Field> modifiedFields) throws OXException {
+        if (version != CURRENT_VERSION) {
+            throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
+        }
         try {
             final String fid = checkFolderId(source.getFolder(), rootUri);
             final String id = source.getId();

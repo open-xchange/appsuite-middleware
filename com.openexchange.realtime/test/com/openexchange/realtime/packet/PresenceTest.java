@@ -49,11 +49,8 @@
 
 package com.openexchange.realtime.packet;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -152,10 +149,6 @@ public class PresenceTest {
         awayPresence.setPriority((byte) -1);
         awayPresence.setState(PresenceState.DO_NOT_DISTURB);
         awayPresence.setMessage("Planning the future of the ox backend");
-        assertThat(awayPresence.getFrom(), is(not(copiedAwayPresence.getFrom())));
-        assertThat(awayPresence.getPriority(), is(not(copiedAwayPresence.getPriority())));
-        assertThat(awayPresence.getState(), is(not(copiedAwayPresence.getState())));
-        assertThat(awayPresence.getMessage(), is(not(copiedAwayPresence.getMessage())));
 
         assertEquals(fromID, copiedAwayPresence.getFrom());
         assertEquals(message, copiedAwayPresence.getMessage());

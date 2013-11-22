@@ -100,10 +100,10 @@ public final class Delete {
     private static final String SQL_GLOBAL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND folderId = ?";
 
     private static final String SQL_DELETE_INSERT =
-        "INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+        "INSERT INTO virtualBackupTree (cid, tree, user, folderId, parentId, lastModified, modifiedBy, shadow, sortNum) SELECT virtualTree.cid, virtualTree.tree, virtualTree.user, virtualTree.folderId, virtualTree.parentId, virtualTree.lastModified, virtualTree.modifiedBy, virtualTree.shadow, virtualTree.sortNum FROM virtualTree WHERE virtualTree.cid = ? AND virtualTree.tree = ? AND virtualTree.user = ? AND virtualTree.folderId = ?";
 
     private static final String SQL_GLOBAL_DELETE_INSERT =
-        "INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND folderId = ?";
+        "INSERT INTO virtualBackupTree (cid, tree, user, folderId, parentId, lastModified, modifiedBy, shadow, sortNum) SELECT virtualTree.cid, virtualTree.tree, virtualTree.user, virtualTree.folderId, virtualTree.parentId, virtualTree.lastModified, virtualTree.modifiedBy, virtualTree.shadow, virtualTree.sortNum FROM virtualTree WHERE virtualTree.cid = ? AND virtualTree.tree = ? AND virtualTree.folderId = ?";
 
     /**
      * Deletes specified folder.

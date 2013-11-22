@@ -65,31 +65,31 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     INVALID_PATH(DriveExceptionMessages.INVALID_PATH_MSG, Category.CATEGORY_USER_INPUT, 1),
 
     /** The directory path \"%1$s\" was not found */
-    PATH_NOT_FOUND(DriveExceptionMessages.PATH_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 2),
+    PATH_NOT_FOUND(DriveExceptionMessages.PATH_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 2),
 
     /** The file \"%1$s\" was not found at \"%2$s\" */
-    FILE_NOT_FOUND(DriveExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 3),
+    FILE_NOT_FOUND(DriveExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 3),
 
     /** An I/O error occurred: \"%1$s\" */
-    IO_ERROR(DriveExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 4),
+    IO_ERROR(DriveExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_CONNECTIVITY, 4),
 
     /** The file offset \"%1$d\" is invalid */
     INVALID_FILE_OFFSET(DriveExceptionMessages.INVALID_FILE_OFFSET_MSG, Category.CATEGORY_USER_INPUT, 5),
 
     /** Unexpected database error: \"%1$s\" */
-    DB_ERROR(DriveExceptionMessages.DB_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+    DB_ERROR(DriveExceptionMessages.DB_ERROR_MSG, Category.CATEGORY_WARNING, 6),
 
     /** The file \"%1$s\" with checksum \"%2$s\" was not found at \"%3$s\" */
-    FILEVERSION_NOT_FOUND(DriveExceptionMessages.FILEVERSION_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 7),
+    FILEVERSION_NOT_FOUND(DriveExceptionMessages.FILEVERSION_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 7),
 
     /** No checksum for file \"%1$s\" available */
-    NO_CHECKSUM_FOR_FILE(DriveExceptionMessages.NO_CHECKSUM_FOR_FILE_MSG, Category.CATEGORY_ERROR, 8),
+    NO_CHECKSUM_FOR_FILE(DriveExceptionMessages.NO_CHECKSUM_FOR_FILE_MSG, Category.CATEGORY_WARNING, 8),
 
     /** Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\" */
-    UPLOADED_FILE_CHECKSUM_ERROR(DriveExceptionMessages.UPLOADED_FILE_CHECKSUM_ERROR_MSG, Category.CATEGORY_ERROR, 9),
+    UPLOADED_FILE_CHECKSUM_ERROR(DriveExceptionMessages.UPLOADED_FILE_CHECKSUM_ERROR_MSG, Category.CATEGORY_USER_INPUT, 9),
 
     /** The directory \"%1$s\" with checksum \"%2$s\" was not found" */
-    DIRECTORYVERSION_NOT_FOUND(DriveExceptionMessages.DIRECTORYVERSION_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
+    DIRECTORYVERSION_NOT_FOUND(DriveExceptionMessages.DIRECTORYVERSION_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 10),
 
     /** You are not allowed to delete the file \"%1$s\" at \"%2$s\" */
     NO_DELETE_FILE_PERMISSION(DriveExceptionMessages.NO_DELETE_FILE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 11),
@@ -107,7 +107,7 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     NO_CREATE_DIRECTORY_PERMISSION(DriveExceptionMessages.NO_CREATE_DIRECTORY_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 15),
 
     /** The allowed Quota is reached */
-    QUOTA_REACHED(DriveExceptionMessages.QUOTA_REACHED_MSG, Category.CATEGORY_PERMISSION_DENIED, 16),
+    QUOTA_REACHED(DriveExceptionMessages.QUOTA_REACHED_MSG, Category.CATEGORY_CAPACITY, 16),
 
     /** The file name \"%1$s\" is invalid */
     INVALID_FILENAME(DriveExceptionMessages.INVALID_FILENAME_MSG, Category.CATEGORY_USER_INPUT, 17),
@@ -116,19 +116,31 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     IGNORED_FILENAME(DriveExceptionMessages.IGNORED_FILENAME_MSG, Category.CATEGORY_USER_INPUT, 18),
 
     /** The directory path \"%1$s\" is conflicting */
-    CONFLICTING_PATH(DriveExceptionMessages.CONFLICTING_PATH_MSG, Category.CATEGORY_USER_INPUT, 19),
+    CONFLICTING_PATH(DriveExceptionMessages.CONFLICTING_PATH_MSG, Category.CATEGORY_CONFLICT, 19),
 
     /** The file version \"%1$s\" with checksum \"%2$s\" is invalid */
-    INVALID_FILEVERSION(DriveExceptionMessages.INVALID_FILEVERSION_MSG, Category.CATEGORY_ERROR, 20),
+    INVALID_FILEVERSION(DriveExceptionMessages.INVALID_FILEVERSION_MSG, Category.CATEGORY_USER_INPUT, 20),
 
     /** The directory version \"%1$s\" with checksum \"%2$s\" is invalid */
-    INVALID_DIRECTORYVERSION(DriveExceptionMessages.INVALID_DIRECTORYVERSION_MSG, Category.CATEGORY_ERROR, 21),
+    INVALID_DIRECTORYVERSION(DriveExceptionMessages.INVALID_DIRECTORYVERSION_MSG, Category.CATEGORY_USER_INPUT, 21),
 
     /** Push via long polling is not available */
-    LONG_POLLING_NOT_AVAILABLE(DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG, Category.CATEGORY_ERROR, 22),
+    LONG_POLLING_NOT_AVAILABLE(DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 22),
 
     /** The server is too busy at the moment - please try again later */
     SERVER_BUSY(DriveExceptionMessages.SERVER_BUSY_MSG, Category.CATEGORY_TRY_AGAIN, 23),
+
+    /** The directory path \"%1$s\" is ignored */
+    IGNORED_PATH(DriveExceptionMessages.IGNORED_PATH_MSG, Category.CATEGORY_USER_INPUT, 24),
+
+    /** The file name \"%1$s\" is conflicting */
+    CONFLICTING_FILENAME(DriveExceptionMessages.CONFLICTING_FILENAME_MSG, Category.CATEGORY_CONFLICT, 25),
+
+    /** The directory \"%1$s\" with checksum \"%2$s\" caused repeated synchronization problems */
+    REPEATED_SYNC_PROBLEMS_MSG(DriveExceptionMessages.REPEATED_SYNC_PROBLEMS_MSG, Category.CATEGORY_WARNING, 26),
+
+    /** The client application you're using is outdated and no longer supported - please upgrade to a newer version */
+    CLIENT_OUTDATED(DriveExceptionMessages.CLIENT_OUTDATED_MSG, Category.CATEGORY_WARNING, 27),
 
     ;
 

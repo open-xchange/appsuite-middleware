@@ -52,9 +52,11 @@ package com.openexchange.ajax.contact;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.http.HttpResponse;
@@ -74,6 +76,7 @@ import com.openexchange.ajax.contact.action.ListRequest;
 import com.openexchange.ajax.contact.action.SearchRequest;
 import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.contact.action.UpdateRequest;
+import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
@@ -81,9 +84,13 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.framework.MultipleRequest;
+import com.openexchange.ajax.framework.MultipleResponse;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -642,6 +649,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             inputStream = httpResponse.getEntity().getContent();
             final int len = 8192;
             final byte[] buf = new byte[len];
+            @SuppressWarnings("resource") //Closing a ByteArrayOutputStream has no effect
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
             for (int read; (read = inputStream.read(buf, 0, len)) > 0;) {
                 out.write(buf, 0, read);
@@ -656,14 +664,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
                 }
             }
         }
-    }
-
-    public Contact[] listModifiedAppointment(final int inFolder, final Date modified) throws Exception {
-        final int[] cols = new int[]{ Appointment.OBJECT_ID };
-        final UpdatesRequest request = new UpdatesRequest(inFolder, cols, 0, null, modified);
-        final ContactUpdatesResponse response = client.execute(request);
-
-        return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
 
     protected Contact[] jsonArray2ContactArray(final JSONArray jsonArray, final int[] cols) throws Exception {
@@ -1322,6 +1322,66 @@ public class AbstractContactTest extends AbstractAJAXSession {
         sb.append("E" + entry.getEmailaddress());
 
         return sb.toString();
+    }
+    
+    public ContactUpdatesResponse listModifiedContacts(final int inFolder, int[] cols, final Date modified, Ignore ignore) throws Exception {
+        final UpdatesRequest request = new UpdatesRequest(inFolder, cols, 0, null, modified, ignore);
+        final ContactUpdatesResponse response = client.execute(request);
+        return response;
+    }
+    
+    public void updateContacts(Contact... contacts) {
+        int numContacts = contacts.length;
+        UpdateRequest[] updateRequests = new UpdateRequest[numContacts];
+        for (int i = 0; i < numContacts; i++) {
+            Contact contact = contacts[i];
+            contact.setDisplayName(contact.getDisplayName() + " was updated");
+            updateRequests[i] = new UpdateRequest(contact);
+        }
+        MultipleRequest<UpdateResponse> multipleUpdate = MultipleRequest.create(updateRequests);
+        MultipleResponse<UpdateResponse> multipleResponse = client.executeSafe(multipleUpdate);
+        for(int i = 0; i < numContacts; i++) {
+            contacts[i].setLastModified(multipleResponse.getResponse(i).getTimestamp());
+        }
+    }
+
+    public void deleteContacts(Contact... contacts) {
+        int numContacts = contacts.length;
+        DeleteRequest[] deleteRequests = new DeleteRequest[numContacts];
+        for (int i = 0; i < numContacts; i++) {
+            Contact contact = contacts[i];
+            deleteRequests[i] = new DeleteRequest(contact);
+        }
+        MultipleRequest<CommonDeleteResponse> multipleDelete = MultipleRequest.create(deleteRequests);
+        client.executeSafe(multipleDelete);
+    }
+
+    public MultipleResponse<InsertResponse> createMultipleInsertRequest(Contact[] newContacts) throws Exception {
+        int numberOfContacts = newContacts.length;
+        List<InsertRequest> insertContactRequests = new ArrayList<InsertRequest>(numberOfContacts);
+        for (Contact contact : newContacts) {
+            insertContactRequests.add(new InsertRequest(contact));
+        }
+        MultipleRequest<InsertResponse> multipleRequest = MultipleRequest.create(insertContactRequests.toArray(new InsertRequest[numberOfContacts]));
+        MultipleResponse<InsertResponse> multipleResponse = client.execute(multipleRequest);
+        return multipleResponse;
+    }
+
+    public Contact[] createSeveralContacts(String givenName, String surName, int numberOfContacts) {
+        Contact[] contacts = new Contact[numberOfContacts];
+        for (int i = 0; i < numberOfContacts; i++) {
+            contacts[i]=createOneMinimalContact(givenName, surName, givenName + "_" + surName + "_" + i);
+        }
+        return contacts;
+    }
+
+    public Contact createOneMinimalContact(String givenName, String surName, String displayName) {
+        Contact newContact = new Contact();
+        newContact.setGivenName(givenName);
+        newContact.setSurName(surName);
+        newContact.setDisplayName(displayName);
+        newContact.setParentFolderID(contactFolderId);
+        return newContact;
     }
 
 }

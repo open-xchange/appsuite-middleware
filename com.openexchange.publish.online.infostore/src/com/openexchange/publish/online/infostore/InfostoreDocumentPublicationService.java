@@ -60,12 +60,14 @@ import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
+import com.openexchange.publish.online.infostore.util.InfostorePublicationUtils;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -83,6 +85,12 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     private static final String URL = "url";
 
     private final Random random = new Random();
+
+    private volatile IDBasedFileAccessFactory fileAccessFactory;
+
+    public InfostoreDocumentPublicationService(IDBasedFileAccessFactory fileAccessFactory) {
+        this.fileAccessFactory = fileAccessFactory;
+    }
 
     private PublicationTarget buildTarget() {
         PublicationTarget target = new PublicationTarget();
@@ -143,9 +151,9 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
 
         if (null != publication.getEntityId()) {
             // Valid entity identifier needed in order to load associated document's meta-data
-            DocumentMetadata metadata = InfostorePublicationServlet.loadDocumentMetadata(publication);
+            DocumentMetadata metadata = InfostorePublicationUtils.loadDocumentMetadata(publication, this.fileAccessFactory);
             publication.setDisplayName((metadata.getTitle() == null) ? metadata.getFileName() : metadata.getTitle());
-            publication.setEntityId(IDMangler.mangle(metadata.getId() + "", metadata.getFolderId() + ""));            
+            publication.setEntityId(IDMangler.mangle(metadata.getId() + "", metadata.getFolderId() + ""));
         }
     }
 
@@ -173,14 +181,14 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         String re4="(\\d+)";    // Integer Number 1
         String re5="(\\/)"; // Any Single Character 3
         String re6="((?:[a-z][a-z]+))"; // Word 3
-        
+
         Pattern p = Pattern.compile(re1+re2+re3+re4+re5+re6,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher m = p.matcher(URL);
         if (m.find())
         {
             String contextId=m.group(3);
             String secret=m.group(5);
-            
+
             final Context ctx = service.getContext(Integer.parseInt(contextId));
             return getPublication(ctx, secret);
         }

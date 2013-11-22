@@ -110,7 +110,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -1475,38 +1474,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return isWhitespace;
     }
 
-    private static String saneForFileName(final String fileName) {
-        if (isEmpty(fileName)) {
-            return fileName;
-        }
-        final int len = fileName.length();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
-        char prev = '\0';
-        for (int i = 0; i < len; i++) {
-            final char c = fileName.charAt(i);
-            if (Strings.isWhitespace(c)) {
-                if (prev != '_') {
-                    prev = '_';
-                    sb.append(prev);
-                }
-            } else if ('/' == c) {
-                if (prev != '_') {
-                    prev = '_';
-                    sb.append(prev);
-                }
-            } else if ('\\' == c) {
-                if (prev != '_') {
-                    prev = '_';
-                    sb.append(prev);
-                }
-            } else {
-                prev = '\0';
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-
     @Override
     public ManagedFile getMessageAttachments(final String folder, final String msgUID, final String[] attachmentPositions) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
@@ -1797,7 +1764,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Proceed
          */
-        if ((mails == null) || (mails.length == 0)) {
+        if ((mails == null) || (mails.length == 0) || onlyNull(mails)) {
             return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
         final boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
@@ -1818,19 +1785,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          *  AND
          * Messages do not already contain requested fields although only IDs were requested
          */
-        if (!onlyFolderAndID && !containsAll(mails[0], useFields)) {
+        if (!onlyFolderAndID && !containsAll(firstNotNull(mails), useFields)) {
             /*
              * Extract IDs
              */
             final String[] mailIds = new String[mails.length];
             for (int i = 0; i < mailIds.length; i++) {
-                mailIds[i] = mails[i].getMailId();
+                final MailMessage m = mails[i];
+                if (null != m) {
+                    mailIds[i] = m.getMailId();
+                }
             }
             /*
              * Fetch identified messages by their IDs and pre-fill them according to specified fields
              */
             mails = mailAccess.getMessageStorage().getMessages(fullName, mailIds, useFields);
-            if (null == mails) {
+            if ((mails == null) || (mails.length == 0) || onlyNull(mails)) {
                 return SearchIteratorAdapter.emptyIterator();
             }
         }
@@ -1869,7 +1839,28 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return new SearchIteratorDelegator<MailMessage>(l);
     }
 
+    private static boolean onlyNull(final MailMessage[] mails) {
+        boolean ret = true;
+        for (int i = mails.length; ret && i-- > 0;) {
+            ret = (null == mails[i]);
+        }
+        return ret;
+    }
+
+    private static MailMessage firstNotNull(final MailMessage[] mails) {
+        for (int i = mails.length; i-- > 0;) {
+            final MailMessage m = mails[i];
+            if (null != m) {
+                return m;
+            }
+        }
+        return null;
+    }
+
     private static boolean containsAll(final MailMessage candidate, final MailField[] fields) {
+        if (null == candidate) {
+            return false;
+        }
         boolean contained = true;
         final int length = fields.length;
         for (int i = 0; contained && i < length; i++) {

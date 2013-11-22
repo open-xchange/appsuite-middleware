@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange message-based push bundle
 Bundle-SymbolicName: com.openexchange.push.ms
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.context,
+ com.openexchange.crypto,
  com.openexchange.event,
  com.openexchange.exception,
  com.openexchange.folder,
@@ -20,6 +21,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.ms,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.session,
  com.openexchange.timer,
  com.openexchange.tools,
  javax.management,

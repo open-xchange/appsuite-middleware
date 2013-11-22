@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Calendar Module
 Bundle-SymbolicName: com.openexchange.calendar
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Activator: com.openexchange.calendar.osgi.CalendarActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -115,7 +115,7 @@ Import-Package: cern.colt,
  gnu.trove.stack,
  gnu.trove.stack.array,
  gnu.trove.strategy,
- javax.activation,
+ javax.activation;version="1.1.0",
  javax.mail,
  javax.mail.internet,
  javax.mail.internet.idn,

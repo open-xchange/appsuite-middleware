@@ -182,6 +182,15 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @param con Writable connection to return.
      */
     void backForUpdateTask(int contextId, Connection con);
+    
+    /**
+     * Returns a writable connection to the database of the context with the specified identifier to the pool. It should be used to return
+     * a writable connection if it was only used for reading information from the master database server. This method must be used if
+     * the connection is obtained with {@link #getForUpdateTask(int)}.
+     * @param contextId identifier of the context.
+     * @param con Writable connection to return.
+     */
+    void backForUpdateTaskAfterReading(int contextId, Connection con);
 
     /**
      * This method is for moving contexts only.

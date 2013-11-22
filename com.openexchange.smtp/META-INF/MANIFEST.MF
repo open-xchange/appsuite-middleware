@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SMTP
 Bundle-SymbolicName: com.openexchange.smtp
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.api2,
@@ -52,7 +52,7 @@ Import-Package: com.openexchange.ajax.container,
  gnu.trove,
  gnu.trove.map,
  gnu.trove.map.hash,
- javax.activation,
+ javax.activation;version="1.1.0",
  javax.mail,
  javax.mail.event,
  javax.mail.internet,

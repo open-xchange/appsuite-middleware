@@ -56,14 +56,13 @@ import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.checksum.ChecksumStore;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -252,7 +251,7 @@ public class TempCleaner implements Runnable {
                     checksumStore.removeFileChecksumsInFolder(id);
                     checksumStore.removeDirectoryChecksum(id);
                 }
-            } else {
+            } else if (0 < foldersToDelete.size() || 0 < filesToDelete.size()) {
                 /*
                  * cleanup selected files and folders, invalidate checksums
                  */
@@ -266,24 +265,20 @@ public class TempCleaner implements Runnable {
                     checksumStore.removeFileChecksumsInFolder(id);
                     checksumStore.removeDirectoryChecksum(id);
                 }
-                List<String> ids = new ArrayList<String>();
-                long sequenceNumber = 0;
-                for (File file : filesToDelete) {
-                    ids.add(file.getId());
-                    sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
-                }
-                List<String> notDeleted = fileAccess.removeDocument(ids, sequenceNumber);
-                for (File file : filesToDelete) {
-                    if (null != notDeleted && notDeleted.contains(file.getId())) {
-                        continue;
+                if (0 < filesToDelete.size()) {
+                    List<String> ids = new ArrayList<String>(filesToDelete.size());
+                    long sequenceNumber = 0;
+                    for (File file : filesToDelete) {
+                        ids.add(file.getId());
+                        sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
                     }
-                    FileID fileID = new FileID(file.getId());
-                    FolderID folderID = new FolderID(file.getFolderId());
-                    if (null == fileID.getFolderId()) {
-                        // TODO: check
-                        fileID.setFolderId(folderID.getFolderId());
+                    List<String> notDeleted = fileAccess.removeDocument(ids, sequenceNumber);
+                    for (File file : filesToDelete) {
+                        if (null != notDeleted && notDeleted.contains(file.getId())) {
+                            continue;
+                        }
+                        checksumStore.removeFileChecksums(IDUtil.getFileID(file));
                     }
-                    checksumStore.removeFileChecksums(fileID);
                 }
             }
         } catch (Throwable t) {

@@ -92,12 +92,10 @@ public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    private static final String[] DEPENDENCIES = {
-        GlobalAddressBookPermissionsResolverTask.class.getName(), MailAccountAddReplyToTask.class.getName() };
-
     @Override
     public String[] getDependencies() {
-        return DEPENDENCIES;
+        return new String[] {
+            GlobalAddressBookPermissionsResolverTask.class.getName(), MailAccountAddReplyToTask.class.getName() };
     }
 
     @Override

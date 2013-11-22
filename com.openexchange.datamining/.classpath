@@ -3,7 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="lib/junit-4.6.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/lib/junit-4.11.jar" sourcepath="/com.openexchange.test/lib/src/junit-4.11-source.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.cli_1.2.0.v201105210650.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>

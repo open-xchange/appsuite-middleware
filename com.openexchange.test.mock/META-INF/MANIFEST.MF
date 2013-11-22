@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open Xchange Mocking framework
+Bundle-SymbolicName: com.openexchange.test.mock
+Bundle-Version: 7.4.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .,
+ lib/mockito-all-1.9.5.jar,
+ lib/powermock-mockito-1.5-full.jar
+Import-Package: 
+ com.hazelcast.config,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.caching,
+ com.openexchange.capabilities,
+ com.openexchange.config,
+ com.openexchange.context,
+ com.openexchange.exception,
+ com.openexchange.hazelcast.configuration,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.lang.builder,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker

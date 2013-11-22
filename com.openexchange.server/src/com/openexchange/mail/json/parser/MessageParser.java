@@ -94,6 +94,7 @@ import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -139,6 +140,10 @@ public final class MessageParser {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageParser.class));
 
+    private static final String CONTENT_TYPE = MailJSONField.CONTENT_TYPE.getKey();
+    private static final String CONTENT = MailJSONField.CONTENT.getKey();
+    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
+
     /**
      * No instantiation
      */
@@ -162,6 +167,7 @@ public final class MessageParser {
      * @param session The session
      * @param accountId The account ID
      * @param warnings
+     * @param monitor The monitor
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
@@ -179,6 +185,7 @@ public final class MessageParser {
      * @param accountId The account ID
      * @param protocol The server's protocol
      * @param warnings
+     * @param monitor The monitor
      * @param hostname The server's host name
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
@@ -200,6 +207,7 @@ public final class MessageParser {
      * @param prepare4Transport <code>true</code> to parse with the intention to transport returned mail later on; otherwise
      *            <code>false</code>
      * @param warnings
+     * @param monitor The monitor
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
@@ -401,27 +409,29 @@ public final class MessageParser {
              */
             if (mail instanceof ComposedMailMessage) {
                 final ComposedMailMessage transportMail = (ComposedMailMessage) mail;
-                if (jsonObj.hasAndNotNull(MailJSONField.ATTACHMENTS.getKey())) {
-                    final JSONArray attachmentArray = jsonObj.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+                final JSONArray attachmentArray = jsonObj.optJSONArray(ATTACHMENTS);
+                if (null != attachmentArray) {
                     /*
-                     * Parse body text
+                     * Parse body text (the first array element)
                      */
-                    final JSONObject tmp = attachmentArray.getJSONObject(0);
-                    final String sContent = tmp.getString(MailJSONField.CONTENT.getKey());
-                    final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
-                    final String contentType = parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey()));
-                    part.setContentType(contentType);
-                    if (contentType.startsWith("text/plain") && tmp.hasAndNotNull("raw") && tmp.getBoolean("raw")) {
-                        part.setPlainText(sContent);
+                    final String sContent;
+                    {
+                        final JSONObject tmp = attachmentArray.getJSONObject(0);
+                        sContent = tmp.getString(CONTENT);
+                        final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
+                        final String contentType = parseContentType(tmp.getString(CONTENT_TYPE));
+                        part.setContentType(contentType);
+                        if (contentType.startsWith("text/plain") && tmp.hasAndNotNull("raw") && tmp.getBoolean("raw")) {
+                            part.setPlainText(sContent);
+                        }
+                        transportMail.setContentType(part.getContentType());
+                        // Add text part
+                        attachmentHandler.setTextPart(part);
                     }
-                    transportMail.setContentType(part.getContentType());
-                    // Add text part
-                    attachmentHandler.setTextPart(part);
                     /*
                      * Parse referenced parts
                      */
-                    final int len = attachmentArray.length();
-                    if (len > 1) {
+                    if (attachmentArray.length() > 1) {
                         final Set<String> contentIds = extractContentIds(sContent);
                         parseReferencedParts(provider, session, accountId, transportMail.getMsgref(), attachmentHandler, attachmentArray, contentIds, prepare4Transport);
                     }
@@ -658,13 +668,12 @@ public final class MessageParser {
             ManagedFileManagement management = null;
             NextAttachment: for (int i = 1; i < len; i++) {
                 final JSONObject attachment = attachmentArray.getJSONObject(i);
-                final String seqId =
-                    attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
-                if (null == seqId && attachment.hasAndNotNull(MailJSONField.CONTENT.getKey())) {
+                final String seqId = attachment.optString(MailListField.ID.getKey(), null);
+                if (null == seqId && attachment.hasAndNotNull(CONTENT)) {
                     /*
                      * A direct attachment, as data part
                      */
-                    final String contentType = parseContentType(attachment.getString(MailJSONField.CONTENT_TYPE.getKey()));
+                    final String contentType = parseContentType(attachment.getString(CONTENT_TYPE));
                     final String charsetName = "UTF-8";
                     final byte[] content;
                     try {
@@ -674,10 +683,10 @@ public final class MessageParser {
                          */
                         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         if (MimeTypes.MIME_TEXT_PLAIN.equals(contentType)) {
-                            content = htmlService.html2text(attachment.getString(MailJSONField.CONTENT.getKey()), true).getBytes(charsetName);
+                            content = htmlService.html2text(attachment.getString(CONTENT), true).getBytes(charsetName);
                         } else {
                             final String conformHTML =
-                                htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "ISO-8859-1");
+                                htmlService.getConformHTML(attachment.getString(CONTENT), "ISO-8859-1");
                             content = conformHTML.getBytes(charsetName);
                         }
 
@@ -933,7 +942,7 @@ public final class MessageParser {
      */
     public static InternetAddress[] parseAddressKey(final String key, final JSONObject jo, final boolean failOnError) throws JSONException, AddressException {
         String value = null;
-        if (!jo.has(key) || jo.isNull(key) || (value = jo.getString(key)).length() == 0) {
+        if (!jo.has(key) || jo.isNull(key) || Strings.isEmpty( (value = jo.getString(key)) )) {
             return EMPTY_ADDRS;
         }
         if (value.charAt(0) == '[') {

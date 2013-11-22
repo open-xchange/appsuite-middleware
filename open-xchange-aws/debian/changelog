@@ -1,3 +1,15 @@
+open-xchange-aws (7.4.1-1) stable; urgency=low
+
+  * First sprint increment for 7.4.0 release
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Thu, 10 Oct 2013 17:23:05 +0200
+
+open-xchange-aws (7.4.1-0) unstable; urgency=low
+
+  * prepare for 7.4.1
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Mon, 07 Oct 2013 11:14:50 +0200
+
 open-xchange-aws (7.4.0-0) unstable; urgency=low
 
   * prepare for 7.4.0

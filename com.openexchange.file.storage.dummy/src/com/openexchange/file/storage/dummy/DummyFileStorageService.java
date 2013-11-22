@@ -52,11 +52,9 @@ package com.openexchange.file.storage.dummy;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
@@ -77,9 +75,9 @@ import com.openexchange.session.Session;
  */
 public class DummyFileStorageService implements FileStorageService, FileStorageServiceFactory {
     
-    private ServiceLookup services;
+    private final ServiceLookup services;
     
-    private ConcurrentHashMap<String, DummyFileStorageFileAccess> fileAccesses = new ConcurrentHashMap<String, DummyFileStorageFileAccess>();
+    private final ConcurrentHashMap<String, DummyFileStorageFileAccess> fileAccesses = new ConcurrentHashMap<String, DummyFileStorageFileAccess>();
 
     public DummyFileStorageService(ServiceLookup services) {
         this.services = services;

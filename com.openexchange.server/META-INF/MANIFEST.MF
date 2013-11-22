@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.damienmiller,
@@ -10,6 +10,7 @@ Import-Package: com.damienmiller,
  com.google.common.annotations,
  com.google.common.base,
  com.google.common.base.internal,
+ com.google.common.cache,
  com.google.common.collect,
  com.google.common.io,
  com.google.common.net,
@@ -17,6 +18,7 @@ Import-Package: com.damienmiller,
  com.google.common.util.concurrent,
  com.googlecode.concurrentlinkedhashmap,
  com.javacodegeeks.concurrent,
+ com.openexchange.annotation,
  com.openexchange.authentication,
  com.openexchange.cache,
  com.openexchange.cache.dynamic,
@@ -123,7 +125,7 @@ Import-Package: com.damienmiller,
  gnu.trove.set,
  gnu.trove.set.hash,
  it.geosolutions.imageio.stream.eraf,
- javax.activation,
+ javax.activation;version="1.1.0",
  javax.annotation,
  javax.annotation.concurrent,
  javax.annotation.meta,

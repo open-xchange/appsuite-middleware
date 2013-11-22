@@ -90,9 +90,9 @@ public class PipesAndFiltersRegisterer implements ServiceTrackerCustomizer<Threa
 
     @Override
     public void removedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
-        final ServiceRegistration<PipesAndFiltersService> registration = this.registration;
-        if (null != registration) {
-            registration.unregister();
+        final ServiceRegistration<PipesAndFiltersService> unregister = this.registration;
+        if (null != unregister) {
+            unregister.unregister();
             this.registration = null;
         }
         context.ungetService(reference);

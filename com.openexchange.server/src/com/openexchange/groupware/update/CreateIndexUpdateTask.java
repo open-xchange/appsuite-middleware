@@ -76,12 +76,6 @@ public abstract class CreateIndexUpdateTask extends UpdateTaskAdapter {
     }
 
     @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BACKGROUND);
-    }
-
-
-    @Override
     public void perform(PerformParameters params) throws OXException {
     	int contextId = params.getContextId();
     	Connection con = null;

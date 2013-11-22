@@ -157,28 +157,37 @@ public class HazelcastResource extends AbstractResource implements Resource {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof HazelcastResource))
+        }
+        if (!(obj instanceof HazelcastResource)) {
             return false;
+        }
         HazelcastResource other = (HazelcastResource) obj;
         if (presence == null) {
-            if (other.presence != null)
+            if (other.presence != null) {
                 return false;
-        } else if (!presence.equals(other.presence))
+            }
+        } else if (!presence.equals(other.presence)) {
             return false;
+        }
         if (routingInfo == null) {
-            if (other.routingInfo != null)
+            if (other.routingInfo != null) {
                 return false;
-        } else if (!routingInfo.equals(other.routingInfo))
+            }
+        } else if (!routingInfo.equals(other.routingInfo)) {
             return false;
+        }
         if (timestamp == null) {
-            if (other.timestamp != null)
+            if (other.timestamp != null) {
                 return false;
-        } else if (!timestamp.equals(other.timestamp))
+            }
+        } else if (!timestamp.equals(other.timestamp)) {
             return false;
+        }
         return true;
     }
 

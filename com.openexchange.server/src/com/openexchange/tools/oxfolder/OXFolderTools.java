@@ -63,10 +63,10 @@ import java.util.List;
 import java.util.Locale;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -89,6 +89,7 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * OXFolderTools
@@ -1495,13 +1496,13 @@ public class OXFolderTools {
      */
     public static boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session, final Connection readCon) throws OXException {
         final int userId = session.getUserId();
-        final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-        final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
+        final Context ctx = ContextStorage.getStorageContext(session);
+        final UserPermissionBits permissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
         try {
             /*
              * Check user permission on folder
              */
-            final OCLPermission oclPerm = fo.getEffectiveUserPermission(userId, userConfig, readCon);
+            final OCLPermission oclPerm = fo.getEffectiveUserPermission(userId, permissionBits, readCon);
             if (!oclPerm.isFolderVisible()) {
                 /*
                  * Folder is not visible to user
@@ -1525,7 +1526,8 @@ public class OXFolderTools {
                     final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
                 case FolderObject.CONTACT:
-                    return !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session);
+                    ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                    return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));
                 case FolderObject.PROJECT:
                     // TODO:
                     break;
@@ -1533,9 +1535,7 @@ public class OXFolderTools {
                     final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
                     return !db.hasFolderForeignObjects(
                         fo.getObjectID(),
-                        ctx,
-                        UserStorage.getStorageUser(session.getUserId(), ctx),
-                        userConfig);
+                        ServerSessionAdapter.valueOf(session, ctx));
                 default:
                     throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
                         Integer.valueOf(ctx.getContextId()));
@@ -1552,7 +1552,8 @@ public class OXFolderTools {
                     final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return calSql.isFolderEmpty(userId, fo.getObjectID());
                 case FolderObject.CONTACT:
-                    return !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx);
+                    ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                    return contactService.isFolderEmpty(session, String.valueOf(fo.getObjectID()));
                 case FolderObject.PROJECT:
                     break;
                 case FolderObject.INFOSTORE:

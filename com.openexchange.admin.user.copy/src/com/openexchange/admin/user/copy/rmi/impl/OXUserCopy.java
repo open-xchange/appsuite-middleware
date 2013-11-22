@@ -140,12 +140,22 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             newUserId = service.copyUser(i(src.getId()), i(dest.getId()), i(user.getId()));
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            throw new StorageException(e.getMessage(), e);
+            final StorageException storageException = new StorageException(e.getMessage());
+            setStackTraceSafe(storageException, e);
+            throw new StorageException(e.getMessage());
         }
 
         LOG.info("User " + user.getId() + " successfully copied to Context " + dest.getId() + " from Context " + src.getId());
 
         return new User(newUserId);
+    }
+
+    private void setStackTraceSafe(final Exception dest, final Exception src) {
+        try {
+            dest.setStackTrace(src.getStackTrace());
+        } catch (final Exception x) {
+            // Ignore
+        }
     }
 
     private final void contextcheck(final Context ctx, final String type) throws InvalidDataException {

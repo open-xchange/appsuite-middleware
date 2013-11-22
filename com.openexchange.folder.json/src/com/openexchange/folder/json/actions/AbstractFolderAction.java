@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -111,6 +112,25 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * @throws JSONException If a JSON error occurs
      */
     protected abstract AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException;
+
+    /**
+     * Checks if <i>Unified Mail</i> shall be suppressed for specified request.
+     *
+     * @param request The request data
+     * @param session The associated session
+     * @return <code>true</code> to suppress <i>Unified Mail</i>; otherwise <code>false</code>
+     */
+    protected static Boolean isSuppressUnifiedMail(final AJAXRequestData request, final ServerSession session) {
+        return Boolean.valueOf(isUsmEas(session.getClient()));
+    }
+
+    private static boolean isUsmEas(final String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
+        }
+        final String uc = Strings.toUpperCase(clientId);
+        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
+    }
 
     /**
      * Gets the default tree identifier to use if request does not provide any.

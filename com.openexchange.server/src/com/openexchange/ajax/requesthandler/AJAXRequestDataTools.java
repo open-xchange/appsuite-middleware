@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -67,6 +68,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.java.UnsynchronizedStringReader;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -77,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestDataTools {
+    
+    private static final Log LOG = LogFactory.getLog(AJAXRequestDataTools.class);
 
     private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
 
@@ -231,6 +235,8 @@ public class AJAXRequestDataTools {
                         retval.setData(AJAXServlet.readFrom(reader));
                     }
                 }
+            } catch (IOException x) {
+                LOG.debug(x.getMessage(), x);
             } finally {
                 Streams.close(reader);
             }
@@ -307,6 +313,25 @@ public class AJAXRequestDataTools {
      */
     public static boolean parseBoolParameter(final String name, final AJAXRequestData requestData) {
         return parseBoolParameter(requestData.getParameter(name));
+    }
+
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified request data.
+     * <p>
+     * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
+     * "1".
+     *
+     * @param name The parameter's name
+     * @param requestData The request data to parse from
+     * @param defaultValue The default value to return if parameter is absent
+     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     */
+    public static boolean parseBoolParameter(final String name, final AJAXRequestData requestData, final boolean defaultValue) {
+        final String value = requestData.getParameter(name);
+        if (null == value) {
+            return defaultValue;
+        }
+        return parseBoolParameter(value);
     }
 
     private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(

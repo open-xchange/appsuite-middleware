@@ -50,6 +50,7 @@
 package com.openexchange.calendar.printing;
 
 import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -63,6 +64,7 @@ public class CPTypeTest extends TestCase {
             CPType.getByTemplateName(template));
     }
 
+    @Test
     public void testShouldFindCorrectTypeByTemplateName() {
         CPType evil = CPType.WORKWEEKVIEW;
         for (CPType type : CPType.values()) {
@@ -78,6 +80,7 @@ public class CPTypeTest extends TestCase {
         }
     }
 
+    @Test
     public void testShouldReturnNullOnFailure() {
         checkType("", null);
         checkType("666/template.tmpl", null);

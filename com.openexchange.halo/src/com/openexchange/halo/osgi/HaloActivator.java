@@ -54,6 +54,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.contacts.ContactDataSource;
 import com.openexchange.halo.internal.ContactHaloImpl;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -73,8 +74,10 @@ public class HaloActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final ContactHaloImpl halo = new ContactHaloImpl(this);
 
-        halo.addContactDataSource(new ContactDataSource());
-
+        ContactDataSource cds = new ContactDataSource(this);
+        halo.addContactDataSource(cds);
+        halo.addContactImageSource(cds);
+        
         registerService(ContactHalo.class, halo);
 
         track(HaloContactDataSource.class, new SimpleRegistryListener<HaloContactDataSource>() {
@@ -89,6 +92,19 @@ public class HaloActivator extends HousekeepingActivator {
                 halo.removeContactDataSource(service);
             }
 
+        });
+        
+        track(HaloContactImageSource.class, new SimpleRegistryListener<HaloContactImageSource>() {
+
+            @Override
+            public void added(ServiceReference<HaloContactImageSource> ref, HaloContactImageSource service) {
+                halo.addContactImageSource(service);
+            }
+
+            @Override
+            public void removed(ServiceReference<HaloContactImageSource> ref, HaloContactImageSource service) {
+                halo.addContactImageSource(service);
+            }
         });
 
         openTrackers();

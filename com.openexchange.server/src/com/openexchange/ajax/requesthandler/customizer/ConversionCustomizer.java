@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
@@ -82,6 +83,9 @@ public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCus
         final String requestedFormat = requestData.getFormat();
         final String currentFormat = result.getFormat();
         if (currentFormat.equals(requestedFormat)) {
+            return result;
+        }
+        if (result.getType() == ResultType.NOT_FOUND) {
             return result;
         }
         converter.convert(currentFormat, requestedFormat, requestData, result, session);

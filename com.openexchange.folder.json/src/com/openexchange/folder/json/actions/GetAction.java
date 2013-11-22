@@ -112,16 +112,17 @@ public final class GetAction extends AbstractFolderAction {
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        // System.out.println("TOPMOST: " + folderId);
         final UserizedFolder folder =
             folderService.getFolder(
                 treeId,
                 folderId,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, null);
+        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         /*
          * Return appropriate result
          */

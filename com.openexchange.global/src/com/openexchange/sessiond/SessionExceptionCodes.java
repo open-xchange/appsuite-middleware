@@ -83,7 +83,7 @@ public enum SessionExceptionCodes implements OXExceptionCode {
     /** Password could not be changed */
     PASSWORD_UPDATE_FAILED(PASSWORD_UPDATE_FAILED_MSG, Category.CATEGORY_ERROR, 6),
     /** Max. number of sessions exceeded for user %1$s in context %2$s */
-    MAX_SESSION_PER_USER_EXCEPTION(MAX_SESSION_PER_USER_EXCEPTION_MSG, Category.CATEGORY_ERROR, 7),
+    MAX_SESSION_PER_USER_EXCEPTION(MAX_SESSION_PER_USER_EXCEPTION_MSG, Category.CATEGORY_USER_INPUT, 7),
     /** Authentication identifier duplicate found. Existing session login: %1$s. Current denied login request: %2$s. */
     DUPLICATE_AUTHID(DUPLICATE_AUTHID_MSG, Category.CATEGORY_ERROR, 8),
     /** SessionD returned wrong session with identifier %1$s for given session identifier %2$s. */

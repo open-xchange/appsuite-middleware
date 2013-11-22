@@ -49,11 +49,9 @@
 
 package com.openexchange.report.appsuite.defaultHandlers;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
@@ -213,7 +211,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 savedCounts.put("admin", 0l);
                 savedCounts.put("disabled", 0l);
                 savedCounts.put("total", 0l);
-                savedCounts.put("capabilities", (ArrayList) contextReport.get("macdetail-lists", entry.getKey(), ArrayList.class)); 
+                savedCounts.put("capabilities", contextReport.get("macdetail-lists", entry.getKey(), ArrayList.class)); 
                 savedCounts.put("quota", quota);
             }
             // And add our counts to it

@@ -52,7 +52,7 @@ package com.openexchange.ajax.session;
 import java.util.Arrays;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpState;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 
 /**
  * {@link AutologinTest}
@@ -117,7 +117,7 @@ public class AutologinTest extends AbstractLoginTest {
         Cookie[] cookies = state.getCookies();
         boolean replaced = false;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().startsWith(Login.SESSION_PREFIX)) {
+            if (cookie.getName().startsWith(LoginServlet.SESSION_PREFIX)) {
                 cookie.setValue("1234567");
                 state.addCookie(cookie);
                 replaced = true;
@@ -146,7 +146,7 @@ public class AutologinTest extends AbstractLoginTest {
         Cookie[] cookies = state.getCookies();
         boolean replaced = false;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().startsWith(Login.SESSION_PREFIX)) {
+            if (cookie.getName().startsWith(LoginServlet.SESSION_PREFIX)) {
                 cookie.setValue(sessionID); // The session of user 1
                 state.addCookie(cookie);
                 replaced = true;

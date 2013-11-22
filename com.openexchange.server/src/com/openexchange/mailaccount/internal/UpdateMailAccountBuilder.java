@@ -195,6 +195,12 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     }
 
     @Override
+    public Object archive() {
+        bob.append("archive = ?,");
+        return null;
+    }
+
+    @Override
     public Object mailPort() {
         return null;
     }
@@ -283,6 +289,12 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     @Override
     public Object trashFullname() {
         bob.append("trash_fullname = ?,");
+        return null;
+    }
+
+    @Override
+    public Object archiveFullname() {
+        bob.append("archive_fullname = ?,");
         return null;
     }
 

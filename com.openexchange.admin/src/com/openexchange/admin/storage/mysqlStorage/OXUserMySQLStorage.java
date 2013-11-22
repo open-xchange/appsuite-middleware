@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
@@ -376,7 +377,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // #################################################################
 
-            if (usrdata.getPrimaryEmail() != null) {
+            if (!isEmpty(usrdata.getPrimaryEmail())) {
                 stmt = con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPrimaryEmail());
                 stmt.setInt(2, contextId);
@@ -385,7 +386,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getLanguage() != null) {
+            if (!isEmpty(usrdata.getLanguage())) {
                 stmt = con.prepareStatement("UPDATE user SET preferredlanguage = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getLanguage());
                 stmt.setInt(2, contextId);
@@ -394,7 +395,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getTimezone() != null) {
+            if (!isEmpty(usrdata.getTimezone())) {
                 stmt = con.prepareStatement("UPDATE user SET timezone = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getTimezone());
                 stmt.setInt(2, contextId);
@@ -421,14 +422,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getImapServerString() == null && usrdata.isImapServerset()) {
+            if (isEmpty(usrdata.getImapServerString()) && usrdata.isImapServerset()) {
                 stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-            } else if (usrdata.getImapServerString() != null) {
+            } else if (!isEmpty(usrdata.getImapServerString())) {
                 stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
@@ -439,14 +440,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getImapLogin() == null && usrdata.isImapLoginset()) {
+            if (isEmpty(usrdata.getImapLogin()) && usrdata.isImapLoginset()) {
                 stmt = con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-            } else if (usrdata.getImapLogin() != null) {
+            } else if (!isEmpty(usrdata.getImapLogin())) {
                 stmt = con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapLogin());
                 stmt.setInt(2, contextId);
@@ -455,14 +456,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getSmtpServerString() == null && usrdata.isSmtpServerset()) {
+            if (isEmpty(usrdata.getSmtpServerString()) && usrdata.isSmtpServerset()) {
                 stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
-            } else if (usrdata.getSmtpServerString() != null) {
+            } else if (!isEmpty(usrdata.getSmtpServerString())) {
                 stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
@@ -473,7 +474,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getPassword() != null) {
+            if (!isEmpty(usrdata.getPassword())) {
                 stmt = con.prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, cache.encryptPassword(usrdata));
                 stmt.setInt(2, contextId);
@@ -482,7 +483,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getPasswordMech() != null) {
+            if (!isEmpty(usrdata.getPasswordMech())) {
                 stmt = con.prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPasswordMech());
                 stmt.setInt(2, contextId);
@@ -1500,6 +1501,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
                 }
 
+                /*-
+                 * Apply other default values
+                 *
+                 * ( taken from '{GIT_HOME}/frontend6/open-xchange-gui/js/config/config.js' )
+                 */
+                flags |= UserSettingMail.INT_DISPLAY_HTML_INLINE_CONTENT;
+                flags |= UserSettingMail.INT_SHOW_GRAPHIC_EMOTICONS;
+                flags |= UserSettingMail.INT_USE_COLOR_QUOTE;
+                flags |= UserSettingMail.INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER;
+                flags |= UserSettingMail.INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT;
+                flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_OWNER;
+                flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT;
+
                 stmt.setInt(8, flags);
                 stmt.setString(9, std_mail_folder_confirmed_spam);
                 stmt.setString(10, std_mail_folder_confirmed_ham);
@@ -1815,12 +1829,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException e) {
                 log.error("SQL Error closing statement!", e);
             }
-            try {
-                if (read_ox_con != null) {
-                    cache.pushConnectionForContext(context_id, read_ox_con);
+            if (read_ox_con != null) {
+                try {
+                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox read connection to pool!", exp);
             }
         }
     }
@@ -1887,12 +1901,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException e) {
                 log.error("SQL Error closing statement!", e);
             }
-            try {
-                if (read_ox_con != null) {
-                    cache.pushConnectionForContext(context_id, read_ox_con);
+            if (read_ox_con != null) {
+                try {
+                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox read connection to pool!", exp);
             }
         }
     }
@@ -2158,12 +2172,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             closePreparedStatement(stmtusername);
             closePreparedStatement(stmtuserattributes);
             closePreparedStatement(stmtstd);
-            try {
-                if (read_ox_con != null) {
-                    cache.pushConnectionForContext(context_id, read_ox_con);
+            if (read_ox_con != null) {
+                try {
+                        cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox read connection to pool!", exp);
             }
         }
     }
@@ -2322,21 +2336,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
-            throw new StorageException(sqle.toString(), sqle);
+            throw new StorageException(sqle.toString());
         } catch (final OXException e) {
-            log.error("Delete contact via groupware API error", e);
             final SQLException sqle = DBUtils.extractSqlException(e);
             if (null != sqle) {
-                throw new StorageException(sqle.toString(), sqle);
+                log.error("SQL Error", sqle);
+                throw new StorageException(sqle.toString());
             }
-            throw new StorageException(e.toString(), e);
+            log.error("Delete contact yielded groupware API error");
+            throw new StorageException(e.toString());
         } finally {
-            try {
-                if (stmt != null) {
+            if (stmt != null) {
+                try {
                     stmt.close();
+                } catch (final SQLException e) {
+                    log.error("SQL Error closing statement on ox write connection!", e);
                 }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing statement on ox write connection!", e);
             }
         }
     }
@@ -2356,7 +2371,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rs.close();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e.toString(), e);
+            throw new StorageException(e.toString());
         } finally {
             com.openexchange.tools.sql.DBUtils.closeSQLStuff(stmt);
         }
@@ -2552,12 +2567,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("OX Error ", e);
             throw new StorageException(e.toString(), e);
         } finally {
-            try {
-                if (read_ox_con != null) {
-                    cache.pushConnectionForContext(ctx.getId(), read_ox_con);
+            if (read_ox_con != null) {
+                try {
+                    cache.pushConnectionForContextAfterReading(ctx.getId(), read_ox_con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox read connection to pool!", exp);
             }
         }
 
@@ -2593,131 +2608,41 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement del_st = null;
         ResultSet rs = null;
         try {
-            del_st = write_ox_con.prepareStatement("SELECT imapServer,smtpServer,imapLogin,mail,mailDomain,mailEnabled," + "preferredLanguage,shadowLastChange,timeZone,contactId,userPassword," + "passwordMech,uidNumber,gidNumber,homeDirectory,loginShell FROM user WHERE id = ? AND cid = ?");
+            del_st = write_ox_con.prepareStatement("SELECT contactId,uidNumber,gidNumber FROM user WHERE id = ? AND cid = ?");
             del_st.setInt(1, user_id);
             del_st.setInt(2, ctx.getId());
             rs = del_st.executeQuery();
 
-            String iserver = null;
-            String sserver = null;
-            String ilogin = null;
-            String mail = null;
-            String maildomain = null;
-            int menabled = -1;
-            String preflang = null;
-            int shadowlastschange = -1;
-            String tzone = null;
             int contactid = -1;
-            String passwd = null;
-            String pwmech = null;
             int uidnumber = -1;
             int gidnumber = -1;
-            String homedir = null;
-            String shell = null;
 
             if (rs.next()) {
-                iserver = rs.getString("imapServer");
-                sserver = rs.getString("smtpServer");
-                ilogin = rs.getString("imapLogin");
-                mail = rs.getString("mail");
-                maildomain = rs.getString("maildomain");
-                menabled = rs.getInt("mailEnabled");
-                preflang = rs.getString("preferredLanguage");
-                shadowlastschange = rs.getInt("shadowLastChange");
-                tzone = rs.getString("timeZone");
                 contactid = rs.getInt("contactId");
-                passwd = rs.getString("userPassword");
-                pwmech = rs.getString("passwordMech");
                 uidnumber = rs.getInt("uidNumber");
                 gidnumber = rs.getInt("gidNumber");
-                homedir = rs.getString("homeDirectory");
-                shell = rs.getString("loginShell");
             }
             del_st.close();
             rs.close();
 
-            del_st = write_ox_con.prepareStatement("INSERT into del_user (id,cid,imapServer,smtpServer,imapLogin,mail,maildomain,mailEnabled,preferredLanguage,shadowLastChange,timeZone,contactId,userPassword," + "passwordMech,uidNumber,gidNumber,homeDirectory,loginShell) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            del_st = write_ox_con.prepareStatement("INSERT into del_user (id,cid,contactId,uidNumber,gidNumber) VALUES (?,?,?,?,?)");
             del_st.setInt(1, user_id);
             del_st.setInt(2, ctx.getId());
-            if (iserver != null) {
-                del_st.setString(3, iserver);
-            } else {
-                del_st.setNull(3, Types.VARCHAR);
-            }
-            if (sserver != null) {
-                del_st.setString(4, sserver);
-            } else {
-                del_st.setNull(4, Types.VARCHAR);
-            }
-            if (ilogin != null) {
-                del_st.setString(5, ilogin);
-            } else {
-                del_st.setNull(5, Types.VARCHAR);
-            }
-            if (mail != null) {
-                del_st.setString(6, mail);
-            } else {
-                del_st.setNull(6, Types.VARCHAR);
-            }
-            if (maildomain != null) {
-                del_st.setString(7, maildomain);
-            } else {
-                del_st.setNull(7, Types.VARCHAR);
-            }
-            if (menabled != -1) {
-                del_st.setInt(8, menabled);
-            } else {
-                del_st.setNull(8, Types.INTEGER);
-            }
-            if (preflang != null) {
-                del_st.setString(9, preflang);
-            } else {
-                del_st.setNull(9, Types.VARCHAR);
-            }
-
-            del_st.setInt(10, shadowlastschange);
-
-            if (tzone != null) {
-                del_st.setString(11, tzone);
-            } else {
-                del_st.setNull(11, Types.VARCHAR);
-            }
             if (contactid != -1) {
-                del_st.setInt(12, contactid);
+                del_st.setInt(3, contactid);
             } else {
-                del_st.setNull(12, Types.INTEGER);
-            }
-            if (passwd != null) {
-                del_st.setString(13, passwd);
-            } else {
-                del_st.setNull(13, Types.VARCHAR);
-            }
-            if (pwmech != null) {
-                del_st.setString(14, pwmech);
-            } else {
-                del_st.setNull(14, Types.VARCHAR);
+                del_st.setNull(3, Types.INTEGER);
             }
             if (uidnumber != -1) {
-                del_st.setInt(15, uidnumber);
+                del_st.setInt(4, uidnumber);
             } else {
-                del_st.setNull(15, Types.INTEGER);
+                del_st.setNull(4, Types.INTEGER);
             }
             if (gidnumber != -1) {
-                del_st.setInt(16, gidnumber);
+                del_st.setInt(5, gidnumber);
             } else {
-                del_st.setNull(16, Types.INTEGER);
+                del_st.setNull(5, Types.INTEGER);
             }
-            if (homedir != null) {
-                del_st.setString(17, homedir);
-            } else {
-                del_st.setNull(17, Types.VARCHAR);
-            }
-            if (shell != null) {
-                del_st.setString(18, shell);
-            } else {
-                del_st.setNull(18, Types.VARCHAR);
-            }
-
             del_st.executeUpdate();
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);

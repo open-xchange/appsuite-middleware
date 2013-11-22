@@ -58,6 +58,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
@@ -74,6 +75,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -307,20 +309,28 @@ public class RdbTaskStorage extends TaskStorage {
      */
     @Override
     public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type) throws OXException {
+        insertTask(ctx, con, task, type, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, int[] columns) throws OXException {
         final StringBuilder insert = new StringBuilder();
         insert.append("INSERT INTO ");
         insert.append(SQL.TASK_TABLES.get(type));
         insert.append(" (");
-        int values = 0;
+        List<Mapper<?>> usedMappers = new ArrayList<Mapper<?>>();
         for (final Mapper<?> mapper : Mapping.MAPPERS) {
-            if (mapper.isSet(task)) {
+            if (mapper.isSet(task) && (null == columns || Arrays.contains(columns, mapper.getId()))) {
                 insert.append(mapper.getDBColumnName());
                 insert.append(',');
-                values++;
+                usedMappers.add(mapper);
             }
         }
         insert.append("cid,id) VALUES (");
-        for (int i = 0; i < values; i++) {
+        for (int i = 0; i < usedMappers.size(); i++) {
             insert.append("?,");
         }
         insert.append("?,?)");
@@ -328,10 +338,8 @@ public class RdbTaskStorage extends TaskStorage {
         try {
             stmt = con.prepareStatement(insert.toString());
             int pos = 1;
-            for (int i = 0; i < Mapping.MAPPERS.length; i++) {
-                if (Mapping.MAPPERS[i].isSet(task)) {
-                    Mapping.MAPPERS[i].toDB(stmt, pos++, task);
-                }
+            for (int i = 0; i < usedMappers.size(); i++) {
+                usedMappers.get(i).toDB(stmt, pos++, task);
             }
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, task.getObjectID());

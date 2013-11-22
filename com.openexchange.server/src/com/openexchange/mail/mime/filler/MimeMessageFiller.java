@@ -169,6 +169,16 @@ public class MimeMessageFiller {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageFiller.class));
 
+    private static final String EMPTY_HTML_DOCUMENT =
+        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" +
+        "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+        " <head>\n" +
+        "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
+        " </head>\n" +
+        " <body>\n" +
+        " </body>\n" +
+        "</html>";
+
     private static final String HDR_ORGANIZATION = MessageHeaders.HDR_ORGANIZATION;
     private static final String HDR_X_MAILER = MessageHeaders.HDR_X_MAILER;
     private static final String HDR_MIME_VERSION = MessageHeaders.HDR_MIME_VERSION;
@@ -1596,10 +1606,12 @@ public class MimeMessageFiller {
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
      * @param isHtml Whether provided content is HTML or not
      * @param type The compose type
+     * @param monitor The monitor
      * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
+     * @throws OXException If a processing error occurs
      */
-    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException {
+    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException, OXException {
         /*
          * Convert HTML content to regular text. First: Create a body part for text content
          */
@@ -1613,9 +1625,17 @@ public class MimeMessageFiller {
             if (content == null || content.length() == 0) {
                 textContent = "";
             } else if (isHtml) {
-                textContent = ComposeType.NEW_SMS.equals(type) ? contents[1] : performLineFolding(htmlService.html2text(content, appendHref), usm.getAutoLinebreak());
+                if (ComposeType.NEW_SMS.equals(type)) {
+                    textContent = contents[1];
+                } else {
+                    textContent = performLineFolding(htmlService.html2text(content, appendHref), usm.getAutoLinebreak());
+                }
             } else {
-                textContent = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(content, usm.getAutoLinebreak());
+                if (ComposeType.NEW_SMS.equals(type)) {
+                    textContent = content;
+                } else {
+                    textContent = performLineFolding(content, usm.getAutoLinebreak());
+                }
             }
         }
         MessageUtility.setText(textContent, charset, text);
@@ -1635,9 +1655,10 @@ public class MimeMessageFiller {
      *
      * @param wellFormedHTMLContent The well-formed HTML content
      * @param charset The charset
+     * @param monitor The monitor
      * @return A body part of type <code>text/html</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
-     * @throws OXException
+     * @throws OXException If a processing error occurs
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
         try {
@@ -2136,6 +2157,6 @@ public class MimeMessageFiller {
         if (null == e) {
             return false;
         }
-        return ((MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) || ("IMAP".equals(e.getPrefix()) && (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() == e.getCode())));
+        return ((MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) || (MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.equals(e)) || ("IMAP".equals(e.getPrefix()) && (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() == e.getCode())));
     }
 }

@@ -59,7 +59,7 @@ import org.apache.http.ParseException;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -113,7 +113,7 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
             HeaderElementIterator iter = new BasicHeaderElementIterator(resp.headerIterator("Set-Cookie"));
             while (iter.hasNext()) {
                 HeaderElement element = iter.nextElement();
-                if (element.getName().startsWith(Login.SECRET_PREFIX)) {
+                if (element.getName().startsWith(LoginServlet.SECRET_PREFIX)) {
                     oxCookieFound = true;
                     continue;
                 }

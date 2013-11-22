@@ -54,6 +54,7 @@ import static com.openexchange.ajp13.AJPv13Utility.decodeUrl;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -70,8 +71,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
@@ -96,6 +96,7 @@ import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
@@ -224,14 +225,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * <p>
      * A writer can acquire the read lock, but not vice-versa.
      */
-    private final ReadWriteLock mainLock;
-
-    /**
-     * The soft lock for non-blocking access to output/input stream.
-     * <p>
-     * A writer can acquire this read lock.
-     */
-    protected final Lock softLock;
+    protected final Lock mainLock;
 
     /**
      * Use Tomcat authentication ?
@@ -435,8 +429,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         bodyBytes = MessageBytes.newInstance();
         sink = new UnsynchronizedByteArrayOutputStream(Constants.MAX_PACKET_SIZE);
         certificates = MessageBytes.newInstance();
-        mainLock = new ReentrantReadWriteLock();
-        softLock = mainLock.readLock();
+        mainLock = new ReentrantLock();
         lastWriteAccess = 0L;
         this.listenerMonitor = listenerMonitor;
         this.number = Long.valueOf(NUMBER.incrementAndGet());
@@ -500,8 +493,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         final int max = AJPv13Config.getKeepAliveTime();
         this.max = max;
-        scheduledKeepAliveTask =
-            timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max, TimeUnit.MILLISECONDS);
+        if (max > 0) {
+            scheduledKeepAliveTask = timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max, TimeUnit.MILLISECONDS);
+        }
     }
 
     public void stopKeepAlivePing() {
@@ -770,7 +764,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
                 }
                 if (type == Constants.JK_AJP13_CPING_REQUEST && 1 == requestHeaderMessage.getLen()) {
-                    softLock.lock();
+                    mainLock.lock();
                     try {
                         output.write(pongMessageArray);
                         lastWriteAccess = System.currentTimeMillis();
@@ -778,7 +772,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     } catch (final IOException e) {
                         error = true;
                     } finally {
-                        softLock.unlock();
+                        mainLock.unlock();
                     }
                     continue;
                 } else if (type != Constants.JK_AJP13_FORWARD_REQUEST) {
@@ -962,6 +956,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         }
                     }
                 } catch (final UploadServletException e) {
+                    stage = Stage.STAGE_SERVICE_ENDED;
                     /*
                      * Log ServletException's own root cause separately
                      */
@@ -981,10 +976,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     byteChunk.append(bytes, 0, bytes.length);
                     outputBuffer.doWrite(byteChunk);
                 } catch (final InterruptedIOException e) {
+                    stage = Stage.STAGE_SERVICE_ENDED;
                     error = true;
                 } catch (final IOException e) {
+                    stage = Stage.STAGE_SERVICE_ENDED;
                     // Ignore
                 } catch (final Throwable t) {
+                    stage = Stage.STAGE_SERVICE_ENDED;
                     ExceptionUtils.handleThrowable(t);
                     final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
@@ -1078,33 +1076,38 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         switch (actionCode) {
         case COMMIT:
             {
-                if (response.isCommitted()) {
-                    return;
-                }
-
-                // Validate and write response headers
+                mainLock.lock();
                 try {
-                    prepareResponse();
-                } catch (final IOException e) {
-                    // Set error flag
-                    error = true;
-                }
-            }
-            break;
-        case CLIENT_FLUSH:
-            {
-                if (!response.isCommitted()) {
+                    if (response.isCommitted()) {
+                        return;
+                    }
+
                     // Validate and write response headers
                     try {
                         prepareResponse();
                     } catch (final IOException e) {
                         // Set error flag
                         error = true;
-                        return;
                     }
+                } finally {
+                    mainLock.unlock();
                 }
-                softLock.lock();
+            }
+            break;
+        case CLIENT_FLUSH:
+            {
+                mainLock.lock();
                 try {
+                    if (!response.isCommitted()) {
+                        // Validate and write response headers
+                        try {
+                            prepareResponse();
+                        } catch (final IOException e) {
+                            // Set error flag
+                            error = true;
+                            return;
+                        }
+                    }
                     /*
                      * Write empty SEND-BODY-CHUNK package
                      */
@@ -1115,14 +1118,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // Set error flag
                     error = true;
                 } finally {
-                    softLock.unlock();
+                    mainLock.unlock();
                 }
             }
             break;
         case CLIENT_PING:
             {
-                final Lock hardLock = mainLock.writeLock();
-                hardLock.lock();
+                mainLock.lock();
                 try {
                     /*
                      * Ensure we still exceed max. idle time and are not yet finished
@@ -1197,7 +1199,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final AJPv13Exception e) {
                     // Cannot occur
                 } finally {
-                    hardLock.unlock();
+                    mainLock.unlock();
                 }
             }
             break;
@@ -1588,6 +1590,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             }
             properties.put(LogProperties.Name.AJP_REQUEST_IP, request.getRemoteAddr());
             properties.put(LogProperties.Name.AJP_SERVER_NAME, serverName);
+            final String userAgent = request.getHeader("User-Agent");
+            properties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
         }
         /*
          * Set proper JSESSIONID cookie and pre-create associated HTTP session
@@ -1722,11 +1726,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if (null == charEnc) {
             charEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
         }
-        final String DecodedRequestURI = AJPv13Utility.decodeUrl(requestURI,charEnc);
+        final String decodedRequestURI = AJPv13Utility.decodeUrl(requestURI, charEnc);
         /*
          * Remove leading slash character
          */
-        final String path = DecodedRequestURI.length() > 1 ? removeFromPath(DecodedRequestURI, '/') : DecodedRequestURI;
+        final String path = decodedRequestURI.length() > 1 ? removeFromPath(decodedRequestURI, '/') : decodedRequestURI;
         /*
          * Lookup path in available servlet paths
          */
@@ -1735,7 +1739,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         HttpServlet servlet = HttpServletManager.getServlet(path, servletId);
         if (servlet == null) {
-            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(DecodedRequestURI));
+            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(decodedRequestURI, charEnc));
         }
         this.servlet = servlet;
         // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
@@ -1757,7 +1761,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 /*
                  * Set complete request URI as path info
                  */
-                request.setPathInfo(DecodedRequestURI);
+                request.setPathInfo(decodedRequestURI);
             } else {
                 /*
                  * The path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include
@@ -1768,8 +1772,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * Set path info: The extra path information follows the servlet path but precedes the query string and will start with a
                  * "/" character.
                  */
-                if ((DecodedRequestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
-                    request.setPathInfo(DecodedRequestURI.substring(servletPathLen));
+                if ((decodedRequestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
+                    request.setPathInfo(decodedRequestURI.substring(servletPathLen));
                 } else {
                     request.setPathInfo(null);
                 }
@@ -2036,78 +2040,92 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * When committing the response, we have to validate the set of headers, as well as setup the response filters.
      */
     protected void prepareResponse() throws IOException {
-        response.setCommitted(true);
-        /*
-         * prefix + http_status_code + http_status_msg (empty string) + num_headers (integer)
-         */
-        String statusMsg = response.getStatusMsg();
-        if (null == statusMsg) {
-            statusMsg = "";
-        }
-        /*-
-         * Check for echo header presence
-         */
-        {
-            final String echoHeaderName = AJPv13Response.getEchoHeaderName();
-            if (null != echoHeaderName) {
-                final String echoValue = request.getHeader(echoHeaderName);
-                if (null != echoValue) {
-                    response.setHeader(echoHeaderName, urlEncode(echoValue));
-                }
+        try {
+            response.setCommitted(true);
+            /*
+             * prefix + http_status_code + http_status_msg (empty string) + num_headers (integer)
+             */
+            String statusMsg = response.getStatusMsg();
+            if (null == statusMsg) {
+                statusMsg = "";
             }
-        }
-        /*
-         * Write headers&cookies to JK_AJP13_SEND_HEADERS message
-         */
-        int numHeaders = 0;
-        final byte[] headers;
-        {
-            sink.reset();
-            for (final Entry<String, List<String>> entry : response.getHeaderEntrySet()) {
-                for (final String value : entry.getValue()) {
-                    writeHeaderSafe(entry.getKey(), value, sink);
-                    numHeaders++;
-                }
-            }
-            headers = sink.toByteArray();
-        }
-        final byte[] cookies;
-        final int numCookies;
-        {
-            sink.reset();
-            final List<List<String>> formattedCookies = response.getFormatedCookies();
-            final int length = formattedCookies.size();
-            if (length > 0) {
-                List<String> list = formattedCookies.get(0);
-                for (final String sCookie : list) {
-                    writeHeaderSafe(STR_SET_COOKIE, sCookie, sink);
-                }
-                if (length > 1) {
-                    final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
-                    for (int i = 1; i < length; i++) {
-                        sb.setLength(0);
-                        final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
-                        list = formattedCookies.get(i);
-                        for (final String sCookie : list) {
-                            writeHeaderSafe(hdrName, sCookie, sink);
-                        }
+            /*-
+             * Check for echo header presence
+             */
+            {
+                final String echoHeaderName = AJPv13Response.getEchoHeaderName();
+                if (null != echoHeaderName) {
+                    final String echoValue = request.getHeader(echoHeaderName);
+                    if (null != echoValue) {
+                        response.setHeader(echoHeaderName, urlEncode(echoValue));
                     }
                 }
-                cookies = sink.toByteArray();
-                numCookies = getNumOfCookieHeader(formattedCookies);
-            } else {
-                cookies = new byte[0];
-                numCookies =  0;
             }
-        }
-        /*
-         * Calculate data length
-         */
-        final int dataLength = SEND_HEADERS_LENGTH + headers.length + cookies.length + statusMsg.length();
-        try {
+            /*-
+             * Check for Content-Security-Policy header
+             */
+            {
+                final String contentSecurityPolicy = AJPv13Config.getContentSecurityPolicy();
+                if (!Strings.isEmpty(contentSecurityPolicy)) {
+                    response.setHeader("Content-Security-Policy", contentSecurityPolicy);
+                    response.setHeader("X-WebKit-CSP", contentSecurityPolicy);
+                    response.setHeader("X-Content-Security-Policy", contentSecurityPolicy);
+                }
+            }
+            /*
+             * Write headers&cookies to JK_AJP13_SEND_HEADERS message
+             */
+            int numHeaders = 0;
+            final byte[] headers;
+            {
+                sink.reset();
+                for (final Entry<String, List<String>> entry : response.getHeaderEntrySet()) {
+                    for (final String value : entry.getValue()) {
+                        writeHeaderSafe(entry.getKey(), value, sink);
+                        numHeaders++;
+                    }
+                }
+                headers = sink.toByteArray();
+            }
+            final byte[] cookies;
+            final int numCookies;
+            {
+                sink.reset();
+                final List<List<String>> formattedCookies = response.getFormatedCookies();
+                final int length = formattedCookies.size();
+                if (length > 0) {
+                    List<String> list = formattedCookies.get(0);
+                    for (final String sCookie : list) {
+                        writeHeaderSafe(STR_SET_COOKIE, sCookie, sink);
+                    }
+                    if (length > 1) {
+                        final StringBuilder sb = new StringBuilder(STR_SET_COOKIE.length() + 1);
+                        for (int i = 1; i < length; i++) {
+                            sb.setLength(0);
+                            final String hdrName = sb.append(STR_SET_COOKIE).append(i + 1).toString();
+                            list = formattedCookies.get(i);
+                            for (final String sCookie : list) {
+                                writeHeaderSafe(hdrName, sCookie, sink);
+                            }
+                        }
+                    }
+                    cookies = sink.toByteArray();
+                    numCookies = getNumOfCookieHeader(formattedCookies);
+                } else {
+                    cookies = new byte[0];
+                    numCookies = 0;
+                }
+            }
+            /*
+             * Calculate data length
+             */
+            final int dataLength = SEND_HEADERS_LENGTH + headers.length + cookies.length + statusMsg.length();
             if (dataLength + RESPONSE_PREFIX_LENGTH > Constants.MAX_PACKET_SIZE) {
                 throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
             }
+            /*
+             * Write to output stream
+             */
             sink.reset();
             AJPv13Response.fillStartBytes(Constants.JK_AJP13_SEND_HEADERS, dataLength, sink);
             AJPv13Response.writeInt(response.getStatus(), sink);
@@ -2115,16 +2133,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             AJPv13Response.writeInt(numHeaders + numCookies, sink);
             AJPv13Response.writeByteArray(headers, sink);
             AJPv13Response.writeByteArray(cookies, sink);
-        } catch (final AJPv13Exception e) {
-            throw new IOException(e.getMessage(), e);
-        }
-        softLock.lock();
-        try {
             sink.writeTo(output);
             lastWriteAccess = System.currentTimeMillis();
             output.flush();
-        } finally {
-            softLock.unlock();
+        } catch (final AJPv13Exception e) {
+            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -2160,31 +2173,30 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Finish AJP response.
      */
     protected void finish(final boolean reuse) throws IOException {
-
-        if (!response.isCommitted()) {
-            // Validate and write response headers
-            try {
-                prepareResponse();
-            } catch (final IOException e) {
-                // Set error flag
-                error = true;
-            }
-        }
-
-        if (finished) {
-            return;
-        }
-
-        finished = true;
-
-        // Add the end message
-        softLock.lock();
+        mainLock.lock();
         try {
+            if (!response.isCommitted()) {
+                // Validate and write response headers
+                try {
+                    prepareResponse();
+                } catch (final IOException e) {
+                    // Set error flag
+                    error = true;
+                }
+            }
+
+            if (finished) {
+                return;
+            }
+
+            finished = true;
+
+            // Add the end message
             output.write(reuse ? endMessageArray : endMessageArrayNoReuse);
             lastWriteAccess = System.currentTimeMillis();
             output.flush();
         } finally {
-            softLock.unlock();
+            mainLock.unlock();
         }
     }
 
@@ -2197,7 +2209,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         while (read < n) {
             res = input.read(buf, read + pos, n - read);
             if (res <= 0) {
-                throw new IOException("Socket read failed");
+                throw new EOFException("Unexpected EOF. Web server provided only " + read + " bytes, although " + n + " were requested.");
             }
             read += res;
         }
@@ -2243,20 +2255,20 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
 
         // Request more data immediately
-        softLock.lock();
+        mainLock.lock();
         try {
             output.write(getBodyMessageArray);
             lastWriteAccess = System.currentTimeMillis();
             output.flush();
-        } finally {
-            softLock.unlock();
-        }
 
-        final boolean moreData = receive();
-        if (!moreData) {
-            endOfStream = true;
+            final boolean moreData = receive();
+            if (!moreData) {
+                endOfStream = true;
+            }
+            return moreData;
+        } finally {
+            mainLock.unlock();
         }
-        return moreData;
     }
 
     /**
@@ -2373,41 +2385,43 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         @Override
         public int doWrite(final ByteChunk chunk) throws IOException {
-            if (!response.isCommitted()) {
-                // Validate and write response headers
-                try {
-                    prepareResponse();
-                } catch (final IOException e) {
-                    // Set error flag
-                    error = true;
+            mainLock.lock();
+            try {
+                if (!response.isCommitted()) {
+                    // Validate and write response headers
+                    try {
+                        prepareResponse();
+                    } catch (final IOException e) {
+                        // Set error flag
+                        error = true;
+                    }
                 }
-            }
-            int len = chunk.getLength();
-            if (len <= 0) {
-                return len;
-            }
-            // 4 - hardcoded, byte[] marshalling overhead
-            // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
-            final byte[] b = chunk.getBuffer();
-            final int start = chunk.getOffset();
-            int off = 0;
-            do {
-                int thisTime = len;
-                if (thisTime > chunkSize) {
-                    thisTime = chunkSize;
+                int len = chunk.getLength();
+                if (len <= 0) {
+                    return len;
                 }
-                len -= thisTime;
-                softLock.lock();
-                try {
+                // 4 - hardcoded, byte[] marshalling overhead
+                // Adjust allowed size if packetSize != default (Constants.MAX_PACKET_SIZE)
+                final byte[] b = chunk.getBuffer();
+                final int start = chunk.getOffset();
+                int off = 0;
+                do {
+                    int thisTime = len;
+                    if (thisTime > chunkSize) {
+                        thisTime = chunkSize;
+                    }
+                    len -= thisTime;
+
                     writeSendBodyChunkBytes(b, start + off, thisTime);
                     lastWriteAccess = System.currentTimeMillis();
                     output.flush();
-                } finally {
-                    softLock.unlock();
-                }
-                off += thisTime;
-            } while (len > 0);
-            return chunk.getLength();
+
+                    off += thisTime;
+                } while (len > 0);
+                return chunk.getLength();
+            } finally {
+                mainLock.unlock();
+            }
         }
 
         private void writeSendBodyChunkBytes(final byte[] b, final int off, final int len) throws IOException {

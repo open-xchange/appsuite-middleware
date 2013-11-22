@@ -49,7 +49,7 @@
 
 package com.openexchange.drive.internal;
 
-import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
+import static com.openexchange.drive.DriveConstants.TEMP_PATH;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,10 +63,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.drive.sync.RenameTools;
@@ -197,7 +197,7 @@ public class UploadHelper {
                     fields.add(Field.LAST_MODIFIED);
 
                     if (null != originalVersion) {
-                        File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());
+                        File originalFile = session.getStorage().findFileByName(path, originalVersion.getName(), true);
                         if (null != originalFile && ChecksumProvider.matches(session, originalFile, originalVersion.getChecksum())) {
                             /*
                              * move upload file as new version for existing item
@@ -276,7 +276,13 @@ public class UploadHelper {
         file.setLastModified(null != modified && modified.before(now) ? modified : now);
         fields.add(Field.LAST_MODIFIED);
         if (session.isTraceEnabled()) {
-            session.trace(session.getStorage().toString() + ">> " + path + '/' + newVersion.getName());
+            String fullPath;
+            if (session.getRootFolderID().equals(file.getFolderId())) {
+                fullPath = DriveConstants.ROOT_PATH + file.getFileName();
+            } else {
+                fullPath = session.getStorage().getPath(file.getFolderId()) + '/' + file.getFileName();
+            }
+            session.trace(session.getStorage().toString() + ">> " + fullPath);
         }
         String checksum = saveDocumentAndChecksum(file, uploadStream, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, fields, false);
         return new AbstractMap.SimpleEntry<File, String>(file, checksum);
@@ -303,7 +309,13 @@ public class UploadHelper {
         uploadFile.setFileMIMEType(contentType);
         uploadFile.setFileSize(totalLength - offset);
         if (session.isTraceEnabled()) {
-            session.trace(session.getStorage().toString() + ">> " + path + '/' + newVersion.getName());
+            String fullPath;
+            if (session.getRootFolderID().equals(uploadFile.getFolderId())) {
+                fullPath = DriveConstants.ROOT_PATH + uploadFile.getFileName();
+            } else {
+                fullPath = session.getStorage().getPath(uploadFile.getFolderId()) + '/' + uploadFile.getFileName();
+            }
+            session.trace(session.getStorage().toString() + ">> " + fullPath);
         }
         if (0 == offset) {
             /*

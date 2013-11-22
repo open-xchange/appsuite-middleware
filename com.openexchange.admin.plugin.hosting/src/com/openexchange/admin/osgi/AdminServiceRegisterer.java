@@ -59,36 +59,35 @@ import com.openexchange.admin.services.AdminServiceRegistry;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-final class AdminServiceRegisterer implements ServiceTrackerCustomizer {
+final class AdminServiceRegisterer<S> implements ServiceTrackerCustomizer<S,S> {
 
-    private final Class<?> clazz;
-
+    private final Class<S> clazz;
     private final BundleContext context;
 
     /**
      * Initializes a new {@link AdminServiceRegisterer}.
      * @param context
      */
-    public AdminServiceRegisterer(Class<?> clazz, BundleContext context) {
+    public AdminServiceRegisterer(Class<S> clazz, BundleContext context) {
         super();
         this.clazz = clazz;
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        Object service = context.getService(reference);
+    public S addingService(ServiceReference<S> reference) {
+        S service = context.getService(reference);
         AdminServiceRegistry.getInstance().addService(clazz, service);
         return service;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(ServiceReference<S> reference, S service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(ServiceReference<S> reference, S service) {
         AdminServiceRegistry.getInstance().removeService(clazz);
         context.ungetService(reference);
     }

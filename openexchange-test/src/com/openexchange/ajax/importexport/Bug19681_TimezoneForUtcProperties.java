@@ -30,7 +30,10 @@ public class Bug19681_TimezoneForUtcProperties extends ManagedAppointmentTest {
 		super(name);
 	}
 
-	public void testErroneousFile() throws Exception {
+	public void noTestErroneousFile() throws Exception {
+	    // disabled test, since a workaround was added with fixes for bugs #28942 and #27706:
+	    // non-utc timestamps in utc-only datetime properties are now converted implicitly at
+	    // com.openexchange.data.conversion.ical.ical4j.ICal4JParser.workaroundFor27706And28942(String)
 		ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));
 		assertTrue("Needs to fail because TZID is not allowed with DTSTAMP", response.hasError());
 	}

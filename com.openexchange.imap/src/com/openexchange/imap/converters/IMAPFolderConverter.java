@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.converters;
 
-import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -60,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.imap.ACLPermission;
-import com.openexchange.imap.AccessedIMAPStore;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
@@ -75,6 +73,7 @@ import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.IMAPServer;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -104,13 +103,9 @@ public final class IMAPFolderConverter {
     private static final class Entity2ACLArgsImpl implements Entity2ACLArgs {
 
         private final int accountId;
-
-        private final InetSocketAddress imapServerAddress;
-
+        private final String serverUrl;
         private final int sessionUser;
-
         private final String fullname;
-
         private final char separator;
 
         /**
@@ -119,13 +114,13 @@ public final class IMAPFolderConverter {
          * @param accountId The account ID
          * @param imapServerAddress The IMAP server address
          * @param sessionUser The session user ID
-         * @param fullname The IMAP folder's fullname
+         * @param fullname The IMAP folder's full name
          * @param separator The separator character
          */
-        public Entity2ACLArgsImpl(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
+        public Entity2ACLArgsImpl(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator) {
             super();
             this.accountId = accountId;
-            this.imapServerAddress = imapServerAddress;
+            this.serverUrl = serverUrl;
             this.sessionUser = sessionUser;
             this.fullname = fullname;
             this.separator = separator;
@@ -133,7 +128,7 @@ public final class IMAPFolderConverter {
 
         @Override
         public Object[] getArguments(final IMAPServer imapServer) throws OXException {
-            return imapServer.getArguments(accountId, imapServerAddress, sessionUser, fullname, separator);
+            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator);
         }
     }
 
@@ -179,7 +174,7 @@ public final class IMAPFolderConverter {
         try {
             return new Entity2ACLArgsImpl(
                 imapConfig.getAccountId(),
-                new InetSocketAddress(IDNA.toASCII(imapConfig.getServer()), imapConfig.getPort()),
+                new StringAllocator(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(),
                 session.getUserId(),
                 imapFolder.getFullName(),
                 ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session));
@@ -720,9 +715,7 @@ public final class IMAPFolderConverter {
             }
             throw MimeMailException.handleMessagingException(e);
         }
-        final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new InetSocketAddress(
-            imapConfig.getServer(),
-            imapConfig.getPort()), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator());
+        final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringAllocator(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator());
         final com.openexchange.java.StringAllocator debugBuilder = DEBUG ? new com.openexchange.java.StringAllocator(128) : null;
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
@@ -810,7 +803,7 @@ public final class IMAPFolderConverter {
         return (e.isPrefix("ACL") && (Entity2ACLExceptionCode.RESOLVE_USER_FAILED.getNumber() == code)) || (e.isPrefix("USR") && (LdapExceptionCode.USER_NOT_FOUND.getNumber() == code));
     }
 
-    private static boolean checkForNamespaceFolder(final String fullName, final AccessedIMAPStore imapStore, final Session session, final int accountId) throws MessagingException, OXException {
+    private static boolean checkForNamespaceFolder(final String fullName, final IMAPStore imapStore, final Session session, final int accountId) throws MessagingException, OXException {
         /*
          * Check for namespace folder
          */

@@ -59,7 +59,9 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.halo.Picture;
 import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -75,7 +77,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LoFiLinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
+public class LoFiLinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource, HaloContactImageSource {
 
     public LoFiLinkedinProfileDataSource(final ServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -149,6 +151,24 @@ public class LoFiLinkedinProfileDataSource extends AbstractLinkedinDataSource im
             emails.add(queryContact.getEmail3());
         }
         return emails;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.halo.HaloContactImageSource#getPriority()
+     */
+    @Override
+    public int getPriority() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.halo.HaloContactImageSource#getPicture(com.openexchange.halo.HaloContactQuery, com.openexchange.tools.session.ServerSession)
+     */
+    @Override
+    public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

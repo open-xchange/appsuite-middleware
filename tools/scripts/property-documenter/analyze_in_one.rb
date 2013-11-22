@@ -35,10 +35,11 @@ end
 #
 # READING
 #
-input = ARGF.read
+startPath = ARGV.first
+
 properties = []
 
-input.each_line do |filepath|
+Dir.glob(startPath + "/**/*.properties") do |filepath|
   next if excludes.any?{|exclude| filepath =~ exclude}
   filepath.chomp!
   filename = Pathname.new(filepath).basename

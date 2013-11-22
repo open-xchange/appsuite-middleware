@@ -393,6 +393,13 @@ public class AdminCache {
         return this.pool.pushConnectionForContext(context_id, con);
     }
 
+    public boolean pushConnectionForContextAfterReading(final int context_id, final Connection con) throws PoolException {
+        if(con == null) {
+            return true;
+        }
+        return this.pool.pushConnectionForContextAfterReading(context_id, con);
+    }
+
     public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
         return this.pool.pushConnectionForContextNoTimeout(contextId, con);
     }
@@ -658,12 +665,20 @@ public class AdminCache {
     }
 
     public void closeContextSqlStuff(final Connection con, final int context_id) {
-        try {
-            if (con != null) {
-                pushConnectionForContext(context_id, con);
+        closeContextSqlStuff(con, context_id, false);
+    }
+
+    public void closeContextSqlStuff(final Connection con, final int context_id, final boolean afterReading) {
+        if (con != null) {
+            try {
+                if (afterReading) {
+                    pushConnectionForContextAfterReading(context_id, con);
+                } else {
+                    pushConnectionForContext(context_id, con);
+                }
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing connection to pool!", exp);
             }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 

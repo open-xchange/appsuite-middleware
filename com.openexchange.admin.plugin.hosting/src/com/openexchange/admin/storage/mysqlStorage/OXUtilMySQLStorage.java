@@ -1510,10 +1510,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
-            try {
-                cache.pushConnectionForContext(cid, con);
-            } catch (final PoolException e) {
-                LOG.error("Error pushing ox connection to pool!", e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(cid, con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing ox connection to pool!", e);
+                }
             }
         }
         return quotaUsed;

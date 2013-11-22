@@ -125,23 +125,30 @@ public abstract class AbstractResource implements Resource {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof AbstractResource))
+        }
+        if (!(obj instanceof AbstractResource)) {
             return false;
+        }
         AbstractResource other = (AbstractResource) obj;
         if (presence == null) {
-            if (other.presence != null)
+            if (other.presence != null) {
                 return false;
-        } else if (!presence.equals(other.presence))
+            }
+        } else if (!presence.equals(other.presence)) {
             return false;
+        }
         if (timestamp == null) {
-            if (other.timestamp != null)
+            if (other.timestamp != null) {
                 return false;
-        } else if (!timestamp.equals(other.timestamp))
+            }
+        } else if (!timestamp.equals(other.timestamp)) {
             return false;
+        }
         return true;
     }
 

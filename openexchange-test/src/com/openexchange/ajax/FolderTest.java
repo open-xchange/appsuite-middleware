@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -606,8 +605,8 @@ public class FolderTest extends AbstractAJAXTest {
             sessionId,
             "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
             true);
-        for (final Iterator iter = subfolders.iterator(); iter.hasNext();) {
-            final FolderObject subfolder = (FolderObject) iter.next();
+        for (Object element : subfolders) {
+            final FolderObject subfolder = (FolderObject) element;
             if (subfolder.getModule() == FolderObject.TASK && subfolder.isDefaultFolder()) {
                 return subfolder;
             }
@@ -627,8 +626,7 @@ public class FolderTest extends AbstractAJAXTest {
             sessionId,
             "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
             true);
-        for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
-            final FolderObject subfolder = iter.next();
+        for (FolderObject subfolder : subfolders) {
             if (subfolder.getModule() == FolderObject.CALENDAR && subfolder.isDefaultFolder()) {
                 return subfolder;
             }
@@ -662,8 +660,8 @@ public class FolderTest extends AbstractAJAXTest {
             sessionId,
             "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
             true);
-        for (final Iterator iter = subfolders.iterator(); iter.hasNext();) {
-            final FolderObject subfolder = (FolderObject) iter.next();
+        for (Object element : subfolders) {
+            final FolderObject subfolder = (FolderObject) element;
             if (subfolder.getModule() == FolderObject.INFOSTORE && subfolder.isDefaultFolder()) {
                 return subfolder;
             }
@@ -678,8 +676,7 @@ public class FolderTest extends AbstractAJAXTest {
     public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int loginId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException, OXException {
         FolderObject infostore = null;
         List<FolderObject> l = getRootFolders(conversation, protocol, hostname, sessionId, false);
-        for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
-            final FolderObject rf = iter.next();
+        for (FolderObject rf : l) {
             if (rf.getObjectID() == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                 infostore = rf;
                 break;
@@ -690,8 +687,7 @@ public class FolderTest extends AbstractAJAXTest {
         }
         FolderObject userStore = null;
         l = getSubfolders(conversation, protocol, hostname, sessionId, Integer.toString(infostore.getObjectID()));
-        for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
-            final FolderObject f = iter.next();
+        for (FolderObject f : l) {
             if (f.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
                 userStore = f;
                 break;
@@ -701,8 +697,7 @@ public class FolderTest extends AbstractAJAXTest {
             throw new TestException("System user store folder not found!");
         }
         l = getSubfolders(conversation, protocol, hostname, sessionId, Integer.toString(userStore.getObjectID()));
-        for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
-            final FolderObject f = iter.next();
+        for (FolderObject f : l) {
             if (f.containsDefaultFolder() && f.isDefaultFolder() && f.getCreator() == loginId) {
                 return f;
             }
@@ -731,8 +726,8 @@ public class FolderTest extends AbstractAJAXTest {
         final List<FolderObject> l = getRootFolders(getWebConversation(), getHostName(), getSessionId(), true);
         assertFalse(l == null || l.size() == 0);
         int i = 0;
-        for (final Iterator iter = l.iterator(); iter.hasNext();) {
-            final FolderObject rf = (FolderObject) iter.next();
+        for (Object element : l) {
+            final FolderObject rf = (FolderObject) element;
             assertTrue(rf.getObjectID() == assumedIds[i]);
             i++;
         }
@@ -963,16 +958,16 @@ public class FolderTest extends AbstractAJAXTest {
             "" + FolderObject.SYSTEM_SHARED_FOLDER_ID,
             true);
         assertFalse(l == null || l.size() == 0);
-        Next: for (final Iterator iter = l.iterator(); iter.hasNext();) {
-            final FolderObject virtualFO = (FolderObject) iter.next();
+        Next: for (Object element : l) {
+            final FolderObject virtualFO = (FolderObject) element;
             final List<FolderObject> subList = getSubfolders(
                 getSecondWebConversation(),
                 getHostName(),
                 anotherSessionId,
                 virtualFO.getFullName(),
                 true);
-            for (final Iterator iterator = subList.iterator(); iterator.hasNext();) {
-                final FolderObject sharedFolder = (FolderObject) iterator.next();
+            for (Object element2 : subList) {
+                final FolderObject sharedFolder = (FolderObject) element2;
                 if (sharedFolder.getObjectID() == fuid01) {
                     found01 = true;
                     if (found01 && found02) {
@@ -1038,8 +1033,8 @@ public class FolderTest extends AbstractAJAXTest {
             final List<FolderObject> l = getSubfolders(getWebConversation(), getHostName(), getSessionId(), "" + fuid, true);
             assertFalse(l == null || l.size() == 0);
             int i = 0;
-            for (final Iterator iter = l.iterator(); iter.hasNext();) {
-                final FolderObject subFolder = (FolderObject) iter.next();
+            for (Object element : l) {
+                final FolderObject subFolder = (FolderObject) element;
                 assertTrue(subFolder.getObjectID() == subfuids[i]);
                 i++;
             }
@@ -1059,17 +1054,17 @@ public class FolderTest extends AbstractAJAXTest {
                     true);
                 if (failedIds != null && failedIds.length > 0) {
                     if (subfuids != null) {
-                        for (int i = 0; i < subfuids.length; i++) {
-                            if (subfuids[i] > 0) {
+                        for (int subfuid : subfuids) {
+                            if (subfuid > 0) {
                                 /*
                                  * Call getFolder to receive a valid timestamp for deletion
                                  */
-                                getFolder(getWebConversation(), getHostName(), getSessionId(), "" + subfuids[i], cal, true);
+                                getFolder(getWebConversation(), getHostName(), getSessionId(), "" + subfuid, cal, true);
                                 deleteFolders(
                                     getWebConversation(),
                                     getHostName(),
                                     getSessionId(),
-                                    new int[] { subfuids[i] },
+                                    new int[] { subfuid },
                                     cal.getTimeInMillis(),
                                     true);
                             }

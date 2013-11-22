@@ -256,8 +256,9 @@ public final class MailFolderStorage implements FolderStorage {
                         /*
                          * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                          */
+                        final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
                         final UnifiedInboxManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedInboxManagement.class);
-                        if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                        if (suppressUnifiedMail || null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                             accountList.remove(0);
                         } else {
                             // Add Unified Mail root folder at first position
@@ -707,7 +708,7 @@ public final class MailFolderStorage implements FolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
             if (MailAccount.DEFAULT_ID == accountId) {
                 final MailFolder rootFolder = mailAccess.getRootFolder();
-                retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null);
+                retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null, mailAccess);
                 addWarnings(mailAccess, storageParameters);
                 hasSubfolders = rootFolder.hasSubfolders();
                 /*
@@ -736,7 +737,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Generate mail folder from loaded one
              */
             {
-                final MailFolderImpl mailFolderImpl = new MailFolderImpl(mailFolder, accountId, mailAccess.getMailConfig(), storageParameters, new MailAccessFullnameProvider(mailAccess));
+                final MailFolderImpl mailFolderImpl = new MailFolderImpl(mailFolder, accountId, mailAccess.getMailConfig(), storageParameters, new MailAccessFullnameProvider(mailAccess), mailAccess);
                 if (MailAccount.DEFAULT_ID == accountId || IGNORABLES.contains(mailAccount.getMailProtocol())) {
                     retval = mailFolderImpl;
                 } else {
@@ -924,9 +925,14 @@ public final class MailFolderStorage implements FolderStorage {
                     /*
                      * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                      */
-                    final UnifiedInboxManagement uim = serviceRegistry.getService(UnifiedInboxManagement.class);
-                    if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                    final boolean suppressUnifiedMail = StorageParametersUtility.getBoolParameter("suppressUnifiedMail", storageParameters);
+                    if (suppressUnifiedMail) {
                         accounts.remove(0);
+                    } else {
+                        final UnifiedInboxManagement uim = serviceRegistry.getService(UnifiedInboxManagement.class);
+                        if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                            accounts.remove(0);
+                        }
                     }
                 }
                 final int size = accounts.size();
@@ -1124,8 +1130,7 @@ public final class MailFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             mailAccess = MailAccess.getInstance(session, argument.getAccountId());
-            final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
-            mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
+            mailAccess.connect(false);
             final boolean exists = mailAccess.getFolderStorage().exists(fullname);
             addWarnings(mailAccess, storageParameters);
             return exists;
@@ -1606,7 +1611,7 @@ public final class MailFolderStorage implements FolderStorage {
      */
     protected static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
         if (null != mailAccess) {
-            mailAccess.close(true);
+            try { mailAccess.close(true); } catch (final Exception e) {/**/}
         }
     }
 

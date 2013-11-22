@@ -51,6 +51,7 @@ package com.openexchange.config;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.exception.OXException;
@@ -98,6 +99,21 @@ public interface ConfigurationService {
      * @return The value in this property list with the specified key value or given default value argument.
      */
     public String getProperty(String name, String defaultValue);
+    
+    /**
+     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
+     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
+     * found. If the value can be found it will be split at the given separator and trimmed.
+     * <p>
+     *
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @param separator the seperator as regular expression used to split the input around this separator
+     * @return The value in this property list with the specified key value or given default value argument split and trimmed at the given
+     * separator
+     * @throws IllegalArgumentException - if defaultValue or the seperator are missing or if the separator isn't a valid pattern
+     */
+    public List<String> getProperty(String name, String defaultValue, String separator);
 
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
@@ -110,7 +126,7 @@ public interface ConfigurationService {
      * @return The value in this property list with the specified key value or <code>null</code>.
      */
     public String getProperty(String name, PropertyListener listener);
-
+    
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
      * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
@@ -124,6 +140,23 @@ public interface ConfigurationService {
      * @return The value in this property list with the specified key value or given default value argument.
      */
     public String getProperty(String name, String defaultValue, PropertyListener listener);
+
+    /**
+     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
+     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
+     * found. If the value can be found it will be split at the given separator and trimmed.
+     * <p>
+     * Furthermore the specified listener will be notified if any changes are noticed on specified property
+     *
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @param listener The property listener which is notified on property changes
+     * @param separator the seperator as regular expression used to split the input around this separator
+     * @return The value in this property list with the specified key value or given default value argument split and trimmed at the given
+     * separator
+     * @throws IllegalArgumentException - if defaultValue or the seperator are missing or if the separator isn't a valid pattern
+     */
+    public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator);
 
     /**
      * Removes specified property listener previously set by {@link #getProperty(String, PropertyListener)} or
@@ -244,4 +277,32 @@ public interface ConfigurationService {
      * @return A map mapping filename to the object that was parsed.
      */
     public Map<String, Object> getYamlInFolder(String dirName);
+
+    /**
+     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
+     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
+     * found.
+     * <p>
+     * Furthermore the specified listener will be notified if any changes are noticed on specified property
+     *
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @param listener The property listener which is notified on property changes
+     * @return The value in this property list with the specified key value or given default value argument.
+     */
+    boolean getBoolProperty(String name, boolean defaultValue, PropertyListener propertyListener);
+
+    /**
+     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
+     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
+     * found.
+     * <p>
+     * Furthermore the specified listener will be notified if any changes are noticed on specified property
+     *
+     * @param name The property name.
+     * @param defaultValue The default value
+     * @param listener The property listener which is notified on property changes
+     * @return The value in this property list with the specified key value or given default value argument.
+     */
+    int getIntProperty(String name, int defaultValue, PropertyListener propertyListener);
 }

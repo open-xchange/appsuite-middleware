@@ -85,7 +85,7 @@ public interface SubscribeService {
     public boolean hasAccounts(Context context, User user) throws OXException;
 
     public void touch(Context context, int subscriptionId) throws OXException;
-    
+
     /**
      * Cleans-up accounts that could no more be decrypted with given secret
      *

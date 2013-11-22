@@ -586,9 +586,11 @@ public class JSONObject extends AbstractJSONValue {
      *
      * @param key A key string.
      * @return true if the JSONObject contains a specific key AND if the value associated with the key is not null.
+     * @see #isNull(String)
      */
     public boolean hasAndNotNull(final String key) {
-        return has(key) && !isNull(key);
+        final Object opt = key == null ? null : this.myHashMap.get(key);
+        return null != opt && !JSONObject.NULL.equals(opt);
     }
 
     /**
@@ -598,7 +600,8 @@ public class JSONObject extends AbstractJSONValue {
      * @return true if there is no value associated with the key or if the value is the JSONObject.NULL object.
      */
     public boolean isNull(final String key) {
-        return JSONObject.NULL.equals(opt(key));
+        final Object opt = opt(key);
+        return null == opt || JSONObject.NULL.equals(opt);
     }
 
     /**

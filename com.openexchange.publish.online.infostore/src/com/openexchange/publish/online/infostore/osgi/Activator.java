@@ -50,17 +50,17 @@
 package com.openexchange.publish.online.infostore.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.online.infostore.InfostoreDocumentPublicationService;
 import com.openexchange.publish.online.infostore.InfostorePublicationServlet;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
 public class Activator extends HousekeepingActivator {
@@ -73,95 +73,41 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserPermissionService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-            registerServlet();
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        unregisterServlet();
+        return new Class<?>[] {IDBasedFileAccessFactory.class, HttpService.class, PublicationDataLoaderService.class, ContextService.class, InfostoreFacade.class, UserService.class, UserPermissionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final InfostoreDocumentPublicationService infostorePublisher = new InfostoreDocumentPublicationService();
-        InfostorePublicationServlet.setInfostoreDocumentPublicationService(infostorePublisher);
+        final IDBasedFileAccessFactory fileAccessFactory = getService(IDBasedFileAccessFactory.class);
+
+        final InfostoreDocumentPublicationService infostorePublisher = new InfostoreDocumentPublicationService(fileAccessFactory);
         registerService(PublicationService.class, infostorePublisher, null);
 
-        registerServlet();
+        final HttpService httpService = getService(HttpService.class);
+        final PublicationDataLoaderService publicationDataLoaderService = getService(PublicationDataLoaderService.class);
+        final ContextService contextService = getService(ContextService.class);
 
+        if (servlet == null) {
+            try {
+                httpService.registerServlet(ALIAS, servlet = new InfostorePublicationServlet(
+                    contextService,
+                    publicationDataLoaderService,
+                    fileAccessFactory,
+                    infostorePublisher), null, null);
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
     }
+
     @Override
     protected void stopBundle() throws Exception {
-        InfostorePublicationServlet.setInfostoreDocumentPublicationService(null);
-        cleanUp();
-
-        unregisterServlet();
-    }
-
-    private void unregisterServlet() {
-        InfostorePublicationServlet.setContextService(null);
-        InfostorePublicationServlet.setPublicationDataLoaderService(null);
+        super.stopBundle();
 
         final HttpService httpService = getService(HttpService.class);
         if(httpService != null && servlet != null) {
             httpService.unregister(ALIAS);
             servlet = null;
         }
-
     }
-
-    private void registerServlet() {
-        final HttpService httpService = getService(HttpService.class);
-        if(httpService == null) {
-            return;
-        }
-
-        final PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
-        if(dataLoader == null) {
-            return;
-        }
-
-        final ContextService contexts = getService(ContextService.class);
-        if(contexts == null) {
-            return;
-        }
-
-        final UserService users = getService(UserService.class);
-        if(users == null) {
-            return;
-        }
-
-        final UserPermissionService userConfigs = getService(UserPermissionService.class);
-        if(userConfigs == null) {
-            return;
-        }
-
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        if(infostore == null) {
-            return;
-        }
-
-        InfostorePublicationServlet.setContextService(contexts);
-        InfostorePublicationServlet.setUserService(users);
-        InfostorePublicationServlet.setUserConfigService(userConfigs);
-
-        InfostorePublicationServlet.setInfostoreFacade(infostore);
-        InfostorePublicationServlet.setPublicationDataLoaderService(dataLoader);
-
-        if(servlet == null) {
-            try {
-                httpService.registerServlet(ALIAS, servlet = new InfostorePublicationServlet(), null, null);
-            } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-
-    }
-
-
 }

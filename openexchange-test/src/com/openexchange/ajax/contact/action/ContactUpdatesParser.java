@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsParser;
+import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -69,7 +70,7 @@ import com.openexchange.groupware.container.LinkEntryObject;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContactUpdatesParser extends AbstractColumnsParser<ContactUpdatesResponse> {
+public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResponse> {
 
     protected ContactUpdatesParser(boolean failOnError, int[] columns) {
         super(failOnError, columns);
@@ -77,6 +78,9 @@ public class ContactUpdatesParser extends AbstractColumnsParser<ContactUpdatesRe
 
     @Override
     protected ContactUpdatesResponse createResponse(Response response) throws JSONException {
+        /*
+         * Calling super.createResponse initiates the modified and deleted ids for the update response
+         */
         ContactUpdatesResponse retval = super.createResponse(response);
         JSONArray rows = (JSONArray) response.getData();
         if (rows == null) {
@@ -84,6 +88,10 @@ public class ContactUpdatesParser extends AbstractColumnsParser<ContactUpdatesRe
         }
         List<Contact> contacts = new ArrayList<Contact>();
         for (int i = 0, size = rows.length(); i < size; i++) {
+            Object arrayOrId = rows.get(i);
+            if(!JSONArray.class.isInstance(arrayOrId)) {
+                continue;
+            }
             JSONArray row = rows.getJSONArray(i);
             Contact contact = new Contact();
             for (int colIndex = 0; colIndex < getColumns().length; colIndex++) {

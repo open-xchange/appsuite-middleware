@@ -101,7 +101,12 @@ public final class IMAPStoreCache {
         }
         final ConfigurationService service = Services.getService(ConfigurationService.class);
         final boolean checkConnected = null == service ? false : service.getBoolProperty("com.openexchange.imap.checkConnected", false);
-        tmp = instance = new IMAPStoreCache(checkConnected);
+        Container container = null == service ? Container.getDefault() : Container.containerFor(service.getProperty("com.openexchange.imap.storeContainerType", Container.getDefault().getId()));
+        if (Container.UNBOUNDED.equals(container) && (null != service && service.getIntProperty("com.openexchange.imap.maxNumConnections", 0) > 0)) {
+            LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than zero. Using default container \"" + Container.getDefault().getId() + "\" instead.");
+            container = Container.getDefault();
+        }
+        tmp = instance = new IMAPStoreCache(checkConnected, container);
         tmp.init();
     }
 
@@ -110,11 +115,10 @@ public final class IMAPStoreCache {
      */
     public static void shutDownInstance() {
         final IMAPStoreCache tmp = instance;
-        if (null == tmp) {
-            return;
+        if (null != tmp) {
+            tmp.shutDown();
+            instance = null;
         }
-        tmp.shutDown();
-        instance = null;
     }
 
     /**
@@ -169,28 +173,35 @@ public final class IMAPStoreCache {
      * -------------------------------------- Member stuff --------------------------------------
      */
 
+    private final Container containerType;
     private final Protocol protocol;
-
     private final ConcurrentMap<Key, IMAPStoreContainer> map;
-
     private final ConcurrentMap<User, Queue<Key>> keys;
-
     private final boolean checkConnected;
-
     private volatile ScheduledTimerTask timerTask;
-
     private final RefusedExecutionBehavior<Object> behavior;
 
     /**
      * Initializes a new {@link IMAPStoreCache}.
+     * @param container
      */
-    private IMAPStoreCache(final boolean checkConnected) {
+    private IMAPStoreCache(final boolean checkConnected, final Container container) {
         super();
+        containerType = null == container ? Container.getDefault() : container;
         behavior = CallerRunsBehavior.getInstance();
         this.checkConnected = checkConnected;
         protocol = IMAPProvider.PROTOCOL_IMAP;
         map = new NonBlockingHashMap<Key, IMAPStoreContainer>();
         keys = new NonBlockingHashMap<IMAPStoreCache.User, Queue<Key>>();
+    }
+
+    /**
+     * Gets the class of the associated IMAP store.
+     *
+     * @return The IMAP store class
+     */
+    public Class<? extends IMAPStore> getStoreClass() {
+        return containerType.getStoreClass();
     }
 
     private void init() {
@@ -257,7 +268,7 @@ public final class IMAPStoreCache {
         }
     }
 
-    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final String pw, final Session session) throws OXException {
+    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final Session session) throws OXException {
         /*
          * Check for a cached one
          */
@@ -267,7 +278,7 @@ public final class IMAPStoreCache {
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final IMAPStoreContainer newContainer = new BoundaryAwareIMAPStoreContainer(server, port, login, pw);
+            final IMAPStoreContainer newContainer = newContainer(server, port);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -285,6 +296,19 @@ public final class IMAPStoreCache {
             }
         }
         return container;
+    }
+
+    private IMAPStoreContainer newContainer(final String server, final int port) {
+        switch (containerType) {
+        case UNBOUNDED:
+            return new UnboundedIMAPStoreContainer(server, port);
+        case BOUNDARY_AWARE:
+            return new BoundaryAwareIMAPStoreContainer(server, port);
+        case NON_CACHING:
+            return new NonCachingIMAPStoreContainer(server, port);
+        default:
+            return new BoundaryAwareIMAPStoreContainer(server, port);
+        }
     }
 
     /**
@@ -322,10 +346,10 @@ public final class IMAPStoreCache {
          */
         try {
             if (!DEBUG) {
-                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+                return getContainer(accountId, server, port, login, session).getStore(imapSession, login, pw);
             }
             final long st = System.currentTimeMillis();
-            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+            final IMAPStore store = getContainer(accountId, server, port, login, session).getStore(imapSession, login, pw);
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
             return store;

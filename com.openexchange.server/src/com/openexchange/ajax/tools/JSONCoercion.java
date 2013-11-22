@@ -103,6 +103,15 @@ public class JSONCoercion {
         }
         return object;
     }
+    
+    public static Object parseAndCoerceToNative(String s) {
+        try {
+            JSONObject object = new JSONObject("{v:"+s+"}");
+            return ((Map)coerceToNative(object)).get("v");
+        } catch (JSONException e) {
+            return s;
+        }
+    }
 
     /**
      * Coerces given JSON data to its Java representation.

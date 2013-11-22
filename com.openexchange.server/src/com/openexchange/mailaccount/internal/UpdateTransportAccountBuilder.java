@@ -189,6 +189,11 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     }
 
     @Override
+    public Object archive() {
+        return null;
+    }
+
+    @Override
     public Object mailPort() {
         return null;
     }
@@ -272,6 +277,11 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
 
     @Override
     public Object trashFullname() {
+        return null;
+    }
+
+    @Override
+    public Object archiveFullname() {
         return null;
     }
 

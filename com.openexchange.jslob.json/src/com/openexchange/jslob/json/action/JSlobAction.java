@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.jslob.registry.JSlobServiceRegistry;
@@ -107,18 +108,6 @@ public abstract class JSlobAction implements AJAXActionService {
         super();
         this.services = services;
         this.actions = actions;
-    }
-
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     @Override
@@ -190,6 +179,11 @@ public abstract class JSlobAction implements AJAXActionService {
      */
     public List<Method> getRESTMethods() {
         return Collections.emptyList();
+    }
+
+    /** Checks for an empty String */
+    protected static boolean isEmpty(final String string) {
+        return Strings.isEmpty(string);
     }
 
 }

@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.utils;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -73,14 +73,14 @@ public final class ProviderUtility {
     }
 
     /**
-     * Turns given server URL to an instance of {@link InetSocketAddress}.
+     * Turns given server URL to a String; e.g. <code>"mail.company.org:143"</code>.
      *
      * @param serverUrl The server URL
      * @param defaultPort The default port to use if server URL does not specify a port
-     * @return An instance of {@link InetSocketAddress} denoting given server URL
+     * @return The server URL; e.g. <code>"mail.company.org:143"</code>
      * @throws OXException if the server URL can not be parsed.
      */
-    public static InetSocketAddress toSocketAddr(final String serverUrl, final int defaultPort) throws OXException {
+    public static String toSocketAddrString(final String serverUrl, final int defaultPort) throws OXException {
         final URI uri;
         try {
             uri = URIParser.parse(serverUrl, new URIDefaults() {
@@ -103,7 +103,7 @@ public final class ProviderUtility {
         } catch (final URISyntaxException e) {
             throw MailAccountExceptionCodes.URI_PARSE_FAILED.create(e, serverUrl);
         }
-        return new InetSocketAddress(uri.getHost(), uri.getPort());
+        return new StringAllocator(uri.getHost()).append(':').append(uri.getPort()).toString();
     }
 
     /**

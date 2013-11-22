@@ -56,7 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -85,7 +85,7 @@ public final class TokenLogin implements LoginRequestHandler {
         try {
             doTokenLogin(req, resp);
         } catch (OXException e) {
-            Login.logAndSendException(resp, e);
+            LoginServlet.logAndSendException(resp, e);
         }
     }
 

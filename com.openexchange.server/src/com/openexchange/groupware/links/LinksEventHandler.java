@@ -251,7 +251,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         }
 
         try {
-            writecon = DBPool.pickupWriteable(ct);
+            writecon = DBPool.pickup(ct);
 
             smt = writecon.prepareStatement(SQL_LOAD);
             int pos = 1;
@@ -285,7 +285,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         PreparedStatement upd = null;
         if (updater) {
             try {
-                writecon = DBPool.pickupWriteable(ct);
+                writecon = DBPool.pickup(ct);
                 writecon.setAutoCommit(false);
 
                 upd = writecon.prepareStatement(SQL_UP1);

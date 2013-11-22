@@ -626,8 +626,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
                                     final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
                                     if (userPermission.isVisible()) {
-                                        subfolders[index] =
-                                            getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
+                                        subfolders[index] = getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
                                     }
                                 }
                             }
@@ -647,16 +646,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
                                             final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
                                             if (userPermission.isVisible()) {
-                                                subfolders[index] =
-                                                    getUserizedFolder(
-                                                        subfolder,
-                                                        userPermission,
-                                                        treeId,
-                                                        all,
-                                                        true,
-                                                        newParameters,
-                                                        openedStorages,
-                                                        checkOnly);
+                                                subfolders[index] = getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
                                             }
                                         }
                                     }

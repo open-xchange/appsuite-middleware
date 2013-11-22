@@ -158,7 +158,7 @@ public class AppsLoadServlet extends HttpServlet {
 
         private boolean buffering = true;
 
-        private HttpServletResponse resp;
+        private final HttpServletResponse resp;
 
         private OutputStream out;
 
@@ -174,8 +174,9 @@ public class AppsLoadServlet extends HttpServlet {
         private void stopBuffering() throws IOException {
             buffering = false;
             out = resp.getOutputStream();
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++) {
                 write(buffer[i]);
+            }
             buffer = null;
         }
 
@@ -198,8 +199,9 @@ public class AppsLoadServlet extends HttpServlet {
         }
 
         public void done() throws IOException {
-            if (!buffering)
+            if (!buffering) {
                 return;
+            }
             resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
             stopBuffering();
         }

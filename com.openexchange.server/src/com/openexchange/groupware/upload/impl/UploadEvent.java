@@ -255,6 +255,15 @@ public class UploadEvent {
     }
 
     /**
+     * Gets the number of form fields.
+     *
+     * @return The number of form fields
+     */
+    public int getNumberOfFormFields() {
+        return formFields.size();
+    }
+
+    /**
      * Removes the form field whose name equals specified field name.
      *
      * @param fieldName The field name.

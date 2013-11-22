@@ -65,6 +65,15 @@ import com.openexchange.server.impl.DBPool;
  */
 public abstract class TaskStorage {
 
+    /**
+     * An array holding the column IDs of attributes that are preserved when storing a 'tombstone' representing a deleted task. This
+     * includes properties to identify the deleted task, as well as all other mandatory fields.
+     */
+    public static final int[] TOMBSTONE_ATTRS = {
+        Task.OBJECT_ID, Task.FOLDER_ID, Task.UID, Task.FILENAME, Task.LAST_MODIFIED, Task.CREATION_DATE,
+        Task.CREATED_BY, Task.MODIFIED_BY, Task.PRIVATE_FLAG, Task.RECURRENCE_TYPE, Task.NUMBER_OF_ATTACHMENTS
+    };
+
     private static final int[] UPDATE_DUMMY_ATTRS = new int[] { Task.CREATION_DATE, Task.LAST_MODIFIED, Task.CREATED_BY, Task.MODIFIED_BY };
 
     /**
@@ -104,19 +113,32 @@ public abstract class TaskStorage {
      * @param con writable database connection.
      * @param task Task to store.
      * @param type storage type of the task (one of ACTIVE, DELETED).
+     * @param columns Columns of the tasks that should be stored, or <code>null</code> if not restricted.
+     * @throws OXException if inserting the task fails.
+     */
+    public abstract void insertTask(Context ctx, Connection con, Task task, StorageType type, int[] columns) throws OXException;
+
+    /**
+     * Stores a task object.
+     *
+     * @param ctx Context
+     * @param con writable database connection.
+     * @param task Task to store.
+     * @param type storage type of the task (one of ACTIVE, DELETED).
      * @param optional <code>true</code> to ignore an already existing task.
+     * @param columns Columns of the tasks that should be stored, or <code>null</code> if not restricted.
      * @throws OXException if some SQL or database connection problem occurs.
      */
-    public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, final boolean optional) throws OXException {
+    public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, final boolean optional, int[] columns) throws OXException {
         if (optional) {
             final boolean exists = existsTask(ctx, con, task.getObjectID(), type);
             if (exists) {
                 updateTask(ctx, con, task, new Date(Long.MAX_VALUE), UPDATE_DUMMY_ATTRS, type);
             } else {
-                insertTask(ctx, con, task, type);
+                insertTask(ctx, con, task, type, columns);
             }
         } else {
-            insertTask(ctx, con, task, type);
+            insertTask(ctx, con, task, type, columns);
         }
     }
 

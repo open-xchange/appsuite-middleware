@@ -65,38 +65,38 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class AuditActivator extends HousekeepingActivator {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(AuditActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuditActivator.class);
 
-	public AuditActivator() {
-		super();
-	}
+    public AuditActivator() {
+        super();
+    }
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class };
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
 
-	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
-		}
-	}
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+    }
 
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
-	}
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+    }
 
-	@Override
+    @Override
     protected void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*", FileStorageEventConstants.ALL_TOPICS });
-            registerService(EventHandler.class, AuditEventHandler.getInstance(), serviceProperties);
+            registerService(EventHandler.class, new AuditEventHandler(), serviceProperties);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -104,15 +104,15 @@ public class AuditActivator extends HousekeepingActivator {
 
     }
 
-	@Override
-	protected void stopBundle() throws Exception {
-		try {
-		    cleanUp();
-		    Services.setServiceLookup(null);
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            cleanUp();
+            Services.setServiceLookup(null);
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
+    }
 
 }

@@ -161,11 +161,11 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
      */
     UNSUPPORTED_FORMAT(AjaxExceptionMessages.UNSUPPORTED_FORMAT_MSG, Category.CATEGORY_ERROR, 25),
     /**
-     * Missing cookie: %s
+     * Missing cookie: %s. Please re-login.
      */
     MISSING_COOKIE(AjaxExceptionMessages.MISSING_COOKIE_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
     /**
-     * Cookie "%1$s" cannot be found because requests do not have any cookies.
+     * Cookie "%1$s" cannot be found because requests do not have any cookies. Please re-login.
      */
     MISSING_COOKIES(AjaxExceptionMessages.MISSING_COOKIES_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
 

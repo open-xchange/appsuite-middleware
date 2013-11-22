@@ -282,6 +282,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public void backForUpdateTaskAfterReading(final int contextId, final Connection con) {
+        backFromReading(con);
+    }
+
+    @Override
     public void back(final int poolId, final Connection con) {
         try {
             pools.getPool(poolId).back(con);

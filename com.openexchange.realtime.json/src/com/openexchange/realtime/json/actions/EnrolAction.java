@@ -49,14 +49,16 @@
 
 package com.openexchange.realtime.json.actions;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.RealtimeConfig;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -64,6 +66,8 @@ import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.NextSequence;
+import com.openexchange.realtime.json.protocol.TracingDemand;
+import com.openexchange.realtime.json.util.RTResultFormatter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,11 +93,25 @@ public class EnrolAction extends RTAction {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Enroling ID: " + constructedId);
         }
+        List<JSONObject> stanzas = new ArrayList<JSONObject>();
+        
+        String userAtContext = constructedId.getUser() + "@" + constructedId.getContext();
+        RealtimeConfig realtimeConfig = RealtimeConfig.getInstance();
+        if(realtimeConfig.isTraceAllUsersEnabled() || realtimeConfig.getUsersToTrace().contains(userAtContext)) {
+            JSONObject tracingDemandJSON = stanzaToJSON(new TracingDemand(constructedId, constructedId, true));
+            stanzas.add(tracingDemandJSON);
+        } else {
+            JSONObject tracingDemandJSON = stanzaToJSON(new TracingDemand(constructedId, constructedId, false));
+            stanzas.add(tracingDemandJSON);
+        }
+
         stateManager.retrieveState(constructedId);
         NextSequence nextSequence = new NextSequence(constructedId, constructedId, 0);
-        JSONObject answerJSON = stanzaToJSON(nextSequence);
-        enrolActionResults.put(STANZAS, Collections.singletonList(answerJSON));
-
+        JSONObject nextSequenceJSON = stanzaToJSON(nextSequence);
+        stanzas.add(nextSequenceJSON);
+        
+        enrolActionResults.put(STANZAS, stanzas);
+        
         ResourceDirectory resourceDirectory = JSONServiceRegistry.getInstance().getService(ResourceDirectory.class);
         try {
             resourceDirectory.set(constructedId, new DefaultResource());
@@ -102,7 +120,9 @@ public class EnrolAction extends RTAction {
             LOG.error(enrolException.getMessage(), enrolException);
             enrolActionResults.put(ERROR, exceptionToJSON(enrolException, session));
         }
-
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(RTResultFormatter.format(enrolActionResults));
+        }
         return new AJAXRequestResult(enrolActionResults, "native");
     }
 

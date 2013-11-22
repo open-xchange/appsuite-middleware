@@ -50,21 +50,31 @@
 package com.openexchange.mail.json.actions;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -89,83 +99,168 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
         super(services);
     }
 
-    /**
-     * Split pattern for CSV.
-     */
-    private static final Pattern SPLIT = Pattern.compile(" *, *");
-
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
-        try {
-            // final ServerSession session = req.getSession();
-            /*
-             * Read in parameters
-             */
-            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String[] ids;
-            {
-                final String parameterId = AJAXServlet.PARAMETER_ID;
-                final String sIds = req.getParameter(parameterId);
-                if (null == sIds) {
-                    final JSONArray jArray = (JSONArray) req.getRequest().requireData();
-                    final int length = jArray.length();
-                    ids = new String[length];
-                    for (int i = 0; i < length; i++) {
-                        ids[i] = jArray.getJSONObject(i).getString(parameterId);
-                    }
-                } else {
-                    ids = SPLIT.split(sIds, 0);
-                }
-            }
-            /*
-             * Get mail interface
-             */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            ManagedFile mf = null;
-            try {
-                mf = mailInterface.getMessages(folderPath, ids);
-                /*
-                 * Set Content-Type and Content-Disposition header
-                 */
-                final String fileName = "mails.zip";
-                /*
-                 * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
-                 */
-                final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-                /*
-                 * Write from content's input stream to response output stream
-                 */
+        final List<IdFolderPair> pairs;
+        // Parse pairs
+        {
+            final String value = req.getParameter("body");
+            if (isEmpty(value)) {
+                final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+                final String[] ids;
                 {
-                    final InputStream zipInputStream = mf.getInputStream();
-                    try {
-                        fileHolder.write(zipInputStream);
-                    } finally {
-                        Streams.close(zipInputStream);
+                    final String parameterId = AJAXServlet.PARAMETER_ID;
+                    final String sIds = req.getParameter(parameterId);
+                    if (null == sIds) {
+                        final JSONArray jArray = (JSONArray) req.getRequest().requireData();
+                        final int length = jArray.length();
+                        ids = new String[length];
+                        for (int i = 0; i < length; i++) {
+                            ids[i] = jArray.getJSONObject(i).getString(parameterId);
+                        }
+                    } else {
+                        ids = Strings.splitByComma(sIds);
                     }
                 }
-                /*
-                 * Parameterize file holder
-                 */
-                req.getRequest().setFormat("file");
-                fileHolder.setName(fileName);
-                fileHolder.setContentType("application/octet-stream");
-                return new AJAXRequestResult(fileHolder, "file");
-            } finally {
-                if (null != mf) {
-                    mf.delete();
-                    mf = null;
+                pairs = new ArrayList<IdFolderPair>(ids.length);
+                for (int i = 0; i < ids.length; i++) {
+                    pairs.add(new IdFolderPair(ids[i], folderPath));
+                }
+            } else {
+                final JSONArray jsonArray = new JSONArray(value);
+                final int len = jsonArray.length();
+                pairs = new ArrayList<IdFolderPair>(len);
+                for (int i = 0; i < len; i++) {
+                    final JSONObject tuple = jsonArray.getJSONObject(i);
+                    // Identifier
+                    final String id = tuple.getString(DataFields.ID);
+                    // Folder
+                    String folderId = tuple.optString(FolderChildFields.FOLDER_ID, null);
+                    if (null == folderId) {
+                        folderId = tuple.optString(AJAXServlet.PARAMETER_FOLDERID, null);
+                    }
+                    final IdFolderPair pair = new IdFolderPair(id, folderId);
+                    pairs.add(pair);
                 }
             }
-        } catch (final OXException e) {
-            if (e.getCause() instanceof IOException) {
-                final IOException ioe = (IOException) e.getCause();
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(ioe.getClass().getName())) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(ioe);
+        }
+        // Do it...
+        Collections.sort(pairs);
+        return performMultipleFolder(req, pairs);
+    }
+
+    private AJAXRequestResult performMultipleFolder(final MailRequest req, final List<IdFolderPair> pairs) throws OXException {
+        final MailServletInterface mailInterface = getMailInterface(req);
+        // Initialize ZIP'ing
+        final ThresholdFileHolder thresholdFileHolder = new ThresholdFileHolder();
+        final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(thresholdFileHolder.asOutputStream());
+        zipOutput.setEncoding("UTF-8");
+        zipOutput.setUseLanguageEncodingFlag(true);
+        boolean error = true;
+        try {
+            final int size = pairs.size();
+            final Set<String> names = new HashSet<String>(size);
+            final String ext = ".eml";
+            for (int i = 0; i < size; i++) {
+                final IdFolderPair pair = pairs.get(i);
+                final MailMessage message = mailInterface.getMessage(pair.folderId, pair.identifier, false);
+                if (null != message) {
+                    // Add ZIP entry to output stream
+                    final String subject = message.getSubject();
+                    String name = (isEmpty(subject) ? "mail" + (i + 1) : MailServletInterface.saneForFileName(subject)) + ext;
+                    final int reslen = name.lastIndexOf('.');
+                    int count = 1;
+                    while (false == names.add(name)) {
+                        // Name already contained
+                        name = name.substring(0, reslen);
+                        name = new StringAllocator(name).append("_(").append(count++).append(')').append(ext).toString();
+                    }
+                    ZipArchiveEntry entry;
+                    int num = 1;
+                    while (true) {
+                        try {
+                            final int pos = name.indexOf(ext);
+                            final String entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + ext;
+                            entry = new ZipArchiveEntry(entryName);
+                            zipOutput.putArchiveEntry(entry);
+                            break;
+                        } catch (final java.util.zip.ZipException e) {
+                            final String eMessage = e.getMessage();
+                            if (eMessage == null || !eMessage.startsWith("duplicate entry")) {
+                                throw e;
+                            }
+                            num++;
+                        }
+                    }
+                    /*
+                     * Transfer bytes from the message to the ZIP file
+                     */
+                    final long before = zipOutput.getBytesWritten();
+                    message.writeTo(zipOutput);
+                    final long entrySize = zipOutput.getBytesWritten() - before;
+                    entry.setSize(entrySize);
+                    /*
+                     * Complete the entry
+                     */
+                    zipOutput.closeArchiveEntry();
                 }
             }
-            throw e;
+            error = false;
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            // Close on error
+            if (error) {
+                Streams.close(thresholdFileHolder);
+            }
+            // Complete the ZIP file
+            Streams.close(zipOutput);
+        }
+        // Set meta information
+        req.getRequest().setFormat("file");
+        thresholdFileHolder.setContentType("application/zip");
+        thresholdFileHolder.setName("mails.zip");
+        // Return AJAX result
+        return new AJAXRequestResult(thresholdFileHolder, "file");
+    }
+
+    private final class IdFolderPair implements Comparable<IdFolderPair> {
+
+        final String identifier;
+        final String folderId;
+
+        IdFolderPair(final String identifier, final String folderId) {
+            super();
+            this.identifier = identifier;
+            this.folderId = folderId;
+        }
+
+        @Override
+        public int compareTo(IdFolderPair o) {
+            int retval = folderId.compareTo(o.folderId);
+            if (0 == retval) {
+                retval = identifier.compareTo(o.identifier);
+            }
+            return retval;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("[");
+            if (identifier != null) {
+                builder.append("identifier=").append(identifier).append(", ");
+            }
+            if (folderId != null) {
+                builder.append("folderId=").append(folderId);
+            }
+            builder.append("]");
+            return builder.toString();
         }
     }
 

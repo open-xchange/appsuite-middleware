@@ -250,8 +250,8 @@ public abstract class AbstractMailJob implements IndexingJob {
     }
 
     protected void closeIndexAccess(IndexAccess<?> indexAccess) throws OXException {
-        if (indexAccess != null) {
-            IndexFacadeService indexFacade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+        IndexFacadeService indexFacade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
+        if (indexAccess != null && indexFacade != null) {
             indexFacade.releaseIndexAccess(indexAccess);
         }
     }

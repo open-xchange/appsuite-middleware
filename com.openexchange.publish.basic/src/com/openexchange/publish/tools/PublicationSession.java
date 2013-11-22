@@ -66,6 +66,8 @@ public class PublicationSession implements Session {
 
     private final Publication publication;
 
+    private String localIp;
+
     /**
      * Initializes a new {@link PublicationSession}.
      *
@@ -83,7 +85,7 @@ public class PublicationSession implements Session {
 
     @Override
     public String getLocalIp() {
-        return null;
+        return localIp;
     }
 
     @Override
@@ -98,11 +100,14 @@ public class PublicationSession implements Session {
 
     @Override
     public boolean containsParameter(final String name) {
-        return false;
+        return PARAM_PUBLICATION.equals(name);
     }
 
     @Override
     public Object getParameter(final String name) {
+        if (PARAM_PUBLICATION.equals(name)) {
+            return Boolean.TRUE;
+        }
         return null;
     }
 
@@ -154,7 +159,7 @@ public class PublicationSession implements Session {
 
     @Override
     public void setLocalIp(final String ip) {
-        // Nothing to do here.
+        this.localIp = ip;
     }
 
     @Override

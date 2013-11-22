@@ -708,14 +708,18 @@ public class OXException extends Exception implements OXExceptionConstants {
         Collections.sort(comparables);
         categories.clear();
         for (final ComparableCategory comparable : comparables) {
-            categories.add(comparable.category);
+            if (null != comparable) {
+                categories.add(comparable.category);
+            }
         }
     }
 
     private static List<ComparableCategory> toComparables(final List<Category> categories) {
         final List<ComparableCategory> ret = new ArrayList<ComparableCategory>(categories.size());
         for (final Category category : categories) {
-            ret.add(new ComparableCategory(category));
+            if (null != category) {
+                ret.add(new ComparableCategory(category));
+            }
         }
         return ret;
     }
@@ -774,9 +778,12 @@ public class OXException extends Exception implements OXExceptionConstants {
     public OXException setCategory(final Category category) {
         if (null != category) {
             categories.clear();
+            /*-
+             *
             if (EnumType.TRY_AGAIN.equals(category.getType()) && OXExceptionStrings.MESSAGE.equals(displayMessage)) {
                 displayMessage = OXExceptionStrings.MESSAGE_RETRY;
             }
+            */
             categories.add(category);
         }
         return this;

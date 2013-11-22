@@ -46,7 +46,7 @@ import java.nio.channels.FileChannel;
  * final. However, if it is necessary to use RandomAccessFile and
  * java.io.RandomAccessFile interchangeably, both classes implement the
  * DataInput and DataOutput interfaces.
- * 
+ *
  * @author Alex McManus
  * @author Russ Rew
  * @version $Id: EnhancedRandomAccessFile.java 22077 2006-10-12 19:08:27Z
@@ -142,7 +142,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * _more_
-     * 
+     *
      * @param bufferSize
      *            _more_
      */
@@ -154,7 +154,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Constructor, default buffer size.
-     * 
+     *
      * @param location
      *            location of the file
      * @param mode
@@ -169,7 +169,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Constructor.
-     * 
+     *
      * @param location
      *            location of the file
      * @param mode
@@ -193,7 +193,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * _more_
-     * 
+     *
      * @param bufferSize
      *            _more_
      */
@@ -210,7 +210,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Create a new buffered random-access file with a default buffer size. Note
      * that the mode CREATE implies WRITE.
-     * 
+     *
      * @param filename
      *            the name of the file.
      * @param mode
@@ -245,7 +245,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * is opened with a mode of <code>"r"</code>. If the mode is
      * <code>"rw"</code> and the file does not exist, then an attempt is made
      * to create it.
-     * 
+     *
      * @param file
      *            the file object.
      * @param modeString
@@ -274,7 +274,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Create a new buffered random-access file with a specified buffer size.
      * Note that the mode CREATE implies WRITE, and the READ is always implied.
-     * 
+     *
      * @param filename
      *            the name of the file.
      * @param mode
@@ -340,7 +340,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Return true if file pointer is at end of file.
-     * 
+     *
      * @return _more_
      */
     public boolean isAtEndOfFile() {
@@ -349,7 +349,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * _more_
-     * 
+     *
      * @return _more_
      */
     public FileChannel getChannel() {
@@ -367,7 +367,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Close the file, and release any associated system resources.
-     * 
+     *
      * @exception IOException
      *                if an I/O error occurrs.
      */
@@ -382,7 +382,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
         // of the buffer.
         if ((mode | WRITE) > 0 && bufferModified) {
             file.seek(bufferStart);
-            file.write(buffer, 0, (int) dataSize);
+            file.write(buffer, 0, dataSize);
         }
 
         // may need to extend file, in case no fill is neing used
@@ -401,7 +401,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Set the position in the file for the next read or write.
-     * 
+     *
      * @param pos
      *            the offset (in bytes) from the start of the file.
      * @exception IOException
@@ -438,7 +438,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Returns the current position in the file, where the next read or write
      * will occur.
-     * 
+     *
      * @return the offset from the start of the file in bytes.
      * @exception IOException
      *                if an I/O error occurrs.
@@ -449,7 +449,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Get the file location, or name.
-     * 
+     *
      * @return _more_
      */
     public String getLocation() {
@@ -459,7 +459,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Get the length of the file. The data in the buffer (which may not have
      * been written the disk yet) is taken into account.
-     * 
+     *
      * @return the length of the file in bytes.
      * @exception IOException
      *                if an I/O error occurrs.
@@ -475,7 +475,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Change the current endian mode. Subsequent reads of short, int, float,
      * double, long, char will use this. Does not currently effect writes.
-     * 
+     *
      * @param endian
      *            BIG_ENDIAN or LITTLE_ENDIAN
      */
@@ -485,7 +485,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Returns the opaque file descriptor object associated with this file.
-     * 
+     *
      * @return the file descriptor object associated with this file.
      * @exception IOException
      *                if an I/O error occurs.
@@ -496,7 +496,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Copy the contents of the buffer to the disk.
-     * 
+     *
      * @exception IOException
      *                if an I/O error occurrs.
      */
@@ -511,7 +511,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Make sure file is at least this long when its closed. needed when not
      * using fill mode, and not all data is written.
-     * 
+     *
      * @param minLength
      *            _more_
      */
@@ -533,7 +533,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Read a byte of data from the file, blocking until data is available.
-     * 
+     *
      * @return the next byte of data, or -1 if the end of the file is reached.
      * @exception IOException
      *                if an I/O error occurrs.
@@ -542,7 +542,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
         // If the file position is within the data, return the byte...
         if (filePosition < dataEnd) {
-            return (int) (buffer[(int) (filePosition++ - bufferStart)] & 0xff);
+            return buffer[(int) (filePosition++ - bufferStart)] & 0xff;
 
             // ...or should we indicate EOF...
         } else if (endOfFile) {
@@ -558,7 +558,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Read up to <code>len</code> bytes into an array, at a specified offset.
      * This will block until at least one byte has been read.
-     * 
+     *
      * @param b
      *            the byte array to receive the bytes.
      * @param off
@@ -625,7 +625,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * read directly, without going through the buffer
-     * 
+     *
      * @param pos
      *            _more_
      * @param b
@@ -634,9 +634,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *            _more_
      * @param len
      *            _more_
-     * 
+     *
      * @return _more_
-     * 
+     *
      * @throws IOException
      *             _more_
      */
@@ -656,7 +656,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Read up to <code>len</code> bytes into an array, at a specified offset.
      * This will block until at least one byte has been read.
-     * 
+     *
      * @param b
      *            the byte array to receive the bytes.
      * @param off
@@ -675,7 +675,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Read up to <code>b.length( )</code> bytes into an array. This will
      * block until at least one byte has been read.
-     * 
+     *
      * @param b
      *            the byte array to receive the bytes.
      * @return the actual number of bytes read, or -1 if there is not more data
@@ -692,7 +692,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method reads repeatedly from the file until all the bytes are read.
      * This method blocks until all the bytes are read, the end of the stream is
      * detected, or an exception is thrown.
-     * 
+     *
      * @param b
      *            the buffer into which the data is read.
      * @exception EOFException
@@ -700,6 +700,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void readFully(byte b[]) throws IOException {
         readFully(b, 0, b.length);
     }
@@ -709,7 +710,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * array. This method reads repeatedly from the file until all the bytes are
      * read. This method blocks until all the bytes are read, the end of the
      * stream is detected, or an exception is thrown.
-     * 
+     *
      * @param b
      *            the buffer into which the data is read.
      * @param off
@@ -721,6 +722,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void readFully(byte b[], int off, int len) throws IOException {
         int n = 0;
         int count;
@@ -736,7 +738,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * Skips exactly <code>n</code> bytes of input. This method blocks until
      * all the bytes are skipped, the end of the stream is detected, or an
      * exception is thrown.
-     * 
+     *
      * @param n
      *            the number of bytes to be skipped.
      * @return the number of bytes skipped, which is always <code>n</code>.
@@ -746,6 +748,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public int skipBytes(int n) throws IOException {
         seek(getFilePointer() + n);
         return n;
@@ -770,10 +773,11 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * Caveat: the effects of seek( )ing beyond the end of the file are
      * undefined.
-     * 
+     *
      * @exception IOException
      *                if an I/O error occurrs.
      */
+    @Override
     public final void write(int b) throws IOException {
 
         // If the file position is within the block of data...
@@ -803,7 +807,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Write <code>len</code> bytes from an array to the file.
-     * 
+     *
      * @param b
      *            the array containing the data.
      * @param off
@@ -862,18 +866,20 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
             file.seek(filePosition); // moved per Steve Cerruti; Jan 14, 2005
             file.write(b, off, len);
             filePosition += len;
+            bufferStart = filePosition; // TF added Nov 11, 2013
         }
     }
 
     /**
      * Writes <code>b.length</code> bytes from the specified byte array
      * starting at offset <code>off</code> to this file.
-     * 
+     *
      * @param b
      *            the data.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public void write(byte b[]) throws IOException {
         writeBytes(b, 0, b.length);
     }
@@ -881,7 +887,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Writes <code>len</code> bytes from the specified byte array starting at
      * offset <code>off</code> to this file.
-     * 
+     *
      * @param b
      *            the data.
      * @param off
@@ -891,6 +897,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public void write(byte b[], int off, int len) throws IOException {
         writeBytes(b, off, len);
     }
@@ -905,13 +912,14 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <code>false</code>. Any other value represents <code>true</code>.
      * This method blocks until the byte is read, the end of the stream is
      * detected, or an exception is thrown.
-     * 
+     *
      * @return the <code>boolean</code> value read.
      * @exception EOFException
      *                if this file has reached the end.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final boolean readBoolean() throws IOException {
         int ch = this.read();
         if (ch < 0)
@@ -932,13 +940,14 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until the byte is read, the end of the stream is
      * detected, or an exception is thrown.
-     * 
+     *
      * @return the next byte of this file as a signed 8-bit <code>byte</code>.
      * @exception EOFException
      *                if this file has reached the end.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final byte readByte() throws IOException {
         int ch = this.read();
         if (ch < 0)
@@ -952,7 +961,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until the byte is read, the end of the stream is
      * detected, or an exception is thrown.
-     * 
+     *
      * @return the next byte of this file, interpreted as an unsigned 8-bit
      *         number.
      * @exception EOFException
@@ -960,6 +969,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final int readUnsignedByte() throws IOException {
         int ch = this.read();
         if (ch < 0)
@@ -981,7 +991,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until the two bytes are read, the end of the stream is
      * detected, or an exception is thrown.
-     * 
+     *
      * @return the next two bytes of this file, interpreted as a signed 16-bit
      *         number.
      * @exception EOFException
@@ -989,6 +999,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final short readShort() throws IOException {
         byte ch[] = new byte[2];
         if (readBytes(ch, 0, 2) < 0)
@@ -1015,7 +1026,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until the two bytes are read, the end of the stream is
      * detected, or an exception is thrown.
-     * 
+     *
      * @return the next two bytes of this file, interpreted as an unsigned
      *         16-bit integer.
      * @exception EOFException
@@ -1023,6 +1034,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final int readUnsignedShort() throws IOException {
         byte ch[] = new byte[2];
         if (readBytes(ch, 0, 2) < 0)
@@ -1049,13 +1061,14 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until the two bytes are read, the end of the stream is
      * detected, or an exception is thrown.
-     * 
+     *
      * @return the next two bytes of this file as a Unicode character.
      * @exception EOFException
      *                if this file reaches the end before reading two bytes.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final char readChar() throws IOException {
         byte ch[] = new byte[2];
         if (readBytes(ch, 0, 2) < 0)
@@ -1082,7 +1095,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until the four bytes are read, the end of the stream
      * is detected, or an exception is thrown.
-     * 
+     *
      * @return the next four bytes of this file, interpreted as an
      *         <code>int</code>.
      * @exception EOFException
@@ -1090,6 +1103,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final int readInt() throws IOException {
 
         byte ch[] = new byte[4];
@@ -1121,17 +1135,17 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * then the result is equal to:
      * <p>
      * <blockquote>
-     * 
+     *
      * <pre>
      * ((long) b1 &lt;&lt; 56) + ((long) b2 &lt;&lt; 48) + ((long) b3 &lt;&lt; 40) + ((long) b4 &lt;&lt; 32)
      *      + ((long) b5 &lt;&lt; 24) + ((long) b6 &lt;&lt; 16) + ((long) b7 &lt;&lt; 8) + b8
      * </pre>
-     * 
+     *
      * </blockquote>
      * <p>
      * This method blocks until the eight bytes are read, the end of the stream
      * is detected, or an exception is thrown.
-     * 
+     *
      * @return the next eight bytes of this file, interpreted as a
      *         <code>long</code>.
      * @exception EOFException
@@ -1139,12 +1153,13 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final long readLong() throws IOException {
 
         byte ch[] = new byte[8];
         if (readBytes(ch, 0, 8) < 0)
             throw new EOFException();
-        return ((long) ((ch[0] << 56) + (ch[1] << 40) + (ch[2] << 40) + (ch[3] << 32))
+        return ((ch[0] << 56) + (ch[1] << 40) + (ch[2] << 40) + (ch[3] << 32)
                 + ((long) (ch[4] << 24) + (ch[5] << 16) + (ch[6] << 8) + (ch[7] << 0)) & 0xFFFFFFFFL);
         // return ((long) (readInt()) << 32) + (readInt() & 0xFFFFFFFFL);
     }
@@ -1157,7 +1172,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until the four bytes are read, the end of the stream
      * is detected, or an exception is thrown.
-     * 
+     *
      * @return the next four bytes of this file, interpreted as a
      *         <code>float</code>.
      * @exception EOFException
@@ -1167,6 +1182,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @see java.io.RandomAccessFile#readInt()
      * @see java.lang.Float#intBitsToFloat(int)
      */
+    @Override
     public final float readFloat() throws IOException {
         return Float.intBitsToFloat(readInt());
     }
@@ -1179,7 +1195,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until the eight bytes are read, the end of the stream
      * is detected, or an exception is thrown.
-     * 
+     *
      * @return the next eight bytes of this file, interpreted as a
      *         <code>double</code>.
      * @exception EOFException
@@ -1189,6 +1205,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @see java.io.RandomAccessFile#readLong()
      * @see java.lang.Double#longBitsToDouble(long)
      */
+    @Override
     public final double readDouble() throws IOException {
         return Double.longBitsToDouble(readLong());
     }
@@ -1206,11 +1223,12 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method blocks until a newline character is read, a carriage return
      * and the byte following it are read (to see if it is a newline), the end
      * of the stream is detected, or an exception is thrown.
-     * 
+     *
      * @return the next line of text from this file.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final String readLine() throws IOException {
         final StringBuffer input = new StringBuffer();
         int c;
@@ -1236,7 +1254,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <p>
      * This method blocks until all the bytes are read, the end of the stream is
      * detected, or an exception is thrown.
-     * 
+     *
      * @return a Unicode string.
      * @exception EOFException
      *                if this file reaches the end before reading all the bytes.
@@ -1247,6 +1265,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                Unicode string.
      * @see java.io.RandomAccessFile#readUnsignedShort()
      */
+    @Override
     public final String readUTF() throws IOException {
         return DataInputStream.readUTF(this);
     }
@@ -1260,36 +1279,39 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <code>true</code> is written out as the value <code>(byte)1</code>;
      * the value <code>false</code> is written out as the value
      * <code>(byte)0</code>.
-     * 
+     *
      * @param v
      *            a <code>boolean</code> value to be written.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void writeBoolean(boolean v) throws IOException {
         write(v ? 1 : 0);
     }
 
     /**
      * Writes a <code>byte</code> to the file as a 1-byte value.
-     * 
+     *
      * @param v
      *            a <code>byte</code> value to be written.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void writeByte(int v) throws IOException {
         write(v);
     }
 
     /**
      * Writes a <code>short</code> to the file as two bytes, high byte first.
-     * 
+     *
      * @param v
      *            a <code>short</code> to be written.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void writeShort(int v) throws IOException {
         write((v >>> 8) & 0xFF);
         write((v >>> 0) & 0xFF);
@@ -1298,12 +1320,13 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Writes a <code>char</code> to the file as a 2-byte value, high byte
      * first.
-     * 
+     *
      * @param v
      *            a <code>char</code> value to be written.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void writeChar(int v) throws IOException {
         write((v >>> 8) & 0xFF);
         write((v >>> 0) & 0xFF);
@@ -1311,12 +1334,13 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Writes an <code>int</code> to the file as four bytes, high byte first.
-     * 
+     *
      * @param v
      *            an <code>int</code> to be written.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void writeInt(int v) throws IOException {
         write((v >>> 24) & 0xFF);
         write((v >>> 16) & 0xFF);
@@ -1326,12 +1350,13 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Writes a <code>long</code> to the file as eight bytes, high byte first.
-     * 
+     *
      * @param v
      *            a <code>long</code> to be written.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void writeLong(long v) throws IOException {
         write((int) (v >>> 56) & 0xFF);
         write((int) (v >>> 48) & 0xFF);
@@ -1348,13 +1373,14 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <code>floatToIntBits</code> method in class <code>Float</code>, and
      * then writes that <code>int</code> value to the file as a 4-byte
      * quantity, high byte first.
-     * 
+     *
      * @param v
      *            a <code>float</code> value to be written.
      * @exception IOException
      *                if an I/O error occurs.
      * @see java.lang.Float#floatToIntBits(float)
      */
+    @Override
     public final void writeFloat(float v) throws IOException {
         writeInt(Float.floatToIntBits(v));
     }
@@ -1364,13 +1390,14 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * <code>doubleToLongBits</code> method in class <code>Double</code>,
      * and then writes that <code>long</code> value to the file as an 8-byte
      * quantity, high byte first.
-     * 
+     *
      * @param v
      *            a <code>double</code> value to be written.
      * @exception IOException
      *                if an I/O error occurs.
      * @see java.lang.Double#doubleToLongBits(double)
      */
+    @Override
     public final void writeDouble(double v) throws IOException {
         writeLong(Double.doubleToLongBits(v));
     }
@@ -1379,12 +1406,13 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * Writes the string to the file as a sequence of bytes. Each character in
      * the string is written out, in sequence, by discarding its high eight
      * bits.
-     * 
+     *
      * @param s
      *            a string of bytes to be written.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void writeBytes(String s) throws IOException {
         int len = s.length();
         for (int i = 0; i < len; i++) {
@@ -1396,7 +1424,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * Writes the character array to the file as a sequence of bytes. Each
      * character in the string is written out, in sequence, by discarding its
      * high eight bits.
-     * 
+     *
      * @param b
      *            a character array of bytes to be written.
      * @param off
@@ -1416,13 +1444,14 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * Writes a string to the file as a sequence of characters. Each character
      * is written to the data output stream as if by the <code>writeChar</code>
      * method.
-     * 
+     *
      * @param s
      *            a <code>String</code> value to be written.
      * @exception IOException
      *                if an I/O error occurs.
      * @see java.io.RandomAccessFile#writeChar(int)
      */
+    @Override
     public final void writeChars(String s) throws IOException {
         int len = s.length();
         for (int i = 0; i < len; i++) {
@@ -1441,12 +1470,13 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This value is the number of bytes actually written out, not the length of
      * the string. Following the length, each character of the string is output,
      * in sequence, using the UTF-8 encoding for each character.
-     * 
+     *
      * @param str
      *            a string to be written.
      * @exception IOException
      *                if an I/O error occurs.
      */
+    @Override
     public final void writeUTF(String str) throws IOException {
         int strlen = str.length();
         int utflen = 0;
@@ -1483,9 +1513,10 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Create a string representation of this object.
-     * 
+     *
      * @return a string representation of the state of the object.
      */
+    @Override
     public String toString() {
         return "fp=" + filePosition + ", bs=" + bufferStart + ", de=" + dataEnd
                 + ", ds=" + dataSize + ", bl=" + buffer.length + ", m=" + mode

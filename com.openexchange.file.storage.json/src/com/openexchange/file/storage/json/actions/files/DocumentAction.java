@@ -64,6 +64,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -85,6 +86,8 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService {
 
+    public static final String DOCUMENT = "com.openexchange.file.storage.json.DocumentAction.DOCUMENT";
+
     /**
      * Initializes a new {@link DocumentAction}.
      */
@@ -99,8 +102,27 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final IDBasedFileAccess fileAccess = request.getFileAccess();
         final String id = request.getId();
         final String version = request.getVersion();
+
+        final Document document = (request.getCachedDocument() == null) ? fileAccess.getDocumentAndMetadata(id, version) : request.getCachedDocument();
+
+        if (document != null) {
+            final FileHolder fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
+
+                @Override
+                public InputStream newStream() throws OXException, IOException {
+                    return document.getData();
+                }
+
+            }, document.getSize(), document.getMimeType(), document.getName());
+
+            AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            result.setHeader("ETag", document.getEtag());
+            return result;
+        }
+
         final File fileMetadata = fileAccess.getFileMetadata(id, version);
 
+        // Download file
         final IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
 
             @Override
@@ -129,6 +151,21 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     public boolean checkETag(String clientETag, AJAXRequestData requestData, ServerSession session) throws OXException {
         final AJAXInfostoreRequest request = new AJAXInfostoreRequest(requestData, session);
         final IDBasedFileAccess fileAccess = request.getFileAccess();
+
+        final String id = request.getId();
+        final String version = request.getVersion();
+
+        final Document document = fileAccess.getDocumentAndMetadata(id, version, clientETag);
+        if (document != null) {
+            requestData.setProperty(DOCUMENT, document);
+            String etag = document.getEtag();
+            if (etag != null && etag.equals(clientETag)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
         return FileStorageUtility.getETagFor(fileMetadata).equals(clientETag);
     }

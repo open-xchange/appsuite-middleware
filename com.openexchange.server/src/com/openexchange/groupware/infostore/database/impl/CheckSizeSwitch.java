@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -66,6 +65,7 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -145,7 +145,7 @@ public class CheckSizeSwitch {
             LOG.error(e.getMessage(),  e);
             return 0;
         } finally {
-            provider.releaseWriteConnection(ctx, con);
+            provider.releaseWriteConnectionAfterReading(ctx, con);
         }
 
     }

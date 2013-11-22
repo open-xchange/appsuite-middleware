@@ -202,7 +202,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 LOG.debug("No changes detected in " + appointmentToSave + ", skipping update.");
             } else {
                 getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified, checkPermissions);
-                clientLastModified = appointmentToSave.getLastModified();
+                if (null != appointmentToSave.getLastModified()) {
+                    clientLastModified = appointmentToSave.getLastModified();
+                }
             }
             /*
              * update change exceptions
@@ -255,7 +257,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     LOG.debug("No changes detected in " + exceptionToSave + ", skipping update.");
                 } else {
                     getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
-                    clientLastModified = exceptionToSave.getLastModified();
+                    if (null != exceptionToSave.getLastModified()) {
+                        clientLastModified = exceptionToSave.getLastModified();
+                    }
                 }
             }
             /*
@@ -591,12 +595,10 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         // Normalize the wanted DelEx to midnight, and add them to our set.
         final Set<Date> wantedSet = new HashSet<Date>(Arrays.asList(wantedDeleteExceptions));
 
-        Date[] knownDeleteExceptions = oldAppointment.getDeleteException();
-        if (knownDeleteExceptions == null) {
-            knownDeleteExceptions = new Date[0];
-        }
-        for (final Date date : knownDeleteExceptions) {
-            wantedSet.remove(date);
+        if (null != oldAppointment && null != oldAppointment.getDeleteException()) {
+            for (Date knownDeleteException : oldAppointment.getDeleteException()) {
+                wantedSet.remove(knownDeleteException);
+            }
         }
 
         for (final Date date : wantedSet) {

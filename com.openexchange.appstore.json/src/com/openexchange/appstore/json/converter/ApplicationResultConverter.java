@@ -97,54 +97,53 @@ public class ApplicationResultConverter implements ResultConverter {
     }
 
     private void convertInstall(AJAXRequestResult result) {
-        final JSONArray json;
-        if (Boolean.class.isInstance(result.getResultObject())) {
-            json = new JSONArray(1);
-            json.put(result.getResultObject());
-        } else {
-            Collection<Boolean> values = (Collection<Boolean>) result.getResultObject();
-            json = new JSONArray(values.size());
+        final Object resultObject = result.getResultObject();
+        if (resultObject instanceof Boolean) {
+            final JSONArray json = new JSONArray(1).put(resultObject);
+            result.setResultObject(json, getOutputFormat());
+        } else if (resultObject instanceof Collection) {
+            Collection<Boolean> values = (Collection<Boolean>) resultObject;
+            final JSONArray json = new JSONArray(values.size());
             for (Boolean value : values) {
                 json.put(value);
             }
+            result.setResultObject(json, getOutputFormat());
         }
-
-        result.setResultObject(json, getOutputFormat());
     }
 
     private void convertInstalled(AJAXRequestResult result) {
-        final JSONArray appJson;
-        if (Application.class.isInstance(result.getResultObject())) {
-            Application app = (Application) result.getResultObject();
-            appJson = new JSONArray(1);
+        final Object resultObject = result.getResultObject();
+        if (resultObject instanceof Application) {
+            Application app = (Application) resultObject;
+            final JSONArray appJson = new JSONArray(1);
             appJson.put(app.getName());
-        } else {
-            Collection<Application> apps = (Collection<Application>) result.getResultObject();
-            appJson = new JSONArray(apps.size());
+            result.setResultObject(appJson, getOutputFormat());
+        } else if (resultObject instanceof Collection) {
+            Collection<Application> apps = (Collection<Application>) resultObject;
+            final JSONArray appJson = new JSONArray(apps.size());
             for (Application app : apps) {
                 appJson.put(app.getName());
             }
+            result.setResultObject(appJson, getOutputFormat());
         }
-
-        result.setResultObject(appJson, getOutputFormat());
     }
 
     private void convertGet(AJAXRequestResult result) throws OXException {
-        final JSONArray appJson;
-
-        if (Application.class.isInstance(result.getResultObject())) {
-            final Application app = (Application) result.getResultObject();
+        final Object resultObject = result.getResultObject();
+        if (resultObject instanceof Application) {
             try {
+                final Application app = (Application) resultObject;
                 JSONObject jsonCont = new JSONObject(app.getDescription());
                 jsonCont.put("path", app.getRelativePath());
-                appJson = new JSONArray(1);
+                final JSONArray appJson = new JSONArray(1);
                 appJson.put(jsonCont);
+                result.setResultObject(appJson, getOutputFormat());
             } catch (JSONException e) {
                 throw AppException.jsonError();
             }
-        } else {
-            final Collection<Application> apps = (Collection<Application>) result.getResultObject();
-            appJson = new JSONArray(apps.size());
+        } else if (resultObject instanceof Collection) {
+            final Collection<Application> apps = (Collection<Application>) resultObject;
+            final JSONArray appJson = new JSONArray(apps.size());
             for (final Application app : apps) {
                 try {
                     JSONObject jsonCont = new JSONObject(app.getDescription());
@@ -157,9 +156,8 @@ public class ApplicationResultConverter implements ResultConverter {
                     throw AppException.jsonError();
                 }
             }
+            result.setResultObject(appJson, getOutputFormat());
         }
-
-        result.setResultObject(appJson, getOutputFormat());
     }
 
 }

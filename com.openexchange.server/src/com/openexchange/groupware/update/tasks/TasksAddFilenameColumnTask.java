@@ -54,7 +54,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -83,23 +82,22 @@ public class TasksAddFilenameColumnTask extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         int contextID = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection connnection = dbService.getForUpdateTask(contextID);
+        Connection connection = dbService.getForUpdateTask(contextID);
         Column filenameColumn = new Column("filename", "VARCHAR(255) DEFAULT NULL");
         try {
-            connnection.setAutoCommit(false);
-            Tools.checkAndAddColumns(connnection, "task", filenameColumn);
-            Tools.checkAndAddColumns(connnection, "del_task", filenameColumn);
-            connnection.commit();
+            connection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connection, "task", filenameColumn);
+            Tools.checkAndAddColumns(connection, "del_task", filenameColumn);
+            connection.commit();
         } catch (SQLException e) {
-            rollback(connnection);
+            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connnection);
+            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connnection);
-            Database.backNoTimeout(contextID, true, connnection);
+            autocommit(connection);
+            dbService.backForUpdateTask(contextID, connection);
         }
     }
-
 }

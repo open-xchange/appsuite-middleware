@@ -90,6 +90,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -146,7 +147,11 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             try {
                 // Try to read first byte and push back immediately
                 final PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
-                in.unread(in.read());
+                final int read = in.read();
+                if (read < 0) {
+                    return Streams.EMPTY_INPUT_STREAM;
+                }
+                in.unread(read);
                 return in;
             } catch (final com.sun.mail.util.FolderClosedIOException e) {
                 // Need to reconnect
@@ -352,9 +357,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
             final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
-            JSONObject fileData = new JSONObject();
-            fileData.put("mailFolder", folderPath);
-            fileData.put("mailUID", uid);
             try {
                 if (!session.getUserPermissionBits().hasInfostore()) {
                     throw MailExceptionCode.NO_MAIL_ACCESS.create();
@@ -372,14 +374,20 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 final File file = parser.parse(jsonFileObject);
                 final List<Field> fields = parser.getFields(jsonFileObject);
                 final Set<Field> set = EnumSet.copyOf(fields);
+                String mimeType = mailPart.getContentType().getBaseType();
                 String fileName = mailPart.getFileName();
                 if (isEmpty(fileName)) {
                     fileName = "part_" + sequenceId + ".dat";
+                } else {
+                    final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                    if (!MIME_APPL_OCTET.equals(contentTypeByFileName) && !equalPrimaryTypes(mimeType, contentTypeByFileName)) {
+                        mimeType = contentTypeByFileName;
+                    }
                 }
                 if (!set.contains(Field.FILENAME) || isEmpty(file.getFileName())) {
                     file.setFileName(fileName);
                 }
-                file.setFileMIMEType(mailPart.getContentType().toString());
+                file.setFileMIMEType(mimeType);
                 /*
                  * Since file's size given from IMAP server is just an estimation and therefore does not exactly match the file's size a
                  * future file access via webdav can fail because of the size mismatch. Thus set the file size to 0 to make the infostore
@@ -443,6 +451,21 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    private String getPrimaryType(final String contentType) {
+        if (isEmpty(contentType)) {
+            return contentType;
+        }
+        final int pos = contentType.indexOf('/');
+        return pos > 0 ? contentType.substring(0, pos) : contentType;
+    }
+
+    private boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
+        if (null == contentType1 || null == contentType2) {
+            return false;
+        }
+        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
     }
 
 }

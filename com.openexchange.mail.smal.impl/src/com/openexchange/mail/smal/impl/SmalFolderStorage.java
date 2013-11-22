@@ -81,21 +81,18 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
 
-    private final IMailFolderStorage folderStorage;
-
     /**
      * Initializes a new {@link SmalFolderStorage}.
      *
      * @throws OXException If initialization fails
      */
-    public SmalFolderStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
-        super(session, accountId, delegateMailAccess);
-        folderStorage = delegateMailAccess.getFolderStorage();
+    public SmalFolderStorage(final Session session, final int accountId, final SmalMailAccess smalMailAccess) throws OXException {
+        super(session, accountId, smalMailAccess);
     }
 
     @Override
     public IMailFolderStorage getDelegateFolderStorage() throws OXException {
-        return folderStorage;
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage();
     }
 
     @Override
@@ -103,31 +100,31 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             return true;
         }
-        return folderStorage.exists(fullName);
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().exists(fullName);
     }
 
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
-        final MailFolder folder = folderStorage.getFolder(fullName);
+        final MailFolder folder = smalMailAccess.getDelegateMailAccess().getFolderStorage().getFolder(fullName);
         return folder;
     }
 
     @Override
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
-        return folderStorage.getSubfolders(parentFullName, all);
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getSubfolders(parentFullName, all);
     }
 
     @Override
     public void checkDefaultFolders() throws OXException {
-        folderStorage.checkDefaultFolders();
+        smalMailAccess.getDelegateMailAccess().getFolderStorage().checkDefaultFolders();
     }
 
     @Override
     public String createFolder(final MailFolderDescription toCreate) throws OXException {
-        String fullName = folderStorage.createFolder(toCreate);
+        final String fullName = smalMailAccess.getDelegateMailAccess().getFolderStorage().createFolder(toCreate);
         try {
             submitFolderJob(fullName);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
         return fullName;
@@ -135,17 +132,17 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public String updateFolder(final String fullName, final MailFolderDescription toUpdate) throws OXException {
-        String fn = folderStorage.updateFolder(fullName, toUpdate);
+        final String fn = smalMailAccess.getDelegateMailAccess().getFolderStorage().updateFolder(fullName, toUpdate);
         return fn;
     }
 
     @Override
     public String moveFolder(final String fullName, final String newFullName) throws OXException {
-        String nfn = folderStorage.moveFolder(fullName, newFullName);
+        final String nfn = smalMailAccess.getDelegateMailAccess().getFolderStorage().moveFolder(fullName, newFullName);
         try {
             submitFolderJob(fullName);
             submitFolderJob(nfn);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
 
@@ -154,13 +151,13 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public String deleteFolder(final String fullName, final boolean hardDelete) throws OXException {
-        String retval = folderStorage.deleteFolder(fullName, hardDelete);
+        final String retval = smalMailAccess.getDelegateMailAccess().getFolderStorage().deleteFolder(fullName, hardDelete);
         try {
             submitFolderJob(retval);
             if (!hardDelete) {
                 submitFolderJob(getTrashFolder());
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.warn("Could not schedule folder job for folder " + retval + '.', e);
         }
         return retval;
@@ -168,66 +165,66 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public void clearFolder(final String fullName, final boolean hardDelete) throws OXException {
-        folderStorage.clearFolder(fullName, hardDelete);
+        smalMailAccess.getDelegateMailAccess().getFolderStorage().clearFolder(fullName, hardDelete);
         try {
             submitFolderJob(fullName);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
     }
 
     @Override
     public Quota[] getQuotas(final String fullName, final Type[] types) throws OXException {
-        return folderStorage.getQuotas(fullName, types);
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getQuotas(fullName, types);
     }
 
     @Override
     public String getConfirmedHamFolder() throws OXException {
-        return folderStorage.getConfirmedHamFolder();
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getConfirmedHamFolder();
     }
 
     @Override
     public String getConfirmedSpamFolder() throws OXException {
-        return folderStorage.getConfirmedSpamFolder();
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getConfirmedSpamFolder();
     }
 
     @Override
     public String getDraftsFolder() throws OXException {
-        return folderStorage.getDraftsFolder();
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getDraftsFolder();
     }
 
     @Override
     public String getSpamFolder() throws OXException {
-        return folderStorage.getSpamFolder();
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getSpamFolder();
     }
 
     @Override
     public String getSentFolder() throws OXException {
-        return folderStorage.getSentFolder();
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getSentFolder();
     }
 
     @Override
     public String getTrashFolder() throws OXException {
-        return folderStorage.getTrashFolder();
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getTrashFolder();
     }
 
     @Override
     public MailFolder getRootFolder() throws OXException {
-        return folderStorage.getFolder(DEFAULT_FOLDER_ID);
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getFolder(DEFAULT_FOLDER_ID);
     }
 
     @Override
     public String getDefaultFolderPrefix() throws OXException {
-        return folderStorage.getDefaultFolderPrefix();
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getDefaultFolderPrefix();
     }
 
     @Override
     public String renameFolder(final String fullName, final String newName) throws OXException {
-        String nfn = folderStorage.renameFolder(fullName, newName);
+        final String nfn = smalMailAccess.getDelegateMailAccess().getFolderStorage().renameFolder(fullName, newName);
         try {
             submitFolderJob(fullName);
             submitFolderJob(nfn);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
         }
 
@@ -246,28 +243,30 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public MailFolder[] getPath2DefaultFolder(final String fullName) throws OXException {
-        return folderStorage.getPath2DefaultFolder(fullName);
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getPath2DefaultFolder(fullName);
     }
 
     @Override
     public Quota getStorageQuota(final String fullName) throws OXException {
-        return folderStorage.getStorageQuota(fullName);
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getStorageQuota(fullName);
     }
 
     @Override
     public Quota getMessageQuota(final String fullName) throws OXException {
-        return folderStorage.getMessageQuota(fullName);
+        return smalMailAccess.getDelegateMailAccess().getFolderStorage().getMessageQuota(fullName);
     }
 
     @Override
     public void releaseResources() throws OXException {
-        folderStorage.releaseResources();
+        smalMailAccess.getDelegateMailAccess().getFolderStorage().releaseResources();
     }
 
     @Override
     public int getUnreadCounter(final String fullName) throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = smalMailAccess.getDelegateMailAccess();
+        final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
-            return ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(ensureFullName(fullName));
+            return ((IMailFolderStorageEnhanced) delegateMailAccess.getFolderStorage()).getUnreadCounter(ensureFullName(fullName));
         }
         return delegateMailAccess.getMessageStorage().getUnreadMessages(
             ensureFullName(fullName),
@@ -278,12 +277,14 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
     }
 
     @Override
-    public void expungeFolder(String fullName) throws OXException {
+    public void expungeFolder(final String fullName) throws OXException {
         expungeFolder(fullName, false);
     }
 
     @Override
-    public void expungeFolder(String fullName, boolean hardDelete) throws OXException {
+    public void expungeFolder(final String fullName, final boolean hardDelete) throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = smalMailAccess.getDelegateMailAccess();
+        final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             ((IMailFolderStorageEnhanced) folderStorage).expungeFolder(ensureFullName(fullName), hardDelete);
         }
@@ -315,6 +316,8 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public int getNewCounter(final String fullName) throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = smalMailAccess.getDelegateMailAccess();
+        final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             return ((IMailFolderStorageEnhanced) folderStorage).getNewCounter(ensureFullName(fullName));
         }
@@ -337,6 +340,8 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public int getTotalCounter(final String fullName) throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = smalMailAccess.getDelegateMailAccess();
+        final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(ensureFullName(fullName));
         }

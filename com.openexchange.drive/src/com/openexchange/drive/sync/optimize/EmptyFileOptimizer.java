@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
@@ -60,7 +61,6 @@ import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
@@ -91,9 +91,11 @@ public class EmptyFileOptimizer extends FileActionOptimizer {
                  */
                 String path = (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH);
                 optimizedActionsForClient.remove(clientAction);
-                optimizedActionsForServer.add(new DownloadFileAction(
-                    session, null, clientAction.getNewVersion(), null, path, null));
-                optimizedActionsForClient.add(new AcknowledgeFileAction(session, null, clientAction.getNewVersion(), null, path, null));
+                DownloadFileAction serverDownload = new DownloadFileAction(session, null, clientAction.getNewVersion(), null, path, null);
+                AcknowledgeFileAction clientAcknowledge = new AcknowledgeFileAction(session, null, clientAction.getNewVersion(), null, path, null);
+                clientAcknowledge.setDependingAction(serverDownload);
+                optimizedActionsForServer.add(serverDownload);
+                optimizedActionsForClient.add(clientAcknowledge);
             }
         }
         /*

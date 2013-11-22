@@ -54,6 +54,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
@@ -143,7 +144,7 @@ public final class FileWatcher {
 
     final File file;
 
-    private final ConcurrentMap<Class<? extends FileListener>, FileListener> listeners;
+    private final CopyOnWriteArraySet<FileListener> listeners;
 
     private final AtomicBoolean started;
 
@@ -159,7 +160,7 @@ public final class FileWatcher {
     private FileWatcher(final File file) {
         super();
         started = new AtomicBoolean();
-        listeners = new ConcurrentHashMap<Class<? extends FileListener>, FileListener>();
+        listeners = new CopyOnWriteArraySet<FileListener>();
         this.file = file;
         timeStamp = file.lastModified();
     }
@@ -170,16 +171,16 @@ public final class FileWatcher {
      * @param listener The listener to add
      */
     public void addFileListener(final FileListener listener) {
-        listeners.putIfAbsent(listener.getClass(), listener);
+        listeners.add(listener);
     }
 
     void notifyListeners(final boolean onDelete) {
         if (onDelete) {
-            for (final FileListener fileListener : listeners.values()) {
+            for (final FileListener fileListener : listeners) {
                 fileListener.onDelete();
             }
         } else {
-            for (final FileListener fileListener : listeners.values()) {
+            for (final FileListener fileListener : listeners) {
                 fileListener.onChange(file);
             }
         }

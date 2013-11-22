@@ -168,6 +168,28 @@ public class ConcurrentList<E> implements List<E> {
         return added;
     }
 
+    /**
+     * Adds specified element if not already contained.
+     *
+     * @param e The element
+     * @return <code>true</code> if added; otherwise <code>false</code>
+     */
+    public boolean addIfAbsent(final E e) {
+        boolean added;
+        List<E> expected;
+        List<E> list;
+        do {
+            expected = ref.get();
+            list = new ArrayList<E>(expected);
+            if (list.contains(e)) {
+                return false;
+            }
+            added = list.add(e);
+        } while (!ref.compareAndSet(expected, list));
+
+        return added;
+    }
+
     @Override
     public boolean remove(final Object o) {
         boolean removed;

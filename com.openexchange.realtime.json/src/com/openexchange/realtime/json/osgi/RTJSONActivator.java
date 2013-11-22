@@ -55,12 +55,12 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.management.ManagementService;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.handle.StanzaQueueService;
-import com.openexchange.realtime.json.JSONConfig;
 import com.openexchange.realtime.json.actions.RealtimeActions;
 import com.openexchange.realtime.json.impl.JSONChannel;
 import com.openexchange.realtime.json.impl.RTJSONHandler;
@@ -76,6 +76,7 @@ import com.openexchange.realtime.json.payload.converter.primitive.JSONToStringCo
 import com.openexchange.realtime.json.payload.converter.primitive.StringToJSONConverter;
 import com.openexchange.realtime.json.presence.converter.JSONToPresenceStateConverter;
 import com.openexchange.realtime.json.presence.converter.PresenceStateToJSONConverter;
+import com.openexchange.realtime.json.management.ManagementHouseKeeper;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.packet.Stanza;
@@ -86,20 +87,24 @@ import com.openexchange.timer.TimerService;
 
 public class RTJSONActivator extends AJAXModuleActivator {
 
+    private RealtimeActions realtimeActions;
+    private RTJSONHandler handler;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, SessiondService.class, MessageDispatcher.class, SimpleConverter.class,
-            ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class, ThreadPoolService.class };
+            ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class,
+            ThreadPoolService.class, ManagementService.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
         JSONServiceRegistry.SERVICES.set(this);
-        JSONConfig atmosphereConfig = JSONConfig.getInstance();
-        atmosphereConfig.start();
+        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
+        managementHouseKeeper.initialize(this);
 
-        RTJSONHandler handler = new RTJSONHandler();
+        handler = new RTJSONHandler();
         registerService(Channel.class, new JSONChannel(handler));
 
         /*
@@ -128,15 +133,17 @@ public class RTJSONActivator extends AJAXModuleActivator {
         converter.declarePreferredFormat(Presence.MESSAGE_PATH, String.class.getSimpleName());
         converter.declarePreferredFormat(Presence.PRIORITY_PATH, Byte.class.getSimpleName());
         converter.declarePreferredFormat(Stanza.ERROR_PATH, RealtimeException.class.getSimpleName());
-        
-        registerModule(new RealtimeActions(this, handler.getStateManager(), handler.getProtocolHandler()), "rt");
+        realtimeActions = new RealtimeActions(this, handler.getStateManager(), handler.getProtocolHandler());
+        registerModule(realtimeActions, "rt");
 
         getService(CapabilityService.class).declareCapability("rt");
-
+        managementHouseKeeper.exposeManagementObjects();
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        ManagementHouseKeeper.getInstance().cleanup();
+        unregisterService(realtimeActions);
         JSONServiceRegistry.SERVICES.set(null);
         super.stop(context);
     }

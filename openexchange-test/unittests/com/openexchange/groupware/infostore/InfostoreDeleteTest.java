@@ -11,10 +11,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
@@ -64,11 +62,7 @@ public class InfostoreDeleteTest extends TestCase {
 				provider.releaseWriteConnection(ContextStorage.getInstance().getContext(session.getContextId()), con);
 			}
 		}
-        final UserStorage userStorage = UserStorage.getInstance();
-        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
-
-        assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserPermissionBits()));
-
+        assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session));
 	}
 
 	private DocumentMetadataImpl createMetadata() throws Exception {

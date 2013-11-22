@@ -54,10 +54,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
@@ -155,43 +152,12 @@ public class WebdavPrincipalServlet extends OXServlet {
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
         ServerSession session = null;
         try {
-            try {
-                session = ServerSessionAdapter.valueOf(getSession(req));
-            } catch (final com.openexchange.exception.OXException exc) {
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                return;
-            }
-            WebdavPrincipalPerformer.getInstance().doIt(req, resp, action, session);
-        } finally {
-            if (null != session && mustLogOut(req)) {
-                logout(session, req, resp);
-            }
+            session = ServerSessionAdapter.valueOf(getSession(req));
+        } catch (final com.openexchange.exception.OXException exc) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
         }
-    }
-
-    private void logout(final ServerSession session, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeCookie(req, resp);
-        try {
-            LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {
-
-        @Override
-        public boolean matches(final String cookieName) {
-            return (COOKIE_SESSIONID.equals(cookieName) || Tools.JSESSIONID_COOKIE.equals(cookieName));
-        }
-    };
-
-    private void removeCookie(final HttpServletRequest req, final HttpServletResponse resp) {
-        Tools.deleteCookies(req, resp, COOKIE_MATCHER);
-    }
-
-    private boolean mustLogOut(final HttpServletRequest req) {
-        return true;
+        WebdavPrincipalPerformer.getInstance().doIt(req, resp, action, session);
     }
 
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
@@ -199,6 +165,11 @@ public class WebdavPrincipalServlet extends OXServlet {
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;
+    }
+
+    @Override
+    protected boolean useCookies() {
+        return false;
     }
 
 }

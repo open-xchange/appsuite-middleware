@@ -50,6 +50,7 @@
 package com.openexchange.apps.manifests.json;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -115,18 +116,18 @@ public class ConfigAction implements AJAXActionService {
 
             addComputedValues(serverconfig, requestData, session);
             mixInConfigurationValues(serverconfig, session);
-            
+
             return new AJAXRequestResult(serverconfig, "json");
         } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.toString());
         }
     }
 
-    private void mixInConfigurationValues(JSONObject serverconfig, ServerSession session) throws OXException, JSONException {
+    protected void mixInConfigurationValues(JSONObject serverconfig, ServerSession session) throws OXException, JSONException {
         if (session.isAnonymous()) {
             return;
         }
-        
+
         ConfigView view = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
         for(Map.Entry<String,ComposedConfigProperty<String>> entry: view.all().entrySet()) {
             if (entry.getKey().startsWith("com.openexchange.appsuite.server")) {
@@ -137,30 +138,45 @@ public class ConfigAction implements AJAXActionService {
     }
 
     @SuppressWarnings("unchecked")
-    private JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
-
+    protected JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
+        // Get configured brands/server configurations
         Map<String, Object> serverConfigs = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config.yml");
 
+        // The resulting brand/server configuration
         Map<String, Object> serverConfig = new HashMap<String, Object>();
 
-        Map<String, Object> defaults = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
-        if (defaults != null) {
-            serverConfig.putAll((Map<String, Object>) defaults.get("default"));
+        // Check for default brands/server configurations
+        {
+            Map<String, Object> defaults = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
+            if (defaults != null) {
+                serverConfig.putAll((Map<String, Object>) defaults.get("default"));
+            }
         }
 
         // Find other applicable configurations
         if (serverConfigs != null) {
+            LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String,Object>>();
             for (Object value : serverConfigs.values()) {
-                if (looksApplicable((Map<String, Object>) value, requestData, session)) {
-                    serverConfig.putAll((Map<String, Object>) value);
+                Map<String, Object> possibleConfig = (Map<String, Object>) value;
+                if (looksApplicable(possibleConfig, requestData, session)) {
+                    // ensure that "all"-host-wildcards are applied first
+                    if ("all".equals(possibleConfig.get("host"))) {
+                        applicableConfigs.addFirst(possibleConfig);
+                    } else {
+                        applicableConfigs.add(possibleConfig);
+                    }
                 }
+            }
+            for (Map<String, Object> config : applicableConfigs) {
+                serverConfig.putAll(config);
             }
         }
 
+        // Return its JSON representation
         return (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
     }
 
-    private boolean looksApplicable(Map<String, Object> value, AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected boolean looksApplicable(Map<String, Object> value, AJAXRequestData requestData, ServerSession session) throws OXException {
         if (value == null) {
             return false;
         }
@@ -193,7 +209,7 @@ public class ConfigAction implements AJAXActionService {
         return false;
     }
 
-    private void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+    protected void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         for (ComputedServerConfigValueService computed : computedValues) {
             computed.addValue(serverconfig, requestData, session);
         }

@@ -49,23 +49,23 @@
 
 package com.openexchange.publish.online.infostore;
 
-import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.publish.online.infostore.osgi.ActivatorTest;
+import com.openexchange.publish.online.infostore.util.PublicationInfostoreUtilsTest;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UnitTests {
-
-    public UnitTests() {
-        super();
-    }
-
-    public static final Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(InfostoreDocumentPublicationServiceTest.class);
-        return tests;
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    InfostoreDocumentPublicationServiceTest.class,
+    PublicationInfostoreUtilsTest.class,
+    ActivatorTest.class
+})
+public class UnitTests extends TestSuite {
 }

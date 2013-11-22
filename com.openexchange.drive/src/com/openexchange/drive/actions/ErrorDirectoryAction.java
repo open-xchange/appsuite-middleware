@@ -61,10 +61,22 @@ import com.openexchange.exception.OXException;
  */
 public class ErrorDirectoryAction extends AbstractDirectoryAction {
 
-    public ErrorDirectoryAction(DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison, OXException error, boolean quarantine) {
+    /**
+     * Initializes a new {@link ErrorDirectoryAction}.
+     *
+     * @param version The directory version
+     * @param newVersion The new directory version
+     * @param comparison The comparison
+     * @param error The error
+     * @param quarantine <code>true</code> to set the 'quarantine' flag, <code>false</code>, otherwise
+     * @param stop <code>true</code> to set the 'stop' flag, <code>false</code>, otherwise
+     */
+    public ErrorDirectoryAction(DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison,
+        OXException error, boolean quarantine, boolean stop) {
         super(version, newVersion, comparison);
         parameters.put(PARAMETER_ERROR, error);
         parameters.put(PARAMETER_QUARANTINE, Boolean.valueOf(quarantine));
+        parameters.put(PARAMETER_STOP, Boolean.valueOf(stop));
     }
 
     @Override

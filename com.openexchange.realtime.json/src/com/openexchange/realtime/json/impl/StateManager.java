@@ -64,9 +64,11 @@ import com.openexchange.realtime.packet.IDEventHandler;
  */
 public class StateManager {
 
-    private ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(StateManager.class);
+    
+    private final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
 
-    private ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
+    private final ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
 
     /**
      * Retrieves stored {@link RTClientState} or creates a new entry for the given id.
@@ -119,14 +121,20 @@ public class StateManager {
     }
 
     /**
-     * Times out states that haven't been touched in more than thirty minutes
+     * Times out states that haven't been touched in more than thirty minutes. Additionally this triggers a refresh of IDs that aren't 
+     * timed out, yet.
      * 
      * @param timestamp - The timestamp to compare the lastSeen value to
      */
     public void timeOutStaleStates(long timestamp) {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
-                state.getId().trigger(ID.Events.DISPOSE, this);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("State for id " + state.getId() + " is timed out. Last seen: " + state.getLastSeen());
+                }
+                state.getId().dispose(this, null);
+            } else {
+                state.getId().trigger(ID.Events.REFRESH, this);
             }
         }
     }

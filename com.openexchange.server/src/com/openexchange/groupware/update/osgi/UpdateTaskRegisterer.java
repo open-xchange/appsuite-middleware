@@ -69,7 +69,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 @SuppressWarnings("deprecation")
 public abstract class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    private BundleContext context;
+    private final BundleContext context;
     private ServiceRegistration<UpdateTaskProviderService> registration;
 
     public UpdateTaskRegisterer(BundleContext context) {

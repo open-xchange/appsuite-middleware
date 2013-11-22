@@ -151,6 +151,21 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
+    public boolean pushConnectionForContextAfterReading(int contextId, Connection con) throws PoolException {
+        try {
+            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backWritableAfterReading(contextId, con);
+        }
+        return true;
+    }
+
+    @Override
     public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
         try {
             if (null != con && !con.getAutoCommit() && !con.isClosed()) {

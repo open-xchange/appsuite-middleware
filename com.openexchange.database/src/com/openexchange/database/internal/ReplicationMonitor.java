@@ -57,6 +57,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.Assignment;
@@ -70,20 +71,26 @@ import com.openexchange.pooling.PoolingException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ReplicationMonitor {
+public class ReplicationMonitor {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
 
     private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this);
     private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this);
+
     private final AtomicLong masterConnectionsFetched = new AtomicLong();
     private final AtomicLong slaveConnectionsFetched = new AtomicLong();
     private final AtomicLong masterInsteadOfSlaveFetched = new AtomicLong();
-    private final boolean active;
 
-    ReplicationMonitor(boolean active) {
+    private final boolean active;
+    private final boolean checkWriteCons;
+
+    private long lastLogged = 0;
+
+    ReplicationMonitor(boolean active, boolean checkWriteCons) {
         super();
         this.active = active;
+        this.checkWriteCons = checkWriteCons;
     }
 
     Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write) throws OXException {
@@ -202,17 +209,30 @@ public final class ReplicationMonitor {
         return slaveTransaction >= masterTransaction;
     }
 
-    public void backAndIncrementTransaction(Pools pools, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
+    public void backAndIncrementTransaction(Pools pools, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, ConnectionState state) {
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
-            if (active && poolId != assign.getReadPoolId() && !usedAsRead && Constants.CONFIGDB_WRITE_ID != poolId) {
-                increaseTransactionCounter(assign, con);
-            } else if (active && poolId != assign.getReadPoolId() && Constants.CONFIGDB_WRITE_ID != poolId && !assign.isTransactionInitialized()) {
-                try {
-                    assign.setTransaction(readTransaction(con, assign.getContextId()));
-                } catch (OXException e) {
-                    LOG.warn(e.getMessage(), e);
+            if (!assign.isToConfigDB() && !state.isUsedAsRead()) {
+                // ConfigDB has no replication monitor and for master fallback connections the counter must not be incremented.
+                if (state.isUsedForUpdate()) {
+                    // Data on the master has been changed without using a transaction, so we need to increment the counter here.
+                    // If a transaction was used the JDBC Connection wrapper incremented the counter in the commit phase.
+                    increaseTransactionCounter(assign, con);
+                } else {
+                    // Initialize counter as early as possible.
+                    if (active && poolId != assign.getReadPoolId() && !assign.isTransactionInitialized()) {
+                        try {
+                            assign.setTransaction(readTransaction(con, assign.getContextId()));
+                        } catch (OXException e) {
+                            LOG.warn(e.getMessage(), e);
+                        }
+                    }
+                    // Warn if a master connection was only used for reading.
+                    if (checkWriteCons && !state.isUsedAsRead() && !state.isUpdateCommitted()) {
+                        Exception e = new Exception();
+                        LOG.warn("A writable connection was used but no data has been manipulated.", e);
+                    }
                 }
             }
         } else {
@@ -254,7 +274,7 @@ public final class ReplicationMonitor {
             } else {
                 throw DBPoolingExceptionCodes.TRANSACTION_MISSING.create(I(ctxId));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -262,36 +282,49 @@ public final class ReplicationMonitor {
         return retval;
     }
 
-    private static long lastLogged = 0;
-
-    private static void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
-        try {
-            if (con.isClosed()) {
-                return;
-            }
-        } catch (final SQLException e) {
-            final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
-            return;
-        }
+    private static void increaseCounter(AssignmentImpl assign, Connection con) throws SQLException {
+        int contextId = assign.getContextId();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            con.setAutoCommit(false);
+            // Using Mysql specific functions like LAST_INSERT_ID() do not reveal any performance improvement compared to this transaction.
+            // UPDATE replicationMonitor SET transaction=LAST_INSERT_ID(transaction+1) WHERE cid=?
+            // There we stick with this simple transaction, UPDATE and SELECT statement for better compatibility.
             stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
-            stmt.setInt(1, assign.getContextId());
+            stmt.setInt(1, contextId);
             stmt.execute();
             stmt.close();
             stmt = con.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
-            stmt.setInt(1, assign.getContextId());
+            stmt.setInt(1, contextId);
             result = stmt.executeQuery();
             if (result.next()) {
                 assign.setTransaction(result.getLong(1));
             } else {
-                LOG.error("Updating transaction for replication monitor failed for context " + assign.getContextId() + ".");
+                LOG.error("Updating transaction for replication monitor failed for context " + contextId + ".");
             }
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private static void increaseCounterExistingTransaction(AssignmentImpl assign, Connection con) throws SQLException {
+        Savepoint save = null;
+        try {
+            save = con.setSavepoint("replication monitor");
+            increaseCounter(assign, con);
+            con.releaseSavepoint(save);
+        } catch (SQLException e) {
+            rollback(con, save);
+            throw e;
+        }
+    }
+
+    private void increateCounterSeparateTransaction(AssignmentImpl assign, Connection con) {
+        try {
+            con.setAutoCommit(false);
+            increaseCounter(assign, con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
             if (1146 == e.getErrorCode()) {
                 if (lastLogged + 300000 < System.currentTimeMillis()) {
@@ -305,7 +338,6 @@ public final class ReplicationMonitor {
             }
         } finally {
             autocommit(con);
-            closeSQLStuff(result, stmt);
         }
     }
 
@@ -331,5 +363,40 @@ public final class ReplicationMonitor {
 
     long getMasterInsteadOfSlave() {
         return masterInsteadOfSlaveFetched.get();
+    }
+
+    private void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
+        try {
+            if (con.isClosed()) {
+                return;
+            }
+        } catch (SQLException e) {
+            final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            LOG.error(e1.getMessage(), e1);
+            return;
+        }
+        increateCounterSeparateTransaction(assign, con);
+    }
+
+    public void increaseInCurrentTransaction(AssignmentImpl assign, Connection delegate, ConnectionState state) {
+        if (!active) {
+            return;
+        }
+        try {
+            increaseCounterExistingTransaction(assign, delegate);
+            state.setUsedForUpdate(false);
+            state.setUpdateCommitted(true);
+        } catch (SQLException e) {
+            if (1146 == e.getErrorCode()) {
+                if (lastLogged + 300000 < System.currentTimeMillis()) {
+                    lastLogged = System.currentTimeMillis();
+                    final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    LOG.error(e1.getMessage(), e1);
+                }
+            } else {
+                final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                LOG.error(e1.getMessage(), e1);
+            }
+        }
     }
 }

@@ -63,13 +63,14 @@ import com.openexchange.java.ConcurrentHashSet;
 final class MemoryCRUDImpl implements MemoryCRUD {
 
     private final ConcurrentMap<String, MemoryFolder> folderMap;
-
     private final ConcurrentMap<String, Set<MemoryFolder>> parentMap;
+    private final ConcurrentMap<String, String> folder2parentMap;
 
-    public MemoryCRUDImpl(final ConcurrentMap<String, MemoryFolder> folderMap, final ConcurrentMap<String, Set<MemoryFolder>> parentMap) {
+    public MemoryCRUDImpl(final ConcurrentMap<String, MemoryFolder> folderMap, final ConcurrentMap<String, Set<MemoryFolder>> parentMap, final ConcurrentMap<String, String> folder2parentMap) {
         super();
         this.folderMap = folderMap;
         this.parentMap = parentMap;
+        this.folder2parentMap = folder2parentMap;
     }
 
     @Override
@@ -83,6 +84,7 @@ final class MemoryCRUDImpl implements MemoryCRUD {
         if (null == prev) {
             // PUT successful
             final String parentId = folder.getParentId();
+            folder2parentMap.put(folderId, parentId);
             Set<MemoryFolder> set = parentMap.get(parentId);
             if (null == set) {
                 final Set<MemoryFolder> newset = new ConcurrentHashSet<MemoryFolder>();
@@ -115,6 +117,7 @@ final class MemoryCRUDImpl implements MemoryCRUD {
     public MemoryFolder put(final String folderId, final MemoryFolder folder) {
         final MemoryFolder ret = folderMap.put(folderId, folder);
         final String parentId = folder.getParentId();
+        folder2parentMap.put(folderId, parentId);
         Set<MemoryFolder> set = parentMap.get(parentId);
         if (null == set) {
             final Set<MemoryFolder> newset = new ConcurrentHashSet<MemoryFolder>();
@@ -131,6 +134,7 @@ final class MemoryCRUDImpl implements MemoryCRUD {
     public MemoryFolder remove(final String folderId) {
         final MemoryFolder ret = folderMap.remove(folderId);
         if (ret != null) {
+            folder2parentMap.remove(folderId);
             final String parentId = ret.getParentId();
             final Set<MemoryFolder> set = parentMap.get(parentId);
             if (null != set) {

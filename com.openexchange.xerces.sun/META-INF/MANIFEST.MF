@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Xerces Compatibility Plugin for Sun JVM
 Bundle-SymbolicName: com.openexchange.xerces.sun
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: lib/xerces.jar,
@@ -12,10 +12,10 @@ Eclipse-BuddyPolicy: registered
 Export-Package: org.apache.xerces.dom,
  org.apache.xerces.impl,
  org.apache.xerces.impl.dv,
- org.apache.xerces.impl.dv.util,
- org.apache.xerces.impl.validation,
+ org.apache.xerces.impl.dv.util, 
+ org.apache.xerces.impl.validation, 
  org.apache.xerces.jaxp,
- org.apache.xerces.jaxp.datatype,
+ org.apache.xerces.jaxp.datatype, 
  org.apache.xerces.jaxp.validation,
  org.apache.xerces.parsers,
  org.apache.xerces.util,

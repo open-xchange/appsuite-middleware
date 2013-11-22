@@ -77,8 +77,9 @@ public final class LoginConfiguration {
     private final List<IPRange> ranges;
     private final boolean disableTrimLogin;
     private final boolean formLoginWithoutAuthId;
+    private final boolean isRandomTokenEnabled;
 
-    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean ipCheck, ClientWhitelist ipCheckWhitelist, boolean redirectIPChangeAllowed, List<IPRange> ranges, boolean disableTrimLogin, boolean formLoginWithoutAuthId) {
+    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean ipCheck, ClientWhitelist ipCheckWhitelist, boolean redirectIPChangeAllowed, List<IPRange> ranges, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled) {
         super();
         this.uiWebPath = uiWebPath;
         this.sessiondAutoLogin = sessiondAutoLogin;
@@ -96,6 +97,7 @@ public final class LoginConfiguration {
         this.ranges = ranges;
         this.disableTrimLogin = disableTrimLogin;
         this.formLoginWithoutAuthId = formLoginWithoutAuthId;
+        this.isRandomTokenEnabled = isRandomTokenEnabled;
     }
 
     public String getUiWebPath() {
@@ -161,4 +163,9 @@ public final class LoginConfiguration {
     public boolean isFormLoginWithoutAuthId() {
         return formLoginWithoutAuthId;
     }
+
+    public boolean isRandomTokenEnabled() {
+        return isRandomTokenEnabled;
+    }
+
 }

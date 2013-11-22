@@ -147,7 +147,7 @@ public abstract class PasswordChangeService {
              * Loading user also verifies its existence
              */
             final Session session = event.getSession();
-            UserStorage.getStorageUser(session.getUserId(), event.getContext());
+            UserStorage.getStorageUser(session);
             authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword()));
         } catch (final OXException e) {
             /*

@@ -51,7 +51,7 @@ package com.openexchange.ajax.session;
 
 import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 import com.openexchange.groupware.calendar.TimeTools;
 
@@ -78,7 +78,7 @@ public class StoreTest extends AbstractSimpleClientTest{
 
         boolean found = false;
         for (Cookie cookie : cookies) {
-            found = found || ( cookie.getName().startsWith(Login.SESSION_PREFIX) && cookie.getValue().equals(sessionID) );
+            found = found || ( cookie.getName().startsWith(LoginServlet.SESSION_PREFIX) && cookie.getValue().equals(sessionID) );
         }
         assertTrue(found);
     }
@@ -94,7 +94,7 @@ public class StoreTest extends AbstractSimpleClientTest{
 
         Cookie sessionCookie = null;
         for (Cookie cookie : cookies) {
-            if ( cookie.getName().startsWith(Login.SESSION_PREFIX) && cookie.getValue().equals(sessionID) ) {
+            if ( cookie.getName().startsWith(LoginServlet.SESSION_PREFIX) && cookie.getValue().equals(sessionID) ) {
                 sessionCookie = cookie;
                 break;
             }

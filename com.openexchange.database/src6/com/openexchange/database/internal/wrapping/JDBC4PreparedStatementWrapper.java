@@ -78,9 +78,10 @@ import org.apache.commons.logging.Log;
  */
 public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper implements PreparedStatement {
 
-    private final PreparedStatement delegate;
-
     private static final Log LOG = com.openexchange.log.Log.loggerFor(JDBC4PreparedStatementWrapper.class);
+
+    private final PreparedStatement delegate;
+    private final JDBC4ConnectionReturner con;
 
     /**
      * Initializes a new {@link JDBC4PreparedStatementWrapper}.
@@ -91,6 +92,7 @@ public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper impleme
     public JDBC4PreparedStatementWrapper(final PreparedStatement delegate, final JDBC4ConnectionReturner con) {
         super(delegate, con);
         this.delegate = delegate;
+        this.con = con;
     }
 
     @Override
@@ -108,7 +110,9 @@ public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper impleme
         if (LOG.isDebugEnabled()) {
             LOG.debug(Thread.currentThread() + " executes: " + delegate.toString());
         }
-        return delegate.execute();
+        boolean retval = delegate.execute();
+        con.updatePerformed();
+        return retval;
     }
 
     @Override
@@ -124,7 +128,9 @@ public class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper impleme
         if (LOG.isDebugEnabled()) {
             LOG.debug(Thread.currentThread() + " executes: " + delegate.toString());
         }
-        return delegate.executeUpdate();
+        int retval = delegate.executeUpdate();
+        con.updatePerformed();
+        return retval;
     }
 
     @Override

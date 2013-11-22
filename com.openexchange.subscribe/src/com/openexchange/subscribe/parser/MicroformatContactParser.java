@@ -56,6 +56,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
+import org.apache.commons.logging.Log;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -70,6 +71,9 @@ import com.openexchange.subscribe.TargetFolderSession;
 
 
 public class MicroformatContactParser extends ContactHandler implements SubscriptionHandler {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MicroformatContactParser.class);
+
     protected Collection<Contact> contacts;
     protected SubscribeService service;
 
@@ -117,11 +121,9 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
             storeContacts(new TargetFolderSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
 
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         } catch (final OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
 
     }
@@ -136,11 +138,9 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
             xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes()) ) );
             contacts = handler.getObjects();
         } catch (final SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
 

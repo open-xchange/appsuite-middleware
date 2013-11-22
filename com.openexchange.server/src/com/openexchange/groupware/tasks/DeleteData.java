@@ -80,18 +80,18 @@ public final class DeleteData {
 
     private final Context ctx;
     private final User user;
-    private final UserPermissionBits userConfig;
+    private final UserPermissionBits permissionBits;
     private final FolderObject folder;
     private final int taskId;
     private final Date lastModified;
 
     private Task task;
 
-    public DeleteData(Context ctx, User user, UserPermissionBits userConfig, FolderObject folder, int taskId, Date lastModified) {
+    public DeleteData(Context ctx, User user, UserPermissionBits permissionBits, FolderObject folder, int taskId, Date lastModified) {
         super();
         this.ctx = ctx;
         this.user = user;
-        this.userConfig = userConfig;
+        this.permissionBits = permissionBits;
         this.folder = folder;
         this.taskId = taskId;
         this.lastModified = lastModified;
@@ -118,7 +118,7 @@ public final class DeleteData {
         }
 
         // Check delete permission
-        Permission.checkDelete(ctx, user, userConfig, folder, task);
+        Permission.checkDelete(ctx, user, permissionBits, folder, task);
     }
 
     public void doDelete() throws OXException {

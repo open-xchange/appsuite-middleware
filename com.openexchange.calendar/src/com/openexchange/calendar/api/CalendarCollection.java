@@ -1782,7 +1782,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
         return false;
     }
-    
+
     private boolean isParticipant(CalendarDataObject cdao, int id) {
         for (Participant participant : cdao.getParticipants()) {
             if (participant.getIdentifier() == id) {
@@ -2238,6 +2238,36 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
 
         return cols;
+    }
+
+    /**
+     * An array holding the column IDs of attributes that are preserved when storing a 'tombstone' representing a deleted appointment.
+     * This includes properties to identify the deleted appointment, as well as all other mandatory fields.
+     */
+    private final int[] TOMBSTONE_COLUMS = {
+        CalendarObject.CREATION_DATE, CalendarObject.CREATED_BY, CalendarObject.LAST_MODIFIED, CalendarObject.MODIFIED_BY,
+        CalendarObject.FOLDER_ID, CalendarObject.PRIVATE_FLAG, CalendarObject.OBJECT_ID, CalendarObject.RECURRENCE_ID,
+        CalendarObject.UID, CalendarObject.FILENAME
+    };
+
+    @Override
+    public int[] checkAndAlterColsForDeleted(int cols[]) {
+        if (null == cols) {
+            return cols;
+        }
+        int idx = 0;
+        int[] alteredColumns = new int[cols.length];
+        for (int col : cols) {
+            if (com.openexchange.tools.arrays.Arrays.contains(TOMBSTONE_COLUMS, col)) {
+                alteredColumns[idx++] = col;
+            }
+        }
+        if (idx < alteredColumns.length) {
+            int[] trimmedToLength = new int[idx];
+            System.arraycopy(alteredColumns, 0, trimmedToLength, 0, idx);
+            return trimmedToLength;
+        }
+        return alteredColumns;
     }
 
     @Override

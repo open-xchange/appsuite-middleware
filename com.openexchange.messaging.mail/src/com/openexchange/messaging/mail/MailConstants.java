@@ -96,7 +96,7 @@ public final class MailConstants {
     public static final String MAIL_CONFIRMED_HAM = "confirmedHam";
 
     /**
-     * The configuration property name for confirmed-ham fullname.
+     * The configuration property name for confirmed-ham full name.
      */
     public static final String MAIL_CONFIRMED_HAM_FULLNAME = "confirmedHamFullname";
 
@@ -106,7 +106,7 @@ public final class MailConstants {
     public static final String MAIL_CONFIRMED_SPAM = "confirmedSpam";
 
     /**
-     * The configuration property name for confirmed-spam fullname.
+     * The configuration property name for confirmed-spam full name.
      */
     public static final String MAIL_CONFIRMED_SPAM_FULLNAME = "confirmedSpamFullname";
 
@@ -116,7 +116,7 @@ public final class MailConstants {
     public static final String MAIL_DRAFTS = "drafts";
 
     /**
-     * The configuration property name for drafts fullname.
+     * The configuration property name for drafts full name.
      */
     public static final String MAIL_DRAFTS_FULLNAME = "draftsFullname";
 
@@ -126,7 +126,7 @@ public final class MailConstants {
     public static final String MAIL_SENT = "sent";
 
     /**
-     * The configuration property name for sent fullname.
+     * The configuration property name for sent full name.
      */
     public static final String MAIL_SENT_FULLNAME = "sentFullname";
 
@@ -136,7 +136,7 @@ public final class MailConstants {
     public static final String MAIL_SPAM = "spam";
 
     /**
-     * The configuration property name for spam fullname.
+     * The configuration property name for spam full name.
      */
     public static final String MAIL_SPAM_FULLNAME = "spamFullname";
 
@@ -146,9 +146,19 @@ public final class MailConstants {
     public static final String MAIL_TRASH = "trash";
 
     /**
-     * The configuration property name for trash fullname.
+     * The configuration property name for archive.
+     */
+    public static final String MAIL_ARCHIVE = "archive";
+
+    /**
+     * The configuration property name for trash full name.
      */
     public static final String MAIL_TRASH_FULLNAME = "trashFullname";
+
+    /**
+     * The configuration property name for archive full name.
+     */
+    public static final String MAIL_ARCHIVE_FULLNAME = "archiveFullname";
 
     public static final String MAIL_PORT = "mailPort";
 

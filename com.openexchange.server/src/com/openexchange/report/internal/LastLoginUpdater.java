@@ -78,8 +78,8 @@ public final class LastLoginUpdater implements EventHandler {
     /** The accepted clients */
     private final Set<String> acceptedClients;
 
-    private ContextService contextService;
-    private UserService userService;
+    private final ContextService contextService;
+    private final UserService userService;
 
     public LastLoginUpdater(ContextService contextService, UserService userService) {
         super();
@@ -111,7 +111,7 @@ public final class LastLoginUpdater implements EventHandler {
             final User user = userService.getUser(session.getUserId(), context);
             // Check last-accessed time stamp for client
             final Set<String> values = user.getAttributes().get("client:" + client);
-            if (!values.isEmpty()) {
+            if (null != values && !values.isEmpty()) {
                 try {
                     final long lastAccessed = Long.parseLong(values.iterator().next());
                     final long now = System.currentTimeMillis();

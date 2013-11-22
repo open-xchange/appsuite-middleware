@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore.webdav;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,12 +60,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.exception.OXException;
@@ -81,7 +76,7 @@ import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -297,8 +292,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         final ServerSession session = getSession();
         final Context ctx = session.getContext();
         try {
-            final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session
-                    .getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), session.getUserPermissionBits());
+            final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session);
             if(resolved.isFolder()) {
 
                 return loadCollection(url, resolved.getId(), s);
@@ -497,11 +491,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         if(!(perm.canReadAllObjects() || perm.canReadOwnObjects())) {
             return new ArrayList<OXWebdavResource>();
         }
-        final SearchIterator<DocumentMetadata> iter = database.getDocuments(
-                folderId,
-                session.getContext(),
-                session.getUser(),
-                session.getUserPermissionBits()).results();
+        final SearchIterator<DocumentMetadata> iter = database.getDocuments(folderId, session).results();
         final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
 
         while(iter.hasNext()) {

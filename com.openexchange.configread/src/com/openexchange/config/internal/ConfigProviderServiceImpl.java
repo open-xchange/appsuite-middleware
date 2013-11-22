@@ -167,7 +167,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         } else {
             // We found a leaf
             final ServerProperty serverProperty = get(namespace, -1, -1);
-            serverProperty.set(PREFRENCE_PATH, (String) namespace);
+            serverProperty.set(PREFRENCE_PATH, namespace);
             serverProperty.set(subkeys.toString());
             serverProperty.setDefined(true);
             if(serverProperty.get(PROTECTED) == null) {

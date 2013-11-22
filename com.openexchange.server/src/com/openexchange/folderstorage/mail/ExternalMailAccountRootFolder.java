@@ -58,6 +58,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -102,7 +103,7 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
          * Set proper name
          */
         if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-            name = StringHelper.valueOf(session.getUser().getLocale()).getString(UnifiedInboxManagement.NAME_UNIFIED_INBOX);
+            name = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.UNIFIED_MAIL);
         } else {
             name = mailAccount.getName();
         }

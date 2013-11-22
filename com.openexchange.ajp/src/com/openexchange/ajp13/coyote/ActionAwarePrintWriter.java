@@ -215,7 +215,7 @@ public final class ActionAwarePrintWriter extends PrintWriter {
         try {
             outputStream.println(d);
         } catch (final IOException e) {
-            e.printStackTrace();
+            // Ignore
         }
     }
 

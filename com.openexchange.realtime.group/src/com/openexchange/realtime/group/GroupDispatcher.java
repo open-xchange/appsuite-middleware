@@ -107,6 +107,8 @@ public class GroupDispatcher implements ComponentHandle {
 
     /** Action handler */
     private final ActionHandler handler;
+    
+    private boolean isDisposed = false;
 
     /**
      * Initializes a new {@link GroupDispatcher}.
@@ -133,19 +135,22 @@ public class GroupDispatcher implements ComponentHandle {
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 try {
-                    // Find any valid member identifier
-                    ID memberId = null;
-                    if (properties != null) {
-                        memberId = (ID) properties.get("id");
+                    if (!isDisposed) {
+                        isDisposed = true;
+                     // Find any valid member identifier
+                        ID memberId = null;
+                        if (properties != null) {
+                            memberId = (ID) properties.get("id");
+                        }
+                        if (null == memberId) {
+                            final Set<ID> ids = idsRef.get();
+                            memberId = ids.isEmpty() ? null : ids.iterator().next();
+                        }
+                        if (memberId == null) {
+                            memberId = id;
+                        }
+                        onDispose(memberId != null ? memberId : id);
                     }
-                    if (null == memberId) {
-                        final Set<ID> ids = idsRef.get();
-                        memberId = ids.isEmpty() ? null : ids.iterator().next();
-                    }
-                    if (memberId == null) {
-                        memberId = id;
-                    }
-                    onDispose(memberId != null ? memberId : id);
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -345,7 +350,9 @@ public class GroupDispatcher implements ComponentHandle {
         if (empty) {
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
-            this.id.trigger(ID.Events.DISPOSE, this, properties);
+            onDispose(id);
+            isDisposed = true;
+            this.id.dispose(this, properties);
         }
     }
 
@@ -436,7 +443,7 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     /**
-     * Callback for when the first used joined
+     * Callback for when the first user joined
      */
     protected void firstJoined(ID id) {
 
@@ -518,6 +525,11 @@ public class GroupDispatcher implements ComponentHandle {
         goodbye.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
                         new PayloadElement("Goodbye", "json", "group", "message")).build()));
         return goodbye;
+    }
+
+    @Override
+    public ID getID() {
+        return id;
     }
 
 }

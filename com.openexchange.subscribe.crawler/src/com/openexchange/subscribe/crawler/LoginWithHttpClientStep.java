@@ -148,7 +148,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
             executedSuccessfully = true;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            com.openexchange.log.Log.loggerFor(LoginWithHttpClientStep.class).error(e.getMessage(), e);
         }
     }
 

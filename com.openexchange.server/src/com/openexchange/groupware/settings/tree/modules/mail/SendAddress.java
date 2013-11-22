@@ -49,11 +49,9 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -64,6 +62,8 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MsisdnUtility;
@@ -116,51 +116,61 @@ public class SendAddress implements PreferencesItemService {
 
             @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
-                final String newAlias = setting.getSingleValue().toString();
-                boolean found = false;
-                final String[] aliases = user.getAliases();
-                final List<String> allAliases = new ArrayList<String>(aliases.length + 3);
-                if (aliases != null) {
-                    for(String alias: aliases) {
-                        allAliases.add(alias);
+                try {
+                    // Add mail aliases
+                    final Set<InternetAddress> allAliases;
+                    {
+                        final String[] aliases = user.getAliases();
+                        if (aliases == null) {
+                            allAliases = new HashSet<InternetAddress>(4);
+                        } else {
+                            allAliases = new HashSet<InternetAddress>(aliases.length + 3);
+                            for (String alias: aliases) {
+                                allAliases.add(new QuotedInternetAddress(alias, false));
+                            }
+                        }
                     }
-                }
-                final boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses();
-                if (supportMsisdnAddresses) {
-                    Set<InternetAddress> msisdnAddresses = new HashSet<InternetAddress>();
-                    MsisdnUtility.addMsisdnAddress(msisdnAddresses, session);
-                    for (InternetAddress internetAddress : msisdnAddresses) {
-                        allAliases.add(internetAddress.getAddress());
+
+                    // Add MSISDN addresses if supported
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                        MsisdnUtility.addMsisdnAddress(allAliases, session);
                     }
-                }
-                
-                final int pos = newAlias.indexOf('/');
-                String checkAlias = newAlias;
-                if (pos > 0) {
-                    checkAlias = checkAlias.substring(0, pos);
-                }
 
-                Iterator<String> aliasIterator = allAliases.iterator();
-                while(!found && aliasIterator.hasNext()) {
-                    String nextAlias = aliasIterator.next();
-                    found = nextAlias.equals(checkAlias);
-                }
+                    // Add primary address
+                    allAliases.add(new QuotedInternetAddress(user.getMail(), false));
 
-                if (user.getMail().equals(newAlias)) {
-                    found = true;
-                }
-                if (!found) {
-                    throw SettingExceptionCodes.INVALID_VALUE.create(newAlias, setting.getName());
-                }
-                final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
-                final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
-                if (null != settings) {
-                    settings.setSendAddr(newAlias);
-                    try {
+                    // Add default sender address
+                    final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
+                    {
+                        final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
+                        allAliases.add(new QuotedInternetAddress(settings.getSendAddr(), false));
+                    }
+
+                    // Determine the new mail address to set as default sender address
+                    final String newAlias = setting.getSingleValue().toString();
+                    final InternetAddress aliasToCheck;
+                    {
+                        final int pos = newAlias.indexOf('/');
+                        String checkAlias = newAlias;
+                        if (pos > 0) {
+                            checkAlias = checkAlias.substring(0, pos);
+                        }
+                        aliasToCheck = new QuotedInternetAddress(checkAlias, false);
+                    }
+
+                    // Check if covered by valid mail addresses
+                    boolean found = allAliases.contains(aliasToCheck);
+                    if (!found) {
+                        throw SettingExceptionCodes.INVALID_VALUE.create(newAlias, setting.getName());
+                    }
+
+                    final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
+                    if (null != settings) {
+                        settings.setSendAddr(newAlias);
                         storage.saveUserSettingMail(settings, user.getId(), ctx);
-                    } catch (final OXException e) {
-                        throw e;
                     }
+                } catch (final AddressException e) {
+                    throw MimeMailException.handleMessagingException(e);
                 }
             }
 

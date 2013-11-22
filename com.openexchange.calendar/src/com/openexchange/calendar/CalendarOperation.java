@@ -732,6 +732,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 // cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) /
                 // Constants.MILLI_DAY)));
                 cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
+                Date realStart = calculateRealRecurringStartDate(cdao);
+                if (realStart != null) {
+                    cdao.setStartDate(realStart);
+                }
             } else {
                 cdao.setRecurrence(CalendarCollectionService.NO_DS);
             }
@@ -961,6 +965,24 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         Date until = cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? edao.getUntil() : cdao.getUntil();
         return calculateRealRecurringEndDate(null == until ? recColl.getMaxUntilDate(cdao) : until, cdao.getEndDate(), cdao.getFullTime());
     }
+    
+    /**
+     * Calclulates the start date of the first occurence of the series.
+     * This might differ from the start_date if the series begin before the first occurrence.
+     * @param cdao
+     * @return
+     * @throws OXException
+     */
+    private static Date calculateRealRecurringStartDate(CalendarDataObject cdao) throws OXException {
+        RecurringResultsInterface firstRecurring = recColl.calculateFirstRecurring(cdao);
+        if (firstRecurring != null) {
+            RecurringResultInterface rs = firstRecurring.getRecurringResult(0);
+            if (rs != null) {
+                return new Date(rs.getStart());
+            }
+        }
+        return null;
+    }
 
     private static final Date calculateRealRecurringEndDate(final Date untilDate, final Date endDate, final boolean isFulltime) {
         long until = untilDate.getTime();
@@ -981,10 +1003,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     private static final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao, final CalendarDataObject edao) {
-        long startDate = edao.getRecurringStart();
-        if (startDate == 0) {
-            startDate = edao.getStartDate().getTime();
-        }
+        long startDate = edao.getStartDate().getTime();
         TimeZone tz = null;
         if (cdao.getTimezone() != null) {
             tz = Tools.getTimeZone(cdao.getTimezone());

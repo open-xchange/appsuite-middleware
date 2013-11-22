@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.json.impl;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -59,14 +58,13 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
-import com.openexchange.realtime.directory.DefaultResource;
-import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTProtocol;
+import com.openexchange.realtime.json.management.ManagementHouseKeeper;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
@@ -87,84 +85,26 @@ public class RTJSONHandler implements StanzaSender {
 
     protected final StateManager stateManager = new StateManager();
 
-    protected final RTProtocol protocol = RTProtocolImpl.getInstance();
+    protected final RTProtocol protocol;
 
-    protected final StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
+    protected final StanzaSequenceGate gate;
 
-        @Override
-        public void handleInternal(Stanza stanza, ID recipient) throws OXException {
-                handleIncoming(stanza);
-        }
-    };
-
-    JSONProtocolHandler protocolHandler = new JSONProtocolHandler(protocol, gate);
+    JSONProtocolHandler protocolHandler;
 
     public RTJSONHandler() {
         super();
+        protocol = RTProtocolImpl.getInstance();
+        gate = new StanzaSequenceGate(RTJSONHandler.class.getSimpleName()) {
 
+            @Override
+            public void handleInternal(Stanza stanza, ID recipient) throws OXException {
+                    handleIncoming(stanza);
+            }
+        };
+        ManagementHouseKeeper.getInstance().addManagementObject(gate.getManagementObject());
+        protocolHandler = new JSONProtocolHandler(protocol, gate);
         startCleanupTimer();
     }
-
-//    @Override
-//    public void onRequest(AtmosphereResource resource) throws IOException {
-//        // Log all events on the console, including WebSocket events for debugging
-//        if (LOG.isDebugEnabled()) {
-//            resource.addEventListener(new WebSocketEventListenerAdapter());
-//        }
-//
-//        AtmosphereRequest request = resource.getRequest();
-//        AtmosphereResponse response = resource.getResponse();
-//        response.setCharacterEncoding("UTF-8");
-//        String method = request.getMethod();
-//        SessionValidator sessionValidator = new SessionValidator(resource);
-//        ServerSession serverSession = null;
-//        ID constructedId = null;
-//        /*
-//         * Two level exception handling needed:
-//         * 1. We didn't identify the sender yet so our only way to inform him about the exception is via
-//         *    RTProtocol.handleRealtimeExceptionDirectly
-//         * 2. We know the ID of the sender and can inform him RTProtocol.handleRealtimeException
-//         */
-//        try {
-//            try {
-//                serverSession = sessionValidator.getServerSession();
-//                constructedId = constructId(resource, serverSession);
-//            } catch (OXException e) {
-//                RealtimeException invalidSessionException = RealtimeExceptionCodes.SESSION_INVALID.create();
-//                protocol.handleRealtimeExceptionDirectly(invalidSessionException, resource);
-//                // no clean up needed, simply return because of invalid session
-//                return;
-//            }
-//            if (method.equalsIgnoreCase("GET")) {
-//
-//                AtmosphereStanzaTransmitter transmitter = new AtmosphereStanzaTransmitter(resource, constructedId, stateManager);
-//                stateManager.rememberTransmitter(constructedId, transmitter);
-//
-//                StateEntry entry = stateManager.retrieveState(constructedId);
-//
-//                ResourceDirectory resourceDirectory = JSONServiceRegistry.getInstance().getService(ResourceDirectory.class);
-//                try {
-//                    resourceDirectory.set(constructedId, new DefaultResource());
-//                } catch (OXException e) {
-//                    throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-//                }
-//
-//                protocol.getReceived(entry.state, entry.transmitter);
-//
-//            } else if (method.equalsIgnoreCase("POST")) {
-//                StateEntry entry = stateManager.retrieveState(constructedId);
-//
-//                String postData = request.getReader().readLine();
-//                if (LOG.isTraceEnabled()) {
-//                    LOG.trace("Incoming: " + postData);
-//                }
-//
-//                handlePost(postData, constructedId, serverSession, entry);
-//            }
-//        } catch (RealtimeException e) {
-//            protocol.handleRealtimeException(constructedId, e, null);
-//        }
-//    }
 
     protected void handlePost(String postData, ID constructedId, ServerSession serverSession, StateEntry entry) throws RealtimeException {
         if (postData != null) {
@@ -203,29 +143,6 @@ public class RTJSONHandler implements StanzaSender {
         StateEntry entry = stateManager.retrieveState(recipient);
         protocol.send(stanza, entry.state, entry.transmitter);
     }
-
-//    /**
-//     * Build an unique {@link ID} <code>{"ox", userLogin, context, resource}</code> from the infos given by the AtmosphereResource and
-//     * ServerSession.
-//     *
-//     * @param atmosphereResource the current AtmosphereResource
-//     * @param serverSession the associated serverSession
-//     * @return the constructed unique ID
-//     */
-//    private ID constructId(AtmosphereResource atmosphereResource, ServerSession serverSession) throws OXException {
-//        String userLogin = serverSession.getUserlogin();
-//        String contextName = serverSession.getContext().getName();
-//
-//        AtmosphereRequest request = atmosphereResource.getRequest();
-//        String resource = request.getHeader("resource");
-//        if (resource == null) {
-//            resource = request.getParameter("resource");
-//        }
-//        if (resource == null) {
-//            throw RealtimeExceptionCodes.INVALID_ID.create();
-//        }
-//        return new ID(JSONChannel.PROTOCOL, null, userLogin, contextName, resource);
-//    }
 
     public boolean isConnected(ID id) {
         return stateManager.isConnected(id);

@@ -60,7 +60,7 @@ import com.openexchange.sessiond.SessiondService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCustomizer<SessiondService,SessiondService> {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SessiondServiceServiceTrackerCustomizer.class));
@@ -76,27 +76,22 @@ public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCu
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
+    public SessiondService addingService(final ServiceReference<SessiondService> reference) {
+        final SessiondService addedService = context.getService(reference);
         if (null == addedService) {
             LOG.warn("Added service is null!", new Throwable());
         }
-        if ((addedService instanceof SessiondService)) {
-            POP3ServiceRegistry.getServiceRegistry().addService(SessiondService.class, addedService);
-            return addedService;
-        }
-        // Service needs not to be tracked
-        context.ungetService(reference);
-        return null;
+        POP3ServiceRegistry.getServiceRegistry().addService(SessiondService.class, addedService);
+        return addedService;
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<SessiondService> reference, final SessiondService service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<SessiondService> reference, final SessiondService service) {
         if (null != service) {
             try {
                 POP3ServiceRegistry.getServiceRegistry().removeService(SessiondService.class);

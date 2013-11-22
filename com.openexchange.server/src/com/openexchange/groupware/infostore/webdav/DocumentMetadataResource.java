@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;
@@ -74,6 +73,7 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -283,12 +283,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 	public InputStream getBody() throws WebdavProtocolException {
 		final ServerSession session = getSession();
 		try {
-			return database.getDocument(
-					id,
-					InfostoreFacade.CURRENT_VERSION,
-					session.getContext(),
-					session.getUser(),
-					session.getUserPermissionBits());
+			return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session);
 		} catch (final OXException e) {
 			if (e instanceof WebdavProtocolException) {
 				throw (WebdavProtocolException) e;
@@ -724,12 +719,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 		final ServerSession session = getSession();
 
 		try {
-			final DocumentMetadata metadata = database.getDocumentMetadata(
-					id,
-					InfostoreFacade.CURRENT_VERSION,
-					session.getContext(),
-					session.getUser(),
-					session.getUserPermissionBits());
+			final DocumentMetadata metadata = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
 			final SetSwitch set = new SetSwitch(this.metadata);
 			final GetSwitch get = new GetSwitch(metadata);
 

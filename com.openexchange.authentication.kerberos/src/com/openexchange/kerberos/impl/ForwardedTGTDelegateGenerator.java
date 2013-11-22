@@ -61,7 +61,6 @@ import org.ietf.jgss.GSSName;
 import com.openexchange.exception.OXException;
 import com.openexchange.kerberos.ClientPrincipal;
 import com.openexchange.kerberos.KerberosExceptionCodes;
-import com.openexchange.kerberos.KerberosUtils;
 
 /**
  * Creates a delegation ticket for the client to contact a backend service.

@@ -75,11 +75,11 @@ public class RTClientStateImpl implements RTClientState {
     
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SendAction.class);
     
-    private ID id;
-    private Map<Long, EnqueuedStanza> resendBuffer = new HashMap<Long, EnqueuedStanza>();
-    private List<Stanza> nonsequenceStanzas = new ArrayList<Stanza>();
+    private final ID id;
+    private final Map<Long, EnqueuedStanza> resendBuffer = new HashMap<Long, EnqueuedStanza>();
+    private final List<Stanza> nonsequenceStanzas = new ArrayList<Stanza>();
 
-    private Lock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
     private long lastSeen;
     private long sequenceNumber = 0;
         

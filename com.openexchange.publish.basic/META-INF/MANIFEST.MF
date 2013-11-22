@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Basic Publication Implementation Plug-in
 Bundle-SymbolicName: com.openexchange.publish.basic
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Activator: com.openexchange.publish.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -20,6 +20,7 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,
+ com.openexchange.file.storage.infostore,
  com.openexchange.groupware,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,

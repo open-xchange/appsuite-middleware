@@ -123,6 +123,18 @@ public class OXExceptionFactory {
     }
 
     /**
+     * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
+     *
+     * @param code The exception code
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final OXExceptionCode code, final Throwable cause, final Object... args) {
+        return create(code, null, cause, args);
+    }
+
+    /**
      * The set containing category types appropriate for being displayed.
      */
     public static final Set<Category.EnumType> DISPLAYABLE = Collections.unmodifiableSet(EnumSet.of(
@@ -140,28 +152,29 @@ public class OXExceptionFactory {
      * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
      *
      * @param code The exception code
+     * @param category The optional category to use
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final OXExceptionCode code, final Throwable cause, final Object... args) {
-        final Category category = code.getCategory();
+    public OXException create(final OXExceptionCode code, final Category category, final Throwable cause, final Object... args) {
+        final Category cat = null == category ? code.getCategory() : category;
         final OXException ret;
-        if (category.getLogLevel().implies(LogLevel.DEBUG)) {
+        if (cat.getLogLevel().implies(LogLevel.DEBUG)) {
             ret = new OXException(code.getNumber(), code.getMessage(), cause, args);
         } else {
-            if (DISPLAYABLE.contains(category.getType())) {
+            if (DISPLAYABLE.contains(cat.getType())) {
                 // Displayed message is equal to logged one
                 ret = new OXException(code.getNumber(), code.getMessage(), cause, args).setLogMessage(code.getMessage(), args);
             } else {
-                final String displayMessage = Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
+                final String displayMessage = Category.EnumType.TRY_AGAIN.equals(cat.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
                 ret = new OXException(code.getNumber(), displayMessage, cause, new Object[0]).setLogMessage(code.getMessage(), args);
             }
         }
         if (code instanceof LogLevelAwareOXExceptionCode) {
             ret.setLogLevel(((LogLevelAwareOXExceptionCode) code).getLogLevel());
         }
-        return ret.addCategory(category).setPrefix(code.getPrefix());
+        return ret.addCategory(cat).setPrefix(code.getPrefix());
     }
 
 }

@@ -66,7 +66,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class ManagedFileManagementActivator implements BundleActivator {
 
-    private Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
+    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
 
     public ManagedFileManagementActivator() {
         super();

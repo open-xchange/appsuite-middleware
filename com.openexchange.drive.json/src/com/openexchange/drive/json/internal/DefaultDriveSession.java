@@ -54,6 +54,7 @@ import java.util.Locale;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -65,9 +66,11 @@ public class DefaultDriveSession implements DriveSession {
 
     private final String rootFolderID;
     private final ServerSession session;
+    private final int apiVersion;
     private String deviceName;
     private Boolean diagnostics;
     private List<DriveFileField> fields;
+    private final HostData hostData;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
@@ -75,10 +78,12 @@ public class DefaultDriveSession implements DriveSession {
      * @param session The session
      * @param rootFolderID The root folder ID
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID) {
+    public DefaultDriveSession(ServerSession session, String rootFolderID, HostData hostData, int apiVersion) {
         super();
         this.session = session;
         this.rootFolderID = rootFolderID;
+        this.hostData = hostData;
+        this.apiVersion = apiVersion;
     }
 
     /**
@@ -141,14 +146,24 @@ public class DefaultDriveSession implements DriveSession {
     }
 
     @Override
+    public HostData getHostData() {
+        return hostData;
+    }
+
+    @Override
     public List<DriveFileField> getFields() {
         return fields;
     }
 
     @Override
+    public int getApiVersion() {
+        return apiVersion;
+    }
+
+    @Override
     public String toString() {
         return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
-            session.getContextId() + ", deviceName=" + deviceName + ", diagnostics=" + diagnostics + "]";
+            session.getContextId() + ", deviceName=" + deviceName + ", apiVersion=" + apiVersion + ", diagnostics=" + diagnostics + "]";
     }
 
 }

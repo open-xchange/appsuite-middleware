@@ -105,13 +105,51 @@ public class DriveEventImpl implements DriveEvent {
     }
 
     @Override
+    public boolean isRemote() {
+        return remote;
+    }
+
+    @Override
     public String toString() {
         return "DriveEvent [remote=" + remote + ", contextID=" + contextID + ", folderIDs=" + folderIDs + "]";
     }
 
     @Override
-    public boolean isRemote() {
-        return remote;
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextID;
+        result = prime * result + ((folderIDs == null) ? 0 : folderIDs.hashCode());
+        result = prime * result + (remote ? 1231 : 1237);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof DriveEventImpl)) {
+            return false;
+        }
+        DriveEventImpl other = (DriveEventImpl) obj;
+        if (contextID != other.contextID) {
+            return false;
+        }
+        if (folderIDs == null) {
+            if (other.folderIDs != null) {
+                return false;
+            }
+        } else if (!folderIDs.equals(other.folderIDs)) {
+            return false;
+        }
+        if (remote != other.remote) {
+            return false;
+        }
+        return true;
     }
 
 }

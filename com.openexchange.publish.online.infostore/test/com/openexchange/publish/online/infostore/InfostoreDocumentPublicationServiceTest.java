@@ -50,7 +50,11 @@
 package com.openexchange.publish.online.infostore;
 
 import junit.framework.TestCase;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 
@@ -61,12 +65,17 @@ import com.openexchange.publish.Publication;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
+@RunWith(PowerMockRunner.class)
 public class InfostoreDocumentPublicationServiceTest extends TestCase{
     private InfostoreDocumentPublicationService publicationService;
 
+    private IDBasedFileAccessFactory fileAccessFactory = null;
+
     @Override
     public void setUp() {
-        publicationService = new InfostoreDocumentPublicationService();
+        this.fileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
+
+        this.publicationService = new InfostoreDocumentPublicationService(this.fileAccessFactory);
     }
 
 
@@ -102,7 +111,7 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase{
 
     }
 
-public void testRemoveSecretFromOutgoingPublications() throws OXException {
+    public void testRemoveSecretFromOutgoingPublications() throws OXException {
 
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));

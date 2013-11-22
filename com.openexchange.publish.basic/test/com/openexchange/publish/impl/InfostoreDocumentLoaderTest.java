@@ -54,10 +54,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.services.SimInfostoreFacade;
 
@@ -82,7 +79,7 @@ public class InfostoreDocumentLoaderTest extends TestCase {
     public void setUp() {
         infostoreFacade = new SimInfostoreFacade();
 
-        cid = 1;
+        cid = -1;
         folder = 12;
         id1 = 1337;
 
@@ -95,17 +92,7 @@ public class InfostoreDocumentLoaderTest extends TestCase {
         publication.setEntityId("1337");
         publication.setModule("infostore");
 
-        loader = new InfostoreDocumentLoader(infostoreFacade, null, null) {
-            @Override
-            protected User loadUser(Context ctx, int userId) throws OXException {
-                return null;
-            }
-
-            @Override
-            protected UserPermissionBits loadUserPermissionBits(Context ctx, int userId) throws OXException {
-                return null;
-            }
-        };
+        loader = new InfostoreDocumentLoader(infostoreFacade);
     }
 
     public void testLoadDocument() throws OXException, IOException {

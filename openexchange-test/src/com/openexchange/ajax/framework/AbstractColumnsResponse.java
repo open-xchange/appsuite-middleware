@@ -104,6 +104,11 @@ public abstract class AbstractColumnsResponse extends AbstractAJAXResponse imple
         };
     }
 
+    /**
+     * Get the column position of a specific attribute
+     * @param attributeId the attribute whose position you want to lookup
+     * @return -1 if the attribute can't be found, the position of the attribute otherwise
+     */
     public int getColumnPos(final int attributeId) {
         for (int i = 0; i < columns.length; i++) {
             if (columns[i] == attributeId) {

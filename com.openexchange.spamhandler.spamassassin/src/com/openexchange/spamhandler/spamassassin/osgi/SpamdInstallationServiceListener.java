@@ -49,6 +49,7 @@
 
 package com.openexchange.spamhandler.spamassassin.osgi;
 
+import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -62,9 +63,7 @@ import com.openexchange.spamhandler.spamassassin.api.SpamdService;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public class SpamdInstallationServiceListener implements ServiceTrackerCustomizer {
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamdInstallationServiceListener.class));
+public class SpamdInstallationServiceListener implements ServiceTrackerCustomizer<SpamdService,SpamdService> {
 
     private final BundleContext context;
 
@@ -73,28 +72,25 @@ public class SpamdInstallationServiceListener implements ServiceTrackerCustomize
     }
 
     @Override
-    public Object addingService(ServiceReference serviceReference) {
-        final Object service = context.getService(serviceReference);
-        if (service instanceof SpamdService) {
-            if (null == ServiceRegistry.getInstance().getService(SpamdService.class)) {
-                ServiceRegistry.getInstance().addService(SpamdService.class, (SpamdService) service);
-            } else {
-                LOG.error("Duplicate SpamdInstallationService detected: " + serviceReference.getClass().getName());
-            }
+    public SpamdService addingService(ServiceReference<SpamdService> serviceReference) {
+        final SpamdService service = context.getService(serviceReference);
+        if (null == ServiceRegistry.getInstance().getService(SpamdService.class)) {
+            ServiceRegistry.getInstance().addService(SpamdService.class, service);
+        } else {
+            final Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamdInstallationServiceListener.class));
+            log.error("Duplicate SpamdInstallationService detected: " + serviceReference.getClass().getName());
         }
         return service;
     }
 
     @Override
-    public void modifiedService(ServiceReference arg0, Object arg1) {
+    public void modifiedService(ServiceReference<SpamdService> arg0, SpamdService arg1) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference arg0, Object o) {
-        if (o instanceof SpamdService) {
-            ServiceRegistry.getInstance().removeService(SpamdService.class);
-        }
+    public void removedService(ServiceReference<SpamdService> arg0, SpamdService o) {
+        ServiceRegistry.getInstance().removeService(SpamdService.class);
         context.ungetService(arg0);
     }
 

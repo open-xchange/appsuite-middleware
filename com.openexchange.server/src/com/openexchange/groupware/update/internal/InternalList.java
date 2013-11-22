@@ -82,6 +82,7 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryK
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.InfostoreClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.InfostoreDocumentCreateForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.InfostoreDocumentDropForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask;
@@ -98,6 +99,8 @@ import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
+import com.openexchange.groupware.update.tasks.ResourceClearDelTablesTask;
+import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
@@ -589,40 +592,40 @@ public final class InternalList {
 
         //Add UUID column to user_setting_server table
         list.add(new UserSettingServerAddUuidUpdateTask());
-        
+
         //Drop foreign key from infostore_document table
         list.add(new InfostoreDocumentDropForeignKeyUpdateTask());
-        
+
         //Add folder_id to primary key in infostore table
         list.add(new InfostorePrimaryKeyUpdateTask());
-        
+
         //Add foreign key to infostore_document_table
         list.add(new InfostoreDocumentCreateForeignKeyUpdateTask());
 
         //Add folder_id to primary key in del_infostore table
         list.add(new DelInfostorePrimaryKeyUpdateTask());
-        
+
         //Drop foreign key from dateExternal table
         list.add(new DateExternalDropForeignKeyUpdateTask());
 
         //Add folder_id to primary key in prg_dates
         list.add(new PrgDatesPrimaryKeyUpdateTask());
-        
+
         //Create foreign key in dateExternal table
         list.add(new DateExternalCreateForeignKeyUpdateTask());
-        
+
         //Drop foreign key from delDateExternal table
         list.add(new DelDateExternalDropForeignKeyUpdateTask());
-        
+
         //Add folder_id to primary key in del_dates
         list.add(new DelDatesPrimaryKeyUpdateTask());
-        
+
         //Create foreign key in delDateExternal table
         list.add(new DelDateExternalCreateForeignKeyUpdateTask());
 
         // Add folder_id to primary key in del_contacts
         list.add(new MakeFolderIdPrimaryForDelContactsTable());
-        
+
         // Remove redundant keys (see bug 26913)
         list.add(new RemoveRedundantKeysForBug26913UpdateTask());
 
@@ -656,14 +659,49 @@ public final class InternalList {
 
             //Add primary key to user_setting_server table
             list.add(new UserSettingServerAddPrimaryKeyUpdateTask());
-            
+
             //Add folder_id to primary key in prg_dates_members
             list.add(new PrgDatesMembersPrimaryKeyUpdateTask());
-            
+
             //Add folder_id to primary key in del_dates_members
             list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
         }
+
+        // Adds "archive" and "archive_fullname" columns to mail/transport account table
+        list.add(new com.openexchange.groupware.update.tasks.MailAccountAddArchiveTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.4.1 starts here. +++++++++++++++++++++++++++++++++
+
+        // Removes obsolete data from the 'del_contacts', 'del_dlist' and 'del_contacts_image' tables
+        list.add(new com.openexchange.groupware.update.tasks.ContactClearDelTablesTasks());
+
+        // Removes obsolete data from the 'del_task' table
+        list.add(new com.openexchange.groupware.update.tasks.TaskClearDelTablesTasks());
+
+        // Removes obsolete data from the 'del_dates' table
+        list.add(new com.openexchange.groupware.update.tasks.AppointmentClearDelTablesTasks());
+
+        // Removes obsolete data from the 'del_user' table
+        list.add(new UserClearDelTablesTask());
+
+        // Removes obsolete data from the 'del_resource' table
+        list.add(new ResourceClearDelTablesTask());
+
+        // Removes obsolete data from the 'del_infostore_document' table
+        list.add(new InfostoreClearDelTablesTask());
+
+        // Removes obsolete data from the 'del_oxfolder_tree', and 'virtualBackupTree' tables
+        list.add(new com.openexchange.groupware.update.tasks.FolderClearDelTablesTasks());
+
+        // Adds default values to the 'del_oxfolder_tree', and 'virtualBackupTree' tables.
+        list.add(new com.openexchange.groupware.update.tasks.FolderDefaultValuesForDelTablesTasks());
+
+        // Extends the sizes of the 'filename', 'title' and 'file_size' columns in the 'infostore_document' table
+        list.add(new com.openexchange.groupware.update.tasks.InfostoreExtendFilenameTitleAndFilesizeTask());
+
+        // Extends the size of the 'name' column in the 'infostoreReservedPaths' table.
+        list.add(new com.openexchange.groupware.update.tasks.InfostoreExtendReservedPathsNameTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

@@ -86,7 +86,7 @@ public final class Task2Links {
      * @return <code>true</code> if the task may be read, <code>false</code>
      * otherwise.
      */
-    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserPermissionBits userConfig, final int taskId) {
+    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserPermissionBits permissionBits, final int taskId) {
         final User user;
         final Task task;
         final Set<Folder> folders;
@@ -100,14 +100,14 @@ public final class Task2Links {
             return false;
         }
         for (final Folder folder : folders) {
-            if (mayRead(ctx, user, userConfig, task, folder)) {
+            if (mayRead(ctx, user, permissionBits, task, folder)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserPermissionBits userConfig, final int taskId, final int folderId) {
+    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserPermissionBits permissionBits, final int taskId, final int folderId) {
         final User user;
         final Task task;
         final Folder folder;
@@ -120,10 +120,10 @@ public final class Task2Links {
             LOG.error(e.getMessage(), e);
             return false;
         }
-        return null == folder ? false : mayRead(ctx, user, userConfig, task, folder);
+        return null == folder ? false : mayRead(ctx, user, permissionBits, task, folder);
     }
 
-    private static boolean mayRead(final Context ctx, final User user, final UserPermissionBits userConfig, final Task task, final Folder folder) {
+    private static boolean mayRead(final Context ctx, final User user, final UserPermissionBits permissionBits, final Task task, final Folder folder) {
         final FolderObject folder2;
         try {
             folder2 = Tools.getFolder(ctx, folder.getIdentifier());
@@ -132,8 +132,8 @@ public final class Task2Links {
             return false;
         }
         try {
-            Permission.isFolderVisible(ctx, user, userConfig, folder2);
-            Permission.canReadInFolder(ctx, user, userConfig, folder2, task);
+            Permission.isFolderVisible(ctx, user, permissionBits, folder2);
+            Permission.canReadInFolder(ctx, user, permissionBits, folder2, task);
             return true;
         } catch (final OXException e) {
             return false;

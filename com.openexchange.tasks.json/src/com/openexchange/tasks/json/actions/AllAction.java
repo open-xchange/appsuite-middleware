@@ -113,7 +113,7 @@ public class AllAction extends TaskAction {
         SearchIterator<Task> it = null;
         try {
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
-            if (leftHandLimit == 0) {
+            if (leftHandLimit < 0) {
                 it = taskssql.getTaskList(folderId, leftHandLimit, -1, orderBy, order, internalColumns);
             } else {
                 it = taskssql.getTaskList(folderId, leftHandLimit, rightHandLimit, orderBy, order, internalColumns);

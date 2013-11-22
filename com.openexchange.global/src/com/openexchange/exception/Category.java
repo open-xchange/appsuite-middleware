@@ -82,7 +82,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -111,7 +111,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -140,7 +140,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -169,7 +169,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -198,7 +198,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -227,7 +227,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -256,7 +256,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -285,7 +285,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -314,7 +314,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -343,7 +343,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };
@@ -372,7 +372,7 @@ public interface Category extends Serializable {
 
         @Override
         public int compareTo(final Category other) {
-            return LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
+            return null == other ? 1 : LogLevel.COMPARATOR.compare(this.getLogLevel(), other.getLogLevel());
         }
 
     };

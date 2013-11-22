@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -42,14 +42,22 @@ if [ ${1:-0} -eq 2 ]; then
     GLOBIGNORE='*'
 
     # SoftwareChange_Request-1539
+    # updated by SoftwareChange_Request-1721
+    # updated by SoftwareChange_Request-1730
     pfile=/opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
     VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.name $pfile)
-    if [ "$VALUE" == "rtResourceDirectory-0" ]; then
-        ox_set_property com.openexchange.hazelcast.configuration.map.name rtResourceDirectory-1 $pfile
+    if [ "$VALUE" == "rtResourceDirectory-0" ] || [ "$VALUE" == "rtResourceDirectory-1" ]; then
+        ox_set_property com.openexchange.hazelcast.configuration.map.name rtResourceDirectory-2 $pfile
     fi
     VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile)
-    if [ "$VALUE" == "0" ]; then
-        ox_set_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds 3600 $pfile
+    if [ "$VALUE" == "0" ] || [ "$VALUE" == "3600" ]; then
+        ox_set_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds 86400 $pfile
+    fi
+
+    # SoftwareChange_Request-1721
+    pfile=/opt/open-xchange/etc/hazelcast/rtIDMapping.properties
+    if ox_exists_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile; then
+       ox_remove_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile
     fi
 fi
 
@@ -66,34 +74,55 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtStanzaStorage.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtIDMapping.properties
+%config(noreplace) /opt/open-xchange/etc/realtime.properties
 
 %changelog
+* Wed Nov 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.4.1 release
+* Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.4.1 release
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-11
 * Thu Nov 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-08
+* Thu Nov 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.4.1 release
 * Tue Nov 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Wed Oct 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-28
 * Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-30
+* Wed Oct 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.4.1 release
 * Tue Oct 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-23
 * Mon Oct 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-21
+* Thu Oct 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-21
+* Tue Oct 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-11
+* Mon Oct 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-21
+* Mon Oct 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-15
+* Thu Oct 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First sprint increment for 7.4.0 release
 * Wed Oct 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-09
 * Wed Oct 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-07
+* Thu Sep 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-23
 * Tue Sep 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eleventh candidate for 7.4.0 release
 * Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.1 release
+* Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Tenth candidate for 7.4.0 release
-* Tue Sep 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-09-26
 * Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Ninth candidate for 7.4.0 release
 * Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>

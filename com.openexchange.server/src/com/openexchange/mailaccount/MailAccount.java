@@ -269,6 +269,15 @@ public interface MailAccount extends Serializable {
     public String getTrash();
 
     /**
+     * Gets the name of the archive folder.
+     * <p>
+     * <b>Note</b>: This is only the name, not its full name.
+     *
+     * @return The name of the archive folder
+     */
+    public String getArchive();
+
+    /**
      * Gets the name of the confirmed ham folder.
      * <p>
      * <b>Note</b>: This is only the name, not its full name.
@@ -299,6 +308,13 @@ public interface MailAccount extends Serializable {
      * @return The trash full name
      */
     public String getTrashFullname();
+
+    /**
+     * Gets the archive full name
+     *
+     * @return The archive full name
+     */
+    public String getArchiveFullname();
 
     /**
      * Gets the sent full name

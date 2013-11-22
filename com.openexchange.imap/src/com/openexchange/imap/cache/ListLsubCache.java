@@ -59,7 +59,6 @@ import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.AccessedIMAPStore;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
@@ -75,7 +74,7 @@ import com.sun.mail.imap.IMAPStore;
 public final class ListLsubCache {
 
     /**
-     * The logger.
+     * The logger
      */
     protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(ListLsubCache.Key.class);
 
@@ -243,7 +242,7 @@ public final class ListLsubCache {
      * @return The separator
      * @throws OXException If a mail error occurs
      */
-    public static char getSeparator(final int accountId, final AccessedIMAPStore imapStore, final Session session) throws OXException {
+    public static char getSeparator(final int accountId, final IMAPStore imapStore, final Session session) throws OXException {
         try {
             return getSeparator(accountId, (IMAPFolder) imapStore.getFolder(INBOX), session);
         } catch (final MessagingException e) {
@@ -315,7 +314,7 @@ public final class ListLsubCache {
      * @return The cached LIST entry
      * @throws OXException If loading the entry fails
      */
-    public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final AccessedIMAPStore imapStore, final Session session) throws OXException {
+    public static ListLsubEntry getCachedLISTEntry(final String fullName, final int accountId, final IMAPStore imapStore, final Session session) throws OXException {
         try {
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
@@ -357,7 +356,7 @@ public final class ListLsubCache {
      * @param session The session
      * @throws OXException If initialization fails
      */
-    public static void initACLs(final int accountId, final AccessedIMAPStore imapStore, final Session session) throws OXException {
+    public static void initACLs(final int accountId, final IMAPStore imapStore, final Session session) throws OXException {
         if (DO_GETACL) {
             // Already perform during initialization
             return;
@@ -383,7 +382,7 @@ public final class ListLsubCache {
      * @return The cached LIST entry
      * @throws MailException If loading the entry fails
      */
-    public static ListLsubEntry getActualLISTEntry(final String fullName, final int accountId, final AccessedIMAPStore imapStore, final Session session) throws OXException {
+    public static ListLsubEntry getActualLISTEntry(final String fullName, final int accountId, final IMAPStore imapStore, final Session session) throws OXException {
         try {
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);

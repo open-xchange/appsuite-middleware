@@ -84,11 +84,12 @@ import com.openexchange.mail.smal.impl.index.IndexDocumentHelper;
 import com.openexchange.mail.smal.impl.index.jobs.AddByIdsJob;
 import com.openexchange.mail.smal.impl.index.jobs.ChangeByIdsJob;
 import com.openexchange.mail.smal.impl.index.jobs.MailJobInfo;
-import com.openexchange.mail.smal.impl.index.jobs.RemoveByIdsJob;
 import com.openexchange.mail.smal.impl.index.jobs.MailJobInfo.Builder;
+import com.openexchange.mail.smal.impl.index.jobs.RemoveByIdsJob;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
@@ -103,27 +104,26 @@ import com.openexchange.session.Session;
  */
 public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
 
-    private final IMailMessageStorage messageStorage;
-
     /**
      * Initializes a new {@link SmalMessageStorage}.
      *
      * @throws OXException If initialization fails
      */
-    public SmalMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
-        super(session, accountId, delegateMailAccess);
-        messageStorage = delegateMailAccess.getMessageStorage();
+    public SmalMessageStorage(final Session session, final int accountId, final SmalMailAccess smalMailAccess) throws OXException {
+        super(session, accountId, smalMailAccess);
     }
 
     @Override
     public void clearCache() throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
         if (messageStorage instanceof IMailMessageStorageExt) {
             ((IMailMessageStorageExt) messageStorage).clearCache();
         }
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
         if (messageStorage instanceof ISimplifiedThreadStructure) {
             return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields);
         }
@@ -132,16 +132,16 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
-        final String[] newIds = messageStorage.appendMessages(destFolder, msgs);
+        final String[] newIds = smalMailAccess.getDelegateMailAccess().getMessageStorage().appendMessages(destFolder, msgs);
         /*
          * Enqueue adder job
          */
         try {
-            Builder builder = prepareJobBuilder(AddByIdsJob.class);
+            final Builder builder = prepareJobBuilder(AddByIdsJob.class);
             builder.folder(destFolder);
             builder.addProperty(AddByIdsJob.IDS, newIds);
             submitJob(builder.build());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
         }
 
@@ -150,16 +150,16 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
-        final String[] newIds = messageStorage.copyMessages(sourceFolder, destFolder, mailIds, false);
+        final String[] newIds = smalMailAccess.getDelegateMailAccess().getMessageStorage().copyMessages(sourceFolder, destFolder, mailIds, false);
         /*
          * Enqueue adder job
          */
         try {
-            Builder builder = prepareJobBuilder(AddByIdsJob.class);
+            final Builder builder = prepareJobBuilder(AddByIdsJob.class);
             builder.folder(destFolder);
             builder.addProperty(AddByIdsJob.IDS, newIds);
             submitJob(builder.build());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
         }
         return fast ? new String[0] : newIds;
@@ -167,46 +167,48 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
         messageStorage.deleteMessages(folder, mailIds, hardDelete);
         /*
          * Enqueue remover job
          */
         try {
-            Builder builder = prepareJobBuilder(RemoveByIdsJob.class);
+            final Builder builder = prepareJobBuilder(RemoveByIdsJob.class);
             builder.folder(folder);
             builder.addProperty(RemoveByIdsJob.IDS, mailIds);
             submitJob(builder.build());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
         }
     }
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
-        return messageStorage.getMessages(folder, mailIds, fields);
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().getMessages(folder, mailIds, fields);
     }
 
     @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        IndexFacadeService indexFacade = getIndexFacadeService();
+        final IndexFacadeService indexFacade = getIndexFacadeService();
         if (searchTerm == null || indexFacade == null || isBlacklisted() || !isIndexingAllowed()) {
-            return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+            return smalMailAccess.getDelegateMailAccess().getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
         }
 
+        // Close for the time accessing the index
+        smalMailAccess.closeDelegateMailAccess();
+        // Access index
         IndexAccess<MailMessage> indexAccess = null;
         try {
-            MailFields mfs = new MailFields(fields);
+            final MailFields mfs = new MailFields(fields);
             indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
-            boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
+            final boolean isIndexed = indexAccess.isIndexed(String.valueOf(accountId), folder);
             if (isIndexed && MailUtility.getIndexableFields(indexAccess).containsAll(mfs)) {
-                AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
-                QueryParameters.Builder builder = new QueryParameters
-                    .Builder()
-                    .setAccountFolders(Collections.singleton(accountFolders));
+                final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
+                final QueryParameters.Builder builder = new QueryParameters.Builder().setAccountFolders(Collections.singleton(accountFolders));
 
                 if (sortField != null) {
-                    MailField field = MailField.getField(sortField.getField());
-                    MailIndexField indexSortField = MailIndexField.getFor(field);
+                    final MailField field = MailField.getField(sortField.getField());
+                    final MailIndexField indexSortField = MailIndexField.getFor(field);
                     if (indexSortField != null) {
                         builder.setSortField(indexSortField);
                     }
@@ -216,18 +218,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     }
                 }
 
-                QueryParameters parameters = builder.setHandler(SearchHandlers.CUSTOM).setSearchTerm(searchTerm).build();
-                long start = System.currentTimeMillis();
-                IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
+                final QueryParameters parameters = builder.setHandler(SearchHandlers.CUSTOM).setSearchTerm(searchTerm).build();
+                final long start = System.currentTimeMillis();
+                final IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
                 if (LOG.isDebugEnabled()) {
-                    long diff = System.currentTimeMillis() - start;
+                    final long diff = System.currentTimeMillis() - start;
                     LOG.debug("Index Query lasted " + diff + "ms.");
                 }
 
                 List<IndexDocument<MailMessage>> documents = result.getResults();
                 List<MailMessage> mails;
                 if (indexRange != null) {
-                    int fromIndex = indexRange.start;
+                    final int fromIndex = indexRange.start;
                     int toIndex = indexRange.end;
                     if ((documents == null) || documents.isEmpty()) {
                         mails = Collections.emptyList();
@@ -250,7 +252,8 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 mails = IndexDocumentHelper.messagesFrom(documents);
                 return mails.toArray(new MailMessage[mails.size()]);
             }
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.warn("Index search failed. Falling back to message storage.", t);
         } finally {
             if (indexAccess != null) {
@@ -259,29 +262,27 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
             try {
                 submitFolderJob(folder);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.warn("Could not schedule folder job for folder " + folder + '.', e);
             }
         }
 
-        /*
-         * Fallback to message storage
-         */
-        return messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        // Fallback to message storage
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().searchMessages(folder, indexRange, sortField, order, searchTerm, fields);
     }
 
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
-        messageStorage.updateMessageFlags(folder, mailIds, flags, set);
+        smalMailAccess.getDelegateMailAccess().getMessageStorage().updateMessageFlags(folder, mailIds, flags, set);
         /*
          * Enqueue change job
          */
         try {
-            Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
+            final Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
             builder.folder(folder);
             builder.addProperty(ChangeByIdsJob.IDS, mailIds);
             submitJob(builder.build());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
         }
     }
@@ -293,17 +294,17 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
-        return messageStorage.getAttachment(folder, mailId, sequenceId);
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().getAttachment(folder, mailId, sequenceId);
     }
 
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
-        return messageStorage.getImageAttachment(folder, mailId, contentId);
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().getImageAttachment(folder, mailId, contentId);
     }
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        final MailMessage mail = messageStorage.getMessage(folder, mailId, markSeen);
+        final MailMessage mail = smalMailAccess.getDelegateMailAccess().getMessageStorage().getMessage(folder, mailId, markSeen);
         if (mail == null)  {
             throw MailExceptionCode.MAIL_NOT_FOUN_BY_MESSAGE_ID.create(folder, mailId);
         }
@@ -326,10 +327,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
-        MailMessage[] messages = messageStorage.getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
+        final MailMessage[] messages = smalMailAccess.getDelegateMailAccess().getMessageStorage().getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, fields);
         try {
             submitFolderJob(folder);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.warn("Could not schedule folder job for folder " + folder + '.', e);
         }
 
@@ -338,30 +339,30 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
-        return messageStorage.getUnreadMessages(folder, sortField, order, fields, limit);
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().getUnreadMessages(folder, sortField, order, fields, limit);
     }
 
     @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         String[] retval = null;
         if (fast) {
-            messageStorage.moveMessages(sourceFolder, destFolder, mailIds, true);
+            smalMailAccess.getDelegateMailAccess().getMessageStorage().moveMessages(sourceFolder, destFolder, mailIds, true);
             retval = new String[0];
         } else {
-            retval = messageStorage.moveMessages(sourceFolder, destFolder, mailIds, false);
+            retval = smalMailAccess.getDelegateMailAccess().getMessageStorage().moveMessages(sourceFolder, destFolder, mailIds, false);
         }
 
         try {
-            Builder deleteBuilder = prepareJobBuilder(RemoveByIdsJob.class);
+            final Builder deleteBuilder = prepareJobBuilder(RemoveByIdsJob.class);
             deleteBuilder.folder(sourceFolder);
             deleteBuilder.addProperty(RemoveByIdsJob.IDS, mailIds);
             submitJob(deleteBuilder.build());
 
-            Builder createBuilder = prepareJobBuilder(AddByIdsJob.class);
+            final Builder createBuilder = prepareJobBuilder(AddByIdsJob.class);
             createBuilder.folder(destFolder);
             createBuilder.addProperty(AddByIdsJob.IDS, mailIds);
             submitJob(createBuilder.build());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
         }
 
@@ -370,38 +371,38 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
-        return messageStorage.saveDraft(draftFullname, draftMail);
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().saveDraft(draftFullname, draftMail);
     }
 
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
-        messageStorage.updateMessageColorLabel(folder, mailIds, colorLabel);
+        smalMailAccess.getDelegateMailAccess().getMessageStorage().updateMessageColorLabel(folder, mailIds, colorLabel);
         /*
          * Enqueue change job.
          */
         try {
-            Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
+            final Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
             builder.folder(folder);
             builder.addProperty(ChangeByIdsJob.IDS, mailIds);
             submitJob(builder.build());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("Could not schedule indexing job.", e);
         }
     }
 
     @Override
     public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
-        return messageStorage.getNewAndModifiedMessages(folder, fields);
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().getNewAndModifiedMessages(folder, fields);
     }
 
     @Override
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
-        return messageStorage.getDeletedMessages(folder, fields);
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().getDeletedMessages(folder, fields);
     }
 
     @Override
     public void releaseResources() throws OXException {
-        messageStorage.releaseResources();
+        smalMailAccess.getDelegateMailAccess().getMessageStorage().releaseResources();
     }
 
     /**
@@ -411,6 +412,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getMessagesByMessageID(final String... messageIDs) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
         if (messageStorage instanceof IMailMessageStorageExt) {
             final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
             return messageStorageExt.getMessagesByMessageID(messageIDs);
@@ -434,6 +436,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public MailMessage[] getMessages(final String fullName, final String[] mailIds, final MailField[] fields, final String[] headerNames) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
         if (messageStorage instanceof IMailMessageStorageExt) {
             final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
             return messageStorageExt.getMessages(fullName, mailIds, fields, headerNames);
@@ -443,6 +446,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public void updateMessageColorLabel(final String fullName, final int colorLabel) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
         if (messageStorage instanceof IMailMessageStorageBatch) {
             final IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
             batch.updateMessageColorLabel(fullName, colorLabel);
@@ -464,6 +468,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public void updateMessageFlags(final String fullName, final int flags, final boolean set) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
         if (messageStorage instanceof IMailMessageStorageBatch) {
             final IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
             batch.updateMessageFlags(fullName, flags, set);
@@ -475,10 +480,10 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     @Override
     public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
-        return messageStorage.getPrimaryContents(folder, mailIds);
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage().getPrimaryContents(folder, mailIds);
     }
 
-    private void submitJob(JobInfo jobInfo) throws OXException {
+    private void submitJob(final JobInfo jobInfo) throws OXException {
         if (session instanceof FakeSession) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Session is a fake session. Job will not be submitted...");
@@ -491,7 +496,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             return;
         }
 
-        IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+        final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
         if (indexingService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class);
         }
@@ -499,20 +504,20 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         indexingService.scheduleJob(true, jobInfo, null, -1L, IndexingService.DEFAULT_PRIORITY);
     }
 
-    private Builder prepareJobBuilder(Class<? extends IndexingJob> clazz) throws OXException {
-        MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
+    private Builder prepareJobBuilder(final Class<? extends IndexingJob> clazz) throws OXException {
+        final MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
         if (storageService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class);
         }
 
-        MailAccount account = storageService.getMailAccount(accountId, userId, contextId);
-        String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(account.getPassword(),
+        final MailAccount account = storageService.getMailAccount(accountId, userId, contextId);
+        final String decryptedPW = account.getPassword() == null ? session.getPassword() : MailPasswordUtil.decrypt(account.getPassword(),
             session,
             accountId,
             account.getLogin(),
             account.getMailServer());
 
-        Builder builder = MailJobInfo.newBuilder(clazz)
+        final Builder builder = MailJobInfo.newBuilder(clazz)
             .login(account.getLogin())
             .accountId(account.getId())
             .contextId(contextId)

@@ -248,6 +248,11 @@ public class MailAccountParser extends DataParser {
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_LITERAL);
         }
+        if (json.has(MailAccountFields.ARCHIVE)) {
+            final String string = parseString(json, MailAccountFields.ARCHIVE);
+            account.setTrash(null == string ? string : string.trim());
+            attributes.add(Attribute.ARCHIVE_LITERAL);
+        }
         if (json.has(MailAccountFields.SENT)) {
             final String string = parseString(json, MailAccountFields.SENT);
             account.setSent(null == string ? string : string.trim());
@@ -281,6 +286,11 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.TRASH_FULLNAME);
             account.setTrashFullname(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
+        }
+        if (json.has(MailAccountFields.ARCHIVE_FULLNAME)) {
+            final String string = parseString(json, MailAccountFields.ARCHIVE_FULLNAME);
+            account.setTrashFullname(null == string ? string : string.trim());
+            attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.SENT_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.SENT_FULLNAME);
@@ -354,11 +364,11 @@ public class MailAccountParser extends DataParser {
             final int port = account.getMailPort();
             if (account.isMailSecure()) {
                 if (standardPorts.isDefaultPort(port)) {
-                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_MAIL.create(mailProtocol));
+                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_MAIL.create(mailProtocol));
                 }
             } else {
                 if (standardPorts.isDefaultSSLPort(port)) {
-                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_MAIL.create(mailProtocol));
+                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_MAIL.create(mailProtocol));
                 }
             }
         }
@@ -374,11 +384,11 @@ public class MailAccountParser extends DataParser {
             final int port = account.getTransportPort();
             if (account.isTransportSecure()) {
                 if (standardPorts.isDefaultPort(port)) {
-                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT.create(transportProtocol));
+                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_TRANSPORT.create(transportProtocol));
                 }
             } else {
                 if (standardPorts.isDefaultSSLPort(port)) {
-                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_TRANSPORT.create(transportProtocol));
+                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT.create(transportProtocol));
                 }
             }
         }

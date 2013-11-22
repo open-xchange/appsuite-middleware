@@ -48,6 +48,7 @@
  */
 package com.openexchange.rss.preprocessors;
 
+import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssServices;
 
 /**
@@ -59,7 +60,8 @@ public class SanitizingPreprocessor extends AbstractPreprocessor {
 
 	@Override
 	protected String innerProcess(String payload) {
-	    return RssServices.getHtmlService().sanitize(payload, null, true, null, null);
+	    final HtmlService htmlService = RssServices.getHtmlService();
+        return null == htmlService ? payload : htmlService.sanitize(payload, null, true, null, null);
 	}
 
 }

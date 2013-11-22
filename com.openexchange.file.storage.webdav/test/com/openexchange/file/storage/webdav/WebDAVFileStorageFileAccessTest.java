@@ -186,7 +186,8 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
                     /*
                      * Copy file
                      */
-                    final IDTuple tuple = fileAccess.copy(new IDTuple(folderId, file.getId()), newId, null, null, null);
+                    final IDTuple tuple = fileAccess.copy(
+                        new IDTuple(folderId, file.getId()), FileStorageFileAccess.CURRENT_VERSION, newId, null, null, null);
                     try {
                         /*
                          * Check

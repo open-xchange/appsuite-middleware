@@ -58,7 +58,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CreateInfostoreTables extends AbstractCreateTableImpl {
-    
+
     private static final String infostoreTableName = "infostore";
     private static final String infostoreDocumentsTableName = "infostore_document";
     private static final String delInfostoreTableName = "del_infostore";
@@ -67,8 +67,8 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
     private static final String infostoreLockTableName = "infostore_lock";
     private static final String lockNullTableName = "lock_null";
     private static final String lockNullLockTableName = "lock_null_lock";
-    
-    
+
+
     private static final String createInfostoreTable = "CREATE TABLE `infostore` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`id` int4 unsigned NOT NULL,"
@@ -84,7 +84,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "INDEX `lastModified` (`cid`,`last_modified`),"
       + "INDEX `folder` (`cid`,`folder_id`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createInfostoreDocumentTable = "CREATE TABLE `infostore_document` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`infostore_id` int4 unsigned NOT NULL,"
@@ -93,20 +93,20 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`last_modified` int8 NOT NULL,"
       + "`created_by` int4 unsigned NOT NULL,"
       + "`changed_by` int4 unsigned ,"
-      + "`title` varchar(128) ,"
+      + "`title` varchar(767) ,"
       + "`url` varchar(256) ,"
       + "`description` text,"
       + "`categories` varchar(255) ,"
-      + "`filename` varchar(255) ,"
+      + "`filename` varchar(767) ,"
       + "`file_store_location` varchar(255) ,"
-      + "`file_size` int4 unsigned ,"
+      + "`file_size` bigint(20) ,"
       + "`file_mimetype` varchar(255) ,"
       + "`file_md5sum` varchar(32)  ,"
       + "`file_version_comment` text,"
       + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`),"
       + "FOREIGN KEY (cid, infostore_id) REFERENCES infostore (cid, id)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createDelInfostoreTable = "CREATE TABLE `del_infostore` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`id` int4 unsigned NOT NULL,"
@@ -121,7 +121,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "INDEX `lastModified` (`cid`,`last_modified`),"
       + "INDEX `folder` (`cid`,`folder_id`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createDelInfostoreDocumentTable = "CREATE TABLE `del_infostore_document` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`infostore_id` int4 unsigned NOT NULL,"
@@ -142,7 +142,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`file_version_comment` text ,"
       + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createInfostorePropertyTable = "CREATE TABLE `infostore_property` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`id` int4 unsigned NOT NULL,"
@@ -153,7 +153,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`xml` boolean,"
       + "PRIMARY KEY (`cid`,`id`,`name`,`namespace`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createInfostoreLockTable = "CREATE TABLE `infostore_lock` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`id` int4 unsigned NOT NULL,"
@@ -165,14 +165,14 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`ownerDesc` varchar(128) ,"
       + "PRIMARY KEY (`cid`,`id`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createLockNullTable = "CREATE TABLE `lock_null` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`id` int4 unsigned NOT NULL,"
       + "`url` varchar(255) NOT NULL,"
       + "PRIMARY KEY (`cid`,`id`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createLockNullLockTable = "CREATE TABLE `lock_null_lock` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`id` int4 unsigned NOT NULL,"

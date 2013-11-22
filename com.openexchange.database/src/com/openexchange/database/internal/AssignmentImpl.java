@@ -117,6 +117,15 @@ public class AssignmentImpl implements Serializable, Assignment {
         return schema;
     }
 
+    @Override
+    public boolean isToConfigDB() {
+        return Constants.CONFIGDB_WRITE_ID == writePoolId;
+    }
+
+    /**
+     * Returns true if the transaction counter has been initialized
+     * @return
+     */
     boolean isTransactionInitialized() {
         return transactionInitialized;
     }
@@ -125,10 +134,11 @@ public class AssignmentImpl implements Serializable, Assignment {
         return transaction;
     }
 
-    void setTransaction(long transaction) {
+    public void setTransaction(long transaction) {
         this.transaction = transaction;
         transactionInitialized = true;
     }
+
 
     @Override
     public int hashCode() {

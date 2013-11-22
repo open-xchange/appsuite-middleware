@@ -119,5 +119,10 @@ public class ManagementExceptionMessage implements LocalizableStrings {
      * A JMX connector is already bound to URL %1$s.
      */
     public final static String JMX_URL_ALREADY_BOUND_MSG = "A JMX connector is already bound to URL %1$s.";
+    
+    /**
+     * The following needed service is missing: \"%1$s\"
+     */
+    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
 
 }

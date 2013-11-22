@@ -9,7 +9,7 @@
     <property name="confDir" value="conf"/>
     <property name="tmpDir" value="tmp"/>
 
-       <!-- Compile Constants -->
+    <!-- Compile Constants -->
     <property name="srcCommon" value="common"/>
     <property name="srcIface" value="src"/>
     <property name="srcUnit" value="unittests"/>

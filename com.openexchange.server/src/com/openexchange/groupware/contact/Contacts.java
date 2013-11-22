@@ -120,8 +120,10 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * {@link Contacts}
  *
+ * @deprecated - replaced by {@link com.openexchange.groupware.contact.ContactService}
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
+@Deprecated
 public final class Contacts {
 
     private static final String PROP_SCALE_IMAGE_HEIGHT = "scale_image_height";
@@ -2623,8 +2625,7 @@ public final class Contacts {
                         final int admin_folder = xx.getObjectID();
                         cs.iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
                     } catch (final Exception oxee) {
-                        oxee.printStackTrace();
-                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid);
+                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid, oxee);
 
                         folder_error = false;
                     }

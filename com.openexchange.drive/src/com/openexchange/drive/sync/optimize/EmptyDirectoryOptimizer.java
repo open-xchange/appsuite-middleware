@@ -53,13 +53,13 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 
 

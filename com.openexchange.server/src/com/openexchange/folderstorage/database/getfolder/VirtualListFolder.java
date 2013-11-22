@@ -85,13 +85,13 @@ public final class VirtualListFolder {
      *
      * @param folderId The folder identifier
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPerm The user permission bits
      * @param ctx The context
      * @param con The connection
      * @return <code>true</code> if specified virtual folder identifier exists; otherwise <code>false</code>
      * @throws OXException If checking existence fails
      */
-    public static boolean existsVirtualListFolder(final int folderId, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static boolean existsVirtualListFolder(final int folderId, final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
         final int module;
         if (FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID == folderId) {
             // Task
@@ -107,7 +107,7 @@ public final class VirtualListFolder {
             module = FolderObject.INFOSTORE;
         }
         // Return non-isEmpty()
-        return OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(module, user.getId(), user.getGroups(), userConfiguration, ctx, con);
+        return OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(module, user.getId(), user.getGroups(), userPerm, ctx, con);
     }
 
     /**
@@ -175,13 +175,13 @@ public final class VirtualListFolder {
      *
      * @param folderId The virtual folder identifier
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPerm The user permission bits
      * @param ctx The context
      * @param con The connection to use
      * @return The subfolder identifiers of database folder representing given virtual folder
      * @throws OXException If returning database folder fails
      */
-    public static int[] getVirtualListFolderSubfoldersAsInt(final int folderId, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static int[] getVirtualListFolderSubfoldersAsInt(final int folderId, final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
         /*
          * Get subfolders
          */
@@ -204,7 +204,7 @@ public final class VirtualListFolder {
                     module,
                     user.getId(),
                     user.getGroups(),
-                    userConfiguration,
+                    userPerm,
                     ctx,
                     con)).asQueue();
         final int[] subfolderIds = new int[q.size()];
@@ -220,13 +220,13 @@ public final class VirtualListFolder {
      *
      * @param folderId The virtual folder identifier
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPerm The user permission bits
      * @param ctx The context
      * @param con The connection to use
      * @return The subfolder identifiers of database folder representing given virtual folder
      * @throws OXException If returning database folder fails
      */
-    public static List<String[]> getVirtualListFolderSubfolders(final int folderId, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static List<String[]> getVirtualListFolderSubfolders(final int folderId, final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
         /*
          * Get subfolders
          */
@@ -249,7 +249,7 @@ public final class VirtualListFolder {
                     module,
                     user.getId(),
                     user.getGroups(),
-                    userConfiguration,
+                    userPerm,
                     ctx,
                     con)).asQueue();
         final List<String[]> ret = new ArrayList<String[]>(q.size());

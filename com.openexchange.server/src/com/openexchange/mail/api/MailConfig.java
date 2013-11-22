@@ -49,11 +49,10 @@
 
 package com.openexchange.mail.api;
 
-import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.net.InetSocketAddress;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
@@ -68,7 +67,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
@@ -395,19 +393,19 @@ public abstract class MailConfig {
 
         private final int contextId;
         private final String pattern;
-        private final String server;
+        private final String serverUrl;
         private final int hash;
 
-        protected UserID(final String pattern, final String server, final int contextId) {
+        protected UserID(final String pattern, final String serverUrl, final int contextId) {
             super();
             this.pattern = pattern;
-            this.server = server;
+            this.serverUrl = serverUrl;
             this.contextId = contextId;
             final int prime = 31;
             int result = 1;
             result = prime * result + contextId;
             result = prime * result + ((pattern == null) ? 0 : pattern.hashCode());
-            result = prime * result + ((server == null) ? 0 : server.hashCode());
+            result = prime * result + ((serverUrl == null) ? 0 : serverUrl.hashCode());
             hash = result;
         }
 
@@ -435,11 +433,11 @@ public abstract class MailConfig {
             } else if (!pattern.equals(other.pattern)) {
                 return false;
             }
-            if (server == null) {
-                if (other.server != null) {
+            if (serverUrl == null) {
+                if (other.serverUrl != null) {
                     return false;
                 }
-            } else if (!server.equals(other.server)) {
+            } else if (!serverUrl.equals(other.serverUrl)) {
                 return false;
             }
             return true;
@@ -452,22 +450,22 @@ public abstract class MailConfig {
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source.
      *
      * @param pattern The pattern
-     * @param server The server address
+     * @param serverUrl The server URL; e.g. <code>"mail.company.org:143"</code>
      * @param ctx The context
      * @return The user IDs from specified pattern dependent on configuration's setting for mail login source
      * @throws OXException If resolving user by specified pattern fails
      */
-    public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws OXException {
+    public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final String serverUrl, final Context ctx) throws OXException {
         final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
-            final UserID userID = new UserID(pattern, new StringAllocator(server.getHostName()).append(':').append(server.getPort()).toString(), ctx.getContextId());
+            final UserID userID = new UserID(pattern, serverUrl, ctx.getContextId());
             Future<int[]> f = USER_ID_CACHE.get(userID);
             if (null == f) {
                 final FutureTask<int[]> ft = new FutureTask<int[]>(new Callable<int[]>() {
 
                     @Override
                     public int[] call() throws OXException {
-                        return forDefaultAccount(pattern, server, ctx, storageService);
+                        return forDefaultAccount(pattern, serverUrl, ctx, storageService);
                     }
                 });
                 f = USER_ID_CACHE.putIfAbsent(userID, ft);
@@ -493,7 +491,7 @@ public abstract class MailConfig {
             }
         }
         // Find user name by user's imap login
-        final MailAccount[] accounts = storageService.resolveLogin(pattern, server, ctx.getContextId());
+        final MailAccount[] accounts = storageService.resolveLogin(pattern, serverUrl, ctx.getContextId());
         final int[] retval = new int[accounts.length];
         for (int i = 0; i < retval.length; i++) {
             retval[i] = accounts[i].getUserId();
@@ -504,7 +502,7 @@ public abstract class MailConfig {
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source for default account
      */
-    protected static int[] forDefaultAccount(final String pattern, final InetSocketAddress server, final Context ctx, final MailAccountStorageService storageService) throws OXException {
+    protected static int[] forDefaultAccount(final String pattern, final String serverUrl, final Context ctx, final MailAccountStorageService storageService) throws OXException {
         switch (MailProperties.getInstance().getLoginSource()) {
         case USER_IMAPLOGIN:
         case PRIMARY_EMAIL:
@@ -528,18 +526,18 @@ public abstract class MailConfig {
             } else {
                 userIds = new TIntHashSet(accounts.length);
                 for (final MailAccount candidate : accounts) {
-                    final InetSocketAddress shouldMatch;
+                    final String shouldMatch;
                     switch (MailProperties.getInstance().getMailServerSource()) {
                     case USER:
-                        shouldMatch = toSocketAddr(candidate.generateMailServerURL(), 143);
+                        shouldMatch = toSocketAddrString(candidate.generateMailServerURL(), 143);
                         break;
                     case GLOBAL:
-                        shouldMatch = toSocketAddr(MailProperties.getInstance().getMailServer(), 143);
+                        shouldMatch = toSocketAddrString(MailProperties.getInstance().getMailServer(), 143);
                         break;
                     default:
                         throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
                     }
-                    if (server.equals(shouldMatch)) {
+                    if (serverUrl.equals(shouldMatch)) {
                         userIds.add(candidate.getUserId());
                     }
                 }

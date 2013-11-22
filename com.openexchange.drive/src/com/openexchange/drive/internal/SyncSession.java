@@ -49,13 +49,14 @@
 
 package com.openexchange.drive.internal;
 
-import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
+import static com.openexchange.drive.DriveConstants.TEMP_PATH;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
@@ -66,13 +67,13 @@ import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -168,6 +169,24 @@ public class SyncSession {
      */
     public String getDeviceName() {
         return session.getDeviceName();
+    }
+
+    /**
+     * Gets the underlying drive session.
+     *
+     * @return The drive session.
+     */
+    public DriveSession getDriveSession() {
+        return session;
+    }
+
+    /**
+     * Gets the host data of the session.
+     *
+     * @return The host data
+     */
+    public HostData getHostData() {
+        return session.getHostData();
     }
 
     public DirectLinkGenerator getLinkGenerator() {

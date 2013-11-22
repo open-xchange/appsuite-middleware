@@ -1,6 +1,5 @@
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.webdav.protocol.WebdavPathTest.assertComponents;
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
@@ -8,6 +7,7 @@ import java.sql.SQLException;
 import junit.framework.TestCase;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -17,11 +17,9 @@ import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
@@ -51,8 +49,6 @@ public class PathResolverTest extends TestCase {
 	ServerSession session;
 	private Context ctx = null;
 	private User user;
-	private UserPermissionBits userPerm;
-
 
     @Override
 	public void setUp() throws Exception {
@@ -61,11 +57,9 @@ public class PathResolverTest extends TestCase {
 		ctx = getContext();
 
         final UserStorage userStorage = UserStorage.getInstance();
-        final UserPermissionBitsStorage userConfigStorage = UserPermissionBitsStorage.getInstance();
 
         session = ServerSessionFactory.createServerSession(userStorage.getUserId(getUsername(), ctx), ctx, "gnitzelgnatzel");
 		user = userStorage.getUser(session.getUserId(), ctx);
-		userPerm = userConfigStorage.getUserPermissionBits(session.getUserId(), ctx);
 
 		findRoot();
 
@@ -112,7 +106,7 @@ public class PathResolverTest extends TestCase {
 
 	private void findRoot() throws Exception {
 		final OXFolderAccess oxfa = new OXFolderAccess(ctx);
-		root = oxfa.getDefaultFolder(user.getId(), FolderObject.INFOSTORE).getObjectID();
+		root = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
 	}
 
 	private String getUsername() {
@@ -128,43 +122,43 @@ public class PathResolverTest extends TestCase {
 	}
 
 	public void testResolvePathDocument() throws Exception {
-		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/document.txt"), ctx, user, userPerm);
+		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/document.txt"), session);
 		assertTrue(resolved.isDocument());
 		assertFalse(resolved.isFolder());
 		assertEquals(id6, resolved.getId());
 
-		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path/document.txt"), ctx, user, userPerm);
+		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path/document.txt"), session);
 		assertTrue(resolved.isDocument());
 		assertFalse(resolved.isFolder());
 		assertEquals(id6, resolved.getId());
 	}
 
 	public void testResolvePathFolder() throws Exception {
-		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path"), ctx, user, userPerm);
+		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path"), session);
 		assertFalse(resolved.isDocument());
 		assertTrue(resolved.isFolder());
 		assertEquals(id5, resolved.getId());
 
-		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path"), ctx, user, userPerm);
+		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path"), session);
 		assertFalse(resolved.isDocument());
 		assertTrue(resolved.isFolder());
 		assertEquals(id5, resolved.getId());
 	}
 
 	public void testGetPathDocument() throws Exception {
-		final WebdavPath path = pathResolver.getPathForDocument(root, id6, ctx, user, userPerm);
+		final WebdavPath path = pathResolver.getPathForDocument(root, id6, session);
         assertComponents(path, "this", "is", "a","nice","path","document.txt");
 	}
 
 	public void testGetPathFolder() throws Exception {
-		final WebdavPath path = pathResolver.getPathForFolder(root, id5, ctx, user, userPerm);
+		final WebdavPath path = pathResolver.getPathForFolder(root, id5, session);
         assertComponents(path, "this","is","a","nice","path");
 
 	}
 
 	public void testNotExists() throws Exception {
 		try {
-			pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), ctx, user, userPerm);
+			pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), session);
 			fail("Expected OXObjectNotFoundException");
 		} catch (final OXException x) {
 			assertTrue(true);
@@ -174,13 +168,13 @@ public class PathResolverTest extends TestCase {
     // Bug 12279
     public void testCaseSensitive() throws Exception {
         try {
-			pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), ctx, user, userPerm);
+			pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/DoCuMeNt.txt"), session);
 			fail("Expected OXObjectNotFoundException");
 		} catch (final OXException x) {
 			assertTrue(true);
 		}
         try {
-            pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/PaTh"), ctx, user, userPerm);
+            pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/PaTh"), session);
             fail("Expected OXObjectNotFoundException");
         } catch (final OXException x) {
             assertTrue(true);
@@ -193,20 +187,20 @@ public class PathResolverTest extends TestCase {
         aliases.registerNameWithIDAndParent("ALIAS!", id5, id4);
         pathResolver.setAliases(aliases);
 
-        final Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/ALIAS!"), ctx, user, userPerm);
+        final Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/ALIAS!"), session);
         assertFalse(resolved.isDocument());
         assertTrue(resolved.isFolder());
         assertEquals(id5, resolved.getId());
 
         pathResolver.clearCache();
 
-        final WebdavPath path = pathResolver.getPathForFolder(root, id5, ctx, user, userPerm);
+        final WebdavPath path = pathResolver.getPathForFolder(root, id5, session);
         assertComponents(path, "this","is","a","nice","ALIAS!");
 
         pathResolver.clearCache();
 
         try {
-            pathResolver.resolve(root, new WebdavPath("this/ALIAS!/a/nice"), ctx, user, userPerm);
+            pathResolver.resolve(root, new WebdavPath("this/ALIAS!/a/nice"), session);
             fail("Expected OXObjectNotFoundException");
         } catch (final OXException x) {
             assertTrue(true);

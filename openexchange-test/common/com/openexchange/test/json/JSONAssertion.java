@@ -198,6 +198,16 @@ public class JSONAssertion implements JSONCondition {
         return this;
     }
 
+    public JSONAssertion lacksKey(final String key) {
+        if(!stack.isEmpty()) {
+            stack.peek().lacksKey(key);
+        } else {
+            conditions.add(new LacksKey(key));
+            this.key = key;
+        }
+        return this;
+    }
+
     public JSONAssertion withValue(final Object value) {
         if(!stack.isEmpty()) {
             stack.peek().withValue(value);
@@ -309,6 +319,25 @@ public class JSONAssertion implements JSONCondition {
         @Override
         public String getComplaint() {
             return "Missing key: "+key;
+        }
+
+    }
+
+    private static final class LacksKey implements JSONCondition {
+        private final String key;
+
+        public LacksKey(final String key) {
+            this.key = key;
+        }
+
+        @Override
+        public boolean validate(final Object o) {
+            return !((JSONObject)o).has(key);
+        }
+
+        @Override
+        public String getComplaint() {
+            return "Key should be missing: "+key;
         }
 
     }

@@ -49,9 +49,9 @@
 
 package com.openexchange.drive.storage;
 
-import static com.openexchange.drive.storage.DriveConstants.PATH_SEPARATOR;
-import static com.openexchange.drive.storage.DriveConstants.ROOT_PATH;
-import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
+import static com.openexchange.drive.DriveConstants.PATH_SEPARATOR;
+import static com.openexchange.drive.DriveConstants.ROOT_PATH;
+import static com.openexchange.drive.DriveConstants.TEMP_PATH;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,8 +61,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveStrings;
 import com.openexchange.drive.internal.DriveServiceLookup;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.filter.FileNameFilter;
 import com.openexchange.drive.storage.filter.Filter;
@@ -86,6 +90,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -168,12 +173,14 @@ public class DriveStorage {
         copiedFile.setFolderId(getFolderID(targetPath, true));
         copiedFile.setLastModified(new Date());
         copiedFile.setVersion("1");
+        copiedFile.setFileMIMEType(sourceFile.getFileMIMEType());
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID, Field.LAST_MODIFIED });
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(targetPath, targetFileName));
         }
-        String targetId = getFileAccess().copy(sourceFile.getId(), copiedFile.getFolderId(), copiedFile, null, fileFields);
+        String targetId = getFileAccess().copy(
+            sourceFile.getId(), sourceFile.getVersion(), copiedFile.getFolderId(), copiedFile, null, fileFields);
         copiedFile.setId(targetId);
         return copiedFile;
     }
@@ -191,6 +198,7 @@ public class DriveStorage {
         copiedFile.setLastModified(new Date());
         copiedFile.setFileSize(sourceFile.getFileSize());
         copiedFile.setFileMD5Sum(sourceFile.getFileMD5Sum());
+        copiedFile.setFileMIMEType(sourceFile.getFileMIMEType());
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(getPath(copiedFile.getFolderId()), copiedFile.getFileName()));
@@ -502,18 +510,54 @@ public class DriveStorage {
         }
     }
 
+    /**
+     * Finds a file with a specific name in a path.
+     *
+     * @param path The path of the directory to look for the file
+     * @param name The name of the file
+     * @return The file, or <code>null</code> if not found.
+     * @throws OXException
+     */
     public File findFileByName(String path, final String name) throws OXException {
-        return findFileByName(path, name, DriveConstants.FILE_FIELDS);
+        return findFileByName(path, name, false);
     }
 
-    public File findFileByName(String path, final String name, List<Field> fields) throws OXException {
-        return Filter.find(getFilesIterator(getFolderID(path), name, fields), new FileNameFilter() {
+    /**
+     * Finds a file with a specific name in a path.
+     *
+     * @param path The path of the directory to look for the file
+     * @param name The name of the file
+     * @param normalizeFileNames <code>true</code> to also consider not-normalized filenames, <code>false</code>, otherwise
+     * @return The file, or <code>null</code> if not found.
+     * @throws OXException
+     */
+    public File findFileByName(String path, final String name, boolean normalizeFileNames) throws OXException {
+        return findFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
+    }
+
+    private File findFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
+        List<File> files = Filter.apply(getFilesIterator(getFolderID(path), name, fields), new FileNameFilter() {
 
             @Override
             protected boolean accept(String fileName) throws OXException {
-                return name.equals(fileName);
+                return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
             }
         });
+        if (1 == files.size()) {
+            return files.get(0);
+        } else if (1 < files.size()) {
+            File normalizedFile = null;
+            for (File file : files) {
+                if (name.equals(file.getFileName())) {
+                    return file;
+                }
+                if (PathNormalizer.isNormalized(file.getFileName())) {
+                    normalizedFile = file;
+                }
+            }
+            return null != normalizedFile ? normalizedFile : files.get(0);
+        }
+        return null;
     }
 
     public String getPath(String folderID) throws OXException {
@@ -562,8 +606,10 @@ public class DriveStorage {
 
     public String getVersionComment() {
         String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
-        //TODO: wording, i18n
-        return "Uploaded with OX Drive (" + device + ")";
+        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
+        String product = configService.getProperty("com.openexchange.drive.shortProductName", "OX Drive");
+        String format = StringHelper.valueOf(session.getDriveSession().getLocale()).getString(DriveStrings.VERSION_COMMENT);
+        return String.format(format, product, device);
     }
 
     private SearchIterator<File> getFilesIterator(String folderID, String pattern, List<Field> fields) throws OXException {
@@ -582,13 +628,15 @@ public class DriveStorage {
         FileStorageFolder currentFolder = getRootFolder();
         String currentPath = ROOT_PATH;
         for (String name : split(path)) {
-            FileStorageFolder existingFolder = knownFolders.getFolder(currentPath + name);
+            String normalizedName = PathNormalizer.normalize(name);
+            FileStorageFolder existingFolder = knownFolders.getFolder(currentPath + normalizedName);
             if (null == existingFolder) {
                 FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(currentFolder.getId(), false);
                 if (null != subfolders && 0 < subfolders.length) {
                     for (FileStorageFolder folder : subfolders) {
-                        knownFolders.remember(currentPath + folder.getName(), folder);
-                        if (name.equals(folder.getName())) {
+                        String normalizedFolderName = PathNormalizer.normalize(folder.getName());
+                        knownFolders.remember(currentPath + normalizedFolderName, folder);
+                        if (normalizedName.equals(normalizedFolderName)) {
                             existingFolder = folder;
                         }
                     }
@@ -603,7 +651,7 @@ public class DriveStorage {
                     }
                 }
                 existingFolder = createFolder(currentFolder, name);
-                knownFolders.remember(currentPath + name, existingFolder);
+                knownFolders.remember(currentPath + normalizedName, existingFolder);
             }
             currentFolder = existingFolder;
             currentPath += name + PATH_SEPARATOR;
@@ -624,7 +672,7 @@ public class DriveStorage {
             StringBuilder pathBuilder = new StringBuilder();
             for (int i = 0; i < folders.size(); i++) {
                 FileStorageFolder folder = folders.get(i);
-                pathBuilder.append(PATH_SEPARATOR).append(folder.getName());
+                pathBuilder.append(PATH_SEPARATOR).append(PathNormalizer.normalize(folder.getName()));
                 knownFolders.remember(pathBuilder.toString(), folder);
             }
             return pathBuilder.toString();
@@ -636,7 +684,7 @@ public class DriveStorage {
     private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path) throws OXException {
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(parent.getId(), false);
         for (FileStorageFolder subfolder : subfolders) {
-            String subPath = path + subfolder.getName();
+            String subPath = path + PathNormalizer.normalize(subfolder.getName());
             knownFolders.remember(subPath, subfolder);
             if (false == TEMP_PATH.equals(subPath)) {
                 folders.put(subPath, subfolder);

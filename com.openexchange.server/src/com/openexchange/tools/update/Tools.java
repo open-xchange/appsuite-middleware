@@ -501,6 +501,32 @@ public final class Tools {
         return type;
     }
 
+    /**
+     * Checks if specified column in given table has a default value set.
+     *
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @return <code>true</code> if that column has a default value; otherwise <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    public static final boolean hasDefaultValue(final Connection con, final String table, final String column) throws SQLException {
+        if (!columnExists(con, table, column)) {
+            throw new SQLException("Column '" + column + "' does not exist in table '" + table + "'");
+        }
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        try {
+            rs = metaData.getColumns(null, null, table, column);
+            if (rs.next()) {
+                return null != rs.getString("COLUMN_DEF");
+            }
+            return false;
+        } finally {
+            closeSQLStuff(rs);
+        }
+    }
+
     public static final String getColumnTypeName(final Connection con, final String table, final String column) throws SQLException {
         if (!columnExists(con, table, column)) {
             return null;

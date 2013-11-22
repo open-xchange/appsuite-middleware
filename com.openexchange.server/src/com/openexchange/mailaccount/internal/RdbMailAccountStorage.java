@@ -50,7 +50,7 @@
 package com.openexchange.mailaccount.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
+import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -59,7 +59,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.sql.Connection;
@@ -141,7 +140,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final int TYPE_VARCHAR = Types.VARCHAR;
 
     private static final String SELECT_MAIL_ACCOUNT =
-        "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
+        "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String SELECT_TRANSPORT_ACCOUNT =
         "SELECT name, url, login, password, send_addr, default_flag, personal, replyTo FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
@@ -163,7 +162,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String INSERT_MAIL_ACCOUNT =
-        "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_TRANSPORT_ACCOUNT =
         "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?";
@@ -327,6 +326,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             mailAccount.setSpam(getOptionalString(result.getString(10)));
             mailAccount.setConfirmedSpam(getOptionalString(result.getString(11)));
             mailAccount.setConfirmedHam(getOptionalString(result.getString(12)));
+            mailAccount.setArchive(getOptionalString(result.getString(23)));
             /*
              * Spam handler name
              */
@@ -353,6 +353,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     mailAccount.setDraftsFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_DRAFTS]) : s);
                     s = getOptionalString(result.getString(18));
                     mailAccount.setSpamFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_SPAM]) : s);
+                    s = getOptionalString(result.getString(24));
+                    mailAccount.setArchiveFullname(s);
                 }
             }
             /*
@@ -876,12 +878,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
+    public MailAccount[] resolveLogin(final String login, final String serverUrl, final int cid) throws OXException {
         final int[][] idsAndUsers = resolveLogin2IDs(login, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
         for (final int[] idAndUser : idsAndUsers) {
             final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
-            if (server.equals(toSocketAddr(candidate.generateMailServerURL(), 143))) {
+            if (serverUrl.equals(toSocketAddrString(candidate.generateMailServerURL(), 143))) {
                 l.add(candidate);
             }
         }
@@ -996,7 +998,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final EnumSet<Attribute> PRIMARY_EDITABLE = EnumSet.of(
         Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
         Attribute.PERSONAL_LITERAL,
-        Attribute.REPLY_TO_LITERAL);
+        Attribute.REPLY_TO_LITERAL,
+        Attribute.ARCHIVE_LITERAL,
+        Attribute.ARCHIVE_FULLNAME_LITERAL);
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final Connection con, final boolean changePrimary) throws OXException {
@@ -1016,7 +1020,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
             final boolean containsPersonal = attributes.contains(Attribute.PERSONAL_LITERAL);
             final boolean containsReplyTo = attributes.contains(Attribute.REPLY_TO_LITERAL);
-            if (!containsUnifiedInbox && !containsPersonal && !containsReplyTo) {
+            final boolean containsArchive = attributes.contains(Attribute.ARCHIVE_LITERAL);
+            final boolean containsArchiveFullName = attributes.contains(Attribute.ARCHIVE_FULLNAME_LITERAL);
+            if (!containsUnifiedInbox && !containsPersonal && !containsReplyTo && !containsArchive && !containsArchiveFullName) {
                 /*
                  * Another attribute must not be changed
                  */
@@ -1076,6 +1082,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                  * OK, update reply-to string.
                  */
                 updateReplyTo(mailAccount.getReplyTo(), MailAccount.DEFAULT_ID, user, cid, con);
+            }
+            if (containsArchive) {
+                updateArchive(mailAccount.getArchive(), MailAccount.DEFAULT_ID, user, cid, con);
+            }
+            if (containsArchiveFullName) {
+                updateArchiveFullName(mailAccount.getArchiveFullname(), MailAccount.DEFAULT_ID, user, cid, con);
             }
         } else {
             /*
@@ -1161,10 +1173,23 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             } else {
                                 stmt.setString(pos++, replyTo);
                             }
+                        } else if (Attribute.ARCHIVE_LITERAL == attribute) {
+                            final String s = mailAccount.getArchive();
+                            if (isEmpty(s)) {
+                                stmt.setString(pos++, "");
+                            } else {
+                                stmt.setString(pos++, s);
+                            }
+                        } else if (Attribute.ARCHIVE_FULLNAME_LITERAL == attribute) {
+                            final String s = mailAccount.getArchiveFullname();
+                            if (isEmpty(s)) {
+                                stmt.setString(pos++, "");
+                            } else {
+                                stmt.setString(pos++, MailFolderUtility.prepareMailFolderParam(s).getFullname());
+                            }
                         } else if (DEFAULT.contains(attribute)) {
                             if (DEFAULT_FULL_NAMES.contains(attribute)) {
-                                final String fullName =
-                                    null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
+                                final String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
                                 stmt.setString(pos++, fullName);
                             } else {
                                 if (null == value) {
@@ -1432,6 +1457,48 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setNull(pos++, TYPE_VARCHAR);
             } else {
                 stmt.setString(pos++, replyTo);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void updateArchive(final String archive, final int id, final int user, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user_mail_account SET archive = ? WHERE cid = ? AND id = ? AND user = ?");
+            int pos = 1;
+            if (null == archive) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, archive);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void updateArchiveFullName(final String archiveFullName, final int id, final int user, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user_mail_account SET archive_fullname = ? WHERE cid = ? AND id = ? AND user = ?");
+            int pos = 1;
+            if (null == archiveFullName) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, archiveFullName);
             }
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, id);
@@ -1764,6 +1831,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     stmt.setString(pos++, replyTo);
                 }
+                /*
+                 * Archive
+                 */
+                setOptionalString(stmt, pos++, mailAccount.getArchive());
+                setOptionalString(stmt, pos++, mailAccount.getArchiveFullname());
                 stmt.executeUpdate();
             }
             final String transportURL = mailAccount.generateTransportServerURL();
@@ -2553,11 +2625,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private static void setOptionalString(final PreparedStatement stmt, final int pos, final String string) throws SQLException {
-        if (null == string) {
-            stmt.setString(pos, "");
-        } else {
-            stmt.setString(pos, string);
-        }
+        stmt.setString(pos, null == string ? "" : string);
     }
 
     private static String getOptionalString(final String string) {

@@ -79,7 +79,7 @@ public final class IMAPCapabilityAndGreetingCache {
     static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPCapabilityAndGreetingCache.class));
 
-    private static volatile ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> MAP;
+    private static volatile ConcurrentMap<String, Future<CapabilityAndGreeting>> MAP;
 
     /**
      * Initializes a new {@link IMAPCapabilityAndGreetingCache}.
@@ -95,7 +95,7 @@ public final class IMAPCapabilityAndGreetingCache {
         if (MAP == null) {
             synchronized (IMAPCapabilityAndGreetingCache.class) {
                 if (MAP == null) {
-                    MAP = new NonBlockingHashMap<InetSocketAddress, Future<CapabilityAndGreeting>>();
+                    MAP = new NonBlockingHashMap<String, Future<CapabilityAndGreeting>>();
                     // TODO: Probably pre-load CAPABILITY and greeting from common IMAP servers like GMail, etc.
                 }
             }
@@ -132,7 +132,7 @@ public final class IMAPCapabilityAndGreetingCache {
      * @return The greeting from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static String getGreeting(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+    public static String getGreeting(final String address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
         return getCapabilityAndGreeting(address, isSecure, imapProperties).getGreeting();
     }
 
@@ -145,12 +145,12 @@ public final class IMAPCapabilityAndGreetingCache {
      * @return The capabilities from IMAP server denoted by specified parameters
      * @throws IOException If an I/O error occurs
      */
-    public static Map<String, String> getCapabilities(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+    public static Map<String, String> getCapabilities(final String address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
         return getCapabilityAndGreeting(address, isSecure, imapProperties).getCapability();
     }
 
-    private static CapabilityAndGreeting getCapabilityAndGreeting(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
-        ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> map = MAP;
+    private static CapabilityAndGreeting getCapabilityAndGreeting(final String address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+        ConcurrentMap<String, Future<CapabilityAndGreeting>> map = MAP;
         if (null == map) {
             init();
             map = MAP;
@@ -192,15 +192,13 @@ public final class IMAPCapabilityAndGreetingCache {
 
         private static final Pattern SPLIT = Pattern.compile("\r?\n");
 
-        private final InetSocketAddress key;
-
+        private final String serverUrl;
         private final boolean isSecure;
-
         private final IIMAPProperties imapProperties;
 
-        public CapabilityAndGreetingCallable(final InetSocketAddress key, final boolean isSecure, final IIMAPProperties imapProperties) {
+        public CapabilityAndGreetingCallable(final String serverUrl, final boolean isSecure, final IIMAPProperties imapProperties) {
             super();
-            this.key = key;
+            this.serverUrl = serverUrl;
             this.isSecure = isSecure;
             this.imapProperties = imapProperties;
         }
@@ -220,9 +218,9 @@ public final class IMAPCapabilityAndGreetingCache {
                      */
                     final int connectionTimeout = imapProperties.getImapConnectionTimeout();
                     if (connectionTimeout > 0) {
-                        s.connect(key, connectionTimeout);
+                        s.connect(toSocketAddress(serverUrl) , connectionTimeout);
                     } else {
-                        s.connect(key);
+                        s.connect(toSocketAddress(serverUrl));
                     }
                     final int timeout = imapProperties.getImapTimeout();
                     if (timeout > 0) {
@@ -343,15 +341,33 @@ public final class IMAPCapabilityAndGreetingCache {
         }
     }
 
+    static InetSocketAddress toSocketAddress(final String serverUrl) {
+        if (null == serverUrl) {
+            return null;
+        }
+        final int pos = serverUrl.lastIndexOf(':');
+        int port;
+        if (pos > 0) {
+            try {
+                port = Integer.parseInt(serverUrl.substring(pos + 1).trim());
+            } catch (final NumberFormatException e) {
+                LOG.error("Port cannot be parsed to integer: " + serverUrl, e);
+                port = 143;
+            }
+        } else {
+            port = 143;
+        }
+        return new InetSocketAddress(serverUrl.substring(0, pos).trim(), port);
+    }
+
     private static final class CapabilityAndGreeting {
 
         private static final Pattern SPLIT = Pattern.compile(" +");
 
         private final Map<String, String> capabilities;
-
         private final String greeting;
 
-        public CapabilityAndGreeting(final String capability, final String greeting) {
+        CapabilityAndGreeting(final String capability, final String greeting) {
             super();
             if (null == capability) {
                 capabilities = Collections.emptyMap();
@@ -367,11 +383,11 @@ public final class IMAPCapabilityAndGreetingCache {
             this.greeting = greeting;
         }
 
-        public Map<String, String> getCapability() {
+        Map<String, String> getCapability() {
             return capabilities;
         }
 
-        public String getGreeting() {
+        String getGreeting() {
             return greeting;
         }
 

@@ -107,6 +107,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.version.Version;
@@ -133,6 +134,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.ListInfo;
+import com.sun.mail.imap.protocol.MailboxInfo;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
 
@@ -236,9 +238,14 @@ public final class IMAPCommandsCollection {
                  */
                 final StringAllocator sb = new StringAllocator(7 + mboxName.length());
                 final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
-                if (r[r.length - 1].isOK()) {
+                final Response response = r[r.length - 1];
+                if (response.isOK()) {
                     sb.reinitTo(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
+                    return Boolean.TRUE;
+                }
+                if (response.isNO() && MimeMailException.isOverQuotaException(response.getRest())) {
+                    // Creating folder failed due to a exceeded quota exception. Thus assume "true".
                     return Boolean.TRUE;
                 }
                 return Boolean.FALSE;
@@ -373,9 +380,14 @@ public final class IMAPCommandsCollection {
                  */
                 sb.reinitTo(0);
                 final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
-                if (r[r.length - 1].isOK()) {
+                final Response response = r[r.length - 1];
+                if (response.isOK()) {
                     sb.reinitTo(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
+                    return Boolean.TRUE;
+                }
+                if (response.isNO() && MimeMailException.isOverQuotaException(response.getRest())) {
+                    // Creating folder failed due to a exceeded quota exception. Thus assume "true".
                     return Boolean.TRUE;
                 }
                 return Boolean.FALSE;
@@ -716,11 +728,13 @@ public final class IMAPCommandsCollection {
      * Gets recent message count from given IMAP folder
      *
      * @param imapFolder The IMAP folder
+     * @return The total/unread message count
      * @return The recent message count
      * @throws MessagingException If determining counts fails
      */
-    public static int getRecent(final IMAPFolder imapFolder) throws MessagingException {
-        return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+    public static int getRecent(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+        return ((Integer) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
@@ -734,7 +748,7 @@ public final class IMAPCommandsCollection {
                  * Encode the mbox as per RFC2060
                  */
                 final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                args.writeString(BASE64MailboxEncoder.encode(fullName));
                 /*
                  * Item arguments
                  */
@@ -779,11 +793,13 @@ public final class IMAPCommandsCollection {
      * Gets total message count from given IMAP folder
      *
      * @param imapFolder The IMAP folder
+     * @return The total/unread message count
      * @return The total message count
      * @throws MessagingException If determining counts fails
      */
-    public static int getTotal(final IMAPFolder imapFolder) throws MessagingException {
-        return ((Integer) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+    public static int getTotal(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+        return ((Integer) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
@@ -797,7 +813,7 @@ public final class IMAPCommandsCollection {
                  * Encode the mbox as per RFC2060
                  */
                 final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                args.writeString(BASE64MailboxEncoder.encode(fullName));
                 /*
                  * Item arguments
                  */
@@ -3138,9 +3154,9 @@ public final class IMAPCommandsCollection {
         }))).booleanValue();
     }
 
-    private static final String ATOM_PERMANENTFLAGS = "[PERMANENTFLAGS";
+    // private static final String ATOM_PERMANENTFLAGS = "[PERMANENTFLAGS";
 
-    static final Pattern PATTERN_USER_FLAGS = Pattern.compile("(?:\\(|\\s)(?:\\\\\\*)(?:\\)|\\s)");
+    // static final Pattern PATTERN_USER_FLAGS = Pattern.compile("(?:\\(|\\s)(?:\\\\\\*)(?:\\)|\\s)");
 
     /**
      * Applies the IMAPv4 SELECT command on given folder and returns whether its permanent flags supports user-defined flags or not.
@@ -3165,23 +3181,8 @@ public final class IMAPCommandsCollection {
                 final Response response = r[r.length - 1];
                 Boolean retval = Boolean.FALSE;
                 if (response.isOK()) {
-                    NextResp: for (int i = 0, len = r.length - 1; i < len; i++) {
-                        if (!(r[i] instanceof IMAPResponse)) {
-                            continue;
-                        }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
-                        if (ir.isUnTagged() && ir.isOK()) {
-                            /*
-                             * " OK [PERMANENTFLAGS (\Deleted \)]"
-                             */
-                            ir.skipSpaces();
-                            if (ATOM_PERMANENTFLAGS.equals(ir.readAtom('\0'))) {
-                                retval = Boolean.valueOf(PATTERN_USER_FLAGS.matcher(ir.getRest()).find());
-                                break NextResp;
-                            }
-                        }
-                        r[i] = null;
-                    }
+                    final MailboxInfo mi = new MailboxInfo(r);
+                    retval = Boolean.valueOf(mi.permanentFlags.contains(Flags.Flag.USER));
                     notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(

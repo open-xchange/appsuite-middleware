@@ -230,13 +230,16 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     if (null != operation && operation.toString().startsWith("update")) {
                         return;
                     }
+                    // There is no session available for remotely received events
                     final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
-                    final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
-                    final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
-                    try {
-                        tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                    if (null != session) {
+                        final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                        final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
+                        try {
+                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                        } catch (final OXException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
                     }
                 }
             };

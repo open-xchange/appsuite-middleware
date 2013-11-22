@@ -123,8 +123,8 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // File name must not contain slashes.
     public static final String VALIDATION_FAILED_SLASH_MSG = "File name must not contain slashes.";
 
-    // File name contains illegal characters.
-    public static final String VALIDATION_FAILED_CHARACTERS_MSG = "File name contains illegal characters.";
+    // File name contains invalid characters.
+    public static final String VALIDATION_FAILED_CHARACTERS_MSG = "File name contains invalid characters.";
 
     public static final String NO_OFFSET_FOR_NEW_VERSIONS_MSG = "New file versions can't be saved with an offset.";
 

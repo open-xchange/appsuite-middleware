@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.fs;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,10 +60,7 @@ import com.openexchange.file.storage.AbstractFileStorageFolderAccess;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.Quota;
-import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.session.Session;
 
 
@@ -75,8 +71,8 @@ import com.openexchange.session.Session;
  */
 public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
 
-    private File directory;
-    private Session session;
+    private final File directory;
+    private final Session session;
 
     /**
      * Initializes a new {@link FSFolderAccess}.

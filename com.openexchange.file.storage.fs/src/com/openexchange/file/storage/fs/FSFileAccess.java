@@ -61,18 +61,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -80,20 +81,20 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link FSFileAccess}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FSFileAccess implements FileStorageFileAccess {
+public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficientRetrieval {
 
-    private java.io.File directory;
+    private final java.io.File directory;
 
-    private Session session;
+    private final Session session;
 
-    private FileStorageAccountAccess accountAccess;
+    private final FileStorageAccountAccess accountAccess;
 
     /**
      * Initializes a new {@link FSFileAccess}.
-     * 
+     *
      * @param file
      * @param session
      */
@@ -106,14 +107,6 @@ public class FSFileAccess implements FileStorageFileAccess {
 
     private java.io.File toFile(String folderId, String id) throws OXException {
         java.io.File file = new java.io.File(toDirectory(folderId), id);
-
-        if (!file.getParentFile().equals(new java.io.File(directory, folderId))) {
-            throw OXException.general(("No directory traversal, please"));
-        }
-
-        if (!file.getParentFile().getParentFile().equals(directory)) {
-            throw OXException.general(("No directory traversal, please"));
-        }
 
         return file;
     }
@@ -246,7 +239,11 @@ public class FSFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
+        if (version != CURRENT_VERSION) {
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("No versioning support");
+        }
+
         java.io.File file = toFile(source.getFolder(), source.getId());
 
         String name = file.getName();
@@ -296,6 +293,34 @@ public class FSFileAccess implements FileStorageFileAccess {
         } catch (FileNotFoundException e) {
             throw OXException.general(e.getMessage());
         }
+    }
+    
+    @Override
+    public Document getDocumentAndMetadata(String folderId, String fileId, String version) throws OXException {
+        java.io.File fsFile = toFile(folderId, fileId);
+        
+        
+        return toDocument(fsFile);
+    }
+
+    private Document toDocument(final java.io.File fsFile) {
+        return new Document() {
+
+            @Override
+            public InputStream getData() throws OXException {
+                try {
+                    return new FileInputStream(fsFile);
+                } catch (FileNotFoundException e) {
+                    throw OXException.general("File not found: " + fsFile);
+                }
+            }
+            
+        }.setSize(fsFile.length()).setMimeType(null).setEtag("fs://" + fsFile.getAbsolutePath() +"/" + fsFile.lastModified());
+    }
+
+    @Override
+    public Document getDocumentAndMetadata(String folderId, String fileId, String version, String clientETag) throws OXException {
+        return getDocumentAndMetadata(folderId, fileId, version);
     }
 
     @Override
@@ -470,5 +495,6 @@ public class FSFileAccess implements FileStorageFileAccess {
     public FileStorageAccountAccess getAccountAccess() {
         return accountAccess;
     }
+
 
 }

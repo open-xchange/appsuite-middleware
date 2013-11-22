@@ -192,9 +192,16 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof InvalidCredentialsException) {
-            final InvalidCredentialsException exc = (InvalidCredentialsException) e;
-            printServerException(id, ctxid, exc, parser);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
+            if (parser.getOptionValue(this.adminPassOption) == null && parser.getOptionValue(this.adminUserOption) == null) {
+                final String msg = "Options \"" + this.adminUserOption.longForm() + ", " + this.adminPassOption.longForm() + "\" missing";
+                printError(id, ctxid, msg, parser);
+                parser.printUsage();
+                sysexit(SYSEXIT_MISSING_OPTION);
+            } else {
+                final InvalidCredentialsException exc = (InvalidCredentialsException) e;
+                printServerException(id, ctxid, exc, parser);
+                sysexit(SYSEXIT_INVALID_CREDENTIALS);
+            }
         } else if (e instanceof NoSuchContextException) {
             final NoSuchContextException exc = (NoSuchContextException) e;
             printServerException(id, ctxid, exc, parser);

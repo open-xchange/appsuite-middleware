@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,17 +51,15 @@ package com.openexchange.publish.osgi;
 
 import com.openexchange.caching.CacheService;
 import com.openexchange.contact.ContactService;
-import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.impl.CachingLoader;
 import com.openexchange.publish.impl.CompositeLoaderService;
 import com.openexchange.publish.impl.ContactFolderLoader;
-import com.openexchange.publish.impl.InfostoreDocumentLoader;
-import com.openexchange.publish.impl.InfostoreFolderLoader;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.publish.impl.IDBasedFileAccessDocumentLoader;
+import com.openexchange.publish.impl.IDBasedFolderAccessFolderLoader;
 
 /**
  * {@link LoaderActivator}
@@ -73,12 +71,10 @@ public class LoaderActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         final CompositeLoaderService compositeLoader = new CompositeLoaderService();
-
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        final UserService users = getService(UserService.class);
-        final UserPermissionService userPermissions = getService(UserPermissionService.class);
-        compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userPermissions));
-        compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userPermissions));
+        final IDBasedFileAccessFactory fileFactory = getService(IDBasedFileAccessFactory.class);
+        final IDBasedFolderAccessFactory folderFactory = getService(IDBasedFolderAccessFactory.class);
+        compositeLoader.registerLoader("infostore/object", new IDBasedFileAccessDocumentLoader(fileFactory));
+        compositeLoader.registerLoader("infostore", new IDBasedFolderAccessFolderLoader(folderFactory, fileFactory));
 
         final ContactFolderLoader contactLoader = new ContactFolderLoader(getService(ContactService.class));
         compositeLoader.registerLoader("contacts", contactLoader);
@@ -87,13 +83,8 @@ public class LoaderActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { CacheService.class, InfostoreFacade.class, UserService.class, UserPermissionService.class, ContactService.class };
+        return new Class[] { IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class, CacheService.class, ContactService.class };
     }
 
 }

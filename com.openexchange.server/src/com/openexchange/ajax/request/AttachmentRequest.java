@@ -86,7 +86,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -124,8 +123,8 @@ public class AttachmentRequest extends CommonRequest {
     public AttachmentRequest(final ServerSession session, final JSONWriter w) {
         super(w);
         this.ctx = session.getContext();
-        this.user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-        this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
+        this.user = session.getUser();
+        this.userConfig = session.getUserConfiguration();
         this.session = session;
     }
 

@@ -57,12 +57,15 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
@@ -597,6 +600,36 @@ public class Strings {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+    
+    /**
+     * Takes a String of separated values, splits it at the separator, trims the split values and returns them as List.
+     * 
+     * @param input String of separated values
+     * @param separator the seperator as regular expression used to split the input around this separator
+     * @return the split and trimmed input as List or an empty list
+     * @throws IllegalArgumentException if input or the seperator are missing or if the separator isn't a valid pattern
+     */
+    public static List<String> splitAndTrim(String input, String separator) {
+        if (input == null) {
+            throw new IllegalArgumentException("Missing input");
+        }
+        if (Strings.isEmpty(input)) {
+            return Collections.emptyList();
+        }
+        if (Strings.isEmpty(separator)) {
+            throw new IllegalArgumentException("Missing separator");
+        }
+        ArrayList<String> trimmedSplits = new ArrayList<String>();
+        try {
+            String[] splits = input.split(separator);
+            for (String string : splits) {
+                trimmedSplits.add(string.trim());
+            }
+        } catch (PatternSyntaxException pse) {
+            throw new IllegalArgumentException("Illegal pattern syntax");
+        }
+        return trimmedSplits;
     }
 
 }

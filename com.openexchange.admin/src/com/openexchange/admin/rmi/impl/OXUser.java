@@ -299,14 +299,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (isContextAdmin && usrdata.getPassword() != null) {
             final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
             final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);
-            if ("{CRYPT}".equals(mech)) {
+            if ("{CRYPT}".equalsIgnoreCase(mech)) {
                 try {
                     cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
                 } catch (final UnsupportedEncodingException e) {
                     log.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 }
-            } else if ("{SHA}".equals(mech)) {
+            } else if ("{SHA}".equalsIgnoreCase(mech)) {
                 try {
                     cauth.setPassword(SHACrypt.makeSHAPasswd(usrdata.getPassword()));
                 } catch (final NoSuchAlgorithmException e) {
@@ -316,7 +316,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     log.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 }
-            } else if ("{BCRYPT}".equals(mech)) {
+            } else if ("{BCRYPT}".equalsIgnoreCase(mech)) {
                 try {
                     cauth.setPassword(BCrypt.hashpw(usrdata.getPassword(), BCrypt.gensalt()));
                 } catch (final RuntimeException e) {
@@ -1291,7 +1291,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         if (prop.getUserProp(AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true)) {
-            if (newuser.getPrimaryEmail() != null && !newuser.getPrimaryEmail().equals(dbuser.getPrimaryEmail())) {
+            if (newuser.getPrimaryEmail() != null && !newuser.getPrimaryEmail().equalsIgnoreCase(dbuser.getPrimaryEmail())) {
                 throw new InvalidDataException("primary mail must not be changed");
             }
         }
@@ -1323,7 +1323,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final String defaultSenderAddress = newuser.getDefaultSenderAddress();
             final String primaryEmail = newuser.getPrimaryEmail();
             final String email1 = newuser.getEmail1();
-            if (primaryEmail != null && email1 != null && !primaryEmail.equals(email1)) {
+            if (primaryEmail != null && email1 != null && !primaryEmail.equalsIgnoreCase(email1)) {
                 // primary mail value must be same with email1
                 throw new InvalidDataException("email1 not equal with primarymail!");
             }
@@ -1333,7 +1333,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             String check_default_sender_address;
             if (primaryEmail != null) {
                 check_primary_mail = IDNA.toIDN(primaryEmail);
-                if (!primaryEmail.equals(dbuser.getPrimaryEmail())) {
+                if (!primaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
                     tool.primaryMailExists(ctx, primaryEmail);
                 }
             } else {

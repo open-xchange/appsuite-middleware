@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.Constants;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
@@ -85,8 +86,7 @@ public class MimeSnippetActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            DatabaseService.class, ContextService.class, CacheService.class, CryptoService.class, IDGeneratorService.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, CacheService.class, CryptoService.class, IDGeneratorService.class, ConfigurationService.class };
     }
 
     @Override
@@ -94,6 +94,22 @@ public class MimeSnippetActivator extends HousekeepingActivator {
         final Log logger = com.openexchange.log.Log.loggerFor(MimeSnippetActivator.class);
         logger.info("Starting bundle: com.openexchange.snippet.mime");
         try {
+
+            /*
+             * First, check for if a file store is available/permitted
+             */
+            /*-
+             *
+            final boolean filestore = getService(ConfigurationService.class).getBoolProperty("com.openexchange.capability.filestore", true);
+            if (!filestore) {
+                logger.info("No registration of filestore-based'" + MimeSnippetService.class.getSimpleName() + "' as property \"com.openexchange.capability.filestore\" is configured to be \"false\".");
+            }
+             *
+             */
+
+            /*
+             * Go ahead with starting bundle...
+             */
             Services.setServiceLookup(this);
             /*
              * Register groupware stuff

@@ -71,56 +71,97 @@ public abstract class Synchronizer<T extends DriveVersion> {
     protected final SyncSession session;
     protected final VersionMapper<T> mapper;
 
+    /**
+     * Initializes a new {@link Synchronizer}.
+     *
+     * @param session The sync session
+     * @param mapper The version mapper
+     * @throws OXException
+     */
     public Synchronizer(SyncSession session, VersionMapper<T> mapper) throws OXException {
         super();
         this.session = session;
         this.mapper = mapper;
     }
 
+    /**
+     * Performs the synchronization.
+     *
+     * @return The sync result
+     * @throws OXException
+     */
     public IntermediateSyncResult<T> sync() throws OXException {
         IntermediateSyncResult<T> result = new IntermediateSyncResult<T>();
         int maxActions = getMaxActions();
+        int nonTrivialActionCount = 0;
         for (Entry<String, ThreeWayComparison<T>> entry : mapper) {
-            process(result, entry.getValue());
-            if (result.length() > maxActions) {
-                session.trace("Interrupting processing since the maximum number of actions (" + maxActions + ") is exceeded.");
+            nonTrivialActionCount += process(result, entry.getValue());
+            if (nonTrivialActionCount > maxActions) {
+                session.trace("Interrupting processing since the maximum number of non-trivial actions (" + maxActions + ") is exceeded.");
                 break;
             }
         }
         return result;
     }
 
-    private void process(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException {
+    private int process(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException {
         Change clientChange = comparison.getClientChange();
         Change serverChange = comparison.getServerChange();
         if (Change.NONE == clientChange && Change.NONE == serverChange) {
             /*
              * nothing to do
              */
-            return;
+            return 0;
         } else if (Change.NONE == clientChange && Change.NONE != serverChange) {
             /*
              * process server-only change
              */
-            processServerChange(result, comparison);
+            return processServerChange(result, comparison);
         } else if (Change.NONE != clientChange && Change.NONE == serverChange) {
             /*
              * process client-only change
              */
-            processClientChange(result, comparison);
+            return processClientChange(result, comparison);
         } else {
             /*
              * process changes on both sides
              */
-            processConflictingChange(result, comparison);
+            return processConflictingChange(result, comparison);
         }
     }
 
-    protected abstract void processServerChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
+    /**
+     * Processes a server-only change caused by the supplied comparison.
+     *
+     * @param result The sync result to add resulting server- and client-actions
+     * @param comparison The causing comparison
+     * @return The number of non-trivial resulting actions, i.e. the number of actions of all added actions apart from
+     *         <code>ACKNOWLEDGE</code>-actions.
+     * @throws OXException
+     */
+    protected abstract int processServerChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
-    protected abstract void processClientChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
+    /**
+     * Processes a client-only change caused by the supplied comparison.
+     *
+     * @param result The sync result to add resulting server- and client-actions
+     * @param comparison The causing comparison
+     * @return The number of non-trivial resulting actions, i.e. the number of actions of all added actions apart from
+     *         <code>ACKNOWLEDGE</code>-actions.
+     * @throws OXException
+     */
+    protected abstract int processClientChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
-    protected abstract void processConflictingChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
+    /**
+     * Processes a conflicting, i.e. server- and client-change caused by the supplied comparison.
+     *
+     * @param result The sync result to add resulting server- and client-actions
+     * @param comparison The causing comparison
+     * @return The number of non-trivial resulting actions, i.e. the number of actions of all added actions apart from
+     *         <code>ACKNOWLEDGE</code>-actions.
+     * @throws OXException
+     */
+    protected abstract int processConflictingChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
     /**
      * Gets the maximum number of actions to be evaluated per synchronization request. Any further open actions will need to be handled in

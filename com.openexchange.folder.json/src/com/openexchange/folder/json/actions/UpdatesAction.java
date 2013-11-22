@@ -143,7 +143,7 @@ public final class UpdatesAction extends AbstractFolderAction {
                 includeMail ? new ContentType[] { ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class).getByString(
                     "mail") } : null,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
         /*
          * Determine last-modified time stamp
          */
@@ -166,14 +166,14 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, null);
+        final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         try {
             final JSONArray jsonArray2 =
                 FolderWriter.writeMultiple2Array(
                     new int[] { FolderField.ID.getColumn() },
                     result[1],
                     session,
-                    Constants.ADDITIONAL_FOLDER_FIELD_LIST, null);
+                    Constants.ADDITIONAL_FOLDER_FIELD_LIST);
             final int len = jsonArray2.length();
             for (int i = 0; i < len; i++) {
                 resultArray.put(jsonArray2.getJSONArray(i).get(0));

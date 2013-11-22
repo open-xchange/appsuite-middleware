@@ -101,13 +101,13 @@ public final class SystemSharedFolder {
      *
      * @param fo The folder object fetched from database
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPerm The user permission bits
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system shared folder for given user
      * @throws OXException
      */
-    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
         /*
          * The system shared folder
          */
@@ -124,7 +124,7 @@ public final class SystemSharedFolder {
             /*
              * Set to null if a shared folder exists otherwise to empty array to indicate no subfolders
              */
-            final boolean hasNext = treeMap.hasSharedFolder(user.getId(), user.getGroups(), userConfiguration.getAccessibleModules());
+            final boolean hasNext = treeMap.hasSharedFolder(user.getId(), user.getGroups(), userPerm.getAccessibleModules());
             retval.setSubfolderIDs(hasNext ? null : new String[0]);
             retval.setSubscribedSubfolders(hasNext);
             return retval;
@@ -140,7 +140,7 @@ public final class SystemSharedFolder {
                     user.getId(),
                     user.getGroups(),
                     ctx,
-                    userConfiguration,
+                    userPerm,
                     null,
                     con);
         } catch (final SQLException e) {
@@ -167,13 +167,13 @@ public final class SystemSharedFolder {
      * Gets the subfolder identifiers of database folder representing system shared folder for given user.
      *
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPerm The user permission bits
      * @param ctx The context
      * @param con The connection
      * @return The subfolder identifiers of database folder representing system shared folder for given user
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemSharedFolderSubfolder(final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static List<String[]> getSystemSharedFolderSubfolder(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
         /*
          * The system shared folder
          */
@@ -187,7 +187,7 @@ public final class SystemSharedFolder {
                         user.getId(),
                         user.getGroups(),
                         ctx,
-                        userConfiguration,
+                        userPerm,
                         null,
                         con)).asQueue();
             } catch (final SQLException e) {

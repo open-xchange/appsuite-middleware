@@ -758,9 +758,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             result.setTempfilemap(tempfilemap);
             instance.checkVersion(result);
 
+            if (dryrun) {
+                return "Done nothing (dry run)";
+            }
+
             final OXContextInterface contextInterface = Activator.getContextInterface();
 
             final OXToolStorageInterface storage = OXToolStorageInterface.getInstance();
+            // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
             if (storage.existsContext(ctx)) {
                 try {
                     contextInterface.delete(ctx, auth);
@@ -769,10 +774,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     LOG.fatal("FATAL:" + e.getMessage(), e);
                 }
             }
-            if (dryrun) {
-                return "Done nothing (dry run)";
-            }
-            // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
             return instance.restorectx(ctx, result, getConfigDbName(optConfigDbName));
         } catch (final StorageException e) {
             LOG.error(e.getMessage(), e);

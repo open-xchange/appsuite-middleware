@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class HistoryAction implements AJAXActionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public HistoryAction(ServiceLookup services) {
         super();

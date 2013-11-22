@@ -95,7 +95,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     private String contentDisposition;
 
-    private int optTtl;
+    private final int optTtl;
 
 
     

@@ -62,12 +62,14 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import junit.framework.JUnit4TestAdapter;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.TestCSVContactImporter;
 
@@ -83,6 +85,11 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		imp = new TestCSVContactImporter();
 	}
 
+	@Before
+	public void TearUp() throws OXException {
+	    folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
+	}
+	
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(OutlookCSVContactImportTest.class);

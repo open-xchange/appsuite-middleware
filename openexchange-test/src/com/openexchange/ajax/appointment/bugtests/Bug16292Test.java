@@ -17,7 +17,7 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -184,7 +184,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final int[] appFields = { Appointment.NUMBER_OF_ATTACHMENTS, Appointment.TITLE, Appointment.OBJECT_ID };
         final UpdatesRequest appointmentUpdatesRequest = new UpdatesRequest(appointmentFolder, appFields, new Date(
             appointment.getLastModified().getTime() - 1), false);
-        final UpdatesResponse appointmentUpdatesResp = client.execute(appointmentUpdatesRequest);
+        final AppointmentUpdatesResponse appointmentUpdatesResp = client.execute(appointmentUpdatesRequest);
 
         assertNOANotNull(
             appointmentUpdatesResp,

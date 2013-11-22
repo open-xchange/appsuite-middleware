@@ -60,12 +60,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.internal.IDUtil;
+import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -90,13 +91,8 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static FileChecksum getChecksum(SyncSession session, File file) throws OXException {
-        FileID fileID = new FileID(file.getId());
-        FolderID folderID = new FolderID(file.getFolderId());
-        if (null == fileID.getFolderId()) {
-            // TODO: check
-            fileID.setFolderId(folderID.getFolderId());
-        }
-        FileChecksum fileChecksum = session.getChecksumStore().getFileChecksum(fileID, file.getVersion(), file.getSequenceNumber());
+        FileChecksum fileChecksum = session.getChecksumStore().getFileChecksum(
+            IDUtil.getFileID(file), file.getVersion(), file.getSequenceNumber());
         if (null == fileChecksum) {
             fileChecksum = session.getChecksumStore().insertFileChecksum(calculateFileChecksum(session, file));
         }
@@ -254,7 +250,7 @@ public class ChecksumProvider {
                         trace.append(' ' + file.getFileName()).append(" - Stored, valid: ").append(fileChecksum).append('\n');
                     }
                 }
-                md5.update(file.getFileName().getBytes(Charsets.UTF_8));
+                md5.update(PathNormalizer.normalize(file.getFileName()).getBytes(Charsets.UTF_8));
                 md5.update(fileChecksum.getChecksum().getBytes(Charsets.UTF_8));
             }
             if (0 < calculatedChecksums.size()) {
@@ -274,14 +270,8 @@ public class ChecksumProvider {
         if (null == md5) {
             throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
         }
-        FileID fileID = new FileID(file.getId());
-        FolderID folderID = new FolderID(file.getFolderId());
-        if (null == fileID.getFolderId()) {
-            // TODO: check
-            fileID.setFolderId(folderID.getFolderId());
-        }
         FileChecksum fileChecksum = new FileChecksum();
-        fileChecksum.setFileID(fileID);
+        fileChecksum.setFileID(IDUtil.getFileID(file));
         fileChecksum.setSequenceNumber(file.getSequenceNumber());
         fileChecksum.setVersion(file.getVersion());
         fileChecksum.setChecksum(md5);
@@ -346,8 +336,8 @@ public class ChecksumProvider {
 
         @Override
         public int compare(File o1, File o2) {
-            byte[] fileName1 = o1.getFileName().getBytes(Charsets.UTF_8);
-            byte[] fileName2 = o2.getFileName().getBytes(Charsets.UTF_8);
+            byte[] fileName1 = PathNormalizer.normalize(o1.getFileName()).getBytes(Charsets.UTF_8);
+            byte[] fileName2 = PathNormalizer.normalize(o2.getFileName()).getBytes(Charsets.UTF_8);
             int minLength = Math.min(fileName1.length, fileName2.length);
             for (int i = 0; i < minLength; i++) {
                 int result = (fileName1[i] & 0xFF) - (fileName2[i] & 0xFF);

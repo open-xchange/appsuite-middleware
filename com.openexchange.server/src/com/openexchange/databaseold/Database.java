@@ -232,7 +232,11 @@ public final class Database {
      */
     public static void backNoTimeout(final int contextId, final boolean write, final Connection con) {
         try {
-            getDatabaseService().backForUpdateTask(contextId, con);
+            if (write) {
+                getDatabaseService().backForUpdateTask(contextId, con);
+            } else {
+                getDatabaseService().backForUpdateTaskAfterReading(contextId, con);
+            }
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }

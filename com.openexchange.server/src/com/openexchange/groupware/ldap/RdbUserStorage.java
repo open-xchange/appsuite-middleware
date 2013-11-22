@@ -674,11 +674,12 @@ public class RdbUserStorage extends UserStorage {
                     throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
                 }
                 condition.resetTransactionRollbackException();
+                boolean modificationPerformed = false;
                 boolean rollback = false;
                 try {
                     con.setAutoCommit(false); // BEGIN
                     rollback = true;
-                    setAttribute(context.getContextId(), con, userId, name, value);
+                    modificationPerformed = setAttribute(context.getContextId(), con, userId, name, value);
                     con.commit(); // COMMIT
                     rollback = false;
                 } catch (final SQLException e) {
@@ -692,7 +693,11 @@ public class RdbUserStorage extends UserStorage {
                         rollback(con);
                     }
                     autocommit(con);
-                    DBPool.closeWriterSilent(context, con);
+                    if (modificationPerformed) {
+                        DBPool.closeWriterSilent(context, con);
+                    } else {
+                        DBPool.closeWriterAfterReading(context, con);
+                    }
                 }
             } while (condition.checkRetry());
         } catch (final SQLException e) {
@@ -701,7 +706,7 @@ public class RdbUserStorage extends UserStorage {
 
     }
 
-    private static void setAttribute(int contextId, Connection con, int userId, String name, String value) throws SQLException, OXException {
+    private static boolean setAttribute(int contextId, Connection con, int userId, String name, String value) throws SQLException, OXException {
         TIntObjectMap<UserImpl> userMap = createSingleUserMap(userId);
         loadAttributes(contextId, con, userMap, true);
         Map<String, UserAttribute> oldAttributes = userMap.get(userId).getAttributesInternal();
@@ -713,7 +718,7 @@ public class RdbUserStorage extends UserStorage {
             newAttribute.addValue(value);
             attributes.put(name, newAttribute);
         }
-        updateAttributes(contextId, userId, con, oldAttributes, attributes);
+        return updateAttributes(contextId, userId, con, oldAttributes, attributes);
     }
 
     @Override
@@ -760,7 +765,8 @@ public class RdbUserStorage extends UserStorage {
         updateAttributes(contextId, userId, con, oldAttributes, attributes);
     }
 
-    private static void updateAttributes(int contextId, int userId, Connection con, Map<String, UserAttribute> oldAttributes, Map<String, UserAttribute> attributes) throws SQLException, OXException {
+    private static boolean updateAttributes(int contextId, int userId, Connection con, Map<String, UserAttribute> oldAttributes, Map<String, UserAttribute> attributes) throws SQLException, OXException {
+        boolean retval = false;
         final Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
         final Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
         final Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
@@ -794,6 +800,7 @@ public class RdbUserStorage extends UserStorage {
                     LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
                     throw e;
                 }
+                retval = true;
             } finally {
                 closeSQLStuff(stmt);
             }
@@ -837,6 +844,7 @@ public class RdbUserStorage extends UserStorage {
                     LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
                     throw e;
                 }
+                retval = true;
             } finally {
                 closeSQLStuff(stmt);
                 closeSQLStuff(stmt2);
@@ -925,11 +933,14 @@ public class RdbUserStorage extends UserStorage {
                         throw e;
                     }
                 }
+                retval = true;
             } finally {
                 closeSQLStuff(stmt);
                 closeSQLStuff(stmt2);
             }
         }
+        // Signal if any modification has been performed
+        return retval;
     }
 
     private static boolean hasPrimaryKey(final String table, final Connection con) throws SQLException {

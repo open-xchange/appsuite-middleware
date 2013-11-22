@@ -60,17 +60,13 @@ public final class SearchStrings {
         super();
     }
 
+    /**
+     * Gets the length of specified pattern without wild-card characters.
+     *
+     * @param pattern The pattern
+     * @return The length without wild-card characters
+     */
     public static int lengthWithoutWildcards(String pattern) {
-        StringBuilder sb = new StringBuilder(pattern);
-        int i = 0;
-        while (i < sb.length()) {
-            final char toTest = sb.charAt(i);
-            if (toTest == ' ' || toTest == '*' || toTest == '%' || toTest == '?') {
-                sb.deleteCharAt(i);
-            } else {
-                i++;
-            }
-        }
-        return sb.length();
+        return com.openexchange.java.SearchStrings.lengthWithoutWildcards(pattern);
     }
 }

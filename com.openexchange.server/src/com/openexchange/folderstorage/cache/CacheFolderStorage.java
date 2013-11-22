@@ -112,6 +112,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -202,7 +203,11 @@ public final class CacheFolderStorage implements FolderStorage {
     public void removeFromGlobalCache(final String folderId, final String treeId, final int contextId) {
         final Cache cache = globalCache;
         if (null != cache) {
-            cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+            try {
+                cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+            } catch (final Exception e) {
+                // ignore
+            }
         }
     }
 
@@ -740,6 +745,8 @@ public final class CacheFolderStorage implements FolderStorage {
                 }
                 folderMapManagement.dropFor(id, tid, optUserId, contextId, optSession);
             }
+        } catch (final Exception x) {
+            // Ignore
         } finally {
             lock.unlock();
         }
@@ -886,7 +893,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    private void removeFromSubfolders(final String treeId, final String parentId, final String contextId, final Session session) {
+    private void removeFromSubfolders(final String treeId, final String parentId, final String contextId, final Session session) throws OXException {
         registry.clearCaches(session.getUserId(), session.getContextId());
         globalCache.removeFromGroup(newCacheKey(parentId, treeId), contextId);
         FolderMapManagement.getInstance().dropFor(parentId, treeId, session.getUserId(), session.getContextId(), session);
@@ -1093,7 +1100,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    private Folder getCloneFromCache(final String treeId, final String folderId, final StorageParameters storageParameters) {
+    private Folder getCloneFromCache(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final Folder folder = getRefFromCache(treeId, folderId, storageParameters);
         return null == folder ? null : (Folder) folder.clone();
     }
@@ -1105,8 +1112,9 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param folderId The folder identifier
      * @param params The storage parameters
      * @return The folder or <code>null</code> on cache miss
+     * @throws OXException
      */
-    protected Folder getRefFromCache(final String treeId, final String folderId, final StorageParameters params) {
+    protected Folder getRefFromCache(final String treeId, final String folderId, final StorageParameters params) throws OXException {
         final int contextId = params.getContextId();
         /*
          * Try global cache key
@@ -1574,8 +1582,13 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param folderId The folder ID
      * @param treeId The tree ID
      * @return The cache key
+     * @throws OXException If cache service is absent
      */
-    private CacheKey newCacheKey(final String folderId, final String treeId) {
+    private CacheKey newCacheKey(final String folderId, final String treeId) throws OXException {
+        final CacheService cacheService = this.cacheService;
+        if (null == cacheService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CacheService.class.getSimpleName());
+        }
         return cacheService.newCacheKey(1, treeId, folderId);
     }
 

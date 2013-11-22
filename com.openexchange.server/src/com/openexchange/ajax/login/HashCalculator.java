@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.login;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
@@ -69,22 +70,47 @@ import com.openexchange.tools.encoding.Base64;
 public class HashCalculator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashCalculator.class));
+
+    private static final String USER_AGENT = LoginFields.USER_AGENT;
+    private static final String CLIENT_PARAM = LoginFields.CLIENT_PARAM;
+
     private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
+
+    // -------------------------------    SINGLETON    ------------------------------------------------ //
+
     private static final HashCalculator SINGLETON = new HashCalculator();
 
-    private String[] fields = new String[0];
-
-    private HashCalculator() {
-        super();
-    }
-
+    /**
+     * Gets the singleton instance of {@link HashCalculator}.
+     *
+     * @return The instance
+     */
     public static HashCalculator getInstance() {
         return SINGLETON;
     }
 
+    // -------------------------------    MEMBER STUFF    -------------------------------------------- //
+
+    private volatile String[] fields;
+    private volatile String salt;
+
+    private HashCalculator() {
+        super();
+        fields = new String[0];
+        salt = "";
+    }
+
+    /**
+     * Configures this {@link HashCalculator} using specified configuration service.
+     *
+     * @param service The configuration service
+     */
     public void configure(ConfigurationService service) {
-        final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
-        fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
+        if (null != service) {
+            final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
+            fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
+            salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890");
+        }
     }
 
     /**
@@ -109,15 +135,22 @@ public class HashCalculator {
     public String getHash(final HttpServletRequest req, final String userAgent, final String client) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update((null == userAgent ? parseUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
+            md.update((null == userAgent ? parseClientUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
             }
-            for (final String field : fields) {
-                final String header = req.getHeader(field);
-                if (!isEmpty(header)) {
-                    md.update(header.getBytes(Charsets.UTF_8));
+            final String[] fields = this.fields;
+            if (null != fields) {
+                for (final String field : fields) {
+                    final String header = req.getHeader(field);
+                    if (!isEmpty(header)) {
+                        md.update(header.getBytes(Charsets.UTF_8));
+                    }
                 }
+            }
+            final String salt = this.salt;
+            if (null != salt) {
+                md.update(salt.getBytes());
             }
             return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {
@@ -137,21 +170,56 @@ public class HashCalculator {
     }
 
     /**
-     * Gets the client identifier associated with specified request.
+     * Gets the <code>"client"</code> request parameter or <code>"default"</code> if absent.
      *
      * @param req The HTTP Servlet request
-     * @return The client identifier or <code>"default"</code> if none available
+     * @return The client identifier or <code>"default"</code> if absent
      */
     public static String getClient(final HttpServletRequest req) {
-        final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
+        final String parameter = req.getParameter(CLIENT_PARAM);
         return isEmpty(parameter) ? "default" : parameter;
     }
 
-    private static String parseUserAgent(final HttpServletRequest req, final String defaultValue) {
-        final String parameter = req.getParameter(LoginFields.USER_AGENT);
+    /**
+     * Gets the calculated hash string for user-agent only.
+     *
+     * @param req The HTTP Servlet request
+     * @return The calculated hash string
+     */
+    public String getUserAgentHash(final HttpServletRequest req) {
+        return getUserAgentHash(req, null);
+    }
+
+    /**
+     * Gets the calculated hash string for user-agent only.
+     *
+     * @param req The HTTP Servlet request
+     * @param userAgent The optional <code>User-Agent</code> identifier
+     * @return The calculated hash string
+     */
+    public String getUserAgentHash(final HttpServletRequest req, final String userAgent) {
+        final String sha256 = com.openexchange.tools.HashUtility.getSha256(null == userAgent ? getUserAgent(req) : userAgent, "hex");
+        return null == sha256 ? "" : sha256;
+    }
+
+    /**
+     * Gets the <code>"clientUserAgent"</code> request parameter or given <code>defaultValue</code> if absent.
+     *
+     * @param req The request
+     * @param defaultValue The default value
+     * @return The <code>"clientUserAgent"</code> request parameter or given <code>defaultValue</code> if absent
+     */
+    private static String parseClientUserAgent(final HttpServletRequest req, final String defaultValue) {
+        final String parameter = req.getParameter(USER_AGENT);
         return isEmpty(parameter) ? defaultValue : parameter;
     }
 
+    /**
+     *  Gets the <code>"User-Agent"</code> request header or an empty String if absent.
+     *
+     * @param req The request
+     * @return The <code>"User-Agent"</code> request header or an empty String if absent
+     */
     private static String getUserAgent(final HttpServletRequest req) {
         final String header = req.getHeader(Header.USER_AGENT);
         if (header == null) {
@@ -160,15 +228,4 @@ public class HashCalculator {
         return header;
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
 }

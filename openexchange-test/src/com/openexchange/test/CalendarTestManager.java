@@ -83,7 +83,7 @@ import com.openexchange.ajax.appointment.action.NewAppointmentSearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -304,7 +304,7 @@ public class CalendarTestManager implements TestManager {
 
     public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
         UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster);
-        UpdatesResponse resp = execute(req);
+        AppointmentUpdatesResponse resp = execute(req);
         extractInfo(resp);
         try {
             return resp.getAppointments(timezone);

@@ -62,6 +62,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Loggable;
 import com.openexchange.log.Loggable.Level;
+import com.openexchange.log.ReportedThrowable;
+import com.openexchange.log.ReportedThrowableHandler;
 import com.openexchange.log.internal.callback.DebugCallback;
 import com.openexchange.log.internal.callback.ErrorCallback;
 import com.openexchange.log.internal.callback.FatalCallback;
@@ -69,6 +71,7 @@ import com.openexchange.log.internal.callback.InfoCallback;
 import com.openexchange.log.internal.callback.LogCallback;
 import com.openexchange.log.internal.callback.TraceCallback;
 import com.openexchange.log.internal.callback.WarnCallback;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -126,6 +129,7 @@ final class LoggerTask extends AbstractTask<Object> {
     private final AtomicBoolean keepgoing;
     private final String lineSeparator;
     private final int maxMessageLength;
+    private final NearRegistryServiceTracker<ReportedThrowableHandler> registry;
 
     private final Map<Level, LogCallback> callbacks;
 
@@ -135,12 +139,13 @@ final class LoggerTask extends AbstractTask<Object> {
      * @param queue
      * @param maxMessageLength
      */
-    protected LoggerTask(final BlockingQueue<Loggable> queue, final int maxMessageLength) {
+    protected LoggerTask(final BlockingQueue<Loggable> queue, final int maxMessageLength, final NearRegistryServiceTracker<ReportedThrowableHandler> registry) {
         super();
         lineSeparator = System.getProperty("line.separator");
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
         this.maxMessageLength = maxMessageLength;
+        this.registry = registry;
 
         final Map<Loggable.Level, LogCallback> callbacks = new EnumMap<Loggable.Level, LogCallback>(Loggable.Level.class);
         callbacks.put(Loggable.Level.DEBUG, new DebugCallback());
@@ -181,16 +186,15 @@ final class LoggerTask extends AbstractTask<Object> {
         while (keepgoing.get()) {
             try {
                 loggables.clear();
-                if (queue.isEmpty()) {
-                    /*
-                     * Blocking wait for at least 1 Loggable to arrive.
-                     */
+                // Blocking wait for at least 1 Loggable to arrive
+                {
                     final Loggable loggable = queue.take();
                     if (POISON == loggable) {
                         return null;
                     }
                     loggables.add(loggable);
                 }
+                // Drain more if available
                 queue.drainTo(loggables);
                 final boolean quit = loggables.remove(POISON);
                 for (final Loggable loggable : loggables) {
@@ -233,10 +237,16 @@ final class LoggerTask extends AbstractTask<Object> {
                 msg = CRLF.matcher(msg).replaceAll(lineSeparator + " ");
             }
         }
+        // The optional Throwable instance
+        final Throwable throwable = loggable.getThrowable();
+        // Reporting (if enabled)
+        if (null != throwable) {
+            report(throwable);
+        }
         // Check stack trace
         final StackTraceElement[] trace = loggable.getCallerTrace();
         if (null == trace) {
-            callback.log(msg, loggable.getThrowable(), loggable.getLog());
+            callback.log(msg, throwable, loggable.getLog());
             return;
         }
         // Stack trace available: <stack-trace> + <LF> + <message>
@@ -258,7 +268,7 @@ final class LoggerTask extends AbstractTask<Object> {
                         substring = "..." + delim + substring;
                     }
                     sb.delete(0, pos + delim.length());
-                    callback.log(substring + "...", sb.length() <= 0 ? loggable.getThrowable() : null, loggable.getLog());
+                    callback.log(substring + "...", sb.length() <= 0 ? throwable : null, loggable.getLog());
                 } else {
                     String substring = sb.substring(0, maxMessageLength);
                     if (first) {
@@ -267,14 +277,28 @@ final class LoggerTask extends AbstractTask<Object> {
                         substring = "..." + delim + substring;
                     }
                     sb.delete(0, maxMessageLength);
-                    callback.log(substring + "...", sb.length() <= 0 ? loggable.getThrowable() : null, loggable.getLog());
+                    callback.log(substring + "...", sb.length() <= 0 ? throwable : null, loggable.getLog());
                 }
             } while (sb.length() > maxMessageLength);
             if (sb.length() > 0) {
-                callback.log("..." + delim + sb.toString(), loggable.getThrowable(), loggable.getLog());
+                callback.log("..." + delim + sb.toString(), throwable, loggable.getLog());
             }
         } else {
-            callback.log(sb.toString(), loggable.getThrowable(), loggable.getLog());
+            callback.log(sb.toString(), throwable, loggable.getLog());
+        }
+    }
+    
+    private void report(final Throwable throwable) {
+        final NearRegistryServiceTracker<ReportedThrowableHandler> registry = this.registry;
+        if (null == registry) {
+            return;
+        }
+        final List<ReportedThrowableHandler> handlers = registry.getServiceList();
+        if (null != handlers) {
+            final ReportedThrowable reportedThrowable = new ReportedThrowable(throwable);
+            for (final ReportedThrowableHandler reportedThrowableHandler : handlers) {
+                reportedThrowableHandler.handleReportedThrowable(reportedThrowable);
+            }
         }
     }
 

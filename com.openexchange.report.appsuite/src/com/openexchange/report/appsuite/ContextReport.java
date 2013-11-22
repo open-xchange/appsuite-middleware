@@ -63,7 +63,7 @@ public @NotThreadSafe class ContextReport extends Report {
 
     private static final long serialVersionUID = 3879587797122632468L;
     
-    private Context ctx;
+    private final Context ctx;
     
     /**
      * Initializes a new {@link ContextReport}.

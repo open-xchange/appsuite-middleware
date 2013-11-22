@@ -58,7 +58,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.Translator;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.publish.PublicationTarget;
@@ -150,7 +150,7 @@ public class PublicationTargetWriterTest extends TestCase {
     private static final class TestTarget extends PublicationTarget implements UserSpecificPublicationTarget {
 
         @Override
-        public DynamicFormDescription getUserSpecificDescription(User user, UserConfiguration configuration) {
+        public DynamicFormDescription getUserSpecificDescription(User user, UserPermissionBits permissionBits) {
             return new DynamicFormDescription().add(FormElement.input("userSpecific", "User Specific"));
         }
 

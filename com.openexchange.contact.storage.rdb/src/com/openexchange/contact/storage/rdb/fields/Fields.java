@@ -60,12 +60,19 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 public final class Fields {
 
     /**
-     * A set of all contact fields as used by the contacts database table.
+     * A set of all contact fields as used by the 'prg_contacts' database table.
      */
     //TODO: might be better to list the fields explicitly
     public static final EnumSet<ContactField> CONTACT_DATABASE = EnumSet.complementOf(EnumSet.of(ContactField.IMAGE1_URL,
         ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1, ContactField.DISTRIBUTIONLIST,
         ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.LAST_MODIFIED_UTC, ContactField.LINKS, ContactField.SORT_NAME));
+
+    /**
+     * A set of all contact fields as used by the 'del_contacts' database table.
+     */
+    public static final EnumSet<ContactField> DEL_CONTACT_DATABASE = EnumSet.of(ContactField.CONTEXTID, ContactField.FOLDER_ID,
+        ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID, ContactField.FILENAME, ContactField.LAST_MODIFIED,
+        ContactField.CREATION_DATE, ContactField.CREATED_BY, ContactField.MODIFIED_BY, ContactField.PRIVATE_FLAG);
 
     /**
      * An array of all contact fields as used by the contacts database table.
@@ -108,6 +115,12 @@ public final class Fields {
     public static final DistListMemberField[] DISTLIST_DATABASE_ARRAY =
         DISTLIST_DATABASE.toArray(new DistListMemberField[DISTLIST_DATABASE.size()]);
 
+    /**
+     * A set of all contact fields that are relevant for contacts referenced by the distribution list database table.
+     */
+    public static final EnumSet<ContactField> DISTLIST_DATABASE_RELEVANT = EnumSet.of(ContactField.OBJECT_ID, ContactField.FOLDER_ID,
+        ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,  ContactField.DISPLAY_NAME, ContactField.SUR_NAME,
+        ContactField.GIVEN_NAME);
 
     private Fields() {
         // prevent instantiation

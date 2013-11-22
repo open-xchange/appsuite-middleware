@@ -57,7 +57,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +66,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -128,11 +128,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     private final Map<String, Map<String, AttributedProperty>> preferenceItems;
 
-    private final Map<String, Map<String, String>[]> configTreeEquivalents;
-
-    private final int CONFIG2LOB = 0;
-
-    private final int LOB2CONFIG = 1;
+    private final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents;
 
     private final Map<String, SharedJSlobService> sharedJSlobs;
 
@@ -149,13 +145,15 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final File file = service.getFileByName("paths.perfMap");
         if (null == file) {
-            configTreeEquivalents = Collections.emptyMap();
+            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2);
         } else {
-            configTreeEquivalents = new HashMap<String, Map<String, String>[]>();
+            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48);
             readPerfMap(file, configTreeEquivalents);
+            this.configTreeEquivalents = configTreeEquivalents;
         }
-
+        // Initialize shared JSlobs
         sharedJSlobs = new ConcurrentHashMap<String, SharedJSlobService>();
+        // Initialize service tracker
     }
 
     /**
@@ -167,8 +165,7 @@ public final class ConfigJSlobService implements JSlobService {
         return services;
     }
 
-    @SuppressWarnings("unchecked")
-    private void readPerfMap(final File file, final Map<String, Map<String, String>[]> map) throws OXException {
+    private void readPerfMap(final File file, final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents) throws OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
@@ -191,14 +188,14 @@ public final class ConfigJSlobService implements JSlobService {
                             }
                         }
 
-                        Map<String, String>[] maps = map.get(jslobName);
-                        if (maps == null) {
-                            maps = new Map[] { new HashMap<String, String>(32), new HashMap<String, String>(32) };
-                            map.put(jslobName, maps);
+                        ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
+                        if (equiv == null) {
+                            equiv = new ConfigTreeEquivalent();
+                            configTreeEquivalents.put(jslobName, equiv);
                         }
 
-                        maps[CONFIG2LOB].put(configTreePath, jslobPath);
-                        maps[LOB2CONFIG].put(jslobPath, configTreePath);
+                        equiv.config2lob.put(configTreePath, jslobPath);
+                        equiv.lob2config.put(jslobPath, configTreePath);
                     }
                 }
             }
@@ -208,6 +205,70 @@ public final class ConfigJSlobService implements JSlobService {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         } finally {
             Streams.close(reader);
+        }
+    }
+
+    /**
+     * Adds specified config tree to jslob path mapping (if not already contained).
+     *
+     * @param configTreePath The config tree path
+     * @param jslobPath The associated jslob path
+     */
+    public void addConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
+        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+            return;
+        }
+        String path = jslobPath.trim();
+        String jslobName;
+        {
+            final int pathSep = path.indexOf("//");
+            if (pathSep < 0) {
+                jslobName = CORE;
+            } else {
+                jslobName = path.substring(0, pathSep);
+                path = path.substring(pathSep + 2);
+            }
+        }
+
+        ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
+        if (equiv == null) {
+            final ConfigTreeEquivalent newEquiv = new ConfigTreeEquivalent();
+            equiv = configTreeEquivalents.putIfAbsent(jslobName, newEquiv);
+            if (null == equiv) {
+                equiv = newEquiv;
+            }
+        }
+
+        equiv.config2lob.put(configTreePath.trim(), path);
+        equiv.lob2config.put(path, configTreePath.trim());
+    }
+
+    /**
+     * Removes specified config tree to jslob path mapping
+     *
+     * @param configTreePath The config tree path
+     * @param jslobPath The associated jslob path
+     */
+    public void removeConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
+        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+            return;
+        }
+        String path = jslobPath.trim();
+        String jslobName;
+        {
+            final int pathSep = path.indexOf("//");
+            if (pathSep < 0) {
+                jslobName = CORE;
+            } else {
+                jslobName = path.substring(0, pathSep);
+                path = path.substring(pathSep + 2);
+            }
+        }
+
+        final ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
+        if (equiv != null) {
+            equiv.config2lob.remove(configTreePath.trim());
+            equiv.lob2config.remove(path);
         }
     }
 
@@ -291,7 +352,7 @@ public final class ConfigJSlobService implements JSlobService {
             jSlob.setId(new JSlobId(SERVICE_ID, CORE, userId, contextId));
             addConfigTreeToJslob(session, jSlob);
         }
-        
+
         for (JSlob jSlob : ret) {
             String id = jSlob.getId().getId();
             for (String sharedId : sharedJSlobs.keySet()) {
@@ -328,9 +389,8 @@ public final class ConfigJSlobService implements JSlobService {
     public JSlob get(final String id, final Session session) throws OXException {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
-        /*
-         * Get from storage
-         */
+
+        // Get from storage
         final DefaultJSlob jsonJSlob;
         {
             final JSlob opt = getStorage().opt(new JSlobId(SERVICE_ID, id, userId, contextId));
@@ -341,10 +401,8 @@ public final class ConfigJSlobService implements JSlobService {
                 jsonJSlob = new DefaultJSlob(opt);
             }
         }
-        
-        /*
-         * Fill with config cascade settings
-         */
+
+        // Append config cascade settings
         final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
         if (null != attributes) {
             final ConfigView view = getConfigViewFactory().getView(userId, contextId);
@@ -353,23 +411,20 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
 
+        // Append config tree settings
         addConfigTreeToJslob(session, jsonJSlob);
-        
-        // Search for shared jslobs and merge them if neccessary
-        for (String sharedId : sharedJSlobs.keySet()) {
+
+        // Search for shared jslobs and merge them if necessary
+        final Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
+        for (final Entry<String, SharedJSlobService> entry : sharedJSlobs.entrySet()) {
+            final String sharedId = entry.getKey();
             if (sharedId.startsWith(id)) {
-                JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
-                String newId = sharedId.substring(id.length() + 1, sharedId.length());
-                JSONObject jsonObject = jsonJSlob.getJsonObject();
-                JSONObject sharedObject = sharedJSlob.getJsonObject();
-                for (String key : sharedObject.keySet()) {
-                    if (sharedObject.hasAndNotNull(key)) {
-                        try {
-                            jsonObject.put(newId, sharedObject);
-                        } catch (JSONException e) {
-                            // should not happen
-                        }
-                    }
+                try {
+                    JSlob sharedJSlob = entry.getValue().getJSlob(session);
+                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                    jsonJSlob.getJsonObject().put(newId, sharedJSlob.getJsonObject());
+                } catch (JSONException e) {
+                    // should not happen
                 }
             }
         }
@@ -420,7 +475,7 @@ public final class ConfigJSlobService implements JSlobService {
 
             ret.add(jsonJSlob);
         }
-        
+
         for (JSlob jslob : ret) {
             String id = jslob.getId().getId();
             // Search for shared jslobs and merge them if neccessary
@@ -465,14 +520,14 @@ public final class ConfigJSlobService implements JSlobService {
      */
     private void addConfigTreeToJslob(final Session session, final DefaultJSlob jsLob) throws OXException {
         try {
-            final Map<String, String>[] maps = configTreeEquivalents.get(jsLob.getId().getId());
-            if (maps == null) {
+            final ConfigTreeEquivalent equiv = configTreeEquivalents.get(jsLob.getId().getId());
+            if (equiv == null) {
                 return;
             }
             final SettingStorage stor = SettingStorage.getInstance(session);
             final ConfigTree configTree = ConfigTree.getInstance();
 
-            final Set<Entry<String, String>> entrySet = maps[CONFIG2LOB].entrySet();
+            final Set<Entry<String, String>> entrySet = equiv.config2lob.entrySet();
             final JSONObject jObject = new JSONObject(entrySet.size());
             for (final Map.Entry<String, String> mapping : entrySet) {
                 final String configTreePath = mapping.getKey();
@@ -570,11 +625,11 @@ public final class ConfigJSlobService implements JSlobService {
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
             // Config Tree Values first
 
-            final Map<String, String>[] configTreeEquivMaps = configTreeEquivalents.get(id);
-            if (configTreeEquivMaps != null) {
+            final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+            if (equiv != null) {
                 final SettingStorage stor = SettingStorage.getInstance(session);
                 final ConfigTree configTree = ConfigTree.getInstance();
-                final Map<String, String> attribute2ConfigTreeMap = configTreeEquivMaps[LOB2CONFIG];
+                final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
 
                 for (final Entry<String, Object> entry : jObject.entrySet()) {
                     String path = attribute2ConfigTreeMap.get(entry.getKey());
@@ -742,10 +797,10 @@ public final class ConfigJSlobService implements JSlobService {
 
             if (path.size() == 1) {
                 // Only first level elements can be config tree equivalents
-                final Map<String, String>[] configTreeEquivMaps = configTreeEquivalents.get(id);
-                if (configTreeEquivMaps != null) {
+                final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+                if (equiv != null) {
 
-                    final String configTreePath = configTreeEquivMaps[LOB2CONFIG].get(path.get(0).getName());
+                    final String configTreePath = equiv.lob2config.get(path.get(0).getName());
                     final Object value = jsonUpdate.getValue();
                     if (null != value) {
                         final SettingStorage stor = SettingStorage.getInstance(session);

@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.getContentType;
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.multipartFor;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -58,7 +60,6 @@ import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.ParseException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -73,7 +74,6 @@ import com.openexchange.mail.utils.MessageUtility;
 public class MimeFilter {
 
     private static final String MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
-    private static final String CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
 
     /**
      * Gets the MIME filter for specified alias.
@@ -144,13 +144,13 @@ public class MimeFilter {
         }
         try {
             final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
-            final String contentType = toLowerCase(mimeMessage.getContentType());
+            final ContentType contentType = getContentType(mimeMessage);
             if (!contentType.startsWith("multipart/")) {
                 // Nothing to filter
                 return mimeMessage;
             }
-            final MimeMultipart newMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
-            handlePart(getMultipartContent(mimeMessage), newMultipart);
+            final MimeMultipart newMultipart = new MimeMultipart(contentType.getSubType());
+            handlePart(multipartFor(mimeMessage, contentType), newMultipart);
             MessageUtility.setContent(newMultipart, mimeMessage);
             // mimeMessage.setContent(newMultipart);
             MimeMessageConverter.saveChanges(mimeMessage);
@@ -170,24 +170,6 @@ public class MimeFilter {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private Multipart getMultipartContent(final MimeMessage mimeMessage) throws IOException, MessagingException, ParseException {
-        try {
-            return (Multipart) mimeMessage.getContent();
-        } catch (final javax.mail.internet.ParseException e) {
-            // Sanitize parameterized headers
-            try {
-                final String sContentType = mimeMessage.getHeader(CONTENT_TYPE, null);
-                mimeMessage.setHeader(CONTENT_TYPE, new ContentType(sContentType).toString(true));
-                MimeMessageConverter.saveChanges(mimeMessage);
-            } catch (final Exception x) {
-                // Content-Type cannot be sanitized
-                com.openexchange.log.Log.loggerFor(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
-                throw e;
-            }
-            return (Multipart) mimeMessage.getContent();
         }
     }
 

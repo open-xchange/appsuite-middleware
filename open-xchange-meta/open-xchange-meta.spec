@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define        ox_release 20
+%define        ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -252,6 +252,21 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-ui-ox6-compat
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for the OX6 UI compatible to the old 6.20 meta-gui
+Provides:	open-xchange-meta-gui
+Requires:	open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-gui-l10n-de-de, open-xchange-gui-l10n-en-us, open-xchange-gui-l10n-fr-fr, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-fr-fr
+
+
+%description -n open-xchange-meta-ui-ox6-compat
+The Open-Xchange Meta package for the OX6 UI compatible to the old 6.20 meta-gui
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-ui-appsuite
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for the OX App Suite UI
@@ -342,6 +357,10 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-meta-ui-ox6-compat
+%defattr(-,root,root)
+%doc README.TXT
+
 %files -n open-xchange-meta-ui-appsuite
 %defattr(-,root,root)
 %doc README.TXT
@@ -399,32 +418,52 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Nov 20 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fifth candidate for 7.4.1 release
+* Tue Nov 19 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fourth candidate for 7.4.1 release
 * Mon Nov 11 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-11
 * Thu Nov 07 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-08
+* Thu Nov 07 2013 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.4.1 release
 * Tue Nov 05 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-11-12
 * Wed Oct 30 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-28
 * Thu Oct 24 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-30
+* Wed Oct 23 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.4.1 release
 * Tue Oct 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-23
 * Mon Oct 21 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-21
+* Thu Oct 17 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-10-21
+* Tue Oct 15 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-10-11
+* Mon Oct 14 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-10-21
+* Mon Oct 14 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-10-15
+* Thu Oct 10 2013 Carsten Hoeger <choeger@open-xchange.com>
+First sprint increment for 7.4.0 release
 * Wed Oct 09 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-09
 * Wed Oct 09 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-10-07
+* Thu Sep 26 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-09-23
 * Tue Sep 24 2013 Carsten Hoeger <choeger@open-xchange.com>
 Eleventh candidate for 7.4.0 release
 * Fri Sep 20 2013 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.4.1 release
+* Fri Sep 20 2013 Carsten Hoeger <choeger@open-xchange.com>
 Tenth candidate for 7.4.0 release
-* Tue Sep 17 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-09-26
 * Thu Sep 12 2013 Carsten Hoeger <choeger@open-xchange.com>
 Ninth candidate for 7.4.0 release
 * Wed Sep 11 2013 Carsten Hoeger <choeger@open-xchange.com>

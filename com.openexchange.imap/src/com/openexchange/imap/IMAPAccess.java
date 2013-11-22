@@ -51,7 +51,6 @@ package com.openexchange.imap;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
@@ -203,7 +202,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The IMAP store.
      */
-    private transient AccessedIMAPStore imapStore;
+    private transient IMAPStore imapStore;
 
     /**
      * The IMAP session.
@@ -317,7 +316,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      *
      * @return The IMAP store or <code>null</code> if this IMAP access is not connected
      */
-    public AccessedIMAPStore getIMAPStore() {
+    public IMAPStore getIMAPStore() {
         return imapStore;
     }
 
@@ -391,19 +390,19 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("Error while closing IMAP message storage.", e);
                 }
             }
-            final AccessedIMAPStore imapStore = this.imapStore;
+            final IMAPStore imapStore = this.imapStore;
             if (imapStore != null) {
                 if (useIMAPStoreCache()) {
                     final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
                     } else {
-                        imapStoreCache.returnIMAPStore(imapStore.dropAndGetImapStore(), accountId, server, port, login);
+                        imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login);
                     }
                 } else {
                     closeSafely(imapStore);
                 }
-                // Drop in associated IMAPConfig instance
+                // Drop associated IMAPConfig instance
                 final IMAPConfig ic = getIMAPConfig();
                 if (null != ic) {
                     ic.dropImapStore();
@@ -415,7 +414,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private void closeSafely(final AccessedIMAPStore imapStore) {
+    private void closeSafely(final IMAPStore imapStore) {
         try {
             imapStore.close();
         } catch (final MessagingException e) {
@@ -543,8 +542,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            final javax.mail.Session imapSession =
-                setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps);
+            final javax.mail.Session imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class);
             /*
              * Check if debug should be enabled
              */
@@ -664,11 +662,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps);
+            {
+                final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz);
+            }
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false; // ("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = false; // ("mail.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
@@ -699,7 +700,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.clientIp = clientIp;
             maxCount = getMaxCount();
             try {
-                imapStore = new AccessedIMAPStore(this, connectIMAPStore(maxCount), imapSession);
+                imapStore = connectIMAPStore(maxCount);
                 if (DEBUG) {
                     final String lineSeparator = System.getProperty("line.separator");
                     final StringAllocator sb = new StringAllocator(1024);
@@ -880,8 +881,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (maxCount > 0) {
                     final Properties properties = imapSession.getProperties();
                     properties.put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
-                    properties.put("mail.imap.authNoWait", "true");
-                    // properties.put("mail.imap.authTimeoutMillis", "90000");
+                    properties.put("mail.imap.authAwait", "true");
                     properties.put("mail.imap.accountId", Integer.toString(accountId));
                 }
                 final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw);
@@ -895,7 +895,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             if (maxCount > 0) {
                 imapSession.getProperties().put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
-                imapSession.getProperties().put("mail.imap.authNoWait", "true");
+                imapSession.getProperties().put("mail.imap.authAwait", "true");
                 imapSession.getProperties().put("mail.imap.accountId", Integer.toString(accountId));
             }
             /*
@@ -1050,6 +1050,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     public javax.mail.Session getMailSession() {
         return imapSession;
+    }
+
+    /**
+     * Whether to notify about recent messages. Notification is enabled if both conditions are met:<br>
+     * It's the primary account's IMAP store <b>AND</b> notify-recent has been enabled by configuration.
+     *
+     * @return <code>true</code> to notify about recent messages; otherwise <code>false</code>
+     */
+    public boolean notifyRecent() {
+        return MailAccount.DEFAULT_ID == accountId && getIMAPConfig().getIMAPProperties().notifyRecent();
     }
 
     @Override
@@ -1238,11 +1248,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
-    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps) {
+    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass) {
         /*
          * Custom IMAP store
          */
-        imapProps.put("mail.imap.class", JavaIMAPStore.class.getName());
+        imapProps.put("mail.imap.class", storeClass.getName());
         /*
          * Set timeouts
          */
@@ -1282,9 +1292,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             if (config.getIMAPProperties().isEnableTls()) {
                 try {
-                    final InetSocketAddress socketAddress = new InetSocketAddress(IDNA.toASCII(config.getServer()), config.getPort());
-                    final Map<String, String> capabilities =
-                        IMAPCapabilityAndGreetingCache.getCapabilities(socketAddress, false, config.getIMAPProperties());
+                    final String serverUrl = new StringAllocator(36).append(IDNA.toASCII(config.getServer())).append(':').append(config.getPort()).toString();
+                    final Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, false, config.getIMAPProperties());
                     if (null != capabilities) {
                         if (capabilities.containsKey("STARTTLS")) {
                             imapProps.put("mail.imap.starttls.enable", "true");
@@ -1318,7 +1327,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Create new IMAP session from initialized properties
          */
         final javax.mail.Session imapSession = javax.mail.Session.getInstance(imapProps, null);
-        imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", JavaIMAPStore.class.getName(), "Open-Xchange, Inc.", "7.2.2"));
+        imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", storeClass.getName(), "Open-Xchange, Inc.", "7.4.1"));
         return imapSession;
     }
 

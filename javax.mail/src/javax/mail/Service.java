@@ -63,7 +63,7 @@ public abstract class Service {
     /**
      * The session from which this service was created.
      */
-    protected Session	session;
+    protected final Session	session;
 
     /**
      * The <code>URLName</code> of this service.
@@ -622,5 +622,14 @@ public abstract class Service {
     protected void finalize() throws Throwable {
 	super.finalize();
 	terminateQueue();
+    }
+
+    /**
+     * Gets the session from which this service was created.
+     *
+     * @return The session from which this service was created.
+     */
+    public Session getServiceSession() {
+        return session;
     }
 }

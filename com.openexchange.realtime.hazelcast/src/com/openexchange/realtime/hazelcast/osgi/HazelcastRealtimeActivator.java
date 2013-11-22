@@ -56,9 +56,9 @@ import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
@@ -71,6 +71,8 @@ import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
+import com.openexchange.realtime.hazelcast.management.ManagementHouseKeeper;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastRealtimeActivator}
@@ -84,13 +86,16 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class };
+        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: " + getClass().getCanonicalName());
         Services.setServiceLookup(this);
+        
+        ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
+        managementHouseKeeper.initialize(this);
 
         HazelcastInstance hazelcastInstance = getService(HazelcastInstance.class);
         HazelcastAccess.setHazelcastInstance(hazelcastInstance);
@@ -117,6 +122,8 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
         }
         final HazelcastResourceDirectory directory = new HazelcastResourceDirectory(id_map, resource_map);
+        managementHouseKeeper.addManagementObject(directory.getManagementObject());
+        
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
         
         track(Channel.class, new SimpleRegistryListener<Channel>() {
@@ -139,6 +146,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         registerService(Channel.class, globalDispatcher.getChannel());
         
         directory.addChannel(globalDispatcher.getChannel());
+        managementHouseKeeper.exposeManagementObjects();
     }
 
     @Override
@@ -146,6 +154,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         LOG.info("Stopping bundle: " + getClass().getCanonicalName());
         super.stopBundle();
         Services.setServiceLookup(null);
+        ManagementHouseKeeper.getInstance().cleanup();
     }
 
     /**

@@ -59,7 +59,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingServiceException;
-import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;

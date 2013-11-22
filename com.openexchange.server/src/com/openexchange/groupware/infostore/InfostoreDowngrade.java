@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -75,7 +75,7 @@ public class InfostoreDowngrade extends DowngradeListener {
 
         final ServerSession session = ServerSessionAdapter.valueOf(event.getSession(), event.getContext());
 
-        final InfostoreFacade infostore = new InfostoreFacadeImpl(provider);
+        final InfostoreFacade infostore = new EventFiringInfostoreFacadeImpl(provider);
         infostore.setTransactional(true);
         infostore.setCommitsTransaction(false);
         try {

@@ -50,14 +50,16 @@
 package com.openexchange.realtime.synthetic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -78,29 +80,34 @@ import com.openexchange.threadpool.ThreadPoolService;
  * {@link SyntheticChannel}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SyntheticChannel implements Channel, Runnable {
     
     private static final int NUMBER_OF_RUNLOOPS = 16;
     
     private static final Log LOG = LogFactory.getLog(SyntheticChannel.class);
+    private static final String SENDLOCK = "syntheticChannel";
     
     private final ConcurrentHashMap<String, Component> components = new ConcurrentHashMap<String, Component>();
     private final ConcurrentHashMap<ID, ComponentHandle> handles = new ConcurrentHashMap<ID, ComponentHandle>();
     private final ConcurrentHashMap<ID, SyntheticChannelRunLoop> runLoopsPerID = new ConcurrentHashMap<ID, SyntheticChannelRunLoop>();
     private final List<SyntheticChannelRunLoop> runLoops = new ArrayList<SyntheticChannelRunLoop>(NUMBER_OF_RUNLOOPS);
-    
     private final ConcurrentHashMap<ID, Long> lastAccess = new ConcurrentHashMap<ID, Long>();
-    private final CopyOnWriteArrayList<TimeoutEviction> timeouts = new CopyOnWriteArrayList<TimeoutEviction>();
+    private final ConcurrentHashMap<ID, TimeoutEviction> timeouts = new ConcurrentHashMap<ID, TimeoutEviction>();
     
-    private Random loadBalancer = new Random();
+    /** Only one CLEANUP handler may clean a loop at a time */
+    private final ConcurrentHashMap<SyntheticChannelRunLoop, Lock> cleanUpLocks = new ConcurrentHashMap<SyntheticChannelRunLoop, Lock>();
     
-    private AtomicBoolean shuttingDown = new AtomicBoolean(false);
+    private final Random loadBalancer = new Random();
+    
+    private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
     
     public SyntheticChannel(ServiceLookup services) {
         for (int i = 0; i < NUMBER_OF_RUNLOOPS; i++) {
             SyntheticChannelRunLoop rl = new SyntheticChannelRunLoop("message-handler-" + i);
             runLoops.add(rl);
+            cleanUpLocks.put(rl, new ReentrantLock());
             services.getService(ThreadPoolService.class).getExecutor().execute(rl);
         }
     }
@@ -129,7 +136,7 @@ public class SyntheticChannel implements Channel, Runnable {
     }
 
     @Override
-    public boolean conjure(ID id) throws OXException {
+    public boolean conjure(ID id) {
         if (shuttingDown.get()) {
             return false;
         }
@@ -137,34 +144,24 @@ public class SyntheticChannel implements Channel, Runnable {
         if (componentHandle != null) {
             return true;
         }
-        
+
         Component component = components.get(id.getComponent());
         if (component == null) {
             return false;
         }
         ComponentHandle handle = component.create(id);
-        
+
         if (handle == null) {
             return false;
         }
-        
+
         handles.put(id, handle);
         runLoopsPerID.put(id, runLoops.get(loadBalancer.nextInt(NUMBER_OF_RUNLOOPS)));
-        
-        setUpEviction(component.getEvictionPolicy(), handle, id);
-        
-        id.on(ID.Events.DISPOSE, new IDEventHandler() {
-            
-            @Override
-            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                handles.remove(id);
-                runLoopsPerID.remove(id);
-                lastAccess.remove(id);
-                timeouts.remove(this);
 
-            }
-        });
-        
+        setUpEviction(component.getEvictionPolicy(), handle, id);
+
+        id.on(ID.Events.BEFOREDISPOSE, CLEANUP);
+
         return true;
     }
 
@@ -174,7 +171,7 @@ public class SyntheticChannel implements Channel, Runnable {
         }
         if (Component.Timeout.class.isInstance(evictionPolicy)) {
             Component.Timeout timeout = (Component.Timeout) evictionPolicy;
-            timeouts.add(new TimeoutEviction(TimeUnit.MILLISECONDS.convert(timeout.getTimeout(), timeout.getUnit()), id));
+            timeouts.put(id, new TimeoutEviction(TimeUnit.MILLISECONDS.convert(timeout.getTimeout(), timeout.getUnit()), id));
         }
     }
 
@@ -187,7 +184,7 @@ public class SyntheticChannel implements Channel, Runnable {
         stanza.trace("SyntheticChannel delivering to " + recipient);
         final ComponentHandle handle = handles.get(recipient);
         if (handle == null) {
-            stanza.trace("Unknown recipient: "+ stanza.getTo());
+            stanza.trace("Unknown recipient: " + stanza.getTo());
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
         stanza.trace("Delivering to handle " + handle);
@@ -198,14 +195,17 @@ public class SyntheticChannel implements Channel, Runnable {
         if (runLoop == null) {
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
-        if (handle.shouldBeDoneInGlobalThread(stanza)) {
-            new MessageDispatch(handle, stanza).tick();
-        } else {
+
+        Lock sendLock = recipient.getLock(SENDLOCK);
+        try {
+            sendLock.lock();
             final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
             if (!taken) {
                 LOG.error("Queue refused offered Stanza");
-                RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
+                throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
             }
+        } finally {
+            sendLock.unlock();
         }
     }
     
@@ -235,7 +235,7 @@ public class SyntheticChannel implements Channel, Runnable {
             long now = System.currentTimeMillis();
             
             if (now - last >= millis) {                
-                id.trigger(ID.Events.DISPOSE, SyntheticChannel.this);
+                id.dispose(SyntheticChannel.this, null);
             }
         }
         
@@ -244,7 +244,7 @@ public class SyntheticChannel implements Channel, Runnable {
     
     public void shutdown() {
         for(ID id: handles.keySet()) {
-            id.trigger(ID.Events.DISPOSE, SyntheticChannel.this);
+            id.dispose(SyntheticChannel.this, null);
         }
     }
 
@@ -253,7 +253,7 @@ public class SyntheticChannel implements Channel, Runnable {
         if (shuttingDown.get()) {
             return;
         }
-        for(TimeoutEviction e: new ArrayList<TimeoutEviction>(timeouts)) {
+        for(TimeoutEviction e: new ArrayList<TimeoutEviction>(timeouts.values())) {
             try {
                 e.tick();
             } catch (OXException e1) {
@@ -261,5 +261,75 @@ public class SyntheticChannel implements Channel, Runnable {
             }
         }
     }
+
+    /**
+     * 
+     * A GroupDispatcher is going to be disposed, messages that are already handed off to RunLoops might have to be reordered:
+     * - lock this channel for the GD ID to stop accepting new messages for the handle
+     * - clean lastAccess and timeouts which are used for eviction of handles
+     * - get the associated Runloop
+     * - stop loop from handling 
+     * - check for MessageDispatchs directed to the handle
+     * - continue RunLoop
+     * - create new handle if necessary and remove the old one from handles, otherwise just remove the old one 
+     * - rewrite MessageDispatchs to use new handle and add them to the new RunLoop
+     * - unlock for ID to start accepting new messages for this ID again
+     */
+    private final IDEventHandler CLEANUP = new IDEventHandler() {
+        
+        @Override
+        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            SyntheticChannelRunLoop runLoopForId = runLoopsPerID.get(id);
+            Lock cleanUpLock = cleanUpLocks.get(runLoopForId); 
+            Lock sendLock = id.getLock(SENDLOCK);
+            try {
+                cleanUpLock.lock();
+                sendLock.lock();
+                lastAccess.remove(id);
+                timeouts.remove(id);
+                handles.remove(id);
+                SyntheticChannelRunLoop runLoop = runLoopsPerID.remove(id);
+                if(runLoop == null) {
+                    LOG.error("RunLoop to clean was null. This should have been been prevented by mutex.");
+                    return;
+                }
+                Collection<MessageDispatch> messagesForHandle = runLoop.removeMessagesForHandle(id);
+                if(!messagesForHandle.isEmpty()) {
+                    /*
+                     * The ID.Events.BEFOREDISPOSAL which triggered this handler allows us to veto the complete disposal of this ID if we
+                     * still see need for it which is the case when messagesForHandle isn't empty.
+                     */
+                    properties.put("veto", true);
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Vetoed disposal of id: " + id);
+                    }
+                    if(conjure(id)) {
+                        ComponentHandle newHandle = handles.get(id);
+                        SyntheticChannelRunLoop newRunLoop = runLoopsPerID.get(id);
+                        for (MessageDispatch messageDispatch : messagesForHandle) {
+                            messageDispatch.setHandle(newHandle);
+                            boolean taken = newRunLoop.offer(messageDispatch);
+                            if (!taken) {
+                                LOG.error("Queue refused offered Stanza for id: " + id);
+                            }
+                        }
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debug("Migrated MessageDispatchs to new Handle for id: " + id);
+                        }
+                    } else {
+                        LOG.error("Unable to conjure ID and migrate MessageDispatchs to new handle for id: " + id);
+                    }
+                } else {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("No MessageDispatchs to migrate for id: " + id);
+                    }
+                }
+            } finally {
+                sendLock.unlock();
+                cleanUpLock.unlock();
+            }
+        }
+
+    };
 
 }

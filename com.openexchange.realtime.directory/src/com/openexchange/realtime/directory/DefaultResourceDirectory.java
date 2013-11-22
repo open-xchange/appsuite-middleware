@@ -102,6 +102,7 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
         return previousResource;
     }
     
+    @Override
     public Resource setIfAbsent(ID id, Resource resource) throws OXException {
         Resource previousResource = doSet(id, resource, false);
         if (null == previousResource) {
@@ -144,6 +145,13 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
         }
     }
 
+    /**
+     * Notify registered ChangeListeners about the removal of Resources from the ResourceDirectory.
+     * 
+     * @param removedResources The Resources that were removed
+     * @param triggerDispose True if the ID.Events.DISPOSE event should be triggered on the ID that is associated with the Resource
+     * @return the IDMap with removed Resources
+     */
     private IDMap<Resource> notifyRemoved(IDMap<Resource> removedResources, boolean triggerDispose) {
         for (ChangeListener listener : listeners) {
             for (Entry<ID, Resource> entry : removedResources.entrySet()) {

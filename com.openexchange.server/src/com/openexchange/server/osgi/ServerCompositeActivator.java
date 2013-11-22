@@ -50,13 +50,7 @@
 package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.osgi.PreviewCacheActivator;
-import com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator;
-import com.openexchange.groupware.update.tasks.quota.QuotaGWActivator;
-import com.openexchange.image.osgi.ImageActivator;
-import com.openexchange.json.cache.impl.osgi.JsonCacheActivator;
 import com.openexchange.osgi.CompositeBundleActivator;
-import com.openexchange.report.osgi.ReportActivator;
 
 /**
  * {@link ServerCompositeActivator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
@@ -67,8 +61,8 @@ import com.openexchange.report.osgi.ReportActivator;
 public class ServerCompositeActivator extends CompositeBundleActivator {
 
     private final BundleActivator[] activators = {
-        new PrefixServiceActivator(),
-        new JsonCacheActivator(),
+        new com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator(),
+        new com.openexchange.json.cache.impl.osgi.JsonCacheActivator(),
         new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
         new com.openexchange.tools.file.osgi.DefaultFileStorageActivator(),
         new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
@@ -104,10 +98,10 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
         new com.openexchange.groupware.tasks.osgi.TaskActivator(),
         new FolderUpdaterRegistryDependencyActivator(),
-        new ImageActivator(),
-        new PreviewCacheActivator(),
-        new ReportActivator(),
-        new QuotaGWActivator(),
+        new com.openexchange.image.osgi.ImageActivator(),
+        new com.openexchange.ajax.requesthandler.converters.preview.cache.osgi.ResourceCacheActivator(),
+        new com.openexchange.report.osgi.ReportActivator(),
+        new com.openexchange.groupware.update.tasks.quota.QuotaGWActivator(),
         new PingActivator()
     };
 

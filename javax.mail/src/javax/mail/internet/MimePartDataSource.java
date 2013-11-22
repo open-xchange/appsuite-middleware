@@ -110,7 +110,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
 	    throw new FolderClosedIOException(fex.getFolder(),
 						fex.getMessage());
 	} catch (MessagingException mex) {
-	    throw new IOException(mex.getMessage());
+	    throw new IOException(mex.getMessage(), mex);
 	}
     }
 

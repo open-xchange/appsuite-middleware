@@ -254,6 +254,11 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             }
 
             @Override
+            public String getArchive() {
+                return acc.getArchive();
+            }
+
+            @Override
             public int getUserId() {
                 return -1;
             }
@@ -306,6 +311,11 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             @Override
             public String getTrashFullname() {
                 return acc.getTrashFullname();
+            }
+
+            @Override
+            public String getArchiveFullname() {
+                return acc.getArchiveFullname();
             }
 
             @Override

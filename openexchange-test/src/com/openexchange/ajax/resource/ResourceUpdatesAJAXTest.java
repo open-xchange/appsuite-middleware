@@ -104,13 +104,24 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
         super.tearDown();
     }
 
-
+    private boolean containsResource(List<Resource> resources, int resourceId) {
+        boolean containsResource = false;
+        for (Resource resource : resources) {
+            if (resource.getIdentifier() == resourceId) {
+                containsResource = true;
+                break;
+            }
+        }
+        return containsResource;
+    }
 
     public void testUpdatesSinceBeginning() throws Exception{
         final ResourceUpdatesResponse response = Executor.execute(getSession(),
             new ResourceUpdatesRequest(new Date(0), true));
         assertTrue("Should find more than 0 new elements", response.getNew().size() > 0);
         assertTrue("Should find more than 0 updated elements", response.getModified().size() > 0);
+        List<Resource> modified = response.getModified();
+        assertTrue(containsResource(modified, resource.getIdentifier()));
     }
 
     public void testUpdates() throws Exception{
@@ -119,7 +130,7 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
         final ResourceUpdatesResponse response = Executor.execute(getSession(),
             new ResourceUpdatesRequest(since, true));
 
-        List<Group> modified = response.getModified();
+        List<Resource> modified = response.getModified();
         assertEquals("Should find one updated element", 1, modified.size());
         assertEquals("Should have matching ID", resource.getIdentifier(), modified.get(0).getIdentifier());
     }
@@ -137,8 +148,10 @@ public class ResourceUpdatesAJAXTest extends AbstractResourceTest{
             new ResourceUpdatesRequest(since, true));
         int deletedAfter =  response.getDeleted().size();
 
+        int identifier = resource.getIdentifier();
         resource = null; //so it does not get deleted in the tearDown()
         assertEquals("Should have one more element in deleted list after deletion", deletedAfter - 1, deletedBefore);
+        assertTrue(containsResource(response.getDeleted(), identifier));
 
     }
 

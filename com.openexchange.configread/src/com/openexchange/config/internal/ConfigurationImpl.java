@@ -78,6 +78,7 @@ import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -232,10 +233,6 @@ public final class ConfigurationImpl implements ConfigurationService {
         this.dirs = dirs;
     }
 
-    private static interface FileProcessor {
-        public void processFile(File file);
-    }
-
     private synchronized void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
@@ -246,6 +243,11 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (file.isDirectory()) {
                 processDirectory(file, fileFilter, processor);
             } else {
+                /**
+                 * Preparations for US: 55795476 Change configuration values without restarting the systems
+                 * final FileWatcher fileWatcher = FileWatcher.getFileWatcher(file); fileWatcher.addFileListener(new
+                 * ProcessingFileListener(file, processor));
+                 */
                 processor.processFile(file);
             }
         }
@@ -315,12 +317,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final PropertyListener listener) {
-        if (properties.containsKey(name)) {
-            final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
-            pw.addPropertyListener(listener);
-            final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
-            fileWatcher.addFileListener(pw);
-            fileWatcher.startFileWatcher(10000);
+        if(watchProperty(name, listener)) {
             return properties.get(name);
         }
         return null;
@@ -328,15 +325,24 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-        if (properties.containsKey(name)) {
-            final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
-            pw.addPropertyListener(listener);
-            final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
-            fileWatcher.addFileListener(pw);
-            fileWatcher.startFileWatcher(10000);
+        if(watchProperty(name, listener)) {
             return properties.get(name);
         }
         return defaultValue;
+    }
+    
+    @Override
+    public List<String> getProperty(String name, String defaultValue, String separator) {
+        String property = getProperty(name, defaultValue);
+        return Strings.splitAndTrim(property, separator);
+    }
+
+    @Override
+    public List<String> getProperty(String name, String defaultValue, PropertyListener propertyListener, String separator) {
+        if(watchProperty(name, propertyListener)) {
+            return getProperty(name, defaultValue, separator);
+        }
+        return Strings.splitAndTrim(defaultValue, separator);
     }
 
     @Override
@@ -426,11 +432,40 @@ public final class ConfigurationImpl implements ConfigurationService {
         return retval;
     }
 
+    /**
+     * Watch a property for changes.
+     * 
+     * @param name the name of the property to watch
+     * @param propertyListener the PropertyListener to register for property changes
+     * @return true if the property with the given name can be found and a watcher is added, else false
+     */
+    private boolean watchProperty(final String name, final PropertyListener propertyListener) {
+        if (properties.containsKey(name)) {
+            final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
+            pw.addPropertyListener(propertyListener);
+            final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
+            fileWatcher.addFileListener(pw);
+            fileWatcher.startFileWatcher(10000);
+            return true;
+        } else {
+            LOG.error("Unable to watch missing property: " + name);
+            return false;
+        }
+    }
+
     @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
         final String prop = properties.get(name);
         if (null != prop) {
             return Boolean.parseBoolean(prop.trim());
+        }
+        return defaultValue;
+    }
+
+    @Override
+    public boolean getBoolProperty(final String name, final boolean defaultValue, final PropertyListener propertyListener) {
+        if(watchProperty(name, propertyListener)) {
+            return getBoolProperty(name, defaultValue);
         }
         return defaultValue;
     }
@@ -449,6 +484,14 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
         return defaultValue;
     }
+
+  @Override
+  public int getIntProperty(final String name, final int defaultValue, final PropertyListener propertyListener) {
+      if(watchProperty(name, propertyListener)) {
+          return getIntProperty(name, defaultValue);
+      }
+      return defaultValue;
+  }
 
     @Override
     public Iterator<String> propertyNames() {
@@ -656,4 +699,5 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
         return retval;
     }
+
 }

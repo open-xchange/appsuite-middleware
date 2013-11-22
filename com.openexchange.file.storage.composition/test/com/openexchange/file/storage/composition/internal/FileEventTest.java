@@ -64,6 +64,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper;
@@ -220,7 +221,7 @@ public class FileEventTest {
                 assertFalse("Wrong id.", file.getId().equals(objectId));
             }
         });
-        String copyId = fileAccess.copy(file.getId(), dstFolder.toUniqueID(), null, null, null);
+        String copyId = fileAccess.copy(file.getId(), FileStorageFileAccess.CURRENT_VERSION, dstFolder.toUniqueID(), null, null, null);
         File copy = fileAccess.getFileMetadata(copyId, FileStorageFileAccess.CURRENT_VERSION);
         assertNotNull("Copy was null.", copy);
     }
@@ -311,6 +312,15 @@ public class FileEventTest {
 
         public void setEventVerifier(EventVerifier verifier) {
             this.verifier = verifier;
+        }
+
+        /* (non-Javadoc)
+         * @see com.openexchange.file.storage.composition.IDBasedFileAccess#getDocumentAndMetadata(java.lang.String, java.lang.String)
+         */
+        @Override
+        public Document getDocumentAndMetadata(String id, String version) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
 

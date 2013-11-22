@@ -60,7 +60,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
-import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -74,21 +73,17 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     protected final String server;
     protected final int port;
-    protected final String login;
-    protected final String pw;
     protected final int maxRetryCount;
     private final AtomicInteger inUseCount;
 
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
-    public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
+    public UnboundedIMAPStoreContainer(final String server, final int port) {
         super();
         maxRetryCount = 10;
         availableQueue = new InheritedPriorityBlockingQueue();
-        this.login = login;
         this.port = port;
-        this.pw = pw;
         this.server = server;
         inUseCount = new AtomicInteger();
     }
@@ -108,50 +103,25 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
-        int count = maxRetryCount;
+    public IMAPStore getStore(final javax.mail.Session imapSession, final String login, final String pw) throws MessagingException, InterruptedException {
         IMAPStore imapStore = null;
-        while (null == imapStore && count-- > 0) {
-            /*
-             * Select a not-in-use element
-             */
-            final IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
-            if (null == imapStoreWrapper) {
-                try {
-                    imapStore = newStore(server, port, login, pw, imapSession);
-                    // System.out.println("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance." +
-                    // imapStore.toString() + "-" + imapStore.hashCode());
-                    if (DEBUG) {
-                        LOG.debug("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
-                    }
-                } catch (final MessagingException e) {
-                    if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
-                        throw e;
-                    }
-                    // None available -- await
-                    final IMAPStoreWrapper polled = availableQueue.poll(2, TimeUnit.SECONDS);
-                    if (null == polled) {
-                        // System.out.println("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
-                        if (DEBUG) {
-                            LOG.debug("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
-                        }
-                    } else {
-                        imapStore = polled.imapStore;
-                        // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" + imapStore.hashCode());
-                        if (DEBUG) {
-                            LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
-                        }
-                    }
-                }
-            } else {
-                imapStore = imapStoreWrapper.imapStore;
-                // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" +
-                // imapStore.hashCode());
-                if (DEBUG) {
-                    LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
-                }
+
+        final IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
+        if (null == imapStoreWrapper) {
+            imapStore = newStore(server, port, login, pw, imapSession);
+            if (DEBUG) {
+                LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
+            }
+        } else {
+            imapStore = imapStoreWrapper.imapStore;
+            // Should we set properties from passed session?
+            // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
+            // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
+            if (DEBUG) {
+                LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
             }
         }
+
         inUseCount.incrementAndGet();
         return imapStore;
     }
@@ -177,7 +147,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
         if (DEBUG) {
-            LOG.debug("IMAPStoreContainer.closeElapsed(): " + availableQueue.size() + " IMAPStore instances in queue for " + login + "@" + server + ":" + port);
+            LOG.debug("IMAPStoreContainer.closeElapsed(): " + availableQueue.size() + " IMAPStore instances in queue for " + server + ":" + port);
         }
         IMAPStoreWrapper imapStoreWrapper;
         do {

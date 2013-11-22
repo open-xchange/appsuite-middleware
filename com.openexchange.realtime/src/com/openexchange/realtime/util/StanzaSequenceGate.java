@@ -52,14 +52,20 @@ package com.openexchange.realtime.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
+import com.openexchange.management.ManagementAware;
+import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.management.StanzaSequenceGateMBean;
+import com.openexchange.realtime.management.StanzaSequenceGateManagement;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
@@ -72,7 +78,7 @@ import com.openexchange.realtime.packet.Stanza;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class StanzaSequenceGate {
+public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequenceGateMBean> {
 
     private static org.apache.commons.logging.Log LOG = Log.loggerFor(StanzaSequenceGate.class);
 
@@ -85,10 +91,24 @@ public abstract class StanzaSequenceGate {
     protected ConcurrentHashMap<ID, List<StanzaWithCustomAction>> inboxes = new ConcurrentHashMap<ID, List<StanzaWithCustomAction>>();
 
     private final String name;
+    private final StanzaSequenceGateManagement managementObject;
 
     public StanzaSequenceGate(String name) {
         this.name = name;
+        this.managementObject = new StanzaSequenceGateManagement(name);
+        initManagementObject(managementObject);
     }
+
+    private void initManagementObject(StanzaSequenceGateManagement managementObject) {
+        managementObject.setBufferSize(BUFFER_SIZE);
+        managementObject.setNumberOfInboxes(inboxes.size());
+    }
+
+    @Override
+    public ManagementObject<StanzaSequenceGateMBean> getManagementObject() {
+        return managementObject;
+    }
+
 
     /**
      * Ensures a correct order of sequence numbers of incoming Stanzas.
@@ -190,6 +210,7 @@ public abstract class StanzaSequenceGate {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Best case, Threshold: " + threshold.get());
                 }
+                notifyManagementSequenceNumbers();
                 stanza.trace("Passing gate " + name);
                 if (customAction != null) {
                     customAction.handle(stanza, recipient);
@@ -206,6 +227,7 @@ public abstract class StanzaSequenceGate {
 
                 /* Drain Stanzas accumulated while waiting for the missing SequenceNumber */
                 List<StanzaWithCustomAction> stanzas = inboxes.remove(stanza.getSequencePrincipal());
+                notifyManagementInboxes();
                 if (stanzas == null || stanzas.isEmpty()) {
                     return true;
                 }
@@ -246,6 +268,7 @@ public abstract class StanzaSequenceGate {
                     inbox = Collections.synchronizedList(new ArrayList<StanzaWithCustomAction>());
                     List<StanzaWithCustomAction> oldList = inboxes.putIfAbsent(stanza.getSequencePrincipal(), inbox);
                     inbox = (oldList != null) ? oldList : inbox;
+                    notifyManagementNumberOfInboxes();
                 }
 
                 if (inbox.size() < BUFFER_SIZE) {
@@ -271,6 +294,7 @@ public abstract class StanzaSequenceGate {
                             LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
                         }
                         inbox.add(new StanzaWithCustomAction(stanza, customAction));
+                        notifyManagementInboxes();
                         return true;
                     } else {
                         stanza.trace("Not in sequence but already enqueued, discarding.");
@@ -307,6 +331,7 @@ public abstract class StanzaSequenceGate {
                 list.clear();
             }
             sequenceNumbers.put(constructedId, new AtomicLong(newSequence));
+            notifyManagementSequenceNumbers();
         } finally {
             constructedId.unlock("gate");
         }
@@ -316,6 +341,8 @@ public abstract class StanzaSequenceGate {
     public void freeRessourcesFor(ID sequencePrincipal) {
         sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
+        notifyManagementSequenceNumbers();
+        notifyManagementInboxes();
     }
 
     /**
@@ -342,6 +369,37 @@ public abstract class StanzaSequenceGate {
             this.sequenceNumber=stanza.getSequenceNumber();
         }
 
+    }
+    
+    // Management calls
+    //======================================================================================================================================
+    
+    private void notifyManagementNumberOfInboxes() {
+        managementObject.setNumberOfInboxes(inboxes.size());
+    }
+    
+    private void notifyManagementSequenceNumbers() {
+        HashMap<String, Long> basicSequenceNumbers = new HashMap<String, Long>(sequenceNumbers.size());
+        for (Entry<ID, AtomicLong> entry : sequenceNumbers.entrySet()) {
+            basicSequenceNumbers.put(entry.getKey().toString(), entry.getValue().get());
+        }
+        managementObject.setSequenceNumbers(basicSequenceNumbers);
+    }
+
+    private void notifyManagementInboxes() {
+        notifyManagementNumberOfInboxes();
+        
+        Map<String, List<Long>> clientSequenceMap = new HashMap<String, List<Long>>();
+        for (Entry<ID, List<StanzaWithCustomAction>> entry : inboxes.entrySet()) {
+            String client = entry.getKey().toString();
+            List<StanzaWithCustomAction> clientStanzas = entry.getValue();
+            List<Long> sequenceListPerClient = new ArrayList<Long>(clientStanzas.size());
+            for (StanzaWithCustomAction stanzaWithCustomAction : clientStanzas) {
+                sequenceListPerClient.add(stanzaWithCustomAction.sequenceNumber);
+            }
+            clientSequenceMap.put(client, sequenceListPerClient);
+        }
+        managementObject.setInboxes(clientSequenceMap);
     }
 
 }

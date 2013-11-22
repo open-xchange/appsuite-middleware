@@ -50,7 +50,14 @@
 package com.openexchange.ajax.task;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -95,6 +102,10 @@ public class UpdatesTest extends AbstractTaskTest {
         final int userId = client.getValues().getUserId();
         final TimeZone timeZone = client.getValues().getTimeZone();
         final InsertRequest[] inserts = new InsertRequest[total];
+        //keep track of the modified ids to verify the updates request
+        final Set<Integer> expectedUpdatedTaskIds = new HashSet<Integer>(UPDATES);
+        final Set<Integer> expectedDeletedTaskIds = new HashSet<Integer>(DELETES);
+        
         for (int i = 0; i < inserts.length; i++) {
             final Task task = new Task();
             task.setParentFolderID(folderId);
@@ -109,6 +120,7 @@ public class UpdatesTest extends AbstractTaskTest {
             folderId, columns, Task.TITLE, Order.ASCENDING));
         assertTrue("Can't find " + total + " inserted tasks.",
             allR.getArray().length >= total);
+
         // Now update 5
         final UpdateRequest[] updates = new UpdateRequest[UPDATES];
         for (int i = 0; i < updates.length; i++) {
@@ -116,20 +128,24 @@ public class UpdatesTest extends AbstractTaskTest {
             task.setTitle("UpdatedTask " + (i + 1));
             final InsertResponse insertR = mInsert.getResponse(i);
             task.setObjectID(insertR.getId());
+            expectedUpdatedTaskIds.add(insertR.getId());
             task.setParentFolderID(folderId);
             task.setLastModified(insertR.getTimestamp());
             updates[i] = new UpdateRequest(task, timeZone);
         }
         final MultipleResponse<UpdateResponse> mUpdate = client.execute(
             MultipleRequest.create(updates));
+
         // And delete 2
         final DeleteRequest[] deletes = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes.length; i++) {
             final InsertResponse insertR = mInsert.getResponse(total - (i + 1));
             deletes[i] = new DeleteRequest(folderId, insertR.getId(), insertR
                 .getTimestamp());
+            expectedDeletedTaskIds.add(insertR.getId());
         }
         client.execute(MultipleRequest.create(deletes));
+
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
@@ -138,7 +154,13 @@ public class UpdatesTest extends AbstractTaskTest {
         assertTrue("Only found " + updatesR.size()
             + " updated tasks but should be more than "
             + (UPDATES + DELETES) + '.', updatesR.size() >= UPDATES + DELETES);
-        // TODO Check more exactly if above done updates and deletes are found.
+
+        //Check exactly if above done updates and deletes are found.
+        Set<Integer> newOrModifiedIds = updatesR.getNewOrModifiedIds();
+        Set<Integer> deletedIds = updatesR.getDeletedIds();
+        assertTrue(newOrModifiedIds.containsAll(expectedUpdatedTaskIds));
+        assertTrue(deletedIds.containsAll(expectedDeletedTaskIds));
+
         // Clean up
         final DeleteRequest[] deletes2 = new DeleteRequest[UPDATES + UNTOUCHED];
         for (int i = 0; i < deletes2.length; i++) {
@@ -155,4 +177,6 @@ public class UpdatesTest extends AbstractTaskTest {
         }
         client.execute(MultipleRequest.create(deletes2));
     }
+
+
 }

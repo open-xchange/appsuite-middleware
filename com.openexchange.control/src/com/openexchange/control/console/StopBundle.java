@@ -76,6 +76,10 @@ public final class StopBundle extends AbstractConsoleHandler {
             final ValueObject[] valueObjectArray = valueParser.getValueObjects();
             if (valueObjectArray.length > 0) {
                 bundleName = valueObjectArray[0].getValue();
+                if (isEmpty(bundleName)) {
+                    showHelp();
+                    exit();
+                }
                 stop(bundleName);
             } else {
                 showHelp();
@@ -111,6 +115,7 @@ public final class StopBundle extends AbstractConsoleHandler {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
         mBeanServerConnection.invoke(objectName, "stop", new Object[] { bundleName }, new String[] { "java.lang.String" });
+        System.out.println("Bundle '" + bundleName + "' successfully stopped.");
     }
 
     public static void main(final String args[]) {
@@ -130,5 +135,18 @@ public final class StopBundle extends AbstractConsoleHandler {
     @Override
     protected String[] getParameter() {
         return DEFAULT_PARAMETER;
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

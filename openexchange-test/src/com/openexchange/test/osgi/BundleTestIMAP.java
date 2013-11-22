@@ -58,7 +58,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.meterware.httpunit.cookies.CookieJar;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Login;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.Mail;
 
@@ -129,7 +129,7 @@ public final class BundleTestIMAP extends AbstractBundleTest {
              * Set cookie cause a request has already been fired before with the same session id.
              */
             final CookieJar cookieJar = new CookieJar();
-            cookieJar.putCookie(Login.SESSION_PREFIX + sessionId, sessionId);
+            cookieJar.putCookie(LoginServlet.SESSION_PREFIX + sessionId, sessionId);
         }
         getReq.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         getReq.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);

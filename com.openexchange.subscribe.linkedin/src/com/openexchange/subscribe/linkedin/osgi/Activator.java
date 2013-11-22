@@ -98,7 +98,7 @@ public class Activator extends HousekeepingActivator {
             try {
                 registerService(OAuthAccountDeleteListener.class, new LinkedInSubscriptionsOAuthAccountDeleteListener(linkedInSubscribeService, contextService));
             } catch (final Throwable t) {
-                t.printStackTrace();
+                LOG.error(t.getMessage(), t);
             }
 
             LOG.info("LinkedInSubscribeService was started.");

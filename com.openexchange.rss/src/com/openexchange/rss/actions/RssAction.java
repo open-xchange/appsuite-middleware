@@ -59,17 +59,21 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.FeedByDateSorter;
+import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.preprocessors.RssPreprocessor;
 import com.openexchange.rss.preprocessors.SanitizingPreprocessor;
+import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -77,17 +81,27 @@ import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.fetcher.FetcherException;
 import com.sun.syndication.fetcher.impl.HashMapFeedInfoCache;
-import com.sun.syndication.fetcher.impl.HttpURLFeedFetcher;
 import com.sun.syndication.io.FeedException;
+import com.sun.syndication.io.ParsingFeedException;
 
+/**
+ * {@link RssAction} - The RSS action.
+ */
 public class RssAction implements AJAXActionService {
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RssAction.class));
-	private final HttpURLFeedFetcher fetcher;
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RssAction.class);
+
+    private static final int NOT_FOUND = 404;
+
+	private final TimoutHttpURLFeedFetcher fetcher;
 	private final HashMapFeedInfoCache feedCache;
 
+	/**
+	 * Initializes a new {@link RssAction}.
+	 */
 	public RssAction () {
 		feedCache = new HashMapFeedInfoCache();
-		fetcher = new HttpURLFeedFetcher(feedCache);
+		fetcher = new TimoutHttpURLFeedFetcher(10000, 30000, feedCache);
 	}
 
 	@Override
@@ -101,12 +115,14 @@ public class RssAction implements AJAXActionService {
             order = "DESC";
         }
 
+        List<OXException> warnings = new LinkedList<OXException>();
+
         List<SyndFeed> feeds = new LinkedList<SyndFeed>();
         {
             String urlString = "";
             try {
-                JSONObject data = (JSONObject) request.requireData();
-                JSONArray test = data.optJSONArray("feedUrl");
+                final JSONObject data = (JSONObject) request.requireData();
+                final JSONArray test = data.optJSONArray("feedUrl");
 
                 final List<URL> urls;
                 if (test == null) {
@@ -121,25 +137,41 @@ public class RssAction implements AJAXActionService {
                         urls.add(new URL(prepareUrlString(urlString)));
                     }
                 }
-                for (URL url : urls) {
+                for (final URL url : urls) {
                     try {
                         feeds.add(fetcher.retrieveFeed(url));
-                    } catch (FeedException e) {
-                        LOG.info("Could not load RSS feed from " + url, e);
-                    } catch (FetcherException e) {
-                        LOG.info("Could not load RSS feed from " + url, e);
+                    } catch (final ParsingFeedException parsingException) {
+                        final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
+                        if (1 == urls.size()) {
+                            throw oxe;
+                        }
+                        oxe.setCategory(Category.CATEGORY_WARNING);
+                        warnings.add(oxe);
+                    } catch (final FeedException e) {
+                        LOG.warn("Could not load RSS feed from: " + url, e);
+                    } catch (final FetcherException e) {
+                        final int responseCode = e.getResponseCode();
+                        if (responseCode <= 0) {
+                            // No response code available
+                            LOG.warn("Could not load RSS feed from: " + url, e);
+                        }
+                        if (NOT_FOUND == responseCode) {
+                            LOG.debug("Resource could not be found: " + url, e);
+                        } else {
+                            LOG.warn("Could not load RSS feed from: " + url, e);
+                        }
                     }
                 }
 
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 /* yeah, right... not happening for UTF-8 */
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, urlString);
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
@@ -163,7 +195,7 @@ public class RssAction implements AJAXActionService {
                 results.add(result);
 
                 RssPreprocessor preprocessor = new SanitizingPreprocessor();
-                List<SyndContent> contents = entry.getContents();
+                @SuppressWarnings("unchecked") List<SyndContent> contents = entry.getContents();
                 boolean foundHtml = false;
                 for (SyndContent content : contents) {
                     if ("html".equals(content.getType())) {
@@ -182,7 +214,7 @@ public class RssAction implements AJAXActionService {
         if (sort.equalsIgnoreCase("DATE")) {
             Collections.sort(results, new FeedByDateSorter(order));
         }
-        return new AJAXRequestResult(results, "rss");
+        return new AJAXRequestResult(results, "rss").addWarnings(warnings);
     }
 
 	private static String urlDecodeSafe(final String urlString) throws MalformedURLException {

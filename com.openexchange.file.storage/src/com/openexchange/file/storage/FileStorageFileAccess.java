@@ -301,6 +301,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * may be uploaded as well.
      *
      * @param source The file to copy
+     * @param version The source version to copy, or {@link FileStorageFileAccess#CURRENT_VERSION} to use the current one
      * @param dest Where to copy the file to. This is a folder id.
      * @param update Which other changes to apply to the copy. May be null, if no changes are to be applied.
      * @param newFile A new file to be attached to the copy. May be null, if no new file data should be attached to the file.
@@ -308,7 +309,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return The new folderId and id
      * @throws OXException If operation fails
      */
-    IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFile, List<File.Field> modifiedFields) throws OXException;
+    IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<File.Field> modifiedFields) throws OXException;
 
     /**
      * Move a file from a given source to a given destination. Changes to the metadata can be applied and a new file attachment

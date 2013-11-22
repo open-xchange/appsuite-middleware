@@ -62,7 +62,7 @@ import com.openexchange.quota.QuotaService;
  */
 public final class QuotaServiceCustomizer implements ServiceTrackerCustomizer<QuotaService, QuotaService> {
 
-    private BundleContext context;
+    private final BundleContext context;
 
     public QuotaServiceCustomizer(BundleContext context) {
         super();

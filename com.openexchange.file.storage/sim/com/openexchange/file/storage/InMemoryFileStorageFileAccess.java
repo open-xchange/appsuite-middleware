@@ -167,7 +167,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             file.setVersion(Integer.toString(version));
             map.put(id, versionContainer);
         } else {
-            
+
             VersionContainer versionContainer = map.get(id);
             if (versionContainer == null) {
                 throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
@@ -181,7 +181,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             }
             int version = versionContainer.addVersion(holder);
             file.setVersion(Integer.toString(version));
-            
+
             // Swap IDs
             String oldId = id;
             id = UUID.randomUUID().toString();
@@ -191,7 +191,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
                 fh.getInternalFile().setId(id);
             }
         }
-        
+
     }
 
     @Override
@@ -275,10 +275,10 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
-        final File orig = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
+    public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
+        final File orig = getFileMetadata(source.getFolder(), source.getId(), version);
         if (newFile == null && orig.getFileName() != null) {
-            newFile = getDocument(source.getFolder(), source.getId(), CURRENT_VERSION);
+            newFile = getDocument(source.getFolder(), source.getId(), version);
         }
         if (update != null) {
             orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));

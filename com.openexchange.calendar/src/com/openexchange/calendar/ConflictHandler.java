@@ -239,8 +239,8 @@ public class ConflictHandler {
             readcon = DBPool.pickup(ctx);
             final long whole_day_start = cdao.getFullTime() ? start.getTime() : recColl.getUserTimeUTCDate(start, user.getTimeZone());
             long whole_day_end = cdao.getFullTime() ? end.getTime() : recColl.getUserTimeUTCDate(end, user.getTimeZone());
-            if (whole_day_end <= whole_day_start) {
-                whole_day_end = whole_day_start+Constants.MILLI_DAY;
+            if (!cdao.getFullTime() || whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_end+Constants.MILLI_DAY;
             }
             prep = calendarsqlimp.getConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
             private_folder_information = calendarsqlimp.getAllPrivateAppointmentAndFolderIdsForUser(ctx, user.getId(), readcon);
@@ -366,10 +366,10 @@ public class ConflictHandler {
         final User user = Tools.getUser(so, ctx);
         try {
             readcon = DBPool.pickup(ctx);
-            final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
-            long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
-            if (whole_day_end <= whole_day_start) {
-                whole_day_end = whole_day_start+Constants.MILLI_DAY;
+            final long whole_day_start = cdao.getFullTime() ? start.getTime() : recColl.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = cdao.getFullTime() ? end.getTime() : recColl.getUserTimeUTCDate(end, user.getTimeZone());
+            if (!cdao.getFullTime() || whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_end+Constants.MILLI_DAY;
             }
             prep = calendarsqlimp.getResourceConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
@@ -479,10 +479,10 @@ public class ConflictHandler {
         final User user = Tools.getUser(so, ctx);
         try {
             readcon = DBPool.pickup(ctx);
-            final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
-            long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
-            if (whole_day_end <= whole_day_start) {
-                whole_day_end = whole_day_start+Constants.MILLI_DAY;
+            final long whole_day_start = cdao.getFullTime() ? start.getTime() : recColl.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = cdao.getFullTime() ? end.getTime() : recColl.getUserTimeUTCDate(end, user.getTimeZone());
+            if (!cdao.getFullTime() || whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_end+Constants.MILLI_DAY;
             }
             prep = calendarsqlimp.getResourceConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);

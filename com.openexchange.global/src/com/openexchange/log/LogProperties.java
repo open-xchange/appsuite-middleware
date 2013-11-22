@@ -130,6 +130,10 @@ public final class LogProperties {
          */
         AJP_HTTP_SESSION("com.openexchange.ajp13.httpSession"),
         /**
+         * com.openexchange.ajp13.userAgent
+         */
+        AJP_USER_AGENT("com.openexchange.ajp13.userAgent"),
+        /**
          * com.openexchange.session.sessionId
          */
         SESSION_SESSION_ID("com.openexchange.session.sessionId"),
@@ -185,6 +189,10 @@ public final class LogProperties {
          * com.openexchange.http.grizzly.session
          */
         GRIZZLY_HTTP_SESSION("com.openexchange.http.grizzly.session"),
+        /**
+         * com.openexchange.http.grizzly.userAgent
+         */
+        GRIZZLY_USER_AGENT("com.openexchange.http.grizzly.userAgent"),
         /**
          * javax.servlet.servletPath
          */

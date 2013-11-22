@@ -174,7 +174,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
             change.setConflicts(util.getConflicts(message.getDataObject(), session));
 
-            describeDiff(change, wrapper, session);
+            describeDiff(change, wrapper, session, message);
             analysis.addChange(change);
 
         } else {
@@ -210,7 +210,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 change.setNewAppointment(exception);
                 change.setConflicts(util.getConflicts(exception, session));
 
-                describeDiff(change, wrapper, session);
+                describeDiff(change, wrapper, session, message);
                 analysis.addChange(change);
             }
         }
@@ -272,8 +272,13 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private boolean isOutdated(CalendarDataObject update, CalendarDataObject original) {
-        if (original.containsSequence() && update.containsSequence() && original.getSequence() > update.getSequence()) {
-            return true;
+        if (original.containsSequence() && update.containsSequence()) {
+            if (original.getSequence() > update.getSequence()) {
+                return true;
+            }
+            if (original.getSequence() < update.getSequence()) {
+                return false;
+            }
         }
         Date originalLastTouched = null;
         if (original.containsLastModified()) {

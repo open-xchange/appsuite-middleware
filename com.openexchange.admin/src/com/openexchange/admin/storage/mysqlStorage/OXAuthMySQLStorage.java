@@ -55,10 +55,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -68,6 +65,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.log.LogFactory;
 
 /**
  * Default mysql implementation for admin auth.
@@ -166,7 +164,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         }
 
                         try {
-                            ClientAdminThread.cache.pushConnectionForContext(ctx.getId(), sql_con);
+                            ClientAdminThread.cache.pushConnectionForContextAfterReading(ctx.getId(), sql_con);
                         } catch (final PoolException ecp) {
                             log.error("Pool Error", ecp);
                         }
@@ -270,7 +268,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 }
 
                 try {
-                    ClientAdminThread.cache.pushConnectionForContext(ctx.getId(), sql_con);
+                    ClientAdminThread.cache.pushConnectionForContextAfterReading(ctx.getId(), sql_con);
                 } catch (final PoolException ecp) {
                     log.error("Pool Error", ecp);
                 }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Osgi
 Bundle-SymbolicName: com.openexchange.osgi
-Bundle-Version: 7.4.0
+Bundle-Version: 7.4.1
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
@@ -21,5 +21,6 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.osgi,
- com.openexchange.osgi.console
+ com.openexchange.osgi.console,
+ com.openexchange.osgi.util
 Bundle-Activator: com.openexchange.osgi.osgi.OsgiActivator

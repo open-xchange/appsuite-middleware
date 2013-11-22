@@ -70,7 +70,7 @@ import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
-import com.openexchange.ajax.appointment.action.UpdatesResponse;
+import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -167,7 +167,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
 
     private void checkViaUpdates(Appointment appointment) throws OXException, IOException, SAXException, JSONException, OXException {
         UpdatesRequest updates = new UpdatesRequest(expectedFolderId, Appointment.ALL_COLUMNS, new Date(0), true);
-        UpdatesResponse response = client.execute(updates);
+        AppointmentUpdatesResponse response = client.execute(updates);
 
         List<Appointment> appointments = response.getAppointments(getTimeZone());
 

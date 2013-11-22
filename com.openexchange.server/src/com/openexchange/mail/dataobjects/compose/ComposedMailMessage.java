@@ -85,13 +85,9 @@ public abstract class ComposedMailMessage extends MailMessage {
     private static final long serialVersionUID = -6179506566418364076L;
 
     private final Session session;
-
     private final Context ctx;
-
     private ComposeType sendType;
-
     private transient MimeMessageFiller filler;
-
     private final Set<InternetAddress> recipients;
 
     /**

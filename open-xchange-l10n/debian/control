@@ -27,7 +27,6 @@ Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Replaces: open-xchange-lang-community-da-dk (<< 6.21.0-0)
 Conflicts: open-xchange-lang-community-da-dk (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for da_DK
- This localization package are driven by the community.
 
 Package: open-xchange-l10n-de-ch
 Architecture: all
@@ -172,7 +171,6 @@ Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Replaces: open-xchange-lang-community-pt-br (<< 6.21.0-0)
 Conflicts: open-xchange-lang-community-pt-br (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for pt_BR
- This localization package are driven by the community.
 
 Package: open-xchange-l10n-pt-pt
 Architecture: all
@@ -210,6 +208,14 @@ Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Replaces: open-xchange-lang-community-sv-sv (<< 6.21.0-0), open-xchange-l10n-sv-sv (<< 7.4.0)
 Conflicts: open-xchange-lang-community-sv-sv (<< 6.21.0-0), open-xchange-l10n-sv-sv (<< 7.4.0)
 Description: Package containing Open-Xchange backend localization for sv_SE
+
+Package: open-xchange-l10n-sv-sv
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-l10n-sv-se
+Section: oldlibs
+Description: transitional dummy package
+ This transitional package ensures that the content of the previous open-xchange-l10n-sv-sv package is removed from the system and the
+ successor open-xchange-l10n-sv-se is installed. This package can be safely removed after the upgrade process.
 
 Package: open-xchange-l10n-tr-tr
 Architecture: all

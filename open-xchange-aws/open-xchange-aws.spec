@@ -7,18 +7,18 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange AWS cluster package
+Summary:       The Open-Xchange Amazon S3 package
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
-This package installs the OSGi bundles needed for the AWS cluster.
+This package installs the OSGi bundles needed for Amazon S3 access.
 
 Authors:
 --------
@@ -47,12 +47,14 @@ ox_update_permissions /opt/open-xchange/etc/aws.properties root:open-xchange 640
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/aws.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/awss3.properties
 %config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/setupautoscaling
 
 %changelog
+* Thu Oct 10 2013 Markus Wagner <markus.wagner@open-xchange.com>
+First sprint increment for 7.4.0 release
+* Mon Oct 07 2013 Markus Wagner <markus.wagner@open-xchange.com>
+prepare for 7.4.1
 * Tue Jul 16 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 prepare for 7.4.0
 * Mon Apr 15 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>

@@ -110,7 +110,7 @@ public abstract class MailTransport {
     }
 
     /**
-     * Gets the proper instance of {@link MailTransport mail transport} for session user's default transport account.
+     * Gets the proper instance of {@link MailTransport mail transport} for specified transport account.
      * <p>
      * Note: Don't forget to call final {@link #close()} on obtained {@link MailTransport mail transport}:
      *

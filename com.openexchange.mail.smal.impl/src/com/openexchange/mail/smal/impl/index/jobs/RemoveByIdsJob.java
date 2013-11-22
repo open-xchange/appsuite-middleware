@@ -59,7 +59,6 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.internal.Services;
 
 
 /**

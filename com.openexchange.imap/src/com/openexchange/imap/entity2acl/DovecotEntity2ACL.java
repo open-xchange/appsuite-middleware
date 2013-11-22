@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.entity2acl;
 
-import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -142,7 +141,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
             throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
         final int accountId = ((Integer) args[0]).intValue();
-        final InetSocketAddress imapAddr = (InetSocketAddress) args[1];
+        final String serverUrl = args[1].toString();
         final int sessionUser = ((Integer) args[2]).intValue();
         final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue());
         if (null == sharedOwner) {
@@ -155,22 +154,22 @@ public class DovecotEntity2ACL extends Entity2ACL {
                  */
                 return ALIAS_OWNER;
             }
-            return getACLNameInternal(userId, ctx, accountId, imapAddr);
+            return getACLNameInternal(userId, ctx, accountId, serverUrl);
         }
         /*
          * A shared folder
          */
-        final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx, accountId, imapAddr, sessionUser);
+        final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx, accountId, serverUrl, sessionUser);
         if (sharedOwnerID == userId) {
             /*
              * Owner is equal to given user
              */
             return ALIAS_OWNER;
         }
-        return getACLNameInternal(userId, ctx, accountId, imapAddr);
+        return getACLNameInternal(userId, ctx, accountId, serverUrl);
     }
 
-    private static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final InetSocketAddress imapAddr) throws OXException {
+    private static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final String serverUrl) throws OXException {
         final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         if (null == storageService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( MailAccountStorageService.class.getName());
@@ -189,7 +188,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
             throw Entity2ACLExceptionCode.UNKNOWN_USER.create(
                 Integer.valueOf(userId),
                 Integer.valueOf(ctx.getContextId()),
-                imapAddr);
+                serverUrl);
         }
     }
 
@@ -203,7 +202,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
             throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
         final int accountId = ((Integer) args[0]).intValue();
-        final InetSocketAddress imapAddr = (InetSocketAddress) args[1];
+        final String serverUrl = args[1].toString();
         final int sessionUser = ((Integer) args[2]).intValue();
         final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue());
         if (null == sharedOwner) {
@@ -216,7 +215,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
                  */
                 return getUserRetval(sessionUser);
             }
-            return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
+            return getUserRetval(getUserIDInternal(pattern, ctx, accountId, serverUrl, sessionUser));
         }
         /*
          * A shared folder
@@ -225,13 +224,13 @@ public class DovecotEntity2ACL extends Entity2ACL {
             /*
              * Map alias "owner" to shared folder owner
              */
-            return getUserRetval(getUserIDInternal(sharedOwner, ctx, accountId, imapAddr, sessionUser));
+            return getUserRetval(getUserIDInternal(sharedOwner, ctx, accountId, serverUrl, sessionUser));
         }
-        return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
+        return getUserRetval(getUserIDInternal(pattern, ctx, accountId, serverUrl, sessionUser));
     }
 
-    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr, final int sessionUser) throws OXException {
-        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, imapAddr, ctx);
+    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final String serverUrl, final int sessionUser) throws OXException {
+        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, ctx);
         if (0 == ids.length) {
             throw Entity2ACLExceptionCode.RESOLVE_USER_FAILED.create(pattern);
         }
@@ -244,7 +243,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
         if (pos >= 0) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
-                    "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
+                    "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
                     "\nThe session user's ID is returned."));
             }
             return ids[pos];
@@ -252,7 +251,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
         // Just select first user ID
         if (LOG.isWarnEnabled()) {
             LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
-                "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
+                "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
                 "\nThe first found user is returned."));
         }
         return ids[0];

@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -81,6 +82,9 @@ public class ITipCalendarWrapper {
 		}
 		loadContext();
 		UserService users = services.getService(UserService.class);
+		if (null == users) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+        }
 		user = users.getUser(session.getUserId(), ctx);
 
 	}
@@ -90,6 +94,9 @@ public class ITipCalendarWrapper {
 			return;
 		}
 		ContextService contexts = services.getService(ContextService.class);
+		if (null == contexts) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContextService.class.getName());
+        }
 		ctx = contexts.getContext(session.getContextId());
 
 	}

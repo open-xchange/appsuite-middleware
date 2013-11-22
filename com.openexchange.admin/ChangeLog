@@ -1,3 +1,16 @@
+* 2013-10-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29612: Possible to set user attributes via SOAP (patch provided by choeger)
+
+* 2013-10-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29251: Push back read-write connection into pool using after-reading flag
+
+* 2013-10-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29160: Examine passed String via SOAP to be not empty (not null and length greater than 0)
+ - Fix for bug 20582: Perform an ignore-case equality check for E-Mail addresses
+
 * 2013-09-16 - choeger@open-xchange.com
 
  - Fix for bug 28830: oxsysreport is collecting unneeded protected data

@@ -81,7 +81,7 @@ public class Search {
 
     private final User user;
 
-    private final UserPermissionBits config;
+    private final UserPermissionBits permissionBits;
 
     private final TaskSearchObject search;
 
@@ -93,9 +93,9 @@ public class Search {
 
     private final List<Integer> all = new ArrayList<Integer>(), own = new ArrayList<Integer>(), shared = new ArrayList<Integer>();
 
-    public Search(final Context ctx, final User user, final UserPermissionBits config, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns) {
+    public Search(final Context ctx, final User user, final UserPermissionBits permissionBits, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns) {
         super();
-        this.config = config;
+        this.permissionBits = permissionBits;
         this.ctx = ctx;
         this.user = user;
         this.search = search;
@@ -135,7 +135,7 @@ public class Search {
                 folders = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
                     getUserId(),
                     user.getGroups(),
-                    config.getAccessibleModules(),
+                    permissionBits.getAccessibleModules(),
                     FolderObject.TASK,
                     ctx);
             } catch (final OXException e) {
@@ -145,13 +145,13 @@ public class Search {
         try {
             while (folders.hasNext()) {
                 final FolderObject folder = folders.next();
-                if (!Permission.isFolderVisible(ctx, user, config, folder) || Permission.canOnlySeeFolder(ctx, user, config, folder)) {
+                if (!Permission.isFolderVisible(ctx, user, permissionBits, folder) || Permission.canOnlySeeFolder(ctx, user, permissionBits, folder)) {
                     continue;
                 }
-                Permission.checkReadInFolder(ctx, user, config, folder);
-                if (folder.isShared(getUserId()) && !Permission.canReadInFolder(ctx, user, config, folder)) {
+                Permission.checkReadInFolder(ctx, user, permissionBits, folder);
+                if (folder.isShared(getUserId()) && !Permission.canReadInFolder(ctx, user, permissionBits, folder)) {
                     shared.add(Integer.valueOf(folder.getObjectID()));
-                } else if (Permission.canReadInFolder(ctx, user, config, folder)) {
+                } else if (Permission.canReadInFolder(ctx, user, permissionBits, folder)) {
                     own.add(Integer.valueOf(folder.getObjectID()));
                 } else {
                     all.add(Integer.valueOf(folder.getObjectID()));

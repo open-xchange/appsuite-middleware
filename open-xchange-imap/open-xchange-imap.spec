@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -45,32 +45,27 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imap.properties
 
-    pfile=/opt/open-xchange/etc/imap.properties
+    PFILE=/opt/open-xchange/etc/imap.properties
 
     # SoftwareChange_Request-1142
-    if ! ox_exists_property com.openexchange.imap.umlautFilterThreshold $pfile; then
-        ox_set_property com.openexchange.imap.umlautFilterThreshold 50 $pfile
-    fi
+    ox_add_property com.openexchange.imap.umlautFilterThreshold 50 $PFILE
 
     # SoftwareChange_Request-1215
-    if ! ox_exists_property com.openexchange.imap.maxMailboxNameLength $pfile; then
-        ox_set_property com.openexchange.imap.maxMailboxNameLength 60 $pfile
-    fi
+    ox_add_property com.openexchange.imap.maxMailboxNameLength 60 $PFILE
 
     # SoftwareChange_Request-1470
-    if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile; then
-        ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile
+    if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $PFILE; then
+        ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $PFILE
     fi
 
     # SoftwareChange_Request-1566
-    if ! ox_exists_property com.openexchange.imap.invalidMailboxNameCharacters $pfile; then
-        ox_set_property com.openexchange.imap.invalidMailboxNameCharacters "" $pfile
-    fi
+    ox_add_property com.openexchange.imap.invalidMailboxNameCharacters "" $PFILE
 
     # SoftwareChange_Request-1586
-    if ! ox_exists_property com.openexchange.imap.allowFolderCaches $pfile; then
-        ox_set_property com.openexchange.imap.allowFolderCaches true $pfile
-    fi
+    ox_add_property com.openexchange.imap.allowFolderCaches true $PFILE
+
+    # SoftwareChange_Request-1668
+    ox_add_property com.openexchange.imap.storeContainerType boundary-aware $PFILE
 fi
 
 %clean
@@ -86,32 +81,52 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Nov 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth candidate for 7.4.1 release
+* Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.4.1 release
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-11
 * Thu Nov 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-08
+* Thu Nov 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.4.1 release
 * Tue Nov 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Wed Oct 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-28
 * Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-30
+* Wed Oct 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.4.1 release
 * Tue Oct 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-23
 * Mon Oct 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-21
+* Thu Oct 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-21
+* Tue Oct 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-11
+* Mon Oct 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-21
+* Mon Oct 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-15
+* Thu Oct 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First sprint increment for 7.4.0 release
 * Wed Oct 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-09
 * Wed Oct 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-07
+* Thu Sep 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-23
 * Tue Sep 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eleventh candidate for 7.4.0 release
 * Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.1 release
+* Fri Sep 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Tenth candidate for 7.4.0 release
-* Tue Sep 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-09-26
 * Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Ninth candidate for 7.4.0 release
 * Wed Sep 11 2013 Marcus Klein <marcus.klein@open-xchange.com>

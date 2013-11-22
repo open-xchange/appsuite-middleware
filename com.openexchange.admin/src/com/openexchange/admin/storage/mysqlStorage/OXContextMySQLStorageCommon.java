@@ -198,12 +198,12 @@ public class OXContextMySQLStorageCommon {
             return cs;
         } finally {
             closePreparedStatement(prep);
-            try {
-                if (oxdb_read != null) {
-                    cache.pushConnectionForContext(context_id, oxdb_read);
+            if (oxdb_read != null) {
+                try {
+                        cache.pushConnectionForContextAfterReading(context_id, oxdb_read);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!",exp);
                 }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox read connection to pool!",exp);
             }
         }
     }
@@ -443,6 +443,10 @@ public class OXContextMySQLStorageCommon {
                 @Override
                 public String getSchema() {
                     return db.getScheme();
+                }
+                @Override
+                public boolean isToConfigDB() {
+                    return true;
                 }
             });
         } catch (PoolException e) {

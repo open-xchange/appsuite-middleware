@@ -52,7 +52,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import static com.openexchange.java.Streams.close;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -74,15 +73,21 @@ import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
+import com.openexchange.ajax.helper.ImageUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.ajax.requesthandler.cache.CachedResource;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -94,11 +99,15 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FileResponseRenderer}
@@ -109,6 +118,10 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /** The default in-memory threshold of 1MB. */
+    private static final int DEFAULT_IN_MEMORY_THRESHOLD = 1024 * 1024; // 1MB
+    private static final int INITIAL_CAPACITY = 8192;
 
     private static final int BUFLEN = 2048;
 
@@ -257,7 +270,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             contentDisposition = unquote(contentDisposition);
             // Write to Servlet's output stream
-            file = transformIfImage(requestData, file, delivery);
+            file = transformIfImage(requestData, result, file, delivery);
             if (null == file) {
                 // Quit with 404
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
@@ -289,6 +302,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(SAVE_AS_TYPE);
                 length = file.getLength();
+                setContentLengthHeader(length, resp);
             } else {
                 // Determine what Content-Type is indicated by file name
                 String contentTypeByFileName = getContentTypeByFileName(fileName);
@@ -300,13 +314,15 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if (null == fileContentType || SAVE_AS_TYPE.equals(fileContentType)) {
                         if (null == contentTypeByFileName) {
                             // Let Tika detect the Content-Type
-                            final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
+                            ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
+                            closeables.add(temp);
+                            temp.write(documentData);
                             // We know for sure
-                            fileLength = baos.size();
-                            documentData = Streams.asInputStream(baos);
-                            cts = tika.detect(Streams.asInputStream(baos));
+                            fileLength = temp.getLength();
+                            documentData = temp.getClosingStream();
+                            cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
-                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray(), true) ? "text/html" : cts;
+                                cts = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : cts;
                             }
                         } else {
                             cts = contentTypeByFileName;
@@ -314,16 +330,15 @@ public class FileResponseRenderer implements ResponseRenderer {
                     } else {
                         if ((null != contentTypeByFileName) && !equalPrimaryTypes(fileContentType, contentTypeByFileName)) {
                             // Differing Content-Types sources
-                            final ThresholdFileHolder temp = new ThresholdFileHolder();
+                            final ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
                             closeables.add(temp);
                             temp.write(documentData);
                             // We know for sure
                             fileLength = temp.getLength();
-                            documentData = temp.getStream();
+                            documentData = temp.getClosingStream();
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
-                                final byte[] bytes = Streams.stream2bytes(temp.getStream());
-                                cts = HTMLDetector.containsHTMLTags(bytes, true) ? "text/html" : cts;
+                                cts = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : cts;
                             }
                         } else {
                             cts = fileContentType;
@@ -367,12 +382,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                  * Set Content-Length if possible
                  */
                 length = checkedDownload.getSize();
-                if (length > 0) {
-                    resp.setHeader("Accept-Ranges", "bytes");
-                    resp.setHeader("Content-Length", Long.toString(length));
-                } else {
-                    resp.setHeader("Accept-Ranges", "none");
-                }
+                setContentLengthHeader(length, resp);
                 /*-
                  * Determine preferred Content-Type
                  *
@@ -405,14 +415,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
                     } else {
                         // Specified Content-Type does NOT match file's real MIME type
-                        final ThresholdFileHolder temp = new ThresholdFileHolder();
+                        final ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
                         closeables.add(temp);
                         temp.write(documentData);
-                        documentData = temp.getStream();
+                        documentData = temp.getClosingStream();
                         preferredContentType = detectMimeType(temp.getStream());
                         if ("text/plain".equals(preferredContentType)) {
-                            final byte[] bytes = Streams.stream2bytes(temp.getStream());
-                            preferredContentType = HTMLDetector.containsHTMLTags(bytes, true) ? "text/html" : preferredContentType;
+                            preferredContentType = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : preferredContentType;
                         }
                         // One more time...
                         if (equalPrimaryTypes(preferredContentType, contentType)) {
@@ -611,7 +620,8 @@ public class FileResponseRenderer implements ResponseRenderer {
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
             } catch (final IOException e) {
-                if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
+                final String lcm = toLowerCase(e.getMessage());
+                if ("connection reset by peer".equals(lcm) || "broken pipe".equals(lcm)) {
                     /*-
                      * The client side has abruptly aborted the connection.
                      * That can have many causes which are not controllable by us.
@@ -630,8 +640,17 @@ public class FileResponseRenderer implements ResponseRenderer {
             LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
-            close(file, documentData);
+            close(documentData, file);
             close(closeables);
+        }
+    }
+
+    private void setContentLengthHeader(final long length, final HttpServletResponse resp) {
+        if (length > 0) {
+            resp.setHeader("Accept-Ranges", "bytes");
+            resp.setHeader("Content-Length", Long.toString(length));
+        } else {
+            resp.setHeader("Accept-Ranges", "none");
         }
     }
 
@@ -676,7 +695,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder fileHolder, final String delivery) throws IOException, OXException {
+    private IFileHolder transformIfImage(final AJAXRequestData request, final AJAXRequestResult result, final IFileHolder fileHolder, final String delivery) throws IOException, OXException {
         /*
          * check input
          */
@@ -722,23 +741,72 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         }
 
+        // Check cache first
+        final ResourceCache previewCache = ResourceCaches.getResourceCache();
+        // Get eTag from result that provides the IFileHolder
+        final String eTag = result.getHeader("ETag");
+        final boolean isValidEtag = !isEmpty(eTag);
+        if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
+            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
+            final CachedResource cachedResource = previewCache.get(cacheKey, 0, request.getSession().getContextId());
+            if (null != cachedResource) {
+                // Scaled version already cached
+                // Create appropriate IFileHolder
+                String contentType = cachedResource.getFileType();
+                if (null == contentType) {
+                    contentType = "image/jpeg";
+                }
+                final IFileHolder ret;
+                {
+                    final InputStream inputStream = cachedResource.getInputStream();
+                    if (null == inputStream) {
+                        final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedResource.getBytes());
+                        responseFileHolder.setContentType(contentType);
+                        responseFileHolder.setName(cachedResource.getFileName());
+                        ret = responseFileHolder;
+                    } else {
+                        // From stream
+                        ret = new FileHolder(inputStream, cachedResource.getSize(), contentType, cachedResource.getFileName());
+                    }
+                }
+                return ret;
+            }
+        }
+
         // OK, so far we assume image transformation is needed
         IFileHolder file = fileHolder;
 
         // Build transformations
-        final InputStream stream = file.getStream();
+        InputStream stream = file.getStream();
         if (null == stream) {
             LOG.warn("(Possible) Image file misses stream data");
             return file;
         }
-        // mark stream if possible
+
+        // Check for an animated .gif image
+        {
+            if (file.repetitive()) {
+                if (ImageUtils.isAnimatedGif(stream)) {
+                    return fileHolder;
+                }
+                stream = file.getStream();
+            } else {
+                final AtomicReference<InputStream> ref = new AtomicReference<InputStream>();
+                if (ImageUtils.isAnimatedGif(stream, ref)) {
+                    return new FileHolder(ref.get(), -1, file.getContentType(), file.getName());
+                }
+                stream = ref.get();
+            }
+        }
+
+        // Mark stream if possible
         final boolean markSupported = file.repetitive() ? false : stream.markSupported();
         if (markSupported) {
             stream.mark(131072); // 128KB
         }
-        // start transformations: scale, rotate, ...
+        // Start transformations: scale, rotate, ...
         final ImageTransformations transformations = scaler.transfom(stream);
-        // rotate by default when not delivering as download
+        // Rotate by default when not delivering as download
         final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
@@ -756,13 +824,13 @@ public class FileResponseRenderer implements ResponseRenderer {
             final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
-        // compress by default when not delivering as download
+        // Compress by default when not delivering as download
         final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
         if ((null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
         /*
-         * transform
+         * Transform
          */
         try {
             InputStream transformed;
@@ -781,7 +849,51 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
                 return handleFailure(file, stream, markSupported);
             }
-            return new FileHolder(transformed, -1, file.getContentType(), file.getName());
+            // Return immediately if not cacheable
+            if (null == previewCache || !isValidEtag) {
+                return new FileHolder(transformed, -1, file.getContentType(), file.getName());
+            }
+            // (Asynchronously) Add to cache if possible
+            final byte[] bytes = Streams.stream2bytes(transformed);
+            final int size = bytes.length;
+            // Specify task
+            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
+            final ServerSession session = request.getSession();
+            final String fileName = file.getName();
+            final String contentType = file.getContentType();
+            final AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws OXException {
+                    final CachedResource preview = new CachedResource(bytes, fileName, contentType, bytes.length);
+                    previewCache.save(cacheKey, preview, 0, session.getContextId());
+                    return null;
+                }
+            };
+            // Acquire thread pool service
+            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+            if (null == threadPool) {
+                final Thread thread = Thread.currentThread();
+                boolean ran = false;
+                task.beforeExecute(thread);
+                try {
+                    task.call();
+                    ran = true;
+                    task.afterExecute(null);
+                } catch (final Exception ex) {
+                    if (!ran) {
+                        task.afterExecute(ex);
+                    }
+                    // Else the exception occurred within
+                    // afterExecute itself in which case we don't
+                    // want to call it again.
+                    throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage()));
+                }
+            } else {
+                threadPool.submit(task);
+            }
+            // Return
+            return new FileHolder(new ByteArrayInputStreamClosure(bytes), size, contentType, fileName);
         } catch (final RuntimeException e) {
             if (DEBUG && file.repetitive()) {
                 try {

@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.entity2acl;
 
-import java.net.InetSocketAddress;
 import java.util.Arrays;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -110,7 +109,7 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
         {
             final UserService userService = Services.getService(UserService.class);
             if (null == userService) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
             }
             userLoginInfo = userService.getUser(userId, ctx).getLoginInfo();
         }
@@ -119,14 +118,9 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
             throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
         try {
-            return MailConfig.getMailLogin(
-                storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()),
-                userLoginInfo);
+            return MailConfig.getMailLogin(storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()), userLoginInfo);
         } catch (final OXException e) {
-            throw Entity2ACLExceptionCode.UNKNOWN_USER.create(
-                Integer.valueOf(userId),
-                Integer.valueOf(ctx.getContextId()),
-                args[1].toString());
+            throw Entity2ACLExceptionCode.UNKNOWN_USER.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), args[1].toString());
         }
     }
 
@@ -139,21 +133,18 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
         if (args == null || args.length == 0) {
             throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
-        final int accountId;
-        final InetSocketAddress imapAddr;
-        final int sessionUser;
         try {
-            accountId = ((Integer) args[0]).intValue();
-            imapAddr = (InetSocketAddress) args[1];
-            sessionUser = ((Integer) args[2]).intValue();
+            final int accountId = ((Integer) args[0]).intValue();
+            final String serverUrl = args[1].toString();
+            final int sessionUser = ((Integer) args[2]).intValue();
+            return getUserRetval(getUserIDInternal(pattern, ctx, accountId, serverUrl, sessionUser));
         } catch (final ClassCastException e) {
             throw Entity2ACLExceptionCode.MISSING_ARG.create(e, new Object[0]);
         }
-        return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
     }
 
-    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final InetSocketAddress imapAddr, final int sessionUser) throws OXException {
-        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, imapAddr, ctx);
+    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final String serverUrl, final int sessionUser) throws OXException {
+        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, ctx);
         if (0 == ids.length) {
             throw Entity2ACLExceptionCode.RESOLVE_USER_FAILED.create(pattern);
         }
@@ -166,7 +157,7 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
         if (pos >= 0) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
-                    "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
+                    "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
                     "\nThe session user's ID is returned."));
             }
             return ids[pos];
@@ -174,7 +165,7 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
         // Just select first user ID
         if (LOG.isWarnEnabled()) {
             LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
-                "\" subscribed to IMAP server \"").append(imapAddr).append("\": ").append(Arrays.toString(ids)).append(
+                "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
                 "\nThe first found user is returned."));
         }
         return ids[0];

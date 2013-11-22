@@ -2405,10 +2405,10 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 						validateString(member.getEmailaddress());
 						validateString(member.getLastname());
 						validateString(member.getFirstname());
-						/*
-						 * Independent entries ('one-offs') must contain a valid e-mail address
-						 */
 						if (DistributionListEntryObject.INDEPENDENT == member.getEmailfield()) {
+	                        /*
+	                         * Independent entries ('one-offs') must contain a valid e-mail address
+	                         */
 							if (null == member.getEmailaddress() || 0 == member.getEmailaddress().trim().length()) {
 								throw ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.create();
 							}
@@ -2417,6 +2417,13 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 							} catch (final AddressException e) {
 								throw ContactExceptionCodes.INVALID_EMAIL.create(e, member.getEmailaddress());
 							}
+						} else {
+						    /*
+	                         * Not-independent entries must contain at least an object ID reference
+	                         */
+						    if (0 == member.getEntryID()) {
+						        throw ContactExceptionCodes.OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS.create();
+						    }
 						}
 					}
 				}

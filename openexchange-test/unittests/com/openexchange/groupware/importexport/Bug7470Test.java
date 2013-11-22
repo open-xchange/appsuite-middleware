@@ -49,72 +49,33 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.groupware.Init;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.ICalImporter;
-import com.openexchange.test.AjaxInit;
-import com.openexchange.tools.session.ServerSessionFactory;
 
-public class Bug7470Test extends AbstractContactTest {
-	public final Format format = Format.ICAL;
-    private static Context ctx;
-
+public class Bug7470Test extends AbstractICalImportTest {
+  //FIXME this one is still broken
+    
     //workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug7470Test.class);
 	}
 
-	@BeforeClass
-	public static void initialize() throws Exception {
-		Init.startServer();
-		final UserStorage uStorage = UserStorage.getInstance();
-	    ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-        userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"),ctx);
-	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "csv-tests");
-
-        userId = sessObj.getUserId();
-		imp = new ICalImporter(null);
-	}
-
-    @AfterClass
-    public static void shutdown() throws Exception {
-        Init.stopServer();
-    }
-
-    @After
-	public void cleanUpAfterTest() throws OXException{
-		deleteTestFolder(folderId);
-	}
-
 	/*
 	 * Imported appointment loses participants
 	 */
-	@Test public void test7470() throws SQLException, UnsupportedEncodingException, OXException, NumberFormatException, OXException, OXException {
-		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
+	@Test public void test7470() throws SQLException, OXException, NumberFormatException, OXException, OXException {
+	    folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
 		final String email = "cbartkowiak@oxhemail.open-xchange.com";
 		final String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";
 		final String ical =

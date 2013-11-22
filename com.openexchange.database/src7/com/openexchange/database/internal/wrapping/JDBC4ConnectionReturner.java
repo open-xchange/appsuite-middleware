@@ -67,53 +67,48 @@ import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.database.internal.AssignmentImpl;
+import com.openexchange.database.internal.ConnectionState;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
 
 /**
  * {@link JDBC4ConnectionReturner}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class JDBC4ConnectionReturner implements Connection {
 
     private final Pools pools;
-
+    private final ReplicationMonitor monitor;
     private final AssignmentImpl assign;
+    private final boolean noTimeout;
+    private final boolean write;
+    protected final ConnectionState state;
 
     protected Connection delegate;
 
-    private final boolean noTimeout;
-
-    private final boolean write;
-
-    private boolean usedAsRead;
-
-	private final ReplicationMonitor monitor;
-
-    public JDBC4ConnectionReturner(final Pools pools, final ReplicationMonitor monitor, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
+    public JDBC4ConnectionReturner(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
         super();
         this.pools = pools;
+        this.monitor = monitor;
         this.assign = assign;
         this.delegate = delegate;
         this.noTimeout = noTimeout;
         this.write = write;
-        this.monitor = monitor;
-        this.usedAsRead = usedAsRead;
-    }
-    
-    public void setUsedAsRead(boolean b) {
-    	this.usedAsRead = b;
-    }
-    @Override
-    public String toString() {
-        return delegate.toString();
+        state = new ConnectionState(usedAsRead);
     }
 
     @Override
-    public void clearWarnings() throws SQLException {
+    public void commit() throws SQLException {
         checkForAlreadyClosed();
-        delegate.clearWarnings();
+        if (write && !assign.isToConfigDB() && state.isUsedForUpdate()) {
+            if (!delegate.getAutoCommit()) {
+                // For performance reasons we increase the replication counter within a possibly active transaction.
+                monitor.increaseInCurrentTransaction(assign, delegate, state);
+            }
+        }
+
+        delegate.commit();
     }
 
     @Override
@@ -121,15 +116,16 @@ public abstract class JDBC4ConnectionReturner implements Connection {
         if (null == delegate) {
             throw new SQLException("Connection is already closed.");
         }
+
         final Connection toReturn = delegate;
         delegate = null;
-        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
+        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, state);
     }
 
     @Override
-    public void commit() throws SQLException {
+    public void clearWarnings() throws SQLException {
         checkForAlreadyClosed();
-        delegate.commit();
+        delegate.clearWarnings();
     }
 
     @Override
@@ -248,9 +244,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     @Override
     public PreparedStatement prepareStatement(final String sql, final int resultSetType, final int resultSetConcurrency, final int resultSetHoldability) throws SQLException {
         checkForAlreadyClosed();
-        return new JDBC41PreparedStatementWrapper(
-            delegate.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability),
-            this);
+        return new JDBC41PreparedStatementWrapper(delegate.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability), this);
     }
 
     @Override
@@ -407,9 +401,22 @@ public abstract class JDBC4ConnectionReturner implements Connection {
         return delegate.unwrap(iface);
     }
 
+    public void updatePerformed() {
+        state.setUsedForUpdate(true);
+    }
+
+    public void setUsedAsRead(boolean usedAsRead) {
+        state.setUsedAsRead(usedAsRead);
+    }
+
     protected void checkForAlreadyClosed() throws SQLException {
         if (null == delegate) {
             throw new SQLException("Connection was already closed.");
         }
+    }
+
+    @Override
+    public String toString() {
+        return delegate.toString();
     }
 }

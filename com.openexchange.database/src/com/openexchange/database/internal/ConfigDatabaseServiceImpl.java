@@ -62,7 +62,6 @@ import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -72,7 +71,9 @@ import com.openexchange.log.LogProperties;
  */
 public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigDatabaseServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigDatabaseServiceImpl.class);
+
+    // ------------------------------------------------------------------------------------------------ //
 
     private final Pools pools;
     private final ConfigDatabaseAssignmentService assignmentService;
@@ -167,4 +168,5 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     public String getServerName() throws OXException {
         return Server.getServerName();
     }
+
 }

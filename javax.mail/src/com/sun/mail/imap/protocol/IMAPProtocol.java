@@ -103,7 +103,7 @@ public class IMAPProtocol extends Protocol {
     private boolean rev1 = false;	// REV1 server ?
     private boolean noauthdebug = true;	// hide auth info in debug output
     private boolean authenticated;	// authenticated?
-    private boolean logoutSignaled = false;  // logout signaled?
+    private boolean alreadySignaledAuthenticated; // Last signaled authenticated status
     // WARNING: authenticated may be set to true in superclass
     //		constructor, don't initialize it here.
 
@@ -286,7 +286,7 @@ public class IMAPProtocol extends Protocol {
 	// only other choice is PREAUTH
 	final IMAPResponse ir = (IMAPResponse)r;
 	if (ir.keyEquals("PREAUTH")) {
-	    authenticatedStatusChanging(true, "PREAUTH", null);
+	    authenticatedStatusChanging0(true, "PREAUTH", null);
 	    authenticated = true;
 	    setCapabilities(r);
 	} else {
@@ -391,10 +391,7 @@ public class IMAPProtocol extends Protocol {
 	try {
         super.disconnect();
     } finally {
-        if (!logoutSignaled) {
-            try { authenticatedStatusChanging(false, null, null); } catch(Exception x) {/*ignore*/}
-            logoutSignaled = true;
-        }
+        try { authenticatedStatusChanging0(false, null, null); } catch(Exception x) {/*ignore*/}
         authenticated = false;	// just in case
     }
     }
@@ -436,8 +433,6 @@ public class IMAPProtocol extends Protocol {
     	    // dispatch any unsolicited responses.
     	    //  NOTE that the BYE response is dispatched here as well
     	    notifyResponseHandlers(r);
-    	    authenticatedStatusChanging(false, null, null);
-    	    logoutSignaled = true;
     	} finally {
     	    disconnect();
     	}
@@ -450,7 +445,7 @@ public class IMAPProtocol extends Protocol {
      */
     public synchronized void login(final String u, final String p) throws ProtocolException {
     try {
-        authenticatedStatusChanging(true, u, p);
+        authenticatedStatusChanging0(true, u, p);
         final Argument args = new Argument();
         args.writeString(u);
         args.writeString(p);
@@ -476,7 +471,7 @@ public class IMAPProtocol extends Protocol {
         authenticated = true;
     } finally {
         if (!authenticated) {
-            authenticatedStatusChanging(false, u, p);
+            authenticatedStatusChanging0(false, u, p);
         }
     }
     }
@@ -488,7 +483,7 @@ public class IMAPProtocol extends Protocol {
      */
     public synchronized void authlogin(final String u, final String p)
 				throws ProtocolException {
-    authenticatedStatusChanging(true, u, p);
+    authenticatedStatusChanging0(true, u, p);
     try {
         final List<Response> v = new ArrayList<Response>();
         String tag = null;
@@ -590,7 +585,7 @@ public class IMAPProtocol extends Protocol {
         authenticated = true;
     } finally {
         if (!authenticated) {
-            authenticatedStatusChanging(false, u, p);
+            authenticatedStatusChanging0(false, u, p);
         }
     }
     }
@@ -611,7 +606,7 @@ public class IMAPProtocol extends Protocol {
     public synchronized void authplain(final String authzid, final String u, final String p)
 				throws ProtocolException {
     try {
-        authenticatedStatusChanging(true, u, p);
+        authenticatedStatusChanging0(true, u, p);
         final List<Response> v = new ArrayList<Response>();
         String tag = null;
         Response r = null;
@@ -704,7 +699,7 @@ public class IMAPProtocol extends Protocol {
         authenticated = true;
     } finally {
         if (!authenticated) {
-            authenticatedStatusChanging(false, u, p);
+            authenticatedStatusChanging0(false, u, p);
         }
     }
     }
@@ -723,7 +718,7 @@ public class IMAPProtocol extends Protocol {
      */
     public synchronized void authntlm(final String authzid, final String u, final String p)
 				throws ProtocolException {
-    authenticatedStatusChanging(true, u, p);
+    authenticatedStatusChanging0(true, u, p);
     try {
         final List<Response> v = new ArrayList<Response>();
         String tag = null;
@@ -804,7 +799,7 @@ public class IMAPProtocol extends Protocol {
         authenticated = true;
     } finally {
         if (!authenticated) {
-            authenticatedStatusChanging(false, u, p);
+            authenticatedStatusChanging0(false, u, p);
         }
     }
     }
@@ -814,7 +809,7 @@ public class IMAPProtocol extends Protocol {
      */
     public void sasllogin(final String[] allowed, final String realm, final String authzid,
 				final String u, final String p) throws ProtocolException {
-    authenticatedStatusChanging(true, u, p);
+    authenticatedStatusChanging0(true, u, p);
     if (saslAuthenticator == null) {
 	    try {
 		final Class sac = Class.forName(
@@ -2608,7 +2603,7 @@ public class IMAPProtocol extends Protocol {
      * used in processIdleResponse() to determine if the response
      * is the matching end tag.
      */
-    private volatile String idleTag;
+    protected volatile String idleTag;
 
     /**
      * IDLE Command. <p>
@@ -2768,6 +2763,14 @@ public class IMAPProtocol extends Protocol {
 	} catch (final IOException ex) {
 	    // nothing to do, hope to detect it again later
 	}
+    }
+
+    private final synchronized void authenticatedStatusChanging0(final boolean authenticate, final String u, final String p) throws ProtocolException {
+        if (authenticate == alreadySignaledAuthenticated) {
+            return;
+        }
+        authenticatedStatusChanging(authenticate, u, p);
+        alreadySignaledAuthenticated = authenticate;
     }
 
     /**

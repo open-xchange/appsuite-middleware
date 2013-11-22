@@ -107,14 +107,15 @@ public class AutoconfigServiceImpl implements AutoconfigService {
             return null;
         }
 
+        Autoconfig candidate = null;
         for (final ConfigSource source : sources) {
             final Autoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context);
-            if (config != null) {
-                return config;
+            if (config != null && (null == candidate || config.getRanking() > candidate.getRanking())) {
+                candidate = config;
             }
         }
 
-        return null;
+        return candidate;
     }
 
     private static final Pattern PATTERN_SPLIT = Pattern.compile("@");

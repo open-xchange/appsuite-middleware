@@ -236,6 +236,7 @@ public class ICal4JEmitter implements ICalEmitter {
         return new ICal4jItem(event);
     }
 
+    @SuppressWarnings("unchecked")
     protected void addVTimeZone(ZoneInfo zoneInfo, Calendar calendar, Appointment appointment) {
         if (appointment.getTimezone() != null && !appointment.getTimezone().trim().equals("")) {
             String tzid = appointment.getTimezone().trim();
@@ -248,7 +249,7 @@ public class ICal4JEmitter implements ICalEmitter {
             TimeZone timeZone = new EmitterTools(zoneInfo).getTimeZoneRegistry().getTimeZone(tzid);
             if (null != timeZone) {
                 VTimeZone vTimeZone = timeZone.getVTimeZone();
-                calendar.getComponents().add(vTimeZone);
+                calendar.getComponents().add(0, vTimeZone);
             }
         }
     }
@@ -344,5 +345,17 @@ public class ICal4JEmitter implements ICalEmitter {
             throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
         }
         return ((ICal4jSession) session).getAndIncreaseIndex();
+    }
+
+    protected void replaceMethod(Calendar calendar, Method newMethod) {
+        if (newMethod != null) {
+            
+            Property oldMethod = calendar.getProperty("METHOD");
+            while (oldMethod != null) {
+                calendar.getProperties().remove(oldMethod);
+                oldMethod = calendar.getProperty("METHOD");
+            }
+            calendar.getProperties().add(newMethod);
+        }
     }
 }

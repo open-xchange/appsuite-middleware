@@ -73,7 +73,7 @@ public abstract class PermissionServlet extends SessionServlet {
         Tools.disableCaching(resp);
         ServerSession session = null;
         try {
-            initializeSession(req);
+            initializeSession(req, resp);
             session = getSessionObject(req);
             if (null != session && !hasModulePermission(session)) {
                 LOG.info("Status code 403 (FORBIDDEN): No permission to access module.");

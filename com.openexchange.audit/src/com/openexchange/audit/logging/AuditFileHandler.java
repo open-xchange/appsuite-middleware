@@ -57,8 +57,8 @@ import java.util.logging.FileHandler;
  */
 public class AuditFileHandler extends FileHandler {
 
-	public AuditFileHandler() throws IOException, SecurityException {
-		super();
+	public AuditFileHandler(String path) throws IOException, SecurityException {
+		super(path);
 	}
 
 }

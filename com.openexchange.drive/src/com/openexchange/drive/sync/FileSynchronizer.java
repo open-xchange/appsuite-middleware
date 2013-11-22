@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
@@ -70,7 +71,6 @@ import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -113,10 +113,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             }
         }
         /*
-         * handle any case-conflicting client versions
+         * handle any conflicting client versions
          */
-        if (null != mapper.getCaseConflictingClientVersions() && 0 < mapper.getCaseConflictingClientVersions().size()) {
-            for (FileVersion clientVersion : mapper.getCaseConflictingClientVersions()) {
+        if (null != mapper.getMappingProblems().getCaseConflictingClientVersions()) {
+            for (FileVersion clientVersion : mapper.getMappingProblems().getCaseConflictingClientVersions()) {
                 /*
                  * let client first rename it's file...
                  */
@@ -136,7 +136,17 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                         DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
                 }
             }
-
+        }
+        if (null != mapper.getMappingProblems().getUnicodeConflictingClientVersions()) {
+            for (FileVersion clientVersion : mapper.getMappingProblems().getUnicodeConflictingClientVersions()) {
+                /*
+                 * indicate as error with quarantine flag
+                 */
+                ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
+                twc.setClientVersion(clientVersion);
+                syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path,
+                    DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName()), true));
+            }
         }
         return syncResult;
     }
@@ -152,14 +162,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     @Override
-    protected void processServerChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+    protected int processServerChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
         switch (comparison.getServerChange()) {
         case DELETED:
             /*
              * deleted on server, delete file on client, too
              */
             result.addActionForClient(new RemoveFileAction(comparison.getClientVersion(), comparison, path));
-            break;
+            return 1;
         case MODIFIED:
             if (comparison.getServerVersion().getChecksum().equalsIgnoreCase(comparison.getClientVersion().getChecksum()) &&
                 comparison.getServerVersion().getName().equalsIgnoreCase(comparison.getClientVersion().getName()) &&
@@ -169,28 +179,29 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 result.addActionForClient(new EditFileAction(
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, path));
+                return 1;
             } else {
                 /*
                  * modified on server, let client download the file
                  */
                 result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
                     ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                return 1;
             }
-            break;
         case NEW:
             /*
              * new on server, let client download the file
              */
             result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
                 ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
-            break;
+            return 1;
         default:
-            break;
+            return 0;
         }
     }
 
     @Override
-    protected void processClientChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+    protected int processClientChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
         switch (comparison.getClientChange()) {
         case DELETED:
             if (mayDelete(comparison.getServerVersion())) {
@@ -199,14 +210,17 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 result.addActionForServer(new RemoveFileAction(comparison.getServerVersion(), comparison, path));
                 result.addActionForClient(new AcknowledgeFileAction(session, comparison.getOriginalVersion(), null, comparison, path));
+                return 1;
             } else {
                 /*
                  * not allowed, let client re-download the file, indicate as error without quarantine flag
                  */
                 result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
                     ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
+                    path, DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), false));
+                return 2;
             }
-            break;
         case MODIFIED:
             if (mayModify(comparison.getServerVersion())) {
                 if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
@@ -216,9 +230,13 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                      * just renamed on client, let server edit the file, acknowledge rename to client
                      */
                     ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
-                    result.addActionForServer(new EditFileAction(serverFileVersion, comparison.getClientVersion(), comparison, path));
-                    result.addActionForClient(new AcknowledgeFileAction(session,
-                        comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile()));
+                    EditFileAction serverEdit = new EditFileAction(serverFileVersion, comparison.getClientVersion(), comparison, path);
+                    AcknowledgeFileAction clientAcknowledge = new AcknowledgeFileAction(session,
+                        comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile());
+                    clientAcknowledge.setDependingAction(serverEdit);
+                    result.addActionForServer(serverEdit);
+                    result.addActionForClient(clientAcknowledge);
+                    return 1;
                 } else {
                     /*
                      * modified on client, let client upload the modified file
@@ -227,6 +245,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                         comparison.getServerVersion(), comparison.getClientVersion(), comparison, path, 0);
                     uploadActions.add(uploadAction);
                     result.addActionForClient(uploadAction);
+                    return 1;
                 }
             } else if (mayCreate()) {
                 /*
@@ -247,6 +266,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 result.addActionForClient(uploadAction);
                 result.addActionForClient(new DownloadFileAction(session, null,
                     ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                return 4;
             } else {
                 /*
                  * not allowed, let client first rename it's file and mark as error with quarantine flag...
@@ -260,8 +280,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 result.addActionForClient(new DownloadFileAction(session, null,
                     ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                return 3;
             }
-            break;
         case NEW:
             /*
              * new on client
@@ -273,12 +293,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                      */
                     result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                         DriveExceptionCodes.INVALID_FILENAME.create(comparison.getClientVersion().getName()), true));
+                    return 1;
                 } else if (isIgnoredName(comparison.getClientVersion().getName())) {
                     /*
                      * ignored file, indicate as error with quarantine flag
                      */
                     result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                         DriveExceptionCodes.IGNORED_FILENAME.create(comparison.getClientVersion().getName()), true));
+                    return 1;
                 } else {
                     /*
                      * let client upload the file
@@ -287,6 +309,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                         comparison.getServerVersion(), comparison.getClientVersion(), comparison, path, 0);
                     uploadActions.add(uploadAction);
                     result.addActionForClient(uploadAction);
+                    return 1;
                 }
             } else {
                 /*
@@ -294,20 +317,21 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                     DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
+                return 1;
             }
-            break;
         default:
-            break;
+            return 0;
         }
     }
 
     @Override
-    protected void processConflictingChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+    protected int processConflictingChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
         if (Change.DELETED == comparison.getServerChange() && Change.DELETED == comparison.getClientChange()) {
             /*
              * both deleted, just let client remove it's metadata
              */
             result.addActionForClient(new AcknowledgeFileAction(session, comparison.getOriginalVersion(), null, comparison, path));
+            return 0;
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) &&
             (Change.NEW == comparison.getServerChange() || Change.MODIFIED == comparison.getServerChange())) {
             /*
@@ -320,6 +344,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
                 result.addActionForClient(new AcknowledgeFileAction(session,
                     comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile()));
+                return 0;
             } else if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
                 comparison.getClientVersion().getName().equalsIgnoreCase(comparison.getServerVersion().getName()) &&
                 false == comparison.getClientVersion().getName().equals(comparison.getServerVersion().getName())) {
@@ -328,6 +353,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 result.addActionForClient(new EditFileAction(
                     comparison.getClientVersion(), comparison.getServerVersion(), comparison, path));
+                return 1;
             } else {
                 /*
                  * keep both client- and server versions, let client first rename it's file...
@@ -350,6 +376,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
                 result.addActionForClient(new DownloadFileAction(session, null, comparison.getServerVersion(), comparison, path, serverFile));
+                return 3;
             }
         } else if (Change.DELETED == comparison.getClientChange() && (Change.MODIFIED == comparison.getServerChange() || Change.NEW == comparison.getServerChange())) {
             /*
@@ -357,6 +384,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              */
             File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
             result.addActionForClient(new DownloadFileAction(session, null, comparison.getServerVersion(), comparison, path, serverFile));
+            return 1;
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) && Change.DELETED == comparison.getServerChange()) {
             /*
              * edit-delete conflict, let client upload it's file
@@ -365,12 +393,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 UploadFileAction uploadAction = new UploadFileAction(null, comparison.getClientVersion(), comparison, path, 0);
                 result.addActionForClient(uploadAction);
                 uploadActions.add(uploadAction);
+                return 1;
             } else {
                 /*
                  * not allowed, indicate as error with quarantine flag
                  */
                 result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                     DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
+                return 1;
             }
         } else {
             throw new UnsupportedOperationException("Not implemented: Server: " + comparison.getServerChange() + ", Client: " + comparison.getClientChange());
@@ -440,6 +470,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         }
         if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
             return true; // no invalid filenames
+        }
+        if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < fileName.length()) {
+            return true; // no too long filenames
         }
         return false;
     }

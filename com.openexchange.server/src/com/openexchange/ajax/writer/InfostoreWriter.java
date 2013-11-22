@@ -109,6 +109,18 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 		jsonWriter.endObject();
 	}
 
+	public void writeLimited(final DocumentMetadata dm, final Metadata[] fields, final TimeZone tz) throws JSONException {
+        jsonWriter.object();
+
+        final WriterSwitch w = new WriterSwitch(jsonWriter, tz);
+        w.setDocumentMetadata(dm);
+        for(final Metadata metadata : fields) {
+            w.setMetadata(metadata);
+            metadata.doSwitch(w);
+        }
+        jsonWriter.endObject();
+    }
+
 	private static final class WriterSwitch implements MetadataSwitcher{
 
 		private DocumentMetadata dm;

@@ -37,10 +37,6 @@ modules/mail/linewrap > io.ox/mail//lineWrapAfter
 modules/mail/vcard > io.ox/mail//appendVcard
 modules/mail/unifiedinboxidentifier > io.ox/mail//unifiedInboxIdentifier
 
-# CalDAV
-modules/caldav/active > io.ox/caldav//active
-modules/caldav/url > io.ox/caldav//url
-
 # Migration
 gui > io.ox/migration//gui
 
@@ -56,3 +52,6 @@ modules/calendar/calendar_freebusy > io.ox/calendar//freeBusy
 modules/tasks/notifyAcceptedDeclinedAsCreator > io.ox/tasks//notifyAcceptedDeclinedAsCreator
 modules/tasks/notifyAcceptedDeclinedAsParticipant > io.ox/tasks//notifyAcceptedDeclinedAsParticipant
 modules/tasks/notifyNewModifiedDeleted > io.ox/tasks//notifyNewModifiedDeleted
+
+# Search
+minimumSearchCharacters > io.ox/core//search/minimumQueryLength
