@@ -2,6 +2,7 @@
 
  - Fix for bug 29854: orderly signal OAuth provider error to client
  - Fix for bug 29860: Tolerate non-deletable file from file storage on user delete attempt
+ - Fix for bug 29925: Propagate proper event in case auto-login is turned off and short-term session container elapsed
 
 * 2013-11-22- tobias.friedrich@open-xchange.com
 
