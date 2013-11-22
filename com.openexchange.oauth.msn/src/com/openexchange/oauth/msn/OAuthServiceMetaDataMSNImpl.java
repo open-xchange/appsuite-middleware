@@ -190,12 +190,15 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             token.setSecret(new JSONObject(2).put("callback", callback).toString());
             {
                 JSONObject responseObj = new JSONObject(postMethod.getResponseBodyAsString());
-                String sToken = responseObj.optString(REFRESH_TOKEN_KEY, null);
+                final String sToken = responseObj.optString(REFRESH_TOKEN_KEY, null);
                 if (null == sToken) {
-                    sToken = responseObj.optString(REFRESH_TOKEN_KEY_ALT, null);
-                    if (null == sToken) {
+                    // "refresh_token" missing -- check for error
+                    final String error = responseObj.optString("error", null);
+                    if (null == error) {
                         throw OAuthExceptionCodes.OAUTH_ERROR.create("Missing field \"refresh_token\" in JSON response: " + responseObj.toString(true));
                     }
+                    final String errorDesc = responseObj.optString("error_description", null);
+                    throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(errorDesc + " (" + error + ")");
                 }
                 token.setToken(sToken);
             }

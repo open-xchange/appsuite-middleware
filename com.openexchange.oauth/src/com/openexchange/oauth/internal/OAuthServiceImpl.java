@@ -751,6 +751,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
+        } catch (final OXException e) {
+            throw e;
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

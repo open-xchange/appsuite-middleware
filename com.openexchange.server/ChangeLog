@@ -1,3 +1,7 @@
+* 2013-11-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29854: orderly signal OAuth provider error to client
+
 * 2013-11-22- tobias.friedrich@open-xchange.com
 
  - Fix for bug 29904: Validate numerical identifiers for infostore file metadata 
