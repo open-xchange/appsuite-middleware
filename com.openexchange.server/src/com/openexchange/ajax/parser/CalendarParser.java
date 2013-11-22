@@ -178,7 +178,7 @@ public class CalendarParser extends CommonParser {
             calendarobject.setParticipants(parseParticipants(jsonobject, participants));
         }
 
-        if (jsonobject.has(CalendarFields.USERS) && parseAll) {
+        if (jsonobject.has(CalendarFields.USERS)) {
             calendarobject.setUsers(parseUsers(jsonobject, participants));
         }
 
