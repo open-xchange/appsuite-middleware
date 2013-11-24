@@ -1,4 +1,4 @@
-* 2013-11-22 - thorben.betten@open-xchange.com
+* 2013-11-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 29823: Delegate acquiring stream from part to thread pool if possible
  - Fix for bug 29846: Enforce serial execution of modifying actions related to database entities/modules
