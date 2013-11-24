@@ -136,6 +136,9 @@ import com.openexchange.mail.utils.CP932EmojiMapping;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -2105,7 +2108,8 @@ public final class MimeMessageUtility {
     public static InputStream getStreamFromPart(final Part part) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
         final PipedInputStream pin = new PipedInputStream(pos);
-        new Thread(new Runnable() {
+
+        final Runnable r = new Runnable() {
 
             @Override
             public void run() {
@@ -2118,7 +2122,14 @@ public final class MimeMessageUtility {
                     Streams.close(pos);
                 }
             }
-        }, "MimeMessageUtility.getStreamFromPart").start();
+        };
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        if (null == threadPool) {
+            new Thread(r, "MimeMessageUtility.getStreamFromPart").start();
+        } else {
+            threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+        }
+
         return pin;
     }
 
@@ -2133,7 +2144,8 @@ public final class MimeMessageUtility {
         try {
             final PipedOutputStream pos = new PipedOutputStream();
             final PipedInputStream pin = new PipedInputStream(pos);
-            new Thread(new Runnable() {
+
+            final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
@@ -2146,7 +2158,14 @@ public final class MimeMessageUtility {
                         Streams.close(pos);
                     }
                 }
-            }, "MimeMessageUtility.getStreamFromMailPart").start();
+            };
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null == threadPool) {
+                new Thread(r, "MimeMessageUtility.getStreamFromMailPart").start();
+            } else {
+                threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+            }
+
             return pin;
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
