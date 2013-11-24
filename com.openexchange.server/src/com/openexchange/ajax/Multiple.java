@@ -54,9 +54,13 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.regex.Pattern;
@@ -273,6 +277,10 @@ public class Multiple extends SessionServlet {
         return respArr;
     }
 
+    private static final Set<String> SERIAL_ON_MODIFICATION_MODULES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MODULE_CALENDAR, MODULE_TASK, MODULE_FOLDER, MODULE_FOLDERS, MODULE_CONTACT)));
+
+    private static final Set<String> MODIFYING_ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ACTION_DELETE, ACTION_NEW, ACTION_UPDATE)));
+
     private static boolean indicatesSerial(JSONObject dataObject) throws JSONException {
         final String module = Strings.toLowerCase(dataObject.getString(MODULE));
 
@@ -281,27 +289,10 @@ public class Multiple extends SessionServlet {
             return true;
         }
 
-        // Check for appointment delete
-        if (MODULE_CALENDAR.equals(module)) {
-            if (ACTION_DELETE.equals(Strings.toLowerCase(dataObject.optString(ACTION, null)))) {
-                return true;
-            }
-            return false;
-        }
-
-        // Check for folder modification operation
-        if ((MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module))) {
+        // Check for a modifying operation
+        if ((null != module) && SERIAL_ON_MODIFICATION_MODULES.contains(module)) {
             final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
-            if (ACTION_DELETE.equals(action)) {
-                return true;
-            }
-            if (ACTION_NEW.equals(action)) {
-                return true;
-            }
-            if (ACTION_UPDATE.equals(action)) {
-                return true;
-            }
-            return false;
+            return ((null != action) && MODIFYING_ACTIONS.contains(action));
         }
 
         // No action that needs serial execution

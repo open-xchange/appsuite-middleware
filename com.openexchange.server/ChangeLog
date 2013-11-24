@@ -1,5 +1,10 @@
 * 2013-11-22 - thorben.betten@open-xchange.com
 
+ - Fix for bug 29823: Delegate acquiring stream from part to thread pool if possible
+ - Fix for bug 29846: Enforce serial execution of modifying actions related to database entities/modules
+
+* 2013-11-22 - thorben.betten@open-xchange.com
+
  - Fix for bug 29854: orderly signal OAuth provider error to client
  - Fix for bug 29860: Tolerate non-deletable file from file storage on user delete attempt
  - Fix for bug 29925: Propagate proper event in case auto-login is turned off and short-term session container elapsed
