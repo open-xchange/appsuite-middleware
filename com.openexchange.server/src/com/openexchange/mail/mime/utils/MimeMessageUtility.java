@@ -59,7 +59,6 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -115,6 +114,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
@@ -2107,7 +2107,7 @@ public final class MimeMessageUtility {
      */
     public static InputStream getStreamFromPart(final Part part) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final PipedInputStream pin = new PipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
 
         final Runnable r = new Runnable() {
 
@@ -2116,8 +2116,7 @@ public final class MimeMessageUtility {
                 try {
                     part.writeTo(pos);
                 } catch (final Exception e) {
-                    // Ignore
-                    LOG.warn("Error while writing part to stream", e);
+                    pin.setException(e);
                 } finally {
                     Streams.close(pos);
                 }
@@ -2143,7 +2142,7 @@ public final class MimeMessageUtility {
     public static InputStream getStreamFromMailPart(final MailPart part) throws OXException {
         try {
             final PipedOutputStream pos = new PipedOutputStream();
-            final PipedInputStream pin = new PipedInputStream(pos);
+            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
 
             final Runnable r = new Runnable() {
 
@@ -2152,8 +2151,7 @@ public final class MimeMessageUtility {
                     try {
                         part.writeTo(pos);
                     } catch (final Exception e) {
-                        // Ignore
-                        LOG.warn("Error while writing part to stream", e);
+                        pin.setException(e);
                     } finally {
                         Streams.close(pos);
                     }
