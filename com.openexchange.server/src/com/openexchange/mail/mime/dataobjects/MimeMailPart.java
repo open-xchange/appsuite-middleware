@@ -55,7 +55,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
@@ -70,6 +69,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -849,7 +849,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      */
     private static InputStream getStreamFromPart(final Part part) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final PipedInputStream pin = new PipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
 
         {
             final Runnable r = new Runnable() {
@@ -860,7 +860,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         part.writeTo(pos);
                     } catch (final Exception e) {
                         // Ignore
-                        LOG.warn("Error while writing part to stream", e);
+                        pin.setException(e);
                     } finally {
                         Streams.close(pos);
                     }
@@ -886,7 +886,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      */
     private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final PipedInputStream pin = new PipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
 
         {
             final Runnable r = new Runnable() {
@@ -896,8 +896,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     try {
                         multipart.writeTo(pos);
                     } catch (final Exception e) {
-                        // Ignore
-                        LOG.warn("Error while writing part to stream", e);
+                        pin.setException(e);
                     } finally {
                         Streams.close(pos);
                     }
