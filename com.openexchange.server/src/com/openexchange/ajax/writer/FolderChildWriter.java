@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.session.Session;
 
 /**
  * {@link FolderChildWriter}
@@ -75,18 +76,18 @@ public class FolderChildWriter extends DataWriter {
         super(timeZone, writer);
     }
 
-    protected boolean writeField(final FolderChildObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+    protected boolean writeField(final FolderChildObject obj, final int column, final TimeZone tz, final JSONArray json, final Session session) throws JSONException {
         final FieldWriter<FolderChildObject> writer = WRITER_MAP.get(column);
         if (null == writer) {
-            return super.writeField(obj, column, tz, json);
+            return super.writeField(obj, column, tz, json, session);
         }
-        writer.write(obj, tz, json);
+        writer.write(obj, tz, json, session);
         return true;
     }
 
-    protected void writeFields(final FolderChildObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
-        super.writeFields(obj, tz, json);
-        final WriterProcedure<FolderChildObject> procedure = new WriterProcedure<FolderChildObject>(obj, json, tz);
+    protected void writeFields(final FolderChildObject obj, final TimeZone tz, final JSONObject json, final Session session) throws JSONException {
+        super.writeFields(obj, tz, json, session);
+        final WriterProcedure<FolderChildObject> procedure = new WriterProcedure<FolderChildObject>(obj, json, tz, session);
         if (!WRITER_MAP.forEachValue(procedure)) {
             final JSONException je = procedure.getError();
             if (null != je) {
@@ -97,11 +98,11 @@ public class FolderChildWriter extends DataWriter {
 
     private static final FieldWriter<FolderChildObject> FOLDER_ID_WRITER = new FieldWriter<FolderChildObject>() {
         @Override
-        public void write(final FolderChildObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final FolderChildObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getParentFolderID(), json, obj.containsParentFolderID());
         }
         @Override
-        public void write(final FolderChildObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final FolderChildObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(FolderChildFields.FOLDER_ID, obj.getParentFolderID(), json, obj.containsParentFolderID());
         }
     };

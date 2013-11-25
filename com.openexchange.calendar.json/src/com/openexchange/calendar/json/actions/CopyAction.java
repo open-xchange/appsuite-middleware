@@ -128,8 +128,8 @@ public final class CopyAction extends AppointmentAction {
         final JSONObject jsonResponseObj = new JSONObject();
 
         if (conflicts != null) {
-            final JSONArray jsonConflictArray = new JSONArray();
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
+            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());
             for (int a = 0; a < conflicts.length; a++) {
                 final JSONObject jsonAppointmentObj = new JSONObject();
                 appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);

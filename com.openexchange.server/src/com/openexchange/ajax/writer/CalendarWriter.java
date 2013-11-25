@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.session.Session;
 
 /**
  * {@link CalendarWriter} - Writer for calendar objects
@@ -208,18 +209,18 @@ public abstract class CalendarWriter extends CommonWriter {
         return jsonObj;
     }
 
-    protected boolean writeField(final CalendarObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+    protected boolean writeField(final CalendarObject obj, final int column, final TimeZone tz, final JSONArray json, final Session session) throws JSONException {
         final FieldWriter<CalendarObject> writer = WRITER_MAP.get(column);
         if (null == writer) {
-            return super.writeField(obj, column, tz, json);
+            return super.writeField(obj, column, tz, json, session);
         }
-        writer.write(obj, tz, json);
+        writer.write(obj, tz, json, session);
         return true;
     }
 
-    protected void writeFields(final CalendarObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
-        super.writeFields(obj, tz, json);
-        final WriterProcedure<CalendarObject> procedure = new WriterProcedure<CalendarObject>(obj, json, tz);
+    protected void writeFields(final CalendarObject obj, final TimeZone tz, final JSONObject json, final Session session) throws JSONException {
+        super.writeFields(obj, tz, json, session);
+        final WriterProcedure<CalendarObject> procedure = new WriterProcedure<CalendarObject>(obj, json, tz, session);
         if (!WRITER_MAP.forEachValue(procedure)) {
             final JSONException je = procedure.getError();
             if (null != je) {
@@ -230,20 +231,20 @@ public abstract class CalendarWriter extends CommonWriter {
 
     private static final FieldWriter<CalendarObject> CONFIRMATIONS_WRITER = new FieldWriter<CalendarObject>() {
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) throws JSONException {
-            json.put(createConfirmationArray(obj));
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json, final Session session) throws JSONException {
+            json.put(createConfirmationArray(obj, session));
         }
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
-            json.put(CalendarFields.CONFIRMATIONS, createConfirmationArray(obj));
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
+            json.put(CalendarFields.CONFIRMATIONS, createConfirmationArray(obj, session));
         }
-        private JSONArray createConfirmationArray(final CalendarObject obj) throws JSONException {
+        private JSONArray createConfirmationArray(final CalendarObject obj, final Session session) throws JSONException {
             final JSONArray confirmations = new JSONArray();
             if (obj.containsConfirmations()) {
                 final ParticipantWriter writer = new ParticipantWriter();
                 for (final ConfirmableParticipant participant : obj.getConfirmations()) {
                     final JSONObject jParticipant = new JSONObject();
-                    writer.write(participant, jParticipant);
+                    writer.write(participant, jParticipant, session);
                     confirmations.put(jParticipant);
                 }
             }
@@ -253,66 +254,66 @@ public abstract class CalendarWriter extends CommonWriter {
 
     protected static final FieldWriter<CalendarObject> ORGANIZER_WRITER = new FieldWriter<CalendarObject>() {
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getOrganizer(), json, obj.containsOrganizer());
         }
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CalendarFields.ORGANIZER, obj.getOrganizer(), json, obj.containsOrganizer());
         }
     };
 
     protected static final FieldWriter<CalendarObject> UID_WRITER = new FieldWriter<CalendarObject>() {
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getUid(), json, obj.containsUid());
         }
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CommonFields.UID, obj.getUid(), json, obj.containsUid());
         }
     };
 
     protected static final FieldWriter<CalendarObject> SEQUENCE_WRITER = new FieldWriter<CalendarObject>() {
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getSequence(), json, obj.containsSequence());
         }
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CalendarFields.SEQUENCE, obj.getSequence(), json, obj.containsSequence());
         }
     };
 
     protected static final FieldWriter<CalendarObject> ORGANIZER_ID_WRITER = new FieldWriter<CalendarObject>() {
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getOrganizerId(), json, obj.containsOrganizerId());
         }
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CalendarFields.ORGANIZER_ID, obj.getOrganizerId(), json, obj.containsOrganizerId());
         }
     };
 
     protected static final FieldWriter<CalendarObject> PRINCIPAL_WRITER = new FieldWriter<CalendarObject>() {
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getPrincipal(), json, obj.containsPrincipal());
         }
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CalendarFields.PRINCIPAL, obj.getPrincipal(), json, obj.containsPrincipal());
         }
     };
 
     protected static final FieldWriter<CalendarObject> PRINCIPAL_ID_WRITER = new FieldWriter<CalendarObject>() {
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getPrincipalId(), json, obj.containsPrincipalId());
         }
         @Override
-        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CalendarFields.PRINCIPAL_ID, obj.getPrincipalId(), json, obj.containsPrincipalId());
         }
     };

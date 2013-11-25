@@ -108,7 +108,7 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
          */
         final JSONArray jsonResponseArray = new JSONArray();
 
-        final TaskWriter taskwriter = new TaskWriter(timeZone);
+        final TaskWriter taskwriter = new TaskWriter(timeZone).setSession(request.getSession());
         for (final Task task : tasks) {
             try {
                 taskwriter.writeArray(task, columns, jsonResponseArray);
@@ -142,7 +142,7 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
          */
         final JSONArray jsonResponseArray = new JSONArray();
 
-        final TaskWriter taskwriter = new TaskWriter(timeZone);
+        final TaskWriter taskwriter = new TaskWriter(timeZone).setSession(request.getSession());
         for (final Task task : taskList) {
             try {
                 taskwriter.writeArray(task, columns, jsonResponseArray);
@@ -180,15 +180,15 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
         final Object resultObject = result.getResultObject();
         final String action = request.getParameter(AJAXServlet.PARAMETER_ACTION);
         if (resultObject instanceof Task) {
-            convertTask((Task) resultObject, result, timeZone);
+            convertTask((Task) resultObject, request, result, timeZone);
         } else {
             @SuppressWarnings("unchecked") final Collection<Task> tasks = (Collection<Task>) resultObject;
             convertTask(action, tasks, request, result, timeZone);
         }
     }
 
-    private void convertTask(final Task task, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
-        final TaskWriter taskWriter = new TaskWriter(timeZone);
+    private void convertTask(final Task task, final AJAXRequestData request, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
+        final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(request.getSession());
 
         final JSONObject jsonResponseObject = new JSONObject();
         try {

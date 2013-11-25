@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.writer.DataWriter.FieldWriter;
 import com.openexchange.groupware.container.SystemObject;
+import com.openexchange.session.Session;
 
 /**
  * {@link WriterProcedure}
@@ -67,25 +68,25 @@ public class WriterProcedure<T extends SystemObject> implements TObjectProcedure
     private JSONException error;
 
     private final T obj;
-
     private final JSONObject json;
-
     private final TimeZone tz;
+    private final Session session;
 
     /**
      * Initializes a new {@link WriterProcedure}.
      */
-    public WriterProcedure(final T obj, final JSONObject json, final TimeZone tz) {
+    public WriterProcedure(final T obj, final JSONObject json, final TimeZone tz, final Session session) {
         super();
         this.obj = obj;
         this.json = json;
         this.tz = tz;
+        this.session = session;
     }
 
     @Override
     public boolean execute(final FieldWriter<T> writer) {
         try {
-            writer.write(obj, tz, json);
+            writer.write(obj, tz, json, session);
             return true;
         } catch (final JSONException e) {
             error = e;

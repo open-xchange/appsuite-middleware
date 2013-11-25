@@ -99,7 +99,7 @@ public class ContactWriter extends CommonWriter {
     }
 
     public void writeContact(final Contact contact, final JSONObject json, final Session session) throws JSONException {
-        writeCommonFields(contact, json);
+        writeCommonFields(contact, json, session);
         /* TODO: Refactoring - this can be done with ContactGetter rather easily. sadly not now when 50% of our tests are broken due to the big HttpUnit/HttpClient rewrite
         EXAMPLE:
 

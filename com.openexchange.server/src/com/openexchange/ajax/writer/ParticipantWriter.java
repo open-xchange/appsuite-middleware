@@ -59,6 +59,7 @@ import com.openexchange.ajax.writer.DataWriter.FieldWriter;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.session.Session;
 
 /**
  * {@link ParticipantWriter}
@@ -71,69 +72,69 @@ public class ParticipantWriter {
         super();
     }
 
-    public void write(ConfirmableParticipant participant, JSONObject json) throws JSONException {
+    public void write(ConfirmableParticipant participant, JSONObject json, Session session) throws JSONException {
         if (participant instanceof ExternalUserParticipant) {
-            write((ExternalUserParticipant) participant, json);
+            write((ExternalUserParticipant) participant, json, session);
         }
     }
 
-    public void write(ExternalUserParticipant participant, JSONObject json) throws JSONException {
+    public void write(ExternalUserParticipant participant, JSONObject json, Session session) throws JSONException {
         for (FieldWriter<Participant> writer : EXTERNAL_WRITERS) {
-            writer.write(participant, null, json);
+            writer.write(participant, null, json, session);
         }
     }
 
     protected static final FieldWriter<Participant> TYPE_WRITER = new FieldWriter<Participant>() {
         @Override
-        public void write(Participant obj, TimeZone timeZone, JSONArray json) {
+        public void write(Participant obj, TimeZone timeZone, JSONArray json, Session session) {
             throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
         }
         @Override
-        public void write(Participant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(Participant obj, TimeZone timeZone, JSONObject json, Session session) throws JSONException {
             writeParameter(ParticipantsFields.TYPE, obj.getType(), json, obj.getType() > 0);
         }
     };
 
     protected static final FieldWriter<ExternalUserParticipant> MAIL_WRITER = new FieldWriter<ExternalUserParticipant>() {
         @Override
-        public void write(ExternalUserParticipant obj, TimeZone timeZone, JSONArray json) {
+        public void write(ExternalUserParticipant obj, TimeZone timeZone, JSONArray json, Session session) {
             throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
         }
         @Override
-        public void write(ExternalUserParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(ExternalUserParticipant obj, TimeZone timeZone, JSONObject json, Session session) throws JSONException {
             writeParameter(ParticipantsFields.MAIL, obj.getEmailAddress(), json);
         }
     };
 
     protected static final FieldWriter<Participant> DISPLAY_NAME_WRITER = new FieldWriter<Participant>() {
         @Override
-        public void write(Participant obj, TimeZone timeZone, JSONArray json) {
+        public void write(Participant obj, TimeZone timeZone, JSONArray json, Session session) {
             throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
         }
         @Override
-        public void write(Participant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(Participant obj, TimeZone timeZone, JSONObject json, Session session) throws JSONException {
             writeParameter(ParticipantsFields.DISPLAY_NAME, obj.getDisplayName(), json);
         }
     };
 
     protected static final FieldWriter<ConfirmableParticipant> STATUS_WRITER = new FieldWriter<ConfirmableParticipant>() {
         @Override
-        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONArray json) {
+        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONArray json, Session session) {
             throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
         }
         @Override
-        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONObject json, Session session) throws JSONException {
             writeParameter(ParticipantsFields.STATUS, obj.getStatus().getId(), json, obj.containsStatus());
         }
     };
 
     protected static final FieldWriter<ConfirmableParticipant> MESSAGE_WRITER = new FieldWriter<ConfirmableParticipant>() {
         @Override
-        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONArray json) {
+        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONArray json, Session session) {
             throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
         }
         @Override
-        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONObject json, Session session) throws JSONException {
             writeParameter(ParticipantsFields.MESSAGE, obj.getMessage(), json, obj.containsMessage());
         }
     };

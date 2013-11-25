@@ -53,7 +53,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +60,8 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
 
 /**
  * JSON writer for tasks.
@@ -71,8 +72,21 @@ public class TaskWriter extends CalendarWriter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskWriter.class));
 
+    private Session session;
+
     public TaskWriter(final TimeZone timeZone) {
         super(timeZone, null);
+    }
+
+    /**
+     * Applies specified session to this writer.
+     *
+     * @param session The session to set
+     * @return This writer with session applied
+     */
+    public TaskWriter setSession(final Session session) {
+        this.session = session;
+        return this;
     }
 
     public void writeArray(final Task taskObject, final int[] columns, final JSONArray jsonArray) throws JSONException {
@@ -84,7 +98,7 @@ public class TaskWriter extends CalendarWriter {
     }
 
     public void writeTask(final Task task, final JSONObject json) throws JSONException {
-        super.writeFields(task, timeZone, json);
+        super.writeFields(task, timeZone, json, session);
         writeParameter(CalendarFields.TITLE, task.getTitle(), json);
         writeParameter(CalendarFields.START_DATE, task.getStartDate(), json);
         writeParameter(CalendarFields.END_DATE, task.getEndDate(), json);
@@ -126,7 +140,7 @@ public class TaskWriter extends CalendarWriter {
         if (null != writer) {
             writer.write(task, json);
             return;
-        } else if (super.writeField(task, column, tz, json)) {
+        } else if (super.writeField(task, column, tz, json, session)) {
             return;
         }
         // No appropriate static writer found, write manually

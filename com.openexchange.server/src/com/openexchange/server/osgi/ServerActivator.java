@@ -77,6 +77,7 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
+import com.openexchange.ajax.meta.MetaContributors;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
@@ -443,6 +444,10 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // CapabilityService
         track(CapabilityService.class, new CapabilityRegistrationListener());
+
+        // MetaContributors
+        track(MetaContributors.class, new RegistryCustomizer<MetaContributors>(context, MetaContributors.class));
+
         /*
          * Register EventHandler
          */

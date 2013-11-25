@@ -62,6 +62,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.meta.MetaContributors;
+import com.openexchange.ajax.meta.internal.MetaContributorsImpl;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
@@ -85,7 +87,9 @@ public final class GlobalActivator implements BundleActivator {
     private volatile Initialization initialization;
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
     private volatile ServiceRegistration<StringParser> parserRegistration;
+    private volatile ServiceRegistration<MetaContributors> metaContributorsRegistration;
     private volatile List<ServiceTracker<?,?>> trackers;
+
 
     /**
      * Initializes a new {@link GlobalActivator}
@@ -122,9 +126,14 @@ public final class GlobalActivator implements BundleActivator {
 
             trackers.add(logWrapperTracker);
 
+            final MetaContributorsImpl metaContributors = new MetaContributorsImpl(context);
+            trackers.add(metaContributors);
+
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
+
+            metaContributorsRegistration = context.registerService(MetaContributors.class, metaContributors, null);
 
             LOG.info("Global bundle successfully started");
         } catch (final Exception e) {
@@ -228,6 +237,13 @@ public final class GlobalActivator implements BundleActivator {
                 this.initialization = null;
             }
             shutdownStringParsers();
+
+            final ServiceRegistration<MetaContributors> metaContributorsRegistration = this.metaContributorsRegistration;
+            if (null != metaContributorsRegistration) {
+                metaContributorsRegistration.unregister();
+                this.metaContributorsRegistration = null;
+            }
+
             LOG.debug("Global bundle successfully stopped");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

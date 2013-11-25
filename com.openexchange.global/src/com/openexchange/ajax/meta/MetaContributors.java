@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,24 @@
  *
  */
 
-package com.openexchange.ajax.itip.actions;
+package com.openexchange.ajax.meta;
 
 import java.util.List;
-import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.itip.ITipAnalysisWriter;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.calendar.itip.ITipAnalysis;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link AnalyzeAction}
+ * {@link MetaContributors} - The registry for contributors.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AnalyzeAction extends AbstractITipAction {
+public interface MetaContributors {
 
-    public AnalyzeAction(ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected Object process(List<ITipAnalysis> analysis, AJAXRequestData request, ServerSession session, TimeZone tz) {
-        JSONArray array = new JSONArray(analysis.size());
-
-        ITipAnalysisWriter writer = new ITipAnalysisWriter(tz, session);
-        for (ITipAnalysis anAnalysis : analysis) {
-            JSONObject object = new JSONObject();
-            try {
-                writer.write(anAnalysis, object);
-            } catch (JSONException e) {
-                LOG.error(e.getMessage(), e); // Shouldn't happen
-            }
-            array.put(object);
-        }
-        return array;
-    }
-
+    /**
+     * Gets the contributors to meta information
+     *
+     * @return The contributors
+     * @throws OXException If contributors cannot be returned
+     */
+    List<MetaContributionService> getMetaContributors() throws OXException;
 }

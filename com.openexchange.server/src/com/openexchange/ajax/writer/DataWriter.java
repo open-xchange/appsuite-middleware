@@ -63,6 +63,7 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -237,7 +238,7 @@ public class DataWriter {
      * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
      * @throws JSONException If putting into JSON object fails
      */
-    public static void writeParameter(String name, BigDecimal value, JSONObject jsonObj, boolean condition) throws JSONException {
+    public static void writeParameter(final String name, final BigDecimal value, final JSONObject jsonObj, final boolean condition) throws JSONException {
         if (condition) {
             writeParameter(name, value, jsonObj);
         }
@@ -251,7 +252,7 @@ public class DataWriter {
      * @param jsonObj The JSON object to put into
      * @throws JSONException If putting into JSON object fails
      */
-    private static void writeParameter(String name, BigDecimal value, JSONObject jsonObj) throws JSONException {
+    private static void writeParameter(final String name, final BigDecimal value, final JSONObject jsonObj) throws JSONException {
         if (null == value) {
             jsonObj.put(name, JSONObject.NULL);
         } else {
@@ -402,7 +403,7 @@ public class DataWriter {
      * @param jsonArray the JSON array to put into
      * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
      */
-    public static void writeValue(BigDecimal value, JSONArray jsonArray, boolean condition) {
+    public static void writeValue(final BigDecimal value, final JSONArray jsonArray, final boolean condition) {
         if (!condition || null == value) {
             jsonArray.put(JSONObject.NULL);
         } else {
@@ -563,8 +564,8 @@ public class DataWriter {
         jsonArray.put(JSONObject.NULL);
     }
 
-    protected void writeFields(final DataObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
-        final WriterProcedure<DataObject> procedure = new WriterProcedure<DataObject>(obj, json, tz);
+    protected void writeFields(final DataObject obj, final TimeZone tz, final JSONObject json, final Session session) throws JSONException {
+        final WriterProcedure<DataObject> procedure = new WriterProcedure<DataObject>(obj, json, tz, session);
         if (!WRITER_MAP.forEachValue(procedure)) {
             final JSONException je = procedure.getError();
             if (null != je) {
@@ -573,91 +574,103 @@ public class DataWriter {
         }
     }
 
-    protected boolean writeField(final DataObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+    protected boolean writeField(final DataObject obj, final int column, final TimeZone tz, final JSONArray json, final Session session) throws JSONException {
         final FieldWriter<DataObject> writer = WRITER_MAP.get(column);
         if (null == writer) {
             return false;
         }
-        writer.write(obj, tz, json);
+        writer.write(obj, tz, json, session);
         return true;
     }
 
     protected static interface FieldWriter<T> {
 
         /**
-         * Writes this writer's value taken from specified data object to given JSON array.
+         * Writes specified value to given JSON array.
          *
-         * @param data the data object
+         * @param obj The value to write
+         * @param timeZone The time zone
          * @param json The JSON array
+         * @param session The associated session
+         *
          * @throws JSONException If writing to JSON array fails
          */
-        void write(T obj, TimeZone timeZone, JSONArray json) throws JSONException;
+        void write(T obj, TimeZone timeZone, JSONArray json, Session session) throws JSONException;
 
-        void write(T obj, TimeZone timeZone, JSONObject json) throws JSONException;
+        /**
+         * Writes specified value to given JSON object.
+         *
+         * @param obj The value to write
+         * @param timeZone The time zone
+         * @param json The JSON array
+         * @param session The associated session
+         * @throws JSONException If writing to JSON object fails
+         */
+        void write(T obj, TimeZone timeZone, JSONObject json, Session session) throws JSONException;
     }
 
     private static final FieldWriter<DataObject> OBJECT_ID_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getObjectID(), json, obj.containsObjectID());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.ID, obj.getObjectID(), json, obj.containsObjectID());
         }
     };
 
     private static final FieldWriter<DataObject> CREATED_BY_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getCreatedBy(), json, obj.containsCreatedBy());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.CREATED_BY, obj.getCreatedBy(), json, obj.containsCreatedBy());
         }
     };
 
     private static final FieldWriter<DataObject> CREATION_DATE_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getCreationDate(), timeZone, json, obj.containsCreationDate());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.CREATION_DATE, obj.getCreationDate(), timeZone, json);
         }
     };
 
     private static final FieldWriter<DataObject> MODIFIED_BY_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getModifiedBy(), json, obj.containsModifiedBy());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.MODIFIED_BY, obj.getModifiedBy(), json, obj.containsModifiedBy());
         }
     };
 
     private static final FieldWriter<DataObject> LAST_MODIFIED_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getLastModified(), timeZone, json, obj.containsLastModified());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.LAST_MODIFIED, obj.getLastModified(), timeZone, json, obj.containsLastModified());
         }
     };
 
     private static final FieldWriter<DataObject> LAST_MODIFIED_UTC_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getLastModified(), UTC, json, obj.containsLastModified());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.LAST_MODIFIED_UTC, obj.getLastModified(), UTC, json, obj.containsLastModified());
         }
     };
@@ -665,19 +678,25 @@ public class DataWriter {
     private static final FieldWriter<DataObject> META_WRITER = new FieldWriter<DataObject>() {
 
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) throws JSONException {
             final Map<String, Object> map = obj.getMap();
             if (null == map || map.isEmpty()) {
                 writeValue((String) null, json, false);
             } else {
+
+                // TODO: Invoke contribution service
+
                 writeValue((JSONValue) JSONCoercion.coerceToJSON(map), json, true);
             }
         }
 
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             final Map<String, Object> map = obj.getMap();
             if (null != map && !map.isEmpty()) {
+
+                // TODO: Invoke contribution service
+
                 writeParameter(DataFields.META, (JSONValue) JSONCoercion.coerceToJSON(map), json, true);
             }
         }

@@ -91,13 +91,13 @@ public class AppointmentWriter extends CalendarWriter {
     /**
      * Initializes a new {@link AppointmentWriter}
      *
-     * @param timeZone
-     *            The user time zone
+     * @param timeZone The user time zone
      */
     public AppointmentWriter(final TimeZone timeZone) {
         this(timeZone, false);
     }
 
+    /** Use for testing only */
     public AppointmentWriter(final TimeZone timeZone, final boolean forTesting) {
         super(timeZone, null);
         this.forTesting = forTesting;
@@ -107,9 +107,11 @@ public class AppointmentWriter extends CalendarWriter {
      * Applies specified session to this writer.
      *
      * @param session The session to set
+     * @return This writer with session applied
      */
-    public void setSession(final ServerSession session) {
+    public AppointmentWriter setSession(final ServerSession session) {
         this.session = session;
+        return this;
     }
 
     public CalendarCollectionService getCalendarCollectionService() {
@@ -147,7 +149,7 @@ public class AppointmentWriter extends CalendarWriter {
     }
 
     public void writeAppointment(final Appointment appointmentObject, final JSONObject jsonObj) throws JSONException {
-        super.writeFields(appointmentObject, timeZone, jsonObj);
+        super.writeFields(appointmentObject, timeZone, jsonObj, session);
         if (appointmentObject.containsTitle()) {
             writeParameter(CalendarFields.TITLE, appointmentObject.getTitle(), jsonObj);
         }
@@ -250,7 +252,7 @@ public class AppointmentWriter extends CalendarWriter {
         if (null != writer) {
             writer.write(appointment, json);
             return;
-        } else if (super.writeField(appointment, column, tz, json)) {
+        } else if (super.writeField(appointment, column, tz, json, session)) {
             return;
         }
         // No appropriate static writer found, write manually

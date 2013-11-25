@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.itip.actions;
+package com.openexchange.ajax.meta.internal;
 
 import java.util.List;
-import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.itip.ITipAnalysisWriter;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.calendar.itip.ITipAnalysis;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.meta.MetaContributionService;
+import com.openexchange.ajax.meta.MetaContributors;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentList;
+
 
 /**
- * {@link AnalyzeAction}
+ * {@link MetaContributorsImpl} - The MetaContributors implementation.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AnalyzeAction extends AbstractITipAction {
+public final class MetaContributorsImpl extends ServiceTracker<MetaContributionService, MetaContributionService> implements MetaContributors {
 
-    public AnalyzeAction(ServiceLookup services) {
-        super(services);
+    private final List<MetaContributionService> contributors;
+
+    /**
+     * Initializes a new {@link NearRegistryServiceTracker}.
+     *
+     * @param context The bundle context
+     */
+    public MetaContributorsImpl(final BundleContext context) {
+        super(context, MetaContributionService.class, null);
+        contributors = new ConcurrentList<MetaContributionService>();
     }
 
     @Override
-    protected Object process(List<ITipAnalysis> analysis, AJAXRequestData request, ServerSession session, TimeZone tz) {
-        JSONArray array = new JSONArray(analysis.size());
-
-        ITipAnalysisWriter writer = new ITipAnalysisWriter(tz, session);
-        for (ITipAnalysis anAnalysis : analysis) {
-            JSONObject object = new JSONObject();
-            try {
-                writer.write(anAnalysis, object);
-            } catch (JSONException e) {
-                LOG.error(e.getMessage(), e); // Shouldn't happen
-            }
-            array.put(object);
+    public MetaContributionService addingService(final ServiceReference<MetaContributionService> reference) {
+        final MetaContributionService service = context.getService(reference);
+        if (contributors.add(service)) {
+            return service;
         }
-        return array;
+        context.ungetService(reference);
+        return null;
+    }
+
+    @Override
+    public void removedService(final ServiceReference<MetaContributionService> reference, final MetaContributionService service) {
+        contributors.remove(service);
+        context.ungetService(reference);
+    }
+
+    @Override
+    public List<MetaContributionService> getMetaContributors() throws OXException {
+        return contributors;
     }
 
 }
