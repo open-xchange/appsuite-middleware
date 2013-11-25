@@ -64,6 +64,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.internal.GenericProperty;
@@ -128,34 +129,47 @@ public final class MailPasswordUtil {
 
         private void update0(final String recrypted, final GenericProperty customizationNote, final Connection con) throws SQLException {
             PreparedStatement stmt = null;
+            final Session session = customizationNote.session;
+            final MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            MailAccount mailAccount = null;
             try {
-                stmt = con.prepareStatement("UPDATE user_mail_account SET password = ? WHERE cid = ? AND user = ? AND id = ?");
-                final Session session = customizationNote.session;
-                stmt.setString(1, recrypted);
-                stmt.setInt(2, session.getContextId());
-                stmt.setInt(3, session.getUserId());
-                stmt.setInt(4, customizationNote.accountId);
-                stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
-                stmt = con.prepareStatement("UPDATE user_transport_account SET password = ? WHERE cid = ? AND user = ? AND id = ? AND (password IS NOT NULL AND password <> '')");
-                stmt.setString(1, recrypted);
-                stmt.setInt(2, session.getContextId());
-                stmt.setInt(3, session.getUserId());
-                stmt.setInt(4, customizationNote.accountId);
-                stmt.executeUpdate();
-                /*
-                 * Invalidate
-                 */
-                final MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                if (null != service) {
+                mailAccount = service.getMailAccount(customizationNote.accountId, session.getUserId(), session.getContextId());
+            } catch (OXException e) {
+                LOG.warn("Could not update encrypted mail account password.", e);
+                return;
+            }
+
+            if (null != service) {
+                if (customizationNote.server != null) {
+                    try {
+                        if (customizationNote.server.equals(mailAccount.getMailServer())) {
+                            stmt = con.prepareStatement("UPDATE user_mail_account SET password = ? WHERE cid = ? AND user = ? AND id = ?");
+                            stmt.setString(1, recrypted);
+                            stmt.setInt(2, session.getContextId());
+                            stmt.setInt(3, session.getUserId());
+                            stmt.setInt(4, customizationNote.accountId);
+                            stmt.executeUpdate();
+                            DBUtils.closeSQLStuff(stmt);
+                        }
+
+                        if (customizationNote.server.equals(mailAccount.getTransportServer())) {
+                            stmt = con.prepareStatement("UPDATE user_transport_account SET password = ? WHERE cid = ? AND user = ? AND id = ? AND (password IS NOT NULL AND password <> '')");
+                            stmt.setString(1, recrypted);
+                            stmt.setInt(2, session.getContextId());
+                            stmt.setInt(3, session.getUserId());
+                            stmt.setInt(4, customizationNote.accountId);
+                            stmt.executeUpdate();
+                        }
+                    } finally {
+                        DBUtils.closeSQLStuff(stmt);
+                    }
+
                     try {
                         service.invalidateMailAccount(customizationNote.accountId, session.getUserId(), session.getContextId());
                     } catch (final Exception e) {
-                        // Ignore
+                        LOG.warn("Could not invalidate mail account after password update.", e);
                     }
                 }
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
             }
         }
     };
