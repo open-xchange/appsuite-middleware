@@ -52,12 +52,12 @@ package com.openexchange.mail.mime.datasource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import javax.activation.DataContentHandler;
 import javax.activation.DataSource;
 import org.apache.commons.logging.Log;
 import com.openexchange.conversion.DataHandler;
+import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
@@ -91,7 +91,7 @@ public final class DataContentHandlerDataSource implements DataSource {
     @Override
     public InputStream getInputStream() throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final PipedInputStream pin = new PipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
 
         final DataContentHandler dch = this.dch;
         final Object object = this.object;
@@ -103,8 +103,7 @@ public final class DataContentHandlerDataSource implements DataSource {
                 try {
                     dch.writeTo(object, objectMimeType, pos);
                 } catch (final Exception e) {
-                    // Ignore
-                    LOG.warn("Error while writing object to stream (object=" + (null == object ? "null" : object.getClass().getName()) + ")", e);
+                    pin.setException(e);
                 } finally {
                     try {
                         pos.close();
