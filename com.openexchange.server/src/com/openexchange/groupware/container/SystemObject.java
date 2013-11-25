@@ -51,13 +51,14 @@ package com.openexchange.groupware.container;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * {@link SystemObject} - The system object.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class SystemObject implements Serializable {
 
@@ -66,9 +67,9 @@ public abstract class SystemObject implements Serializable {
     /**
      * The map with arbitrary properties.
      */
-    protected transient Map<Object, Object> map;
+    protected transient Map<String, Object> map;
 
-    private Map<Serializable, Serializable> serializableMap;
+    private Map<String, Serializable> serializableMap;
 
     /**
      * Initializes a new {@link SystemObject}.
@@ -79,12 +80,72 @@ public abstract class SystemObject implements Serializable {
     }
 
     /**
+     * Sets specified property. Existing mapping will be replaced.
+     *
+     * @param name The property name
+     * @param value The property value
+     */
+    public void setProperty(final String name, final Object value) {
+        if (null == name || null == value) {
+            return;
+        }
+        Map<String, Object> map = this.map;
+        if (null == map) {
+            map = new LinkedHashMap<String, Object>(12);
+            this.map = map;
+        }
+        map.put(name, value);
+    }
+
+    /**
+     * Gets the denoted property.
+     *
+     * @param name The property name
+     * @return The property value or <code>null</code>
+     */
+    public <V> V getProperty(final String name) {
+        if (null == name) {
+            return null;
+        }
+        Map<String, Object> map = this.map;
+        if (null == map) {
+            return null;
+        }
+        try {
+            return (V) map.get(name);
+        } catch (final ClassCastException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Removes the denoted property.
+     *
+     * @param name The property name
+     * @return The removed property value or <code>null</code>
+     */
+    public <V> V removeProperty(final String name) {
+        if (null == name) {
+            return null;
+        }
+        Map<String, Object> map = this.map;
+        if (null == map) {
+            return null;
+        }
+        try {
+            return (V) map.remove(name);
+        } catch (final ClassCastException e) {
+            return null;
+        }
+    }
+
+    /**
      * Sets the map with arbitrary properties.
      *
      * @param map The properties map
      */
-    public void setMap(final Map<? extends Object, ? extends Object> map) {
-        this.map = null == map ? null : new HashMap<Object, Object>(map);
+    public void setMap(final Map<String, ? extends Object> map) {
+        this.map = null == map ? null : new LinkedHashMap<String, Object>(map);
     }
 
     /**
@@ -92,9 +153,11 @@ public abstract class SystemObject implements Serializable {
      *
      * @return The map or <code>null</code>
      */
-    public Map<?, ?> getMap() {
+    public Map<String, Object> getMap() {
         return null == map ? null : Collections.unmodifiableMap(map);
     }
+
+    // -------------------------------------------------------------------------------------------------- //
 
     /**
      * The <tt>writeObject</tt> method is responsible for writing the state of the object for its particular class so that the corresponding
@@ -107,16 +170,16 @@ public abstract class SystemObject implements Serializable {
      * @throws java.io.IOException If serialization fails
      */
     private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
-        final Map<Object, Object> map = this.map;
+        final Map<String, Object> map = this.map;
         if (null == map) {
             this.serializableMap = null;
         } else {
-            final Map<Serializable, Serializable> serializableMap = new HashMap<Serializable, Serializable>(map.size());
-            for (final Map.Entry<Object, Object> entry : map.entrySet()) {
-                final Object key = entry.getKey();
+            final Map<String, Serializable> serializableMap = new LinkedHashMap<String, Serializable>(map.size());
+            for (final Map.Entry<String, Object> entry : map.entrySet()) {
+                final String key = entry.getKey();
                 final Object value = entry.getValue();
-                if (isSerializable(key) && isSerializable(value)) {
-                    serializableMap.put((Serializable) key, (Serializable) value);
+                if ((value instanceof Serializable)) {
+                    serializableMap.put(key, (Serializable) value);
                 }
             }
             this.serializableMap = serializableMap;
@@ -139,16 +202,13 @@ public abstract class SystemObject implements Serializable {
      */
     private void readObject(final java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
         in.readObject();
-        final Map<Serializable, Serializable> serializableMap = this.serializableMap;
+        final Map<String, Serializable> serializableMap = this.serializableMap;
         if (null == serializableMap) {
             this.map = null;
         } else {
-            this.map = new HashMap<Object, Object>(serializableMap);
+            this.map = new LinkedHashMap<String, Object>(serializableMap);
         }
         this.serializableMap = null;
     }
 
-    private static boolean isSerializable(final Object obj) {
-        return (obj instanceof Serializable);
-    }
 }

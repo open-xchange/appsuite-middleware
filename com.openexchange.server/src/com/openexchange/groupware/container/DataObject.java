@@ -75,6 +75,8 @@ public abstract class DataObject extends SystemObject {
 
     public static final int LAST_MODIFIED_UTC = 6;
 
+    public static final int META = 7;
+
     protected int objectId;
 
     protected int createdBy;

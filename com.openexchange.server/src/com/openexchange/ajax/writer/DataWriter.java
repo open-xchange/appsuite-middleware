@@ -53,6 +53,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +61,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -660,14 +662,36 @@ public class DataWriter {
         }
     };
 
+    private static final FieldWriter<DataObject> META_WRITER = new FieldWriter<DataObject>() {
+
+        @Override
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) throws JSONException {
+            final Map<String, Object> map = obj.getMap();
+            if (null == map || map.isEmpty()) {
+                writeValue((String) null, json, false);
+            } else {
+                writeValue((JSONValue) JSONCoercion.coerceToJSON(map), json, true);
+            }
+        }
+
+        @Override
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+            final Map<String, Object> map = obj.getMap();
+            if (null != map && !map.isEmpty()) {
+                writeParameter(DataFields.META, (JSONValue) JSONCoercion.coerceToJSON(map), json, true);
+            }
+        }
+    };
+
     static {
-        final TIntObjectMap<FieldWriter<DataObject>> m = new TIntObjectHashMap<FieldWriter<DataObject>>(6, 1);
+        final TIntObjectMap<FieldWriter<DataObject>> m = new TIntObjectHashMap<FieldWriter<DataObject>>(8, 1);
         m.put(DataObject.OBJECT_ID, OBJECT_ID_WRITER);
         m.put(DataObject.CREATED_BY, CREATED_BY_WRITER);
         m.put(DataObject.CREATION_DATE, CREATION_DATE_WRITER);
         m.put(DataObject.MODIFIED_BY, MODIFIED_BY_WRITER);
         m.put(DataObject.LAST_MODIFIED, LAST_MODIFIED_WRITER);
         m.put(DataObject.LAST_MODIFIED_UTC, LAST_MODIFIED_UTC_WRITER);
+        m.put(DataObject.META, META_WRITER);
         WRITER_MAP = m;
     }
 

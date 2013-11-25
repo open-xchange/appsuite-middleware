@@ -72,4 +72,9 @@ public interface DataFields {
      */
     public static final String LAST_MODIFIED_UTC = "last_modified_utc";
 
+    /**
+     * The meta field for JSON blobs.
+     */
+    public static final String META = "meta";
+
 }
