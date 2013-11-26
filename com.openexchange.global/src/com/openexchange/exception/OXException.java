@@ -666,6 +666,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         /*
          * Append message
          */
+        final String logMessage = this.logMessage;
         if (null == logMessage) {
             final String str = getDisplayMessage0(Locale.US);
             if (null == str) {

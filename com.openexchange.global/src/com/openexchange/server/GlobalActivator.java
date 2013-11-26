@@ -65,6 +65,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.meta.MetaContributors;
 import com.openexchange.ajax.meta.internal.MetaContributorsImpl;
 import com.openexchange.exception.internal.I18nCustomizer;
+import com.openexchange.exception.internal.SuppressedLoggingCheckerTracker;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.log.LogFactory;
@@ -128,6 +129,8 @@ public final class GlobalActivator implements BundleActivator {
 
             final MetaContributorsImpl metaContributors = new MetaContributorsImpl(context);
             trackers.add(metaContributors);
+
+            trackers.add(new SuppressedLoggingCheckerTracker(context));
 
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
