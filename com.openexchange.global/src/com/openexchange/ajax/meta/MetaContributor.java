@@ -55,11 +55,11 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link MetaContributionService} - Possibly extends a given entity's meta information.
+ * {@link MetaContributor} - Possibly extends a given entity's meta information.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MetaContributionService {
+public interface MetaContributor {
 
     /**
      * Contributes to given meta information.
@@ -68,6 +68,7 @@ public interface MetaContributionService {
      * @param id The associated entities identifier
      * @param session The session
      * @throws OXException If contribute operation fails
+     * @see MetaContributionConstants#CONTRIBUTOR_TOPIC
      */
     void contributeTo(Map<String, Object> meta, String id, Session session) throws OXException;
 

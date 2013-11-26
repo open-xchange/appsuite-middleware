@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.meta;
 
-import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 
 
@@ -61,10 +61,11 @@ import com.openexchange.exception.OXException;
 public interface MetaContributors {
 
     /**
-     * Gets the contributors to meta information
+     * Gets the meta contributors for topic-covered entities.
      *
-     * @return The contributors
+     * @param The topic of the entities to consider
+     * @return The contributors that apply to specified topic
      * @throws OXException If contributors cannot be returned
      */
-    List<MetaContributionService> getMetaContributors() throws OXException;
+    Set<MetaContributor> getMetaContributors(String topic) throws OXException;
 }

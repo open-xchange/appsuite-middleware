@@ -63,7 +63,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.meta.MetaContributors;
-import com.openexchange.ajax.meta.internal.MetaContributorsImpl;
+import com.openexchange.ajax.meta.internal.MetaContributorTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.exception.internal.SuppressedLoggingCheckerTracker;
 import com.openexchange.i18n.I18nService;
@@ -127,7 +127,7 @@ public final class GlobalActivator implements BundleActivator {
 
             trackers.add(logWrapperTracker);
 
-            final MetaContributorsImpl metaContributors = new MetaContributorsImpl(context);
+            final MetaContributorTracker metaContributors = new MetaContributorTracker(context);
             trackers.add(metaContributors);
 
             trackers.add(new SuppressedLoggingCheckerTracker(context));

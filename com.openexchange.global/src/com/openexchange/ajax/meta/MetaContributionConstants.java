@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.meta.internal;
-
-import java.util.List;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.ajax.meta.MetaContributionService;
-import com.openexchange.ajax.meta.MetaContributors;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.ConcurrentList;
+package com.openexchange.ajax.meta;
 
 
 /**
- * {@link MetaContributorsImpl} - The MetaContributors implementation.
+ * {@link MetaContributionConstants} - Defines standard names for {@code MetaContributionService} properties and helper methods.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class MetaContributorsImpl extends ServiceTracker<MetaContributionService, MetaContributionService> implements MetaContributors {
-
-    private final List<MetaContributionService> contributors;
+public final class MetaContributionConstants {
 
     /**
-     * Initializes a new {@link NearRegistryServiceTracker}.
-     *
-     * @param context The bundle context
+     * Initializes a new {@link MetaContributionConstants}.
      */
-    public MetaContributorsImpl(final BundleContext context) {
-        super(context, MetaContributionService.class, null);
-        contributors = new ConcurrentList<MetaContributionService>();
+    private MetaContributionConstants() {
+        super();
     }
 
-    @Override
-    public MetaContributionService addingService(final ServiceReference<MetaContributionService> reference) {
-        final MetaContributionService service = context.getService(reference);
-        if (contributors.add(service)) {
-            return service;
-        }
-        context.ungetService(reference);
-        return null;
-    }
-
-    @Override
-    public void removedService(final ServiceReference<MetaContributionService> reference, final MetaContributionService service) {
-        contributors.remove(service);
-        context.ungetService(reference);
-    }
-
-    @Override
-    public List<MetaContributionService> getMetaContributors() throws OXException {
-        return contributors;
-    }
+    /**
+     * Service registration property specifying the {@link MetaContributor} topics of interest to an Event Handler service.
+     * <p>
+     * Contributors SHOULD be registered with this property. Each value of this property is a string that describe the topics in which the
+     * handler is interested. An asterisk ('*') may be used as a trailing wildcard. Contributors which do not have a value for this
+     * property must not receive events. More precisely, the value of each string must conform to the following grammar:
+     *
+     * <pre>
+     *  topic-description := '*' | topic ( '/*' )?
+     *  topic := token ( '/' token )*
+     * </pre>
+     * <p>
+     * The value of this property must be of type {@code String}, {@code String[]}, or {@code Collection<String>}.
+     *
+     * @see Event
+     */
+    public static final String CONTRIBUTOR_TOPIC = "contributor.topics";
 
 }
