@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyEvent.Type;
@@ -71,6 +72,8 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SuppressedLoggingCheckerImpl implements SuppressedLoggingChecker, PropertyListener {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SuppressedLoggingCheckerImpl.class);
 
     /**
      * Creates a new instance.
@@ -99,17 +102,24 @@ public final class SuppressedLoggingCheckerImpl implements SuppressedLoggingChec
     }
 
     private void parseProperty(final String property) {
+        final Set<Category> suppressedCategories;
         if (property.isEmpty()) {
-            suppressedCategoriesRef.set(Collections.<Category> emptySet());
-        }
-        final String[] names = Strings.splitByComma(property);
-        final Set<Category> suppressedCategories = new HashSet<Category>(names.length);
-        for (final String name : names) {
-            final Category category = Categories.getKnownCategoryByName(name, null);
-            if (null != category) {
-                suppressedCategories.add(category);
+            suppressedCategories = Collections.<Category> emptySet();
+        } else {
+            final String[] names = Strings.splitByComma(property);
+            suppressedCategories = new HashSet<Category>(names.length);
+            for (final String name : names) {
+                final Category category = Categories.getKnownCategoryByName(name, null);
+                if (null != category) {
+                    suppressedCategories.add(category);
+                }
             }
         }
+
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Suppressed categories set to: " + suppressedCategories);
+        }
+
         suppressedCategoriesRef.set(suppressedCategories);
     }
 
