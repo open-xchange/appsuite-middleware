@@ -704,31 +704,36 @@ public final class HtmlProcessing {
         for (int i = 0; i <= llen; i++) {
             String line = lines[i];
             int currentLevel = 0;
-            int offset = 0;
-            if ((offset = startsWithQuote(line)) != -1) {
+            if (line.trim().equalsIgnoreCase("&gt;")) {
                 currentLevel++;
-                int pos = -1;
-                boolean next = true;
-                while (next && ((pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1)) {
-                    /*
-                     * Continue only if next starting position is equal to offset or if just one whitespace character has been skipped
-                     */
-                    next = ((offset == pos) || ((pos - offset == 1) && Strings.isWhitespace(line.charAt(offset))));
-                    if (next) {
-                        currentLevel++;
-                        offset = (pos + 4);
+                line = "";
+            } else {
+                int offset = 0;
+                if ((offset = startsWithQuote(line)) != -1) {
+                    currentLevel++;
+                    int pos = -1;
+                    boolean next = true;
+                    while (next && ((pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1)) {
+                        /*
+                         * Continue only if next starting position is equal to offset or if just one whitespace character has been skipped
+                         */
+                        next = ((offset == pos) || ((pos - offset == 1) && Strings.isWhitespace(line.charAt(offset))));
+                        if (next) {
+                            currentLevel++;
+                            offset = (pos + 4);
+                        }
                     }
                 }
-            }
-            if (offset > 0) {
-                try {
-                    offset = (offset < line.length()) && Strings.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
-                } catch (final StringIndexOutOfBoundsException e) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(e.getMessage(), e);
+                if (offset > 0) {
+                    try {
+                        offset = (offset < line.length()) && Strings.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
+                    } catch (final StringIndexOutOfBoundsException e) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(e.getMessage(), e);
+                        }
                     }
+                    line = line.substring(offset);
                 }
-                line = line.substring(offset);
             }
             if (levelBefore < currentLevel) {
                 for (; levelBefore < currentLevel; levelBefore++) {

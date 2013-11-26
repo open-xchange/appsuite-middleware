@@ -12,6 +12,7 @@
 
  - Fix for bug 29914: Cleansed all duplicate log4j occurrences from runtime system
  - Fix for bug 30027: Trim date values prior to passing to iCal parser
+ - Fix for bug 30029: Avoid unexpected semicolon on color-quoting for plain text
 
 * 2013-11-25 - steffen.templin@open-xchange.com
 
