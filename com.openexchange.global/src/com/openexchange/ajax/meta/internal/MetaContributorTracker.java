@@ -211,7 +211,7 @@ public final class MetaContributorTracker extends ServiceTracker<MetaContributor
      */
     public Set<MetaContributor> getContributors(final String topic) {
         // Use a set to remove duplicates
-        final Set<MetaContributor> handlers = new HashSet<MetaContributor>();
+        final Set<MetaContributor> handlers = new HashSet<MetaContributor>(6);
 
         // Add the "*" handlers
         handlers.addAll(globalWildcard);
