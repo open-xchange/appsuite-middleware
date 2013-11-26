@@ -154,7 +154,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         if (null != buffer) {
             Set<String> folderIDs = buffer.getFolderIDs();
             if (null != folderIDs && 0 < folderIDs.size()) {
-                notifyPublishers(new DriveEventImpl(buffer.getContexctID(), folderIDs, false));
+                notifyPublishers(new DriveEventImpl(buffer.getContexctID(), folderIDs, false, buffer.getPushToken()));
             }
         }
     }

@@ -54,10 +54,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -68,6 +70,7 @@ import com.openexchange.session.Session;
 public class FolderBuffer {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderBuffer.class);
+    private static final String UNDEFINED_PUSH_TOKEN = "{undefined}";
 
     private final int consolidationTime;
     private final int maxDelayTime ;
@@ -75,6 +78,7 @@ public class FolderBuffer {
     private final int contextID;
 
     private Set<String> folderIDs;
+    private String pushToken;
     private long lastEventTime;
     private long firstEventTime;
 
@@ -129,6 +133,15 @@ public class FolderBuffer {
         return this.contextID;
     }
 
+    /**
+     * Gets the client push token if all events in this buffer were originating from the same client.
+     *
+     * @return The client push token, or <code>null</code> if not unique
+     */
+    public String getPushToken() {
+        return UNDEFINED_PUSH_TOKEN.equals(pushToken) ? null : pushToken;
+    }
+
     public synchronized void add(Session session, String folderID, List<String> folderPath) {
         if (session.getContextId() != this.contextID) {
             throw new IllegalArgumentException("session not in this context");
@@ -146,6 +159,19 @@ public class FolderBuffer {
          */
         if (folderIDs.add(folderID)) {
             folderIDs.addAll(null != folderPath ? folderPath : resolveToRoot(folderID, session));
+        }
+        /*
+         * check for client push token
+         */
+        String pushToken = (String)session.getParameter(DriveSession.PARAMETER_PUSH_TOKEN);
+        if (false == Strings.isEmpty(pushToken)) {
+            if (null == this.pushToken) {
+                this.pushToken = pushToken; // use push token from event
+            } else if (false == this.pushToken.equals(pushToken)) {
+                this.pushToken = UNDEFINED_PUSH_TOKEN; // different push token - reset to undefined
+            }
+        } else {
+            this.pushToken = UNDEFINED_PUSH_TOKEN; // no push token - reset to undefined
         }
     }
 

@@ -62,6 +62,11 @@ import com.openexchange.tools.session.ServerSession;
 public interface DriveSession {
 
     /**
+     * The session parameter used to hold the client's push token
+     */
+    static final String PARAMETER_PUSH_TOKEN = "com.openexchange.drive.pushToken";
+
+    /**
      * Gets the underlying server session.
      *
      * @return The server session

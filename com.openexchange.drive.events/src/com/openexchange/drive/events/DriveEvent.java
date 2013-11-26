@@ -90,4 +90,11 @@ public interface DriveEvent {
      */
     boolean isRemote();
 
+    /**
+     * Gets the drive push token if this event originates in a drive client. Only applicable if available in the drive session.
+     *
+     * @return The push token of the device causing the event, or <code>null</code> if not applicable
+     */
+    String getPushToken();
+
 }

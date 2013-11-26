@@ -1,3 +1,7 @@
+* 2013-11-26- tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30003: Introduced 'pushToken' parameter for drive requests to associate the registration token in generated events 
+
 * 2013-11-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 29914: Cleansed all duplicate log4j occurrences from runtime system
