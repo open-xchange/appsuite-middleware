@@ -2,9 +2,10 @@
 
  - Fix for bug 29734: Marked paths.perfMap not as configuration file anymore.
 
-* 2013-11-26- tobias.friedrich@open-xchange.com
+* 2013-11-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30003: Introduced 'pushToken' parameter for drive requests to associate the registration token in generated events 
+ - Fix for bug 29949: Extend the sizes of the 'fname' column in the 'oxfolder_tree' and the 'name' column in the 'virtualTree' table 
 
 * 2013-11-26 - thorben.betten@open-xchange.com
 
@@ -26,7 +27,7 @@
  - Fix for bug 29860: Tolerate non-deletable file from file storage on user delete attempt
  - Fix for bug 29925: Propagate proper event in case auto-login is turned off and short-term session container elapsed
 
-* 2013-11-22- tobias.friedrich@open-xchange.com
+* 2013-11-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29904: Validate numerical identifiers for infostore file metadata 
 

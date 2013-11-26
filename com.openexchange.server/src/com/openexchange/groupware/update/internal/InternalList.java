@@ -703,6 +703,9 @@ public final class InternalList {
         // Extends the size of the 'name' column in the 'infostoreReservedPaths' table.
         list.add(new com.openexchange.groupware.update.tasks.InfostoreExtendReservedPathsNameTask());
 
+        // Extends the size of the 'fname' column in the 'oxfolder_tree' table, as well as the 'name' column in the 'virtualTree' table.
+        list.add(new com.openexchange.groupware.update.tasks.FolderExtendNameTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
