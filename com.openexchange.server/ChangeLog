@@ -1,3 +1,7 @@
+* 2013-11-26 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29734: Marked paths.perfMap not as configuration file anymore.
+
 * 2013-11-26- tobias.friedrich@open-xchange.com
 
  - Fix for bug 30003: Introduced 'pushToken' parameter for drive requests to associate the registration token in generated events 
