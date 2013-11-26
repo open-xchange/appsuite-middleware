@@ -66,9 +66,9 @@ public class FormStrings implements LocalizableStrings {
 
     public static final String FORM_LABEL_LINK = "URL";
 
-    public static final String TARGET_NAME_CONTACTS = "OXMF Contacts";
+    public static final String TARGET_NAME_CONTACTS = "Shared contacts";
 
-    public static final String TARGET_NAME_INFOSTORE = "OXMF Infostore";
+    public static final String TARGET_NAME_INFOSTORE = "Shared files";
 
     public FormStrings() {
         super();
