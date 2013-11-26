@@ -203,11 +203,11 @@ public final class MetaContributorTracker extends ServiceTracker<MetaContributor
     }
 
     /**
-     * Return the set of handlers which subscribe to the event topic.
-     * A set is used to ensure a handler is not called for an event more than once.
+     * Return the set of contributors which subscribes to the topic.
+     * A set is used to ensure a contributor is not called for a topic more than once.
      *
      * @param topic
-     * @return a set of handlers
+     * @return a set of contributors
      */
     public Set<MetaContributor> getContributors(final String topic) {
         // Use a set to remove duplicates
