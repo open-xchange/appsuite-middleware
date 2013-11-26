@@ -47,25 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.meta;
+package com.openexchange.server.services;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 
 /**
- * {@link MetaContributors} - The registry for contributors.
+ * {@link MetaContributors} - Provides access to {@link MetaContributorRegistry} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MetaContributors {
+public final class MetaContributors {
 
     /**
-     * Gets the meta contributors for topic-covered entities.
-     *
-     * @param The topic of the entities to consider
-     * @return The contributors that apply to specified topic
-     * @throws OXException If contributors cannot be returned
+     * Initializes a new {@link MetaContributors}.
      */
-    Set<MetaContributor> getMetaContributors(String topic) throws OXException;
+    private MetaContributors() {
+        super();
+    }
+
+    private static final AtomicReference<MetaContributorRegistry> REGISTRY_REF = new AtomicReference<MetaContributorRegistry>();
+
+    /**
+     * Sets the registry
+     *
+     * @param registry The registry to set
+     */
+    public static void setRegistry(final MetaContributorRegistry registry) {
+        REGISTRY_REF.set(registry);
+    }
+
+    /**
+     * Gets the registry
+     *
+     * @return The registry or <code>null</code>
+     */
+    public static MetaContributorRegistry getRegistry() {
+        return REGISTRY_REF.get();
+    }
+
 }

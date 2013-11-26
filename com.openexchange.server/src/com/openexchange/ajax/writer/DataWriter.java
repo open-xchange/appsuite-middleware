@@ -52,17 +52,23 @@ package com.openexchange.ajax.writer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.meta.MetaContributor;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.server.services.MetaContributors;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -74,6 +80,9 @@ import com.openexchange.tools.TimeZoneUtils;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class DataWriter {
+
+    /** The logger */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(DataWriter.class);
 
     protected TimeZone timeZone;
 
@@ -683,9 +692,9 @@ public class DataWriter {
             if (null == map || map.isEmpty()) {
                 writeValue((String) null, json, false);
             } else {
-
-                // TODO: Invoke contribution service
-
+                // Invoke contribution service
+                contributeTo(map, obj, session);
+                // Write meta map
                 writeValue((JSONValue) JSONCoercion.coerceToJSON(map), json, true);
             }
         }
@@ -694,13 +703,35 @@ public class DataWriter {
         public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             final Map<String, Object> map = obj.getMap();
             if (null != map && !map.isEmpty()) {
-
-                // TODO: Invoke contribution service
-
+                // Invoke contribution service
+                contributeTo(map, obj, session);
+                // Write meta map
                 writeParameter(DataFields.META, (JSONValue) JSONCoercion.coerceToJSON(map), json, true);
             }
         }
     };
+
+    protected static void contributeTo(final Map<String, Object> map, final DataObject obj, final Session session) {
+        final String topic = obj.getTopic();
+        if (null != topic) {
+            final MetaContributorRegistry registry = MetaContributors.getRegistry();
+            if (null == registry) {
+                return;
+            }
+            final Set<MetaContributor> contributors = registry.getMetaContributors(topic);
+            if (null != contributors && !contributors.isEmpty()) {
+                final int objectID = obj.getObjectID();
+                final String id = objectID <= 0 ? null : Integer.toString(objectID);
+                for (final MetaContributor contributor : contributors) {
+                    try {
+                        contributor.contributeTo(map, id, session);
+                    } catch (final Exception e) {
+                        LOG.warn(MessageFormat.format("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), Integer.valueOf(objectID)), e);
+                    }
+                }
+            }
+        }
+    }
 
     static {
         final TIntObjectMap<FieldWriter<DataObject>> m = new TIntObjectHashMap<FieldWriter<DataObject>>(8, 1);

@@ -59,8 +59,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.meta.MetaContributor;
-import com.openexchange.ajax.meta.MetaContributors;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 
 
 /**
@@ -69,7 +68,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public final class MetaContributorTracker extends ServiceTracker<MetaContributor, MetaContributorReference> implements MetaContributors {
+public final class MetaContributorTracker extends ServiceTracker<MetaContributor, MetaContributorReference> implements MetaContributorRegistry {
 
     /** List of all handlers with topic of "*" */
     private final List<MetaContributorReference> globalWildcard;
@@ -241,7 +240,7 @@ public final class MetaContributorTracker extends ServiceTracker<MetaContributor
     }
 
     @Override
-    public Set<MetaContributor> getMetaContributors(String topic) throws OXException {
+    public Set<MetaContributor> getMetaContributors(String topic) {
         return getContributors(topic);
     }
 

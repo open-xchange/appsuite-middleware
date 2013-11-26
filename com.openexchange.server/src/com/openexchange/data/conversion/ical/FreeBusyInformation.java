@@ -73,6 +73,7 @@ public class FreeBusyInformation extends CalendarObject {
      */
     public FreeBusyInformation() {
         super();
+        topic = "ox/common/freebusy";
     }
 
     /**

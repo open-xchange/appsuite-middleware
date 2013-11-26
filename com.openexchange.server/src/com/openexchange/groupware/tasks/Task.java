@@ -190,6 +190,7 @@ public class Task extends CalendarObject {
 
     public Task() {
         super();
+        topic = "ox/common/task";
     }
 
     // GET METHODS

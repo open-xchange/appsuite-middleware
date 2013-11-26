@@ -49,28 +49,30 @@
 
 package com.openexchange.ajax.meta;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.Set;
 
 
 /**
- * {@link MetaContributor} - Possibly extends a given entity's meta information.
+ * {@link MetaContributorRegistry} - The registry for contributors.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public interface MetaContributor {
+public interface MetaContributorRegistry {
 
     /**
-     * Contributes to given meta information.
+     * Gets the meta contributors for topic-covered entities.
+     * <ul>
+     * <li>"ox/common/task"</li>
+     * <li>"ox/common/contact"</li>
+     * <li>"ox/common/folder"</li>
+     * <li>"ox/common/appointment"</li>
+     * <li>"ox/common/freebusy"</li>
+     * </ul>
      *
-     * @param meta The meta information
-     * @param id The associated entities identifier
-     * @param session The session
-     * @throws OXException If contribute operation fails
-     * @see MetaContributionConstants#CONTRIBUTOR_TOPIC
+     * @param The topic of the entities to consider
+     * @return The contributors that apply to specified topic
      */
-    void contributeTo(Map<String, Object> meta, String id, Session session) throws OXException;
+    Set<MetaContributor> getMetaContributors(String topic);
 
 }
