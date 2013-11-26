@@ -610,7 +610,7 @@ public class StatisticTools extends AbstractJMXTools {
     }
 
     static String showOfficeData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
-        return getStats(mbeanServerConnection, "com.openexchange.office:name=OfficeInformation").toString();
+        return getStats(mbeanServerConnection, "com.openexchange.office:name=OfficeMonitoring").toString();
     }
 
     /**
