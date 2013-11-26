@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,73 @@
  *
  */
 
-package com.openexchange.drive.storage.filter;
+package com.openexchange.drive.management;
 
-import com.openexchange.drive.DriveConstants;
-import com.openexchange.drive.management.DriveConfig;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
+import com.openexchange.management.ManagementExceptionCode;
+import com.openexchange.management.ManagementService;
 
 /**
- * {@link SynchronizedFileFilter}
- *
- * A {@link FileNameFilter} that only lets through files that are actually synchronized, i.e. temporary files, infostore entries
- * without attached document, or files with invalid / ignored filenames are excluded.
+ * {@link ManagementRegisterer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SynchronizedFileFilter extends FileNameFilter {
+public class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+
+    private final BundleContext context;
+    private final ObjectName objectName;
 
     /**
-     * Gets the {@link SynchronizedFileFilter} instance.
+     * Initializes a new {@link ManagementRegisterer}.
      *
-     * @return The singleton instance.
+     * @param context The bundle context
      */
-    public static final SynchronizedFileFilter getInstance() {
-        return INSTANCE;
-    }
-
-    private static final SynchronizedFileFilter INSTANCE = new SynchronizedFileFilter();
-
-    /**
-     * Initializes a new {@link SynchronizedFileFilter}.
-     */
-    private SynchronizedFileFilter() {
+    public ManagementRegisterer(BundleContext context) throws OXException {
         super();
+        this.context = context;
+        try {
+            this.objectName = new ObjectName("com.openexchange.drive", "name", "Drive Configuration");
+        } catch (MalformedObjectNameException e) {
+            throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e);
+        }
     }
 
     @Override
-    protected boolean accept(String fileName) throws OXException {
-        if (Strings.isEmpty(fileName)) {
-            return false; // no empty filenames
+    public ManagementService addingService(ServiceReference<ManagementService> reference) {
+        ManagementService management = context.getService(reference);
+        try {
+            management.registerMBean(objectName, new DriveConfigMBeanImpl());
+        } catch (OXException e) {
+            LOG.error("Error registering MBean", e);
+        } catch (NotCompliantMBeanException e) {
+            LOG.error("Error registering MBean", e);
         }
-        if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
-            return false; // no temporary upload files
+        return management;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<ManagementService> reference, ManagementService service) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void removedService(ServiceReference<ManagementService> reference, ManagementService service) {
+        try {
+            service.unregisterMBean(objectName);
+        } catch (OXException e) {
+            LOG.error("Error unregistering MBean", e);
         }
-        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-            return false; // no invalid filenames
-        }
-        if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
-            return false; // no excluded files
-        }
-        return true;
+        context.ungetService(reference);
     }
 
 }

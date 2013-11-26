@@ -55,9 +55,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 import org.apache.commons.logging.Log;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.checksum.ChecksumStore;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -73,7 +73,6 @@ import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link TempCleaner}
@@ -92,11 +91,6 @@ public class TempCleaner implements Runnable {
      * @param session The sync session
      */
     public static void cleanUpIfNeeded(SyncSession session) {
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        if (null == configService) {
-            LOG.warn("Unable to access config service, skipping cleanup-thread initialization.");
-            return;
-        }
         Object parameter = session.getServerSession().getParameter(PARAM_LAST_CLEANER_RUN);
         if (null != parameter && Long.class.isInstance(parameter)) {
             long lastCleanerRun = ((Long)parameter).longValue();
@@ -104,15 +98,14 @@ public class TempCleaner implements Runnable {
                 LOG.debug("Last cleaner run for session " + session + " at: " +
                     DriveConstants.LOG_DATE_FORMAT.get().format(new Date(lastCleanerRun)));
             }
-            String intervalValue = configService.getProperty("com.openexchange.drive.cleaner.interval", "1D");
-            long interval = TimeSpanParser.parseTimespan(intervalValue);
+            long interval = DriveConfig.getInstance().getCleanerInterval();
             if (MILLIS_PER_HOUR > interval) {
-                LOG.warn("The configured interval of '" + intervalValue +
+                LOG.warn("The configured interval of '" + interval +
                     "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
                 interval = MILLIS_PER_HOUR;
             }
             if (System.currentTimeMillis() - lastCleanerRun < interval) {
-                LOG.debug("Cleaner interval time of '" + intervalValue +
+                LOG.debug("Cleaner interval time of '" + interval +
                     "' not yet exceeded, not starting new run for session " + session);
                 return;
             }
@@ -129,10 +122,9 @@ public class TempCleaner implements Runnable {
                 }
                 return;
             }
-            String maxAgeValue = configService.getProperty("com.openexchange.drive.cleaner.maxAge", "1D");
-            long maxAge = TimeSpanParser.parseTimespan(maxAgeValue);
+            long maxAge = DriveConfig.getInstance().getCleanerMaxAge();
             if (MILLIS_PER_HOUR > maxAge) {
-                LOG.warn("The configured maximum age of '" + maxAgeValue +
+                LOG.warn("The configured maximum age of '" + maxAge +
                     "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
                 maxAge = MILLIS_PER_HOUR;
             }

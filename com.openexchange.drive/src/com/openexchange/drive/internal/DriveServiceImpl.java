@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
@@ -86,6 +85,7 @@ import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.internal.tracking.SyncTracker;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.storage.execute.FileActionExecutor;
 import com.openexchange.drive.sync.DefaultSyncResult;
@@ -125,8 +125,7 @@ public class DriveServiceImpl implements DriveService {
         /*
          * check api version first
          */
-        if (session.getApiVersion() < DriveServiceLookup.getService(ConfigurationService.class)
-            .getIntProperty("com.openexchange.drive.minApiVersion", DriveConstants.DEFAULT_MIN_API_VERSION)) {
+        if (session.getApiVersion() < DriveConfig.getInstance().getMinApiVersion()) {
             OXException error = DriveExceptionCodes.CLIENT_OUTDATED.create();
             List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
             actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));

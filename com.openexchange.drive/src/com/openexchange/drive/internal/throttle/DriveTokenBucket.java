@@ -49,18 +49,16 @@
 
 package com.openexchange.drive.internal.throttle;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 import org.apache.commons.logging.Log;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.internal.DriveServiceLookup;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.java.Strings;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,7 +77,7 @@ public class DriveTokenBucket implements TokenBucket {
     private final Semaphore overallBucket;
     private final int overallBytesPerSecond;
     private final int clientBytesPerSecond;
-
+    private final ScheduledTimerTask bucketFillerTask;
 
     /**
      * Initializes a new {@link DriveTokenBucket}.
@@ -87,29 +85,45 @@ public class DriveTokenBucket implements TokenBucket {
      * @throws OXException
      */
     public DriveTokenBucket() throws OXException {
+        this(DriveConfig.getInstance().getMaxBandwidth(), DriveConfig.getInstance().getMaxBandwidthPerClient());
+    }
+
+    /**
+     * Initializes a new {@link DriveTokenBucket}.
+     *
+     * @param overallBytesPerSecond The (overall) allowed bytes per second, or <code>-1</code> if unlimited
+     * @param clientBytesPerSecond The allowed bytes per second and client, or <code>-1</code> if unlimited
+     * @throws OXException
+     */
+    public DriveTokenBucket(int overallBytesPerSecond, int clientBytesPerSecond) throws OXException {
         super();
         /*
          * init client / overall bucket semaphores
          */
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class, true);
-        String maxBandwidth = configService.getProperty("com.openexchange.drive.maxBandwidth");
-        overallBytesPerSecond = Strings.isEmpty(maxBandwidth) ? -1 : parseBytes(maxBandwidth);
-        overallBucket = 0 < overallBytesPerSecond ? new Semaphore(overallBytesPerSecond, true) : null;
-        String maxBandwidthPerClient = configService.getProperty("com.openexchange.drive.maxBandwidthPerClient");
-        clientBytesPerSecond = Strings.isEmpty(maxBandwidthPerClient) ? -1 : parseBytes(maxBandwidthPerClient);
-        bucketsPerSession = 0 < clientBytesPerSecond ? new ConcurrentHashMap<String, Semaphore>() : null;
+        this.overallBytesPerSecond = overallBytesPerSecond;
+        this.overallBucket = 0 < overallBytesPerSecond ? new Semaphore(overallBytesPerSecond, true) : null;
+        this.clientBytesPerSecond = clientBytesPerSecond;
+        this.bucketsPerSession = 0 < clientBytesPerSecond ? new ConcurrentHashMap<String, Semaphore>() : null;
         /*
          * init bucket filler thread
          */
         if (isEnabled()) {
             long rate = 1000 / BUCKET_FILLS_PER_SECOND;
-            DriveServiceLookup.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
+            bucketFillerTask = DriveServiceLookup.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
 
                 @Override
                 public void run() {
                     fillBuckets();
                 }
             }, rate, rate);
+        } else {
+            bucketFillerTask = null;
+        }
+    }
+
+    public void stop() {
+        if (null != bucketFillerTask) {
+            bucketFillerTask.cancel();
         }
     }
 
@@ -205,40 +219,6 @@ public class DriveTokenBucket implements TokenBucket {
             }
         }
         return bucket;
-    }
-
-    /**
-     * Parses a byte value including an optional unit.
-     *
-     * @param value the value to parse
-     * @return The parsed number of bytes
-     * @throws NumberFormatException If the supplied string is not parsable or greater then <code>Integer.MAX_VALUE</code>
-     */
-    private static int parseBytes(String value) throws NumberFormatException {
-        StringAllocator numberAllocator = new StringAllocator(8);
-        StringAllocator unitAllocator = new StringAllocator(4);
-        for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            if (Character.isDigit(c) || '.' == c || '-' == c) {
-                numberAllocator.append(c);
-            } else if (false == Character.isWhitespace(c)) {
-                unitAllocator.append(c);
-            }
-        }
-        double number = Double.parseDouble(numberAllocator.toString());
-        if (0 < unitAllocator.length()) {
-            String unit = unitAllocator.toString().toUpperCase();
-            int exp = Arrays.asList("B", "KB", "MB", "GB").indexOf(unit);
-            if (0 <= exp) {
-                number *= Math.pow(1024, exp);
-            } else {
-                throw new NumberFormatException(value);
-            }
-        }
-        if (Integer.MAX_VALUE >= number) {
-            return (int)number;
-        }
-        throw new NumberFormatException(value);
     }
 
 }

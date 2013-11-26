@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
@@ -67,6 +66,7 @@ import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
@@ -99,7 +99,7 @@ public class SyncSession {
     public SyncSession(DriveSession session) {
         super();
         this.session = session;
-        this.tracer = new Tracer(session.isDiagnostics());
+        this.tracer = new Tracer(session.isDiagnostics(), DriveConfig.getInstance().isDiagnostics(session.getServerSession()));
         if (isTraceEnabled()) {
             trace("Creating new sync session for user " + session.getServerSession().getLoginName() + " (" +
                 session.getServerSession().getUserId() + ") in context " + session.getServerSession().getContextId() +
@@ -231,9 +231,7 @@ public class SyncSession {
             /*
              * check configuration first
              */
-            ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-            if (null != configService && false ==
-                Boolean.valueOf(configService.getBoolProperty("com.openexchange.drive.useTempFolder", false))) {
+            if (false == DriveConfig.getInstance().isUseTempFolder()) {
                 trace("Temporary folder for upload is disabled by configuration.");
                 hasTempFolder = Boolean.FALSE;
             } else {

@@ -65,15 +65,17 @@ public class Tracer {
     private static final int MAX_SIZE = 20000;
 
     private final StringAllocator traceLog;
+    private final boolean serverDiagnostics;
 
     /**
      * Initializes a new {@link Tracer}.
      *
-     * @param diagnostics Whether to write a diagnostics log or not.
+     * @param clientDiagnostics Whether to write a diagnostics log or not.
      */
-    public Tracer(Boolean diagnostics) {
+    public Tracer(Boolean clientDiagnostics, boolean serverDiagnostics) {
         super();
-        this.traceLog = null != diagnostics && diagnostics.booleanValue() ? new StringAllocator() : null;
+        this.serverDiagnostics = serverDiagnostics;
+        this.traceLog = null != clientDiagnostics && clientDiagnostics.booleanValue() ? new StringAllocator() : null;
     }
 
     /**
@@ -84,7 +86,9 @@ public class Tracer {
     public void trace(Object message) {
         if (isTraceEnabled()) {
             String msg = String.valueOf(message);
-            if (LOG.isTraceEnabled()) {
+            if (serverDiagnostics && LOG.isInfoEnabled()) {
+                LOG.info(msg);
+            } else if (LOG.isTraceEnabled()) {
                 LOG.trace(msg);
             }
             if (null != traceLog) {
@@ -98,17 +102,6 @@ public class Tracer {
                         traceLog.append(msg.substring(0, remainingCapacity)).append("\n... (truncated)");
                     }
                 }
-//                if (traceLog.length() + msg.length() < MAX_SIZE) {
-//                    traceLog
-//                        .append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
-//                        .append(" [").append(Thread.currentThread().getId()).append("] : ")
-//                        .append(msg.trim()).append("\n\n");
-//                } else {
-//                    String end = traceLog.substring(traceLog.length() - 20, traceLog.length());
-//                    if (false == end.endsWith("\n... (truncated)")) {
-//                        traceLog.append("\n... (truncated)");
-//                    }
-//                }
             }
         }
     }
@@ -129,7 +122,7 @@ public class Tracer {
      * @return <code>true</code> if tracing is enabled, <code>false</code>, otherwise
      */
     public boolean isTraceEnabled() {
-        return LOG.isTraceEnabled() || null != traceLog;
+        return LOG.isTraceEnabled() || null != traceLog || serverDiagnostics && LOG.isInfoEnabled();
     }
 
 }

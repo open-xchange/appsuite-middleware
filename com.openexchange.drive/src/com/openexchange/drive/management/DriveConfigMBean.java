@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,52 @@
  *
  */
 
-package com.openexchange.drive.storage.filter;
+package com.openexchange.drive.management;
 
-import com.openexchange.drive.DriveConstants;
-import com.openexchange.drive.management.DriveConfig;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import java.util.Set;
 
 /**
- * {@link SynchronizedFileFilter}
- *
- * A {@link FileNameFilter} that only lets through files that are actually synchronized, i.e. temporary files, infostore entries
- * without attached document, or files with invalid / ignored filenames are excluded.
+ * {@link DriveConfigMBean}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SynchronizedFileFilter extends FileNameFilter {
+public interface DriveConfigMBean {
 
     /**
-     * Gets the {@link SynchronizedFileFilter} instance.
+     * Enables or disables diagnostics logging at <code>INFO</code>-level for all users.
      *
-     * @return The singleton instance.
+     * @param diagnostics <code>true</code> to enable the diagnostics log, <code>false</code> to disable it
      */
-    public static final SynchronizedFileFilter getInstance() {
-        return INSTANCE;
-    }
-
-    private static final SynchronizedFileFilter INSTANCE = new SynchronizedFileFilter();
+    void setDiagnostics(boolean diagnostics);
 
     /**
-     * Initializes a new {@link SynchronizedFileFilter}.
+     * Gets a value indicating whether diagnostic logging for all users is enabled or not.
+     *
+     * @return <code>true</code> if diagnostics logging is enabled, <code>false</code>, otherwise
      */
-    private SynchronizedFileFilter() {
-        super();
-    }
+    boolean getDiagnostics();
 
-    @Override
-    protected boolean accept(String fileName) throws OXException {
-        if (Strings.isEmpty(fileName)) {
-            return false; // no empty filenames
-        }
-        if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
-            return false; // no temporary upload files
-        }
-        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-            return false; // no invalid filenames
-        }
-        if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
-            return false; // no excluded files
-        }
-        return true;
-    }
+    /**
+     * Gets a list of users where diagnostics logging is enabled.
+     *
+     * @return The users
+     */
+    Set<String> getDiagnosticsUsers();
+
+    /**
+     * Adds a user for for diagnostics logging.
+     *
+     * @param user The user in the format <code>username@context</code> or <code>userId@contextId</code>
+     * @return <code>true</code> if the user was added successfully, <code>false</code>, otherwise
+     */
+    boolean addDiagnosticsUser(String user);
+
+    /**
+     * Removes a user from diagnostics logging
+     *
+     * @param user The user to remove
+     * @return <code>true</code> if the user was removed successfully, <code>false</code>, otherwise
+     */
+    boolean removeDiagnosticsUser(String user);
 
 }

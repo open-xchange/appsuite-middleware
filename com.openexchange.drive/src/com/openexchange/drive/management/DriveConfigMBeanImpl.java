@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,51 @@
  *
  */
 
-package com.openexchange.drive.storage.filter;
+package com.openexchange.drive.management;
 
-import com.openexchange.drive.DriveConstants;
-import com.openexchange.drive.management.DriveConfig;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import java.util.Set;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 
 /**
- * {@link SynchronizedFileFilter}
- *
- * A {@link FileNameFilter} that only lets through files that are actually synchronized, i.e. temporary files, infostore entries
- * without attached document, or files with invalid / ignored filenames are excluded.
+ * {@link DriveConfigMBeanImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SynchronizedFileFilter extends FileNameFilter {
+public class DriveConfigMBeanImpl extends StandardMBean implements DriveConfigMBean {
 
     /**
-     * Gets the {@link SynchronizedFileFilter} instance.
+     * Initializes a new {@link DriveConfigMBeanImpl}.
      *
-     * @return The singleton instance.
+     * @throws NotCompliantMBeanException
      */
-    public static final SynchronizedFileFilter getInstance() {
-        return INSTANCE;
-    }
-
-    private static final SynchronizedFileFilter INSTANCE = new SynchronizedFileFilter();
-
-    /**
-     * Initializes a new {@link SynchronizedFileFilter}.
-     */
-    private SynchronizedFileFilter() {
-        super();
+    public DriveConfigMBeanImpl() throws NotCompliantMBeanException {
+        super(DriveConfigMBean.class);
     }
 
     @Override
-    protected boolean accept(String fileName) throws OXException {
-        if (Strings.isEmpty(fileName)) {
-            return false; // no empty filenames
-        }
-        if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
-            return false; // no temporary upload files
-        }
-        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-            return false; // no invalid filenames
-        }
-        if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
-            return false; // no excluded files
-        }
-        return true;
+    public void setDiagnostics(boolean diagnostics) {
+        DriveConfig.getInstance().setDiagnostics(diagnostics);
+    }
+
+    @Override
+    public boolean getDiagnostics() {
+        return DriveConfig.getInstance().isDiagnostics();
+    }
+
+    @Override
+    public Set<String> getDiagnosticsUsers() {
+        return DriveConfig.getInstance().getDiagnosticsUsers();
+    }
+
+    @Override
+    public boolean addDiagnosticsUser(String user) {
+        return DriveConfig.getInstance().addDiagnisticsUser(user);
+    }
+
+    @Override
+    public boolean removeDiagnosticsUser(String user) {
+        return DriveConfig.getInstance().removeDiagnisticsUser(user);
     }
 
 }

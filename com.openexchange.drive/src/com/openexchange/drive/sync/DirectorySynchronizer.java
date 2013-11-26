@@ -50,7 +50,6 @@
 package com.openexchange.drive.sync;
 
 import java.util.Collection;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -62,9 +61,9 @@ import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -115,12 +114,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
 
     @Override
     protected int getMaxActions() {
-        int defaultValue = 1000;
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        if (null != configService) {
-            return configService.getIntProperty("com.openexchange.drive.maxDirectoryActions", defaultValue);
-        }
-        return defaultValue;
+        return DriveConfig.getInstance().getMaxDirectoryActions();
     }
 
     @Override
