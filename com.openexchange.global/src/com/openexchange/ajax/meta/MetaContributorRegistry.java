@@ -71,7 +71,7 @@ public interface MetaContributorRegistry {
      * <li>"ox/mail/account"</li>
      * </ul>
      *
-     * @param The topic of the entities to consider
+     * @param topic The topic of the entities to consider
      * @return The contributors that apply to specified topic
      */
     Set<MetaContributor> getMetaContributors(String topic);
