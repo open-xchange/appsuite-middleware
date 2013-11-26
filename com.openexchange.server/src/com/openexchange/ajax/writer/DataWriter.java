@@ -54,6 +54,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -688,49 +689,56 @@ public class DataWriter {
 
         @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) throws JSONException {
-            final Map<String, Object> map = obj.getMap();
+            // Get meta map
+            Map<String, Object> map = obj.getMap();
+            // Invoke contribution service
+            map = contributeTo(map, obj, session);
+
+            // Write meta map
             if (null == map || map.isEmpty()) {
                 writeValue((String) null, json, false);
             } else {
-                // Invoke contribution service
-                contributeTo(map, obj, session);
-                // Write meta map
                 writeValue((JSONValue) JSONCoercion.coerceToJSON(map), json, true);
             }
         }
 
         @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
-            final Map<String, Object> map = obj.getMap();
+            // Get meta map
+            Map<String, Object> map = obj.getMap();
+            // Invoke contribution service
+            map = contributeTo(map, obj, session);
+
+            // Write meta map
             if (null != map && !map.isEmpty()) {
-                // Invoke contribution service
-                contributeTo(map, obj, session);
-                // Write meta map
                 writeParameter(DataFields.META, (JSONValue) JSONCoercion.coerceToJSON(map), json, true);
             }
         }
     };
 
-    protected static void contributeTo(final Map<String, Object> map, final DataObject obj, final Session session) {
+    protected static Map<String, Object> contributeTo(final Map<String, Object> map, final DataObject obj, final Session session) {
         final String topic = obj.getTopic();
         if (null != topic) {
             final MetaContributorRegistry registry = MetaContributors.getRegistry();
             if (null == registry) {
-                return;
+                return map;
             }
             final Set<MetaContributor> contributors = registry.getMetaContributors(topic);
             if (null != contributors && !contributors.isEmpty()) {
+                final Map<String, Object> mapp = null == map ? new LinkedHashMap<String, Object>(2) : map;
                 final int objectID = obj.getObjectID();
                 final String id = objectID <= 0 ? null : Integer.toString(objectID);
                 for (final MetaContributor contributor : contributors) {
                     try {
-                        contributor.contributeTo(map, id, session);
+                        contributor.contributeTo(mapp, id, session);
                     } catch (final Exception e) {
                         LOG.warn(MessageFormat.format("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), Integer.valueOf(objectID)), e);
                     }
                 }
+                return mapp;
             }
         }
+        return map;
     }
 
     static {

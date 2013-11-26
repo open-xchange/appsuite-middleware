@@ -68,6 +68,7 @@ public interface MetaContributorRegistry {
      * <li>"ox/common/folder"</li>
      * <li>"ox/common/appointment"</li>
      * <li>"ox/common/freebusy"</li>
+     * <li>"ox/mail/account"</li>
      * </ul>
      *
      * @param The topic of the entities to consider
