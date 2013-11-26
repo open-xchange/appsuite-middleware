@@ -49,7 +49,6 @@
 
 package com.hazelcast.osgi;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -93,7 +92,7 @@ public class HzActivator implements BundleActivator {
                 final ConfigurationService configService = context.getService(reference);
                 final boolean loggingEnabled = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true);
                 if (loggingEnabled) {
-                    checkForLog4j(context);
+                    System.setProperty("hazelcast.logging.type", "slf4j");
                 } else {
                     System.setProperty("hazelcast.logging.type", "none");
                 }
@@ -113,16 +112,4 @@ public class HzActivator implements BundleActivator {
             this.tracker = null;
         }
     }
-
-    protected void checkForLog4j(final BundleContext context) {
-        boolean hasLog4J = false;
-        final Bundle[] bundles = context.getBundles();
-        for (int i = 0; !hasLog4J && i < bundles.length; i++) {
-            hasLog4J = ("org.apache.commons.logging.log4j".equals(bundles[i].getSymbolicName()));
-        }
-        if (hasLog4J) {
-            System.setProperty("hazelcast.logging.type", "log4j");
-        }
-    }
-
 }
