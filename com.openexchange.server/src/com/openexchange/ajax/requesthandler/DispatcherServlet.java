@@ -417,10 +417,8 @@ public class DispatcherServlet extends SessionServlet {
                 } else {
                     logException(e);
                 }
-            } else if (e.isLoggable()){
-                logException(e, LogLevel.DEBUG);
             } else {
-                logException(e, LogLevel.TRACE);
+                logException(e, LogLevel.DEBUG);
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
