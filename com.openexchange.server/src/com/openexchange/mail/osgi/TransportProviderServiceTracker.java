@@ -114,10 +114,10 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
             return null;
         }
         // Capability stuff
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        final String sCapability = "auto_publish_attachments";
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
         if (null == capabilityChecker) {
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            final String sCapability = "auto_publish_attachments";
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
             capabilityChecker = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
 
                 @Override
