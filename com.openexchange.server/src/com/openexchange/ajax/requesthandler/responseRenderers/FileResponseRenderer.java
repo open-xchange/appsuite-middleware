@@ -773,8 +773,6 @@ public class FileResponseRenderer implements ResponseRenderer {
                     }
                 }
                 return ret;
-            } else {
-                System.out.println("ResourceCache MISS for " + cacheKey);
             }
         }
 
