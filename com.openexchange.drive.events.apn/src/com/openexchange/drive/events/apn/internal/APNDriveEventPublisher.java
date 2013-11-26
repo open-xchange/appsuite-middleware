@@ -67,6 +67,7 @@ import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link APNDriveEventPublisher}
@@ -162,8 +163,13 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
     }
 
     private List<PayloadPerDevice> getPayloads(DriveEvent event, List<Subscription> subscriptions) {
+        String pushToken = event.getPushToken();
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
+            if (false == Strings.isEmpty(pushToken) && pushToken.equals(subscription.getToken())) {
+                LOG.trace("Skipping push notification for subscription: " + subscription);
+                continue;
+            }
             try {
                 PushNotificationPayload payload = new PushNotificationPayload();
                 payload.addCustomAlertLocKey("TRIGGER_SYNC");

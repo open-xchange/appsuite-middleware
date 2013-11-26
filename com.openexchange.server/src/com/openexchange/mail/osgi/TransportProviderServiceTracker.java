@@ -49,12 +49,21 @@
 
 package com.openexchange.mail.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Service tracker for transport providers
@@ -66,6 +75,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportProviderServiceTracker.class));
 
     private final BundleContext context;
+    private ServiceRegistration<CapabilityChecker> capabilityChecker;
 
     /**
      * Initializes a new {@link TransportProviderServiceTracker}
@@ -76,27 +86,25 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
     }
 
     @Override
-    public TransportProvider addingService(final ServiceReference<TransportProvider> reference) {
-        final TransportProvider addedService = context.getService(reference);
-        if (null == addedService) {
+    public synchronized TransportProvider addingService(final ServiceReference<TransportProvider> reference) {
+        final BundleContext context = this.context;
+        final TransportProvider transportProvider = context.getService(reference);
+        if (null == transportProvider) {
             LOG.warn("Added service is null!", new Throwable());
+            context.ungetService(reference);
+            return null;
         }
         final Object protocol = reference.getProperty("protocol");
         if (null == protocol) {
-            LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+            LOG.error("Missing protocol in transport provider service: " + transportProvider.getClass().getName());
             context.ungetService(reference);
             return null;
         }
         try {
-            /*
-             * TODO: Clarify if proxy object is reasonable or if service itself should be registered
-             */
-            if (TransportProviderRegistry.registerTransportProvider(protocol.toString(), addedService)) {
-                LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
-                    "' successfully registered"));
+            if (TransportProviderRegistry.registerTransportProvider(protocol.toString(), transportProvider)) {
+                LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append("' successfully registered"));
             } else {
-                LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
-                    "' could not be added.").append("Another provider which supports the protocol has already been registered."));
+                LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append("' could not be added.").append("Another provider which supports the protocol has already been registered."));
                 context.ungetService(reference);
                 return null;
             }
@@ -105,7 +113,33 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
             context.ungetService(reference);
             return null;
         }
-        return addedService;
+        // Capability stuff
+        if (null == capabilityChecker) {
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            final String sCapability = "auto_publish_attachments";
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+            capabilityChecker = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+                @Override
+                public boolean isEnabled(String capability, Session ses) throws OXException {
+                    if (sCapability.equals(capability)) {
+                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                        if (session.isAnonymous()) {
+                            return false;
+                        }
+
+                        return (TransportProperties.getInstance().isPublishOnExceededQuota() && session.getUserPermissionBits().hasInfostore());
+                    }
+
+                    return true;
+                }
+            }, properties);
+            // Obtain capability service
+            ServiceReference<CapabilityService> capabilityRef = context.getServiceReference(CapabilityService.class);
+            context.getService(capabilityRef).declareCapability(sCapability);
+        }
+        // Finally, return transport provider
+        return transportProvider;
     }
 
     @Override
@@ -114,7 +148,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
     }
 
     @Override
-    public void removedService(final ServiceReference<TransportProvider> reference, final TransportProvider service) {
+    public synchronized void removedService(final ServiceReference<TransportProvider> reference, final TransportProvider service) {
         if (null != service) {
             try {
                 try {
@@ -126,10 +160,15 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                     LOG.error(e.getMessage(), e);
                 }
             } finally {
-                /*
-                 * TODO: Necessary?
-                 */
                 context.ungetService(reference);
+            }
+
+            if (TransportProviderRegistry.isEmpty()) {
+                final ServiceRegistration<CapabilityChecker> capabilityChecker = this.capabilityChecker;
+                if (capabilityChecker != null) {
+                    capabilityChecker.unregister();
+                    this.capabilityChecker = null;
+                }
             }
         }
     }

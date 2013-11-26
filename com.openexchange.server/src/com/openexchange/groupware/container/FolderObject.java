@@ -343,6 +343,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public FolderObject() {
         super();
+        topic = "ox/common/folder";
     }
 
     /**
@@ -353,7 +354,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public FolderObject(final int objectId) {
         super();
         this.objectId = objectId;
-        b_object_id = true;
+        b_objectId = true;
+        topic = "ox/common/folder";
     }
 
     /**
@@ -375,9 +377,10 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         this.type = type;
         b_type = true;
         this.objectId = objectId;
-        b_object_id = true;
+        b_objectId = true;
         createdBy = creator;
-        b_created_by = true;
+        b_createdBy = true;
+        topic = "ox/common/folder";
     }
 
     /**
@@ -792,7 +795,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @return <code>true</code> if creator is set; otherwise <code>false</code>
      */
     public boolean containsCreator() {
-        return b_created_by;
+        return b_createdBy;
     }
 
     /**
@@ -802,7 +805,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public void setCreator(final int creator) {
         createdBy = creator;
-        b_created_by = true;
+        b_createdBy = true;
     }
 
     /**
@@ -810,7 +813,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public void removeCreator() {
         createdBy = 0;
-        b_created_by = false;
+        b_createdBy = false;
     }
 
     /**
@@ -1418,16 +1421,16 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public FolderObject clone() {
         try {
             final FolderObject clone = (FolderObject) super.clone();
-            if (b_created_by) {
+            if (b_createdBy) {
                 clone.setCreatedBy(createdBy);
             }
-            if (b_creation_date) {
+            if (b_creationDate) {
                 clone.setCreationDate(creationDate);
             }
             if (b_defaultFolder) {
                 clone.setDefaultFolder(defaultFolder);
             }
-            if (b_object_id) {
+            if (b_objectId) {
                 clone.setObjectID(objectId);
             }
             if (b_folderName) {
@@ -1436,10 +1439,10 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             if (b_fullName) {
                 clone.setFullName(fullName);
             }
-            if (b_last_modified) {
+            if (b_lastModified) {
                 clone.setLastModified(lastModified);
             }
-            if (b_modified_by) {
+            if (b_modifiedBy) {
                 clone.setModifiedBy(modifiedBy);
             }
             if (b_module) {

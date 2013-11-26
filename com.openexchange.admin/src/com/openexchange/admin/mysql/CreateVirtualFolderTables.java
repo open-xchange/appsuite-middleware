@@ -73,7 +73,7 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "user INT4 unsigned NOT NULL,"
         + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "parentId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "name VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "name VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "lastModified BIGINT(64) DEFAULT NULL,"
         + "modifiedBy INT4 unsigned DEFAULT NULL,"
         + "shadow VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"

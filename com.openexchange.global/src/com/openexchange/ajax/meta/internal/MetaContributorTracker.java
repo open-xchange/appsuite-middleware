@@ -47,54 +47,54 @@
  *
  */
 
-package com.openexchange.eventsystem.internal;
+package com.openexchange.ajax.meta.internal;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventHandler;
+import com.openexchange.ajax.meta.MetaContributor;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 
 
 /**
- * {@link EventHandlerTracker}
+ * {@link MetaContributorTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public final class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandlerReference> {
+public final class MetaContributorTracker extends ServiceTracker<MetaContributor, MetaContributorReference> implements MetaContributorRegistry {
 
-    /** List<EventHandlerWrapper> of all handlers with topic of "*" */
-    private final List<EventHandlerReference> globalWildcard;
+    /** List of all handlers with topic of "*" */
+    private final List<MetaContributorReference> globalWildcard;
 
-    /** Map<String,List<EventHandlerWrapper>> key is topic prefix of partial wildcard */
-    private final Map<String, List<EventHandlerReference>> partialWildcard;
+    /** Map key is topic prefix of partial wildcard */
+    private final ConcurrentMap<String, List<MetaContributorReference>> partialWildcard;
 
-    /** Map<String,List<EventHandlerWrapper>> key is topic name */
-    private final Map<String, List<EventHandlerReference>> topicName;
+    /** Map key is topic name */
+    private final ConcurrentMap<String, List<MetaContributorReference>> topicName;
 
     /**
-     * Initializes a new {@link EventHandlerTracker}.
+     * Initializes a new {@link MetaContributorTracker}.
      *
      * @param context The bundle context
      */
-    public EventHandlerTracker(final BundleContext context) {
-        super(context, EventHandler.class, null);
-        globalWildcard = new CopyOnWriteArrayList<EventHandlerReference>();
-        partialWildcard = new ConcurrentHashMap<String, List<EventHandlerReference>>();
-        topicName = new ConcurrentHashMap<String, List<EventHandlerReference>>();
+    public MetaContributorTracker(final BundleContext context) {
+        super(context, MetaContributor.class, null);
+        globalWildcard = new CopyOnWriteArrayList<MetaContributorReference>();
+        partialWildcard = new ConcurrentHashMap<String, List<MetaContributorReference>>();
+        topicName = new ConcurrentHashMap<String, List<MetaContributorReference>>();
     }
 
     @Override
-    public EventHandlerReference addingService(final ServiceReference<EventHandler> reference) {
-        final EventHandlerReference wrapper = new EventHandlerReference(reference, context);
+    public MetaContributorReference addingService(final ServiceReference<MetaContributor> reference) {
+        final MetaContributorReference wrapper = new MetaContributorReference(reference, context);
         synchronized (this) {
             if (wrapper.init()) {
                 bucket(wrapper);
@@ -104,7 +104,7 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
     }
 
     @Override
-    public void modifiedService(final ServiceReference<EventHandler> reference, final EventHandlerReference service) {
+    public void modifiedService(final ServiceReference<MetaContributor> reference, final MetaContributorReference service) {
         synchronized (this) {
             unbucket(service);
             if (service.init()) {
@@ -117,7 +117,7 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
     }
 
     @Override
-    public void removedService(final ServiceReference<EventHandler> reference, final EventHandlerReference service) {
+    public void removedService(final ServiceReference<MetaContributor> reference, final MetaContributorReference service) {
         synchronized (this) {
             unbucket(service);
         }
@@ -132,7 +132,7 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
      * @param wrapper The wrapper to place in buckets.
      * @GuardedBy this
      */
-    private void bucket(final EventHandlerReference wrapper) {
+    private void bucket(final MetaContributorReference wrapper) {
         final String[] topics = wrapper.getTopics();
         final int length = (topics == null) ? 0 : topics.length;
         for (int i = 0; i < length; i++) {
@@ -144,18 +144,18 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
             // partial wildcard
             else if (topic.endsWith("/*")) {
                 final String key = topic.substring(0, topic.length() - 2); // Strip off "/*" from the end
-                List<EventHandlerReference> wrappers = partialWildcard.get(key);
+                List<MetaContributorReference> wrappers = partialWildcard.get(key);
                 if (wrappers == null) {
-                    wrappers = new ArrayList<EventHandlerReference>();
+                    wrappers = new ArrayList<MetaContributorReference>();
                     partialWildcard.put(key, wrappers);
                 }
                 wrappers.add(wrapper);
             }
             // simple topic name
             else {
-                List<EventHandlerReference> wrappers = topicName.get(topic);
+                List<MetaContributorReference> wrappers = topicName.get(topic);
                 if (wrappers == null) {
-                    wrappers = new ArrayList<EventHandlerReference>();
+                    wrappers = new ArrayList<MetaContributorReference>();
                     topicName.put(topic, wrappers);
                 }
                 wrappers.add(wrapper);
@@ -169,7 +169,7 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
      * @param wrapper The wrapper to remove from the buckets.
      * @GuardedBy this
      */
-    private void unbucket(final EventHandlerReference wrapper) {
+    private void unbucket(final MetaContributorReference wrapper) {
         final String[] topics = wrapper.getTopics();
         final int length = (topics == null) ? 0 : topics.length;
         for (int i = 0; i < length; i++) {
@@ -181,7 +181,7 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
             // partial wildcard
             else if (topic.endsWith("/*")) { //$NON-NLS-1$
                 final String key = topic.substring(0, topic.length() - 2); // Strip off "/*" from the end
-                final List<EventHandlerReference> wrappers = partialWildcard.get(key);
+                final List<MetaContributorReference> wrappers = partialWildcard.get(key);
                 if (wrappers != null) {
                     wrappers.remove(wrapper);
                     if (wrappers.isEmpty()) {
@@ -191,7 +191,7 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
             }
             // simple topic name
             else {
-                final List<EventHandlerReference> wrappers = topicName.get(topic);
+                final List<MetaContributorReference> wrappers = topicName.get(topic);
                 if (wrappers != null) {
                     wrappers.remove(wrapper);
                     if (wrappers.isEmpty()) {
@@ -203,25 +203,25 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
     }
 
     /**
-     * Return the set of handlers which subscribe to the event topic.
-     * A set is used to ensure a handler is not called for an event more than once.
+     * Return the set of contributors which subscribes to the topic.
+     * A set is used to ensure a contributor is not called for a topic more than once.
      *
      * @param topic
-     * @return a set of handlers
+     * @return a set of contributors
      */
-    public Set<EventHandlerReference> getHandlers(final String topic) {
+    public Set<MetaContributor> getContributors(final String topic) {
         // Use a set to remove duplicates
-        final Set<EventHandlerReference> handlers = new HashSet<EventHandlerReference>(6);
+        final Set<MetaContributor> handlers = new HashSet<MetaContributor>(6);
 
         // Add the "*" handlers
         handlers.addAll(globalWildcard);
 
         // Add the handlers with partial matches
-        if (partialWildcard.size() > 0) {
+        if (!partialWildcard.isEmpty()) {
             int index = topic.lastIndexOf('/');
             while (index >= 0) {
                 final String subTopic = topic.substring(0, index);
-                final List<EventHandlerReference> wrappers = partialWildcard.get(subTopic);
+                final List<MetaContributorReference> wrappers = partialWildcard.get(subTopic);
                 if (wrappers != null) {
                     handlers.addAll(wrappers);
                 }
@@ -232,7 +232,7 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
         }
 
         // Add the handlers for matching topic names
-        final List<EventHandlerReference> wrappers = topicName.get(topic);
+        final List<MetaContributorReference> wrappers = topicName.get(topic);
         if (wrappers != null) {
             handlers.addAll(wrappers);
         }
@@ -240,14 +240,9 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
         return handlers;
     }
 
-    /**
-     * Dispatches Event to EventHandlers
-     *
-     * @param eventListener
-     * @param eventObject
-     */
-    public void dispatchEvent(final EventHandlerReference eventListener, final Event eventObject) {
-        eventListener.handleEvent(eventObject);
+    @Override
+    public Set<MetaContributor> getMetaContributors(String topic) {
+        return getContributors(topic);
     }
 
 }

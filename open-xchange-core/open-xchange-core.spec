@@ -1,4 +1,4 @@
-%define	       configfiles     configfiles.list
+%define        configfiles     configfiles.list
 
 Name:          open-xchange-core
 BuildArch:     noarch
@@ -12,7 +12,7 @@ Version:       @OXVERSION@
 %define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
-License:       GPL-2.0 
+License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
@@ -179,6 +179,7 @@ find %{buildroot}/opt/open-xchange/etc \
         -type f \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
+perl -pi -e 's;^(.*?)\s+(.*/paths.perfMap)$;$2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|oauth-provider|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 

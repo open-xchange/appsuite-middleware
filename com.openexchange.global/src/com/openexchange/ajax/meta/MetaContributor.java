@@ -49,22 +49,28 @@
 
 package com.openexchange.ajax.meta;
 
-import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link MetaContributors} - The registry for contributors.
+ * {@link MetaContributor} - Possibly extends a given entity's meta information.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public interface MetaContributors {
+public interface MetaContributor {
 
     /**
-     * Gets the contributors to meta information
+     * Contributes to given meta information.
      *
-     * @return The contributors
-     * @throws OXException If contributors cannot be returned
+     * @param meta The meta information
+     * @param id The associated entities identifier
+     * @param session The session
+     * @throws OXException If contribute operation fails
+     * @see MetaContributionConstants#CONTRIBUTOR_TOPIC
      */
-    List<MetaContributionService> getMetaContributors() throws OXException;
+    void contributeTo(Map<String, Object> meta, String id, Session session) throws OXException;
+
 }

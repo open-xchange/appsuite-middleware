@@ -69,11 +69,13 @@ public final class CopyTaskSorter {
     }
 
     List<CopyUserTaskService> sort(final List<CopyUserTaskService> toSort) throws OXException {
-        final List<CopyUserTaskService> retval = new ArrayList<CopyUserTaskService>(toSort.size());
+        // Copy passed list of tasks because multiple iterators are used on this list which may have been modified in between.
+        final List<CopyUserTaskService> copy = new ArrayList<CopyUserTaskService>(toSort);
+        final List<CopyUserTaskService> retval = new ArrayList<CopyUserTaskService>(copy.size());
         boolean found = true;
-        while (found && !toSort.isEmpty()) {
+        while (found && !copy.isEmpty()) {
             found = false;
-            final Iterator<CopyUserTaskService> iter = toSort.iterator();
+            final Iterator<CopyUserTaskService> iter = copy.iterator();
             while (!found && iter.hasNext()) {
                 final CopyUserTaskService task = iter.next();
                 found = checkDependencies(task.getAlreadyCopied(), retval);
@@ -83,8 +85,8 @@ public final class CopyTaskSorter {
                 }
             }
         }
-        if (!toSort.isEmpty()) {
-            throw UserCopyExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(retval, ","), Strings.join(toSort, ","));
+        if (!copy.isEmpty()) {
+            throw UserCopyExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(retval, ","), Strings.join(copy, ","));
         }
         return retval;
     }

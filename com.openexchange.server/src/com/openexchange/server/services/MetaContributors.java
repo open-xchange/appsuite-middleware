@@ -47,56 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.meta.internal;
+package com.openexchange.server.services;
 
-import java.util.List;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.ajax.meta.MetaContributionService;
-import com.openexchange.ajax.meta.MetaContributors;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.ConcurrentList;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 
 /**
- * {@link MetaContributorsImpl} - The MetaContributors implementation.
+ * {@link MetaContributors} - Provides access to {@link MetaContributorRegistry} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MetaContributorsImpl extends ServiceTracker<MetaContributionService, MetaContributionService> implements MetaContributors {
-
-    private final List<MetaContributionService> contributors;
+public final class MetaContributors {
 
     /**
-     * Initializes a new {@link NearRegistryServiceTracker}.
-     *
-     * @param context The bundle context
+     * Initializes a new {@link MetaContributors}.
      */
-    public MetaContributorsImpl(final BundleContext context) {
-        super(context, MetaContributionService.class, null);
-        contributors = new ConcurrentList<MetaContributionService>();
+    private MetaContributors() {
+        super();
     }
 
-    @Override
-    public MetaContributionService addingService(final ServiceReference<MetaContributionService> reference) {
-        final MetaContributionService service = context.getService(reference);
-        if (contributors.add(service)) {
-            return service;
-        }
-        context.ungetService(reference);
-        return null;
+    private static final AtomicReference<MetaContributorRegistry> REGISTRY_REF = new AtomicReference<MetaContributorRegistry>();
+
+    /**
+     * Sets the registry
+     *
+     * @param registry The registry to set
+     */
+    public static void setRegistry(final MetaContributorRegistry registry) {
+        REGISTRY_REF.set(registry);
     }
 
-    @Override
-    public void removedService(final ServiceReference<MetaContributionService> reference, final MetaContributionService service) {
-        contributors.remove(service);
-        context.ungetService(reference);
-    }
-
-    @Override
-    public List<MetaContributionService> getMetaContributors() throws OXException {
-        return contributors;
+    /**
+     * Gets the registry
+     *
+     * @return The registry or <code>null</code>
+     */
+    public static MetaContributorRegistry getRegistry() {
+        return REGISTRY_REF.get();
     }
 
 }

@@ -38,7 +38,6 @@ opt/open-xchange/etc/contextSets/quota.yml
 opt/open-xchange/etc/ox-scriptconf.sh
 opt/open-xchange/etc/participant.properties
 opt/open-xchange/etc/passwordchange.properties
-opt/open-xchange/etc/paths.perfMap
 opt/open-xchange/etc/permissions.properties
 opt/open-xchange/etc/preview.properties
 opt/open-xchange/etc/publications.properties

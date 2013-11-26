@@ -120,6 +120,13 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             driveSession.setDeviceName(device);
         }
         /*
+         * extract push token if present
+         */
+        String pushToken = requestData.getParameter("pushToken");
+        if (false == Strings.isEmpty(pushToken)) {
+            session.setParameter(DriveSession.PARAMETER_PUSH_TOKEN, pushToken);
+        }
+        /*
          * extract diagnostics parameter if present
          */
         String diagnostics = requestData.getParameter("diagnostics");

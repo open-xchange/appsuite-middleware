@@ -47,66 +47,40 @@
  *
  */
 
-package com.openexchange.capabilities;
+package com.openexchange.ajax.meta;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link CapabilityService} - A capability service.
+ * {@link MetaContributionConstants} - Defines standard names for {@code MetaContributionService} properties and helper methods.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public interface CapabilityService {
+public final class MetaContributionConstants {
 
     /**
-     * Gets the capabilities associated with given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
-     *            capabilities
-     * @return The capabilities
-     * @throws OXException If capabilities cannot be determined
+     * Initializes a new {@link MetaContributionConstants}.
      */
-    CapabilitySet getCapabilities(int userId, int contextId, boolean computeCapabilityFilters) throws OXException;
+    private MetaContributionConstants() {
+        super();
+    }
 
     /**
-     * Gets the capabilities associated with given session.
+     * Service registration property specifying the {@link MetaContributor} topics of interest to an Event Handler service.
+     * <p>
+     * Contributors SHOULD be registered with this property. Each value of this property is a string that describe the topics in which the
+     * handler is interested. An asterisk ('*') may be used as a trailing wildcard. Contributors which do not have a value for this
+     * property must not receive events. More precisely, the value of each string must conform to the following grammar:
      *
-     * @param session The session
-     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
-     *            capabilities
-     * @return The capabilities
-     * @throws OXException If capabilities cannot be determined
-     */
-    CapabilitySet getCapabilities(Session session, boolean computeCapabilityFilters) throws OXException;
-
-    /**
-     * Gets the capabilities associated with given user.
+     * <pre>
+     *  topic-description := '*' | topic ( '/*' )?
+     *  topic := token ( '/' token )*
+     * </pre>
+     * <p>
+     * The value of this property must be of type {@code String}, {@code String[]}, or {@code Collection<String>}.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The capabilities
-     * @throws OXException If capabilities cannot be determined
+     * @see Event
      */
-    CapabilitySet getCapabilities(int userId, int contextId) throws OXException;
-
-    /**
-     * Gets the capabilities associated with given session.
-     *
-     * @param session The session
-     * @return The capabilities
-     * @throws OXException If capabilities cannot be determined
-     */
-    CapabilitySet getCapabilities(Session session) throws OXException;
-
-    /**
-     * Declares specified capability.
-     *
-     * @param capability The capability to declare
-     * @return <code>true</code> if capability has not been declared before; otherwise <code>false</code> if already declared (no-op)
-     */
-    boolean declareCapability(String capability);
+    public static final String CONTRIBUTOR_TOPIC = "contributor.topics";
 
 }

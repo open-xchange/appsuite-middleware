@@ -167,6 +167,15 @@ public final class TransportProviderRegistry {
     }
 
     /**
+     * Checks if transport provider registry is empty.
+     *
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    public static boolean isEmpty() {
+        return providers.isEmpty();
+    }
+
+    /**
      * Registers a transport provider and performs its start-up actions
      *
      * @param protocol The transport protocol's string representation; e.g. <code>"smtp_smtps"</code>

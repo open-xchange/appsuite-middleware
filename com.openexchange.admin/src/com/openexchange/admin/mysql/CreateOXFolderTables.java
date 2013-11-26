@@ -73,7 +73,7 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
        + "`fuid` INT4 UNSIGNED NOT NULL,"
        + "`cid` INT4 UNSIGNED NOT NULL,"
        + "`parent` INT4 UNSIGNED NOT NULL,"
-       + "`fname` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+       + "`fname` VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
        + "`module` TINYINT UNSIGNED NOT NULL,"
        + "`type` TINYINT UNSIGNED NOT NULL,"
        + "`creating_date` BIGINT(64) NOT NULL,"

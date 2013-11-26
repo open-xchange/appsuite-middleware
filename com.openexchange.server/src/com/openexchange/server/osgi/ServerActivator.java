@@ -77,7 +77,7 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
-import com.openexchange.ajax.meta.MetaContributors;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
@@ -189,6 +189,7 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
+import com.openexchange.server.services.MetaContributors;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -446,7 +447,28 @@ public final class ServerActivator extends HousekeepingActivator {
         track(CapabilityService.class, new CapabilityRegistrationListener());
 
         // MetaContributors
-        track(MetaContributors.class, new RegistryCustomizer<MetaContributors>(context, MetaContributors.class));
+        {
+            class MetaContributorRegistryCustomizer extends RegistryCustomizer<MetaContributorRegistry> {
+
+                public MetaContributorRegistryCustomizer(final BundleContext context) {
+                    super(context, MetaContributorRegistry.class);
+                }
+
+                @Override
+                public MetaContributorRegistry addingService(final ServiceReference<MetaContributorRegistry> serviceReference) {
+                    final MetaContributorRegistry registry = super.addingService(serviceReference);
+                    MetaContributors.setRegistry(registry);
+                    return registry;
+                }
+
+                @Override
+                public void removedService(final ServiceReference<MetaContributorRegistry> serviceReference, final MetaContributorRegistry o) {
+                    MetaContributors.setRegistry(null);
+                    super.removedService(serviceReference, o);
+                }
+            }
+            track(MetaContributorRegistry.class, new MetaContributorRegistryCustomizer(context));
+        }
 
         /*
          * Register EventHandler

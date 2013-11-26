@@ -62,8 +62,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.meta.MetaContributors;
-import com.openexchange.ajax.meta.internal.MetaContributorsImpl;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
+import com.openexchange.ajax.meta.internal.MetaContributorTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.exception.internal.SuppressedLoggingCheckerTracker;
 import com.openexchange.i18n.I18nService;
@@ -88,7 +88,7 @@ public final class GlobalActivator implements BundleActivator {
     private volatile Initialization initialization;
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
     private volatile ServiceRegistration<StringParser> parserRegistration;
-    private volatile ServiceRegistration<MetaContributors> metaContributorsRegistration;
+    private volatile ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration;
     private volatile List<ServiceTracker<?,?>> trackers;
 
 
@@ -127,7 +127,7 @@ public final class GlobalActivator implements BundleActivator {
 
             trackers.add(logWrapperTracker);
 
-            final MetaContributorsImpl metaContributors = new MetaContributorsImpl(context);
+            final MetaContributorTracker metaContributors = new MetaContributorTracker(context);
             trackers.add(metaContributors);
 
             trackers.add(new SuppressedLoggingCheckerTracker(context));
@@ -136,7 +136,7 @@ public final class GlobalActivator implements BundleActivator {
                 tracker.open();
             }
 
-            metaContributorsRegistration = context.registerService(MetaContributors.class, metaContributors, null);
+            metaContributorsRegistration = context.registerService(MetaContributorRegistry.class, metaContributors, null);
 
             LOG.info("Global bundle successfully started");
         } catch (final Exception e) {
@@ -241,7 +241,7 @@ public final class GlobalActivator implements BundleActivator {
             }
             shutdownStringParsers();
 
-            final ServiceRegistration<MetaContributors> metaContributorsRegistration = this.metaContributorsRegistration;
+            final ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration = this.metaContributorsRegistration;
             if (null != metaContributorsRegistration) {
                 metaContributorsRegistration.unregister();
                 this.metaContributorsRegistration = null;
