@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration debug="true">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder>
+            <pattern>%d{"MMM d, YYYY H:m:s a"} %class %M%n%level: %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/var/log/open-xchange/open-xchange.log.0</file>
+        <rollingPolicy class="com.openexchange.logback.extensions.FixedWindowRollingPolicy">
+            <fileNamePattern>/var/log/open-xchange/open-xchange.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>99</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>2MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%d{"MMM d, YYYY H:m:s a"} %class %M%n%level: %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>localhost</syslogHost>
+        <facility>LOCAL2</facility>
+        <suffixPattern>%d open-xchange %-5p [%c][%t]: %C,%M %m%n</suffixPattern>
+    </appender>
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="FILE" />
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC" />
+    </root>
+
+    <logger name="org.apache.jcs" level="WARN"/>
+
+    <!-- Important note: -->
+    <!-- The following option ensures, that all login relevant information is logged correctly. Such information is essential to detect -->
+    <!-- and to address session issues, pontentially caused by 3rd parties. -->
+    <!-- Open-Xchange strongly suggests NOT to modify this configuration setting unless you are forced to do so by specific legal -->
+    <!-- requirements, e.g. privacy regulations. -->
+    <!-- -->
+    <!-- Please note: If these settings are changed, Open-Xchange will take no responsibility and will exclude support regarding any -->
+    <!-- session issues and potential security breaches arising thereof. -->
+    <logger name="com.openexchange.login.internal.LoginPerformer" level="INFO"/>
+    <logger name="com.openexchange.sessiond.impl.SessionHandler" level="INFO"/>
+</configuration>
