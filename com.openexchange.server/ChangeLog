@@ -5,6 +5,7 @@
 * 2013-11-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 29914: Cleansed all duplicate log4j occurrences from runtime system
+ - Fix for bug 30027: Trim date values prior to passing to iCal parser
 
 * 2013-11-25 - steffen.templin@open-xchange.com
 
