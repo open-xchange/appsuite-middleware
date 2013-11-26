@@ -546,8 +546,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public void declareCapability(String capability) {
-        declaredCapabilities.put(capability, PRESENT);
+    public boolean declareCapability(String capability) {
+        return (null == declaredCapabilities.putIfAbsent(capability, PRESENT));
     }
 
     /**

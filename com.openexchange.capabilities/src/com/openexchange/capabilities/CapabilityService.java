@@ -105,7 +105,8 @@ public interface CapabilityService {
      * Declares specified capability.
      *
      * @param capability The capability to declare
+     * @return <code>true</code> if capability has not been declared before; otherwise <code>false</code> if already declared (no-op)
      */
-    void declareCapability(String capability);
+    boolean declareCapability(String capability);
 
 }
