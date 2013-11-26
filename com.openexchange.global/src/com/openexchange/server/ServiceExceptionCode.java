@@ -50,28 +50,27 @@
 package com.openexchange.server;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
-import com.openexchange.exception.LogLevelAwareOXExceptionCode;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * The error code enumeration for service errors.
  */
-public enum ServiceExceptionCode implements LogLevelAwareOXExceptionCode {
+public enum ServiceExceptionCode implements OXExceptionCode {
 
     /**
      * The required service %1$s is temporary not available. Please try again later.
      */
-    SERVICE_UNAVAILABLE(ServiceExceptionMessage.SERVICE_UNAVAILABLE_MSG, Category.CATEGORY_TRY_AGAIN, 1, LogLevel.ERROR),
+    SERVICE_UNAVAILABLE(ServiceExceptionMessage.SERVICE_UNAVAILABLE_MSG, Category.CATEGORY_TRY_AGAIN, 1),
     /**
      * An I/O error occurred
      */
-    IO_ERROR(ServiceExceptionMessage.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2, LogLevel.ERROR),
+    IO_ERROR(ServiceExceptionMessage.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * Service initialization failed
      */
-    SERVICE_INITIALIZATION_FAILED(ServiceExceptionMessage.SERVICE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 3, LogLevel.ERROR);
+    SERVICE_INITIALIZATION_FAILED(ServiceExceptionMessage.SERVICE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 3);
 
     /**
      * Creates a new <code>"SRV-0001"</code> (SERVICE_UNAVAILABLE) exception for specified class
@@ -104,18 +103,11 @@ public enum ServiceExceptionCode implements LogLevelAwareOXExceptionCode {
     private final String message;
     private final int detailNumber;
     private final Category category;
-    private final LogLevel logLevel;
 
-    private ServiceExceptionCode(final String message, final Category category, final int detailNumber, final LogLevel logLevel) {
+    private ServiceExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
-        this.logLevel = logLevel;
-    }
-
-    @Override
-    public LogLevel getLogLevel() {
-        return logLevel;
     }
 
     @Override

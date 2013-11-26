@@ -51,16 +51,18 @@ package com.openexchange.exception;
 
 
 /**
- * {@link LogLevelAwareOXExceptionCode} - Extends <tt>OXExceptionCode</tt> by {@link #getLogLevel()}.
+ * {@link SuppressedLoggingChecker} - Checks if a given {@link OXException} instance shall not be logged.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface LogLevelAwareOXExceptionCode extends OXExceptionCode {
+public interface SuppressedLoggingChecker {
 
     /**
-     * Gets the log level applicable for this error code.
+     * Checks if given {@link OXException} instance shall not be logged
      *
-     * @return The log level or <code>null</code> to use default
+     * @param e The instance to check
+     * @return <code>true</code> if instance shall not be logged; otherwise <code>false</code> if allowed to log it
      */
-    LogLevel getLogLevel();
+    boolean isSuppressed(OXException e);
+
 }

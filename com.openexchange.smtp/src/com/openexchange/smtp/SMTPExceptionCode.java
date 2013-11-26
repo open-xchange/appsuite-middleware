@@ -51,9 +51,8 @@
 package com.openexchange.smtp;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
-import com.openexchange.exception.LogLevelAwareOXExceptionCode;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.mail.MailExceptionCode;
 
@@ -62,7 +61,7 @@ import com.openexchange.mail.MailExceptionCode;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
+public enum SMTPExceptionCode implements OXExceptionCode {
 
     /**
      * An I/O error occurred: %1$s
@@ -130,18 +129,12 @@ public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
     private final int detailNumber;
     private final Category category;
     private final String prefix;
-    private final LogLevel logLevel;
 
     private SMTPExceptionCode(final String message, final Category category, final int detailNumber) {
-        this(message, category, detailNumber, null);
-    }
-
-    private SMTPExceptionCode(final String message, final Category category, final int detailNumber, final LogLevel logLevel) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
         prefix = SMTPProvider.PROTOCOL_SMTP.getName();
-        this.logLevel = logLevel;
     }
 
     private SMTPExceptionCode(final MailExceptionCode code) {
@@ -149,7 +142,6 @@ public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
         detailNumber = code.getNumber();
         category = code.getCategory();
         prefix = code.getPrefix();
-        logLevel = null;
     }
 
     @Override
@@ -170,11 +162,6 @@ public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
     @Override
     public String getMessage() {
         return message;
-    }
-
-    @Override
-    public LogLevel getLogLevel() {
-        return logLevel;
     }
 
     @Override

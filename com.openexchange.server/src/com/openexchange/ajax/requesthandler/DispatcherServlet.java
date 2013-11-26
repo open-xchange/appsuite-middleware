@@ -387,7 +387,7 @@ public class DispatcherServlet extends SessionServlet {
              */
             OXException exception = result.getException();
             if (exception != null) {
-                if (exception.isLoggable(LogLevel.DEBUG)) {
+                if (exception.isLoggable()) {
                     logException(exception, LogLevel.DEBUG);
                 } else {
                     logException(exception, LogLevel.TRACE);
@@ -410,14 +410,14 @@ public class DispatcherServlet extends SessionServlet {
             // Handle other OXExceptions
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
                 LOG.error(new StringAllocator("Unexpected error: '").append(e.getMessage()).append('\'').toString(), e);
-            } else if (e.isLoggable(LogLevel.ERROR)) {
+            } else if (e.isLoggable()) {
                 // Ignore special "folder not found" error
                 if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                     logException(e, LogLevel.DEBUG);
                 } else {
                     logException(e);
                 }
-            } else if (e.isLoggable(LogLevel.DEBUG)){
+            } else if (e.isLoggable()){
                 logException(e, LogLevel.DEBUG);
             } else {
                 logException(e, LogLevel.TRACE);

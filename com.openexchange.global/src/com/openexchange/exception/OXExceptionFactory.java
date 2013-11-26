@@ -175,9 +175,6 @@ public class OXExceptionFactory {
                 }
             }
         }
-        if (code instanceof LogLevelAwareOXExceptionCode) {
-            ret.setLogLevel(((LogLevelAwareOXExceptionCode) code).getLogLevel());
-        }
         return ret.addCategory(cat).setPrefix(code.getPrefix());
     }
 

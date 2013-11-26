@@ -274,8 +274,8 @@ public class RealtimeException extends OXException {
     }
 
     @Override
-    public boolean isLoggable(LogLevel logLevel) {
-        return delegate.isLoggable(logLevel);
+    public boolean isLoggable() {
+        return delegate.isLoggable();
     }
 
     @Override

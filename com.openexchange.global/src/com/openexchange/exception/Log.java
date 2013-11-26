@@ -50,7 +50,7 @@
 package com.openexchange.exception;
 
 /**
- * {@link Log} - A simple wrapper for {@link org.apache.commons.logging.Log} which checks with {@link OXException#isLoggable(LogLevel)} if
+ * {@link Log} - A simple wrapper for {@link org.apache.commons.logging.Log} which checks with {@link OXException#isLoggable()} if
  * an {@link OXException} is passed to one of its log methods.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -124,7 +124,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     @Override
     public void trace(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.TRACE)) {
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable()) {
             return;
         }
         delegatee.trace(message, t);
@@ -137,7 +137,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     @Override
     public void debug(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.DEBUG)) {
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable()) {
             return;
         }
         delegatee.debug(message, t);
@@ -150,7 +150,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     @Override
     public void info(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.INFO)) {
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable()) {
             return;
         }
         delegatee.info(message, t);
@@ -163,7 +163,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     @Override
     public void warn(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.WARNING)) {
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable()) {
             return;
         }
         delegatee.warn(message, t);
@@ -176,7 +176,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     @Override
     public void error(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.ERROR)) {
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable()) {
             return;
         }
         delegatee.error(message, t);
@@ -189,7 +189,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     @Override
     public void fatal(final Object message, final Throwable t) {
-        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable(LogLevel.FATAL)) {
+        if (OXException.class.isInstance(t) && !((OXException) t).isLoggable()) {
             return;
         }
         delegatee.fatal(message, t);
