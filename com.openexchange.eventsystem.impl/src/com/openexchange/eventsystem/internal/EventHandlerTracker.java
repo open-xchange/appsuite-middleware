@@ -50,11 +50,12 @@
 package com.openexchange.eventsystem.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -86,9 +87,9 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
      */
     public EventHandlerTracker(final BundleContext context) {
         super(context, EventHandler.class, null);
-        globalWildcard = new ArrayList<EventHandlerReference>();
-        partialWildcard = new HashMap<String, List<EventHandlerReference>>();
-        topicName = new HashMap<String, List<EventHandlerReference>>();
+        globalWildcard = new CopyOnWriteArrayList<EventHandlerReference>();
+        partialWildcard = new ConcurrentHashMap<String, List<EventHandlerReference>>();
+        topicName = new ConcurrentHashMap<String, List<EventHandlerReference>>();
     }
 
     @Override
@@ -208,9 +209,9 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
      * @param topic
      * @return a set of handlers
      */
-    public synchronized Set<EventHandlerReference> getHandlers(final String topic) {
+    public Set<EventHandlerReference> getHandlers(final String topic) {
         // Use a set to remove duplicates
-        final Set<EventHandlerReference> handlers = new HashSet<EventHandlerReference>();
+        final Set<EventHandlerReference> handlers = new HashSet<EventHandlerReference>(6);
 
         // Add the "*" handlers
         handlers.addAll(globalWildcard);
