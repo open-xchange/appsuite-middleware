@@ -50,11 +50,12 @@
 package com.openexchange.ajax.meta.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -74,10 +75,10 @@ public final class MetaContributorTracker extends ServiceTracker<MetaContributor
     private final List<MetaContributorReference> globalWildcard;
 
     /** Map key is topic prefix of partial wildcard */
-    private final Map<String, List<MetaContributorReference>> partialWildcard;
+    private final ConcurrentMap<String, List<MetaContributorReference>> partialWildcard;
 
     /** Map key is topic name */
-    private final Map<String, List<MetaContributorReference>> topicName;
+    private final ConcurrentMap<String, List<MetaContributorReference>> topicName;
 
     /**
      * Initializes a new {@link MetaContributorTracker}.
@@ -86,9 +87,9 @@ public final class MetaContributorTracker extends ServiceTracker<MetaContributor
      */
     public MetaContributorTracker(final BundleContext context) {
         super(context, MetaContributor.class, null);
-        globalWildcard = new ArrayList<MetaContributorReference>();
-        partialWildcard = new HashMap<String, List<MetaContributorReference>>();
-        topicName = new HashMap<String, List<MetaContributorReference>>();
+        globalWildcard = new CopyOnWriteArrayList<MetaContributorReference>();
+        partialWildcard = new ConcurrentHashMap<String, List<MetaContributorReference>>();
+        topicName = new ConcurrentHashMap<String, List<MetaContributorReference>>();
     }
 
     @Override
@@ -208,7 +209,7 @@ public final class MetaContributorTracker extends ServiceTracker<MetaContributor
      * @param topic
      * @return a set of handlers
      */
-    public synchronized Set<MetaContributor> getContributors(final String topic) {
+    public Set<MetaContributor> getContributors(final String topic) {
         // Use a set to remove duplicates
         final Set<MetaContributor> handlers = new HashSet<MetaContributor>();
 
@@ -216,7 +217,7 @@ public final class MetaContributorTracker extends ServiceTracker<MetaContributor
         handlers.addAll(globalWildcard);
 
         // Add the handlers with partial matches
-        if (partialWildcard.size() > 0) {
+        if (!partialWildcard.isEmpty()) {
             int index = topic.lastIndexOf('/');
             while (index >= 0) {
                 final String subTopic = topic.substring(0, index);
