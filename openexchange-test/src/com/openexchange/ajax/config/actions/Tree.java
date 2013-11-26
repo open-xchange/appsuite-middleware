@@ -285,6 +285,9 @@ public enum Tree {
     /** Wether spell checking is enabled for that user or not */
     SpellCheck("/spellcheck"),
 
+    /** the standard folders (read-only) */
+    PrivateFolders("/folder"),
+
     /** the standard task folder (read-only) */
     PrivateTaskFolder("/folder/tasks"),
 
