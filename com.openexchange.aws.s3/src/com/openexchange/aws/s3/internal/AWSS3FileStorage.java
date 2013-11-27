@@ -116,7 +116,6 @@ public class AWSS3FileStorage implements FileStorage {
         super();
         this.amazonS3 = amazonS3;
         this.bucketName = bucketName;
-        this.amazonS3.addRequestHandler(new WorkaroundingRequestHandler());
     }
 
     @Override
