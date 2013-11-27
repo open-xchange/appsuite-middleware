@@ -73,9 +73,8 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
 import com.damienmiller.BCrypt;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
@@ -160,7 +159,7 @@ public class AdminCache {
 
     private PropertyHandler prop = null;
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(AdminCache.class);
 
     private OXAdminPoolInterface pool = null;
 

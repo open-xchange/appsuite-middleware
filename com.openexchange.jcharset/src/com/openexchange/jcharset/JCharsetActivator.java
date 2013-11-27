@@ -50,11 +50,11 @@
 package com.openexchange.jcharset;
 
 import java.nio.charset.spi.CharsetProvider;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -78,7 +78,7 @@ public final class JCharsetActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        final Log log = LogFactory.getLog(JCharsetActivator.class);
+        final Logger log = LoggerFactory.getLogger(JCharsetActivator.class);
         log.info("Starting bundle: com.openexchange.freecharset");
         try {
             /*
@@ -93,7 +93,7 @@ public final class JCharsetActivator implements BundleActivator {
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        final Log log = LogFactory.getLog(JCharsetActivator.class);
+        final Logger log = LoggerFactory.getLogger(JCharsetActivator.class);
         try {
             /*
              * Unregister jcharset's charset provider

@@ -57,9 +57,8 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mozilla.universalchardet.UniversalDetector;
+import org.slf4j.Logger;
 
 /**
  * {@link CharsetDetector} - A charset detector based on <a href="https://code.google.com/p/juniversalchardet/">juniversalchardet</a>
@@ -69,7 +68,7 @@ import org.mozilla.universalchardet.UniversalDetector;
  */
 public final class CharsetDetector {
 
-    private static final Log LOG = LogFactory.getLog(CharsetDetector.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CharsetDetector.class);
 
     private static final String FALLBACK = "ISO-8859-1";
 
@@ -120,11 +119,11 @@ public final class CharsetDetector {
      */
     private static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.fatal(" ---=== /!\\ ===--- Thread death ---=== /!\\ ===--- ", t);
+            LOG.error(" ---=== /!\\ ===--- Thread death ---=== /!\\ ===--- ", t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
-            LOG.fatal(
+            LOG.error(
                 " ---=== /!\\ ===--- The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating. ---=== /!\\ ===--- ",
                 t);
             throw (VirtualMachineError) t;

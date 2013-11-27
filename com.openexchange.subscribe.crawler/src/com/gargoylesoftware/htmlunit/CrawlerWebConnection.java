@@ -87,8 +87,8 @@ import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.util.EncodingUtil;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.SimpleLog;
+import org.slf4j.Logger;
 
 
 /**
@@ -402,7 +402,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
             httpClient_ = createHttpClient();
 
             // Disable informational messages from httpclient
-            final Log log = LogFactory.getLog("httpclient.wire");
+            final Logger log = org.slf4j.LoggerFactory.getLogger(CrawlerWebConnection.class);
             if (log instanceof SimpleLog) {
                 ((SimpleLog) log).setLevel(SimpleLog.LOG_LEVEL_WARN);
             }

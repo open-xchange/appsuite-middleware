@@ -56,7 +56,8 @@ import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -101,7 +102,7 @@ public final class DListAddIndexForLookup extends UpdateTaskAdapter {
     }
 
     private void createDListIndex(final Connection con, final String[] tables, final String name, final String... columns) throws SQLException {
-        final Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DListAddIndexForLookup.class));
+        final Logger log = LoggerFactory.getLogger(DListAddIndexForLookup.class);
         final String[] cols = new String[columns.length + 1];
         cols[0] = "cid";
         System.arraycopy(columns, 0, cols, 1, columns.length);

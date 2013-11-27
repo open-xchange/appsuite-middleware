@@ -56,6 +56,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.management.ManagementService;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCountMBean;
@@ -120,8 +121,7 @@ public final class ManagementServiceTrackerCustomizer2 implements ServiceTracker
 
     void registerCacheMBean(final ManagementService management) {
         if (objectName == null) {
-            final org.apache.commons.logging.Log LOG =
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagementServiceTrackerCustomizer.class));
+            final Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer2.class);
             try {
                 objectName = getObjectName(SessionThreadCountMBeanImpl.class.getName(), SessionThreadCountMBean.SESSION_THREAD_COUNT_DOMAIN);
                 management.registerMBean(objectName, new SessionThreadCountMBeanImpl(counter, sessiondServiceTracker));
@@ -140,7 +140,7 @@ public final class ManagementServiceTrackerCustomizer2 implements ServiceTracker
             try {
                 management.unregisterMBean(objectName);
             } catch (final Exception e) {
-                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagementServiceTrackerCustomizer.class)).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer2.class).error(e.getMessage(), e);
             } finally {
                 objectName = null;
             }

@@ -80,8 +80,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.security.auth.Subject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -96,14 +95,14 @@ import com.sun.mail.util.PropUtil;
 public class QueuingIMAPStore extends IMAPStore {
 
     /** The logger */
-    static final Log LOG = LogFactory.getLog(QueuingIMAPStore.class);
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(QueuingIMAPStore.class);
 
     /**
      * Gets the logger.
      *
      * @return The logger
      */
-    public static Log getLog() {
+    public static Logger getLog() {
         return LOG;
     }
 
