@@ -1,3 +1,7 @@
+* 2013-11-27 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29982: Correct handling of URLs as database hostnames
+
 * 2013-11-27 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29853: Check for duplicate folder name during insert/update
