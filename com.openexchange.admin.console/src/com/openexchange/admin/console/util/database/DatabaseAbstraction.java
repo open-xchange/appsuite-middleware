@@ -169,7 +169,8 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
                 URI uri;
                 try {
                     uri = new URI(hostname);
-                    hostname = uri.getHost();
+                    int port = uri.getPort();
+                    hostname = uri.getHost() + String.valueOf(port != -1 ? port : 3306);
                 } catch (URISyntaxException e) {
                     throw new InvalidDataException(e);
                 }
