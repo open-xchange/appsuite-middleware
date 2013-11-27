@@ -63,7 +63,6 @@ import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
  * {@link GCMDriveEventPublisher}
@@ -98,7 +97,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             LOG.error("unable to get subscriptions for service " + SERIVCE_ID, e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
-            String pushToken = event.getPushToken();
+            String pushTokenReference = event.getPushTokenReference();
             for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
                 /*
                  * prepare chunk
@@ -107,7 +106,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 List<String> registrationIDs = new ArrayList<String>(length);
                 for (int j = 0; j < length; j++) {
                     Subscription subscription = subscriptions.get(i + j);
-                    if (false == Strings.isEmpty(pushToken) && pushToken.equals(subscription.getToken())) {
+                    if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
                         LOG.trace("Skipping push notification for subscription: " + subscription);
                         continue;
                     }

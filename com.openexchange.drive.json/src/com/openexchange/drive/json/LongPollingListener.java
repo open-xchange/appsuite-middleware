@@ -84,4 +84,14 @@ public interface LongPollingListener {
      */
     DriveSession getSession();
 
+    /**
+     * Gets a value indicating whether this listener's push token matches the supplied token value, trying to match either the token
+     * itself or the md5 checksum of the token.
+     *
+     * @param tokenRef The push token reference to match
+     * @return <code>true</code> if this listener's token or the md5 checksum of this listener's token matches, <code>false</code>,
+     *         otherwise
+     */
+    boolean matches(String tokenRef);
+
 }

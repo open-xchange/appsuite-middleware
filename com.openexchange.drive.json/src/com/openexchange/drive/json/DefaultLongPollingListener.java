@@ -47,55 +47,63 @@
  *
  */
 
-package com.openexchange.drive.events;
+package com.openexchange.drive.json;
 
-import java.util.List;
-import java.util.Set;
-import com.openexchange.drive.DriveAction;
-import com.openexchange.drive.DriveVersion;
-
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import com.openexchange.drive.DriveSession;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 
 /**
- * {@link DriveEvent}
+ * {@link DefaultLongPollingListener}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveEvent {
+public abstract class DefaultLongPollingListener implements LongPollingListener {
+
+    protected DriveSession driveSession;
 
     /**
-     * Gets the consecutive actions to be executed by the client.
+     * Initializes a new {@link DefaultLongPollingListener}.
      *
-     * @return The client actions
+     * @param driveSession The drive session
      */
-    List<DriveAction<? extends DriveVersion>> getActions();
+    protected DefaultLongPollingListener(DriveSession driveSession) {
+        super();
+        this.driveSession = driveSession;
+    }
 
-    /**
-     * Gets the context ID.
-     *
-     * @return The context ID
-     */
-    int getContextID();
+    @Override
+    public DriveSession getSession() {
+        return driveSession;
+    }
 
-    /**
-     * Gets the IDs of all affected folders.
-     *
-     * @return The folder IDs
-     */
-    Set<String> getFolderIDs();
+    @Override
+    public boolean matches(String tokenRef) {
+        String token = extractToken(driveSession);
+        return null == tokenRef ? null == token : tokenRef.equals(token) || tokenRef.equals(getMD5(token));
+    }
 
-    /**
-     * Gets a value indicating whether this event is originated from a remote backend node or not.
-     *
-     * @return <code>true</code> it this event is 'remote', <code>false</code>, otherwise
-     */
-    boolean isRemote();
+    private static String extractToken(DriveSession driveSession) {
+        if (null != driveSession && null != driveSession.getServerSession()) {
+            return (String)driveSession.getServerSession().getParameter(DriveSession.PARAMETER_PUSH_TOKEN);
+        }
+        return null;
+    }
 
-    /**
-     * Gets the drive push token if this event originates in a drive client. Only applicable if available in the drive session. A token
-     * reference is either the push token itself, or the md5 checksum of that token, expressed as a lowercase hexadecimal number string.
-     *
-     * @return The push token reference of the device causing the event, or <code>null</code> if not applicable
-     */
-    String getPushTokenReference();
+    private static String getMD5(String string) {
+        if (Strings.isEmpty(string)) {
+            return string;
+        }
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] digest = md5.digest(string.getBytes(Charsets.UTF_8));
+            return new BigInteger(1, digest).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            return null; // ignore
+        }
+    }
 
 }

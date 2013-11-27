@@ -81,7 +81,7 @@ public class DriveEventWrapper {
         if (null != folderIDs) {
             map.put("__folderIDs", driveEvent.getFolderIDs().toArray(new String[folderIDs.size()]));
         }
-        String pushToken = driveEvent.getPushToken();
+        String pushToken = driveEvent.getPushTokenReference();
         if (null != pushToken) {
             map.put("__pushToken", pushToken);
         }

@@ -64,7 +64,7 @@ import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
-import com.openexchange.drive.json.LongPollingListener;
+import com.openexchange.drive.json.DefaultLongPollingListener;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -74,11 +74,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CometListener implements LongPollingListener {
+public class CometListener extends DefaultLongPollingListener {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CometListener.class);
 
-    private final DriveSession session;
     private final CometContext<DriveEvent> cometContext;
     private final ReentrantLock lock;
 
@@ -91,15 +90,9 @@ public class CometListener implements LongPollingListener {
      * @param session The session
      */
     public CometListener(DriveSession session, CometContext<DriveEvent> cometContext) {
-        super();
-        this.session = session;
+        super(session);
         this.cometContext = cometContext;
         this.lock = new ReentrantLock();
-    }
-
-    @Override
-    public DriveSession getSession() {
-        return session;
     }
 
     @Override
@@ -110,8 +103,8 @@ public class CometListener implements LongPollingListener {
                 /*
                  * wait for event inside comet handler
                  */
-                LOG.debug("Registering new comet handler for " + session + " ...");
-                cometHandler = new DriveCometHandler(session);
+                LOG.debug("Registering new comet handler for " + driveSession + " ...");
+                cometHandler = new DriveCometHandler(driveSession);
                 cometContext.addCometHandler(cometHandler);
                 /*
                  * return placeholder result for now
@@ -123,7 +116,7 @@ public class CometListener implements LongPollingListener {
                 /*
                  * consume available event directly
                  */
-                LOG.debug("Stored event available for " + session + ", no need to wait.");
+                LOG.debug("Stored event available for " + driveSession + ", no need to wait.");
                 AJAXRequestResult result = createResult(this.event);
                 this.event = null;
                 return result;
@@ -176,12 +169,12 @@ public class CometListener implements LongPollingListener {
     }
 
     private boolean isInteresting(DriveEvent event) {
-        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(session.getRootFolderID());
+        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(driveSession.getRootFolderID());
     }
 
     @Override
     public String toString() {
-        return "CometListener [session=" + session + "]";
+        return "CometListener [session=" + driveSession + "]";
     }
 
 }

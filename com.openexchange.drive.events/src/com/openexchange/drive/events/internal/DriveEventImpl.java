@@ -73,7 +73,7 @@ public class DriveEventImpl implements DriveEvent {
     private final int contextID;
     private final Set<String> folderIDs;
     private final boolean remote;
-    private final String pushToken;
+    private final String pushTokenReference;
 
     /**
      * Initializes a new {@link DriveEventImpl}.
@@ -82,14 +82,14 @@ public class DriveEventImpl implements DriveEvent {
      * @param folderIDs The affected folder IDs
      * @param actions The client actions to execute
      * @param remote <code>true</code> it this event is 'remote', <code>false</code>, otherwise
-     * @param pushToken The push token of the device causing the event, or <code>null</code> if not applicable
+     * @param pushTokenReference The push token of the device causing the event, or <code>null</code> if not applicable
      */
-    public DriveEventImpl(int contextID, Set<String> folderIDs, boolean remote, String pushToken) {
+    public DriveEventImpl(int contextID, Set<String> folderIDs, boolean remote, String pushTokenReference) {
         super();
         this.contextID = contextID;
         this.folderIDs = folderIDs;
         this.remote = remote;
-        this.pushToken = pushToken;
+        this.pushTokenReference = pushTokenReference;
     }
 
     @Override
@@ -113,13 +113,13 @@ public class DriveEventImpl implements DriveEvent {
     }
 
     @Override
-    public String getPushToken() {
-        return pushToken;
+    public String getPushTokenReference() {
+        return pushTokenReference;
     }
 
     @Override
     public String toString() {
-        return "DriveEvent [remote=" + remote + ", contextID=" + contextID + ", folderIDs=" + folderIDs + ", pushToken=" + pushToken + "]";
+        return "DriveEvent [remote=" + remote + ", contextID=" + contextID + ", folderIDs=" + folderIDs + ", pushToken=" + pushTokenReference + "]";
     }
 
     @Override
@@ -128,7 +128,7 @@ public class DriveEventImpl implements DriveEvent {
         int result = 1;
         result = prime * result + contextID;
         result = prime * result + ((folderIDs == null) ? 0 : folderIDs.hashCode());
-        result = prime * result + ((pushToken == null) ? 0 : pushToken.hashCode());
+        result = prime * result + ((pushTokenReference == null) ? 0 : pushTokenReference.hashCode());
         result = prime * result + (remote ? 1231 : 1237);
         return result;
     }
@@ -155,11 +155,11 @@ public class DriveEventImpl implements DriveEvent {
         } else if (!folderIDs.equals(other.folderIDs)) {
             return false;
         }
-        if (pushToken == null) {
-            if (other.pushToken != null) {
+        if (pushTokenReference == null) {
+            if (other.pushTokenReference != null) {
                 return false;
             }
-        } else if (!pushToken.equals(other.pushToken)) {
+        } else if (!pushTokenReference.equals(other.pushTokenReference)) {
             return false;
         }
         if (remote != other.remote) {

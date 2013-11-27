@@ -71,9 +71,7 @@ import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.LongPollingListenerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListenerRegistrar}
@@ -181,16 +179,12 @@ public class ListenerRegistrar implements DriveEventPublisher  {
         for (String folderID : event.getFolderIDs()) {
             listenerSessionIDs.addAll(listenersPerFolder.get(getFolderKey(folderID, event.getContextID())));
         }
+        String pushTokenReference = event.getPushTokenReference();
         for (LongPollingListener listener : listeners.getAllPresent(listenerSessionIDs).values()) {
-            String pushToken = event.getPushToken();
-            if (false == Strings.isEmpty(pushToken)) {
-                ServerSession serverSession = listener.getSession().getServerSession();
-                String listenerPushToken = (String)serverSession.getParameter(DriveSession.PARAMETER_PUSH_TOKEN);
-                if (null != serverSession && pushToken.equals(listenerPushToken)) {
-                    // don't send back to originator
-                    LOG.trace("Skipping push notification for listener: " + listener);
-                    continue;
-                }
+            if (null != pushTokenReference && listener.matches(pushTokenReference)) {
+                // don't send back to originator
+                LOG.trace("Skipping push notification for listener: " + listener);
+                continue;
             }
             listener.onEvent(event);
         }
