@@ -878,6 +878,9 @@ if ! grep "com.openexchange.groupware.update.tasks.FolderExtendNameTask" >/dev/n
 EOF
 fi
 
+# SoftwareChange_Request-1747
+ox_add_property com.openexchange.log.suppressedCategories USER_INPUT /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
