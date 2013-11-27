@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<configuration debug="true">
+<configuration>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.err</target>
         <encoder>
-            <pattern>%d{"MMM d, YYYY H:m:s a"} %class %M%n%level: %msg%n</pattern>
+            <pattern>%d{"MMM d, yyyy H:m:s a"} %class %M%n%level: %msg%n</pattern>
         </encoder>
     </appender>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -17,7 +17,7 @@
             <maxFileSize>2MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{"MMM d, YYYY H:m:s a"} %class %M%n%level: %msg%n</pattern>
+            <pattern>%d{"MMM d, yyyy H:m:s a"} %class %M%n%level: %msg%n</pattern>
         </encoder>
     </appender>
     <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">

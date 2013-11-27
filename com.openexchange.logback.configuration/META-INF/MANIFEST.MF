@@ -5,5 +5,5 @@ Bundle-SymbolicName: com.openexchange.logback.configuration
 Bundle-Version: 7.4.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Fragment-Host: ch.qos.logback.core
+Fragment-Host: ch.qos.logback.classic
 Bundle-ClassPath: .

@@ -24,6 +24,7 @@ opt/open-xchange/etc/javamail.properties
 opt/open-xchange/etc/jolokia.properties
 opt/open-xchange/etc/ldap.properties
 opt/open-xchange/etc/login.properties
+opt/open-xchange/etc/logback.xml
 opt/open-xchange/etc/mailcache.ccf
 opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-push.properties
