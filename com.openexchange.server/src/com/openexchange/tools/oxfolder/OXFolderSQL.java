@@ -920,7 +920,7 @@ public final class OXFolderSQL {
     private static final String SQL_UPDATE_WITH_FOLDERNAME =
         "UPDATE oxfolder_tree SET fname=?,changing_date=?,changed_from=?,permission_flag=?,module=? " +
         "WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
-        "SELECT fname FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=?);"
+        "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);"
     ;
 
     private static final String SQL_UPDATE_WITHOUT_FOLDERNAME = "UPDATE oxfolder_tree SET changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?";
@@ -974,6 +974,7 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, folderObj.getParentFolderID());
                     stmt.setInt(pos++, FolderObject.MIN_FOLDER_ID);
                     stmt.setString(pos++, folderObj.getFolderName());
+                    stmt.setInt(pos++, folderObj.getObjectID());
                     if (0 == executeUpdate(stmt)) {
                         // due to already existing subfolder with the same name
                         throw new SQLException("Entry not updated");
