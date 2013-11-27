@@ -102,7 +102,6 @@ import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
@@ -1157,11 +1156,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private static String getHostName() {
-        final Props logProperties = LogProperties.optLogProperties();
-        if (null == logProperties) {
-            return getStaticHostName();
-        }
-        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
+        final String serverName = LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }

@@ -143,6 +143,18 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Creates a general exception.
+     *
+     * @param logMessage The log message
+     * @param cause The cause
+     * @return A general exception.
+     */
+    public static OXException general(final String logMessage, final Throwable cause) {
+        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE, cause).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(
+            PREFIX_GENERAL);
+    }
+
+    /**
      * Creates a not-found exception.
      *
      * @param id The identifier of the missing object

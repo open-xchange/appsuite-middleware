@@ -49,6 +49,8 @@
 
 package com.openexchange.ajp13.watcher;
 
+import java.util.Map;
+
 
 /**
  * {@link Task} - A task tracked by watcher.
@@ -68,6 +70,8 @@ public interface Task {
     StackTraceElement[] getStackTrace();
 
     Thread getThread();
+
+    Map<String, String> getMdcMap();
 
     String getThreadName();
 

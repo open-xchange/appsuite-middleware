@@ -59,7 +59,6 @@ import org.glassfish.grizzly.http.server.util.Globals;
 import org.glassfish.grizzly.utils.Charsets;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.tools.servlet.http.Cookies;
 
 /**
@@ -220,10 +219,7 @@ public class OXRequest extends Request {
         session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval() * 1000);
         sessions.put(sessionId, session);
         response.addCookie(createSessionCookie(sessionId));
-        if (LogProperties.isEnabled()) {
-            Props logProperties = LogProperties.getLogProperties();
-            logProperties.put(LogProperties.Name.GRIZZLY_HTTP_SESSION, sessionId);
-        }
+        LogProperties.put(LogProperties.Name.GRIZZLY_HTTP_SESSION, sessionId);
     }
 
     /**

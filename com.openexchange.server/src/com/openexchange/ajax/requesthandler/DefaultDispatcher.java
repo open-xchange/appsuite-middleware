@@ -64,9 +64,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -256,10 +254,9 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
     private void addLogProperties(final AJAXRequestData requestData, final boolean withQueryString) {
-        if (null != requestData && LogProperties.isEnabled()) {
-            final Props props = LogProperties.getLogProperties();
-            props.put(LogProperties.Name.AJAX_ACTION, ForceLog.valueOf(requestData.getAction()));
-            props.put(LogProperties.Name.AJAX_MODULE, ForceLog.valueOf(requestData.getModule()));
+        if (null != requestData) {
+            LogProperties.putProperty(LogProperties.Name.AJAX_ACTION, requestData.getAction());
+            LogProperties.putProperty(LogProperties.Name.AJAX_MODULE, requestData.getModule());
 
             if (withQueryString) {
                 final Map<String, String> parameters = requestData.getParameters();
@@ -277,7 +274,7 @@ public class DefaultDispatcher implements Dispatcher {
                         sb.append(entry.getKey()).append('=').append(entry.getValue());
                     }
                     sb.append('"');
-                    props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(sb.toString()));
+                    LogProperties.putProperty(LogProperties.Name.SERVLET_QUERY_STRING, sb.toString());
                 }
             }
         }

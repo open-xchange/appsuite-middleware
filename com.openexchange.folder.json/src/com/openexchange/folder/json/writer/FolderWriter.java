@@ -467,7 +467,7 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                LogProperties.putLogProperty(LogProperties.Name.SESSION_SESSION, folder.getSession());
+                LogProperties.putProperty(LogProperties.Name.SESSION_SESSION, folder.getSession());
                 final int obj = folder.getTotal();
                 jsonPutter.put(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }

@@ -139,7 +139,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -1601,7 +1600,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                                     if (null == userAccounts) {
                                         userAccounts = fsService.getAccountManager().getAccounts(session);
                                     }
-                                    final Props props = LogProperties.getLogProperties();
                                     for (final FileStorageAccount userAccount : userAccounts) {
                                         if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
                                             // Ignore infostore file storage and default account
@@ -1610,9 +1608,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                                         final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
                                         accountAccess.connect();
                                         try {
-                                            props.put(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID, userAccount.getId());
-                                            props.put(LogProperties.Name.FILE_STORAGE_CONFIGURATION, userAccount.getConfiguration().toString());
-                                            props.put(LogProperties.Name.FILE_STORAGE_SERVICE_ID, fsService.getId());
+                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID, userAccount.getId());
+                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_CONFIGURATION, userAccount.getConfiguration().toString());
+                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_SERVICE_ID, fsService.getId());
                                             final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
                                             if (null != rootFolder) {
                                                 fsAccounts.add(userAccount);
@@ -1622,9 +1620,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                                             }
                                         } finally {
                                             accountAccess.close();
-                                            props.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
-                                            props.remove(LogProperties.Name.FILE_STORAGE_CONFIGURATION);
-                                            props.remove(LogProperties.Name.FILE_STORAGE_SERVICE_ID);
+                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
+                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_CONFIGURATION);
+                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_SERVICE_ID);
                                         }
                                     }
                                 }

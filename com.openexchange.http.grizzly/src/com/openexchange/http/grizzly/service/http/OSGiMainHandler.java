@@ -191,9 +191,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
-                    if (LogProperties.isEnabled()) {
-                        logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
-                    }
+                    logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
                     appendRequestInfo(logBuilder, request);
                     LOG.error(logBuilder.toString(), t);
                     // 500 - Internal Server Error
@@ -535,7 +533,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         final MappingData mappingData = request.obtainMappingData();
         //Change contextPath from "/" to the empty Sring for the default context in the httpservice
         mappingData.contextPath.setString("");
-        
+
         mappingData.wrapperPath.setString(alias);
 
         if (alias.length() != originalAlias.length()) {

@@ -103,7 +103,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -1446,17 +1445,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     private EventProperty extractRemoteAddress() {
-        Props properties = LogProperties.getLogProperties();
-        if (null != properties) {
-            Object serverName = properties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-            if (null == serverName) {
-                serverName = properties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
-            }
-            if (null != serverName) {
-                return new EventProperty("remoteAddress", serverName.toString());
-            }
+        Object serverName = LogProperties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
+        if (null == serverName) {
+            serverName = LogProperties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
         }
-
+        if (null != serverName) {
+            return new EventProperty("remoteAddress", serverName.toString());
+        }
         return null;
     }
 

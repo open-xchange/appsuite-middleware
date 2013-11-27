@@ -54,9 +54,7 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -67,9 +65,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -125,17 +121,13 @@ public final class MessageWriter {
      * @throws OXException If writing structure fails
      */
     public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws OXException {
-        final Set<LogProperties.Name> removees = EnumSet.noneOf(LogProperties.Name.class);
-        final Props props = LogProperties.getLogProperties();
         {
-            if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId))) {
-                removees.add(LogProperties.Name.MAIL_ACCOUNT_ID);
+            LogProperties.putProperty(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(accountId));
+            if (null != mail.getFolder()) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, mail.getFolder());
             }
-            if (!props.put(LogProperties.Name.MAIL_FULL_NAME, mail.getFolder())) {
-                removees.add(LogProperties.Name.MAIL_FULL_NAME);
-            }
-            if (!props.put(LogProperties.Name.MAIL_MAIL_ID, mail.getMailId())) {
-                removees.add(LogProperties.Name.MAIL_MAIL_ID);
+            if (null != mail.getMailId()) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_MAIL_ID, mail.getMailId());
             }
         }
         try {
@@ -144,9 +136,7 @@ public final class MessageWriter {
             new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(mail, handler);
             return handler.getJSONMailObject();
         } finally {
-            for (final LogProperties.Name name : removees) {
-                props.remove(name);
-            }
+            LogProperties.removeProperties(LogProperties.Name.MAIL_ACCOUNT_ID, LogProperties.Name.MAIL_FULL_NAME, LogProperties.Name.MAIL_MAIL_ID);
         }
     }
 
@@ -237,17 +227,13 @@ public final class MessageWriter {
         /*
          * Add log properties
          */
-        final Set<LogProperties.Name> removees = EnumSet.noneOf(LogProperties.Name.class);
-        final Props props = LogProperties.optLogProperties();
-        if (null != props) {
-            if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)))) {
-                removees.add(LogProperties.Name.MAIL_ACCOUNT_ID);
+        {
+            LogProperties.putProperty(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(accountId));
+            if (null != fullName) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, fullName);
             }
-            if (null != fullName && !props.put(LogProperties.Name.MAIL_FULL_NAME, ForceLog.valueOf(fullName))) {
-                removees.add(LogProperties.Name.MAIL_FULL_NAME);
-            }
-            if (null != mailId && !props.put(LogProperties.Name.MAIL_MAIL_ID, ForceLog.valueOf(mailId))) {
-                removees.add(LogProperties.Name.MAIL_MAIL_ID);
+            if (null != mailId) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_MAIL_ID, mailId);
             }
         }
         try {
@@ -297,9 +283,7 @@ public final class MessageWriter {
             }
             throw e;
         } finally {
-            for (final LogProperties.Name name : removees) {
-                props.remove(name);
-            }
+            LogProperties.removeProperties(LogProperties.Name.MAIL_ACCOUNT_ID, LogProperties.Name.MAIL_FULL_NAME, LogProperties.Name.MAIL_MAIL_ID);
         }
     }
 

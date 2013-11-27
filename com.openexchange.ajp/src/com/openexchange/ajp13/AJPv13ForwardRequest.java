@@ -266,7 +266,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                 ajpRequestHandler.setContentLength(contentLength);
             }
         }
-        if (LogProperties.isEnabled()) {
+        {
             /*
              * Gather logging info
              */
@@ -274,12 +274,12 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             if (null != echoHeaderName) {
                 final String echoValue = servletRequest.getHeader(echoHeaderName);
                 if (null != echoValue) {
-                    LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_ID, echoValue);
+                    LogProperties.putProperty(LogProperties.Name.AJP_REQUEST_ID, echoValue);
                 }
             }
         }
-        LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_IP, servletRequest.getRemoteAddr());
-        LogProperties.putLogProperty(LogProperties.Name.AJP_SERVER_NAME, servletRequest.getServerName());
+        LogProperties.putProperty(LogProperties.Name.AJP_REQUEST_IP, servletRequest.getRemoteAddr());
+        LogProperties.putProperty(LogProperties.Name.AJP_SERVER_NAME, servletRequest.getServerName());
         /*
          * Determine if content type indicates form data
          */
@@ -699,7 +699,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
+                        LogProperties.putProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     } else {
@@ -736,7 +736,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
+                        LogProperties.putProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     }
@@ -786,7 +786,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             }
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
-        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, jsessionIdVal);
+        LogProperties.putProperty(LogProperties.Name.AJP_HTTP_SESSION, jsessionIdVal);
         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
         /*

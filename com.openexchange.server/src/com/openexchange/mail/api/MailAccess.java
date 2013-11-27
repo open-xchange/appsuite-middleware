@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
@@ -138,6 +137,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private Properties mailProperties;
 
     private transient Thread usingThread;
+    private transient Map<String, String> usingThreadProperties;
 
     private StackTraceElement[] trace;
 
@@ -219,6 +219,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected final void resetFields() {
         mailProperties = null;
         usingThread = null;
+        usingThreadProperties = null;
         trace = null;
     }
 
@@ -757,14 +758,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public void logTrace(final StringBuilder sBuilder, final org.apache.commons.logging.Log log) {
         final Thread usingThread = this.usingThread;
         if (null != usingThread) {
-            final Props taskProps = LogProperties.optLogProperties(usingThread);
+            final Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
+                for (final Entry<String, String> entry : taskProps.entrySet()) {
                     final String propertyName = entry.getKey();
-                    final Object value = entry.getValue();
+                    final String value = entry.getValue();
                     if (null != value) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName, value);
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
@@ -815,14 +816,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public final String getTrace() {
         final StringBuilder sBuilder = new StringBuilder(2048);
         {
-            final Props taskProps = LogProperties.optLogProperties(usingThread);
+            final Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
+                for (final Entry<String, String> entry : taskProps.entrySet()) {
                     final String propertyName = entry.getKey();
-                    final Object value = entry.getValue();
+                    final String value = entry.getValue();
                     if (null != value) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName, value);
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
@@ -906,6 +907,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private final void applyNewThread() {
         usingThread = Thread.currentThread();
+        usingThreadProperties = LogProperties.getPropertyMap();
         /*
          * This is faster than Thread.getStackTrace() since a native method is used to fill thread's stack trace
          */

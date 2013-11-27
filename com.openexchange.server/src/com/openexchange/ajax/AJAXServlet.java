@@ -96,7 +96,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
-import org.slf4j.MDC;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -117,9 +116,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -507,10 +504,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
-        final Props props = LogProperties.getLogProperties();
-        props.put(LogProperties.Name.AJAX_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
-
-        MDC.put(LogProperties.Name.AJAX_REQUEST_NUMBER.getName(), Long.toString(REQUEST_NUMBER.incrementAndGet()));
+        LogProperties.putProperty(LogProperties.Name.AJAX_REQUEST_NUMBER, Long.toString(REQUEST_NUMBER.incrementAndGet()));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
@@ -530,7 +524,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw se;
         } finally {
             decrementRequests();
-            MDC.remove(LogProperties.Name.AJAX_REQUEST_NUMBER.getName());
+            LogProperties.removeProperty(LogProperties.Name.AJAX_REQUEST_NUMBER);
         }
     }
 

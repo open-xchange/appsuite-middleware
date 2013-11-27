@@ -666,7 +666,7 @@ public class LoginServlet extends AJAXServlet {
                 return;
             }
         } finally {
-            LogProperties.removeLogProperties(LOG_PROPERTIES);
+            LogProperties.removeProperties(LOG_PROPERTIES);
         }
     }
 
@@ -944,7 +944,7 @@ public class LoginServlet extends AJAXServlet {
              */
             cookie.setMaxAge(conf.getCookieExpiry());
         }
-        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName);
+        final String domain = getDomainValue(null == serverName ? LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
         }

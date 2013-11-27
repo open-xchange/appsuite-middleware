@@ -85,7 +85,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.MdcProvider;
 import com.openexchange.threadpool.Task;
@@ -1583,7 +1582,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     protected void afterExecute(final Runnable r, final Throwable throwable) {
         super.afterExecute(r, throwable);
-        LogProperties.removeLogProperties(); // Drop possible log properties
+        MDC.clear(); // Drop possible log properties
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
             if (customFutureTask.isTrackable()) {

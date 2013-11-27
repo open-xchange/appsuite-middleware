@@ -441,12 +441,10 @@ public class DispatcherServlet extends SessionServlet {
 
     private void logException(final Exception e, final LogLevel logLevel) {
         final String msg;
-        if (LogProperties.isEnabled()) {
+        {
             final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
             logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
             msg = logBuilder.toString();
-        } else {
-            msg = "Error processing request.";
         }
         if (null == logLevel) {
             LOG.error(msg, e);

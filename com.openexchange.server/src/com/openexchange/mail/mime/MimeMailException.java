@@ -68,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
@@ -181,12 +180,11 @@ public class MimeMailException extends OXException {
         try {
             // Put log properties
             if (null != mailConfig) {
-                final Props props = LogProperties.getLogProperties();
-                props.put(Name.MAIL_ACCOUNT_ID, Integer.valueOf(mailConfig.getAccountId()));
-                props.put(Name.MAIL_HOST, mailConfig.getServer());
-                props.put(Name.MAIL_LOGIN, mailConfig.getLogin());
+                LogProperties.put(Name.MAIL_ACCOUNT_ID, Integer.valueOf(mailConfig.getAccountId()));
+                LogProperties.put(Name.MAIL_HOST, mailConfig.getServer());
+                LogProperties.put(Name.MAIL_LOGIN, mailConfig.getLogin());
                 if (null != folder) {
-                    props.put(Name.MAIL_FULL_NAME, folder.getFullName());
+                    LogProperties.put(Name.MAIL_FULL_NAME, folder.getFullName());
                 }
             }
             // Start examining MessageException

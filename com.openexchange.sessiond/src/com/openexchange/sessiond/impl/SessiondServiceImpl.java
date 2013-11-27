@@ -59,8 +59,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessionMatcher;
@@ -243,13 +241,6 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
-        final Props logProperties = LogProperties.optLogProperties();
-        if (null != logProperties) {
-            final Session session = logProperties.get(LogProperties.Name.SESSION_SESSION);
-            if (null != session && userId == session.getUserId() && contextId == session.getContextId()) {
-                return session;
-            }
-        }
         final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId, false, false);
         return null == sessionControl ? null: sessionControl.getSession();
     }

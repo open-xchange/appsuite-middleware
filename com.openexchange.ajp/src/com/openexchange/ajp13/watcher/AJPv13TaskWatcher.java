@@ -66,7 +66,6 @@ import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.Task;
@@ -323,11 +322,7 @@ public class AJPv13TaskWatcher {
                     }
                     t.setStackTrace(stackTrace);
                 }
-                final Map<String, Object> taskProperties;
-                {
-                    final Props taskProps = LogProperties.optLogProperties(task.getThread());
-                    taskProperties = null == taskProps ? null : taskProps.asMap();
-                }
+                final Map<String, String> taskProperties = task.getMdcMap();
                 if (null == taskProperties) {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(196).append("AJP Listener \"").append(task.getThreadName());
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
@@ -338,9 +333,9 @@ public class AJPv13TaskWatcher {
                 } else {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(2048);
                     final Map<String, String> sorted = new TreeMap<String, String>();
-                    for (final Entry<String, Object> entry : taskProperties.entrySet()) {
+                    for (final Entry<String, String> entry : taskProperties.entrySet()) {
                         final String propertyName = entry.getKey();
-                        final Object value = entry.getValue();
+                        final String value = entry.getValue();
                         if (null != value) {
                             if (LogProperties.Name.SESSION_SESSION_ID.getName().equals(propertyName) && !isValidSession(value.toString())) {
                                 // Non-existent or elapsed session
@@ -348,7 +343,7 @@ public class AJPv13TaskWatcher {
                                 tasks.remove(task.getNum());
                                 return;
                             }
-                            sorted.put(propertyName, value.toString());
+                            sorted.put(propertyName, value);
                         }
                     }
                     for (final Map.Entry<String, String> entry : sorted.entrySet()) {

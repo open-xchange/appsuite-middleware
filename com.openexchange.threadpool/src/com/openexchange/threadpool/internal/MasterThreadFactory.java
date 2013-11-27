@@ -50,7 +50,6 @@
 package com.openexchange.threadpool.internal;
 
 import java.util.concurrent.ThreadFactory;
-import com.openexchange.log.LogProperties;
 
 /**
  * Thread factory creating the single master thread that is then used in a single thread executor service to create new threads for the
@@ -78,7 +77,6 @@ final class MasterThreadFactory implements ThreadFactory {
     public static CustomThread newCustomThread(Runnable runnable, String threadName) {
         CustomThread retval = new CustomThread(runnable, threadName);
         retval.setUncaughtExceptionHandler(new CustomUncaughtExceptionhandler());
-        LogProperties.cloneLogProperties(retval);
         return retval;
     }
 }

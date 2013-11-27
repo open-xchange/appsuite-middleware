@@ -70,7 +70,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 
 /**
  * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
@@ -88,18 +87,17 @@ public class ExceptionUtils {
      */
     public static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            final Props props = LogProperties.optLogProperties();
-            final Map<String, Object> taskProperties = null == props ? null : props.asMap();
+            final Map<String, String> taskProperties = LogProperties.getPropertyMap();
             if (null == taskProperties) {
                 LOG.fatal(MARKER + "Thread death" + MARKER, t);
             } else {
                 final StringBuilder logBuilder = new StringBuilder(512);
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Map.Entry<String, Object> entry : taskProperties.entrySet()) {
+                for (final Map.Entry<String, String> entry : taskProperties.entrySet()) {
                     final String propertyName = entry.getKey();
-                    final Object value = entry.getValue();
+                    final String value = entry.getValue();
                     if (null != value) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName, value);
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
@@ -115,8 +113,7 @@ public class ExceptionUtils {
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
-            final Props props = LogProperties.optLogProperties();
-            final Map<String, Object> taskProperties = null == props ? null : props.asMap();
+            final Map<String, String> taskProperties = LogProperties.getPropertyMap();
             if (null == taskProperties) {
                 LOG.fatal(
                     MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
@@ -124,11 +121,11 @@ public class ExceptionUtils {
             } else {
                 final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(512);
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Map.Entry<String, Object> entry : taskProperties.entrySet()) {
+                for (final Map.Entry<String, String> entry : taskProperties.entrySet()) {
                     final String propertyName = entry.getKey();
-                    final Object value = entry.getValue();
+                    final String value = entry.getValue();
                     if (null != value) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName, value);
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {

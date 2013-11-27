@@ -66,10 +66,8 @@ import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -170,29 +168,28 @@ public class WrappingFilter implements Filter {
         httpServletRequest.getSession(true);
 
         // Set LogProperties
-        if (LogProperties.isEnabled()) {
-            Props logProperties = LogProperties.getLogProperties();
+        {
 
             // Servlet related properties
-            logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpServletRequest.getRequestURI());
-            logProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpServletRequest.getServletPath());
-            logProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpServletRequest.getRequestURI());
+            LogProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpServletRequest.getServletPath());
+            LogProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
 
             // Remote infos
-            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequestWrapper.getRemotePort());
-            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, ForceLog.valueOf(httpServletRequestWrapper.getRemoteAddr()));
-            logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequestWrapper.getRemotePort());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpServletRequestWrapper.getRemoteAddr());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
 
             // Names, addresses
-            logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
-            logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
+            LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
+            LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
             final String userAgent = httpServletRequest.getHeader("User-Agent");
-            logProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
+            LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
 
             // AJAX action
             final String action = request.getParameter("action");
             if (null != action) {
-                logProperties.put(LogProperties.Name.AJAX_ACTION, action);
+                LogProperties.put(LogProperties.Name.AJAX_ACTION, action);
             }
         }
 

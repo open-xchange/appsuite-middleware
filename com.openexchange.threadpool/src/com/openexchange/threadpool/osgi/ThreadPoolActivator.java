@@ -49,12 +49,8 @@
 
 package com.openexchange.threadpool.osgi;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,10 +60,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.LogPropertyName;
-import com.openexchange.log.LogPropertyName.LogLevel;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
@@ -107,7 +99,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.threadpool");
             }
-            configureLogProperties();
             /*
              * Initialize thread pool
              */
@@ -198,61 +189,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
             throw e;
         }
-    }
-
-    private void configureLogProperties() {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
-        final ConfigurationService service = getService(ConfigurationService.class);
-        final String property = service.getProperty("com.openexchange.log.propertyNames");
-        if (null == property) {
-            LogProperties.configuredProperties(Collections.<LogPropertyName> emptyList());
-        } else {
-            final List<String> list = Arrays.asList(Strings.splitByComma(property));
-            final List<LogPropertyName> names = new ArrayList<LogPropertyName>(list.size());
-            for (final String configuredName : list) {
-                if (!isEmpty(configuredName)) {
-                    final int pos = configuredName.indexOf('(');
-                    if (pos < 0) {
-                        final LogProperties.Name name = LogProperties.Name.nameFor(configuredName);
-                        if (null == name) {
-                            log.warn("Unknown log property: " + configuredName);
-                        } else {
-                            names.add(new LogPropertyName(name, LogLevel.ALL));
-                        }
-                    } else {
-                        final String propertyName = configuredName.substring(0, pos);
-                        if (!isEmpty(propertyName)) {
-                            final LogProperties.Name name = LogProperties.Name.nameFor(propertyName);
-                            if (null == name) {
-                                log.warn("Unknown log property: " + configuredName);
-                            } else {
-                                final int closing = configuredName.indexOf(')', pos + 1);
-                                if (closing < 0) { // No closing parenthesis
-                                    names.add(new LogPropertyName(name, LogLevel.ALL));
-                                } else {
-                                    names.add(new LogPropertyName(
-                                        name,
-                                        LogLevel.logLevelFor(configuredName.substring(pos + 1, closing))));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            LogProperties.configuredProperties(names);
-        }
-    }
-
-    private static boolean isEmpty(final String s) {
-        if (s.length() == 0) {
-            return true;
-        }
-        boolean retval = true;
-        final int length = s.length();
-        for (int i = 0; i < length && retval; i++) {
-            retval = Strings.isWhitespace(s.charAt(i));
-        }
-        return retval;
     }
 
     @Override

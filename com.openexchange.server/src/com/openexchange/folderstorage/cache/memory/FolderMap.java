@@ -251,9 +251,7 @@ public final class FolderMap {
             if (null == session) {
                 return;
             }
-            if (LogProperties.isEnabled()) {
-                LogProperties.putSessionProperties(session);
-            }
+            LogProperties.putSessionProperties(session);
             ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {
             // Ignore

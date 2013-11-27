@@ -82,9 +82,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -285,21 +283,19 @@ public final class MailMessageParser {
         if (null == handler) {
             throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
-        final boolean logPropsEnabled = LogProperties.isEnabled();
         try {
-            if (logPropsEnabled) {
-                final Props properties = LogProperties.getLogProperties();
+            {
                 final int accountId = mail.getAccountId();
                 if (accountId >= 0) {
-                    properties.put(LogProperties.Name.MAIL_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId));
                 }
                 final String mailId = mail.getMailId();
                 if (null != mailId) {
-                    properties.put(LogProperties.Name.MAIL_MAIL_ID, ForceLog.valueOf(mailId));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_MAIL_ID, mailId);
                 }
                 final String folder = mail.getFolder();
                 if (null != folder) {
-                    properties.put(LogProperties.Name.MAIL_FULL_NAME, ForceLog.valueOf(folder));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, folder);
                 }
             }
             /*
@@ -326,12 +322,9 @@ public final class MailMessageParser {
                 null == mailId ? "" : mailId,
                 null == folder ? "" : folder);
         } finally {
-            if (logPropsEnabled) {
-                final Props properties = LogProperties.getLogProperties();
-                properties.remove(LogProperties.Name.MAIL_ACCOUNT_ID);
-                properties.remove(LogProperties.Name.MAIL_MAIL_ID);
-                properties.remove(LogProperties.Name.MAIL_FULL_NAME);
-            }
+            LogProperties.removeProperty(LogProperties.Name.MAIL_ACCOUNT_ID);
+            LogProperties.removeProperty(LogProperties.Name.MAIL_MAIL_ID);
+            LogProperties.removeProperty(LogProperties.Name.MAIL_FULL_NAME);
         }
         handler.handleMessageEnd(mail);
     }
@@ -987,7 +980,7 @@ public final class MailMessageParser {
      * </ul>
      *
      * @param contentType The content type
-     * @param fileName 
+     * @param fileName
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
     private static boolean isText(final String contentType, String name) {

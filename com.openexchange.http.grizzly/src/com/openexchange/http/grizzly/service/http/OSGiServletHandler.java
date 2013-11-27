@@ -461,9 +461,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
             ExceptionUtils.handleThrowable(throwable);
 
             StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
-            if (LogProperties.isEnabled()) {
-                logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
-            }
+            logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
 
             if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
                 appendHttpServletRequestInfo(logBuilder, (HttpServletRequest) request);

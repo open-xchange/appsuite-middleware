@@ -74,7 +74,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
@@ -206,14 +205,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } finally {
             requestData.cleanUploads();
-            if (LogProperties.isEnabled()) {
-                final Props logProperties = LogProperties.optLogProperties();
-                if (null != logProperties) {
-                    for (final LogProperties.Name name : ALL_LOG_PROPERTIES) {
-                        logProperties.remove(name);
-                    }
-                }
-            }
+
+            LogProperties.removeProperties(ALL_LOG_PROPERTIES);
         }
     }
 

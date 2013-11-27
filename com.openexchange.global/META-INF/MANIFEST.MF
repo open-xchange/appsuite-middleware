@@ -32,7 +32,8 @@ Export-Package: com.openexchange.authentication,
  com.openexchange.tools.iterator,
  com.openexchange.tools.stream,
  com.openexchange.tools.strings
-Import-Package: com.openexchange.exception,
+Import-Package: ch.qos.logback.classic.util;version="1.0.13",
+ com.openexchange.exception,
  com.openexchange.java,
  gnu.trove,
  gnu.trove.decorator,
@@ -67,7 +68,9 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.service.packageadmin,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j,
+ org.slf4j.spi;version="1.7.2"
 Bundle-Activator: com.openexchange.server.GlobalActivator
 Bundle-ClassPath: lib/stringsearch-2.jar,
  lib/stringsearch-1.0.0.jar,

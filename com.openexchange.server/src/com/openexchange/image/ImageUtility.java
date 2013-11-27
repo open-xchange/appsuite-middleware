@@ -64,7 +64,6 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 
 /**
@@ -205,12 +204,9 @@ public final class ImageUtility {
                  * Compose relative URL
                  */
                 prefix = "";
-                final Props properties = LogProperties.optLogProperties();
-                if (null == properties) {
-                    route = null;
-                } else {
-                    final String ajpRoute = properties.<String> get(LogProperties.Name.AJP_HTTP_SESSION);
-                    route = null == ajpRoute ? properties.<String> get(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
+                {
+                    final String ajpRoute = LogProperties.getLogProperty(LogProperties.Name.AJP_HTTP_SESSION);
+                    route = null == ajpRoute ? LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
                 }
             } else {
                 /*

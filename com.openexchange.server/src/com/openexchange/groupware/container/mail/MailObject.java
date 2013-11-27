@@ -76,7 +76,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -613,11 +612,7 @@ public class MailObject {
     }
 
     private static String getHostName() {
-        final Props logProperties = LogProperties.optLogProperties();
-        if (null == logProperties) {
-            return getStaticHostName();
-        }
-        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
+        final String serverName = LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }

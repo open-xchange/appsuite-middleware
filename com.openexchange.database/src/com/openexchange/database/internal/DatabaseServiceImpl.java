@@ -60,7 +60,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
 import com.openexchange.pooling.PoolingException;
 
@@ -88,13 +87,13 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = assignmentService.getAssignment(contextId);
-        LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, ForceLog.valueOf(assign.getSchema()));
+        LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, assign.getSchema());
         return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
     private static void back(final Connection con) {
         if (null == con) {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error(e.getMessage(), e);
             return;
@@ -105,13 +104,13 @@ public final class DatabaseServiceImpl implements DatabaseService {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
         } finally {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 
     private static void backFromReading(Connection con) {
         if (null == con) {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error(e.getMessage(), e);
             return;
@@ -126,7 +125,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
         } finally {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 

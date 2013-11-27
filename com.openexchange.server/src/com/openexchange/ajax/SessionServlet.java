@@ -95,9 +95,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -957,17 +955,16 @@ public abstract class SessionServlet extends AJAXServlet {
             return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
         }
         // No session found
-        final Props props = LogProperties.optLogProperties();
-        if (null != props) {
+        {
             final HttpServletRequest httpRequest = (HttpServletRequest) req;
-            props.put(LogProperties.Name.SERVLET_SERVLET_PATH, ForceLog.valueOf(httpRequest.getServletPath()));
+            LogProperties.put(LogProperties.Name.SERVLET_SERVLET_PATH, httpRequest.getServletPath());
             final String pathInfo = httpRequest.getPathInfo();
             if (null != pathInfo) {
-                props.put(LogProperties.Name.SERVLET_PATH_INFO, ForceLog.valueOf(pathInfo));
+                LogProperties.put(LogProperties.Name.SERVLET_PATH_INFO, pathInfo);
             }
             final String queryString = httpRequest.getQueryString();
             if (null != queryString) {
-                props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(queryString));
+                LogProperties.put(LogProperties.Name.SERVLET_QUERY_STRING, queryString);
             }
         }
         return null;

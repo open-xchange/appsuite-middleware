@@ -65,7 +65,6 @@ import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
@@ -232,7 +231,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
      * Performs the request w/o cache look-up.
      */
     protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
-        final Props props = LogProperties.getLogProperties();
         final Set<LogProperties.Name> names = EnumSet.noneOf(LogProperties.Name.class);
         try {
             /*
@@ -241,12 +239,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
             {
                 final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(folderId);
-                if (!props.put(LogProperties.Name.MAIL_FULL_NAME, arg.getFullname())) {
-                    names.add(LogProperties.Name.MAIL_FULL_NAME);
-                }
-                if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(arg.getAccountId()))) {
-                    names.add(LogProperties.Name.MAIL_ACCOUNT_ID);
-                }
+                LogProperties.put(LogProperties.Name.MAIL_FULL_NAME, arg.getFullname());
+                LogProperties.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(arg.getAccountId()));
             }
             int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
             final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
@@ -397,10 +391,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            for (final LogProperties.Name name : names) {
-                props.remove(name);
-            }
         }
     }
 

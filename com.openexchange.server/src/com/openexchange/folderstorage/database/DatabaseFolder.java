@@ -71,13 +71,14 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -233,8 +234,7 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     private int itemCount() {
-        final Props props = LogProperties.optLogProperties();
-        final Session session = (Session) (null == props ? null : props.get(LogProperties.Name.SESSION_SESSION));
+        final Session session = getSession();
         if (null != session) {
             try {
                 final FolderObject folderObject = this.folderObject;
@@ -251,8 +251,9 @@ public class DatabaseFolder extends AbstractFolder {
                 final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                 final int userId = session.getUserId();
                 final User user = UserStorage.getStorageUser(userId, ctx);
-                final UserConfiguration userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, user.getGroups(), ctx);
-                final EffectivePermission permission = folderObject.getEffectiveUserPermission(userId, userConfiguration);
+                final UserPermissionBits userPerm = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
+                userPerm.setGroups(user.getGroups());
+                final EffectivePermission permission = folderObject.getEffectiveUserPermission(userId, userPerm);
                 if (permission.getFolderPermission() <= 0 || permission.getReadPermission() <= 0) {
                     return 0;
                 }
@@ -264,6 +265,15 @@ public class DatabaseFolder extends AbstractFolder {
             }
         }
         return super.getTotal();
+    }
+
+    private Session getSession() {
+        ServerSession session = ThreadLocalSessionHolder.getInstance().getSessionObject();
+        if (null != session) {
+            return session;
+        }
+        final String sessionId = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION_ID);
+        return null == sessionId ? null : SessiondService.SERVICE_REFERENCE.get().getSession(sessionId);
     }
 
 }
