@@ -140,6 +140,11 @@ public class IDComponentsParser {
                             components.user = b.toString();
                             b = new StringBuilder();
                             mode = 1;
+                        } else if (c == '/') {
+                            components.user = b.toString();
+                            components.context = "";
+                            b = new StringBuilder();
+                            mode = 2;
                         } else {
                             b.append(c);
                         }

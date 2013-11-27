@@ -57,6 +57,15 @@ public class IDComponentsParserTest {
         assertEquals("20d39asd9da93249f009d", idComponents.resource);
     }
     
+    @Test
+    public void testComponentContextAndResource(){
+        IDComponents idComponents = IDComponentsParser.parse("synthetic.office://operations/folderId.fileId~fileVersion_fileName");
+        assertEquals("folderId.fileId~fileVersion_fileName", idComponents.resource);
+        
+        assertEquals("folderId.fileId~fileVersion_fileName", new ID("synthetic.office://operations/folderId.fileId~fileVersion_fileName").getResource());
+        
+    }
+    
     // Bug 30006
     @Test
     public void testAtSignInContextName() {
