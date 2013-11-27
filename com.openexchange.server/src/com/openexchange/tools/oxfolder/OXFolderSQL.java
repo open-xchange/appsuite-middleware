@@ -769,7 +769,11 @@ public final class OXFolderSQL {
         return 0;
     }
 
-    private static final String SQL_INSERT_NEW_FOLDER = "INSERT INTO oxfolder_tree VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_NEW_FOLDER = "INSERT INTO oxfolder_tree " +
+        "(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag," +
+        "default_flag) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL " +
+        "WHERE NOT EXISTS (SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND parent>?);"
+    ;
 
     private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) " + "VALUES (?,?,?,?,?,?,?,?,?)";
 
@@ -839,7 +843,14 @@ public final class OXFolderSQL {
                     } else {
                         stmt.setInt(13, 0); // default_flag
                     }
-                    executeUpdate(stmt);
+                    stmt.setInt(14, ctx.getContextId());
+                    stmt.setInt(15, folderObj.getParentFolderID());
+                    stmt.setString(16, folderObj.getFolderName());
+                    stmt.setInt(17, FolderObject.MIN_FOLDER_ID);
+                    if (0 == executeUpdate(stmt)) {
+                        // due to already existing subfolder with the same name
+                        throw new SQLException("Entry not inserted");
+                    }
                     stmt.close();
                     stmt = null;
                     /*
@@ -906,7 +917,11 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_UPDATE_WITH_FOLDERNAME = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?";
+    private static final String SQL_UPDATE_WITH_FOLDERNAME =
+        "UPDATE oxfolder_tree SET fname=?,changing_date=?,changed_from=?,permission_flag=?,module=? " +
+        "WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
+        "SELECT fname FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=?);"
+    ;
 
     private static final String SQL_UPDATE_WITHOUT_FOLDERNAME = "UPDATE oxfolder_tree SET changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?";
 
@@ -955,7 +970,14 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, folderObj.getModule());
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folderObj.getObjectID());
-                    executeUpdate(stmt);
+                    stmt.setInt(pos++, ctx.getContextId());
+                    stmt.setInt(pos++, folderObj.getParentFolderID());
+                    stmt.setInt(pos++, FolderObject.MIN_FOLDER_ID);
+                    stmt.setString(pos++, folderObj.getFolderName());
+                    if (0 == executeUpdate(stmt)) {
+                        // due to already existing subfolder with the same name
+                        throw new SQLException("Entry not updated");
+                    }
                     stmt.close();
                     stmt = null;
                 } else {
