@@ -62,7 +62,7 @@ public class IDComponentsParserTest {
         IDComponents idComponents = IDComponentsParser.parse("synthetic.office://operations/folderId.fileId~fileVersion_fileName");
         assertEquals("folderId.fileId~fileVersion_fileName", idComponents.resource);
         
-        assertEquals("folderId.fileId~fileVersion_fileName", new ID("synthetic.office://operations/folderId.fileId~fileVersion_fileName").getResource());
+        assertEquals("folderId.fileId~fileVersion_fileName", new ID("synthetic.office://operations/folderId.fileId~fileVersion_fileName", "1").getResource());
         
     }
     
