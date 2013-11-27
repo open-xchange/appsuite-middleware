@@ -68,7 +68,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailCacheConfiguration implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailCacheConfiguration.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailCacheConfiguration.class);
 
     private static final MailCacheConfiguration instance = new MailCacheConfiguration();
 

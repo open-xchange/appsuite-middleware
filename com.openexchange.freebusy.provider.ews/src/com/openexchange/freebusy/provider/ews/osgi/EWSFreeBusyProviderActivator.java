@@ -55,7 +55,6 @@ import com.openexchange.ews.EWSFactoryService;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.freebusy.provider.ews.EWSFreeBusyProvider;
 import com.openexchange.freebusy.provider.ews.EWSFreeBusyProviderLookup;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -65,7 +64,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class EWSFreeBusyProviderActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EWSFreeBusyProviderActivator.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(EWSFreeBusyProviderActivator.class);
 
     /**
      * Initializes a new {@link EWSFreeBusyProviderActivator}.

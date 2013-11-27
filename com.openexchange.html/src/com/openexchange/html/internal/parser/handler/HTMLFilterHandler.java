@@ -85,7 +85,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
 
     private static final String WARN_USING_DEFAULT_WHITE_LIST = "Using default white list";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLFilterHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HTMLFilterHandler.class);
 
     private static final String CRLF = "\r\n";
 

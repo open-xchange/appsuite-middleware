@@ -65,7 +65,6 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.HasLoginPage;
@@ -90,7 +89,7 @@ public class Workflow {
 
     private boolean useThreadedRefreshHandler;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Workflow.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Workflow.class);
 
     private Activator activator;
 

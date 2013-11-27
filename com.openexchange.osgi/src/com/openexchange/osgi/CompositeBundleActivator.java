@@ -53,7 +53,6 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.log.LogFactory;
 
 /**
  * With this abstract class multiple activators in a bundle can be joined.
@@ -62,7 +61,7 @@ import com.openexchange.log.LogFactory;
  */
 public abstract class CompositeBundleActivator implements BundleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompositeBundleActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CompositeBundleActivator.class);
 
     /**
      * The stack of activated {@link BundleActivator}s.

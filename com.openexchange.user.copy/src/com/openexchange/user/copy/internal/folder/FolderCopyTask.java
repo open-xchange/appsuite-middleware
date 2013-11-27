@@ -70,7 +70,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -93,7 +92,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  */
 public class FolderCopyTask implements CopyUserTaskService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCopyTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCopyTask.class);
 
     private static final String SELECT_FOLDERS =
         "SELECT "+

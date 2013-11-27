@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import com.openexchange.exception.OXException;
@@ -66,7 +65,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 
-	public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreWriter.class));
+	public static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreWriter.class);
 
 	public InfostoreWriter(final JSONWriter w) {
 		super(w);

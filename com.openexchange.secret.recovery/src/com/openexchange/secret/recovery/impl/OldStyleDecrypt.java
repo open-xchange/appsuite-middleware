@@ -66,7 +66,7 @@ import com.openexchange.java.Strings;
  */
 public final class OldStyleDecrypt {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OldStyleDecrypt.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OldStyleDecrypt.class);
 
     /**
      * The key length.

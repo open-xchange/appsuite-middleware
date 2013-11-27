@@ -58,7 +58,6 @@ import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
 import com.openexchange.freebusy.publisher.ews.Tools;
 import com.openexchange.freebusy.publisher.ews.internal.EWSFreeBusyPublisherLookup;
 import com.openexchange.freebusy.publisher.ews.internal.Publisher;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -71,7 +70,7 @@ import com.openexchange.user.UserService;
  */
 public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EWSFreeBusyPublisherActivator.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(EWSFreeBusyPublisherActivator.class);
 
     private ScheduledTimerTask publishTask = null;
 

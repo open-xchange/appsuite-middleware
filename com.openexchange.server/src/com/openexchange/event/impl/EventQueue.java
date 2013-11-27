@@ -62,7 +62,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -152,7 +151,7 @@ public final class EventQueue {
 
     private static volatile boolean isEnabled;
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventQueue.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(EventQueue.class);
 
     /*
      * +++++++++++++++ Appointment Event Lists +++++++++++++++

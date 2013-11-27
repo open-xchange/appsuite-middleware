@@ -12,7 +12,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class DeleteTest extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(DeleteTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DeleteTest.class);
 
     public DeleteTest(final String name) {
         super(name);

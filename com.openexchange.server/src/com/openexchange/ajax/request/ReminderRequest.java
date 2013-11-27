@@ -55,7 +55,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,7 +102,7 @@ public final class ReminderRequest {
 
     private final AppointmentSqlFactoryService appointmentFactory;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReminderRequest.class);
 
     /**
      * Gets the time stamp.

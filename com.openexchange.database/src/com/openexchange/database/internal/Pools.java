@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -68,7 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public final class Pools implements Runnable {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Pools.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(Pools.class);
 
     private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
 

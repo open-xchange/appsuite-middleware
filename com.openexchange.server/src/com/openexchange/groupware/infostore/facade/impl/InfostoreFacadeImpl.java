@@ -129,7 +129,6 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -167,7 +166,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFacadeImpl.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFacadeImpl.class);
 
     private static final boolean INDEXING_ENABLED = false; //TODO: remove switch once we index infoitems
 

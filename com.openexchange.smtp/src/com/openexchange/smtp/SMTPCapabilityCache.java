@@ -77,7 +77,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 public final class SMTPCapabilityCache {
 
     static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPCapabilityCache.class));
+        com.openexchange.log.Log.loggerFor(SMTPCapabilityCache.class);
 
     private static volatile ConcurrentMap<InetSocketAddress, Future<Capabilities>> MAP;
 

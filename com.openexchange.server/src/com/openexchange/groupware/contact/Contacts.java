@@ -105,7 +105,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -138,7 +137,7 @@ public final class Contacts {
 
     public static final int DATA_TRUNCATION = 54;
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Contacts.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(Contacts.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

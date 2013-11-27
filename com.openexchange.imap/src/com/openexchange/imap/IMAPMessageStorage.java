@@ -212,7 +212,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPMessageStorage.class));
+        com.openexchange.log.Log.loggerFor(IMAPMessageStorage.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

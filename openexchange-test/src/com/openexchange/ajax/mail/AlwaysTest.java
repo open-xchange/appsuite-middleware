@@ -84,7 +84,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(AlwaysTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AlwaysTest.class);
 
     /**
      * Random number generator.

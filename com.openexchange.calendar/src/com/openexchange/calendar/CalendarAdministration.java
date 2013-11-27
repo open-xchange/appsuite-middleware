@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -97,7 +96,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
     private com.openexchange.java.StringAllocator u1;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAdministration.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarAdministration.class);
 
     private final Set<Integer> handledObjects = new HashSet<Integer>();
 

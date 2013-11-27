@@ -62,7 +62,6 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -74,7 +73,7 @@ import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
 
 public class LDAPHostnameService implements HostnameService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LDAPHostnameService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LDAPHostnameService.class);
 
     private static final String PLACEHOLDER = "%i";
 

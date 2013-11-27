@@ -76,7 +76,7 @@ requestBody = "Task object as described in Common object data, Detailed task and
 responseDescription = "A json objekt with attribute id of the newly created task.")
 public class NewAction extends TaskAction {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(NewAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(NewAction.class);
 
     /**
      * Initializes a new {@link NewAction}.

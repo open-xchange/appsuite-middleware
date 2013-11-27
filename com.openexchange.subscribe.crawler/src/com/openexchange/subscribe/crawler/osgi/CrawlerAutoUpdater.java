@@ -56,7 +56,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -82,7 +81,7 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer<Object, Obje
 
     private ConfigurationService configurationService;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerAutoUpdater.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CrawlerAutoUpdater.class);
 
     public CrawlerAutoUpdater(final BundleContext context, final Activator activator) {
         super();

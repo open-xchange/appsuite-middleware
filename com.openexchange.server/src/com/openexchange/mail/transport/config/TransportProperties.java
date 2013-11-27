@@ -62,7 +62,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class TransportProperties implements ITransportProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportProperties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(TransportProperties.class);
 
     private static final TransportProperties instance = new TransportProperties();
 

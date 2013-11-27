@@ -58,7 +58,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SpecificServiceChooser}
@@ -67,7 +66,7 @@ import com.openexchange.log.LogFactory;
  */
 public class SpecificServiceChooser<T> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SpecificServiceChooser.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SpecificServiceChooser.class);
 
     private final SortedSet<WeightedRegistration<T>> general = new TreeSet<WeightedRegistration<T>>();
 

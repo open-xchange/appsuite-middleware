@@ -76,7 +76,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.tools.PublicationSession;
@@ -98,7 +97,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFileServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFileServlet.class);
 
     private static OXMFPublicationService infostorePublisher = null;
 

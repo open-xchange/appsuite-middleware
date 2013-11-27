@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -63,8 +64,7 @@ import com.openexchange.server.services.ServerRequestHandlerRegistry;
  */
 public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomizer<AJAXRequestHandler, AJAXRequestHandler> {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(AJAXRequestHandlerCustomizer.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AJAXRequestHandlerCustomizer.class);
 
 	private final BundleContext context;
 

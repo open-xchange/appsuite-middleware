@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -74,7 +73,7 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
 
     protected boolean executedSuccessfully;
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByLinkRegexStep.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(PageByLinkRegexStep.class);
 
     public PageByLinkRegexStep() {
         super();

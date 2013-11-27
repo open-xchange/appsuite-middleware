@@ -80,7 +80,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
-import com.openexchange.log.LogFactory;
 
 /**
  * MBean for update task toolkit.
@@ -90,7 +89,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class UpdateTaskMBean implements DynamicMBean {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateTaskMBean.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UpdateTaskMBean.class);
 
     private final MBeanInfo mbeanInfo;
 

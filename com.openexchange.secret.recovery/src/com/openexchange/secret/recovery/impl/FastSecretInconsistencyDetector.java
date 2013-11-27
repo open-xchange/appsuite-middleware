@@ -57,7 +57,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.secret.SecretExceptionCodes;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
@@ -75,7 +74,7 @@ import com.openexchange.user.UserService;
  */
 public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator, EncryptedItemCleanUpService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FastSecretInconsistencyDetector.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FastSecretInconsistencyDetector.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

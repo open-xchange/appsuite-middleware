@@ -61,7 +61,7 @@ import com.openexchange.folder.FolderDeleteListenerService;
  */
 public final class FolderDeleteListenerRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderDeleteListenerRegistry.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(FolderDeleteListenerRegistry.class);
 
     private static volatile FolderDeleteListenerRegistry instance;
 

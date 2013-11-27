@@ -66,7 +66,7 @@ import com.openexchange.push.udp.PushRequest;
  */
 public class PeerServerListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(PeerServerListener.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(PeerServerListener.class);
 
     private final InetAddress remoteAddress;
     private final int remotePort;

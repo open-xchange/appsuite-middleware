@@ -58,7 +58,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 /**
  * ReminderConfigImpl
@@ -74,7 +73,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 
 	private boolean isInit = false;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderConfigImpl.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(ReminderConfigImpl.class);
 
 	public ReminderConfigImpl(final String propfile) {
 		if (isInit) {

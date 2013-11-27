@@ -51,7 +51,6 @@ package com.openexchange.mailaccount.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -65,7 +64,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailAccountStorageInit implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccountStorageInit.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailAccountStorageInit.class);
 
     private final AtomicBoolean started;
 

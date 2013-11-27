@@ -62,7 +62,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
@@ -78,7 +77,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailProperties implements IMailProperties {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailProperties.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailProperties.class);
 
     private static volatile MailProperties instance;
 

@@ -88,7 +88,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class contains the implementation of the API defined in {@link OXContextRestoreInterface}
@@ -705,7 +704,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
     }
 
-    protected final static Log LOG = LogFactory.getLog(OXContextRestore.class);
+    protected final static Log LOG = com.openexchange.log.Log.loggerFor(OXContextRestore.class);
 
     private final BasicAuthenticator basicauth;
 

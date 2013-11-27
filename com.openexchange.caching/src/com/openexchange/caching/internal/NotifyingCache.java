@@ -67,7 +67,6 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link NotifyingCache}
@@ -79,7 +78,7 @@ import com.openexchange.log.LogFactory;
  */
 public class NotifyingCache implements Cache, CacheListener {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(NotifyingCache.class));
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(NotifyingCache.class);
 
     private static final AtomicReference<EventAdmin> EVENT_ADMIN_REF = new AtomicReference<EventAdmin>();
 

@@ -52,7 +52,6 @@ package com.openexchange.push.ms.osgi;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -102,7 +101,7 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
 
     private void registerPushMsMBean(final ManagementService management) {
         if (objectName == null) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+            final Log logger = com.openexchange.log.Log.loggerFor(ManagementRegisterer.class);
             try {
                 objectName = getObjectName(PushMsMBeanImpl.class.getName(), PushMsMBean.PUSH_MS_DOMAIN);
                 management.registerMBean(objectName, new PushMsMBeanImpl());
@@ -118,7 +117,7 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
 
     private void unregisterPushMsMBean(final ManagementService management) {
         if (objectName != null) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+            final Log logger = com.openexchange.log.Log.loggerFor(ManagementRegisterer.class);
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {

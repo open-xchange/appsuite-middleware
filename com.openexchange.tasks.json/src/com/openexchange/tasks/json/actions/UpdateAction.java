@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated task, and maybe errors.")
 public class UpdateAction extends TaskAction {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UpdateAction.class);
 
     /**
      * Initializes a new {@link UpdateAction}.

@@ -95,7 +95,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 
@@ -104,7 +103,7 @@ import com.openexchange.resource.Resource;
  */
 public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Participants.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(Participants.class);
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 

@@ -96,7 +96,7 @@ import com.openexchange.tools.session.ServerSession;
     responseDescription = "Dependent on optional \"tree\" parameter a JSON folder object or a boolean value indicating the validation result.")
 public final class ValidateAction extends AbstractMailAccountTreeAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ValidateAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ValidateAction.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

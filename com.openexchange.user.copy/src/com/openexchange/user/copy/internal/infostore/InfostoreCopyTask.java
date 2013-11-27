@@ -74,7 +74,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.sql.DBUtils;
@@ -95,7 +94,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  */
 public class InfostoreCopyTask implements CopyUserTaskService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreCopyTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreCopyTask.class);
 
     private static final String SELECT_INFOSTORE_MASTERS =
         "SELECT " +

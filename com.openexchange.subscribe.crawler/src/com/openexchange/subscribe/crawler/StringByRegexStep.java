@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
@@ -68,7 +67,7 @@ public class StringByRegexStep extends AbstractStep<String, Page> {
 
     private String regex;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringByRegexStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(StringByRegexStep.class);
 
     public StringByRegexStep(){
 

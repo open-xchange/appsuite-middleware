@@ -64,7 +64,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  */
 public class AvailableModulesTest extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(AvailableModulesTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AvailableModulesTest.class);
 
     public AvailableModulesTest(final String name) {
         super(name);

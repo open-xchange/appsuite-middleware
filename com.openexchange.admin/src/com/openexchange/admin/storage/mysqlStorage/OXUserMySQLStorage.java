@@ -116,7 +116,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.Attribute;
@@ -169,7 +168,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     }
 
-    private static final Log log = LogFactory.getLog(OXUserMySQLStorage.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXUserMySQLStorage.class);
 
     private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
 

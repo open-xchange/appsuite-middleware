@@ -67,7 +67,6 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -79,7 +78,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class UserImageDataSource implements ImageDataSource {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserImageDataSource.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UserImageDataSource.class);
     private static final String REGISTRATION_NAME = "com.openexchange.user.image";
     private static final String ALIAS = "/user/picture";
     private static final String ID_ARGUMENT = "com.openexchange.groupware.user.id";

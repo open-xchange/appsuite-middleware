@@ -17,7 +17,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 
 public class PortalSearchTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(PortalSearchTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(PortalSearchTest.class);
 
 	private final int[] columns = {
 		DataObject.OBJECT_ID,

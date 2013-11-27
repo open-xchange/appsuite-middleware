@@ -81,7 +81,6 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -94,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VisibleFoldersPerformer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(VisibleFoldersPerformer.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

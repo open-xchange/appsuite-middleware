@@ -56,7 +56,6 @@ import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -98,7 +97,7 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
     }
 
     private void createMyIndex(final Connection con, final String[] tables, final String name) {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderAddIndex2LastModified.class));
+        final Log log = com.openexchange.log.Log.loggerFor(FolderAddIndex2LastModified.class);
         final String[] columns = { "cid", "changing_date", "module" };
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {

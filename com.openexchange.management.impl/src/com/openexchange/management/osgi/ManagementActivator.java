@@ -52,7 +52,6 @@ package com.openexchange.management.osgi;
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 import java.lang.management.ThreadMXBean;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
@@ -68,7 +67,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public final class ManagementActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManagementActivator.class);
 
     /**
      * Initializes a new {@link ManagementActivator}

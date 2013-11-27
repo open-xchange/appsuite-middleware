@@ -53,7 +53,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.services.MonitoringServiceRegistry;
@@ -73,7 +72,7 @@ public final class MonitoringInit implements Initialization {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MonitoringInit.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MonitoringInit.class);
 
     /**
      * Prevent instantiation.

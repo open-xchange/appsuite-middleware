@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link CompiledLineParserTemplate} - Compiles a template as per
@@ -66,7 +65,7 @@ import com.openexchange.log.LogFactory;
  */
 public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompiledLineParserTemplate.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CompiledLineParserTemplate.class);
 
     private static final String STR_EMPTY = "";
 

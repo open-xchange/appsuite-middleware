@@ -59,7 +59,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaService;
 
@@ -71,7 +70,7 @@ import com.openexchange.quota.QuotaService;
  */
 public class RdbContactStorageActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorageActivator.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(RdbContactStorageActivator.class);
 
     /**
      * Initializes a new {@link RdbContactStorageActivator}.

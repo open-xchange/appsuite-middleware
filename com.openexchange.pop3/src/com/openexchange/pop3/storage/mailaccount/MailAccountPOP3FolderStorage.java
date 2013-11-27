@@ -97,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountPOP3FolderStorage.class));
+        com.openexchange.log.Log.loggerFor(MailAccountPOP3FolderStorage.class);
 
     private final IMailFolderStorage delegatee;
 

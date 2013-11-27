@@ -89,7 +89,7 @@ import com.openexchange.textxtraction.TextXtractExceptionCodes;
 public final class TikaDocumentHandler {
 
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TikaDocumentHandler.class));
+        com.openexchange.log.Log.loggerFor(TikaDocumentHandler.class);
 
     protected final Detector detector;
 

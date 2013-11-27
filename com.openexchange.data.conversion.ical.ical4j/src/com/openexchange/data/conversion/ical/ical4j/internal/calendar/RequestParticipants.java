@@ -62,7 +62,6 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link RequestParticipants}
@@ -71,7 +70,7 @@ import com.openexchange.log.LogFactory;
  */
 public class RequestParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestParticipants.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(RequestParticipants.class);
 
     @Override
     protected void addUserAttendee(final int index, final UserParticipant userParticipant, final Context ctx, final T component, final U cObj) throws ConversionError {

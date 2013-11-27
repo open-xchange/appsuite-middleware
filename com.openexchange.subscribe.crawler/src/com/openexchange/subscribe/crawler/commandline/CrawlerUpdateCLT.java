@@ -71,7 +71,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 
@@ -88,7 +87,7 @@ public class CrawlerUpdateCLT {
 
     private static final Options toolkitOptions;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerUpdateCLT.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CrawlerUpdateCLT.class);
 
     static {
         toolkitOptions = new Options();

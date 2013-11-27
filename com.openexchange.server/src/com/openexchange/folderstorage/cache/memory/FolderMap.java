@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FolderMap {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(FolderMap.class);
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(FolderMap.class);
 
     private final ConcurrentMap<Key, Wrapper> map;
     private final int maxLifeMillis;

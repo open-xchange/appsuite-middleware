@@ -55,7 +55,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import com.openexchange.log.Log;
 
 /**
  * {@link StringCache}
@@ -64,7 +63,7 @@ import com.openexchange.log.Log;
  */
 public final class StringCache {
 
-    private static final org.apache.commons.logging.Log log = Log.valueOf(com.openexchange.log.LogFactory.getLog(StringCache.class));
+    private static final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(StringCache.class);
 
     /**
      * Enabled ?

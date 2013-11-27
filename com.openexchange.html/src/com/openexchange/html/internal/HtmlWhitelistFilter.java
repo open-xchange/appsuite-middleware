@@ -85,7 +85,6 @@ import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link HtmlWhitelistFilter}
@@ -540,7 +539,7 @@ public final class HtmlWhitelistFilter {
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HtmlWhitelistFilter.class));
+            final Log LOG = com.openexchange.log.Log.loggerFor(HtmlWhitelistFilter.class);
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {

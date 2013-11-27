@@ -50,7 +50,6 @@
 package com.openexchange.hostname.ldap.configuration;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceRegistry;
@@ -64,7 +63,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class LDAPHostnameProperties {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LDAPHostnameProperties.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LDAPHostnameProperties.class);
 
     /**
      * Fetches the property (convenience method)

@@ -76,7 +76,7 @@ import com.openexchange.timer.TimerService;
  */
 class TicketRenewalTimer implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TicketRenewalTimer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TicketRenewalTimer.class);
 
     private final Session session;
     private final KerberosService kerberosService;

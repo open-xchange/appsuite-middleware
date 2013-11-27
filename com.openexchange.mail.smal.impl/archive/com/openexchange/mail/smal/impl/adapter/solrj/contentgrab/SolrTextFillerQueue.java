@@ -71,7 +71,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
@@ -99,7 +98,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrTextFillerQueue.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrTextFillerQueue.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -75,7 +75,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -100,7 +99,7 @@ public class RdbContactSQLImpl {
 
     private final UserConfiguration userConfiguration;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactSQLImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbContactSQLImpl.class);
 
     public RdbContactSQLImpl(final Session session) throws OXException {
         super();

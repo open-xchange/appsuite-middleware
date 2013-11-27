@@ -67,7 +67,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.log.LogFactory;
 
 /**
  * General abstraction class used by all impl classes
@@ -76,7 +75,7 @@ import com.openexchange.log.LogFactory;
  */
 public abstract class OXCommonImpl {
 
-    private final static Log log = LogFactory.getLog(OXCommonImpl.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(OXCommonImpl.class);
 
     protected final OXToolStorageInterface tool;
 

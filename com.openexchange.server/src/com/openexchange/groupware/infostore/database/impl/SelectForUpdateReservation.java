@@ -65,7 +65,6 @@ import com.openexchange.groupware.infostore.database.InfostoreFilenameReservatio
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SelectForUpdateReservation}
@@ -80,7 +79,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private static final String RESERVE_NAME_SQL = "INSERT INTO infostoreReservedPaths (uuid, cid, folder, name) VALUES (?, ?, ?, ?)";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SelectForUpdateReservation.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SelectForUpdateReservation.class);
 
     private final String fileName;
 

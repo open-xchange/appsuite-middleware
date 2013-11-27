@@ -58,7 +58,6 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -74,7 +73,7 @@ import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
  */
 public class FilestoreDataMover implements Callable<Void> {
 
-    private final static Log log = LogFactory.getLog(FilestoreDataMover.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(FilestoreDataMover.class);
 
     private String src = null;
 

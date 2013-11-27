@@ -124,7 +124,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                 sb.append(currentContextId);
                 sb.append(":\n");
                 sb.append(e.getMessage());
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountMigrationTask.class));
+                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccountMigrationTask.class);
                 LOG.error(sb.toString(), e);
             }
             state.incrementState();
@@ -184,7 +184,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
     private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws OXException {
         final Context ctx = new ContextImpl(contextId);
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountMigrationTask.class));
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccountMigrationTask.class);
         // First check (and possibly insert) a sequence for specified context
         checkAndInsertMailAccountSequence(ctx);
         final StringBuilder sb = new StringBuilder(256);

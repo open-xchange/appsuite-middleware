@@ -59,7 +59,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
@@ -93,7 +92,7 @@ public class ConflictHandler {
 
     public static final CalendarDataObject NO_CONFLICTS[] = new CalendarDataObject[0];
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConflictHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConflictHandler.class);
     private final CalendarDataObject edao;
     private final CalendarCollection recColl;
 

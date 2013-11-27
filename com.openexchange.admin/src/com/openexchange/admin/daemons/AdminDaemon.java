@@ -75,11 +75,10 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 
 public class AdminDaemon {
 
-    static final Log LOG = LogFactory.getLog(AdminDaemon.class);
+    static final Log LOG = com.openexchange.log.Log.loggerFor(AdminDaemon.class);
 
     private static PropertyHandler prop = null;
 

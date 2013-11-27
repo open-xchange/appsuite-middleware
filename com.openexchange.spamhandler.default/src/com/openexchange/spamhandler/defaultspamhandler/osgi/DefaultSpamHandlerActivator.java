@@ -67,7 +67,7 @@ import com.openexchange.spamhandler.defaultspamhandler.Services;
 public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultSpamHandlerActivator.class));
+        com.openexchange.log.Log.loggerFor(DefaultSpamHandlerActivator.class);
 
     /**
      * Initializes a new {@link DefaultSpamHandlerActivator}

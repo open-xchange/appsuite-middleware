@@ -63,7 +63,6 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.SharedNode;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class is a container for the settings tree.
@@ -71,7 +70,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class ConfigTree {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigTree.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigTree.class);
 
     private static final ConfigTree SINGLETON = new ConfigTree();
 

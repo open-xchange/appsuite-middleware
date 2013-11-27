@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ClearPerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ClearPerformer.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ClearPerformer.class);
 
     /**
      * Initializes a new {@link ClearPerformer}.

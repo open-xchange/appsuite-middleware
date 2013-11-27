@@ -138,7 +138,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class MessageParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageParser.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MessageParser.class);
 
     private static final String CONTENT_TYPE = MailJSONField.CONTENT_TYPE.getKey();
     private static final String CONTENT = MailJSONField.CONTENT.getKey();

@@ -54,7 +54,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
@@ -65,7 +64,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class TwitterEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TwitterEventHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TwitterEventHandler.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

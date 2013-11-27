@@ -51,7 +51,6 @@ package com.openexchange.smtp.config;
 
 import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.transport.config.MailAccountTransportProperties;
 import com.openexchange.mailaccount.MailAccount;
 
@@ -62,7 +61,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountSMTPProperties extends MailAccountTransportProperties implements ISMTPProperties {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccountSMTPProperties.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailAccountSMTPProperties.class);
 
     private final MailAccount mailAccount;
 

@@ -52,7 +52,6 @@ package com.openexchange.imap.storecache;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -63,7 +62,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractIMAPStoreContainer.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractIMAPStoreContainer.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 

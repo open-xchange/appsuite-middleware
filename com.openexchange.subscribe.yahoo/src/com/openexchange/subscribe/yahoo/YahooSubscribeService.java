@@ -58,7 +58,6 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -76,7 +75,7 @@ private final Activator activator;
 
     private final SubscriptionSource source = new SubscriptionSource();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooSubscribeService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(YahooSubscribeService.class);
 
     public YahooSubscribeService(final Activator activator){
         this.activator = activator;

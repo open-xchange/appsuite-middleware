@@ -74,7 +74,7 @@ import com.openexchange.server.ServiceExceptionCode;
 public final class AJPv13Config implements Initialization {
 
     // Final static fields
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Config.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AJPv13Config.class);
 
     private static final AJPv13Config instance = new AJPv13Config();
 

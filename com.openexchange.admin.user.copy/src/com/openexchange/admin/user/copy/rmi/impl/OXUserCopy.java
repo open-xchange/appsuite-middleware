@@ -68,14 +68,13 @@ import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.user.copy.UserCopyService;
 
 public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
 
     private static final String THE_GIVEN_SOURCE_USER_OBJECT_IS_NULL = "The given source user object is null";
 
-    private final static Log LOG = LogFactory.getLog(OXUser.class);
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(OXUser.class);
 
     private final BundleContext context;
 

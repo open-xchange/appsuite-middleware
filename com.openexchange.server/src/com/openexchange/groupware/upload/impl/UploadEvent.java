@@ -66,7 +66,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class UploadEvent {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UploadEvent.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UploadEvent.class);
 
     /*-
      * ------------ Constants ------------

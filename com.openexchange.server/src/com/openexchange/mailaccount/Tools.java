@@ -389,7 +389,7 @@ public final class Tools {
             final StringBuilder sb = new StringBuilder("Checking default folder full names for account ");
             sb.append(account.getId()).append(" failed with user ").append(userId);
             sb.append(" in context ").append(contextId);
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAccountAction.class)).warn(sb.toString(), e);
+            com.openexchange.log.Log.loggerFor(AbstractMailAccountAction.class).warn(sb.toString(), e);
             return account;
         }
     }

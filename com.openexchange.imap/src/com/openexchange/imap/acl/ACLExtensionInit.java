@@ -50,6 +50,7 @@
 package com.openexchange.imap.acl;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
@@ -60,7 +61,7 @@ import com.openexchange.server.Initialization;
  */
 public final class ACLExtensionInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ACLExtensionInit.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ACLExtensionInit.class);
 
     private static final ACLExtensionInit instance = new ACLExtensionInit();
 

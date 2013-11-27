@@ -66,14 +66,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.FileStorage;
 
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
     private final ThreadLocal<Map<Integer, FileStorage>> filestorages = new ThreadLocal<Map<Integer,FileStorage>>();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ClearLeftoverAttachmentsUpdateTask.class);
 
     @Override
     public int addedWithVersion() {

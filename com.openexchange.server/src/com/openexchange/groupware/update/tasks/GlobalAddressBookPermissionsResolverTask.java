@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -82,7 +81,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  */
 public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GlobalAddressBookPermissionsResolverTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalAddressBookPermissionsResolverTask.class);
 
     /**
      * Initializes a new {@link GlobalAddressBookPermissionsResolverTask}.

@@ -63,7 +63,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
@@ -81,7 +80,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookRegisterer.class);
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();

@@ -18,14 +18,13 @@
 package com.openexchange.soap.cxf;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
  */
 public class ExceptionUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExceptionUtils.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ExceptionUtils.class);
 
     private static final String MARKER = " ---=== /!\\ ===--- ";
 

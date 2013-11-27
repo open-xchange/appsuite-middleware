@@ -117,7 +117,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.monitoring.MonitoringInfo;
@@ -141,7 +140,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     private static final long serialVersionUID = 718576864014891156L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AJAXServlet.class));
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(AJAXServlet.class);
 
     // Modules
     public static final String MODULE_TASK = "tasks";

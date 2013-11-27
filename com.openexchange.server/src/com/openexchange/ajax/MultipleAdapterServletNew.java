@@ -72,7 +72,6 @@ import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -103,7 +102,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MultipleAdapterServletNew.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MultipleAdapterServletNew.class);
 
     private final AJAXActionServiceFactory factory;
 

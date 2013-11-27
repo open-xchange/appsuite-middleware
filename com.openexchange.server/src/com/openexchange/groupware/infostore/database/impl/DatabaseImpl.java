@@ -84,7 +84,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Autoboxing;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -95,7 +94,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class DatabaseImpl extends DBService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseImpl.class);
 
     private final static int DOCUMENT_VERSION_NUMBER_WITHOUT_FILE = 0;
 

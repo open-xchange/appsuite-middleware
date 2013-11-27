@@ -41,7 +41,7 @@ public class UpdatesTest extends AppointmentTest {
 		Appointment.RECURRENCE_START
 	};
 
-	private static final Log LOG = LogFactory.getLog(UpdatesTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(UpdatesTest.class);
 
 	public UpdatesTest(final String name) {
 		super(name);

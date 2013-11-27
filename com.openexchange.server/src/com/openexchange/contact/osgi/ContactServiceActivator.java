@@ -57,7 +57,6 @@ import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.folder.FolderService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -71,7 +70,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ContactServiceActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactServiceActivator.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(ContactServiceActivator.class);
 
     /**
      * Initializes a new {@link ContactServiceActivator}.

@@ -75,7 +75,6 @@ import com.openexchange.freebusy.BusyStatus;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
 import com.openexchange.freebusy.FreeBusyInterval;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -95,7 +94,7 @@ public class JsonClient {
         }
     };
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JsonClient.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(JsonClient.class);
 
     private final String apiKey;
     private final String apiEndpoint;

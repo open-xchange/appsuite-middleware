@@ -60,7 +60,6 @@ import com.google.common.cache.RemovalNotification;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
@@ -73,7 +72,7 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class WebDAVSessionStore {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVSessionStore.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebDAVSessionStore.class);
 
     private static final WebDAVSessionStore instance = new WebDAVSessionStore();
 

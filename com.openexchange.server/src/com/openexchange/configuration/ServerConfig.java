@@ -57,7 +57,6 @@ import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class handles the configuration parameters read from the configuration property file server.properties.
@@ -66,7 +65,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class ServerConfig {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerConfig.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServerConfig.class);
 
     /**
      * Singleton object.

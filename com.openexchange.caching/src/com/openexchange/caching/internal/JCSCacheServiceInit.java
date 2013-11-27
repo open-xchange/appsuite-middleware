@@ -81,7 +81,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class JCSCacheServiceInit {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JCSCacheServiceInit.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(JCSCacheServiceInit.class);
 
     private static final String PROP_CACHE_CONF_FILE_NAME = "com.openexchange.caching.configfile";
 

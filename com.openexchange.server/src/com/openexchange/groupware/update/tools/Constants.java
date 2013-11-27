@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.tools;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link Constants}
@@ -77,9 +76,9 @@ public final class Constants {
         try {
             retval = new ObjectName("com.openexchange.updatetasktoolkit", "name", "Update Task Toolkit");
         } catch (final MalformedObjectNameException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(Constants.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(Constants.class).error(e.getMessage(), e);
         } catch (final NullPointerException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(Constants.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(Constants.class).error(e.getMessage(), e);
         }
         return retval;
     }

@@ -68,7 +68,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.log.LogFactory;
 
 /**
  * Implementation class for the RMI interface for util
@@ -78,7 +77,7 @@ import com.openexchange.log.LogFactory;
  */
 public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
-    private final static Log log = LogFactory.getLog(OXUtil.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(OXUtil.class);
 
     private final BasicAuthenticator basicauth;
 

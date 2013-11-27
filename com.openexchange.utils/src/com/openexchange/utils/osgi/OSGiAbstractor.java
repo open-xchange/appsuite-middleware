@@ -313,7 +313,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
         }
     }
 
-    static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiAbstractor.class));
+    static Log LOG = com.openexchange.log.Log.loggerFor(OSGiAbstractor.class);
 
     static ServiceRegistry registry;
 

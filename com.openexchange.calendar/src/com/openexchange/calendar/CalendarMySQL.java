@@ -134,7 +134,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -216,7 +215,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String CAL_TABLE_NAME = "prg_dates";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarMySQL.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarMySQL.class);
 
     private static final CalendarCollection COLLECTION = new CalendarCollection();
 

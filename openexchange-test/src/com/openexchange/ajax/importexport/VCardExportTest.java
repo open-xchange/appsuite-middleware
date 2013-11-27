@@ -64,7 +64,7 @@ public class VCardExportTest extends AbstractVCardTest {
 
 	final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-	private static final Log LOG = LogFactory.getLog(ICalImportTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(ICalImportTest.class);
 
 	public VCardExportTest(final String name) {
 		super(name);

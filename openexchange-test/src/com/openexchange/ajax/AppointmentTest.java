@@ -146,7 +146,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     protected TimeZone timeZone = null;
 
-    private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentTest.class);
 
     private final List<Appointment> clean = new ArrayList<Appointment>();
 

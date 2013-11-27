@@ -116,7 +116,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -167,7 +166,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     private static final long serialVersionUID = -889739420660750770L;
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Folder.class));
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Folder.class);
 
     private static final AdditionalFolderFieldList FIELDS = new AdditionalFolderFieldList();
 

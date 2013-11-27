@@ -77,7 +77,7 @@ public class SpamdInstallationServiceListener implements ServiceTrackerCustomize
         if (null == ServiceRegistry.getInstance().getService(SpamdService.class)) {
             ServiceRegistry.getInstance().addService(SpamdService.class, service);
         } else {
-            final Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamdInstallationServiceListener.class));
+            final Log log = com.openexchange.log.Log.loggerFor(SpamdInstallationServiceListener.class);
             log.error("Duplicate SpamdInstallationService detected: " + serviceReference.getClass().getName());
         }
         return service;

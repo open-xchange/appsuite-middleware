@@ -11,7 +11,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 public class MoveTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(MoveTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(MoveTest.class);
 
 	public MoveTest(final String name) {
 		super(name);

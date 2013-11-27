@@ -63,7 +63,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 import com.openexchange.subscribe.helpers.HTTPToolkit;
@@ -80,7 +79,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdaterStrategy<DocumentMetadataHolder> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DocumentMetadataHolderFolderUpdaterStrategy.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DocumentMetadataHolderFolderUpdaterStrategy.class);
 
     final UserService users;
     final UserPermissionService userPermissions;

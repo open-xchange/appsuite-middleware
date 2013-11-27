@@ -55,7 +55,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -75,7 +74,7 @@ public class WebdavLockAction extends AbstractAction {
 
 	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavLockAction.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavLockAction.class);
 
 	@Override
 	public void perform(final WebdavRequest req, final WebdavResponse res)

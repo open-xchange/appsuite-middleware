@@ -56,7 +56,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SolrCore;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
@@ -72,7 +71,7 @@ import com.openexchange.solr.SolrExceptionCodes;
  */
 public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrCoreConfigServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrCoreConfigServiceImpl.class);
 
     private final SolrIndexMysql indexMysql;
 

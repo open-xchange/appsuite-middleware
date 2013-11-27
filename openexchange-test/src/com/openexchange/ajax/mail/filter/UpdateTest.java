@@ -10,7 +10,7 @@ import com.openexchange.ajax.mail.filter.test.HeaderTest;
 
 public class UpdateTest extends AbstractMailFilterTest {
 
-	private static final Log LOG = LogFactory.getLog(UpdateTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(UpdateTest.class);
 
 	public static final int[] cols = { Rule.ID };
 

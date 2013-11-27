@@ -50,7 +50,6 @@
 package com.openexchange.server.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -64,7 +63,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
  */
 public class PreferencesCustomizer implements ServiceTrackerCustomizer<PreferencesItemService,PreferencesItemService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreferencesCustomizer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PreferencesCustomizer.class);
 
     private final BundleContext context;
 

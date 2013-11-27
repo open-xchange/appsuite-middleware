@@ -21,7 +21,7 @@ import com.openexchange.tools.URLParameter;
 
 public class CopyTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(CopyTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(CopyTest.class);
 
 	public CopyTest(final String name) {
 		super(name);

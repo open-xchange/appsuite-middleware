@@ -134,7 +134,7 @@ public class ContactTest extends AbstractAJAXTest {
 
     protected int userId = 0;
 
-    private static final Log LOG = LogFactory.getLog(ContactTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactTest.class);
 
     @Override
     protected void setUp() throws Exception {

@@ -57,14 +57,13 @@ import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class LockCleaner implements FolderEventInterface, EventHandler {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LockCleaner.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(LockCleaner.class);
 
 	private final EntityLockManager infoLockManager;
 	private final FolderLockManager folderLockManager;

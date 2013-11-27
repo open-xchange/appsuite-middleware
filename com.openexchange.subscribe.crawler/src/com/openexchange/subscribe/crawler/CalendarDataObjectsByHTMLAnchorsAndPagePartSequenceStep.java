@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -76,7 +75,7 @@ public class CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abs
 
     private PagePartSequence pageParts;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
 
     public CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep(String description, PagePartSequence pageParts){
         this.description = description;

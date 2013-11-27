@@ -66,7 +66,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -94,7 +93,7 @@ public class FolderWriter extends FolderChildWriter {
 
     protected int userId = -1;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderWriter.class);
 
     public FolderWriter(final int userId) {
         this.userId = userId;

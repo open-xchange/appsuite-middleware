@@ -71,7 +71,7 @@ import com.openexchange.tools.RandomString;
  */
 public class FunctionTests extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(FunctionTests.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FunctionTests.class);
 
     private AJAXClient client;
 

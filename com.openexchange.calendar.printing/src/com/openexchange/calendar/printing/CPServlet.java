@@ -85,7 +85,6 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
@@ -102,7 +101,7 @@ public class CPServlet extends PermissionServlet {
 
     private static final long serialVersionUID = -5186422014968264569L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CPServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CPServlet.class);
 
     private static final String APPOINTMENTS = "appointments";
 

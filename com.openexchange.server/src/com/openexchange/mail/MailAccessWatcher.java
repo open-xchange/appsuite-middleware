@@ -68,7 +68,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MailAccessWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccessWatcher.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccessWatcher.class);
 
     private static final MailAccessDelayQueue MAIL_ACCESSES = new MailAccessDelayQueue();
 

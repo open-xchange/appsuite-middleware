@@ -68,7 +68,6 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -118,7 +117,7 @@ public class LDAPAuthentication implements AuthenticationService {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LDAPAuthentication.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LDAPAuthentication.class);
 
     /**
      * Properties for the JNDI context.

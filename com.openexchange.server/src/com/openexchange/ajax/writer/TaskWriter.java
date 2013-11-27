@@ -53,7 +53,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,7 +68,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskWriter extends CalendarWriter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskWriter.class);
 
     public TaskWriter(final TimeZone timeZone) {
         super(timeZone, null);

@@ -86,7 +86,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class SessiondActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessiondActivator.class);
 
     private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 

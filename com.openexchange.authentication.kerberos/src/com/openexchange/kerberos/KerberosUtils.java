@@ -79,7 +79,7 @@ public final class KerberosUtils {
 
     public static final String SESSION_PRINCIPAL = "kerberosPrincipal";
 
-    public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(KerberosUtils.class));
+    public static final Log LOG = com.openexchange.log.Log.loggerFor(KerberosUtils.class);
 
     public static CallbackHandler getCallbackHandler(final String user, final String password) {
         return new CallbackHandler() {

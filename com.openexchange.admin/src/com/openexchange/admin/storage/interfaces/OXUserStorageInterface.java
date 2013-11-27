@@ -62,7 +62,6 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.log.LogFactory;
 
 /**
  * This interface provides an abstraction to the storage of the user information
@@ -78,7 +77,7 @@ public abstract class OXUserStorageInterface {
      */
     private static Class<? extends OXUserStorageInterface> implementingClass;
 
-    private static final Log log = LogFactory.getLog(OXUserStorageInterface.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXUserStorageInterface.class);
 
     protected static AdminCache cache = null;
 

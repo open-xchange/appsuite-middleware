@@ -56,7 +56,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ReportContextHandler;
 import com.openexchange.report.appsuite.ReportUserHandler;
@@ -76,7 +75,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
     
     private static final long serialVersionUID = -578253218760102061L;
 
-    private static final Log LOG = LogFactory.getLog(AnalyzeContextBatch.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AnalyzeContextBatch.class);
     
     private final String uuid;
     private String reportType;

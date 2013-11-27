@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ClusterUtils {
 
-    private static Log log = LogFactory.getLog(ClusterUtils.class);
+    private static Log log = com.openexchange.log.Log.loggerFor(ClusterUtils.class);
 
     /**
      * Re-Balance the cluster by assigning a new token to each node.

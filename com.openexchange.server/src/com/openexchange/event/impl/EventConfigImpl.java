@@ -57,7 +57,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link EventConfigImpl}
@@ -72,7 +71,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 
     //private boolean isInit;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventConfigImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(EventConfigImpl.class);
 
     public EventConfigImpl() {
 

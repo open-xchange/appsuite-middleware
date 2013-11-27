@@ -72,7 +72,7 @@ import com.openexchange.version.Version;
  */
 public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GeneralControl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GeneralControl.class);
 
     private MBeanServer server;
 

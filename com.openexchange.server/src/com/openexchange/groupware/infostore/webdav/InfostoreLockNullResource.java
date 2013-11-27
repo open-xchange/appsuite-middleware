@@ -64,7 +64,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -90,7 +89,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE};
 
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreLockNullResource.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreLockNullResource.class);
 
 
 	private final InfostoreWebdavFactory factory;

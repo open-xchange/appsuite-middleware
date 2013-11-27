@@ -60,7 +60,6 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -74,7 +73,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public abstract class DefaultContactService implements ContactService {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultContactService.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultContactService.class);
 
     /**
      * Initializes a new {@link DefaultContactService}.

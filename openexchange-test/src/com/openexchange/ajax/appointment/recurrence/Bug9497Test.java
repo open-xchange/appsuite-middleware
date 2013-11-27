@@ -15,7 +15,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug9497Test extends AbstractRecurrenceTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug9497Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug9497Test.class);
     private int objectId = -1;
 
 	public Bug9497Test(final String name) {

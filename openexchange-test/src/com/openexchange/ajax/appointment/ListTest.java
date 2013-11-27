@@ -76,7 +76,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 public class ListTest extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(ListTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ListTest.class);
 
     public ListTest(final String name) {
         super(name);

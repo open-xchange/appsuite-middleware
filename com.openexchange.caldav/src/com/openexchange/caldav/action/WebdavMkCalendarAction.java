@@ -60,7 +60,6 @@ import org.jdom2.output.XMLOutputter;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -76,7 +75,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class WebdavMkCalendarAction extends AbstractAction {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavMkCalendarAction.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavMkCalendarAction.class);
 
     /**
      * Initializes a new {@link WebdavMkCalendarAction}.

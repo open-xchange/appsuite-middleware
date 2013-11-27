@@ -72,7 +72,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
@@ -93,7 +92,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String CONTACT_ID = "contactId";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactPictureServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactPictureServlet.class);
 
     private static OXMFPublicationService contactPublisher = null;
 

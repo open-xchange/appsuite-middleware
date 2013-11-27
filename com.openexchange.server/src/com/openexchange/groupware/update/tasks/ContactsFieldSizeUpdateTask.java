@@ -62,7 +62,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -77,7 +76,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsFieldSizeUpdateTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactsFieldSizeUpdateTask.class);
 
     public ContactsFieldSizeUpdateTask() {
         super();

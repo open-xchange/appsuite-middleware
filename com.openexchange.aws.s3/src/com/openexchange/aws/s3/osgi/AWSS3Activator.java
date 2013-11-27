@@ -63,7 +63,7 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  */
 public class AWSS3Activator extends HousekeepingActivator {
 
-    private final static Log LOG = LogFactory.getLog(AWSS3Activator.class);
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(AWSS3Activator.class);
 
     /**
      * Initializes a new {@link AWSS3Activator}.

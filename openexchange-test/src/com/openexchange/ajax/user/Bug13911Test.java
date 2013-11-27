@@ -69,7 +69,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
  */
 public class Bug13911Test extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(Bug13911Test.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug13911Test.class);
 
     private static final int[] COLUMNS = new int[] {
         Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.EMAIL1, Contact.MARK_AS_DISTRIBUTIONLIST,

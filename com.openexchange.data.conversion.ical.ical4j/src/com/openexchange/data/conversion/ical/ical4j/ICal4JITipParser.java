@@ -80,7 +80,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link ICal4JITipParser}
@@ -89,7 +88,7 @@ import com.openexchange.log.LogFactory;
  */
 public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JITipParser.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(ICal4JITipParser.class);
 
     @Override
     public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {

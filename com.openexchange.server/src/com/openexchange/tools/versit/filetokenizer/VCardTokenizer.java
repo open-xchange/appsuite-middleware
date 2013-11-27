@@ -58,7 +58,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VCard;
@@ -73,7 +72,7 @@ import com.openexchange.tools.versit.old.VCard21;
  */
 public class VCardTokenizer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardTokenizer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(VCardTokenizer.class);
 
     public static final String VCARD_V3 = "3.0";
 

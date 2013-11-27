@@ -77,7 +77,6 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class contains all the mysql database related code
@@ -87,7 +86,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStorage {
 
-    private final static Log LOG = LogFactory.getLog(OXContextRestoreMySQLStorage.class);
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(OXContextRestoreMySQLStorage.class);
 
     @Override
     public String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema, String configdbname) throws SQLException, IOException, OXContextRestoreException, StorageException {

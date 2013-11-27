@@ -54,7 +54,6 @@ import java.util.Locale;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -101,7 +100,7 @@ public final class SubjectTerm extends SearchTerm<String> {
         try {
             subject = msg.getSubject();
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(SubjectTerm.class)).warn("Error during search.", e);
+            com.openexchange.log.Log.loggerFor(SubjectTerm.class).warn("Error during search.", e);
             return false;
         }
         if (subject != null) {

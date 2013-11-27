@@ -59,7 +59,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.log.LogFactory;
 import com.openexchange.proxy.servlet.Constants;
 import com.openexchange.proxy.servlet.ProxyServlet;
 
@@ -96,9 +95,9 @@ public class ServletRegisterer implements ServiceTrackerCustomizer<HttpService,H
         try {
             httpService.registerServlet(Constants.PATH, new ProxyServlet(), null, null);
         } catch (final ServletException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ServletRegisterer.class).error(e.getMessage(), e);
         } catch (final NamespaceException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ServletRegisterer.class).error(e.getMessage(), e);
         }
 
     }

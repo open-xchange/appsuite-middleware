@@ -80,7 +80,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.l10n.SuperCollator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -105,7 +104,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public final class Tools {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tools.class);
 
 	/**
 	 * Gets a comparator for contacts based on the supplied sort options.

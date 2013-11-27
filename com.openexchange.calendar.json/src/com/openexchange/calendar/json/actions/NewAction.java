@@ -85,7 +85,7 @@ responseDescription = "If the appointment was created successfully, an object wi
 public final class NewAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NewAction.class));
+        com.openexchange.log.Log.loggerFor(NewAction.class);
 
     /**
      * Initializes a new {@link NewAction}.

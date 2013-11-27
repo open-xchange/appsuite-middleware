@@ -71,7 +71,7 @@ import com.openexchange.user.UserService;
  */
 public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthenticationRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuthenticationRegisterer.class);
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();

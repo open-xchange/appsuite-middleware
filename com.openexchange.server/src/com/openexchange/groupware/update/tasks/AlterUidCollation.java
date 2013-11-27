@@ -56,7 +56,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -70,7 +69,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class AlterUidCollation implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AlterUidCollation.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AlterUidCollation.class);
 
     private static final String SQL = "ALTER TABLE login2user MODIFY uid VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL";
 

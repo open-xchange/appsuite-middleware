@@ -87,7 +87,7 @@ responseDescription = "Response (not IMAP: with timestamp): An array with mail d
 public final class ListAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListAction.class));
+        com.openexchange.log.Log.loggerFor(ListAction.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

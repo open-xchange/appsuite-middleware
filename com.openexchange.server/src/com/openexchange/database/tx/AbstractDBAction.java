@@ -59,14 +59,13 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
 
 public abstract class AbstractDBAction extends AbstractUndoable implements UndoableAction {
 
-	static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractDBAction.class));
+	static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractDBAction.class);
 
 	private DBProvider provider = null;
 	private Context context = null;

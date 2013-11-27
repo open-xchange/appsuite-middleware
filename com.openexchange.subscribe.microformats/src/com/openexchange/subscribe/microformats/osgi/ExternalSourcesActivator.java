@@ -54,7 +54,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.external.ExternalSubscriptionSourceDiscoveryService;
@@ -71,7 +70,7 @@ import com.openexchange.timer.TimerService;
  */
 public class ExternalSourcesActivator extends HousekeepingActivator {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSourcesActivator.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(ExternalSourcesActivator.class);
 
     private static final String SOURCES_LIST = "com.openexchange.subscribe.external.sources";
 

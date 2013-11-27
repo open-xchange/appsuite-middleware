@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.internal;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -72,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public final class UpdateExecutor {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateExecutor.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UpdateExecutor.class);
 
     private static final SchemaStore store = SchemaStore.getInstance();
 

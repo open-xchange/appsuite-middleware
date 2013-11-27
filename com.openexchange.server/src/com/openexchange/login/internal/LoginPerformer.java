@@ -79,7 +79,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -104,7 +103,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class LoginPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPerformer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginPerformer.class);
 
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 

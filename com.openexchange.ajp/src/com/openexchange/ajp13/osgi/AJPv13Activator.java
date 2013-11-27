@@ -77,7 +77,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AJPv13Activator.class);
 
     private volatile List<Initialization> inits;
 
@@ -163,7 +163,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             final HttpServiceImpl http = new HttpServiceImpl();
             registerService(HttpService.class, http);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(AJPv13Activator.class).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -187,7 +187,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
              */
             Services.setServiceLookup(null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(AJPv13Activator.class).error(e.getMessage(), e);
             throw e;
         }
     }

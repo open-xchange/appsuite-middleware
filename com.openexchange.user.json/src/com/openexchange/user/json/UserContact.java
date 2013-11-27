@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.comparator.Comparators;
@@ -81,7 +80,7 @@ public class UserContact {
 
 	public static final String ALL_ATTRIBUTES = "*";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserContact.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UserContact.class);
 
 	private final User user;
 	private final Contact contact;

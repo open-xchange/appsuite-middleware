@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SQL}
@@ -70,7 +69,7 @@ import com.openexchange.log.LogFactory;
  */
 public class SQL {
 
-    public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SQL.class));
+    public static final Log LOG = com.openexchange.log.Log.loggerFor(SQL.class);
 
     public static String getCreateFileChecksumsTableStmt() {
         return "CREATE TABLE fileChecksums (" +

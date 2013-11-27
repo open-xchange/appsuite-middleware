@@ -12,7 +12,7 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 
 	protected SimpleDateFormat simpleDateFormatUTC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
-	private static final Log LOG = LogFactory.getLog(AbstractRecurrenceTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractRecurrenceTest.class);
 
 	public AbstractRecurrenceTest(final String name) {
 		super(name);

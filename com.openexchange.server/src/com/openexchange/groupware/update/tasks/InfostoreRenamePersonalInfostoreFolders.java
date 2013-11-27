@@ -63,11 +63,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.log.LogFactory;
 
 public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreRenamePersonalInfostoreFolders.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreRenamePersonalInfostoreFolders.class);
 
     @Override
     public int addedWithVersion() {

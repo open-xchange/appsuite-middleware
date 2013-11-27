@@ -56,7 +56,6 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.DeferredActivator;
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.osgi.DeferredActivator;
  */
 public class AuthLDAPActivator extends DeferredActivator {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthLDAPActivator.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AuthLDAPActivator.class);
 
 	private ServiceRegistration<AuthenticationService> registration;
 

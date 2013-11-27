@@ -74,7 +74,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class ListTest extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(ListTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ListTest.class);
 
     private AJAXClient client;
     private AJAXClient client2;

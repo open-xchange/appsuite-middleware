@@ -87,7 +87,7 @@ public final class LinkTools extends Assert {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(LinkTools.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinkTools.class);
 
     /**
      * Encoding.

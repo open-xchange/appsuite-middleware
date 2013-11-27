@@ -61,7 +61,6 @@ import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.pooling.PoolingException;
 
@@ -72,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class DatabaseServiceImpl implements DatabaseService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseServiceImpl.class);
 
     private final Pools pools;
     private final ConfigDatabaseService configDatabaseService;

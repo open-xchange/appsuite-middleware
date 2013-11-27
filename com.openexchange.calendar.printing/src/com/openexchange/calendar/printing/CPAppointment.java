@@ -55,7 +55,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.printing.days.CalendarTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
@@ -72,7 +71,7 @@ import com.openexchange.user.UserService;
  */
 public class CPAppointment {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CPAppointment.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CPAppointment.class);
 
     private String title, description, location;
 

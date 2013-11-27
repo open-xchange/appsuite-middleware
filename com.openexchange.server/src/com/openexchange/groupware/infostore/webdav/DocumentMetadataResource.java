@@ -73,7 +73,6 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -91,8 +90,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 public class DocumentMetadataResource extends AbstractResource implements
 		OXWebdavResource, OXExceptionConstants {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory
-			.getLog(DocumentMetadataResource.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(DocumentMetadataResource.class);
 
 	private final InfostoreWebdavFactory factory;
 

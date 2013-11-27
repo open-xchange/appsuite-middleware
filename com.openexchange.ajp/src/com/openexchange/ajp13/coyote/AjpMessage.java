@@ -56,7 +56,6 @@ import com.openexchange.ajp13.coyote.util.CharChunk;
 import com.openexchange.ajp13.coyote.util.MessageBytes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.log.Log;
 import com.openexchange.tools.codec.QuotedPrintable;
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.tools.codec.QuotedPrintable;
  */
 public final class AjpMessage {
 
-    private static final org.apache.commons.logging.Log log = Log.valueOf(com.openexchange.log.LogFactory.getLog(AjpMessage.class));
+    private static final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(AjpMessage.class);
 
     // ------------------------------------------------------------ Constructor
 

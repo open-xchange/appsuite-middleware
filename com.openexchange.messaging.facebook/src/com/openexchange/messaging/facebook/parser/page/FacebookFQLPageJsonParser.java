@@ -136,7 +136,7 @@ public final class FacebookFQLPageJsonParser {
             for (final String name : pageElement.keySet()) {
                 final ItemHandler itemHandler = ITEM_HANDLERS.get(name);
                 if (null == itemHandler) {
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookFQLGroupJsonParser.class)).warn("Un-handled item: " + name);
+                    com.openexchange.log.Log.loggerFor(FacebookFQLGroupJsonParser.class).warn("Un-handled item: " + name);
                 } else {
                     itemHandler.handleItem(pageElement, page);
                 }

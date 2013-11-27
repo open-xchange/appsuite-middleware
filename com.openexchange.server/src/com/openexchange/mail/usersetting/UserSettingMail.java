@@ -117,7 +117,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     private static final long serialVersionUID = -5787223065275414178L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserSettingMail.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UserSettingMail.class);
 
     /*-
      * Integer constants for on/off options

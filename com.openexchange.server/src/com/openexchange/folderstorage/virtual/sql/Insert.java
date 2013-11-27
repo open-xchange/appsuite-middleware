@@ -57,7 +57,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.event.impl.EventClient;
@@ -247,7 +246,7 @@ public final class Insert {
                     }
                 } catch (final Exception e) {
                     // Ignore
-                    final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(Delete.class));
+                    final Log log = com.openexchange.log.Log.loggerFor(Delete.class);
                     log.error(e.getMessage(), e);
                 }
             }

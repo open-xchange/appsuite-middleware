@@ -56,7 +56,6 @@ import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -69,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class CalendarAttachments implements  AttachmentListener, AttachmentAuthorization {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAttachments.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarAttachments.class);
 
     //private static AppointmentSqlFactoryService appointmentSqlFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
 

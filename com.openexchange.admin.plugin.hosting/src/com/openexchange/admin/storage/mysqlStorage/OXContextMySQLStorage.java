@@ -124,7 +124,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.log.LogFactory;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -144,7 +143,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class OXContextMySQLStorage extends OXContextSQLStorage {
 
-    static final Log LOG = LogFactory.getLog(OXContextMySQLStorage.class);
+    static final Log LOG = com.openexchange.log.Log.loggerFor(OXContextMySQLStorage.class);
 
     private int CONTEXTS_PER_SCHEMA = 1;
 

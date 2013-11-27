@@ -100,7 +100,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     private static final long serialVersionUID = -1142595512657302179L;
 
-    static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailPart.class));
+    static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeMailPart.class);
 
     /**
      * The max. in-memory size in bytes.

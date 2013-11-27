@@ -61,7 +61,6 @@ import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -77,7 +76,7 @@ public class TasksDowngrade extends DowngradeListener {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksDowngrade.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TasksDowngrade.class);
 
     /**
      * Default constructor.

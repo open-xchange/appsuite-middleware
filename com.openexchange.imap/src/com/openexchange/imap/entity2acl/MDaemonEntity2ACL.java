@@ -77,7 +77,7 @@ import com.openexchange.user.UserService;
  */
 public final class MDaemonEntity2ACL extends Entity2ACL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MDaemonEntity2ACL.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MDaemonEntity2ACL.class);
 
     private static final MDaemonEntity2ACL INSTANCE = new MDaemonEntity2ACL();
 

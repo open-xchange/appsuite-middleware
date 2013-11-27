@@ -69,7 +69,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ConfigMenuTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigMenuTest.class);
 
     /**
      * Default constructor.

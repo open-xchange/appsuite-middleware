@@ -89,7 +89,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -404,7 +403,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private final List<OXException> warnings = new ArrayList<OXException>(2);
 
     private boolean has_next;
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarOperation.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarOperation.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private ResultSet co_rs;

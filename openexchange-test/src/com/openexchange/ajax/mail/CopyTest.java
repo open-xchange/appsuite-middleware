@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
  */
 public class CopyTest extends AbstractMailTest {
 
-    private static final Log LOG = LogFactory.getLog(CopyTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CopyTest.class);
 
     private String mailObject_25kb;
 

@@ -72,7 +72,6 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -85,7 +84,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public class HTMLServiceActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTMLServiceActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HTMLServiceActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

@@ -62,7 +62,6 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -75,7 +74,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class ResultIterator implements SearchIterator<Contact> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ResultIterator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ResultIterator.class);
 
     private static final ContactField[] DLISTMEMBER_FIELDS = {
     	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED,

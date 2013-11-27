@@ -95,7 +95,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.TimeZoneUtils;
@@ -127,7 +126,7 @@ public class ICalImporter extends AbstractImporter {
     private static final int APP = 0;
 	private static final int TASK = 1;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalImporter.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(ICalImporter.class);
 
 	@Override
     public boolean canImport(final ServerSession session, final Format format,

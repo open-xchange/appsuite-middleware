@@ -73,8 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "(not IMAP: with timestamp): An integer value representing folder's mail count.")
 public final class GetMailCountAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetMailCountAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GetMailCountAction.class);
 
     /**
      * Initializes a new {@link GetMailCountAction}.

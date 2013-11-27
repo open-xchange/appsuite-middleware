@@ -61,11 +61,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 public class ResourceBundleDiscoverer extends FileDiscoverer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ResourceBundleDiscoverer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ResourceBundleDiscoverer.class);
 
     public ResourceBundleDiscoverer(final File dir) throws FileNotFoundException {
         super(dir);

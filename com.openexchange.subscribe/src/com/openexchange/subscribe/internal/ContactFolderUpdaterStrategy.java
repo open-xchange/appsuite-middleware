@@ -67,7 +67,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
@@ -81,7 +80,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactFolderUpdaterStrategy.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactFolderUpdaterStrategy.class);
 
     private static final int SQL_INTERFACE = 1;
 

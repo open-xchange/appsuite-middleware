@@ -73,7 +73,7 @@ import com.openexchange.timer.TimerService;
  */
 public class PushUDPActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushUDPActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(PushUDPActivator.class);
 
     /**
      * Initializes a new {@link PushUDPActivator}.

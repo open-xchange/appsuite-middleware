@@ -65,7 +65,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -77,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class ServerUserSetting {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerUserSetting.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServerUserSetting.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

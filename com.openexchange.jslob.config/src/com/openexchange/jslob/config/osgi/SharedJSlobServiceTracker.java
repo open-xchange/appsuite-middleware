@@ -59,7 +59,6 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.jslob.config.ConfigJSlobService;
 import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SharedJSlobServiceTracker}
@@ -68,7 +67,7 @@ import com.openexchange.log.LogFactory;
  */
 public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<SharedJSlobService, SharedJSlobService> {
 
-    private final static Log LOG = LogFactory.getLog(SharedJSlobServiceTracker.class);
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(SharedJSlobServiceTracker.class);
 
     private final BundleContext context;
 

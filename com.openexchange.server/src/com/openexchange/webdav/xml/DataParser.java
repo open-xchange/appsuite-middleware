@@ -56,7 +56,6 @@ import org.apache.commons.logging.Log;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.DataFields;
 
@@ -99,7 +98,7 @@ public class DataParser {
 
     private int inFolder;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DataParser.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DataParser.class);
 
     protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws XmlPullParserException, IOException {
         if (isTag(parser, DataFields.OBJECT_ID, XmlServlet.NAMESPACE)) {

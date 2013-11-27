@@ -99,7 +99,7 @@ public class CommonsLoggingLogger extends AbstractDelegatingLogger {
      */
     public CommonsLoggingLogger(final String name, final String resourceBundleName) {
         super(name, resourceBundleName);
-        logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(name));
+        logger = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.loggerFor(name));
     }
 
     @Override

@@ -326,7 +326,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolActivator.class));
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
         if (LOG.isInfoEnabled()) {
             LOG.info("Appeared service: " + clazz.getName());
         }
@@ -334,7 +334,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolActivator.class));
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
         if (LOG.isInfoEnabled()) {
             LOG.info("Disappeared service: " + clazz.getName());
         }

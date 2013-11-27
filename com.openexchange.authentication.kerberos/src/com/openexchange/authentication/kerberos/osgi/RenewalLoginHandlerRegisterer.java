@@ -70,7 +70,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class RenewalLoginHandlerRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RenewalLoginHandlerRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RenewalLoginHandlerRegisterer.class);
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();

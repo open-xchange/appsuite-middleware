@@ -306,7 +306,7 @@ public class SyndMessage implements MessagingMessage {
                      */
                     final ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
                     if (null == proxyRegistry) {
-                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SyndMessage.class)).warn("Missing ProxyRegistry service. Replacing image URL skipped.");
+                        com.openexchange.log.Log.loggerFor(SyndMessage.class).warn("Missing ProxyRegistry service. Replacing image URL skipped.");
                         return null;
                     }
                     picUrl = proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance())).toString();
@@ -314,13 +314,13 @@ public class SyndMessage implements MessagingMessage {
                     /*
                      * Not a valid URL
                      */
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SyndMessage.class)).warn("Not a valid image URL. Replacing image URL skipped.", e);
+                    com.openexchange.log.Log.loggerFor(SyndMessage.class).warn("Not a valid image URL. Replacing image URL skipped.", e);
                     picUrl = null;
                 } catch (final OXException e) {
                     /*
                      * Not a valid URL
                      */
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SyndMessage.class)).warn("Proxying image URL failed. Replacing image URL skipped.", e);
+                    com.openexchange.log.Log.loggerFor(SyndMessage.class).warn("Proxying image URL failed. Replacing image URL skipped.", e);
                     picUrl = null;
                 }
             } else {

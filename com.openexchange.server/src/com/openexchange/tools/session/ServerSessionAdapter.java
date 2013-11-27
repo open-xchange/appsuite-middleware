@@ -73,7 +73,7 @@ import com.openexchange.sessiond.impl.SessionObject;
 public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServerSessionAdapter.class));
+        com.openexchange.log.Log.loggerFor(ServerSessionAdapter.class);
 
     /**
      * Gets the server session for specified session.

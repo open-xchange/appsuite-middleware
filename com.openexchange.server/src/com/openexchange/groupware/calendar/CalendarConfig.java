@@ -51,7 +51,6 @@ package com.openexchange.groupware.calendar;
 
 import java.io.File;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -69,7 +68,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
 
     private static final CalendarConfig singleton = new CalendarConfig();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarConfig.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarConfig.class);
 
     private static volatile boolean solo_reminder_trigger_event = true;
     private static volatile boolean check_and_remove_past_reminders = true;

@@ -12,7 +12,7 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class Bug9089Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug9089Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug9089Test.class);
 
 	public Bug9089Test(final String name) {
 		super(name);

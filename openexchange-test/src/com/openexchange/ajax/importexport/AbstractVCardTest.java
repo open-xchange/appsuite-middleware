@@ -44,7 +44,7 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 
 	protected TimeZone timeZone = null;
 
-	private static final Log LOG = LogFactory.getLog(AbstractVCardTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractVCardTest.class);
 
 	public AbstractVCardTest(final String name) {
 		super(name);

@@ -53,7 +53,7 @@ public class LoginTest extends TestCase {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(LoginTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTest.class);
 
     /**
      * How much logins?

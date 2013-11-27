@@ -58,7 +58,6 @@ import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupEventConstants;
@@ -84,7 +83,7 @@ public final class Delete {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Delete.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Delete.class);
 
     /**
      * Context.

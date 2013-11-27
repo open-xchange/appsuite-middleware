@@ -118,7 +118,6 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -177,7 +176,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public static final TimeZone ZONE_UTC = TimeZone.getTimeZone("UTC");
 
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCollection.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarCollection.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

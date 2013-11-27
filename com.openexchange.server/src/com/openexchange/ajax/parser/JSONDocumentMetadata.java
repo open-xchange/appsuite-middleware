@@ -52,7 +52,6 @@ package com.openexchange.ajax.parser;
 import java.util.Date;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -69,7 +68,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     private final JSONObject jsonObject;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JSONDocumentMetadata.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(JSONDocumentMetadata.class);
     private static final String DEFAULT_MIMETYPE = "application/octet-stream";
     //private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(JSONDocumentMetadata.class);
 

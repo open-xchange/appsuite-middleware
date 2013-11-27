@@ -50,7 +50,6 @@
 package com.openexchange.config.cascade.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -72,7 +71,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     // private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigCascadeActivator.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigCascadeActivator.class);
 
     private boolean configured = false;
 

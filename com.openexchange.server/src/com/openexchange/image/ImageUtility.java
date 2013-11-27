@@ -294,7 +294,7 @@ public final class ImageUtility {
             return URLEncoder.encode(text, UTF_8);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ImageUtility.class).error(e.getMessage(), e);
             return text;
         }
     }
@@ -313,7 +313,7 @@ public final class ImageUtility {
             checksum.update(string.getBytes(Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ImageUtility.class).error(e.getMessage(), e);
         }
         return null;
     }
@@ -343,9 +343,9 @@ public final class ImageUtility {
             checksum.update(string.getBytes(UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ImageUtility.class).error(e.getMessage(), e);
         } catch (final UnsupportedEncodingException e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ImageUtility.class).error(e.getMessage(), e);
         }
         return null;
     }

@@ -57,7 +57,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.user.copy.rmi.impl.OXUserCopy;
-import com.openexchange.log.LogFactory;
 import com.openexchange.user.copy.UserCopyService;
 
 /**
@@ -67,7 +66,7 @@ import com.openexchange.user.copy.UserCopyService;
  */
 public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyService,UserCopyService> {
 
-    private static final Log LOG = LogFactory.getLog(RMIUserCopyRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RMIUserCopyRegisterer.class);
 
     private final BundleContext context;
 

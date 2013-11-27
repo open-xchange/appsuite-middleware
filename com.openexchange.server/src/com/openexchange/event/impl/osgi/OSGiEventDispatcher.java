@@ -68,7 +68,6 @@ import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -79,7 +78,7 @@ import com.openexchange.session.Session;
  */
 public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispatcher {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiEventDispatcher.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiEventDispatcher.class);
 
     private final Queue<AppointmentEventInterface> appointmentListeners;
 

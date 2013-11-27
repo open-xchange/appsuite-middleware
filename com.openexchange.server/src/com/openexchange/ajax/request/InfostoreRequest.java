@@ -92,7 +92,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -112,7 +111,7 @@ public class InfostoreRequest extends CommonRequest {
 
     private final UserPermissionBits userPermissionBits;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreRequest.class);
 
     public InfostoreRequest(final ServerSession session, final JSONWriter w) {
         super(w);

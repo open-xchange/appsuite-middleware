@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link CalendarAddIndex2DatesMembers} - Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
@@ -101,7 +100,7 @@ public final class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
     }
 
     private void createMyIndex(final Connection con, final String[] tables, final String fieldName, final String name) {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAddIndex2DatesMembers.class));
+        final Log log = com.openexchange.log.Log.loggerFor(CalendarAddIndex2DatesMembers.class);
         final String[] columns = { "cid", fieldName };
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {

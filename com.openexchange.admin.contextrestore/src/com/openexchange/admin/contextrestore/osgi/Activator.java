@@ -59,7 +59,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXContext;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -73,7 +72,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = LogFactory.getLog(Activator.class);
+        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
         try {
             final BundleContext context = this.context;
             AdminCache.compareAndSetBundleContext(null, context);

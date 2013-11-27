@@ -61,7 +61,7 @@ import com.openexchange.webdav.xml.types.Response;
  */
 public abstract class AbstractInsertParser<T extends CommonInsertResponse> extends AbstractWebDAVParser<T> {
 
-    private static final Log LOG = LogFactory.getLog(AbstractInsertParser.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractInsertParser.class);
 
     protected AbstractInsertParser() {
         super();

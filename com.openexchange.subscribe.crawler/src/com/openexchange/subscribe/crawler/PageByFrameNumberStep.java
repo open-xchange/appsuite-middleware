@@ -50,7 +50,6 @@
 package com.openexchange.subscribe.crawler;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.FrameWindow;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -70,7 +69,7 @@ public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
 
     private int frameNumber;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByFrameNumberStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PageByFrameNumberStep.class);
 
     public PageByFrameNumberStep() {
         super();

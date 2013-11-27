@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
 
 /**
@@ -64,7 +63,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class DynamicList implements UpdateTaskList<UpdateTask> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DynamicList.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DynamicList.class);
 
     private static final DynamicList SINGLETON = new DynamicList();
 

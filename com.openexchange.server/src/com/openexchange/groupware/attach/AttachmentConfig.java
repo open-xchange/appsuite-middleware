@@ -52,7 +52,6 @@ package com.openexchange.groupware.attach;
 import java.io.File;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -73,7 +72,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     private static final ReentrantLock INIT_LOCK = new ReentrantLock();
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentConfig.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentConfig.class);
 
     private static volatile AttachmentConfig _singleton;
 

@@ -72,7 +72,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.arrays.Arrays;
@@ -86,7 +85,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbTaskStorage extends TaskStorage {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbTaskStorage.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(RdbTaskStorage.class);
 
     /**
      * This SQL statement counts the tasks in a folder. TODO Move to {@link SQL} class.

@@ -64,7 +64,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,7 +80,7 @@ public final class CSVLibrary {
         super();
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVLibrary.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CSVLibrary.class);
     public static final char CELL_DELIMITER = ',';
     public static final char ROW_DELIMITER = '\n';
 

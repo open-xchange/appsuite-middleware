@@ -68,6 +68,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractPublicationServlet extends PermissionServlet {
 
+    private static final long serialVersionUID = 5880236559668102629L;
+
     /**
      * Initializes a new {@link AbstractPublicationServlet}.
      */
@@ -81,7 +83,7 @@ public abstract class AbstractPublicationServlet extends PermissionServlet {
     }
 
     protected void writeOXException(final OXException x, final HttpServletRequest req, final HttpServletResponse resp) {
-        x.log(com.openexchange.exception.Log.valueOf(getLog()));
+        x.log(getLog());
         final Response response = new Response(getSessionObject(req));
         response.setException(x);
         writeResponseSafely(response, resp, getSessionObject(req));

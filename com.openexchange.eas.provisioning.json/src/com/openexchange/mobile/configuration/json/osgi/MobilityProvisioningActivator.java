@@ -56,7 +56,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -68,7 +67,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class MobilityProvisioningActivator extends HousekeepingActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobilityProvisioningActivator.class));
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(MobilityProvisioningActivator.class);
     private final static String SERVLET_PATH_APPENDIX = "mobilityprovisioning";
 
 	public MobilityProvisioningActivator() {

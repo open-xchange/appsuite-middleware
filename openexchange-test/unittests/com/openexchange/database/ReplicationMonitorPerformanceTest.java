@@ -91,7 +91,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class ReplicationMonitorPerformanceTest {
 
-    private static final Log LOG = LogFactory.getLog(ReplicationMonitorPerformanceTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReplicationMonitorPerformanceTest.class);
 
     private static final int RUNS = 5;
 

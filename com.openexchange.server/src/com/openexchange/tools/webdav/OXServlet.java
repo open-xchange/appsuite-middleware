@@ -69,7 +69,6 @@ import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
@@ -94,7 +93,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     private static final long serialVersionUID = 301910346402779362L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OXServlet.class));
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(OXServlet.class);
 
     /**
      * Simple {@link LoginRequest} implementation.

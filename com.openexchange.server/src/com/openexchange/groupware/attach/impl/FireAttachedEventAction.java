@@ -52,14 +52,13 @@ package com.openexchange.groupware.attach.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class FireAttachedEventAction extends AttachmentEventAction {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FireAttachedEventAction.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FireAttachedEventAction.class);
 
     @Override
     protected void undoAction() throws OXException {

@@ -84,7 +84,7 @@ public class EffectivePermission extends OCLPermission {
 
     private static final long serialVersionUID = -1303754404748836561L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EffectivePermission.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(EffectivePermission.class);
 
     /**
      * The configuration profile of the current logged in user

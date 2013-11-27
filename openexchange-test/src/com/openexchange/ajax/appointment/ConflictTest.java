@@ -27,7 +27,7 @@ import com.openexchange.tools.URLParameter;
 
 public class ConflictTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(ConflictTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(ConflictTest.class);
 
 	public ConflictTest(final String name) {
 		super(name);

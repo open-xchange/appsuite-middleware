@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaUpdateState;
@@ -71,7 +70,7 @@ import com.openexchange.java.Strings;
  */
 class UpdateTaskCollection {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateTaskCollection.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UpdateTaskCollection.class);
 
     private static final UpdateTaskCollection SINGLETON = new UpdateTaskCollection();
 

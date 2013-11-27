@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public class PushMsSession implements PutIfAbsent {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsSession.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushMsSession.class);
 
     /**
      * Deserializes a session from a map that was previously wrapped via {@link PushMsSession#wrap}.

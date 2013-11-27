@@ -64,7 +64,6 @@ import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 
 public class CSVImportAction extends AbstractImportAction implements AJAXActionService {
@@ -77,7 +76,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
         super(services);
     }
 
-    public static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVImportAction.class));
+    public static Log LOG = com.openexchange.log.Log.loggerFor(CSVImportAction.class);
 
 	private Importer importer;
 

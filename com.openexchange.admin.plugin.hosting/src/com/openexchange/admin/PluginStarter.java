@@ -63,11 +63,10 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 
 public class PluginStarter {
 
-    private static Log LOG = LogFactory.getLog(PluginStarter.class);
+    private static Log LOG = com.openexchange.log.Log.loggerFor(PluginStarter.class);
 
     private static com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = null;
 

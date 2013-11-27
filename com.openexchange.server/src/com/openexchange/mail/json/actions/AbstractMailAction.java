@@ -102,7 +102,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractMailAction implements AJAXActionService, MailActionConstants {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailAction.class);
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 

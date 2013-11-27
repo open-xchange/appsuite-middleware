@@ -67,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.log.LogFactory;
 
 /**
  * @author d7
@@ -75,7 +74,7 @@ import com.openexchange.log.LogFactory;
  */
 public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMySQLDefaultValues {
 
-    private final static Log log = LogFactory.getLog(OXResourceMySQLStorage.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(OXResourceMySQLStorage.class);
 
     public OXResourceMySQLStorage() {
     }

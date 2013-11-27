@@ -69,7 +69,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -142,7 +141,7 @@ public final class CalculatePermission {
                     }
                 }
             } catch (final OXException e) {
-                final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalculatePermission.class));
+                final Log logger = com.openexchange.log.Log.loggerFor(CalculatePermission.class);
                 logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             }
         }

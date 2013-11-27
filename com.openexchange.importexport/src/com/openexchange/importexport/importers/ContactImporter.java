@@ -58,7 +58,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -75,7 +74,7 @@ public abstract class ContactImporter extends AbstractImporter {
         super(services);
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactImporter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactImporter.class);
 
     /**
      * Defines the maximum number of implicit retries in case of truncation errors.

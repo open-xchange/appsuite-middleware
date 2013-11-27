@@ -74,7 +74,6 @@ import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 public class OXUtilMySQLStorageCommon {
 
@@ -122,7 +121,7 @@ public class OXUtilMySQLStorageCommon {
         return isWhitespace;
     }
 
-    private static final Log LOG = LogFactory.getLog(OXUtilMySQLStorageCommon.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OXUtilMySQLStorageCommon.class);
 
     private static AdminCache cache = ClientAdminThread.cache;
 

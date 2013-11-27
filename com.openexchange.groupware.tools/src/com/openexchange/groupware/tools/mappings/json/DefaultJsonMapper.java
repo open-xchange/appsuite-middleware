@@ -334,7 +334,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
             // Keep interrupted status
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultJsonMapper.class));
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DefaultJsonMapper.class);
             LOG.error(e.getMessage(), e);
         }
         return TimeZone.getTimeZone(ID);

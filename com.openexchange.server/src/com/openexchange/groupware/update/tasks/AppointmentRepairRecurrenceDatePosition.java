@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -81,7 +80,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentRepairRecurrenceDatePosition.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentRepairRecurrenceDatePosition.class);
 
     public AppointmentRepairRecurrenceDatePosition() {
         super();

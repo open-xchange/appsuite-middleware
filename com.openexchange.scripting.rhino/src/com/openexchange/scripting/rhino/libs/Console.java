@@ -73,7 +73,7 @@ public class Console {
 	private Log log = null;
 
 	public Console(String def) {
-		log = com.openexchange.log.LogFactory.getLog(def);
+		log = com.openexchange.log.Log.loggerFor(def);
 	}
 
 	public void log(Object... values) {

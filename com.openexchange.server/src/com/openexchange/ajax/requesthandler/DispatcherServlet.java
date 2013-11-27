@@ -79,7 +79,6 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
-import com.openexchange.log.PropertiesAppendingLogWrapper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -444,12 +443,7 @@ public class DispatcherServlet extends SessionServlet {
         final String msg;
         if (LogProperties.isEnabled()) {
             final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
-            if (LOG instanceof PropertiesAppendingLogWrapper) {
-                final Set<Name> nonmatching = ((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR, LogProperties.optLogProperties());
-                logBuilder.append(LogProperties.getAndPrettyPrint(nonmatching));
-            } else {
-                logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
-            }
+            logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
             msg = logBuilder.toString();
         } else {
             msg = "Error processing request.";

@@ -52,7 +52,6 @@ package com.openexchange.messaging.rss.osgi;
 import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.logging.Log;
 import com.openexchange.html.HtmlService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -66,7 +65,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

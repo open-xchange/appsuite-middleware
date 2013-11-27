@@ -146,7 +146,7 @@ import com.openexchange.tools.sql.DBUtils;
 public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DatabaseFolderStorage.class));
+        com.openexchange.log.Log.loggerFor(DatabaseFolderStorage.class);
 
     private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
 

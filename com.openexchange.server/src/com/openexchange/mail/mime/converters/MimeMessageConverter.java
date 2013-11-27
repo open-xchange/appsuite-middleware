@@ -183,7 +183,7 @@ public final class MimeMessageConverter {
             MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
         public static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessageFieldFiller.class));
+            com.openexchange.log.Log.loggerFor(MailMessageFieldFiller.class);
 
         /**
          * Fills a fields from source instance of {@link Message} in given destination instance of {@link MailMessage}.

@@ -208,7 +208,7 @@ import com.openexchange.tools.versit.utility.VersitUtility;
  */
 public class Mail extends PermissionServlet implements UploadListener {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Mail.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Mail.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

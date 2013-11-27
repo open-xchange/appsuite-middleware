@@ -82,7 +82,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.l10n.SuperCollator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
 
 
@@ -93,7 +92,7 @@ import com.openexchange.search.SearchTerm;
  */
 public class Executor {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Executor.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Executor.class);
 
     /**
      * Initializes a new {@link Executor}.

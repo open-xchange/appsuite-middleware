@@ -92,8 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response with timestamp: An array with new and deleted attachments for the specified object. New attachments are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted attachments (should the ignore parameter be ever implemented) would be identified by their object IDs as plain numbers, without being part of a nested array.")
 public final class UpdatesAction extends AbstractAttachmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatesAction.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UpdatesAction.class);
 
     /**
      * Initializes a new {@link UpdatesAction}.

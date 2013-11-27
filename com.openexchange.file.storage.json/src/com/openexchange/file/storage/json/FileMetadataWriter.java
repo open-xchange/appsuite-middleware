@@ -63,7 +63,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -77,7 +76,7 @@ public class FileMetadataWriter {
     /**
      * The logger constant.
      */
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileMetadataWriter.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(FileMetadataWriter.class);
 
     /**
      * The {@link JSONHandler} constant.

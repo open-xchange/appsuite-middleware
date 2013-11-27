@@ -64,7 +64,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Languages implements ComputedServerConfigValueService {
 
-	private static final Log LOG = LogFactory.getLog(Languages.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Languages.class);
 
 	private JSONObject allLanguages;
 

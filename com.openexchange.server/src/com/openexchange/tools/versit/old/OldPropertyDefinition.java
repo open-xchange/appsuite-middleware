@@ -59,7 +59,6 @@ import java.util.Set;
 import javax.mail.internet.MimeUtility;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.ParameterValueDefinition;
@@ -72,7 +71,7 @@ public class OldPropertyDefinition {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OldPropertyDefinition.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OldPropertyDefinition.class);
 
     private final Map<String, OldParamDefinition> Params = new HashMap<String, OldParamDefinition>();
 

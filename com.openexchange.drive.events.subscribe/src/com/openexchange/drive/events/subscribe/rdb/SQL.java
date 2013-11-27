@@ -61,7 +61,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SQL}
@@ -186,7 +185,7 @@ public class SQL {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SQL.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SQL.class);
 
     private SQL() {
         super();

@@ -53,11 +53,10 @@ import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
 
-    private static final Log LOG = LogFactory.getLog(OXAdminPoolDBPoolExtension.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OXAdminPoolDBPoolExtension.class);
 
     public OXAdminPoolDBPoolExtension() {
         super();

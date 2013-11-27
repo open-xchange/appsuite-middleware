@@ -63,7 +63,7 @@ import com.openexchange.imap.IMAPException;
  */
 final class ThreadSortParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadSortParser.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadSortParser.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

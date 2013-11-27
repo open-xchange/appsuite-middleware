@@ -53,7 +53,6 @@ package com.openexchange.admin.tools;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -63,7 +62,7 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 
 public class DatabaseDataMover implements Callable<Void> {
 
-    private final static Log log = LogFactory.getLog(DatabaseDataMover.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(DatabaseDataMover.class);
 
     private Context ctx = null;
 

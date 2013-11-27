@@ -10,7 +10,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class ConfirmTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(ConfirmTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfirmTest.class);
 
 	public ConfirmTest(final String name) {
 		super(name);

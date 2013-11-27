@@ -78,7 +78,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     private static final long serialVersionUID = 1085330725813918879L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ParameterList.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ParameterList.class);
 
     /**
      * The regular expression to parse parameters
@@ -531,7 +531,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     private static final class Parameter implements Cloneable, Serializable, Comparable<Parameter> {
 
-        private static final transient org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Parameter.class));
+        private static final transient org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.loggerFor(Parameter.class);
 
         private static final long serialVersionUID = 7978948703870567515L;
 

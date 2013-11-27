@@ -57,7 +57,6 @@ import javax.mail.event.MessageRecentEvent;
 import javax.mail.event.MessageRecentListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -74,7 +73,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 public final class IMAPNotifierMessageRecentListener implements MessageRecentListener {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPNotifierMessageRecentListener.class));
+        com.openexchange.log.Log.loggerFor(IMAPNotifierMessageRecentListener.class);
 
     private static final boolean INFO_ENABLED = LOG.isInfoEnabled();
 
@@ -253,7 +252,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                     accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
             }
         } catch (final OXException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPNotifierMessageRecentListener.class)).warn("Couldn't notify about possible recent message.", e);
+            com.openexchange.log.Log.loggerFor(IMAPNotifierMessageRecentListener.class).warn("Couldn't notify about possible recent message.", e);
         }
     }
 

@@ -58,7 +58,6 @@ import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.freebusy.service.impl.FreeBusyProviderRegistry;
 import com.openexchange.freebusy.service.impl.FreeBusyServiceImpl;
 import com.openexchange.freebusy.service.impl.FreeBusyServiceLookup;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -71,7 +70,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class FreeBusyServiceActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyServiceActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FreeBusyServiceActivator.class);
 
     /**
      * Initializes a new {@link FreeBusyServiceActivator}.

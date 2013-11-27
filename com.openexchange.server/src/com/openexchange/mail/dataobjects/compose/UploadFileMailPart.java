@@ -83,7 +83,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
     private static final long serialVersionUID = 257902073011243269L;
 
     private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UploadFileMailPart.class));
+        com.openexchange.log.Log.loggerFor(UploadFileMailPart.class);
 
     private final File uploadFile;
 

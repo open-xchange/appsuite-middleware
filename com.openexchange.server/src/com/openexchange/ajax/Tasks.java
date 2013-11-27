@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,7 +73,7 @@ public class Tasks extends DataServlet {
 
     private static final long serialVersionUID = 8092832647688901704L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tasks.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tasks.class);
 
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws IOException {

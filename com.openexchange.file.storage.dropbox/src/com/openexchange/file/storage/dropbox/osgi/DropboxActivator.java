@@ -109,7 +109,7 @@ public final class DropboxActivator extends HousekeepingActivator {
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new DropboxEventHandler(), serviceProperties);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DropboxActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(DropboxActivator.class).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -127,7 +127,7 @@ public final class DropboxActivator extends HousekeepingActivator {
             // Clear service registry
             DropboxServices.setServices(null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DropboxActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(DropboxActivator.class).error(e.getMessage(), e);
             throw e;
         }
     }

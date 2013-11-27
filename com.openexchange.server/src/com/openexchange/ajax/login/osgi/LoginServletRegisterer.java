@@ -66,7 +66,6 @@ import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.ConfigurationProperty;
 
 /**
@@ -76,7 +75,7 @@ import com.openexchange.login.ConfigurationProperty;
  */
 public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServletRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginServletRegisterer.class);
     private static final String SERVLET_PATH_APPENDIX = "login";
 
     private final BundleContext context;

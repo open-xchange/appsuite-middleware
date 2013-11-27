@@ -68,7 +68,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(CalendarSqlTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarSqlTest.class);
 
     /**
      * Calendar fields.

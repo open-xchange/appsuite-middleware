@@ -58,7 +58,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexProperties;
 import com.openexchange.index.solr.ModuleSet;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -91,7 +90,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public abstract class AbstractSMALStorage {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSMALStorage.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSMALStorage.class);
     /**
      * The fields containing only the mail identifier.
      */

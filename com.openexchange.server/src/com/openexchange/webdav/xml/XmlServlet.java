@@ -76,7 +76,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 import com.openexchange.webdav.LastModifiedCache;
@@ -157,7 +156,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     private static final Namespace dav = Namespace.getNamespace("D", davUri);
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(XmlServlet.class));
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(XmlServlet.class);
 
     @Override
     public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {

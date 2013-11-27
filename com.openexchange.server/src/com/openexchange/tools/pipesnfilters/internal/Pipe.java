@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -68,7 +67,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 final class Pipe<T> implements DataSource<T>, DataSink<T> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Pipe.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Pipe.class);
 
     private final ThreadPoolService threadPool;
     private final BlockingQueue<Object> queue = new LinkedBlockingQueue<Object>();

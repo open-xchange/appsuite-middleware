@@ -91,7 +91,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
     private static final long serialVersionUID = 257902073011243269L;
 
     private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeFileStoreMailPart.class));
+        com.openexchange.log.Log.loggerFor(MimeFileStoreMailPart.class);
 
     private final IDBasedFileAccessFactory fileAccessFactory;
 

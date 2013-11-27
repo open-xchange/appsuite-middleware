@@ -55,7 +55,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractSubscriptionServlet extends PermissionServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSubscriptionServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSubscriptionServlet.class);
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {

@@ -58,7 +58,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -70,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class QuotaRequest {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuotaRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotaRequest.class);
 
     private QuotaFileStorage qfs;
 

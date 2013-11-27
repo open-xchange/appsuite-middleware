@@ -71,7 +71,6 @@ import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Charsets;
 import com.openexchange.l10n.SuperCollator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -81,7 +80,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class Tools {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tools.class);
 
     /**
      * Constructs a comma separated string vor the given numeric values.

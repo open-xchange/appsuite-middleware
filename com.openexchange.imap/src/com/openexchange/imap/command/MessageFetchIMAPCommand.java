@@ -95,7 +95,7 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageFetchIMAPCommand.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MessageFetchIMAPCommand.class);
 
     private static interface SeqNumFetcher {
 

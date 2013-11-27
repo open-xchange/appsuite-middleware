@@ -67,7 +67,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for database resource handling.
@@ -77,7 +76,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class DBUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBUtils.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DBUtils.class);
 
     public static final int IN_LIMIT = 1000;
 

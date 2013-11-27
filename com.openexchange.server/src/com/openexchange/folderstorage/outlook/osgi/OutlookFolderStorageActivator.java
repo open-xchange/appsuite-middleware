@@ -91,7 +91,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class OutlookFolderStorageActivator extends DeferredActivator {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OutlookFolderStorageActivator.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OutlookFolderStorageActivator.class);
 
     private List<ServiceRegistration<?>> serviceRegistrations;
 

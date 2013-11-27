@@ -65,7 +65,6 @@ import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.i18n.tools.replacement.ModuleReplacement;
 import com.openexchange.i18n.tools.replacement.StringReplacement;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -76,7 +75,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public abstract class LinkableState implements State {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkableState.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinkableState.class);
 
     protected static volatile Template object_link_template;
 

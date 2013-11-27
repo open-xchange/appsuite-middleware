@@ -27,7 +27,7 @@ import com.openexchange.java.util.TimeZones;
 
 public class AllTest extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(AllTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AllTest.class);
 
     private static final int[] SIMPLE_COLUMNS = new int[] {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };

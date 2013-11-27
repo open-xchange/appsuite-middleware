@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -69,7 +68,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  */
 public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObject[], Page> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarObjectsByICalFileStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarObjectsByICalFileStep.class);
 
     public CalendarObjectsByICalFileStep() {
 

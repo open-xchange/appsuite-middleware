@@ -64,7 +64,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -80,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderClearDelTablesTasks.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderClearDelTablesTasks.class);
 
     /**
      * Initializes a new {@link FolderClearDelTablesTasks}.

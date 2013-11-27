@@ -53,7 +53,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ews.EWSFactoryService;
 import com.openexchange.ews.ExchangeWebService;
 import com.openexchange.ews.internal.ExchangeWebServiceImpl;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -63,7 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class EWSActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EWSActivator.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(EWSActivator.class);
 
     /**
      * Initializes a new {@link EWSActivator}.

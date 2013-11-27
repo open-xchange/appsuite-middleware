@@ -67,7 +67,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -119,7 +118,7 @@ public final class ical extends PermissionServlet {
     /**
      * Logger.
      */
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ical.class));
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(ical.class);
 
     private final static int[] APPOINTMENT_FIELDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.MODIFIED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED,

@@ -76,7 +76,6 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Assignment;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
@@ -86,7 +85,7 @@ public class OXContextMySQLStorageCommon {
 
     public static final String LOG_ERROR_CLOSING_STATEMENT = "Error closing statement";
 
-    private static final Log log = LogFactory.getLog(OXContextMySQLStorageCommon.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXContextMySQLStorageCommon.class);
 
     private final OXUtilMySQLStorageCommon oxutilcommon;
 

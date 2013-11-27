@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -71,7 +70,7 @@ public class ContactsAddUseCountColumnUpdateTask implements UpdateTask {
 
     private final String ADD_COLUMN_DEL = "ALTER TABLE del_contacts ADD COLUMN useCount INT4 UNSIGNED";
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsAddUseCountColumnUpdateTask.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(ContactsAddUseCountColumnUpdateTask.class);
 
     @Override
     public int addedWithVersion() {

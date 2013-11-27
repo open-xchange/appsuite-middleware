@@ -65,7 +65,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
-import com.openexchange.log.LogFactory;
 
 /**
  * Default mysql implementation for admin auth.
@@ -74,7 +73,7 @@ import com.openexchange.log.LogFactory;
  */
 public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
-    private final static Log log = LogFactory.getLog(OXAuthMySQLStorage.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(OXAuthMySQLStorage.class);
 
     /** */
     public OXAuthMySQLStorage() {

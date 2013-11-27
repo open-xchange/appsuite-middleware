@@ -123,11 +123,11 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
             try {
                 // new StartUpTest().test();
             } catch (final Exception e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingActivator.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.loggerFor(FacebookMessagingActivator.class).error(e.getMessage(), e);
             }
 
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(FacebookMessagingActivator.class).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -142,7 +142,7 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
 
             Services.setServiceLookup(null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(FacebookMessagingActivator.class).error(e.getMessage(), e);
             throw e;
         }
     }

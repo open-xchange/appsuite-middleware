@@ -75,7 +75,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -94,7 +93,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class AutoLogin extends AbstractLoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AutoLogin.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AutoLogin.class);
 
     private final LoginConfiguration conf;
 

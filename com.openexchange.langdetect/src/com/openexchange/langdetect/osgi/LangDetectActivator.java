@@ -50,7 +50,6 @@
 package com.openexchange.langdetect.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
@@ -74,7 +73,7 @@ public class LangDetectActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(LangDetectActivator.class));
+        final Log logger = com.openexchange.log.Log.loggerFor(LangDetectActivator.class);
         logger.info("Starting bundle: com.openexchange.langdetect");
         try {
             /*
@@ -138,7 +137,7 @@ public class LangDetectActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(LangDetectActivator.class));
+        final Log logger = com.openexchange.log.Log.loggerFor(LangDetectActivator.class);
         logger.info("Stopping bundle: com.openexchange.langdetect");
         try {
             unregisterServices();

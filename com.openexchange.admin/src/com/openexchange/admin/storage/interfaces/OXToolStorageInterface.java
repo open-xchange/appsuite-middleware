@@ -67,11 +67,10 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.log.LogFactory;
 
 public abstract class OXToolStorageInterface {
 
-    private static final Log log = LogFactory.getLog(OXToolStorageInterface.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXToolStorageInterface.class);
 
     protected static AdminCache cache = null;
 

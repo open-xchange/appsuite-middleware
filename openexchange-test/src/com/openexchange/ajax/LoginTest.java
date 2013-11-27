@@ -75,7 +75,7 @@ public class LoginTest extends AbstractAJAXTest {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(LoginTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTest.class);
 
     /**
      * URL of the login AJAX servlet.

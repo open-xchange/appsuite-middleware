@@ -27,7 +27,7 @@ import com.openexchange.webdav.xml.types.Response;
 
 public class GroupUserTest extends AbstractWebdavXMLTest {
 
-    private static final Log LOG = LogFactory.getLog(GroupUserTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupUserTest.class);
 
 	public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
 

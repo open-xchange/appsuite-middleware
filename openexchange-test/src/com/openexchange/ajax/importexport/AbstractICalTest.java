@@ -128,7 +128,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 
     protected TimeZone timeZone = null;
 
-    private static final Log LOG = LogFactory.getLog(AbstractICalTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractICalTest.class);
 
     public AbstractICalTest(final String name) {
         super(name);

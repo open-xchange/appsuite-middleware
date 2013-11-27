@@ -69,7 +69,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
@@ -81,7 +80,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ContactDeleteListener implements DeleteListener {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactDeleteListener.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(ContactDeleteListener.class);
 
     /**
      * Initializes a new {@link ContactDeleteListener}

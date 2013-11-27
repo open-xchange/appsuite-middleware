@@ -74,7 +74,6 @@ import com.openexchange.importexport.formats.vcard.VCardTokenizer;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -97,7 +96,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class VCardImporter extends ContactImporter implements OXExceptionConstants {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(VCardImporter.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
     
     

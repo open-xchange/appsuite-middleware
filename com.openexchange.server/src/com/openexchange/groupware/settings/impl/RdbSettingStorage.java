@@ -62,7 +62,6 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -74,7 +73,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbSettingStorage extends SettingStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbSettingStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbSettingStorage.class);
 
     /**
      * SQL statement for loading one specific user setting.

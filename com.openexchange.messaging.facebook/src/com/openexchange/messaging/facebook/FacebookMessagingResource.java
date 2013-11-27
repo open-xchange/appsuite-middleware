@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 public class FacebookMessagingResource implements MessagingResource {
 
     protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingResource.class));
+        com.openexchange.log.Log.loggerFor(FacebookMessagingResource.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 

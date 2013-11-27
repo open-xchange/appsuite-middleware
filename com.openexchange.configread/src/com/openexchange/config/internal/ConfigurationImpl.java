@@ -79,7 +79,6 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link ConfigurationImpl}
@@ -88,7 +87,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class ConfigurationImpl implements ConfigurationService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigurationImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigurationImpl.class);
 
     private static final String EXT = ".properties";
 

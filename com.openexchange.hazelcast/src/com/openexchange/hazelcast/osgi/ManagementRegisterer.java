@@ -59,7 +59,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.mbean.HazelcastMBean;
 import com.openexchange.hazelcast.mbean.HazelcastMBeanImpl;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -69,7 +68,7 @@ import com.openexchange.management.ManagementService;
  */
 final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManagementRegisterer.class);
 
     private final BundleContext context;
     private volatile ObjectName objectName;

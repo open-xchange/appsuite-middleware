@@ -63,7 +63,7 @@ import com.openexchange.mobile.configuration.json.action.ActionTypes;
  */
 public class ActionServiceListener implements ServiceTrackerCustomizer<ActionService, ActionService> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ActionServiceListener.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ActionServiceListener.class);
 
     private final BundleContext context;
 

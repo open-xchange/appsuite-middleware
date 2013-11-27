@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -74,7 +73,7 @@ import com.openexchange.tools.update.Tools;
  */
 public final class MALPollCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MALPollCreateTableTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MALPollCreateTableTask.class);
 
     @Override
     public int addedWithVersion() {

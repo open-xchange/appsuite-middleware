@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public final class Bug10836Test extends AbstractAJAXSession {
 
-	private static final Log LOG = LogFactory.getLog(Bug10836Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug10836Test.class);
 
 	/**
 	 * Default constructor.

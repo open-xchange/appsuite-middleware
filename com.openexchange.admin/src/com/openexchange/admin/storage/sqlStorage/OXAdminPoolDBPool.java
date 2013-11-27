@@ -52,11 +52,11 @@ package com.openexchange.admin.storage.sqlStorage;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 

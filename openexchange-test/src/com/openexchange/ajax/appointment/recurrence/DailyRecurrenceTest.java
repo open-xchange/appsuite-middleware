@@ -10,7 +10,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
-	private static final Log LOG = LogFactory.getLog(DailyRecurrenceTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(DailyRecurrenceTest.class);
 
 	public DailyRecurrenceTest(final String name) {
 		super(name);

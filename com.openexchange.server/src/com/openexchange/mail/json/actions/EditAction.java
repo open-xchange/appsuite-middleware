@@ -84,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class EditAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EditAction.class));
+        com.openexchange.log.Log.loggerFor(EditAction.class);
 
     private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
     private static final String CONTENT = MailJSONField.CONTENT.getKey();

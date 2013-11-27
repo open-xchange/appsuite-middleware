@@ -97,7 +97,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class MessageWriter {
 
-    // private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageWriter.class));
+    // private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MessageWriter.class);
 
     /**
      * No instantiation

@@ -50,7 +50,6 @@
 package com.openexchange.oauth.msn.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
@@ -74,7 +73,7 @@ public class MSNOAuthActivator extends HousekeepingActivator {
 
     private OAuthServiceMetaDataMSNImpl oAuthMetadata;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNOAuthActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MSNOAuthActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

@@ -99,7 +99,7 @@ import com.openexchange.tools.URLParameter;
  */
 public final class TaskTools extends Assert {
 
-    private static final Log LOG = LogFactory.getLog(TaskTools.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskTools.class);
 
     private static final String ENCODING = "UTF-8";
 

@@ -86,7 +86,6 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.osgi.ServerActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -105,7 +104,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
  */
 public final class PermissionLoaderService implements Runnable {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PermissionLoaderService.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(PermissionLoaderService.class);
 
     private static volatile PermissionLoaderService instance;
 

@@ -58,7 +58,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Implements the queue of preread tasks.
@@ -69,7 +68,7 @@ final class PreRead<T> {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreRead.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PreRead.class);
 
     /**
      * What is the minimum count of tasks for additional sub requests.

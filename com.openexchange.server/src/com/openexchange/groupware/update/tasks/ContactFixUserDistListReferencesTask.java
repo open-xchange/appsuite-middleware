@@ -64,7 +64,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -78,7 +77,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactFixUserDistListReferencesTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactFixUserDistListReferencesTask.class);
 
     /**
      * Initializes a new {@link ContactFixUserDistListReferencesTask}.

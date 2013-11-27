@@ -72,7 +72,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class MessageDataSource implements DataSource {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageDataSource.class));
+        com.openexchange.log.Log.loggerFor(MessageDataSource.class);
 
     private static final int DEFAULT_BUF_SIZE = 0x1000;
 

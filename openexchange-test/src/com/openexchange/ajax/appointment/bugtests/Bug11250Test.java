@@ -20,7 +20,7 @@ public class Bug11250Test extends AppointmentTest {
 		CalendarObject.TITLE,
 	};
 
-	private static final Log LOG = LogFactory.getLog(Bug11250Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug11250Test.class);
 
 	public Bug11250Test(final String name) {
 		super(name);

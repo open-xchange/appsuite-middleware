@@ -83,7 +83,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
 	 */
     private static final long serialVersionUID = -3158021272821196715L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(InfostoreDocumentMailPart.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(InfostoreDocumentMailPart.class);
 
     private transient final Session session;
     private transient final String documentId;

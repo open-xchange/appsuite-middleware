@@ -74,7 +74,6 @@ import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
-import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrExceptionCodes;
@@ -89,7 +88,7 @@ import com.openexchange.solr.rmi.RMISolrException;
  */
 public class DelegationSolrAccessImpl implements SolrAccessService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelegationSolrAccessImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DelegationSolrAccessImpl.class);
 
     private final EmbeddedSolrAccessImpl embeddedAccess;
 

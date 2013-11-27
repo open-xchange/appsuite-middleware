@@ -13,7 +13,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug10733Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug10733Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug10733Test.class);
 
 	public Bug10733Test(final String name) {
 		super(name);

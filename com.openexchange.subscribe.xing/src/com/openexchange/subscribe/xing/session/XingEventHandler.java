@@ -66,7 +66,7 @@ public final class XingEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(XingEventHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(XingEventHandler.class);
 
     /**
      * Whether logger allows debug.

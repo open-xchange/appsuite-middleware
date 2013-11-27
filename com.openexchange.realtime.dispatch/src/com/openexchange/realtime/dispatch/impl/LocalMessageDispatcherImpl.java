@@ -55,7 +55,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
@@ -74,7 +73,7 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
  */
 public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(MessageDispatcher.class);
 
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
     

@@ -53,7 +53,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -97,7 +96,7 @@ import com.openexchange.user.UserService;
  */
 public final class DBChatActivator extends HousekeepingActivator {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBChatActivator.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DBChatActivator.class);
 
     /**
      * Initializes a new {@link DBChatActivator}.

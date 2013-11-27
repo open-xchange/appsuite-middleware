@@ -68,7 +68,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
@@ -83,7 +82,7 @@ public class MSNServiceImpl implements MSNService {
 
     private final MSNOAuthActivator activator;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MSNServiceImpl.class);
 
     public MSNServiceImpl(final MSNOAuthActivator activator){
         this.activator = activator;

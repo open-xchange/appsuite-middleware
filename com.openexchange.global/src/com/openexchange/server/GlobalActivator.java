@@ -65,8 +65,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
-import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogWrapperFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -80,7 +78,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public final class GlobalActivator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalActivator.class);
 
     private volatile Initialization initialization;
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
@@ -106,21 +104,6 @@ public final class GlobalActivator implements BundleActivator {
             final List<ServiceTracker<?, ?>> trackers = new ArrayList<ServiceTracker<?, ?>>(4);
             this.trackers = trackers;
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
-
-            final ServiceTracker<LogWrapperFactory, LogWrapperFactory> logWrapperTracker = new ServiceTracker<LogWrapperFactory, LogWrapperFactory>(context, LogWrapperFactory.class, null);
-			LogFactory.FACTORY.set(new LogWrapperFactory() {
-
-				@Override
-                public Log wrap(final String name, final Log log) {
-                    Log retval = log;
-                    for (final LogWrapperFactory factory : logWrapperTracker.getTracked().values()) {
-                        retval = factory.wrap(name, retval);
-                    }
-                    return retval;
-                }
-			});
-
-            trackers.add(logWrapperTracker);
 
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();

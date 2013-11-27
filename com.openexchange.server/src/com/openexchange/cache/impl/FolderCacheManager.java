@@ -73,7 +73,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -90,7 +89,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class FolderCacheManager {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCacheManager.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCacheManager.class);
 
     private static volatile FolderCacheManager instance;
 

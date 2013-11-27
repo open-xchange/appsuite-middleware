@@ -51,7 +51,6 @@ package com.openexchange.ajax.parser;
 
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.attach.AttachmentField;
@@ -59,7 +58,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class JSONAttachmentMetadata implements AttachmentMetadata {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JSONAttachmentMetadata.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(JSONAttachmentMetadata.class);
 
     private final JSONObject json;
 

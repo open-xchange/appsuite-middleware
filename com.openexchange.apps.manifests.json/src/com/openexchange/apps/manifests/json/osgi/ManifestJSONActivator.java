@@ -68,7 +68,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 
@@ -79,7 +78,7 @@ import com.openexchange.passwordchange.PasswordChangeService;
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManifestJSONActivator.class);
 
     /**
      * Initializes a new {@link ManifestJSONActivator}.

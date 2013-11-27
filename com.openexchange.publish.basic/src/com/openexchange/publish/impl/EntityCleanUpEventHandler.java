@@ -50,7 +50,6 @@
 package com.openexchange.publish.impl;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EntityCleanUpEventHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(EntityCleanUpEventHandler.class);
 
     private final String module;
 

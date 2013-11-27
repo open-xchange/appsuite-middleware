@@ -70,8 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Resource extends DataServlet {
 
-	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(Resource.class);
+	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Resource.class);
 
 	/**
 	 * For serialization.

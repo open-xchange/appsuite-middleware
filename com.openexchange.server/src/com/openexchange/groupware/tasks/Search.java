@@ -62,7 +62,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -75,7 +74,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class Search {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Search.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Search.class);
 
     private final Context ctx;
 

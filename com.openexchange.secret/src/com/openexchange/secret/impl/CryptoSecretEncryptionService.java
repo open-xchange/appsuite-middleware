@@ -54,7 +54,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.secret.Decrypter;
 import com.openexchange.secret.RankingAwareSecretService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -71,7 +70,7 @@ import com.openexchange.session.Session;
  */
 public class CryptoSecretEncryptionService<T> implements SecretEncryptionService<T> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CryptoSecretEncryptionService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CryptoSecretEncryptionService.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

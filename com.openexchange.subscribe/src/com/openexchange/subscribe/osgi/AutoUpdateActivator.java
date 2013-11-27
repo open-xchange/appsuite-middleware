@@ -58,7 +58,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
@@ -78,7 +77,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AutoUpdateActivator extends HousekeepingActivator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(AutoUpdateActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AutoUpdateActivator.class);
 
     public static OSGiSubscriptionSourceDiscoveryCollector COLLECTOR;
 

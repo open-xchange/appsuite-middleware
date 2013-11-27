@@ -67,7 +67,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
@@ -83,7 +82,7 @@ public class Activator implements BundleActivator {
 
     private ArrayList<ServiceRegistration<?>> services;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     public static final String DIR_NAME_PROPERTY = "com.openexchange.subscribe.crawler.path";
 

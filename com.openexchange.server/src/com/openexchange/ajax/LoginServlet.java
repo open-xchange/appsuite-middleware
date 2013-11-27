@@ -111,7 +111,6 @@ import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
@@ -140,7 +139,7 @@ public class LoginServlet extends AJAXServlet {
 
     private static final long serialVersionUID = 7680745138705836499L;
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServlet.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(LoginServlet.class);
 
     /** The log properties for login-related information. */
     protected static final Set<LogProperties.Name> LOG_PROPERTIES;

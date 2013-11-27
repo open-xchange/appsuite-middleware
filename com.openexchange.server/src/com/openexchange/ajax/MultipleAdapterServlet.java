@@ -68,7 +68,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
-import com.openexchange.log.LogFactory;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -85,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class MultipleAdapterServlet extends PermissionServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MultipleAdapterServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MultipleAdapterServlet.class);
 
 
     @Override

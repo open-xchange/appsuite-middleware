@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class SearchTest extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(SearchTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SearchTest.class);
 
     public SearchTest(final String name) {
         super(name);

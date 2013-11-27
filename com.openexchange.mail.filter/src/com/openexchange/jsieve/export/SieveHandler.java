@@ -75,7 +75,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 
@@ -94,7 +93,7 @@ public class SieveHandler {
 	/**
      * The logger.
      */
-    private static Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(SieveHandler.class));
+    private static Log log = com.openexchange.log.Log.loggerFor(SieveHandler.class);
 
     /**
      * The constant for CRLF (carriage-return line-feed).

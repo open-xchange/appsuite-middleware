@@ -57,7 +57,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.monitoring.Monitor;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class ManagementCustomizer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
-    private static final Log LOG = LogFactory.getLog(ManagementCustomizer.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManagementCustomizer.class);
 
     private final BundleContext context;
 

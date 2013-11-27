@@ -63,7 +63,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for database resource handling.
@@ -73,7 +72,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class Databases {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Databases.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Databases.class);
 
     public static final int IN_LIMIT = 1000;
 

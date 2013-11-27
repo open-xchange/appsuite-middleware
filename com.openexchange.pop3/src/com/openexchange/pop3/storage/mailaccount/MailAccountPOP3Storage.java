@@ -112,7 +112,7 @@ import com.sun.mail.pop3.POP3Store;
  */
 public class MailAccountPOP3Storage implements POP3Storage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountPOP3Storage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccountPOP3Storage.class);
 
     /*-
      * Member section

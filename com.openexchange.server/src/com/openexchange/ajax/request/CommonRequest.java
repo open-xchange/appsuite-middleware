@@ -60,7 +60,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,7 +67,7 @@ public abstract class CommonRequest {
 
 	protected JSONWriter w;
 
-	private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CommonRequest.class));
+	private final Log LOG = com.openexchange.log.Log.loggerFor(CommonRequest.class);
 
 	public CommonRequest(final JSONWriter w) {
 		this.w = w;

@@ -61,7 +61,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
@@ -80,7 +79,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ServletActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServletActivator.class);
 
     private final PublicationServicesActivator activator;
     private volatile boolean registered;

@@ -88,7 +88,6 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -103,7 +102,7 @@ import com.openexchange.user.UserService;
  */
 public final class DBChat implements Chat {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBChat.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DBChat.class);
 
     private static abstract class SafeRunnable implements Runnable {
 

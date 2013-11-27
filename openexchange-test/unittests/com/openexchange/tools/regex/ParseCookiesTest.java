@@ -60,7 +60,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class ParseCookiesTest extends TestCase {
 
-    private final Log LOG = LogFactory.getLog(ParseCookiesTest.class);
+    private final Log LOG = com.openexchange.log.Log.loggerFor(ParseCookiesTest.class);
 
     /**
      * @param name

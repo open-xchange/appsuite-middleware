@@ -56,7 +56,6 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.imap.impl.IMAPAuthentication;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -64,7 +63,7 @@ import com.openexchange.user.UserService;
 
 public class ActivatorNew extends DeferredActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ActivatorNew.class));
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(ActivatorNew.class);
 
     private ServiceRegistration<AuthenticationService> registration;
 

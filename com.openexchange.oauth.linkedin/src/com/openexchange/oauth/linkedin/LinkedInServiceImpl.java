@@ -76,7 +76,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedPushbackReader;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -105,7 +104,7 @@ public class LinkedInServiceImpl implements LinkedInService {
 
     private final ServiceLookup services;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinkedInServiceImpl.class);
 
     /**
      * Initializes a new {@link LinkedInServiceImpl}.

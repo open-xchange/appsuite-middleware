@@ -60,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link PushChannels}
@@ -73,7 +72,7 @@ public class PushChannels {
         INTERNAL, EXTERNAL;
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushChannels.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushChannels.class);
 
     private DatagramSocket internalChannel = null;
     private DatagramSocket externalChannel = null;

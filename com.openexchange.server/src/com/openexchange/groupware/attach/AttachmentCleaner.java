@@ -55,7 +55,6 @@ import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
-import com.openexchange.exception.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
@@ -70,7 +69,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(AttachmentCleaner.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AttachmentCleaner.class);
 
     private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission
 

@@ -70,7 +70,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ms.Topic;
 import com.openexchange.session.Session;
 
@@ -81,7 +80,7 @@ import com.openexchange.session.Session;
  */
 public class PushMsHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushMsHandler.class);
 
     private final DelayPushQueue delayPushQueue;
 

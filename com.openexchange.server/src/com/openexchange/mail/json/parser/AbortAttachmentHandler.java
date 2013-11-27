@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
  */
 public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbortAttachmentHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AbortAttachmentHandler.class);
 
     private TextBodyMailPart textPart;
 

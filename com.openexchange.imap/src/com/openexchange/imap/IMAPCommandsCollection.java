@@ -154,7 +154,7 @@ public final class IMAPCommandsCollection {
 
     private static final String STR_FETCH = "FETCH";
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPCommandsCollection.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IMAPCommandsCollection.class);
 
     static final boolean DEBUG = LOG.isDebugEnabled();
 

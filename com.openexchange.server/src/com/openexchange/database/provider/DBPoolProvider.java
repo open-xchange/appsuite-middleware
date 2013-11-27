@@ -54,12 +54,11 @@ import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 
 public class DBPoolProvider implements DBProvider {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBPoolProvider.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DBPoolProvider.class);
 
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException {

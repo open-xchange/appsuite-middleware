@@ -55,7 +55,6 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -87,7 +86,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     private static final long serialVersionUID = 1750720959626156342L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(tasks.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(tasks.class);
 
     public tasks() {
         super();

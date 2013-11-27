@@ -99,7 +99,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 
 /**
  * @author d7
@@ -107,7 +106,7 @@ import com.openexchange.log.LogFactory;
  */
 public class OXUser extends OXCommonImpl implements OXUserInterface {
 
-    private final static Log log = LogFactory.getLog(OXUser.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(OXUser.class);
 
     private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
 

@@ -81,7 +81,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public final class VersitUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VersitUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(VersitUtility.class);
 
     /**
      * No instantiation

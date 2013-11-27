@@ -60,7 +60,6 @@ import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.configuration.DirectoryService;
@@ -76,7 +75,7 @@ public final class LdapUtility {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapUtility.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LdapUtility.class);
 
     /**
      * Empty map.

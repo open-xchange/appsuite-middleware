@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -70,7 +69,7 @@ public class UserConfiguration implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -8277899698366715803L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(UserConfiguration.class);
 
     /**
      * The permission bit for mail access.

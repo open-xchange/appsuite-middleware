@@ -77,7 +77,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.yahoo.YahooService;
@@ -97,7 +96,7 @@ public class YahooServiceImpl implements YahooService {
 
     private static final String SINGLE_CONTACT_URL = "http://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(YahooServiceImpl.class);
 
     private final Pattern patternGuid;
     private final YahooOAuthActivator activator;

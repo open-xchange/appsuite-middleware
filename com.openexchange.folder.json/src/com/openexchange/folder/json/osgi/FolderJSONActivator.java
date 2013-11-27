@@ -63,7 +63,6 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 
@@ -74,7 +73,7 @@ import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
  */
 public class FolderJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderJSONActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderJSONActivator.class);
 
     private String module;
 
@@ -148,7 +147,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             restore();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderJSONActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(FolderJSONActivator.class).error(e.getMessage(), e);
             throw e;
         }
     }

@@ -67,7 +67,6 @@ import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -84,7 +83,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
-    private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
+    private static Log LOG = com.openexchange.log.Log.loggerFor(HazelcastSessionStorageActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

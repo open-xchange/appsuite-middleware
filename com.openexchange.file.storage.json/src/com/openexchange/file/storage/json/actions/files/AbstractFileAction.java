@@ -63,7 +63,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -74,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractFileAction implements AJAXActionService {
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractFileAction.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractFileAction.class);
 
 
     private static final FileMetadataWriter fileWriter = new FileMetadataWriter();

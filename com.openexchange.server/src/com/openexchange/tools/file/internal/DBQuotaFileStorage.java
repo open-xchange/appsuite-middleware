@@ -66,7 +66,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.file.external.QuotaFileStorage;
@@ -75,7 +74,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class DBQuotaFileStorage implements QuotaFileStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuotaFileStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotaFileStorage.class);
 
     /**
      * The context of the QuotaFileStorage

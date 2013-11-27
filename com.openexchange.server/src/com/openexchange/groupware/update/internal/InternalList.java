@@ -104,7 +104,6 @@ import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -114,7 +113,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class InternalList {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalList.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InternalList.class);
 
     private static final InternalList SINGLETON = new InternalList();
 

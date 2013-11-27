@@ -57,7 +57,6 @@ import javax.servlet.http.HttpServlet;
 import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -67,7 +66,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public abstract class AbstractServletActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractServletActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractServletActivator.class);
 
     private final List<String> servlets = new ArrayList<String>();
 

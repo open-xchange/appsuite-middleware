@@ -57,7 +57,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.java.AllocatingStringWriter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -69,7 +68,7 @@ public final class Send {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Send.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Send.class);
 
     /**
      * Prevent instantiation.

@@ -57,7 +57,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -95,7 +94,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         }
         try {
 
-            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MALPollModifyTableTask.class));
+            final Log log = com.openexchange.log.Log.loggerFor(MALPollModifyTableTask.class);
 
             boolean contentDropped = false;
 

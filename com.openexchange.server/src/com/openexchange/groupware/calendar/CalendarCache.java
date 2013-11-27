@@ -54,7 +54,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -70,7 +69,7 @@ public final class CalendarCache {
 
     private static final String CACHE_NAME = "CalendarCache";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCache.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarCache.class);
 
     private Cache jcs;
 

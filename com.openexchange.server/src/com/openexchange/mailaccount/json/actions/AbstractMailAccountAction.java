@@ -101,7 +101,7 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAccountAction.class));
+        com.openexchange.log.Log.loggerFor(AbstractMailAccountAction.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

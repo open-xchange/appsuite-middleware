@@ -72,14 +72,13 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     private Mode MODE;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PathResolverImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PathResolverImpl.class);
 
     private final ThreadLocal<Map<WebdavPath,Resolved>> resolveCache = new ThreadLocal<Map<WebdavPath,Resolved>>();
     private final ThreadLocal<TIntObjectMap<WebdavPath>> docPathCache = new ThreadLocal<TIntObjectMap<WebdavPath>>();

@@ -56,7 +56,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  *
@@ -64,7 +63,7 @@ import com.openexchange.log.LogFactory;
  */
 public class DataFetcherMysql implements DataFetcher{
 
-    private final Log log = LogFactory.getLog(DataFetcherMysql.class);
+    private final Log log = com.openexchange.log.Log.loggerFor(DataFetcherMysql.class);
 
     private Connection dbConnection = null;
 

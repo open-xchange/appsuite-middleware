@@ -57,7 +57,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -72,7 +71,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderAddPermColumnUpdateTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderAddPermColumnUpdateTask.class);
 
     @Override
     public int addedWithVersion() {

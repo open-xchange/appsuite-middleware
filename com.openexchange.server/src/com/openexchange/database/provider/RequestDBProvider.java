@@ -58,13 +58,12 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 public class RequestDBProvider implements DBProvider {
 
     private static final ThreadLocal<DBTransaction> txIds = new ThreadLocal<DBTransaction>();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestDBProvider.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RequestDBProvider.class);
     private boolean commits = true;
 
 

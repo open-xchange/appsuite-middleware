@@ -72,7 +72,7 @@ import com.openexchange.osgi.ServiceRegistry;
 public final class FileStorageFolderStorageActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageFolderStorageActivator.class));
+        com.openexchange.log.Log.loggerFor(FileStorageFolderStorageActivator.class);
 
     private ServiceRegistration<FolderStorage> folderStorageRegistration;
 

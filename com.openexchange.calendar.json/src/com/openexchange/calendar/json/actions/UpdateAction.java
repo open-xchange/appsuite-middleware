@@ -87,7 +87,7 @@ responseDescription = "Nothing, except the standard response object with empty d
 public final class UpdateAction extends AppointmentAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateAction.class));
+        com.openexchange.log.Log.loggerFor(UpdateAction.class);
 
     /**
      * Initializes a new {@link UpdateAction}.

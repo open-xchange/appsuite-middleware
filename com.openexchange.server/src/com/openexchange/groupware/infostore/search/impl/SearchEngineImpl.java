@@ -82,7 +82,6 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -98,7 +97,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class SearchEngineImpl extends DBService implements InfostoreSearchEngine {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SearchEngineImpl.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(SearchEngineImpl.class);
 
     private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 

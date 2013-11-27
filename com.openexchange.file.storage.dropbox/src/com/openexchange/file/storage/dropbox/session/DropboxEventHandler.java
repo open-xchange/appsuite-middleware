@@ -66,7 +66,7 @@ public final class DropboxEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DropboxEventHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DropboxEventHandler.class);
 
     /**
      * Whether logger allows debug.

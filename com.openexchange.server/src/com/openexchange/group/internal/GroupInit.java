@@ -51,7 +51,6 @@ package com.openexchange.group.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.server.Initialization;
@@ -62,7 +61,7 @@ import com.openexchange.server.Initialization;
  */
 public final class GroupInit implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GroupInit.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupInit.class);
 
     /**
      * Singleton instance.

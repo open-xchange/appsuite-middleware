@@ -83,7 +83,6 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -92,7 +91,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class TaskRequest extends CalendarRequest {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskRequest.class);
 
     protected final static int[] _taskFields = {
         DataObject.OBJECT_ID,

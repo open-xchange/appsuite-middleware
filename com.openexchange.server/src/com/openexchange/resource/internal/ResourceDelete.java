@@ -78,7 +78,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ResourceDelete {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ResourceDelete.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ResourceDelete.class);
 
     private final User user;
 

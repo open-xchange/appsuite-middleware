@@ -8,7 +8,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug8836Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug8836Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug8836Test.class);
 
 	public Bug8836Test(final String name) {
 		super(name);

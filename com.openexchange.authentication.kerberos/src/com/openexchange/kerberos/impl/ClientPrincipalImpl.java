@@ -64,7 +64,7 @@ import com.openexchange.kerberos.KerberosUtils;
  */
 public final class ClientPrincipalImpl implements ClientPrincipal {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClientPrincipalImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ClientPrincipalImpl.class);
 
     private Subject clientSubject;
     private Subject delegateSubject;

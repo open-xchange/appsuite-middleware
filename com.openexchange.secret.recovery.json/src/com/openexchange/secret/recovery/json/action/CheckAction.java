@@ -66,7 +66,7 @@ import com.openexchange.server.ServiceLookup;
 public final class CheckAction extends AbstractSecretRecoveryAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CheckAction.class));
+        com.openexchange.log.Log.loggerFor(CheckAction.class);
 
     /**
      * Initializes a new {@link CheckAction}.

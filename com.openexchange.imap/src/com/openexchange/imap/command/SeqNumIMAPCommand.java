@@ -63,7 +63,7 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SeqNumIMAPCommand.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SeqNumIMAPCommand.class);
 
     private static final long[] L1 = new long[0];
 

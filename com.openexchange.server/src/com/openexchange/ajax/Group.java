@@ -60,7 +60,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -74,7 +73,7 @@ public class Group extends DataServlet {
 	 * For serialization.
 	 */
 	private static final long serialVersionUID = 6699123983027304951L;
-	private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Group.class));
+	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(Group.class);
 
 	/**
 	 * {@inheritDoc}

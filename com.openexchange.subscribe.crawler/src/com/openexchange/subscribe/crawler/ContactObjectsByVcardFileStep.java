@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
@@ -79,7 +78,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByVcardFileStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactObjectsByVcardFileStep.class);
 
     private List<String> unwantedLines = new ArrayList<String>();
 

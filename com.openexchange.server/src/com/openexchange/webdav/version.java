@@ -56,7 +56,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.version.Version;
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.version.Version;
  */
 public final class version extends HttpServlet {
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(version.class));
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(version.class);
 
     /**
      * For serialization.

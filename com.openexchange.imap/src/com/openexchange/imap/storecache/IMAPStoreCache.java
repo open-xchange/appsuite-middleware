@@ -60,7 +60,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.services.Services;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
@@ -80,7 +79,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class IMAPStoreCache {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPStoreCache.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(IMAPStoreCache.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 

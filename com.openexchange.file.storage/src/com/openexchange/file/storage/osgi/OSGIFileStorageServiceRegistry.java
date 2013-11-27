@@ -148,7 +148,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
                     return service;
                 }
                 final org.apache.commons.logging.Log logger =
-                    com.openexchange.log.LogFactory.getLog(OSGIFileStorageServiceRegistry.Customizer.class);
+                    com.openexchange.log.Log.loggerFor(OSGIFileStorageServiceRegistry.Customizer.class);
                 if (logger.isWarnEnabled()) {
                     logger.warn(new StringBuilder(128).append("File storage service ").append(addMe.getDisplayName()).append(
                         " could not be added to registry. Another service is already registered with identifier: ").append(addMe.getId()).toString());

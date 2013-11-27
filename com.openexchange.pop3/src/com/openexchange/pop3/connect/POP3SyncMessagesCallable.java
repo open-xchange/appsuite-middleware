@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public final class POP3SyncMessagesCallable implements Callable<Object> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3SyncMessagesCallable.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(POP3SyncMessagesCallable.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

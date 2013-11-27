@@ -82,7 +82,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public final class CacheActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CacheActivator.class);
 
     static volatile CacheService cacheService;
 

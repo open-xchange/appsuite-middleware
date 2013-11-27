@@ -72,7 +72,7 @@ import com.openexchange.ajax.writer.DataWriter;
 
 public class MailFilterWriter extends DataWriter {
 
-	private static final Log LOG = LogFactory.getLog(MailFilterWriter.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(MailFilterWriter.class);
 
 	public MailFilterWriter() {
 		super(null, null);

@@ -98,7 +98,8 @@ public final class Log implements org.apache.commons.logging.Log {
      * @return The logger.
      */
     public static org.apache.commons.logging.Log loggerFor(final Class<?> clazz) {
-        return valueOf(com.openexchange.log.LogFactory.getLog(clazz));
+        // TODO: Return logger here
+        return valueOf(com.openexchange.log.Log.loggerFor(clazz));
     }
 
     /**
@@ -108,7 +109,8 @@ public final class Log implements org.apache.commons.logging.Log {
      * @return The logger.
      */
     public static org.apache.commons.logging.Log loggerFor(final String clazz) {
-        return valueOf(com.openexchange.log.LogFactory.getLog(clazz));
+        // TODO: Return logger here
+        return valueOf(com.openexchange.log.Log.loggerFor(clazz));
     }
 
     /**
@@ -118,7 +120,7 @@ public final class Log implements org.apache.commons.logging.Log {
      * @return The appropriate instance
      */
     public static org.apache.commons.logging.Log valueOf(final org.apache.commons.logging.Log log) {
-        if ((log instanceof Log) || (log instanceof PropertiesAppendingLogWrapper)) {
+        if (log instanceof Log) {
             return log;
         }
         return new Log(log);

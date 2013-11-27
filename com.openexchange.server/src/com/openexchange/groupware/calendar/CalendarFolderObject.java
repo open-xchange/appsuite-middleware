@@ -54,7 +54,6 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -82,7 +81,7 @@ public class CalendarFolderObject implements Serializable {
 
     private final boolean fill_shared;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarFolderObject.class));
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CalendarFolderObject.class);
 
     public static final String IDENTIFIER = "CalendarFolderObject@";
 

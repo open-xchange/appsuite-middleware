@@ -57,7 +57,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link HTTPServletRegistration} -  A simple {@link ServiceTracker service tracker} for {@link HttpService OSGi's HttpService}.
@@ -67,7 +66,7 @@ import com.openexchange.log.LogFactory;
  */
 public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpService> {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPServletRegistration.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(HTTPServletRegistration.class);
 
     private final Servlet servlet;
 

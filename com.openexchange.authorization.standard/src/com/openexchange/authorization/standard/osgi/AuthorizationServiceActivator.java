@@ -50,7 +50,6 @@
 package com.openexchange.authorization.standard.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.authorization.standard.DefaultAuthorizationImpl;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -61,7 +60,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class AuthorizationServiceActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthorizationServiceActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuthorizationServiceActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

@@ -73,7 +73,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.log.LogFactory;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -92,7 +91,7 @@ public class freebusy extends HttpServlet {
 
     private static final long serialVersionUID = 6336387126907903347L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(freebusy.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(freebusy.class);
 
     private static final DateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
 

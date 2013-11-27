@@ -56,7 +56,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -68,7 +67,7 @@ public final class Task2Links {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Task2Links.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Task2Links.class);
 
     /**
      * Prevent instantiation

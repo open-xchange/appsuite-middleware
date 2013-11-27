@@ -73,7 +73,6 @@ import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.eventsystem.Event;
 import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
-import com.openexchange.log.LogFactory;
 
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
@@ -84,7 +83,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         super();
     }
 
-    private final static Log log = LogFactory.getLog(OXContextCommonImpl.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(OXContextCommonImpl.class);
 
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
 

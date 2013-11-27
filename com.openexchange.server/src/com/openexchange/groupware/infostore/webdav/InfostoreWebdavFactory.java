@@ -76,7 +76,6 @@ import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -205,7 +204,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
     private InfostoreSecurity security;
     private DBProvider provider;
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreWebdavFactory.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreWebdavFactory.class);
 
 
     @Override

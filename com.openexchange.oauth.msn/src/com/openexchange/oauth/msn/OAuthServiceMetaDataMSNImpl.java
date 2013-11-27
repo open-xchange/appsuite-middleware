@@ -62,7 +62,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
@@ -81,7 +80,7 @@ import com.openexchange.session.Session;
  */
 public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataMSNImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OAuthServiceMetaDataMSNImpl.class);
 
     private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
 

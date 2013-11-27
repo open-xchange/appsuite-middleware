@@ -72,7 +72,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
@@ -82,7 +81,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
  */
 public final class EmitterTools {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmitterTools.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(EmitterTools.class);
     private static volatile CalendarCollectionService calendarCollection;
 
     private final TimeZoneRegistry registry;

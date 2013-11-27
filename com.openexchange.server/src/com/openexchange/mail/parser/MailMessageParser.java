@@ -83,7 +83,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -117,7 +116,7 @@ import com.openexchange.tools.tnef.TNEF2ICal;
  */
 public final class MailMessageParser {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailMessageParser.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailMessageParser.class);
 
     private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 

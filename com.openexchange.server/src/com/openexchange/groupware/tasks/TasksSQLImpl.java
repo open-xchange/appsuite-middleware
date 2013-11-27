@@ -61,7 +61,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -72,7 +71,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class TasksSQLImpl implements TasksSQLInterface {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksSQLImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TasksSQLImpl.class);
 
     private final Session session;
 

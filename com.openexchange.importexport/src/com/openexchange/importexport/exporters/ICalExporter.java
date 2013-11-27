@@ -83,7 +83,6 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -103,7 +102,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class ICalExporter implements Exporter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalExporter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ICalExporter.class);
     private static final Date DATE_ZERO = new Date(0);
     private final static int[] _appointmentFields = {
         DataObject.OBJECT_ID,

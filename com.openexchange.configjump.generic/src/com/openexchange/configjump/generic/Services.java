@@ -53,7 +53,6 @@ import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.configjump.ConfigJumpService;
@@ -64,7 +63,7 @@ import com.openexchange.configjump.ConfigJumpService;
  */
 public final class Services {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Services.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Services.class);
 
     private final BundleContext context;
 

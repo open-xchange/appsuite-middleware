@@ -38,7 +38,7 @@ public class Bug4392Test extends AppointmentTest {
 		Appointment.TIMEZONE
 	};
 
-	private static final Log LOG = LogFactory.getLog(Bug4392Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug4392Test.class);
 
 	public Bug4392Test(final String name) {
 		super(name);

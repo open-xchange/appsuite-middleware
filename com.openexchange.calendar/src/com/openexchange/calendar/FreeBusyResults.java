@@ -71,7 +71,6 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -129,7 +128,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
     private String categories;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyResults.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FreeBusyResults.class);
 
     /*public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);

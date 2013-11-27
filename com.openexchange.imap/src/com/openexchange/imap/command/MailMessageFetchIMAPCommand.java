@@ -110,7 +110,7 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessageFetchIMAPCommand.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailMessageFetchIMAPCommand.class);
 
     private static final boolean WARN = LOG.isWarnEnabled();
 

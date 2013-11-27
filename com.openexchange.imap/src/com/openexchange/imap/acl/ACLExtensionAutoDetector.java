@@ -51,6 +51,7 @@ package com.openexchange.imap.acl;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.java.StringAllocator;
 
@@ -61,7 +62,7 @@ import com.openexchange.java.StringAllocator;
  */
 final class ACLExtensionAutoDetector {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ACLExtensionAutoDetector.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ACLExtensionAutoDetector.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

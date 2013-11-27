@@ -88,7 +88,7 @@ import com.sun.mail.smtp.SMTPSendFailedException;
  */
 public class MimeMailException extends OXException {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailException.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeMailException.class);
 
     private static final long serialVersionUID = -3401580182929349354L;
 

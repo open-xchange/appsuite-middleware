@@ -61,6 +61,6 @@ public abstract class CalendarSqlTest extends AbstractCalendarTest {
     /**
      * Logger.
      */
-    protected static final Log LOG = LogFactory.getLog(CalendarSqlTest.class);
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarSqlTest.class);
 
 }

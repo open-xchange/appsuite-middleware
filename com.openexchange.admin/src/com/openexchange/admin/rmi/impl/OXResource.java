@@ -77,13 +77,12 @@ import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.log.LogFactory;
 
 public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
     private static final long serialVersionUID = -7012370962672596682L;
 
-    private static final Log log = LogFactory.getLog(OXResource.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXResource.class);
 
     private final BasicAuthenticator basicauth;
 

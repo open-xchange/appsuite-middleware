@@ -68,7 +68,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -82,7 +81,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinksEventHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinksEventHandler.class);
 
     public LinksEventHandler() {
         super();

@@ -102,7 +102,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     private static final long serialVersionUID = 6445442372690458946L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailFolderImpl.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
@@ -319,7 +319,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                             localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
                         }
                     } catch (final OXException e) {
-                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class)).error(e.getMessage(), e);
+                        com.openexchange.log.Log.loggerFor(MailFolderImpl.class).error(e.getMessage(), e);
                         mailFolderType = MailFolderType.NONE;
                     }
                 }

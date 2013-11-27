@@ -68,7 +68,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 
 /**
  * Writes the recurrence identifier into change exception appointments to get the series not displayed at the change exceptions original
@@ -77,7 +76,7 @@ import com.openexchange.log.LogFactory;
  */
 public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChangeExceptions.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ChangeExceptions.class);
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private static volatile CalendarCollectionService calendarCollection;

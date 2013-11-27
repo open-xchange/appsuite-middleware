@@ -55,7 +55,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Utility methods for file handling.
@@ -67,7 +66,7 @@ public final class IOUtils {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IOUtils.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(IOUtils.class);
 
     /**
      * Prevent instantiation

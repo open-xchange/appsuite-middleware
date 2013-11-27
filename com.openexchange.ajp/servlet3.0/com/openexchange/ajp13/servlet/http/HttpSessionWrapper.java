@@ -72,7 +72,7 @@ import com.openexchange.java.HashKeyMap;
  */
 public class HttpSessionWrapper implements HttpSession {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpSessionWrapper.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HttpSessionWrapper.class);
 
     private static volatile int cookieTTL = -1;
 

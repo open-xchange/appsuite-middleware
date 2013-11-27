@@ -66,7 +66,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
@@ -83,7 +82,7 @@ public abstract class OXContextStorageInterface {
      */
     private static Class<? extends OXContextStorageInterface> implementingClass;
 
-    private static final Log log = LogFactory.getLog(OXContextStorageInterface.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXContextStorageInterface.class);
 
     protected static final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
 

@@ -56,7 +56,6 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 
 /**
@@ -78,7 +77,7 @@ public class PushRequest {
 
     private int currentLength;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushRequest.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

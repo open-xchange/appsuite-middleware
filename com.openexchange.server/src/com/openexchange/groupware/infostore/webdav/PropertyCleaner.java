@@ -56,7 +56,6 @@ import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -66,7 +65,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 	private final PropertyStore infoProperties;
 	private final PropertyStore folderProperties;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropertyCleaner.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(PropertyCleaner.class);
 
 	public PropertyCleaner(final PropertyStore folderProperties, final PropertyStore infoProperties){
 		this.folderProperties = folderProperties;

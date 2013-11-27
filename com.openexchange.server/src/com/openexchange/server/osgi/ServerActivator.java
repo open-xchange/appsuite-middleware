@@ -144,7 +144,6 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.log.CommonsLoggingLogger;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
@@ -246,7 +245,7 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServerActivator.class);
 
     /**
      * Constant for string: "identifier"

@@ -70,7 +70,7 @@ import com.openexchange.mail.MailSortField;
  */
 public final class SearchTest extends AbstractMailTest {
 
-    private static final Log LOG = LogFactory.getLog(SearchTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SearchTest.class);
 
     String mailObject_25kb;
 

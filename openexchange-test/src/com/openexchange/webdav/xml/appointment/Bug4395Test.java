@@ -10,7 +10,7 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class Bug4395Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug4395Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug4395Test.class);
 
 	public Bug4395Test(final String name) {
 		super(name);

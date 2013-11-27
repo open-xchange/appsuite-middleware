@@ -107,7 +107,6 @@ import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -130,7 +129,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class CacheFolderStorage implements FolderStorage {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CacheFolderStorage.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(CacheFolderStorage.class);
 
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {
@@ -633,7 +632,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 }
             } catch (final Exception e) {
                 final org.apache.commons.logging.Log log =
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheFolderStorage.class));
+                    com.openexchange.log.Log.loggerFor(CacheFolderStorage.class);
                 if (log.isDebugEnabled()) {
                     log.debug(e.getMessage(), e);
                 }

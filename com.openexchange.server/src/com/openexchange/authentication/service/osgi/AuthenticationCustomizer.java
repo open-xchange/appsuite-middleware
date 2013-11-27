@@ -50,7 +50,6 @@
 package com.openexchange.authentication.service.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -64,7 +63,7 @@ import com.openexchange.authentication.service.Authentication;
  */
 public class AuthenticationCustomizer implements ServiceTrackerCustomizer<AuthenticationService, AuthenticationService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthenticationCustomizer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuthenticationCustomizer.class);
 
     private final BundleContext context;
 

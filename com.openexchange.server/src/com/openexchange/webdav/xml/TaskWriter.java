@@ -85,7 +85,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -138,7 +137,7 @@ public class TaskWriter extends CalendarWriter {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskWriter.class);
 
     /**
      * Initializes a new {@link TaskWriter}

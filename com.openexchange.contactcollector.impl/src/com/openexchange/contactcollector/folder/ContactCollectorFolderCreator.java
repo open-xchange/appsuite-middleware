@@ -60,7 +60,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
@@ -80,7 +79,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  */
 public class ContactCollectorFolderCreator implements LoginHandlerService, NonTransient {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactCollectorFolderCreator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactCollectorFolderCreator.class);
 
     /**
      * Initializes a new {@link ContactCollectorFolderCreator}.

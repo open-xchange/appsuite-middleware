@@ -101,7 +101,6 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -148,7 +147,7 @@ public class Infostore extends PermissionServlet {
     // public static final Exception2Message OXEXCEPTION_HANDLER = new
     // InfostoreException2Message();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Infostore.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Infostore.class);
 
     private final long maxUploadSize = -1;
 

@@ -68,7 +68,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class Rtf2HtmlConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Rtf2HtmlConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Rtf2HtmlConverter.class);
 
     private static final class HTMLStateMachine {
 

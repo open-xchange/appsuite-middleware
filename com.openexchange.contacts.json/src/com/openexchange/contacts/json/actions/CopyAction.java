@@ -71,7 +71,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -90,7 +89,7 @@ requestBody = "",
 responseDescription = "")
 public class CopyAction extends ContactAction {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CopyAction.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CopyAction.class);
 
     /**
      * Initializes a new {@link CopyAction}.

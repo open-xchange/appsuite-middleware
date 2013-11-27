@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -81,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RTJSONHandler implements StanzaSender {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTJSONHandler.class));
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(RTJSONHandler.class);
 
     protected final StateManager stateManager = new StateManager();
 

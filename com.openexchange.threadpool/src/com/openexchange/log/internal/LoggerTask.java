@@ -209,7 +209,7 @@ final class LoggerTask extends AbstractTask<Object> {
             } catch (final Exception e) {
                 // Log task run failed...
                 try {
-                    final org.apache.commons.logging.Log logger = LogFactory.getLog(LoggerTask.class);
+                    final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(LoggerTask.class);
                     logger.error("LoggerTask run failed", e);
                 } catch (final Exception x) {
                     // Ignore

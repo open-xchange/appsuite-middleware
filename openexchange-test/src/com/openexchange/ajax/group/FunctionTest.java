@@ -84,7 +84,7 @@ import com.openexchange.group.Group;
  */
 public final class FunctionTest extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(FunctionTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FunctionTest.class);
 
     private Set<Integer> groupsToDelete;
 

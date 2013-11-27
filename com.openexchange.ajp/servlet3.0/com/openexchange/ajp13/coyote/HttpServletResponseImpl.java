@@ -99,7 +99,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
 public final class HttpServletResponseImpl implements HttpServletResponse {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServletResponseWrapper.class));
+        com.openexchange.log.Log.loggerFor(ServletResponseWrapper.class);
 
     public static final int OUTPUT_NOT_SELECTED = -1;
 

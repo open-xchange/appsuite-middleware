@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.microformats.objectparser.OXMFVisitor;
 import com.openexchange.tools.ImageTypeDetector;
@@ -80,7 +79,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 
     private static final String OXMF_PREFIX = OXMFVisitor.OXMF_PREFIX;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MapToContactObjectTransformer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MapToContactObjectTransformer.class);
 
 	@Override
     public List<Contact> transform (List<Map<String, String>> inlist){

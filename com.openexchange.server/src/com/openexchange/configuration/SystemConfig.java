@@ -51,7 +51,6 @@ package com.openexchange.configuration;
 
 import java.io.File;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -72,7 +71,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SystemConfig.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SystemConfig.class);
 
     /**
      * Key of the system property that contains the file name of the

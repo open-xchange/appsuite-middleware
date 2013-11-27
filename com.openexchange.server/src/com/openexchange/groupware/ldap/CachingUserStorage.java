@@ -65,7 +65,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -77,7 +76,7 @@ public class CachingUserStorage extends UserStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingUserStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CachingUserStorage.class);
 
     private static final String REGION_NAME = "User";
 

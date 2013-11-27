@@ -66,7 +66,6 @@ import javax.management.MBeanException;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
@@ -86,7 +85,7 @@ public class LoginCounterImpl implements LoginCounterService {
      */
     public LoginCounterImpl() {
         super();
-        logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReportingMBean.class));
+        logger = com.openexchange.log.Log.loggerFor(ReportingMBean.class);
     }
 
     @Override

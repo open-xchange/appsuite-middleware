@@ -50,7 +50,6 @@
 package com.openexchange.push.udp;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -61,7 +60,7 @@ import com.openexchange.config.ConfigurationService;
 
 public abstract class AbstractConfigWrapper {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractConfigWrapper.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractConfigWrapper.class);
 
     public static String parseProperty(final ConfigurationService prop, final String name, final String value) {
         final String tmp = prop.getProperty(name, "");

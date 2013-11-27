@@ -66,7 +66,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 
@@ -76,7 +75,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 public class DynamicAttributesLoader implements Filter<Context, Context> {
 
-    private static final Log LOG = LogFactory.getLog(DynamicAttributesLoader.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DynamicAttributesLoader.class);
 
     private final AdminCache cache;
 

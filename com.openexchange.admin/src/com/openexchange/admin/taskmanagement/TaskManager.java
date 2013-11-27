@@ -59,7 +59,6 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.log.LogFactory;
 
 public class TaskManager {
 
@@ -67,7 +66,7 @@ public class TaskManager {
 
     private final PropertyHandler prop;
 
-    private static final Log log = LogFactory.getLog(TaskManager.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(TaskManager.class);
 
     private final Hashtable<Integer, ExtendedFutureTask<?>> jobs = new Hashtable<Integer, ExtendedFutureTask<?>>();
 

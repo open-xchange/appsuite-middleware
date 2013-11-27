@@ -18,7 +18,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class MultipleTest extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(MultipleTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MultipleTest.class);
 
     public MultipleTest(final String name) {
         super(name);

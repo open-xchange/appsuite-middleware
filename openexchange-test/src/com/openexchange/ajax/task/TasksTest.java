@@ -87,7 +87,7 @@ public class TasksTest extends AbstractAJAXTest {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(TasksTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TasksTest.class);
     /**
      * Proxy attribute for the private task folder of the user.
      */

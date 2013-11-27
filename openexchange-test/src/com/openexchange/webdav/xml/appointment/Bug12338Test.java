@@ -74,7 +74,7 @@ import com.openexchange.webdav.xml.framework.WebDAVClient;
  */
 public final class Bug12338Test extends AbstractWebDAVSession {
 
-    private static final Log LOG = LogFactory.getLog(Bug12338Test.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug12338Test.class);
 
     public Bug12338Test(final String name) {
         super(name);

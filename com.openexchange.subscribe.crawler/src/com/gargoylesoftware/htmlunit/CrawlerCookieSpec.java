@@ -55,7 +55,6 @@ import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.cookie.CookieSpecBase;
 import org.apache.commons.httpclient.cookie.MalformedCookieException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -65,7 +64,7 @@ import com.openexchange.log.LogFactory;
  */
 public class CrawlerCookieSpec extends CookieSpecBase {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerCookieSpec.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(CrawlerCookieSpec.class);
 
     public CrawlerCookieSpec(){
     }

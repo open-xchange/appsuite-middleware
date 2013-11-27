@@ -68,7 +68,7 @@ import com.openexchange.kerberos.impl.KerberosServiceImpl;
  */
 public class KerberosServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(KerberosServiceRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(KerberosServiceRegisterer.class);
     private final BundleContext context;
     private ServiceRegistration<KerberosService> registration;
     private KerberosServiceImpl impl;

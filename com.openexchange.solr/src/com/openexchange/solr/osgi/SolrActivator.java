@@ -31,7 +31,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -63,7 +62,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SolrActivator extends HousekeepingActivator {
 
-    static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
+    static Log LOG = com.openexchange.log.Log.loggerFor(SolrActivator.class);
 
     private volatile DelegationSolrAccessImpl delegationAccess;
 

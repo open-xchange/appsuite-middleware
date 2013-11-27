@@ -36,7 +36,7 @@ public class Bug8724Test extends AppointmentTest {
 		Appointment.TIMEZONE
 	};
 
-	private static final Log LOG = LogFactory.getLog(Bug8724Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug8724Test.class);
 
 	public Bug8724Test(final String name) {
 		super(name);

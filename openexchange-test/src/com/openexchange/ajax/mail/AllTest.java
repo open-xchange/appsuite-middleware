@@ -66,7 +66,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class AllTest extends AbstractMailTest {
 
-    private static final Log LOG = LogFactory.getLog(AllTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AllTest.class);
 
     String mailObject_25kb;
 

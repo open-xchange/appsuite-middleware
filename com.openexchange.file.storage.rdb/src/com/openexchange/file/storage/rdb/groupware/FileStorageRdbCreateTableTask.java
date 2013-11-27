@@ -114,7 +114,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
         final int contextId = params.getContextId();
         createTable("filestorageAccount", getMessagingAccountTable(), contextId);
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbCreateTableTask.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(FileStorageRdbCreateTableTask.class);
         if (logger.isInfoEnabled()) {
             logger.info("UpdateTask '" + FileStorageRdbCreateTableTask.class.getSimpleName() + "' successfully performed!");
         }

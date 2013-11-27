@@ -68,14 +68,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class LinkedInXMLParser {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInXMLParser.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinkedInXMLParser.class);
 
     private String getTextValue(final Element ele, final String tagName) {
         String textVal = null;

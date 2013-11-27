@@ -58,7 +58,6 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * Contains the code to startup the complete database connection pooling and replication monitor.
@@ -67,7 +66,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Initialization.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Initialization.class);
     private static final Initialization SINGLETON = new Initialization();
 
     private final Management management = new Management();

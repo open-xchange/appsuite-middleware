@@ -68,7 +68,7 @@ public final class IndexEventHandler implements EventHandler {
     }
 
 //    protected static final org.apache.commons.logging.Log LOG =
-//        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IndexEventHandler.class));
+//        com.openexchange.log.Log.loggerFor(IndexEventHandler.class);
 //
 //    private final ConcurrentMap<Key, ConcurrentMap<String, ElapsedFolderJob>> periodicJobs;
 //

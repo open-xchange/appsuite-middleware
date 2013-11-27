@@ -78,7 +78,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -93,7 +92,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class Consistency implements ConsistencyMBean {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Consistency.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Consistency.class);
 
     @Override
     public List<String> listMissingFilesInContext(final int contextId) throws MBeanException {
@@ -794,7 +793,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class CreateDummyFileForInfoitem extends CreateDummyFile implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateDummyFileForInfoitem.class));
+            com.openexchange.log.Log.loggerFor(CreateDummyFileForInfoitem.class);
 
         private final DatabaseImpl database;
 
@@ -853,7 +852,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateDummyFileForAttachment.class));
+            com.openexchange.log.Log.loggerFor(CreateDummyFileForAttachment.class);
 
         private final AttachmentBase attachments;
 
@@ -917,7 +916,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class CreateDummyFileForSnippet extends CreateDummyFile implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateDummyFileForSnippet.class));
+            com.openexchange.log.Log.loggerFor(CreateDummyFileForSnippet.class);
 
         public CreateDummyFileForSnippet(final FileStorage storage) {
             super(storage);
@@ -983,7 +982,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class RemoveFile implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RemoveFile.class));
+            com.openexchange.log.Log.loggerFor(RemoveFile.class);
 
         private final FileStorage storage;
 
@@ -1017,7 +1016,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class DeleteInfoitem implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteInfoitem.class));
+            com.openexchange.log.Log.loggerFor(DeleteInfoitem.class);
 
         private final DatabaseImpl database;
 
@@ -1068,7 +1067,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class DeleteAttachment implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteAttachment.class));
+            com.openexchange.log.Log.loggerFor(DeleteAttachment.class);
 
         private final AttachmentBase attachments;
 
@@ -1130,7 +1129,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class DeleteSnippet implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteSnippet.class));
+            com.openexchange.log.Log.loggerFor(DeleteSnippet.class);
 
         public DeleteSnippet() {
             super();
@@ -1293,7 +1292,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class CreateInfoitem implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateInfoitem.class));
+            com.openexchange.log.Log.loggerFor(CreateInfoitem.class);
 
         private static final String description = "This file needs attention";
 

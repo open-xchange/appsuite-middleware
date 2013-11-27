@@ -54,7 +54,6 @@ import java.nio.charset.Charset;
 import java.util.BitSet;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -64,7 +63,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class URLCoder {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(URLCoder.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(URLCoder.class);
 
     private URLCoder() {
         super();

@@ -80,7 +80,7 @@ public class QuartzActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        final Log log = LogFactory.getLog(QuartzActivator.class);
+        final Log log = com.openexchange.log.Log.loggerFor(QuartzActivator.class);
         log.info("Starting bundle: org.quartz");
         try {
             System.setProperty("org.terracotta.quartz.skipUpdateCheck", "true");
@@ -95,7 +95,7 @@ public class QuartzActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final Log log = LogFactory.getLog(QuartzActivator.class);
+        final Log log = com.openexchange.log.Log.loggerFor(QuartzActivator.class);
         log.info("Stopping bundle: org.quartz");
         try {
             final ServiceRegistration<QuartzService> quartzServiceRegistration = this.quartzServiceRegistration;

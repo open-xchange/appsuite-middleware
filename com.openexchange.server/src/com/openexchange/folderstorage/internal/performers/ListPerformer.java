@@ -80,7 +80,6 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -98,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ListPerformer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ListPerformer.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

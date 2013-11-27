@@ -55,7 +55,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
@@ -65,7 +64,7 @@ import com.openexchange.tools.images.impl.ImageInformation;
  */
 public class CropTransformation implements ImageTransformation {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CropTransformation.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(CropTransformation.class);
 
     private final int x, y, width, height;
 

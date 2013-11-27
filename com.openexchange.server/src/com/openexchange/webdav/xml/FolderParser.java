@@ -53,7 +53,6 @@ package com.openexchange.webdav.xml;
 
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.OXException;
@@ -71,7 +70,7 @@ import com.openexchange.webdav.xml.fields.FolderFields;
 
 public class FolderParser extends FolderChildParser {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderParser.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderParser.class);
 
 	public FolderParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;

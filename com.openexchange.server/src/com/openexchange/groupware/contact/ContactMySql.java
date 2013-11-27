@@ -63,7 +63,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.sqlinjectors.IntSQLInjector;
@@ -99,7 +98,7 @@ public class ContactMySql implements ContactSql {
 
     private static final String STR_PERCENT = "%";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactMySql.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactMySql.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

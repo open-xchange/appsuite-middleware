@@ -56,7 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
@@ -70,7 +69,7 @@ import com.openexchange.tools.Collections;
  */
 public final class MALPollPushListenerRegistry {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MALPollPushListenerRegistry.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MALPollPushListenerRegistry.class);
 
     private static final MALPollPushListenerRegistry instance = new MALPollPushListenerRegistry();
 
@@ -149,7 +148,7 @@ public final class MALPollPushListenerRegistry {
             try {
                 l.open();
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MALPollPushListenerRegistry.class)).error(
+                com.openexchange.log.Log.loggerFor(MALPollPushListenerRegistry.class).error(
                     MessageFormat.format("Opening MAL Poll listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();

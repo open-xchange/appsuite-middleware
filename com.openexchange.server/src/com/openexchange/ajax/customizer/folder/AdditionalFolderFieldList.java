@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,7 +67,7 @@ public class AdditionalFolderFieldList {
 
 	 // TODO: Track service ranking and allow fields to overwrite other fields.
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AdditionalFolderFieldList.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AdditionalFolderFieldList.class);
 
     private final TIntObjectHashMap<AdditionalFolderField> byColId = new TIntObjectHashMap<AdditionalFolderField>();
     private final Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();

@@ -68,7 +68,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,7 +80,7 @@ public class APIResponseRenderer implements ResponseRenderer {
     /**
      * The logger constant.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(APIResponseRenderer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(APIResponseRenderer.class);
 
     private static final String JSONP = "jsonp";
 

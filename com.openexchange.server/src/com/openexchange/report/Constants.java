@@ -52,7 +52,6 @@ package com.openexchange.report;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link Constants}
@@ -61,7 +60,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class Constants {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Constants.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Constants.class);
 
     public static final ObjectName REPORTING_NAME = initReportingName();
     public static final ObjectName LOGIN_COUNTER_NAME = initOxtenderMonitorName();

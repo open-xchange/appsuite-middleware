@@ -51,7 +51,6 @@ package com.openexchange.messaging.json.osgi;
 
 import java.io.ByteArrayInputStream;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.caching.Cache;
@@ -77,7 +76,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
  */
 public class MessagingJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MessagingJSONActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MessagingJSONActivator.class);
 
     private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class };
 

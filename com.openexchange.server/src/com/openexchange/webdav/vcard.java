@@ -69,7 +69,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -144,7 +143,7 @@ public final class vcard extends PermissionServlet {
 
     private static String SQL_ENTRY_DELETE = "DELETE FROM vcard_ids WHERE target_object_id = ? AND principal_id = ?";
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(vcard.class));
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(vcard.class);
 
     public void oxinit() {
         // Nothing to do

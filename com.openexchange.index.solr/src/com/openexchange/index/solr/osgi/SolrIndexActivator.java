@@ -69,7 +69,6 @@ import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.index.solr.internal.SolrIndexManagementService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
@@ -86,7 +85,7 @@ import com.openexchange.user.UserService;
  */
 public class SolrIndexActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrIndexActivator.class);
 
     private SolrIndexFacadeService solrFacadeService;
 

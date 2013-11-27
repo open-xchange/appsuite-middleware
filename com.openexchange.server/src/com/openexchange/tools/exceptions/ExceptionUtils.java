@@ -69,7 +69,6 @@ package com.openexchange.tools.exceptions;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 
@@ -78,7 +77,7 @@ import com.openexchange.log.Props;
  */
 public class ExceptionUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExceptionUtils.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ExceptionUtils.class);
 
     private static final String MARKER = " ---=== /!\\ ===--- ";
 

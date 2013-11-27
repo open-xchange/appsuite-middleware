@@ -71,7 +71,6 @@ import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.sql.DBUtils;
@@ -95,7 +94,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  */
 public class AttachmentCopyTask implements CopyUserTaskService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentCopyTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentCopyTask.class);
 
     private static final String SELECT_ATTACHMENTS =
         "SELECT " +

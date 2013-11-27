@@ -52,7 +52,6 @@ package com.openexchange.admin.autocontextid.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.autocontextid.tools.PropertyHandlerExtended;
@@ -70,7 +69,7 @@ public abstract class OXAutoCIDStorageInterface {
      */
     private static Class<? extends OXAutoCIDStorageInterface> implementingClass;
 
-    private static final Log log = LogFactory.getLog(OXAutoCIDStorageInterface.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXAutoCIDStorageInterface.class);
 
     protected static AdminCacheExtended cache = null;
 

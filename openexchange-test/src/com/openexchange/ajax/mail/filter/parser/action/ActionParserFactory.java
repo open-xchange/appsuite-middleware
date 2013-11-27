@@ -61,7 +61,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ActionParserFactory {
 
-	private static final Log LOG = LogFactory.getLog(ActionParserFactory.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(ActionParserFactory.class);
 
 	final static HashMap<String, ActionParser> parserMap = new HashMap<String, ActionParser>();
 

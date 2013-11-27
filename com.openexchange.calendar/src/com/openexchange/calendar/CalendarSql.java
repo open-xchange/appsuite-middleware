@@ -88,7 +88,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -131,7 +130,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private boolean includePrivateAppointments;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarSql.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarSql.class);
 
     /**
      * Initializes a new {@link CalendarSql}.

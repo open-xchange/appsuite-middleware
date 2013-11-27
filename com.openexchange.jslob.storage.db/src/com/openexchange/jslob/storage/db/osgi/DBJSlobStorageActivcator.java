@@ -82,7 +82,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class DBJSlobStorageActivcator extends HousekeepingActivator {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(DBJSlobStorageActivcator.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DBJSlobStorageActivcator.class);
 
     /** List of known JSlobService identifiers */
     public static final List<String> SERVICE_IDS = new CopyOnWriteArrayList<String>();

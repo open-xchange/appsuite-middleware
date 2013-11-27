@@ -68,7 +68,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -126,7 +125,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         /*
          * Logger
          */
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(DuplicateContactCollectFolderRemoverTask.class));
+        final Log log = com.openexchange.log.Log.loggerFor(DuplicateContactCollectFolderRemoverTask.class);
         /*
          * Progress state
          */

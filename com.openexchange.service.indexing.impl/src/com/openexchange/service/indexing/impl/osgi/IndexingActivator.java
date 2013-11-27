@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexManagementService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -89,7 +88,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class IndexingActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingActivator.class);
 
     private IndexingServiceImpl serviceImpl;
 

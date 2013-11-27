@@ -63,7 +63,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
@@ -81,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SubscriptionExecutionServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SubscriptionExecutionServiceImpl.class);
 
     /*-
      * -------------------------------- Guard stuff -------------------------------

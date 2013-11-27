@@ -23,7 +23,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 
 public class Bug9742Test extends AbstractAJAXSession {
 
-	private static final Log LOG = LogFactory.getLog(Bug9742Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug9742Test.class);
 
 	public static final int[] APPOINTMENT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY,
 			DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,

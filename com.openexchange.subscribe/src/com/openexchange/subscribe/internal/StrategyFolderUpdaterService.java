@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.log.LogFactory;
  */
 public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T> {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StrategyFolderUpdaterService.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(StrategyFolderUpdaterService.class);
 
     private final FolderUpdaterStrategy<T> strategy;
 

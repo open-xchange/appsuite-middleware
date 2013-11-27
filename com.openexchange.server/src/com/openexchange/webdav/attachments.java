@@ -72,7 +72,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -117,7 +116,7 @@ public final class attachments extends OXServlet {
         ATTACHMENT_BASE.setTransactional(true);
     }
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(attachments.class));
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(attachments.class);
 
     @Override
     protected Interface getInterface() {

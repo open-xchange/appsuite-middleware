@@ -96,7 +96,6 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
@@ -125,7 +124,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final long serialVersionUID = -8308340875362868795L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionServlet.class);
 
     private static final boolean INFO = LOG.isInfoEnabled();
 

@@ -56,11 +56,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
-import com.openexchange.log.LogFactory;
 
 public class OXAdminCoreImpl implements OXAdminCoreInterface {
 
-    private static final Log log = LogFactory.getLog(OXAdminCoreImpl.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXAdminCoreImpl.class);
 
     private BundleContext context = null;
 

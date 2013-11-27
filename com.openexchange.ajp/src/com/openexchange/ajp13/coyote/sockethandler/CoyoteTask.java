@@ -60,7 +60,6 @@ import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
-import com.openexchange.log.LogFactory;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -74,7 +73,7 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
 public final class CoyoteTask implements Task<Object> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CoyoteTask.class));
+        com.openexchange.log.Log.loggerFor(CoyoteTask.class);
 
     /**
      * The client socket.
@@ -213,7 +212,7 @@ public final class CoyoteTask implements Task<Object> {
         try {
             s.close();
         } catch (final IOException e) {
-            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class));
+            final Log log = com.openexchange.log.Log.loggerFor(CoyoteTask.class);
             if (log.isDebugEnabled()) {
                 log.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
             }

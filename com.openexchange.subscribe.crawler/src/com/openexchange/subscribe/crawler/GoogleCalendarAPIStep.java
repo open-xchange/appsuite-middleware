@@ -69,7 +69,6 @@ import com.google.gdata.util.ServiceException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
@@ -81,7 +80,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  */
 public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Object> implements LoginStep {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleCalendarAPIStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GoogleCalendarAPIStep.class);
 
     private String username, password;
 

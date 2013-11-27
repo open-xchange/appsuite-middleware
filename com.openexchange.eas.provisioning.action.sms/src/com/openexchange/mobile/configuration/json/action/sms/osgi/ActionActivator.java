@@ -52,7 +52,6 @@ package com.openexchange.mobile.configuration.json.action.sms.osgi;
 import static com.openexchange.mobile.configuration.json.action.sms.osgi.ActionServiceRegistry.getServiceRegistry;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
@@ -65,7 +64,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class ActionActivator extends HousekeepingActivator {
 
-	private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ActionActivator.class));
+	private static transient final Log LOG = com.openexchange.log.Log.loggerFor(ActionActivator.class);
 
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class } ;
 

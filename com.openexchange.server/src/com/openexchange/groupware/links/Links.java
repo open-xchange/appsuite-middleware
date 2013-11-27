@@ -78,7 +78,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -93,7 +92,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class Links {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Links.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(Links.class);
 
     private static interface ModuleAccess {
 

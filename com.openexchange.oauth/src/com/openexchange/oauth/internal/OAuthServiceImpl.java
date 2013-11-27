@@ -93,7 +93,6 @@ import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
@@ -130,7 +129,7 @@ import com.openexchange.tools.session.SessionHolder;
  */
 public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<PWUpdate>, EncryptedItemDetectorService, SecretMigrator, EncryptedItemCleanUpService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OAuthServiceImpl.class);
 
     private final OAuthServiceMetaDataRegistry registry;
 

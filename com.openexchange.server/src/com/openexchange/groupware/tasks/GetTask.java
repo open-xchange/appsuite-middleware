@@ -64,7 +64,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class collects all information for getting tasks. It is also able to
@@ -73,7 +72,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class GetTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GetTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GetTask.class);
 
     private final Context ctx;
 

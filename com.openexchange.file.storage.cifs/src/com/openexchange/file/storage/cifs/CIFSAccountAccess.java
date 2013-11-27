@@ -75,7 +75,7 @@ import com.openexchange.session.Session;
  */
 public final class CIFSAccountAccess implements FileStorageAccountAccess, WarningsAware {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSAccountAccess.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CIFSAccountAccess.class);
 
     /*-
      * Member stuff

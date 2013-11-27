@@ -65,7 +65,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
@@ -81,7 +80,7 @@ import com.openexchange.timer.TimerService;
  */
 final class SessionData {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionData.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(SessionData.class);
 
     private final int maxSessions;
     private final long randomTokenTimeout;

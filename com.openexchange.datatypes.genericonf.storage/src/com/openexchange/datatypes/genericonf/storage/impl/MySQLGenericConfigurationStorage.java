@@ -59,7 +59,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -75,7 +74,7 @@ import com.openexchange.groupware.impl.IDGenerator;
  */
 public class MySQLGenericConfigurationStorage implements GenericConfigurationStorageService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MySQLGenericConfigurationStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MySQLGenericConfigurationStorage.class);
 
     private DBProvider provider;
 

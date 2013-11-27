@@ -50,7 +50,6 @@
 package com.openexchange.rdiff.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.rdiff.internal.RdiffServiceImpl;
@@ -71,7 +70,7 @@ public final class RdiffActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdiffActivator.class));
+        final Log log = com.openexchange.log.Log.loggerFor(RdiffActivator.class);
         log.info("Starting bundle: com.openexchange.rdiff");
         try {
             registerService(RdiffService.class, new RdiffServiceImpl(), null);
@@ -83,7 +82,7 @@ public final class RdiffActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdiffActivator.class));
+        final Log log = com.openexchange.log.Log.loggerFor(RdiffActivator.class);
         log.info("Stopping bundle: com.openexchange.rdiff");
         try {
             unregisterServices();

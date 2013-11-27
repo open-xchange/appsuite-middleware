@@ -57,7 +57,6 @@ import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUtility;
@@ -74,7 +73,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class PushEventHandler implements EventHandler {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushEventHandler.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(PushEventHandler.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 

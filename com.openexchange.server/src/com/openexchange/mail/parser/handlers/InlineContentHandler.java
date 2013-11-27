@@ -79,7 +79,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class InlineContentHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(InlineContentHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(InlineContentHandler.class);
 
     private final int size;
 

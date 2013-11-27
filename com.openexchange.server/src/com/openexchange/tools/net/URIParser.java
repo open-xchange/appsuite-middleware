@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
  */
 public final class URIParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(URIParser.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(URIParser.class);
 
     // The magic is the not being there of the dot character that would allow the match to IPv4 addresses. Place here \. in the pattern to
     // break it.

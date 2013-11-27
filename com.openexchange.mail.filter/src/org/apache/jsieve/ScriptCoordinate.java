@@ -20,7 +20,6 @@
 package org.apache.jsieve;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Specifies the positional extent of an element
@@ -30,7 +29,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class ScriptCoordinate {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ScriptCoordinate.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(ScriptCoordinate.class);
 
     private final int startLineNumber;
     private final int startColumnNumber;

@@ -62,7 +62,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -89,7 +88,7 @@ public class ReminderHandler implements ReminderService {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReminderHandler.class);
 
     final Context context;
 

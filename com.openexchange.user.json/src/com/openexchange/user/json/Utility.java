@@ -117,7 +117,7 @@ public final class Utility {
             // Keep interrupted status
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class));
+            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Utility.class);
             LOG.error(e.getMessage(), e);
         }
         return TimeZone.getTimeZone(ID);

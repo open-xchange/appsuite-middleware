@@ -55,7 +55,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
@@ -65,7 +64,7 @@ import com.openexchange.tools.images.impl.ImageInformation;
  */
 public class RotateTransformation implements ImageTransformation {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RotateTransformation.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(RotateTransformation.class);
 
     public RotateTransformation() {
         super();

@@ -73,7 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CachingUserConfigurationStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CachingUserConfigurationStorage.class);
 
     private static final String CACHE_REGION_NAME = "UserPermissionBits";
 

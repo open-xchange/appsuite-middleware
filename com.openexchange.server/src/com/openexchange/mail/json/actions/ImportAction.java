@@ -110,7 +110,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class ImportAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImportAction.class));
+        com.openexchange.log.Log.loggerFor(ImportAction.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

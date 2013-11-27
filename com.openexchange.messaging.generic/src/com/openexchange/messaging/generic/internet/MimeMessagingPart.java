@@ -91,7 +91,7 @@ import com.openexchange.messaging.StringContent;
  */
 public class MimeMessagingPart implements MessagingPart {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessagingPart.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeMessagingPart.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -54,7 +54,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.freebusy.provider.google.GoogleFreeBusyProvider;
 import com.openexchange.freebusy.provider.google.GoogleFreeBusyProviderLookup;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -64,7 +63,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class GoogleFreeBusyProviderActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleFreeBusyProviderActivator.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(GoogleFreeBusyProviderActivator.class);
 
     /**
      * Initializes a new {@link GoogleFreeBusyProviderActivator}.

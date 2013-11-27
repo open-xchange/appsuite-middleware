@@ -82,7 +82,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
@@ -101,7 +100,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class ImageTransformationsImpl implements ImageTransformations {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageTransformationsImpl.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(ImageTransformationsImpl.class);
 
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;

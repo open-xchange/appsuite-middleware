@@ -57,7 +57,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -91,7 +90,7 @@ public final class contacts extends XmlServlet<ContactService> {
 
     private static final long serialVersionUID = -3731372041610025543L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(contacts.class));
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(contacts.class);
 
     /**
      * Initializes a new {@link contacts}.

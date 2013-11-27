@@ -53,7 +53,6 @@ import java.util.Collection;
 import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -116,7 +115,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
         try {
             msgFlags = msg.getFlags();
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(FlagTerm.class)).warn("Error during search.", e);
+            com.openexchange.log.Log.loggerFor(FlagTerm.class).warn("Error during search.", e);
             return false;
         }
         return set ? msgFlags.contains(flagsObj) : !msgFlags.contains(flagsObj);

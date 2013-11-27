@@ -71,7 +71,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
 
-    private static final Log LOG = LogFactory.getLog(LoginResponseParser.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginResponseParser.class);
 
     private String jvmRoute;
 

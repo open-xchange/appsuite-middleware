@@ -67,7 +67,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -80,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AppointmentWriter extends CalendarWriter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentWriter.class);
 
     private volatile CalendarCollectionService calColl;
 

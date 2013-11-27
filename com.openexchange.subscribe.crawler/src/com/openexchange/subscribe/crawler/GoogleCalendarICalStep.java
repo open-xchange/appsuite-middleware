@@ -69,7 +69,6 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
@@ -81,7 +80,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
     private String url;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleCalendarICalStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GoogleCalendarICalStep.class);
 
     public GoogleCalendarICalStep() {
         super();

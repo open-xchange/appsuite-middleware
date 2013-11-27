@@ -62,7 +62,6 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -190,7 +189,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                 if (null == providers.putIfAbsent(service, PRESENT)) {
                     return service;
                 }
-                final Log logger = LogFactory.getLog(OSGIFileStorageAccountManagerLookupService.Customizer.class);
+                final Log logger = com.openexchange.log.Log.loggerFor(OSGIFileStorageAccountManagerLookupService.Customizer.class);
                 if (logger.isWarnEnabled()) {
                     logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(service.getClass().getSimpleName()).append(
                         " could not be added. Provider is already present.").toString());

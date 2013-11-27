@@ -57,7 +57,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -67,7 +66,7 @@ import com.openexchange.session.Session;
  */
 public final class TreeLockManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TreeLockManagement.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TreeLockManagement.class);
 
     private static final TreeLockManagement INSTANCE = new TreeLockManagement();
 

@@ -58,7 +58,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
@@ -70,7 +69,7 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  */
 public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FilteredSubscriptionSourceDiscoveryService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FilteredSubscriptionSourceDiscoveryService.class);
 
     public static final AtomicReference<ConfigViewFactory> CONFIG_VIEW_FACTORY = new AtomicReference<ConfigViewFactory>();
 

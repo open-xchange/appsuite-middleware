@@ -54,7 +54,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -64,7 +63,7 @@ import com.openexchange.session.Session;
  */
 public final class UserLockManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserLockManagement.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UserLockManagement.class);
 
     private static final UserLockManagement INSTANCE = new UserLockManagement();
 

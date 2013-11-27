@@ -52,7 +52,6 @@ package com.openexchange.consistency.osgi;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -69,7 +68,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class MBeanRegisterer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MBeanRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MBeanRegisterer.class);
 
     private final BundleContext context;
 

@@ -66,7 +66,7 @@ import com.openexchange.search.SearchAttributeFetcher;
  */
 public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AttributeGetter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AttributeGetter.class);
 
     private static interface AttributeGetter {
 

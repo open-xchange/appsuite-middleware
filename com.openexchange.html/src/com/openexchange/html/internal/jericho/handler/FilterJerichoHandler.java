@@ -88,7 +88,6 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link FilterJerichoHandler}
@@ -722,7 +721,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLURLReplacerHandler.class));
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(HTMLURLReplacerHandler.class);
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);
@@ -1102,7 +1101,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FilterJerichoHandler.class));
+            final Log LOG = com.openexchange.log.Log.loggerFor(FilterJerichoHandler.class);
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {

@@ -56,7 +56,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -70,7 +69,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class POP3CreateTableTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(POP3CreateTableTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(POP3CreateTableTask.class);
 
     @Override
     public int addedWithVersion() {

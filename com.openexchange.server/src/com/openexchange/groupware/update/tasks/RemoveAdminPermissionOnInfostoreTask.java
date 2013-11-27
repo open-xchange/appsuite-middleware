@@ -58,7 +58,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -75,7 +74,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveAdminPermissionOnInfostoreTask.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RemoveAdminPermissionOnInfostoreTask.class);
 
     public RemoveAdminPermissionOnInfostoreTask() {
         super();

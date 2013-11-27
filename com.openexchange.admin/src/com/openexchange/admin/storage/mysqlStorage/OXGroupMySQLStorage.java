@@ -80,7 +80,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
@@ -89,7 +88,7 @@ import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
  */
 public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDefaultValues {
 
-    private final static Log log = LogFactory.getLog(OXGroupMySQLStorage.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(OXGroupMySQLStorage.class);
 
     private void changeLastModifiedOnGroup(int ctxId, int groupId, Connection con) throws SQLException {
         PreparedStatement stmt = null;

@@ -60,7 +60,6 @@ import com.openexchange.jslob.json.JSlobActionFactory;
 import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
 import com.openexchange.jslob.json.rest.jslob.JSlobRestServlet;
 import com.openexchange.jslob.registry.JSlobServiceRegistry;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -78,7 +77,7 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(JSlobJSONActivator.class));
+        final Log log = com.openexchange.log.Log.loggerFor(JSlobJSONActivator.class);
         registerModule(new JSlobActionFactory(this), "jslob");
         registerService(ResultConverter.class, new JSlobJSONResultConverter());
 
@@ -107,6 +106,6 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        com.openexchange.log.Log.valueOf(LogFactory.getLog(JSlobJSONActivator.class)).info("Bundle stopped: com.openexchange.jslob.json");
+        com.openexchange.log.Log.loggerFor(JSlobJSONActivator.class).info("Bundle stopped: com.openexchange.jslob.json");
     }
 }

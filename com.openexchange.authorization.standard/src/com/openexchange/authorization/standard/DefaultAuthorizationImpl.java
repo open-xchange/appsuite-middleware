@@ -57,7 +57,6 @@ import com.openexchange.context.ContextExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class DefaultAuthorizationImpl implements AuthorizationService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultAuthorizationImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultAuthorizationImpl.class);
 
     private static final DefaultAuthorizationImpl INSTANCE = new DefaultAuthorizationImpl();
 

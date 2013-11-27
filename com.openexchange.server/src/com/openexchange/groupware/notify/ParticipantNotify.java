@@ -139,7 +139,6 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -167,7 +166,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     private static final String STR_UNKNOWN = "UNKNOWN";
 
-    private final static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ParticipantNotify.class));
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(ParticipantNotify.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

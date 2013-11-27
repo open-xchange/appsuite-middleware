@@ -56,7 +56,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationService;
@@ -75,7 +74,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         CREATE, DELETE, UPDATE;
     }
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPublicationService.class));
+    private static Log LOG = com.openexchange.log.Log.loggerFor(AbstractPublicationService.class);
 
     public static SecurityStrategy ALLOW_ALL = new AllowEverything();
 

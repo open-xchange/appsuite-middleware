@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -78,7 +77,7 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
  */
 public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
-    private final static Log log = LogFactory.getLog(OXLogin.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(OXLogin.class);
 
     private BundleContext context = null;
 

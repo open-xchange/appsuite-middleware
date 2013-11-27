@@ -57,7 +57,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -95,7 +94,7 @@ public final class IDGenerator {
         }
     }
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IDGenerator.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(IDGenerator.class);
 
     /**
      * Used implementation.

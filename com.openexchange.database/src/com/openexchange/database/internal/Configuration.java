@@ -51,7 +51,6 @@ package com.openexchange.database.internal;
 
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -63,7 +62,7 @@ import com.openexchange.pooling.ExhaustedActions;
  */
 public final class Configuration {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Configuration.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Configuration.class);
 
     private static final String CONFIG_FILENAME = "configdb.properties";
 

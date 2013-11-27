@@ -60,7 +60,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 /**
  * Methods for easy handling of collections.
@@ -72,7 +71,7 @@ public final class Collections {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Collections.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Collections.class);
 
     /**
      * Prevent instantiation

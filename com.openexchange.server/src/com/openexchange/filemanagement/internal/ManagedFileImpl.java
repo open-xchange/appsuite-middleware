@@ -76,7 +76,7 @@ import com.openexchange.session.Session;
  */
 public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, TtlAware {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ManagedFileImpl.class);
 
     private final ManagedFileManagementImpl management;
     private final String id;

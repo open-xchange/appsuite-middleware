@@ -101,8 +101,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public final class HttpServletRequestImpl implements HttpServletRequest, Parameterizable {
 
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpServletRequestImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HttpServletRequestImpl.class);
 
     /**
      * The name of the "Content-Type" header.
@@ -416,7 +415,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
             try {
                 ct = new ContentType(value);
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpServletRequestImpl.class)).error(
+                com.openexchange.log.Log.loggerFor(HttpServletRequestImpl.class).error(
                     e.getMessage(),
                     e);
                 throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, e, value);

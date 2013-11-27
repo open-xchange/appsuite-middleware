@@ -88,7 +88,6 @@ import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationS
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -110,7 +109,7 @@ import com.openexchange.user.UserService;
  */
 public class DefaultMailSenderService implements MailSenderService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultMailSenderService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultMailSenderService.class);
 
     private final ITipEmitter iTipEmitter;
 

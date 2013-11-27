@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.update.ProgressState;
 
 /**
@@ -60,7 +59,7 @@ import com.openexchange.groupware.update.ProgressState;
  */
 public class ProgressStatusImpl implements ProgressState {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ProgressStatusImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ProgressStatusImpl.class);
 
     /**
      * Log every 10 seconds the state.

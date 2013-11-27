@@ -76,7 +76,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.update.Tools;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -88,7 +87,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class SchemaStoreImpl extends SchemaStore {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SchemaStoreImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SchemaStoreImpl.class);
     private static final String TABLE_NAME = "updateTask";
     private static final String LOCKED = "LOCKED";
     private static final String BACKGROUND = "BACKGROUND";

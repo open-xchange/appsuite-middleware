@@ -61,7 +61,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public abstract class LoggingCallable<V> implements Task<V> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LoggingCallable.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(LoggingCallable.class);
 
     private final Session session;
 

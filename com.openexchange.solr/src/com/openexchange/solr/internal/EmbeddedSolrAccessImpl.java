@@ -70,7 +70,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SchemaAndConfigStore;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
@@ -92,7 +91,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
     private static final String IAE_MSG = "Parameter `%s` must not be null.";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmbeddedSolrAccessImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(EmbeddedSolrAccessImpl.class);
 
     private CoreContainer coreContainer;
 

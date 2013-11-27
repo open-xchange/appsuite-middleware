@@ -69,7 +69,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.online.infostore.util.InfostorePublicationUtils;
@@ -91,7 +90,7 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private static final long serialVersionUID = 8929899129435791832L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostorePublicationServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostorePublicationServlet.class);
 
     private final String SELF_DESTRUCT = "selfDestruct";
 

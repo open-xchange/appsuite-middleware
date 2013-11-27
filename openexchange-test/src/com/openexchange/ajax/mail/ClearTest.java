@@ -69,7 +69,7 @@ import com.openexchange.exception.OXException;
  */
 public class ClearTest extends AbstractMailTest {
 
-	private static final Log LOG = LogFactory.getLog(ClearTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(ClearTest.class);
 
 	public ClearTest(final String name) {
 		super(name);

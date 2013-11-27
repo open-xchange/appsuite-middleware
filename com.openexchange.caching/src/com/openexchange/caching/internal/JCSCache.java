@@ -80,7 +80,6 @@ import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
@@ -89,7 +88,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class JCSCache implements Cache, SupportsLocalOperations {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(JCSCache.class));
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(JCSCache.class);
 
     private static volatile Field cacheControlField;
     private static Field cacheControlField() {

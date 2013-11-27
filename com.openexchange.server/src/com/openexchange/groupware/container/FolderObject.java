@@ -89,7 +89,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     private static final long serialVersionUID = 1019652520335292041L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderObject.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(FolderObject.class);
 
     /**
      * Gets the locale-specific folder name

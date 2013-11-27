@@ -52,7 +52,6 @@ package com.openexchange.subscribe.facebook.osgi;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -72,7 +71,7 @@ import com.openexchange.subscribe.facebook.groupware.FacebookSubscriptionsOAuthA
  */
 public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookRegisterer.class);
 
     private final BundleContext context;
 

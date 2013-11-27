@@ -57,7 +57,6 @@ import java.util.Hashtable;
 import java.util.Map.Entry;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -71,7 +70,7 @@ public class PropertyHandler {
     private Hashtable<String, String>       resPropValues       = null;
     private Hashtable<String, String>       rmiPropValues       = null;
     protected Hashtable<String, String> sqlPropValues = null;
-    private final static Log log = LogFactory.getLog(PropertyHandler.class);
+    private final static Log log = com.openexchange.log.Log.loggerFor(PropertyHandler.class);
 
     private String configdirname;
     private final Properties sysprops;

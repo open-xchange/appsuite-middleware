@@ -59,7 +59,7 @@ public class ConfigJumpTest extends AbstractAJAXTest {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ConfigJumpTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigJumpTest.class);
 
     /**
      * URL of the AJAX config interface.

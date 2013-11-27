@@ -57,7 +57,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -85,7 +84,7 @@ public final class SessionImpl implements PutIfAbsent {
     private volatile boolean tranzient;
     private final ConcurrentMap<String, Object> parameters;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionImpl.class);
 
     /**
      * Initializes a new {@link SessionImpl}

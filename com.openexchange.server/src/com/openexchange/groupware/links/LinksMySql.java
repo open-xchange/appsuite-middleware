@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import com.openexchange.groupware.container.LinkObject;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -81,7 +80,7 @@ public class LinksMySql implements LinksSql {
 
 	private static final String SQL_AND_SECONDID = ") AND (secondid=";
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinksMySql.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(LinksMySql.class);
 
 	@Override
     public String iFperformLinkStorage(final LinkObject l, final int cid){

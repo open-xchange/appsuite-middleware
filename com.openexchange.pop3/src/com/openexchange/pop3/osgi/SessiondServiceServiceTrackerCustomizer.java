@@ -63,7 +63,7 @@ import com.openexchange.sessiond.SessiondService;
 public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCustomizer<SessiondService,SessiondService> {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SessiondServiceServiceTrackerCustomizer.class));
+        com.openexchange.log.Log.loggerFor(SessiondServiceServiceTrackerCustomizer.class);
 
     private final BundleContext context;
 

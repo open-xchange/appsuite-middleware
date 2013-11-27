@@ -54,7 +54,6 @@ import java.util.MissingResourceException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.server.services.I18nServices;
 
@@ -66,7 +65,7 @@ import com.openexchange.server.services.I18nServices;
  */
 public class StringHelper {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringHelper.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(StringHelper.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -68,7 +68,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
 public class LocalFileStorage extends DefaultFileStorage {
@@ -135,7 +134,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LocalFileStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LocalFileStorage.class);
 
     /**
      * This lock is used to avoid threads from creating a filestore dir simultaneously.

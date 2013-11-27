@@ -214,7 +214,7 @@ import com.openexchange.xml.spring.impl.DefaultSpringParser;
  */
 public final class Init {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Init.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Init.class);
 
     // private static Properties infostoreProps = null;
 

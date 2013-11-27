@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.mail.BodyPart;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.utils.MessageUtility;
@@ -101,7 +100,7 @@ public final class IcsMimeFilter extends MimeFilter {
                         final String method = iCalParser.parseProperty("METHOD", MessageUtility.getPartInputStream(bodyPart));
                         return null != method && ITIP_METHODS.contains(method.toUpperCase());
                     } catch (final RuntimeException e) {
-                        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(IcsMimeFilter.class));
+                        final Log logger = com.openexchange.log.Log.loggerFor(IcsMimeFilter.class);
                         logger.warn("A runtime error occurred.", e);
                     }
                 }
@@ -124,7 +123,7 @@ public final class IcsMimeFilter extends MimeFilter {
                         final String method = iCalParser.parseProperty("METHOD", bodyPart.getInputStream());
                         return null != method && ITIP_METHODS.contains(method.toUpperCase());
                     } catch (final Exception e) {
-                        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(IcsMimeFilter.class));
+                        final Log logger = com.openexchange.log.Log.loggerFor(IcsMimeFilter.class);
                         logger.warn("An error occurred.", e);
                     }
                 }

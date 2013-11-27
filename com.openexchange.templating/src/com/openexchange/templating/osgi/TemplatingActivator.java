@@ -69,7 +69,7 @@ import freemarker.log.OXFreemarkerLoggerFactory;
  */
 public class TemplatingActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TemplatingActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(TemplatingActivator.class);
 
     @Override
     public void startBundle() throws Exception {

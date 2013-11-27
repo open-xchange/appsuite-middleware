@@ -79,8 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ResourceRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-            .getLog(ResourceRequest.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ResourceRequest.class);
 
     private final ServerSession session;
 

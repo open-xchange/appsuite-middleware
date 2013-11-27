@@ -52,7 +52,6 @@ package com.openexchange.groupware.contact;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 
 /**
  * Configuration class for contact options.
@@ -64,7 +63,7 @@ public class ContactConfig {
 
     private static final ContactConfig SINGLETON = new ContactConfig();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactConfig.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactConfig.class);
 
     private final Properties props = new Properties();
 

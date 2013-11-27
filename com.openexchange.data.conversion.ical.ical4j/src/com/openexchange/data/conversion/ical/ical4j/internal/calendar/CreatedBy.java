@@ -66,7 +66,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 
 /**
  * Test implementation to write the organizer.
@@ -75,7 +74,7 @@ import com.openexchange.log.LogFactory;
  */
 public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CreatedBy.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CreatedBy.class);
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 

@@ -67,7 +67,7 @@ package com.openexchange.subscribe.parser;
  */
 public class ExternalSubscriptionHandlerImpl extends ContactHandler {
 
-//    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSubscriptionHandlerImpl.class));
+//    private static final Log LOG = com.openexchange.log.Log.loggerFor(ExternalSubscriptionHandlerImpl.class);
 //
 //    public void handleSubscription(ExternalSubscription subscription) {
 //        try {

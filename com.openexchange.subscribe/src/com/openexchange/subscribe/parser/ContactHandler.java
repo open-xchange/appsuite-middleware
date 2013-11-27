@@ -55,7 +55,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -70,7 +69,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class ContactHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactHandler.class);
 
     /**
      * Update or insert contacts from a subscription

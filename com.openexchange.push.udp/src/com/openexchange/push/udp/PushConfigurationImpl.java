@@ -55,7 +55,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -96,7 +95,7 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
 
     private boolean isInit = false;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushConfigurationImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushConfigurationImpl.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

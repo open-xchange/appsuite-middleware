@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public class UnifiedInboxIdentifier implements PreferencesItemService {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxIdentifier.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UnifiedInboxIdentifier.class);
 
     /**
      * Default constructor.

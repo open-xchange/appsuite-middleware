@@ -65,7 +65,7 @@ public final class Parser {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(Parser.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Parser.class);
 
     /**
      * Prevent instanciation.

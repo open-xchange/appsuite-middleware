@@ -67,7 +67,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -150,7 +149,7 @@ public class GroupUserWriter extends ContactWriter {
 
     protected Element parent = null;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GroupUserWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupUserWriter.class);
 
     public GroupUserWriter(final User userObj, final Context ctx, final Session sessionObj, final Element parent) {
         super(userObj, ctx, sessionObj);

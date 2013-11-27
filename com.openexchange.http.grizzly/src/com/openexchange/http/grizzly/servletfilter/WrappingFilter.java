@@ -68,7 +68,6 @@ import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 
@@ -80,7 +79,7 @@ import com.openexchange.log.Props;
  */
 public class WrappingFilter implements Filter {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(WrappingFilter.class));
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(WrappingFilter.class);
 
     IPTools remoteIPFinder;
 

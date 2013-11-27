@@ -50,7 +50,6 @@
 package com.openexchange.server.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.server.impl.Constants;
@@ -66,7 +65,7 @@ import com.openexchange.tools.service.SpecificServiceChooser;
  */
 public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceTracker<T> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentPluginsTracker.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentPluginsTracker.class);
 
     public AttachmentPluginsTracker(BundleContext context, Class<T> toTrack) {
         super(context, toTrack);

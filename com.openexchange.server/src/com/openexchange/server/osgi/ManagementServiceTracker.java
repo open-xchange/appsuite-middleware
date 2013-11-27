@@ -55,7 +55,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import com.openexchange.groupware.update.tools.UpdateTaskMBeanInit;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.report.internal.ReportingInit;
@@ -93,11 +92,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             gadObjectName = OXFolderProperties.registerRestorerMBean(managementService);
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
         } catch (final MalformedObjectNameException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ManagementServiceTracker.class).error(e.getMessage(), e);
         } catch (final NullPointerException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ManagementServiceTracker.class).error(e.getMessage(), e);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ManagementServiceTracker.class).error(e.getMessage(), e);
         }
         new ReportingInit(managementService).start();
         new UpdateTaskMBeanInit(managementService).start();
@@ -117,11 +116,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
                 OXFolderProperties.unregisterRestorerMBean(gadObjectName, managementService);
             }
         } catch (final MalformedObjectNameException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ManagementServiceTracker.class).error(e.getMessage(), e);
         } catch (final NullPointerException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ManagementServiceTracker.class).error(e.getMessage(), e);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementServiceTracker.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(ManagementServiceTracker.class).error(e.getMessage(), e);
         } finally {
             this.gadObjectName = null;
         }

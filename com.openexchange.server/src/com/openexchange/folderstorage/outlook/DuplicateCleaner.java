@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -78,7 +77,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class DuplicateCleaner {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DuplicateCleaner.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DuplicateCleaner.class);
 
     /**
      * Initializes a new {@link DuplicateCleaner}.

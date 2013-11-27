@@ -63,7 +63,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.Collections;
 
 /**
@@ -75,7 +74,7 @@ final class Reminder {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Reminder.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Reminder.class);
 
     /**
      * Prevent instantiation.

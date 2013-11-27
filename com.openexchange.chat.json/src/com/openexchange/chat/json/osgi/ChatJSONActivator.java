@@ -51,7 +51,6 @@ package com.openexchange.chat.json.osgi;
 
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -84,7 +83,7 @@ public final class ChatJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatJSONActivator.class));
+        final Log log = com.openexchange.log.Log.loggerFor(ChatJSONActivator.class);
         registerModule(new ChatAccountActionFactory(this), "chat/account");
         registerModule(new ChatConversationActionFactory(this), "conversation");
         registerModule(new ChatRosterActionFactory(this), "roster");

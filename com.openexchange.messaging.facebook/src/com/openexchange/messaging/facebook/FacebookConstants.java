@@ -126,10 +126,10 @@ public final class FacebookConstants {
             cmf.setAccessible(true);
         } catch (final SecurityException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookConstants.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(FacebookConstants.class).error(e.getMessage(), e);
         } catch (final NoSuchFieldException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookConstants.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(FacebookConstants.class).error(e.getMessage(), e);
         }
         HTTP_CLIENT_FIELD = hcf;
         CONNECTION_MANAGER_FIELD = cmf;

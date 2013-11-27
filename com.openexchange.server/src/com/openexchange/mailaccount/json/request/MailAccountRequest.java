@@ -97,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailAccountRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountRequest.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccountRequest.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

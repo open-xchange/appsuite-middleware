@@ -64,7 +64,6 @@ import com.openexchange.configjump.Replacements;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,7 +78,7 @@ public class ConfigJump extends SessionServlet {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJump.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigJump.class);
 
     /**
      * For serialization.

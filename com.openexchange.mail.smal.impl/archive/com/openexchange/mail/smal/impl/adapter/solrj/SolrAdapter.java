@@ -75,7 +75,6 @@ import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -121,7 +120,7 @@ import com.openexchange.user.UserService;
  */
 public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrAdapter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrAdapter.class);
 
     /*-
      * ----------------------------------------------------------------------------------------------

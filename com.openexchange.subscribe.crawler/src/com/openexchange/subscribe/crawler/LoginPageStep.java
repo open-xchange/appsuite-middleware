@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
@@ -77,7 +76,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
 
     private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginPageStep.class);
 
     private Page loginPage;
 

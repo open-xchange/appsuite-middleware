@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class Bug6055Test extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(Bug6055Test.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug6055Test.class);
 
     public Bug6055Test(final String name) {
         super(name);

@@ -58,7 +58,6 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.output.XMLOutputter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -74,7 +73,7 @@ public class WebdavPropfindAction extends AbstractAction {
 
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPropfindAction.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavPropfindAction.class);
 
 	protected final XMLOutputter outputter = new XMLOutputter();
 

@@ -65,7 +65,6 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Entity;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.helpers.AbstractPublicationService;
@@ -78,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class IsPublished implements AdditionalFolderField {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IsPublished.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(IsPublished.class);
 
     private static final TIntSet ID_BLACKLIST;
     static {

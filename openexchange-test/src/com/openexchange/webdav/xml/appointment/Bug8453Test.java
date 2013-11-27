@@ -11,7 +11,7 @@ import com.openexchange.webdav.xml.AppointmentTest;
 
 public class Bug8453Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug6535Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug6535Test.class);
 
 	public Bug8453Test(final String name) {
 		super(name);

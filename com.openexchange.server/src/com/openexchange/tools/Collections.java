@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Methods for easy handling of collections. TODO use Collections in com.openexchange.tools.arrays.
@@ -74,7 +73,7 @@ public final class Collections {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Collections.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Collections.class);
 
     /**
      * Prevent instantiation

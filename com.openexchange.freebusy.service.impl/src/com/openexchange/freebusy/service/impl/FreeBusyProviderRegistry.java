@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link FreeBusyProviderRegistry}
@@ -64,7 +63,7 @@ import com.openexchange.log.LogFactory;
  */
 public class FreeBusyProviderRegistry {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyProviderRegistry.class));
+    private final Log LOG = com.openexchange.log.Log.loggerFor(FreeBusyProviderRegistry.class);
 
     private final List<FreeBusyProvider> providers;
 

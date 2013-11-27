@@ -55,12 +55,11 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingFilestoreStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CachingFilestoreStorage.class);
     private static final String REGION_NAME = "Filestore";
 
     private final FilestoreStorage delegate;

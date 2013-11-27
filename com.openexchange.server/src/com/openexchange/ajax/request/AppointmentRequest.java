@@ -102,7 +102,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -144,7 +143,7 @@ public class AppointmentRequest extends CalendarRequest {
 
     private final AppointmentSqlFactoryService appointmentFactory;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentRequest.class);
 
     /**
      * Initializes a new {@link AppointmentRequest}.

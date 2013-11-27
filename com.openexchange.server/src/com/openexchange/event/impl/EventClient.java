@@ -79,7 +79,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -91,7 +90,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class EventClient {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventClient.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(EventClient.class);
 
     public static final int CREATED = 5;
     public static final int CHANGED = 6;

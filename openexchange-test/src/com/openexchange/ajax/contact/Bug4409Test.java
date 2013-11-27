@@ -15,7 +15,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug4409Test extends ContactTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug4409Test.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug4409Test.class);
     private int objectId = -1;
 
 	public Bug4409Test(final String name) {

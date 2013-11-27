@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.exception.OXException;
@@ -74,7 +73,7 @@ public class CalendarDataObjectsByPageAndPagePartsSequenceStep extends AbstractS
 
     private PagePartSequence pageParts;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarDataObjectsByPageAndPagePartsSequenceStep.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarDataObjectsByPageAndPagePartsSequenceStep.class);
 
     public CalendarDataObjectsByPageAndPagePartsSequenceStep(String description, PagePartSequence pageParts){
         this.description = description;

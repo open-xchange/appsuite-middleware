@@ -56,7 +56,6 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -71,7 +70,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class CloudmarkSpamHandler extends SpamHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CloudmarkSpamHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CloudmarkSpamHandler.class);
 
     private static final String NAME = "CloudmarkSpamHandler";
 

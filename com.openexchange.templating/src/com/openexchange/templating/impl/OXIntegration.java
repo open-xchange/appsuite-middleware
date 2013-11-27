@@ -72,7 +72,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.templating.TemplateErrorMessage;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -89,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OXIntegration.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(OXIntegration.class);
 
     private static final String TEMPLATE_FOLDER_NAME = "OXMF Templates";
 

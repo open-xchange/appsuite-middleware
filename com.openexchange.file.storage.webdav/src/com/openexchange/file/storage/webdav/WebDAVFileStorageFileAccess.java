@@ -202,7 +202,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             try {
                 unlock0(entry.getKey(), entry.getValue());
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(WebDAVFileStorageFileAccess.class)).error(e.getMessage(), e);
+                com.openexchange.log.Log.loggerFor(WebDAVFileStorageFileAccess.class).error(e.getMessage(), e);
             }
         }
     }

@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -73,7 +72,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class ContextSearcher extends AbstractTask<Collection<Integer>> {
 
-    private static final Log LOG = LogFactory.getLog(ContextSearcher.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContextSearcher.class);
 
     private final AdminCacheExtended cache;
     private final String sql;

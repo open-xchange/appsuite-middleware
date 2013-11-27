@@ -84,7 +84,7 @@ public class IDGeneratorTest extends TestCase {
 
     private static final int TIME = 20;
 
-    static final Log LOG = LogFactory.getLog(IDGeneratorTest.class);
+    static final Log LOG = com.openexchange.log.Log.loggerFor(IDGeneratorTest.class);
 
     static final Random rand = new Random(System.currentTimeMillis());
 

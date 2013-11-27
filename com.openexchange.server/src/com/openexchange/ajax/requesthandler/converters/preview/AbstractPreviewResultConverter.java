@@ -82,7 +82,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
@@ -104,7 +103,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractPreviewResultConverter implements ResultConverter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPreviewResultConverter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractPreviewResultConverter.class);
 
     private static final Charset UTF8 = Charsets.UTF_8;
     private static final byte[] DELIM = new byte[] { '\r', '\n' };

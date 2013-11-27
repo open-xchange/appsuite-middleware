@@ -53,7 +53,6 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.i18n.I18nService;
 
 /**
@@ -61,7 +60,7 @@ import com.openexchange.i18n.I18nService;
  */
 public class I18nImpl implements I18nService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(I18nImpl.class);
 
     private final ResourceBundle serverBundle;
 

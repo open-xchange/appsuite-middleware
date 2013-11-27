@@ -65,7 +65,7 @@ import com.openexchange.tools.file.internal.LocalFileStorage;
  */
 public class FileStorageTest extends TestCase {
 
-    private static final Log LOG = LogFactory.getLog(FileStorageTest.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileStorageTest.class);
 
 
 

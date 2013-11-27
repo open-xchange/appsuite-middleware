@@ -62,7 +62,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
@@ -86,7 +85,7 @@ public class SyntheticChannel implements Channel, Runnable {
     
     private static final int NUMBER_OF_RUNLOOPS = 16;
     
-    private static final Log LOG = LogFactory.getLog(SyntheticChannel.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SyntheticChannel.class);
     private static final String SENDLOCK = "syntheticChannel";
     
     private final ConcurrentHashMap<String, Component> components = new ConcurrentHashMap<String, Component>();

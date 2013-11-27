@@ -75,7 +75,6 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
@@ -93,7 +92,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public abstract class AbstractLoginRequestHandler implements LoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractLoginRequestHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractLoginRequestHandler.class);
 
     /**
      * @return a boolean value indicated if an auto login should proceed afterwards

@@ -57,7 +57,6 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -82,7 +81,7 @@ import com.openexchange.timer.TimerService;
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
-    private static Log LOG = LogFactory.getLog(HazelcastRealtimeActivator.class);
+    private static Log LOG = com.openexchange.log.Log.loggerFor(HazelcastRealtimeActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

@@ -55,7 +55,6 @@ import java.net.MalformedURLException;
 import java.util.List;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
@@ -84,7 +83,7 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
  */
 public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSubscriptionSourceDiscoveryService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ExternalSubscriptionSourceDiscoveryService.class);
 
     private final String sourceURL;
     private SubscriptionSourceCollector sources = new SubscriptionSourceCollector();

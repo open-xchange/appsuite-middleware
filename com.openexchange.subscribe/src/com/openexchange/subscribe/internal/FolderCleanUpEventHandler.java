@@ -63,7 +63,6 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
 
@@ -76,7 +75,7 @@ import com.openexchange.subscribe.SubscriptionStorage;
  */
 public class FolderCleanUpEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCleanUpEventHandler.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCleanUpEventHandler.class);
     private final ContextService contexts;
     private final SubscriptionStorage storage;
     private ServiceRegistration<EventHandler> registration;

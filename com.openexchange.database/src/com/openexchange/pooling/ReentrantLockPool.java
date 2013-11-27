@@ -57,7 +57,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Implementation of the object pool.
@@ -66,7 +65,7 @@ import com.openexchange.log.LogFactory;
  */
 public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReentrantLockPool.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(ReentrantLockPool.class);
 
     private final int minIdle;
     private final int maxIdle;

@@ -54,7 +54,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -65,7 +64,7 @@ import com.openexchange.timer.TimerService;
  */
 public class PushDiscoverySender implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushDiscoverySender.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushDiscoverySender.class);
 
     private final int multicastPort;
     private final InetAddress multicastAddress;

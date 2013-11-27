@@ -57,7 +57,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
@@ -141,10 +140,10 @@ public final class BodyTerm extends SearchTerm<String> {
             }
             return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
         } catch (final OXException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(FromTerm.class)).warn("Error during search.", e);
+            com.openexchange.log.Log.loggerFor(FromTerm.class).warn("Error during search.", e);
             return false;
         } catch (final RuntimeException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(FromTerm.class)).warn("Error during search.", e);
+            com.openexchange.log.Log.loggerFor(FromTerm.class).warn("Error during search.", e);
             return false;
         }
     }

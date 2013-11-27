@@ -56,7 +56,6 @@ import java.util.ListIterator;
 import com.google.common.net.InetAddresses;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link IPTools} Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
@@ -65,7 +64,7 @@ import com.openexchange.log.LogFactory;
  */
 public class IPTools {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(WrappingFilter.class));
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(WrappingFilter.class);
 
     public final static String COMMA_SEPARATOR = ",";
 

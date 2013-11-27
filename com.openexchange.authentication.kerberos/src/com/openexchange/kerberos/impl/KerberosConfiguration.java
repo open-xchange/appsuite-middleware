@@ -68,7 +68,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public final class KerberosConfiguration {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(KerberosConfiguration.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(KerberosConfiguration.class);
 
     private static String moduleName;
     private static String userModuleName;

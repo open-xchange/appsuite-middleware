@@ -82,7 +82,7 @@ import com.openexchange.session.Session;
  */
 public final class IndexAccessAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IndexAccessAdapter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexAccessAdapter.class);
 
     private static final IndexAccessAdapter INSTANCE = new IndexAccessAdapter();
 

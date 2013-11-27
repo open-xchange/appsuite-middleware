@@ -73,7 +73,6 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -120,7 +119,7 @@ public class ContactWriter extends CommonWriter {
 
     protected final static ContactField[] deleteFields = { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED };
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactWriter.class);
 
     public ContactWriter() {
 

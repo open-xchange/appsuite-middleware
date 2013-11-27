@@ -90,7 +90,7 @@ public final class ServletConfigLoader {
      */
     private static final String FILEEXT_PROPERTIES = ".properties";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServletConfigLoader.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ServletConfigLoader.class);
 
     /**
      * Puts properties into map

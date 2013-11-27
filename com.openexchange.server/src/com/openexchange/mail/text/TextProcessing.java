@@ -71,7 +71,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public final class TextProcessing {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TextProcessing.class));
+        com.openexchange.log.Log.loggerFor(TextProcessing.class);
 
     private static final String SPLIT_LINES = "\r?\n";
 

@@ -64,7 +64,6 @@ import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.database.provider.RequestDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionExceptionCodes;
@@ -73,7 +72,7 @@ import com.openexchange.tx.UndoableAction;
 
 public abstract class DBService implements TransactionAware, DBProviderUser, DBProvider {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DBService.class);
 
     private RequestDBProvider provider;
 

@@ -59,7 +59,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.session.Session;
@@ -76,7 +75,7 @@ import com.openexchange.sessiond.SessiondServiceExtended;
  */
 public class SessiondServiceImpl implements SessiondServiceExtended {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessiondServiceImpl.class);
 
     private final Lock migrateLock;
 

@@ -60,7 +60,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
@@ -69,7 +68,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     private PluginStarter starter = null;
 

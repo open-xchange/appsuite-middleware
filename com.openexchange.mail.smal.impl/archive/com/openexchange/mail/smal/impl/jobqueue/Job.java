@@ -52,7 +52,6 @@ package com.openexchange.mail.smal.impl.jobqueue;
 import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.Log;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.adapter.IndexAdapter;
@@ -67,7 +66,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public abstract class Job implements Task<Void>, Comparable<Job>, Serializable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Job.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Job.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -274,7 +273,7 @@ public abstract class Job implements Task<Void>, Comparable<Job>, Serializable {
         try {
             perform();
         } catch (final Exception e) {
-            Log.valueOf(LogFactory.getLog(Job.class)).error(e.getMessage(), e);
+            Log.loggerFor(Job.class).error(e.getMessage(), e);
         }
     }
 

@@ -89,7 +89,7 @@ public final class ConfigTools extends Assert {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ConfigTools.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigTools.class);
 
     /**
      * URL of the AJAX config interface.

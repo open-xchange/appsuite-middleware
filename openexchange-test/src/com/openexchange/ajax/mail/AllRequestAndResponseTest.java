@@ -24,7 +24,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class AllRequestAndResponseTest extends AbstractMailTest {
 
-	private static final Log LOG = LogFactory.getLog(AllTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AllTest.class);
 	protected String folder;
 	String mailObject_25kb;
 

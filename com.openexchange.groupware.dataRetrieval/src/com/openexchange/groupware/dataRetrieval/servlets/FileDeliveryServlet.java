@@ -68,7 +68,6 @@ import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
 import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -82,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileDeliveryServlet extends HttpServlet {
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileDeliveryServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileDeliveryServlet.class);
 
     public static RandomTokenContainer<Map<String, Object>> PARAM_MAP = null;
     public static DataProviderRegistry DATA_PROVIDERS = null;

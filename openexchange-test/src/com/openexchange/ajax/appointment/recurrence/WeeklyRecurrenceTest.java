@@ -9,7 +9,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 
-	private static final Log LOG = LogFactory.getLog(WeeklyRecurrenceTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(WeeklyRecurrenceTest.class);
 
 	public WeeklyRecurrenceTest(final String name) {
 		super(name);

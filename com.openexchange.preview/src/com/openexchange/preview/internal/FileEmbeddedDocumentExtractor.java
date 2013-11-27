@@ -56,7 +56,6 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.io.IOUtils;
@@ -78,7 +77,7 @@ import com.openexchange.java.Streams;
  */
 public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtractor {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileEmbeddedDocumentExtractor.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileEmbeddedDocumentExtractor.class);
 
     private final TikaDocumentHandler documentHandler;
 

@@ -54,11 +54,10 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.log.LogFactory;
 
 public class Activator implements BundleActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     /**
      * Reference to the service registration.

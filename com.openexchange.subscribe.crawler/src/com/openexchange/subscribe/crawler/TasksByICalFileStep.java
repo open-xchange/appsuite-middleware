@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -70,7 +69,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class TasksByICalFileStep extends AbstractStep<Task[], Page> {
-private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksByICalFileStep.class));
+private static final Log LOG = com.openexchange.log.Log.loggerFor(TasksByICalFileStep.class);
 
     public TasksByICalFileStep(){
 

@@ -75,7 +75,6 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -154,7 +153,7 @@ public class CSVContactExporter implements Exporter {
         Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20,
         Contact.DEFAULT_ADDRESS };
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVContactExporter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CSVContactExporter.class);
 
     @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) {

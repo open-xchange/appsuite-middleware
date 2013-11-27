@@ -93,7 +93,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.OXAborted;
@@ -128,7 +127,7 @@ public class Attachment extends PermissionServlet {
         ATTACHMENT_BASE.setTransactional(true);
     }
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Attachment.class));
+    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Attachment.class);
 
 
     private long maxUploadSize = -2;

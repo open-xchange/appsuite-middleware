@@ -78,7 +78,7 @@ import com.openexchange.session.Session;
  */
 public final class CMISAccountAccess implements FileStorageAccountAccess {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CMISAccountAccess.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CMISAccountAccess.class);
 
     /*-
      * Member stuff

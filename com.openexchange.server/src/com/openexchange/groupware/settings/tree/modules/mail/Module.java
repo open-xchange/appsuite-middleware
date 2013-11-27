@@ -50,7 +50,6 @@
 package com.openexchange.groupware.settings.tree.modules.mail;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -70,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public class Module implements PreferencesItemService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Module.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Module.class);
 
     /**
      * Default constructor.

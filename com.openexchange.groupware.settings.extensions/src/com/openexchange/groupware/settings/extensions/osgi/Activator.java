@@ -71,7 +71,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.strings.StringParser;
@@ -81,7 +80,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class Activator extends HousekeepingActivator {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     private static final String PREFERENCE_PATH = "preferencePath";
 

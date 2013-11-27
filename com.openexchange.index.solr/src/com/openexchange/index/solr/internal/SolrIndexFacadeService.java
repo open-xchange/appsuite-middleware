@@ -83,7 +83,6 @@ import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.index.solr.internal.querybuilder.BuilderException;
 import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SchemaAndConfigStore;
@@ -100,7 +99,7 @@ import com.openexchange.user.UserService;
  */
 public class SolrIndexFacadeService implements IndexFacadeService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexFacadeService.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrIndexFacadeService.class);
 
     private final ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>> accessMap;
 

@@ -78,7 +78,6 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -108,7 +107,7 @@ public class AppointmentWriter extends CalendarWriter {
     protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED,
             Appointment.RECURRENCE_ID };
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentWriter.class);
 
     /**
      * Initializes a new {@link AppointmentWriter}.

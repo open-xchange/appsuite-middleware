@@ -60,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class UserStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UserStorage.class);
 
     /**
      * The instance

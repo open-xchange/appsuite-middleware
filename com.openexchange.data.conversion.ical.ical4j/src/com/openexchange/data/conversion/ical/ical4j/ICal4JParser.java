@@ -103,7 +103,6 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -116,7 +115,7 @@ public class ICal4JParser implements ICalParser {
 
     private static final Charset UTF8 = Charsets.UTF_8;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JParser.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ICal4JParser.class);
 
     private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {

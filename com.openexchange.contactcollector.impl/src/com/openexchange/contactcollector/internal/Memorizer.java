@@ -70,7 +70,6 @@ import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contact.ContactFieldOperand;
@@ -107,7 +106,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class Memorizer implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerUserSetting.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServerUserSetting.class);
 
     private static final boolean ALL_ALIASES = true;
 

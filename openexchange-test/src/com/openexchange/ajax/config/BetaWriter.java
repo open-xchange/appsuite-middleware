@@ -65,7 +65,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
  */
 public final class BetaWriter implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(BetaWriter.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(BetaWriter.class);
 
     private final User user;
     private boolean run = true;

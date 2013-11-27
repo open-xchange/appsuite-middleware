@@ -74,7 +74,6 @@ import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 
@@ -194,7 +193,7 @@ public final class SieveTextFilter {
 
     private static final String LEGAL_FLAG_CHARS = "[a-zA-Z1-9]";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SieveTextFilter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SieveTextFilter.class);
 
     private static final String RULENAME_TAG = "Rulename: ";
 

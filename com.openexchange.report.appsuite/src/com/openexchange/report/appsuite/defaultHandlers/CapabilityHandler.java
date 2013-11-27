@@ -60,7 +60,6 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.Report;
@@ -81,7 +80,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
  */
 public class CapabilityHandler implements ReportUserHandler, ReportContextHandler, UserReportCumulator, ContextReportCumulator, ReportFinishingTouches {
 
-    private static final Log LOG = LogFactory.getLog(CapabilityHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CapabilityHandler.class);
 
 
     @Override

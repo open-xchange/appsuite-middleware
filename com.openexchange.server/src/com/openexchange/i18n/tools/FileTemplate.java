@@ -57,14 +57,13 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 /**
  * Template that reads the template content from a file.
  */
 public class FileTemplate extends CompiledLineParserTemplate {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompiledLineParserTemplate.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CompiledLineParserTemplate.class);
 
     private final File file;
 

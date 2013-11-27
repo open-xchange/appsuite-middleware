@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 public final class PropertyMapManagement {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PropertyMapManagement.class));
+        com.openexchange.log.Log.loggerFor(PropertyMapManagement.class);
 
     private static final PropertyMapManagement INSTANCE = new PropertyMapManagement();
 

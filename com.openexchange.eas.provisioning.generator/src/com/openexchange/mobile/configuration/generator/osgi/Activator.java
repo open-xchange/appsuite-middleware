@@ -56,7 +56,6 @@ import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mobile.configuration.generator.MobileConfigServlet;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
@@ -72,7 +71,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
 
     public static final String ALIAS = "/servlet/mobileconfig";
 

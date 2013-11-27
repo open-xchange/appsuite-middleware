@@ -60,7 +60,6 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.ajp13.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
-import com.openexchange.log.Log;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -593,7 +592,7 @@ public class AJPv13Response {
         try {
             writeHeader(name, value, sink);
         } catch (final AJPv13Exception e) {
-            Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Response.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.loggerFor(AJPv13Response.class).error(e.getMessage(), e);
         }
     }
 

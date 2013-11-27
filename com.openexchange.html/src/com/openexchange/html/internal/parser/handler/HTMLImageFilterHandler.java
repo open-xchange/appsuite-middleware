@@ -84,7 +84,7 @@ import com.openexchange.java.Stringer;
  */
 public class HTMLImageFilterHandler implements HtmlHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLImageFilterHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HTMLImageFilterHandler.class);
 
     /**
      * The {@link DefaultDeferringURLService} reference.

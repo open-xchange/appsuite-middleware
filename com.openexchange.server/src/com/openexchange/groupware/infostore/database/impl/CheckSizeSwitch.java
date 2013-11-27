@@ -64,13 +64,12 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.sql.DBUtils;
 
 public class CheckSizeSwitch {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CheckSizeSwitch.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CheckSizeSwitch.class);
 
     private static Map<Metadata, Integer> SIZES = new HashMap<Metadata, Integer>();
     private final DBProvider provider;

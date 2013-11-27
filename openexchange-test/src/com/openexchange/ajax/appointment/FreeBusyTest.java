@@ -14,7 +14,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class FreeBusyTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(FreeBusyTest.class);
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(FreeBusyTest.class);
 
 	public FreeBusyTest(final String name) {
 		super(name);

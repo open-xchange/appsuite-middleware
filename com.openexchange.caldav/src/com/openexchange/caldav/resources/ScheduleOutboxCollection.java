@@ -74,7 +74,6 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -91,7 +90,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 public class ScheduleOutboxCollection extends CommonCollection {
 
     private static final String CALDAV_NS = CaldavProtocol.CAL_NS.getURI();
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ScheduleOutboxCollection.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ScheduleOutboxCollection.class);
 
     private final GroupwareCaldavFactory factory;
 

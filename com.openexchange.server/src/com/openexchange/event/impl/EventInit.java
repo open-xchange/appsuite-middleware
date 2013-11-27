@@ -61,7 +61,6 @@ import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -73,7 +72,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 public class EventInit implements Initialization {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventInit.class));
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(EventInit.class);
     private boolean started;
 
 

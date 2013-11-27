@@ -52,7 +52,6 @@ package com.openexchange.groupware.tasks;
 import java.sql.Connection;
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
@@ -66,7 +65,7 @@ public class TaskAttachmentListener implements AttachmentListener {
 
     private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY, Task.NUMBER_OF_ATTACHMENTS };
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskAttachmentListener.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskAttachmentListener.class);
 
     public TaskAttachmentListener() {
         super();

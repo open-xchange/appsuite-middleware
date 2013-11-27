@@ -71,7 +71,6 @@ import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
@@ -80,7 +79,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class JerichoParser {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JerichoParser.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(JerichoParser.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

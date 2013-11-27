@@ -74,7 +74,6 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -119,7 +118,7 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class InfostorePerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostorePerformer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostorePerformer.class);
 
     private static final InfostorePerformer INSTANCE = new InfostorePerformer();
 

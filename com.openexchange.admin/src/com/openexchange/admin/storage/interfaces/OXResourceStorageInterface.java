@@ -53,7 +53,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -76,7 +75,7 @@ public abstract class OXResourceStorageInterface {
      */
     private static Class<? extends OXResourceStorageInterface> implementingClass;
 
-    private static final Log log = LogFactory.getLog(OXResourceStorageInterface.class);
+    private static final Log log = com.openexchange.log.Log.loggerFor(OXResourceStorageInterface.class);
 
     protected static AdminCache cache = null;
 

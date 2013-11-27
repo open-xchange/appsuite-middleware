@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.tools.session.ServerSession;
@@ -68,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 abstract class AbstractMailPreviewResultConverter implements ResultConverter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailPreviewResultConverter.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailPreviewResultConverter.class);
 
     protected final AbstractPreviewResultConverter resultConverter;
 

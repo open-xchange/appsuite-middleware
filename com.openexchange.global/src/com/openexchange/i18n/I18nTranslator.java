@@ -51,7 +51,6 @@ package com.openexchange.i18n;
 
 import java.util.Locale;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Implementation of a {@link Translator} backed with an {@link I18nService}.
@@ -60,7 +59,7 @@ import com.openexchange.log.LogFactory;
  */
 public class I18nTranslator implements Translator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nTranslator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(I18nTranslator.class);
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
     private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 

@@ -61,7 +61,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -92,7 +91,7 @@ public class Processor {
     /**
      * The logger constant.
      */
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Processor.class));
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(Processor.class);
 
     /**
      * The singleton instance.

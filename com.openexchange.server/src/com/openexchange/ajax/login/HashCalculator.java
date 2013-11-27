@@ -59,7 +59,6 @@ import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -69,7 +68,7 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class HashCalculator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashCalculator.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HashCalculator.class);
 
     private static final String USER_AGENT = LoginFields.USER_AGENT;
     private static final String CLIENT_PARAM = LoginFields.CLIENT_PARAM;
