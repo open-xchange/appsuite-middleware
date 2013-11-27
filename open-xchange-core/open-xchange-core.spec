@@ -867,6 +867,17 @@ ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts fals
 # SoftwareChange_Request-1707
 ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
 
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.FolderExtendNameTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# v7.4.2 update tasks start here
+
+# Extends the size of the 'fname' column in the 'oxfolder_tree' table, as well as the 'name' column in the 'virtualTree' table.
+!com.openexchange.groupware.update.tasks.FolderExtendNameTask
+EOF
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
