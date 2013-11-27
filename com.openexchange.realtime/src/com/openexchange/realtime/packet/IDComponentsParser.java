@@ -122,38 +122,48 @@ public class IDComponentsParser {
         Validate.notNull(components, "Missing obligatory parameter components");
         Validate.notEmpty(input, "Missing obligatory parameter input");
 
-        String resource;
-
-        if (input.contains("/")) {
-            String[] split = input.split("/", 2);
-            String userAndContext = split[0];
-            resource = split[1];
-            components.resource = resource;
-            parseUserAndContext(components, userAndContext);
-        } else {
-            parseUserAndContext(components, input);
+        int mode = 0;
+        boolean escape = false;
+        StringBuilder b = new StringBuilder();
+        
+        for(char c: input.toCharArray()) {
+            if (escape) {
+                b.append(c);
+                escape = false;
+            } else {
+                if (c == '\\') {
+                    escape = true;
+                } else {
+                    switch (mode) {
+                    case 0: 
+                        if (c == '@') {
+                            components.user = b.toString();
+                            b = new StringBuilder();
+                            mode = 1;
+                        } else {
+                            b.append(c);
+                        }
+                        break;
+                    case 1:
+                        if (c == '/') {
+                            components.context = b.toString();
+                            b = new StringBuilder();
+                            mode = 2;
+                        } else {
+                            b.append(c);
+                        }
+                        break;
+                    case 2: 
+                        b.append(c);
+                    }
+                }
+            }
         }
-    }
-
-    /**
-     * Parse user and context from a string
-     * @param components the components data structure to fill during parsing
-     * @param input the string representation of user and context formatted as user[@context]
-     */
-    private static void parseUserAndContext(IDComponents components, String input) {
-        Validate.notNull(components, "Missing obligatory parameter components");
-        Validate.notEmpty(input, "Missing obligatory parameter input");
-
-        String user, context;
-        if (input.contains("@")) {
-            String[] userAndContextSplit = input.split("@");
-            user = userAndContextSplit[0];
-            context = userAndContextSplit[1];
-
-            components.user = user;
-            components.context = context;
-        } else {
-            components.user = input;
+        
+        switch (mode) {
+        case 0: components.user = b.toString(); break;
+        case 1: components.context = b.toString(); break;
+        case 2: components.resource = (b.length() != 0) ? b.toString() : null; break;
         }
     }
 

@@ -342,9 +342,30 @@ public class ID implements Serializable {
         if (needSep) {
             b.append("://");
         }
-        b.append(user).append('@').append(context);
+        b.append(escape(user, '@')).append('@').append(escape(context, '@','/'));
         if (resource != null) {
             b.append('/').append(resource);
+        }
+        return b.toString();
+    }
+
+    private String escape(String str, char...chars) {
+        StringBuilder b = new StringBuilder();
+        for(char c: str.toCharArray()) {
+            boolean escape = false;
+            if (c == '\\') {
+                escape = true;
+            } else {
+                for(char candidate: chars) {
+                    if (candidate == c) {
+                        escape = true;
+                    }
+                }
+            }
+            if (escape) {
+                b.append('\\');
+            }
+            b.append(c);
         }
         return b.toString();
     }

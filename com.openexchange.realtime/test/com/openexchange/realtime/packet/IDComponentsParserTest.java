@@ -56,4 +56,34 @@ public class IDComponentsParserTest {
         assertEquals("premium", idComponents.context);
         assertEquals("20d39asd9da93249f009d", idComponents.resource);
     }
+    
+    // Bug 30006
+    @Test
+    public void testAtSignInContextName() {
+        ID id = new ID(new ID("protocol", "user", "context_with_@_sign", "resource").toString());
+        assertEquals("context_with_@_sign", id.getContext());
+    }
+    
+    @Test
+    public void testAtSignInUserName() {
+        ID id = new ID(new ID("protocol", "user_with_@_sign", "context", "resource").toString());
+        assertEquals("user_with_@_sign", id.getUser());
+    }
+    
+    @Test
+    public void testForwardSlashInContextName() {
+        ID id = new ID(new ID("protocol", "user", "context_with_/_sign", "resource").toString());
+        assertEquals("context_with_/_sign", id.getContext());
+    }
+    
+    public void testBackslashInContextName() {
+        ID id = new ID(new ID("protocol", "user", "context_with_\\_sign", "resource").toString());
+        assertEquals("context_with_\\_sign", id.getContext());
+    }
+    
+    @Test
+    public void testBackslashInUserName() {
+        ID id = new ID(new ID("protocol", "user_with_\\_sign", "context", "resource").toString());
+        assertEquals("user_with_\\_sign", id.getUser());
+    }
 }
