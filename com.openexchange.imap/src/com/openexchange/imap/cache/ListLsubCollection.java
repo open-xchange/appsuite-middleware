@@ -74,7 +74,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.Log;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -220,15 +219,7 @@ final class ListLsubCollection {
         deprecated.set(true);
         stamp = 0;
         if (DEBUG) {
-            if (Log.appendTraceToMessage()) {
-                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator("Cleared LIST/LSUB cache.");
-                final String lineSeparator = System.getProperty("line.separator");
-                builder.append(lineSeparator);
-                appendStackTrace(new Throwable().getStackTrace(), builder, lineSeparator);
-                LOG.debug(builder.toString());
-            } else {
-                LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
-            }
+            LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
         }
     }
 

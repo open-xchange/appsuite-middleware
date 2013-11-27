@@ -142,8 +142,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -1690,7 +1688,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final Future<ThreadableResult> future;
                     {
                         final IMAPFolder sent = sentFolder;
-                        final Props props = LogProperties.optLogProperties(Thread.currentThread());
                         future = ThreadPools.getThreadPool().submit(new AbstractTrackableTask<ThreadableResult>() {
 
                             @Override
@@ -1698,10 +1695,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                                 return getThreadableFor(sent, false, cache, limit, accountId, session);
                             }
 
-                            @Override
-                            public Props optLogProperties() {
-                                return props;
-                            }
                         });
                     }
                     final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, limit, accountId, session);
@@ -2009,18 +2002,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         Conversations.checkFetchProfile(fetchProfile, byEnvelope);
         // Get ThreadableMapping
         final IMAPFolder sent = sentFolder;
-        final Props props = LogProperties.optLogProperties(Thread.currentThread());
         final Task<ThreadableMapping> task = new AbstractTrackableTask<ThreadableMapping>() {
 
             @Override
             public ThreadableMapping call() throws Exception {
                 final List<MailMessage> mails = Threadables.getAllMailsFrom(sent, limit, fetchProfile);
                 return new ThreadableMapping(64).initWith(mails);
-            }
-
-            @Override
-            public Props optLogProperties() {
-                return props;
             }
 
         };

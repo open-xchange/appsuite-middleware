@@ -70,7 +70,6 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -462,14 +461,7 @@ public class IMAPDefaultFolderChecker {
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
             sb.append("Couldn't check default folder: ");
             sb.append((null == fullName ? (prefix + name) : fullName));
-            if (Log.appendTraceToMessage()) {
-                final String lineSeparator = System.getProperty("line.separator");
-                sb.append(lineSeparator).append(lineSeparator);
-                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
-                LOG.warn(sb.toString());
-            } else {
-                LOG.warn(sb.toString(), e);
-            }
+            LOG.warn(sb.toString(), e);
             setDefaultMailFolder(index, null, cache);
             e.setCategory(Category.CATEGORY_WARNING);
             imapAccess.addWarnings(Collections.singleton(e));
@@ -493,14 +485,7 @@ public class IMAPDefaultFolderChecker {
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
             sb.append("Couldn't check default folder: ");
             sb.append((null == fullName ? (prefix + name) : fullName));
-            if (Log.appendTraceToMessage()) {
-                final String lineSeparator = System.getProperty("line.separator");
-                sb.append(lineSeparator).append(lineSeparator);
-                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
-                LOG.warn(sb.toString());
-            } else {
-                LOG.warn(sb.toString(), e);
-            }
+            LOG.warn(sb.toString(), e);
             setDefaultMailFolder(index, null, cache);
             final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
             imapAccess.addWarnings(Collections.singleton(warning));

@@ -136,14 +136,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                 if (linkedException != null && linkedException.getClass().getName().indexOf("SAXParseException") >= 0) {
                                     {
                                         final StringAllocator sb = new StringAllocator(fault.getMessage());
-                                        if (Log.appendTraceToMessage()) {
-                                            final String lineSeparator = System.getProperty("line.separator");
-                                            sb.append(lineSeparator);
-                                            appendStackTrace(fault.getStackTrace(), sb, lineSeparator);
-                                            LOG.severe(sb.toString());
-                                        } else {
-                                            LOG.log(Level.SEVERE, sb.toString(), fault);
-                                        }
+                                        LOG.log(Level.SEVERE, sb.toString(), fault);
                                     }
                                     final String[] info = extractUnexpectedElement(linkedException.getMessage());
                                     if (null != info) {

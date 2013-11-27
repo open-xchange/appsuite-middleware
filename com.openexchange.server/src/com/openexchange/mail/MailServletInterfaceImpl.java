@@ -110,7 +110,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
@@ -876,18 +875,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private static Future<ThreadableMapping> getThreadableMapping(final String sentFolder, final int limit, final MailFields mailFields, final IMailMessageStorage messageStorage) {
-        final Props props = LogProperties.optLogProperties(Thread.currentThread());
         final Task<ThreadableMapping> task = new AbstractTrackableTask<ThreadableMapping>() {
 
             @Override
             public ThreadableMapping call() throws Exception {
                 final List<MailMessage> mails = Conversations.messagesFor(sentFolder, limit, mailFields, messageStorage);
                 return new ThreadableMapping(64).initWith(mails);
-            }
-
-            @Override
-            public Props optLogProperties() {
-                return props;
             }
 
         };

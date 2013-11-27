@@ -96,6 +96,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
+import org.slf4j.MDC;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -508,6 +509,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         incrementRequests();
         final Props props = LogProperties.getLogProperties();
         props.put(LogProperties.Name.AJAX_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
+
+        MDC.put(LogProperties.Name.AJAX_REQUEST_NUMBER.getName(), Long.toString(REQUEST_NUMBER.incrementAndGet()));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
@@ -527,7 +530,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw se;
         } finally {
             decrementRequests();
-            props.remove(LogProperties.Name.AJAX_REQUEST_NUMBER);
+            MDC.remove(LogProperties.Name.AJAX_REQUEST_NUMBER.getName());
         }
     }
 

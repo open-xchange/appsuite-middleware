@@ -47,29 +47,22 @@
  *
  */
 
-package com.openexchange.log.internal.callback;
+package com.openexchange.threadpool;
 
-import org.apache.commons.logging.Log;
+import java.util.Map;
+
 
 /**
- * {@link TraceCallback}
+ * {@link MdcProvider} - Provides access to MDC map.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TraceCallback implements LogCallback {
+public interface MdcProvider {
 
-    @Override
-    public void log(final Object message, final Throwable t, final Log log) {
-        if (null == t) {
-            log.trace(message);
-        } else {
-            log.trace(message, t);
-        }
-    }
-
-    @Override
-    public boolean isLoggable(Log log) {
-        return log.isTraceEnabled();
-    }
-
+    /**
+     * Gets the MDC map
+     *
+     * @return The MDC map
+     */
+    Map<String, Object> getMdc();
 }

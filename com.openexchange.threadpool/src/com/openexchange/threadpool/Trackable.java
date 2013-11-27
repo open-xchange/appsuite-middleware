@@ -49,7 +49,6 @@
 
 package com.openexchange.threadpool;
 
-import com.openexchange.log.Props;
 
 
 /**
@@ -59,10 +58,5 @@ import com.openexchange.log.Props;
  */
 public interface Trackable {
 
-    /**
-     * Gets the optional log properties.
-     *
-     * @return The log properties or <code>null</code>
-     */
-    Props optLogProperties();
+    // Marker interface
 }

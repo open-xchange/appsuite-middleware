@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.log.Log;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.watcher.MailAccessDelayElement;
@@ -237,13 +236,7 @@ public final class MailAccessWatcher {
                             sb.setLength(0);
                             sb.append("UNCLOSED MAIL CONNECTION AFTER ");
                             sb.append(duration).append("msec:");
-                            if (Log.appendTraceToMessage()) {
-                                sb.append(lineSeparator);
-                                sb.append(mailAccess.getTrace());
-                                logger.info(sb.toString());
-                            } else {
-                                mailAccess.logTrace(sb, logger);
-                            }
+                            mailAccess.logTrace(sb, logger);
                             exceededAcesses.add(mailAccess);
                         }
                     } while ((expired = queue.poll(filter)) != null);
@@ -266,13 +259,7 @@ public final class MailAccessWatcher {
                             sb.setLength(0);
                             sb.append("UNCLOSED MAIL CONNECTION AFTER ");
                             sb.append(duration).append("msec:");
-                            if (Log.appendTraceToMessage()) {
-                                sb.append(lineSeparator);
-                                sb.append(mailAccess.getTrace());
-                                logger.info(sb.toString());
-                            } else {
-                                mailAccess.logTrace(sb, logger);
-                            }
+                            mailAccess.logTrace(sb, logger);
                         }
                     } while ((expired = queue.poll(filter)) != null);
                 }

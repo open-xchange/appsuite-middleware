@@ -80,8 +80,6 @@ import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -305,7 +303,6 @@ public final class ImportAction extends AbstractMailAction {
         private final boolean force;
         private final int flags;
         private final BlockingQueue<MimeMessage> queue;
-        private final Props logProperties;
 
         protected AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
             super();
@@ -315,8 +312,6 @@ public final class ImportAction extends AbstractMailAction {
             this.force = force;
             this.flags = flags;
             this.queue = queue;
-            final Props props = LogProperties.optLogProperties();
-            logProperties = null == props ? null : props;
         }
 
         protected void stop() throws OXException {
@@ -333,11 +328,6 @@ public final class ImportAction extends AbstractMailAction {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             }
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return logProperties;
         }
 
         @Override

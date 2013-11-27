@@ -65,16 +65,11 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.LogPropertyName.LogLevel;
-import com.openexchange.log.LogService;
-import com.openexchange.log.ReportedThrowableHandler;
-import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCounterImpl;
@@ -97,8 +92,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
     public static final AtomicReference<TimerService> REF_TIMER = new AtomicReference<TimerService>();
 
     private volatile ThreadPoolServiceImpl threadPool;
-
-    private volatile LogServiceImpl logService;
 
     /**
      * Initializes a new {@link ThreadPoolActivator}.
@@ -124,25 +117,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
-            // Log configuration       Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
-
-            final NearRegistryServiceTracker<ReportedThrowableHandler> reportedThrowableHandlerRegistry = new NearRegistryServiceTracker<ReportedThrowableHandler>(context, ReportedThrowableHandler.class);
-            rememberTracker(reportedThrowableHandlerRegistry);
-            final int queueCapacity = confService.getIntProperty("com.openexchange.log.queueCapacity", -1);
-            final boolean appendTraceToMessage = confService.getBoolProperty("com.openexchange.log.appendTraceToMessage", false);
-            Log.setAppendTraceToMessage(appendTraceToMessage);
-            final int maxMessageLength = confService.getIntProperty("com.openexchange.log.maxMessageLength", -1);
-            final boolean reporting = confService.getBoolProperty("com.openexchange.log.reporting", false);
-            final LogServiceImpl logService;
-            if (reporting) {
-                final NearRegistryServiceTracker<ReportedThrowableHandler> registry = new NearRegistryServiceTracker<ReportedThrowableHandler>(context, ReportedThrowableHandler.class);
-                rememberTracker(registry);
-                logService = new LogServiceImpl(threadPool, queueCapacity, maxMessageLength, registry);
-            } else {
-                logService = new LogServiceImpl(threadPool, queueCapacity, maxMessageLength, null);
-            }
-            this.logService = logService;
-            Log.set(logService);
             /*
              * Service trackers
              */
@@ -162,7 +136,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             final TimerService timerService = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             REF_TIMER.set(timerService);
             registerService(TimerService.class, timerService);
-            registerService(LogService.class, logService);
             /*
              * Register SessionThreadCounter service
              */
@@ -296,12 +269,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             /*
              * Stop thread pool
              */
-            final LogServiceImpl logService = this.logService;
-            if (null != logService) {
-                logService.stop();
-                this.logService = null;
-                Log.set(null);
-            }
             final ThreadPoolServiceImpl threadPool = this.threadPool;
             if (null != threadPool) {
                 try {

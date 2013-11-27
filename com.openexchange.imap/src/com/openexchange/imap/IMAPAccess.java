@@ -92,7 +92,6 @@ import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -707,15 +706,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     sb.append(lineSeparator).append(lineSeparator);
                     sb.append("IMAP login performed...").append(lineSeparator);
                     sb.append("Queued in cache: ").append(MailAccess.getMailAccessCache().numberOfMailAccesses(session, accountId));
-                    if (Log.appendTraceToMessage()) {
-                        sb.append(lineSeparator);
-                        appendStackTrace(new Throwable().getStackTrace(), lineSeparator, sb);
-                        sb.append(lineSeparator).append(lineSeparator);
-                        LOG.debug(sb.toString());
-                    } else {
-                        sb.append(lineSeparator).append(lineSeparator);
-                        LOG.debug(sb.toString(), new Throwable());
-                    }
+                    sb.append(lineSeparator).append(lineSeparator);
+                    LOG.debug(sb.toString(), new Throwable());
                 }
             } catch (final AuthenticationFailedException e) {
                 throw e;

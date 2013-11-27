@@ -2400,22 +2400,15 @@ public final class OutlookFolderStorage implements FolderStorage {
         private final int contextId;
         private final int tree;
         private final StorageParameters parameters;
-        private final Props props;
 
         public MailFolderCallable(final FolderNameComparator comparator, final Locale locale, final User user, final int contextId, final int tree, final StorageParameters parameters) {
             super();
-            this.props = LogProperties.optLogProperties(Thread.currentThread());
             this.comparator = comparator;
             this.locale = locale == null ? Locale.US : locale;
             this.user = user;
             this.contextId = contextId;
             this.tree = tree;
             this.parameters = parameters;
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
         }
 
         @Override
@@ -2804,15 +2797,8 @@ public final class OutlookFolderStorage implements FolderStorage {
      */
     private static abstract class TrackableCallable<V> implements Callable<V>, Trackable {
 
-        private final Props props;
         TrackableCallable() {
             super();
-            this.props = LogProperties.optLogProperties(Thread.currentThread());
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
         }
     }
 

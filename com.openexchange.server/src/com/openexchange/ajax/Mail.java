@@ -135,7 +135,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.Log;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -246,13 +245,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.").append(lineSeparator);
             warnBuilder.append("For safety reason its original content is displayed here.").append(lineSeparator);
             warnBuilder.append(null == message ? "[Not available]" : message);
-            if (Log.appendTraceToMessage()) {
-                warnBuilder.append(lineSeparator);
-                appendStackTrace(cause.getStackTrace(), warnBuilder, lineSeparator);
-                LOG.warn(warnBuilder.toString());
-            } else {
-                LOG.warn(warnBuilder.toString(), cause);
-            }
+            LOG.warn(warnBuilder.toString(), cause);
         }
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
     }

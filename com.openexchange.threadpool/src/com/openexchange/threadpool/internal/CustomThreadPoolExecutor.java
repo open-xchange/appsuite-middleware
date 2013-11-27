@@ -83,14 +83,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.MdcProvider;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
-import com.openexchange.threadpool.Trackable;
 import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
 
 /**
@@ -790,7 +789,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
                 // Prepare thread
                 Thread.interrupted(); // clear interrupt status on entry
-                LogProperties.removeLogProperties(); // Drop possible log properties
+                MDC.clear(); // Drop possible log properties
 
                 boolean ran = false;
                 beforeExecute(thread, task);
@@ -1199,7 +1198,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
         }
 
-        void addTask(final long number, final Thread thread, final Props logProperties) {
+        void addTask(final long number, final Thread thread, final Map<String, Object> logProperties) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -1250,11 +1249,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             }
                             if (taskInfo.stamp < max) {
                                 final Thread thread = taskInfo.t;
-                                final Props logProperties = taskInfo.logProperties;
+                                final Map<String, Object> logProperties = taskInfo.logProperties;
                                 logBuilder.setLength(0);
                                 if (null != logProperties) {
                                     final Map<String, String> sorted = new TreeMap<String, String>();
-                                    for (final Map.Entry<String, Object> entry : logProperties.asMap().entrySet()) {
+                                    for (final Map.Entry<String, Object> entry : logProperties.entrySet()) {
                                         final String propertyName = entry.getKey();
                                         final Object value = entry.getValue();
                                         if (null != value) {
@@ -1270,15 +1269,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                 logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
                                 logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - taskInfo.stamp);
                                 logBuilder.append("msec");
-                                if (Log.appendTraceToMessage()) {
-                                    logBuilder.append(lineSeparator);
-                                    appendStackTrace(thread.getStackTrace(), logBuilder);
-                                    LOG.info(logBuilder);
-                                } else {
-                                    final Throwable t = new Throwable();
-                                    t.setStackTrace(thread.getStackTrace());
-                                    LOG.info(logBuilder, t);
-                                }
+                                final Throwable t = new Throwable();
+                                t.setStackTrace(thread.getStackTrace());
+                                LOG.info(logBuilder, t);
                             }
                         }
                         if (poisoned) {
@@ -1326,13 +1319,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private static final class TaskInfo {
         final Thread t;
         final long stamp;
-        final Props logProperties;
+        final Map<String, Object> logProperties;
 
         TaskInfo(final Thread t) {
             this(t, null);
         }
 
-        TaskInfo(final Thread t, final Props logProperties) {
+        TaskInfo(final Thread t, final Map<String, Object> logProperties) {
             super();
             this.t = t;
             stamp = System.currentTimeMillis();
@@ -1582,7 +1575,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
             };
         }
-        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task);
+        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, callable instanceof MdcProvider ? ((MdcProvider) callable).getMdc() : MDC.getCopyOfContextMap());
         execute(ftask);
         return ftask;
     }
@@ -1593,8 +1586,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         LogProperties.removeLogProperties(); // Drop possible log properties
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
-            final Trackable trackable = customFutureTask.getTrackable();
-            if (null != trackable) {
+            if (customFutureTask.isTrackable()) {
                 activeTaskWatcher.removeTask(customFutureTask.getNumber());
             }
             customFutureTask.getTask().afterExecute(throwable);
@@ -1616,14 +1608,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             final Task<?> task = customFutureTask.getTask();
             task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
-            final Trackable trackable = customFutureTask.getTrackable();
-            if (null != trackable) {
-                final Props props = trackable.optLogProperties();
-                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, props);
-                if (null != props) {
-                    LogProperties.getLogProperties(thread).putAll(props);
-                }
+            // MDC map for executing thread
+            MDC.setContextMap(customFutureTask.getMdc());
+            // Check if trackable
+            if (customFutureTask.isTrackable()) {
+                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, customFutureTask.getMdc());
             }
+        } else if (r instanceof MdcProvider) {
+            // MDC map for executing thread
+            MDC.setContextMap(((MdcProvider) r).getMdc());
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");
         }
@@ -1644,12 +1637,14 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null == command) {
             throw new NullPointerException();
         }
+
+        final Runnable mdcCommand = command instanceof MdcProvider ? command : new MDCProvidingRunnable(command, MDC.getCopyOfContextMap());
         if (blocking) {
             if (runState != RUNNING) {
-                rejectCustom(command);
+                rejectCustom(mdcCommand);
                 return;
             }
-            if (poolSize < corePoolSize && addIfUnderCorePoolSize(command)) {
+            if (poolSize < corePoolSize && addIfUnderCorePoolSize(mdcCommand)) {
                 return;
             }
             /*
@@ -1658,7 +1653,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             boolean acquired = false;
             do {
                 try {
-                    workQueue.put(command);
+                    workQueue.put(mdcCommand);
                     acquired = true;
                 } catch (final InterruptedException e) {
                     /*
@@ -1669,24 +1664,24 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         } else {
             for (;;) {
                 if (runState != RUNNING) {
-                    rejectCustom(command);
+                    rejectCustom(mdcCommand);
                     return;
                 }
-                if (poolSize < corePoolSize && addIfUnderCorePoolSize(command)) {
+                if (poolSize < corePoolSize && addIfUnderCorePoolSize(mdcCommand)) {
                     return;
                 }
                 /*
                  * Non-blocking behavior, just offer and accept a possible rejected execution exception
                  */
-                if (workQueue.offer(command)) {
+                if (workQueue.offer(mdcCommand)) {
                     return;
                 }
-                final Runnable r = addIfUnderMaximumPoolSize(command);
-                if (r == command) {
+                final Runnable r = addIfUnderMaximumPoolSize(mdcCommand);
+                if (r == mdcCommand) {
                     return;
                 }
                 if (null == r) {
-                    rejectCustom(command);
+                    rejectCustom(mdcCommand);
                     return;
                 }
                 // else retry
@@ -2421,6 +2416,31 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 e.getQueue().poll();
                 e.execute(r);
             }
+        }
+    }
+
+    /**
+     * Enhances a {@link Runnable} by MDC properties.
+     */
+    private static final class MDCProvidingRunnable implements Runnable, MdcProvider {
+
+        private final Runnable delegate;
+        private final Map<String, Object> mdc;
+
+        MDCProvidingRunnable(Runnable delegate, Map<String, Object> mdc) {
+            super();
+            this.delegate = delegate;
+            this.mdc = mdc;
+        }
+
+        @Override
+        public Map<String, Object> getMdc() {
+            return mdc;
+        }
+
+        @Override
+        public void run() {
+            delegate.run();
         }
     }
 

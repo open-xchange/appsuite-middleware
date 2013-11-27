@@ -63,7 +63,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailAccessWatcher;
@@ -782,11 +781,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             /*
              * Start at index 3
              */
-            if (Log.appendTraceToMessage()) {
-                for (int i = 3; i < length; i++) {
-                    sBuilder.append("    at ").append(traze[i]).append(lineSeparator);
-                }
-            } else {
+            {
                 final StackTraceElement[] tmp = new StackTraceElement[length - 3];
                 System.arraycopy(traze, 3, tmp, 0, tmp.length);
                 final Throwable thr = new Throwable();
@@ -796,23 +791,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
             if ((null != usingThread) && usingThread.isAlive()) {
                 final StackTraceElement[] trace = usingThread.getStackTrace();
-                final int tleng;
-                if (null != trace && (tleng = trace.length) > 0) {
+                if (null != trace && trace.length > 0) {
                     sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
                     /*
                      * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
                      * MailAccessWatcher.
                      */
-                    if (Log.appendTraceToMessage()) {
-                        sBuilder.append("    at ").append(trace[0]);
-                        for (int i = 1; i < tleng; i++) {
-                            sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
-                        }
-                    } else {
-                        final Throwable thr = new Throwable();
-                        thr.setStackTrace(trace);
-                        log.info(sBuilder.toString(), thr);
-                    }
+                    final Throwable thr = new Throwable();
+                    thr.setStackTrace(trace);
+                    log.info(sBuilder.toString(), thr);
                 }
             }
         }
