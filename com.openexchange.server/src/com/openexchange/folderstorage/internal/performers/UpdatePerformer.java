@@ -274,7 +274,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     folder.setName(newName == null ? storageFolder.getName() : newName);
                 }
                 if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), newParentId, treeId);
+                    String parentName = newParentId;
+                    try {
+                        Folder parentFolder = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
+                        if (null != parentFolder) {
+                            parentName = parentFolder.getName();
+                        }
+                    } catch (OXException e) {
+                        // swallow
+                    }
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), parentName, treeId);
                 }
                 /*
                  * Check for forbidden public mail folder
