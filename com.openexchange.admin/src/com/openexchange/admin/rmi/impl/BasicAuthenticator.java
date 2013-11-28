@@ -49,11 +49,10 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
@@ -72,7 +71,7 @@ import com.openexchange.admin.tools.AdminCache;
  */
 public class BasicAuthenticator extends OXCommonImpl {
 
-    private final static Log LOG = LogFactory.getLog (BasicAuthenticator.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticator.class);
 
     private OXAuthStorageInterface sqlAuth = null;
     private OXAuthStorageInterface fileAuth = null;

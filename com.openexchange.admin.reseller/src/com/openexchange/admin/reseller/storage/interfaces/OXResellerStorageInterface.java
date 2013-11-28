@@ -52,8 +52,7 @@ package com.openexchange.admin.reseller.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -77,7 +76,7 @@ public abstract class OXResellerStorageInterface {
      */
     private static Class<? extends OXResellerStorageInterface> implementingClass;
 
-    private static final Log log = LogFactory.getLog(OXResellerStorageInterface.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerStorageInterface.class);
 
     protected static AdminCacheExtended cache = null;
 

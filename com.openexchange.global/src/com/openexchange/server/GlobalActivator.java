@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -62,6 +61,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
@@ -78,8 +78,6 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public final class GlobalActivator implements BundleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalActivator.class);
-
     private volatile Initialization initialization;
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
     private volatile ServiceRegistration<StringParser> parserRegistration;
@@ -94,6 +92,7 @@ public final class GlobalActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
             final Initialization initialization = new com.openexchange.server.ServerInitialization();
             this.initialization = initialization;
@@ -109,9 +108,9 @@ public final class GlobalActivator implements BundleActivator {
                 tracker.open();
             }
 
-            LOG.info("Global bundle successfully started");
+            logger.info("Global bundle successfully started");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -196,6 +195,7 @@ public final class GlobalActivator implements BundleActivator {
 
     @Override
     public void stop(final BundleContext context) throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
             final List<ServiceTracker<?, ?>> trackers = this.trackers;
             if (null != trackers) {
@@ -211,9 +211,9 @@ public final class GlobalActivator implements BundleActivator {
                 this.initialization = null;
             }
             shutdownStringParsers();
-            LOG.debug("Global bundle successfully stopped");
+            logger.debug("Global bundle successfully stopped");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw e;
         }
     }

@@ -64,11 +64,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -120,7 +119,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXContext.class);
 
     private final OXAdminPoolDBPoolExtension pool;
 
@@ -274,7 +273,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (NoSuchObjectException e) {
             throw new NoSuchContextException(e);
         }
-        log.debug(ctx);
+        log.debug(ctx.toString());
 
         Context backup_ctx = null; // used for invalidating old login mappings in the cache
 
@@ -405,7 +404,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (NoSuchObjectException e) {
             throw new NoSuchContextException(e);
         }
-        log.debug(ctx);
+        log.debug(ctx.toString());
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
@@ -603,7 +602,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (NoSuchObjectException e) {
             throw new NoSuchContextException(e);
         }
-        log.debug(ctx);
+        log.debug(ctx.toString());
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
@@ -684,7 +683,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 } catch (NoSuchObjectException e) {
                     throw new NoSuchContextException(e);
                 }
-                log.debug(ctx);
+                log.debug(ctx.toString());
                 try {
                     if (!tool.existsContext(ctx)) {
                         throw new NoSuchContextException();
@@ -816,7 +815,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (NoSuchObjectException e) {
             throw new NoSuchDatabaseException(e);
         }
-        log.debug(db);
+        log.debug(db.toString());
         try {
             if( !tool.existsDatabase(db.getId()) ) {
                 throw new NoSuchDatabaseException();
@@ -851,7 +850,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         new BasicAuthenticator().doAuthentication(auth);
 
-        log.debug(filestore);
+        log.debug(filestore.toString());
         try {
             if( !tool.existsStore(filestore.getId()) ) {
                 throw new NoSuchFilestoreException();
@@ -1273,7 +1272,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        log.debug(ctx);
+        log.debug(ctx.toString());
 
         if (!tool.existsContext(ctx)) {
             throw new NoSuchContextException();
@@ -1317,7 +1316,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        log.debug(ctx);
+        log.debug(ctx.toString());
 
         try {
             if (!tool.existsContext(ctx)) {
@@ -1356,7 +1355,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        log.debug(ctx);
+        log.debug(ctx.toString());
 
         try {
             if (!tool.existsContext(ctx)) {

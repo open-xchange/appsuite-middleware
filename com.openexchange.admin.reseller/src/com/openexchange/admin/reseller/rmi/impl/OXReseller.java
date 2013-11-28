@@ -52,8 +52,7 @@ package com.openexchange.admin.reseller.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
@@ -79,7 +78,7 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
-    private final static Log log = LogFactory.getLog(OXReseller.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXReseller.class);
 
     private final BasicAuthenticator basicauth;
 

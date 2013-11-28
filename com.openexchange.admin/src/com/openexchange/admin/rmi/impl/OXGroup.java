@@ -54,11 +54,10 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
@@ -101,7 +100,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     private AdminCache cache = null;
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXGroup.class);
 
     private PropertyHandler prop = null;
 

@@ -58,8 +58,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -71,7 +70,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 public class ResellerContextFilter implements Filter<Integer, Integer> {
 
-    private static final Log LOG = LogFactory.getLog(ResellerContextFilter.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ResellerContextFilter.class);
 
     private final AdminCache cache;
 

@@ -61,7 +61,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 /**
  * @author choeger
@@ -102,10 +102,9 @@ public abstract class OXSOAPRMIMapper {
 
     protected Object rmistub = null;
 
-
     private Class<?> clazz = null;
 
-    protected static final Log log = org.apache.commons.logging.LogFactory.getLog(OXSOAPRMIMapper.class);
+    protected static final Logger log = org.slf4j.LoggerFactory.getLogger(OXSOAPRMIMapper.class);
 
     /**
      * @throws RemoteException

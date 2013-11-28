@@ -51,8 +51,7 @@ package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
@@ -71,7 +70,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     public Activator() {
         super();
@@ -107,10 +106,10 @@ public class Activator extends HousekeepingActivator {
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
             openTrackers();
         } catch (final StorageException e) {
-            LOG.fatal("Error while creating one instance for RMI interface", e);
+            LOG.error("Error while creating one instance for RMI interface", e);
             throw e;
         } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
