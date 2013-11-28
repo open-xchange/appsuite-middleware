@@ -1,3 +1,7 @@
+* 2013-11-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30051: Added missing build step for de_CH l10n package to install the PO file during package build.
+
 * 2013-11-27 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 29982: Correct handling of URLs as database hostnames
