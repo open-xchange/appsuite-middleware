@@ -76,7 +76,7 @@ final class MasterThreadFactory implements ThreadFactory {
 
     public static CustomThread newCustomThread(Runnable runnable, String threadName) {
         CustomThread retval = new CustomThread(runnable, threadName);
-        retval.setUncaughtExceptionHandler(new CustomUncaughtExceptionhandler());
+        retval.setUncaughtExceptionHandler(CustomUncaughtExceptionhandler.getInstance());
         return retval;
     }
 }
