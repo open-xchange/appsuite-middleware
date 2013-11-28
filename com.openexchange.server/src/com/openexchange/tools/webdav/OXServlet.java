@@ -60,9 +60,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
@@ -93,7 +93,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     private static final long serialVersionUID = 301910346402779362L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(OXServlet.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXServlet.class);
 
     /**
      * Simple {@link LoginRequest} implementation.

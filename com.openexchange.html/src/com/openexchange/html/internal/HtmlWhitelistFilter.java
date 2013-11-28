@@ -77,7 +77,6 @@ import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.Tag;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
@@ -539,7 +538,7 @@ public final class HtmlWhitelistFilter {
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            final Log LOG = com.openexchange.log.Log.loggerFor(HtmlWhitelistFilter.class);
+            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlWhitelistFilter.class);
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {

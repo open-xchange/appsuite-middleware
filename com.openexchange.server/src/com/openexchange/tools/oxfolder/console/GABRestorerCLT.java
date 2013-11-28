@@ -174,7 +174,7 @@ public class GABRestorerCLT {
 
             } catch (final MalformedObjectNameException e) {
                 // Cannot occur
-                com.openexchange.log.Log.loggerFor(GABRestorerCLT.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(GABRestorerCLT.class).error(e.getMessage(), e);
             } finally {
                 if (null != jmxConnector) {
                     try {

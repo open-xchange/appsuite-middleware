@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -75,7 +74,7 @@ public class ContactObjectsByStringAndPagePartSequenceStep extends AbstractStep<
 
     private PagePartSequence pageParts;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactObjectsByPageAndPagePartSequenceStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactObjectsByPageAndPagePartSequenceStep.class);
 
     public ContactObjectsByStringAndPagePartSequenceStep() {
     }

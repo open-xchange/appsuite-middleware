@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public abstract class PermissionServlet extends SessionServlet {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(PermissionServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermissionServlet.class);
 
     private static final long serialVersionUID = -1496492688713194989L;
 

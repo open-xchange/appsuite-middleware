@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class JSONResponseWriter extends org.apache.solr.response.JSONResponseWriter 
 {
   
-  private static Logger log = LoggerFactory.getLogger(JSONResponseWriter.class.getName());
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(JSONResponseWriter.class.getName());
 
 	public JSONResponseWriter(){
 	  super();

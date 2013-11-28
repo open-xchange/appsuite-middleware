@@ -50,7 +50,6 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -69,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class QuotaRequest {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotaRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaRequest.class);
 
     private QuotaFileStorage qfs;
 

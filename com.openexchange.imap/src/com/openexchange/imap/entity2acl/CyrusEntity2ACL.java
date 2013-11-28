@@ -77,7 +77,7 @@ import com.openexchange.user.UserService;
  */
 public final class CyrusEntity2ACL extends Entity2ACL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CyrusEntity2ACL.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CyrusEntity2ACL.class);
 
     private static final CyrusEntity2ACL INSTANCE = new CyrusEntity2ACL();
 
@@ -158,7 +158,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
                     "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
-                    "\nThe session user's ID is returned."));
+                    "\nThe session user's ID is returned.").toString());
             }
             return ids[pos];
         }
@@ -166,7 +166,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
         if (LOG.isWarnEnabled()) {
             LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
                 "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
-                "\nThe first found user is returned."));
+                "\nThe first found user is returned.").toString());
         }
         return ids[0];
     }

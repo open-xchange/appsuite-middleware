@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> {
-  private static Logger log = LoggerFactory.getLogger(CqlQuery.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(CqlQuery.class);
   
   private Serializer<V> valueSerializer;
   private ByteBuffer query;

@@ -68,7 +68,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.management.MBeanException;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -92,7 +91,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class Consistency implements ConsistencyMBean {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Consistency.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Consistency.class);
 
     @Override
     public List<String> listMissingFilesInContext(final int contextId) throws MBeanException {
@@ -792,8 +791,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForInfoitem extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(CreateDummyFileForInfoitem.class);
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForInfoitem.class);
 
         private final DatabaseImpl database;
 
@@ -851,8 +850,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(CreateDummyFileForAttachment.class);
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForAttachment.class);
 
         private final AttachmentBase attachments;
 
@@ -915,8 +914,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForSnippet extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(CreateDummyFileForSnippet.class);
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForSnippet.class);
 
         public CreateDummyFileForSnippet(final FileStorage storage) {
             super(storage);
@@ -981,8 +980,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class RemoveFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(RemoveFile.class);
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(RemoveFile.class);
 
         private final FileStorage storage;
 
@@ -1015,8 +1014,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteInfoitem implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(DeleteInfoitem.class);
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(DeleteInfoitem.class);
 
         private final DatabaseImpl database;
 
@@ -1066,8 +1065,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteAttachment implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(DeleteAttachment.class);
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(DeleteAttachment.class);
 
         private final AttachmentBase attachments;
 
@@ -1128,8 +1127,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteSnippet implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(DeleteSnippet.class);
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(DeleteSnippet.class);
 
         public DeleteSnippet() {
             super();
@@ -1291,8 +1290,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateInfoitem implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(CreateInfoitem.class);
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(CreateInfoitem.class);
 
         private static final String description = "This file needs attention";
 

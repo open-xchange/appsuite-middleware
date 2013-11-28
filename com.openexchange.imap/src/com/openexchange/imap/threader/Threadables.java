@@ -68,7 +68,6 @@ import javax.mail.FetchProfile;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
@@ -105,7 +104,7 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class Threadables {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Threadables.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Threadables.class);
     private static final boolean INFO = LOG.isInfoEnabled();
 
     /**
@@ -327,7 +326,7 @@ public final class Threadables {
              */
             return Collections.emptyList();
         }
-        final org.apache.commons.logging.Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         return (List<MailMessage>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -448,7 +447,7 @@ public final class Threadables {
              */
             return null;
         }
-        final org.apache.commons.logging.Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final Map<String, HeaderHandler> handlers = HANDLERS;
         return (Threadable) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 

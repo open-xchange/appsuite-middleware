@@ -2,7 +2,6 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -24,7 +23,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class AllRequestAndResponseTest extends AbstractMailTest {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(AllTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
 	protected String folder;
 	String mailObject_25kb;
 

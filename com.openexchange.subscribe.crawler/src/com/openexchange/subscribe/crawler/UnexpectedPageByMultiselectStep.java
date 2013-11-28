@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.crawler;
 
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -72,7 +71,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
 
     private int formNumber;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnexpectedPageByMultiselectStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnexpectedPageByMultiselectStep.class);
 
     public UnexpectedPageByMultiselectStep(){
 
@@ -109,7 +108,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
             try {
                 output = (UnexpectedPage) button.click();
             } catch (final Exception e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
             if (output != null) {
                 executedSuccessfully = true;

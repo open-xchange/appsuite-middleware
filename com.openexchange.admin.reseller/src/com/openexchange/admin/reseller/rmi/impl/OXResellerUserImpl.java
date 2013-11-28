@@ -67,7 +67,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class OXResellerUserImpl implements OXUserPluginInterface {
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerUserImpl.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerUserImpl.class);
 
     private OXResellerStorageInterface oxresell = null;
 

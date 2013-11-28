@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -78,7 +77,7 @@ import com.openexchange.config.ConfigurationService;
 
 public class AdminDaemon {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(AdminDaemon.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminDaemon.class);
 
     private static PropertyHandler prop = null;
 
@@ -333,9 +332,9 @@ public class AdminDaemon {
             services.add(context.registerService(Remote.class, oxtaskmgmt, null));
             services.add(context.registerService(Remote.class, oxpublication, null));
         } catch (final RemoteException e) {
-            LOG.fatal("Error creating RMI registry!", e);
+            LOG.error("Error creating RMI registry!", e);
         } catch (final StorageException e) {
-            LOG.fatal("Error while creating one instance for RMI interface", e);
+            LOG.error("Error while creating one instance for RMI interface", e);
         }
     }
 

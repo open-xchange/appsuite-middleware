@@ -52,7 +52,6 @@ package com.openexchange.index.solr.internal.mail.translators;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.solr.internal.LuceneQueryTools;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
@@ -87,7 +86,7 @@ import com.openexchange.mail.search.ToTerm;
  */
 public class CustomTranslator implements QueryTranslator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomTranslator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomTranslator.class);
 
     private Configuration config;
 

@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Link extends DataServlet {
 
-	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Link.class);
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Link.class);
 
 	/**
 	 * For serialization.

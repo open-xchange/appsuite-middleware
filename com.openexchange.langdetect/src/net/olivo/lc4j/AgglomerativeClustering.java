@@ -41,8 +41,8 @@ import cern.colt.list.IntArrayList;
  * @version $Id$
  */
 public class AgglomerativeClustering {
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(AgglomerativeClustering.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AgglomerativeClustering.class);
 	/** Enable debugging? */
 	private static final boolean DEBUG = LOG.isDebugEnabled();
 	/** Default buffer size. */

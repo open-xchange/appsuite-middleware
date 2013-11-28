@@ -50,7 +50,6 @@
 package com.openexchange.subscribe.internal;
 
 import java.util.Collection;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
  */
 public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T> {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(StrategyFolderUpdaterService.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StrategyFolderUpdaterService.class);
 
     private final FolderUpdaterStrategy<T> strategy;
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.caldav.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
@@ -96,7 +95,7 @@ public class CaldavActivator extends HousekeepingActivator {
 
     private static final String NULL_PATH = "/servlet/dav/dev/null";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavActivator.class);
 
 	private volatile OSGiPropertyMixin mixin;
 

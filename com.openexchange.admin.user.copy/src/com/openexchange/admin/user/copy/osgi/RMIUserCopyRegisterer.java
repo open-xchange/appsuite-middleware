@@ -50,7 +50,6 @@
 package com.openexchange.admin.user.copy.osgi;
 
 import java.rmi.Remote;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -66,7 +65,7 @@ import com.openexchange.user.copy.UserCopyService;
  */
 public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyService,UserCopyService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RMIUserCopyRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RMIUserCopyRegisterer.class);
 
     private final BundleContext context;
 

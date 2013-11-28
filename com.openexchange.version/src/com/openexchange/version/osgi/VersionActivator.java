@@ -50,7 +50,6 @@
 package com.openexchange.version.osgi;
 
 import java.util.Dictionary;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import com.openexchange.version.Version;
@@ -63,7 +62,7 @@ import com.openexchange.version.internal.Numbers;
  */
 public class VersionActivator implements BundleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(VersionActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VersionActivator.class);
 
     public VersionActivator() {
         super();

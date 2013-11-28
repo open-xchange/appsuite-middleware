@@ -53,7 +53,6 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
@@ -73,7 +72,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class PushEventHandler implements EventHandler {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(PushEventHandler.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushEventHandler.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 

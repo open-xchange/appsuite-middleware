@@ -51,7 +51,6 @@ package com.openexchange.authentication.database.osgi;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -67,7 +66,7 @@ import com.openexchange.user.UserService;
  */
 public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<Object,Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuthenticationRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthenticationRegisterer.class);
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();

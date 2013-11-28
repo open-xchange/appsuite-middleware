@@ -57,7 +57,6 @@ import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -71,7 +70,7 @@ import com.openexchange.rmi.osgi.RMIActivator;
  */
 public class RMIRegistry {
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(RMIRegistry.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RMIRegistry.class);
 
     private static Registry registry = null;
 

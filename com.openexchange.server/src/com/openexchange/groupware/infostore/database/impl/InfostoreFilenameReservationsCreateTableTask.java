@@ -123,7 +123,7 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable(INFOSTORE_RESERVED_PATHS, getTableSQL(), contextId);
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(InfostoreFilenameReservationsCreateTableTask.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreFilenameReservationsCreateTableTask.class);
         if (logger.isInfoEnabled()) {
             logger.info("UpdateTask '" + InfostoreFilenameReservationsCreateTableTask.class.getSimpleName() + "' successfully performed!");
         }

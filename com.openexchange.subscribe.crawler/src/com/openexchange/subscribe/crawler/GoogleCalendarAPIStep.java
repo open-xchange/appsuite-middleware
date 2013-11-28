@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.google.gdata.client.calendar.CalendarService;
 import com.google.gdata.data.calendar.CalendarEventEntry;
@@ -80,7 +79,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  */
 public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Object> implements LoginStep {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GoogleCalendarAPIStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GoogleCalendarAPIStep.class);
 
     private String username, password;
 
@@ -124,7 +123,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
         } catch (final AuthenticationException e) {
             LOG.error(e.getMessage(), e);
         } catch (final ServiceException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }

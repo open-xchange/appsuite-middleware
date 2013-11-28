@@ -58,7 +58,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.requestwatcher.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
@@ -77,7 +76,7 @@ import com.openexchange.timer.TimerService;
 public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     /** The logger. */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(RequestWatcherServiceImpl.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestWatcherServiceImpl.class);
 
     /** The request number */
     private static final AtomicLong NUMBER = new AtomicLong();
@@ -124,7 +123,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                             }
                             final String entries = sb.toString();
                             if (!entries.isEmpty()) {
-                                LOG.debug(sb);
+                                LOG.debug(sb.toString());
                             }
                         }
                         final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();

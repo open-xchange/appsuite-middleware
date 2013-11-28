@@ -75,7 +75,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
  */
 public class ServletResponseWrapper implements ServletResponse {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ServletResponseWrapper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletResponseWrapper.class);
 
     public static final int OUTPUT_NOT_SELECTED = -1;
 

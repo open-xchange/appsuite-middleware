@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CassandraClusterFactory
 {
-  static final Logger LOGGER = LoggerFactory.getLogger( CassandraClusterFactory.class );
+  static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger( CassandraClusterFactory.class );
   
   public static Cluster getInstance( String name, String host, int port )
   {

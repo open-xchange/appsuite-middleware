@@ -99,7 +99,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class RawJSONMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(RawJSONMessageHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RawJSONMessageHandler.class);
 
     /**
      * The max. allowed body size of 16 KB.

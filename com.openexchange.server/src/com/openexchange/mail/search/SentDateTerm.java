@@ -131,7 +131,7 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
         try {
             sentDate = msg.getSentDate();
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.loggerFor(SentDateTerm.class).warn("Error during search.", e);
+            org.slf4j.LoggerFactory.getLogger(SentDateTerm.class).warn("Error during search.", e);
             return false;
         }
         if (null == sentDate) {

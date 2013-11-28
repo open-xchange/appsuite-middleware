@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -83,7 +82,7 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     private int intervalStart;
     private int intervalStop;
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(AnchorsByLinkXPathStep.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AnchorsByLinkXPathStep.class);
 
     public AnchorsByLinkXPathStep() {
         subpagesHref = new ArrayList<String>();

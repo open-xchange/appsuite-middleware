@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConcurrentHClientPool implements HClientPool {
 
-  private static final Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
 
   private final ArrayBlockingQueue<HClient> availableClientQueue;
   private final AtomicInteger activeClientsCount;

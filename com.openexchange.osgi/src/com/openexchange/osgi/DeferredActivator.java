@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -81,7 +80,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(DeferredActivator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeferredActivator.class);
 
     private static final DeferredActivatorServiceStateLookup STATE_LOOKUP = new DeferredActivatorServiceStateLookup();
 
@@ -408,12 +407,12 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             bundle.stop();
             if (null != errorBuilder) {
                 errorBuilder.setLength(0);
-                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n"));
+                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n").toString());
             }
         } catch (final BundleException e) {
             if (null != errorBuilder) {
                 errorBuilder.setLength(0);
-                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n"));
+                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n").toString());
             }
         }
     }

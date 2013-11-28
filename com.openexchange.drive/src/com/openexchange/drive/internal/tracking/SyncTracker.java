@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -115,7 +114,7 @@ public class SyncTracker {
     private static final int MAX_HISTORY_ENTRY_LENGTH = 10;
 
     private static final String PARAM_RESULT_HISTORY = "com.openexchange.drive.resultHistory";
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SyncTracker.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncTracker.class);
 
     private final SyncSession session;
     private ArrayList<HistoryEntry> resultHistory;

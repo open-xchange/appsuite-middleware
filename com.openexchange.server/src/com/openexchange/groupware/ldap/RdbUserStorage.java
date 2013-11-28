@@ -81,7 +81,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -103,7 +102,7 @@ import com.openexchange.user.internal.mapping.UserMapper;
  */
 public class RdbUserStorage extends UserStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbUserStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbUserStorage.class);
 
     private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
         "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId FROM user WHERE user.cid=?";

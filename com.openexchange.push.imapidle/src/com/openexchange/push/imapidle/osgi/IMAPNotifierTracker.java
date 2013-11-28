@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.push.imapidle.ImapIdlePushListener;
 import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;
@@ -92,8 +93,8 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer<IMAPN
                     service.addTaskFor(ImapIdlePushListener.getAccountId(), listener.getSession());
                 }
                 listenerRegistry.purgeAllPushListener();
-                com.openexchange.log.Log.loggerFor(IMAPNotifierTracker.class).warn(
-                    "\n\t----- /!\\ Orderly dropped IMAP-IDLE mail push because poll-based recent-notifier is enabled. /!\\ -----\n");
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IMAPNotifierTracker.class);
+                log.warn("\n\t----- /!\\ Orderly dropped IMAP-IDLE mail push because poll-based recent-notifier is enabled. /!\\ -----\n");
             }
             return service;
         }

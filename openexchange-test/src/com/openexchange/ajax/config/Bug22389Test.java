@@ -50,7 +50,6 @@
 package com.openexchange.ajax.config;
 
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.Tree;
@@ -63,7 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  */
 public class Bug22389Test extends AbstractAJAXSession {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug22389Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug22389Test.class);
     private static final String EXPRESSION = "[67]\\.[0-9]+\\.[0-9]-Rev[0-9]+";
     private static final Pattern PATTERN = Pattern.compile(EXPRESSION);
 

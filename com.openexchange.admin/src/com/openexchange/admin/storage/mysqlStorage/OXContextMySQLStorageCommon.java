@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -85,7 +84,7 @@ public class OXContextMySQLStorageCommon {
 
     public static final String LOG_ERROR_CLOSING_STATEMENT = "Error closing statement";
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXContextMySQLStorageCommon.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextMySQLStorageCommon.class);
 
     private final OXUtilMySQLStorageCommon oxutilcommon;
 

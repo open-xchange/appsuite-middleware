@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -74,7 +73,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class DBQuotaFileStorage implements QuotaFileStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotaFileStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
     /**
      * The context of the QuotaFileStorage
@@ -207,7 +206,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             if (newUsage < 0) {
                 newUsage = 0;
                 final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(context.getContextId()));
-                LOG.fatal(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");

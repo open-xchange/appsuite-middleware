@@ -52,7 +52,6 @@ package com.openexchange.carddav.resources;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;
@@ -69,7 +68,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class AggregatedCollection extends CardDAVCollection {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AggregatedCollection.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AggregatedCollection.class);
 
     private String displayName = null;
 

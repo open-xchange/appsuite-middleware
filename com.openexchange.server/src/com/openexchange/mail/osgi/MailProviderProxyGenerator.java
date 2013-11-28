@@ -63,7 +63,7 @@ import com.openexchange.mail.api.MailProvider;
  */
 public final class MailProviderProxyGenerator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailProviderProxyGenerator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProviderProxyGenerator.class);
 
     /**
      * TODO: Does not work since {@link MailProvider} is not an interface

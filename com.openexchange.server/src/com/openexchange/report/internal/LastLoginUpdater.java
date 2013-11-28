@@ -51,7 +51,6 @@ package com.openexchange.report.internal;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -70,7 +69,7 @@ import com.openexchange.user.UserService;
  */
 public final class LastLoginUpdater implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LastLoginUpdater.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LastLoginUpdater.class);
 
     /** The constant providing the amount of milliseconds for one day */
     private static final long MILLIS_DAY = 86400000L;

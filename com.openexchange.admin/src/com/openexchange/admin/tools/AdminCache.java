@@ -159,7 +159,7 @@ public class AdminCache {
 
     private PropertyHandler prop = null;
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(AdminCache.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminCache.class);
 
     private OXAdminPoolInterface pool = null;
 

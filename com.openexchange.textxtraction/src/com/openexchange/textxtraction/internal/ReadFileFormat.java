@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
-import org.apache.commons.logging.Log;
 import org.apache.poi.extractor.ExtractorFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -73,7 +72,7 @@ import com.openexchange.java.Streams;
  */
 public class ReadFileFormat {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(ReadFileFormat.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReadFileFormat.class);
 
     private final StringBuilder sb;
 

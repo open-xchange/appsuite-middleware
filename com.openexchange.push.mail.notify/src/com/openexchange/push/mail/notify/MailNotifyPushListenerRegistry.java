@@ -69,7 +69,7 @@ import com.openexchange.tools.iterator.ReadOnlyIterator;
  */
 public final class MailNotifyPushListenerRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailNotifyPushListenerRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class);
 
 
     /**
@@ -242,7 +242,7 @@ public final class MailNotifyPushListenerRegistry {
             try {
                 l.open();
             } catch (final OXException e) {
-                com.openexchange.log.Log.loggerFor(MailNotifyPushListenerRegistry.class).error(
+                org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class).error(
                     MessageFormat.format("Opening mail push UDP listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();

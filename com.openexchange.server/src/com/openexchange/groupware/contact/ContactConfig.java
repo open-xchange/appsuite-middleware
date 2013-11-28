@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact;
 
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -63,7 +62,7 @@ public class ContactConfig {
 
     private static final ContactConfig SINGLETON = new ContactConfig();
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactConfig.class);
 
     private final Properties props = new Properties();
 

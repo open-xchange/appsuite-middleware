@@ -49,7 +49,6 @@
 
 package com.openexchange.preview.thirdwing.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -71,7 +70,7 @@ public class ThirdwingPreviewActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(ThirdwingPreviewActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ThirdwingPreviewActivator.class);
         log.info("Starting bundle: com.openexchange.preview.thirdwing.");
         registerService(InternalPreviewService.class, new ThirdwingPreviewService(this));
     }

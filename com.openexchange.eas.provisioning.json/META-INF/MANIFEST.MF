@@ -27,7 +27,8 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Export-Package: com.openexchange.mobile.configuration.json.action,
  com.openexchange.mobile.configuration.json.container,
  com.openexchange.mobile.configuration.json.servlet

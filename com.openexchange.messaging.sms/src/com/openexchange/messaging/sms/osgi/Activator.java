@@ -50,7 +50,6 @@
 package com.openexchange.messaging.sms.osgi;
 
 import static com.openexchange.messaging.sms.osgi.MessagingSMSServiceRegistry.getServiceRegistry;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -66,7 +65,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class Activator extends DeferredActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private volatile ServletRegisterer servletRegisterer;
 

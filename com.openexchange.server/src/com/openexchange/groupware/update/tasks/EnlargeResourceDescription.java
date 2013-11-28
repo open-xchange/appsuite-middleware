@@ -54,7 +54,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -83,7 +82,7 @@ public final class EnlargeResourceDescription extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        final Log log = com.openexchange.log.Log.loggerFor(EnlargeResourceDescription.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnlargeResourceDescription.class);
         log.info("Performing update task " + EnlargeResourceDescription.class.getSimpleName());
         final Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {

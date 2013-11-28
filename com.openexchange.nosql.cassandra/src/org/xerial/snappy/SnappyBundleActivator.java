@@ -48,7 +48,6 @@
  */
 package org.xerial.snappy;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -61,7 +60,7 @@ import org.osgi.framework.BundleContext;
 @Deprecated
 public class SnappyBundleActivator implements BundleActivator {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(SnappyBundleActivator.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SnappyBundleActivator.class);
 
 	@Override
     public void start(BundleContext context) throws Exception {

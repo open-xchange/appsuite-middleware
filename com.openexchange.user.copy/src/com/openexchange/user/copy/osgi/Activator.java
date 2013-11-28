@@ -49,7 +49,6 @@
 
 package com.openexchange.user.copy.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import com.openexchange.osgi.CompositeBundleActivator;
@@ -104,7 +103,7 @@ public class Activator extends CompositeBundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         super.start(context);
         log.info("Bundle started: com.openexchange.user.copy");
     }

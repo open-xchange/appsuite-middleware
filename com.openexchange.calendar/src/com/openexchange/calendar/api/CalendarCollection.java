@@ -72,7 +72,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.calendar.CachedCalendarIterator;
@@ -176,7 +175,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public static final TimeZone ZONE_UTC = TimeZone.getTimeZone("UTC");
 
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarCollection.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarCollection.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -2139,7 +2138,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         try {
             return rsql.existsReminder(oid, uid, Types.APPOINTMENT);
         } catch (final OXException ex) {
-            LOG.error(ex);
+            LOG.error(ex.getMessage(), ex);
         }
         return false;
     }
@@ -2167,7 +2166,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     @Override
     public void debugRecurringResult(final RecurringResultInterface rr) {
         if (DEBUG) {
-            LOG.debug(Integer.valueOf(rr.getPosition()));
+            LOG.debug(Integer.toString(rr.getPosition()));
             LOG.debug(" : ");
             LOG.debug(StringCollection.date2String(new Date(rr.getStart())));
             LOG.debug(" ");

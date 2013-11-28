@@ -70,7 +70,6 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -105,7 +104,7 @@ import com.openexchange.version.Version;
  */
 public class MailObject {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailObject.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailObject.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

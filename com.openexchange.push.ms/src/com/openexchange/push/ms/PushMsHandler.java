@@ -59,7 +59,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -80,7 +79,7 @@ import com.openexchange.session.Session;
  */
 public class PushMsHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushMsHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsHandler.class);
 
     private final DelayPushQueue delayPushQueue;
 

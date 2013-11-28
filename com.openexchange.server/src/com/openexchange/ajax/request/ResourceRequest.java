@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ResourceRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ResourceRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceRequest.class);
 
     private final ServerSession session;
 
@@ -259,7 +259,7 @@ public class ResourceRequest {
         } else {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new com.openexchange.java.StringAllocator(64).append("Missing field \"").append(SearchFields.PATTERN).append(
-                        "\" in JSON data. Searching for all as fallback"));
+                        "\" in JSON data. Searching for all as fallback").toString());
             }
             return actionAll();
         }

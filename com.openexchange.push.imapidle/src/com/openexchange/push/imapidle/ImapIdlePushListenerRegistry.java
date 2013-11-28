@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
@@ -80,7 +79,7 @@ public final class ImapIdlePushListenerRegistry {
         DEBUG_ENABLED = Boolean.valueOf(debugEnabled);
     }
 
-    private static boolean isDebugEnabled(final Log logger) {
+    private static boolean isDebugEnabled(final org.slf4j.Logger logger) {
         final Boolean debug = DEBUG_ENABLED;
         return null == debug ? logger.isDebugEnabled() : debug.booleanValue();
     }
@@ -161,7 +160,7 @@ public final class ImapIdlePushListenerRegistry {
             try {
                 l.open();
             } catch (final OXException e) {
-                com.openexchange.log.Log.loggerFor(ImapIdlePushListenerRegistry.class).error(
+                org.slf4j.LoggerFactory.getLogger(ImapIdlePushListenerRegistry.class).error(
                     MessageFormat.format("Opening IMAP IDLE listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();
@@ -233,7 +232,7 @@ public final class ImapIdlePushListenerRegistry {
 
         });
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
-        final Log logger = com.openexchange.log.Log.loggerFor(ImapIdlePushListenerRegistry.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListenerRegistry.class);
         if (null == session) {
             final String message = "Found no other valid & active session for user " + userId + " in context " + contextId  + ". Therefore shutting down associated IMAP IDLE push listener.";
             if (isDebugEnabled(logger)) {

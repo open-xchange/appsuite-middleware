@@ -53,7 +53,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -78,7 +77,7 @@ import com.openexchange.session.Session;
  */
 public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispatcher {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiEventDispatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiEventDispatcher.class);
 
     private final Queue<AppointmentEventInterface> appointmentListeners;
 

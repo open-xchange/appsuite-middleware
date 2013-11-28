@@ -71,7 +71,7 @@ import com.openexchange.admin.tools.AdminCache;
  */
 public class BasicAuthenticator extends OXCommonImpl {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticator.class);
 
     private OXAuthStorageInterface sqlAuth = null;
     private OXAuthStorageInterface fileAuth = null;

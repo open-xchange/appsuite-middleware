@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.BeanFactory;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -118,7 +117,7 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class InfostorePerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostorePerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostorePerformer.class);
 
     private static final InfostorePerformer INSTANCE = new InfostorePerformer();
 

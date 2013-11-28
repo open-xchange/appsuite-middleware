@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -74,7 +73,7 @@ public class CalDAV extends OXServlet {
 
 	private static final long serialVersionUID = -7768308794451862636L;
 
-	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CalDAV.class);
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalDAV.class);
 
     private static volatile ServiceLookup services;
 

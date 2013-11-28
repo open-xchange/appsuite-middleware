@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -80,7 +79,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
  */
 public class CapabilityHandler implements ReportUserHandler, ReportContextHandler, UserReportCumulator, ContextReportCumulator, ReportFinishingTouches {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CapabilityHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CapabilityHandler.class);
 
 
     @Override

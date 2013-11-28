@@ -96,7 +96,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 
     private static final String TABLE_PERMISSIONS_WORKING = "oxfolder_permissions";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXFolderDowngradeListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderDowngradeListener.class);
 
     /**
      * Initializes a new {@link OXFolderDowngradeListener}

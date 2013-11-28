@@ -57,7 +57,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -73,7 +72,7 @@ import com.openexchange.exception.OXException;
  */
 public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssignmentService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContextDatabaseAssignmentImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextDatabaseAssignmentImpl.class);
 
     private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
     private static final String INSERT = "INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema) VALUES (?,?,?,?,?)";

@@ -55,7 +55,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -71,7 +70,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class SpellCheckUserDictTableTask implements UpdateTask {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(SpellCheckUserDictTableTask.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpellCheckUserDictTableTask.class);
 
 	private static final String CREATE = "CREATE TABLE spellcheck_user_dict (" + "cid INT4 UNSIGNED NOT NULL,"
 			+ "user INT4 UNSIGNED NOT NULL,"

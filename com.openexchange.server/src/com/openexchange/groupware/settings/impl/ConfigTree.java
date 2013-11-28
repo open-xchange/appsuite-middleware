@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -70,7 +69,7 @@ import com.openexchange.java.StringAllocator;
  */
 public final class ConfigTree {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigTree.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigTree.class);
 
     private static final ConfigTree SINGLETON = new ConfigTree();
 

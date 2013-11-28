@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link FormalFieldParser}
@@ -64,7 +63,7 @@ public class FormalFieldParser {
 
     private final Map<String, List<String>> formalFieldMap;
 
-    private static Log log = com.openexchange.log.Log.loggerFor(FormalFieldParser.class);
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FormalFieldParser.class);
 
     public FormalFieldParser(Map<String, String> mapping) {
         formalFieldMap = this.createMapping(mapping);

@@ -50,7 +50,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -72,7 +71,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class OXPublication extends OXCommonImpl implements OXPublicationInterface {
 
-    private final static Log log = com.openexchange.log.Log.loggerFor(OXPublication.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXPublication.class);
 
     private final BasicAuthenticator basicauth;
 

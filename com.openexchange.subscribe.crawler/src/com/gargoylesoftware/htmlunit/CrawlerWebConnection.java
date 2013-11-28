@@ -86,7 +86,6 @@ import org.apache.commons.httpclient.methods.multipart.PartBase;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.util.EncodingUtil;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.SimpleLog;
 import org.slf4j.Logger;
 
@@ -101,7 +100,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
     private final WebClient webClient_;
     private HttpClient httpClient_;
     private String virtualHost_;
-    private static Log LOG = com.openexchange.log.Log.loggerFor(CrawlerWebConnection.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CrawlerWebConnection.class);
     private boolean quirkyCookieQuotes;
     private boolean switchUserAgent;
     private final String mobileUserAgent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16";
@@ -402,7 +401,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
             httpClient_ = createHttpClient();
 
             // Disable informational messages from httpclient
-            final Logger log = org.slf4j.LoggerFactory.getLogger(CrawlerWebConnection.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CrawlerWebConnection.class);
             if (log instanceof SimpleLog) {
                 ((SimpleLog) log).setLevel(SimpleLog.LOG_LEVEL_WARN);
             }

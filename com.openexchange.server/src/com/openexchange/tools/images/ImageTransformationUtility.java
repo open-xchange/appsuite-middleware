@@ -51,7 +51,6 @@ package com.openexchange.tools.images;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import javax.imageio.ImageIO;
-import org.apache.commons.logging.Log;
 
 
 /**
@@ -61,7 +60,7 @@ import org.apache.commons.logging.Log;
  */
 public class ImageTransformationUtility {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ImageTransformationUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationUtility.class);
 
     /**
      * Initializes a new {@link ImageTransformationUtility}.

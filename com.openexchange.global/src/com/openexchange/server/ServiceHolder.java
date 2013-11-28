@@ -59,7 +59,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link ServiceHolder} - Provides convenient access to a bundle service formerly applied with {@link #setService(Object)}. The service may
@@ -74,7 +73,7 @@ import org.apache.commons.logging.Log;
 public abstract class ServiceHolder<S> {
 
     /** The logger */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(ServiceHolder.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServiceHolder.class);
 
     private static final Object PRESENT = new Object();
 

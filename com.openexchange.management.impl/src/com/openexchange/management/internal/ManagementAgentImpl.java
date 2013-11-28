@@ -276,7 +276,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 cs.start();
                 connectors.put(url, cs);
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" started"));
+                    LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" started").toString());
                 }
                 jmxURL = url;
             } else {

@@ -76,7 +76,7 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedInboxActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UnifiedInboxActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxActivator.class);
 
     /**
      * Initializes a new {@link UnifiedInboxActivator}

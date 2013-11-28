@@ -3,7 +3,6 @@ package com.openexchange.webdav.xml.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
@@ -11,7 +10,7 @@ import com.openexchange.webdav.xml.AppointmentTest;
 
 public class Bug12494Test extends AppointmentTest {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug12494Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug12494Test.class);
 
 	public Bug12494Test(final String name) {
 		super(name);

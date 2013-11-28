@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public final class TransportProviderRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(TransportProviderRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TransportProviderRegistry.class);
 
     /**
      * Concurrent map used as set for transport providers
@@ -109,7 +109,7 @@ public final class TransportProviderRegistry {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new com.openexchange.java.StringAllocator(128).append("Missing transport server URL. Transport server URL not set in account ").append(
                     accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                    ". Using fallback protocol ").append(TransportProperties.getInstance().getDefaultTransportProvider()));
+                    ". Using fallback protocol ").append(TransportProperties.getInstance().getDefaultTransportProvider()).toString());
             }
             protocol = TransportProperties.getInstance().getDefaultTransportProvider();
         } else {

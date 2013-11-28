@@ -78,7 +78,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajp13.AJPv13Config;
@@ -104,7 +103,7 @@ import com.openexchange.version.Version;
  */
 public final class HttpServletResponseImpl implements HttpServletResponse {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpServletResponseImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServletResponseImpl.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

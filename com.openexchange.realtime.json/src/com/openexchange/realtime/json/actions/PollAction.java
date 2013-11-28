@@ -52,7 +52,6 @@ package com.openexchange.realtime.json.actions;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -76,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PollAction extends RTAction {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(PollAction.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PollAction.class);
 
     private final StateManager stateManager;
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
@@ -62,7 +61,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public class ContactStorageListener implements SimpleRegistryListener<ContactStorage> {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(ContactStorageListener.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactStorageListener.class);
 
     private final DefaultContactStorageRegistry registry;
 

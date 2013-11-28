@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -65,7 +64,7 @@ import com.openexchange.tx.UndoableAction;
 
 public abstract class AbstractDBAction extends AbstractUndoable implements UndoableAction {
 
-	static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractDBAction.class);
+	static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractDBAction.class);
 
 	private DBProvider provider = null;
 	private Context context = null;

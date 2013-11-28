@@ -69,7 +69,7 @@ public class CommonsHttpSolrServer extends SolrServer
    */
   public static final String AGENT = "Solr["+CommonsHttpSolrServer.class.getName()+"] 1.0"; 
   
-  private static Logger log = LoggerFactory.getLogger(CommonsHttpSolrServer.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(CommonsHttpSolrServer.class);
 
   /**
    * The URL of the Solr server.

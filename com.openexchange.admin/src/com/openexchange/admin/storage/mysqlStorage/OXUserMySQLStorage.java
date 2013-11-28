@@ -79,7 +79,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.daemons.AdminDaemon;
@@ -168,7 +167,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     }
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXUserMySQLStorage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUserMySQLStorage.class);
 
     private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
 

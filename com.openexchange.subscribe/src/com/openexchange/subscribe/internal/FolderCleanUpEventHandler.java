@@ -52,7 +52,6 @@ package com.openexchange.subscribe.internal;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -75,7 +74,7 @@ import com.openexchange.subscribe.SubscriptionStorage;
  */
 public class FolderCleanUpEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCleanUpEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCleanUpEventHandler.class);
     private final ContextService contexts;
     private final SubscriptionStorage storage;
     private ServiceRegistration<EventHandler> registration;

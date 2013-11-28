@@ -57,7 +57,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -70,7 +69,7 @@ import com.openexchange.log.LogProperties;
  */
 public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigDatabaseServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigDatabaseServiceImpl.class);
 
     // ------------------------------------------------------------------------------------------------ //
 

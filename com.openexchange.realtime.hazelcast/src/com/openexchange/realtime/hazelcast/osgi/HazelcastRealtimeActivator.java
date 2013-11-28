@@ -50,7 +50,6 @@
 package com.openexchange.realtime.hazelcast.osgi;
 
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
@@ -81,7 +80,7 @@ import com.openexchange.timer.TimerService;
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(HazelcastRealtimeActivator.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

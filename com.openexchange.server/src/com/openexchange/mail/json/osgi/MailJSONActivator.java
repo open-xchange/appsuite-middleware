@@ -51,7 +51,6 @@ package com.openexchange.mail.json.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailJSONActivator extends AJAXModuleActivator {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(MailJSONActivator.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailJSONActivator.class);
 
     /**
      * The {@link ServiceLookup} reference.

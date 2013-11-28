@@ -58,6 +58,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.MailExceptionCode;
@@ -76,7 +77,7 @@ public final class ListLsubCache {
     /**
      * The logger
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ListLsubCache.Key.class);
+    protected static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ListLsubCache.class);
 
     private static final class Key {
 

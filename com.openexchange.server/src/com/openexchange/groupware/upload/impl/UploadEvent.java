@@ -66,7 +66,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class UploadEvent {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UploadEvent.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UploadEvent.class);
 
     /*-
      * ------------ Constants ------------
@@ -360,10 +360,10 @@ public class UploadEvent {
                 if (null != tmpFile && tmpFile.exists()) {
                     try {
                         if (!tmpFile.delete()) {
-                            LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()));
+                            LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()).toString());
                         }
                     } catch (final Exception e) {
-                        LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()), e);
+                        LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()).toString(), e);
                     }
                 }
             }

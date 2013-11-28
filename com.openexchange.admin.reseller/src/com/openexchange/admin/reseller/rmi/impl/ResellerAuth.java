@@ -68,7 +68,7 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPluginInterface {
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ResellerAuth.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ResellerAuth.class);
 
     public ResellerAuth() throws StorageException {
         super();

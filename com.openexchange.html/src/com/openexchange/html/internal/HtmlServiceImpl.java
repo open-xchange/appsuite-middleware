@@ -115,7 +115,7 @@ import com.openexchange.proxy.ProxyRegistry;
  */
 public final class HtmlServiceImpl implements HtmlService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HtmlServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlServiceImpl.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

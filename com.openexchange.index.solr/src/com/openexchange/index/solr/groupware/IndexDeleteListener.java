@@ -50,7 +50,6 @@
 package com.openexchange.index.solr.groupware;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -69,7 +68,7 @@ import com.openexchange.user.UserService;
  */
 public class IndexDeleteListener implements DeleteListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexDeleteListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IndexDeleteListener.class);
 
     private final int[] coreTypes;
 

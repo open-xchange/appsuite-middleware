@@ -52,7 +52,6 @@ package com.openexchange.report.appsuite.defaultHandlers;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.Report;
@@ -67,7 +66,7 @@ import com.openexchange.report.appsuite.Services;
  */
 public class ClientLoginCount implements ReportSystemHandler {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ClientLoginCount.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientLoginCount.class);
     
     @Override
     public boolean appliesTo(String reportType) {

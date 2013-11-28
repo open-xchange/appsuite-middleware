@@ -61,7 +61,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
@@ -82,7 +81,7 @@ import com.openexchange.timer.TimerService;
  */
 public class DriveEventServiceImpl implements org.osgi.service.event.EventHandler, DriveEventService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveEventServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveEventServiceImpl.class);
 
     private final List<DriveEventPublisher> publishers;
     private final ConcurrentMap<Integer, FolderBuffer> folderBuffers;

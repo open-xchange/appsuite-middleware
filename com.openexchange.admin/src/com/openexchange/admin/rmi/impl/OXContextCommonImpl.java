@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi.impl;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -83,7 +82,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         super();
     }
 
-    private final static Log log = com.openexchange.log.Log.loggerFor(OXContextCommonImpl.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextCommonImpl.class);
 
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
 

@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -72,7 +71,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
     private final ThreadLocal<Map<Integer, FileStorage>> filestorages = new ThreadLocal<Map<Integer,FileStorage>>();
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ClearLeftoverAttachmentsUpdateTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearLeftoverAttachmentsUpdateTask.class);
 
     @Override
     public int addedWithVersion() {

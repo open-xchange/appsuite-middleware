@@ -60,7 +60,7 @@ import com.openexchange.server.Initialization;
  */
 public final class MailPropertiesInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailPropertiesInit.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailPropertiesInit.class);
 
     private final AtomicBoolean started = new AtomicBoolean();
 

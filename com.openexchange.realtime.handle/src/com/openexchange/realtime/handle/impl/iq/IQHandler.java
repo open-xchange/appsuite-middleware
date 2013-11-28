@@ -50,7 +50,6 @@
 package com.openexchange.realtime.handle.impl.iq;
 
 import java.util.concurrent.BlockingQueue;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.handle.impl.AbstractStrategyHandler;
 import com.openexchange.realtime.handle.impl.HandlerStrategy;
@@ -67,7 +66,7 @@ import com.openexchange.realtime.packet.IQ.Type;
  */
 public class IQHandler extends AbstractStrategyHandler<IQ> {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(IQHandler.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IQHandler.class);
     
     public IQHandler(BlockingQueue<IQ> queue) {
         super(queue, new HandlerStrategy<IQ>());

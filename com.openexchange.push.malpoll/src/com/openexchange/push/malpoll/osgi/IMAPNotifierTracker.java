@@ -93,7 +93,7 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer<IMAPN
                     registryService.addTaskFor(MALPollPushListener.getAccountId(), listener.getSession());
                 }
                 listenerRegistry.purgeAllPushListener();
-                com.openexchange.log.Log.loggerFor(IMAPNotifierTracker.class).warn(
+                org.slf4j.LoggerFactory.getLogger(IMAPNotifierTracker.class).warn(
                     "\n\t----- /!\\ Orderly dropped MAL-Poll mail push because poll-based recent-notifier is enabled. /!\\ -----\n");
             }
             return service;

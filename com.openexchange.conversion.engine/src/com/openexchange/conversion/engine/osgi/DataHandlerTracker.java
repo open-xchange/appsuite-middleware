@@ -65,8 +65,8 @@ public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHa
 
     private static final String PROP_IDENTIFIER = "identifier";
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(DataHandlerTracker.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(DataHandlerTracker.class);
 
     private final BundleContext context;
 
@@ -101,7 +101,7 @@ public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHa
                 return null;
             }
             registry.putDataHandler(identifier, addedService);
-            LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier).append("' successfully registered"));
+            LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier).append("' successfully registered").toString());
         }
         return addedService;
     }
@@ -123,7 +123,7 @@ public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHa
                 return;
             }
             getInstance().removeDataHandler(identifier);
-            LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier).append("' successfully unregistered"));
+            LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier).append("' successfully unregistered").toString());
         } finally {
             context.ungetService(reference);
         }

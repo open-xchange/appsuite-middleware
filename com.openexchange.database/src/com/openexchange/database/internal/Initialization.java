@@ -51,7 +51,6 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -66,7 +65,7 @@ import com.openexchange.java.Strings;
  */
 public final class Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Initialization.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Initialization.class);
     private static final Initialization SINGLETON = new Initialization();
 
     private final Management management = new Management();

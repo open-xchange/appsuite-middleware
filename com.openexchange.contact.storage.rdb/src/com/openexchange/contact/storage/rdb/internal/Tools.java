@@ -55,7 +55,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
@@ -80,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class Tools {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     /**
      * Constructs a comma separated string vor the given numeric values.

@@ -62,7 +62,6 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -147,7 +146,7 @@ public class Infostore extends PermissionServlet {
     // public static final Exception2Message OXEXCEPTION_HANDLER = new
     // InfostoreException2Message();
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Infostore.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Infostore.class);
 
     private final long maxUploadSize = -1;
 
@@ -513,7 +512,7 @@ public class Infostore extends PermissionServlet {
             w.write(substituteJS("{}", ACTION_UPDATE));
             close(w);
         } catch (final IOException e) {
-            LOG.warn(e);
+            LOG.warn(e.toString());
         }
     }
 

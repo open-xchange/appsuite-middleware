@@ -90,6 +90,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.transaction.TransactionConstants;
 import org.apache.jackrabbit.webdav.transaction.TransactionInfo;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -202,7 +203,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             try {
                 unlock0(entry.getKey(), entry.getValue());
             } catch (final OXException e) {
-                com.openexchange.log.Log.loggerFor(WebDAVFileStorageFileAccess.class).error(e.getMessage(), e);
+                LoggerFactory.getLogger(WebDAVFileStorageFileAccess.class).error(e.getMessage(), e);
             }
         }
     }

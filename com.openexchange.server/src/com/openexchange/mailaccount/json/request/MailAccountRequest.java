@@ -97,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailAccountRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccountRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountRequest.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -427,7 +427,7 @@ public final class MailAccountRequest {
                     mailConfig.setPort(Integer.parseInt(sPort));
                 } catch (final NumberFormatException e) {
                     LOG.warn(new com.openexchange.java.StringAllocator().append("Cannot parse port out of string: \"").append(sPort).append(
-                        "\". Using fallback 143 instead."), e);
+                        "\". Using fallback 143 instead.").toString(), e);
                     mailConfig.setPort(143);
                 }
                 mailConfig.setServer(server.substring(0, pos));
@@ -491,7 +491,7 @@ public final class MailAccountRequest {
                 transportConfig.setPort(Integer.parseInt(sPort));
             } catch (final NumberFormatException e) {
                 LOG.warn(new com.openexchange.java.StringAllocator().append("Cannot parse port out of string: \"").append(sPort).append(
-                    "\". Using fallback 25 instead."), e);
+                    "\". Using fallback 25 instead.").toString(), e);
                 transportConfig.setPort(25);
             }
             transportConfig.setServer(server.substring(0, pos));

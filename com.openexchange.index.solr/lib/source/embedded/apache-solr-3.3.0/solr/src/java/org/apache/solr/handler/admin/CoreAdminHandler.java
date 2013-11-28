@@ -48,7 +48,7 @@ import java.util.Date;
  * @since solr 1.3
  */
 public class CoreAdminHandler extends RequestHandlerBase {
-  protected static Logger log = LoggerFactory.getLogger(CoreAdminHandler.class);
+  protected static org.slf4j.Logger log = LoggerFactory.getLogger(CoreAdminHandler.class);
   protected final CoreContainer coreContainer;
 
   public CoreAdminHandler() {

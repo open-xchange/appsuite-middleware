@@ -61,7 +61,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -111,7 +110,7 @@ public class InfostoreRequest extends CommonRequest {
 
     private final UserPermissionBits userPermissionBits;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreRequest.class);
 
     public InfostoreRequest(final ServerSession session, final JSONWriter w) {
         super(w);

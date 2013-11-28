@@ -57,7 +57,6 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,7 +73,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class LinkedInXMLParser {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinkedInXMLParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkedInXMLParser.class);
 
     private String getTextValue(final Element ele, final String tagName) {
         String textVal = null;
@@ -184,11 +183,11 @@ public class LinkedInXMLParser {
             	throw OXException.general(message);
             }
         } catch (final ParserConfigurationException pce) {
-            LOG.error(pce);
+            LOG.error(pce.getMessage(), pce);
         } catch (final SAXException se) {
-            LOG.error(se);
+            LOG.error(se.getMessage(), se);
         } catch (final IOException ioe) {
-            LOG.error(ioe);
+            LOG.error(ioe.getMessage(), ioe);
         }
         return contacts;
     }
@@ -202,11 +201,11 @@ public class LinkedInXMLParser {
             final Contact contact = parse(root);
             return contact;
         } catch (final ParserConfigurationException pce) {
-            LOG.error(pce);
+            LOG.error(pce.getMessage(), pce);
         } catch (final SAXException se) {
-            LOG.error(se);
+            LOG.error(se.getMessage(), se);
         } catch (final IOException ioe) {
-            LOG.error(ioe);
+            LOG.error(ioe.getMessage(), ioe);
         }
         return null;
     }

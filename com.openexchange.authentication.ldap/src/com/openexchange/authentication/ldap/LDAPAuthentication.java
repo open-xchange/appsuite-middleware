@@ -62,7 +62,6 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -117,7 +116,7 @@ public class LDAPAuthentication implements AuthenticationService {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LDAPAuthentication.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPAuthentication.class);
 
     /**
      * Properties for the JNDI context.

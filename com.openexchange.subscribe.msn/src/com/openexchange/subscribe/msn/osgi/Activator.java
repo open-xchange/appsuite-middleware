@@ -48,7 +48,6 @@
  */
 package com.openexchange.subscribe.msn.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;
@@ -64,7 +63,7 @@ public class Activator extends HousekeepingActivator {
 
     private MSNService msnService;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

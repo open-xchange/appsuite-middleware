@@ -54,8 +54,6 @@ import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.tools.NodeProbe;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -65,7 +63,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ClusterUtils {
 
-    private static Log log = com.openexchange.log.Log.loggerFor(ClusterUtils.class);
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ClusterUtils.class);
 
     /**
      * Re-Balance the cluster by assigning a new token to each node.

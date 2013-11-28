@@ -54,12 +54,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.webdav.action.WebdavRequest;
 
 public class RequestSpecificBehaviourRegistry {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(RequestSpecificBehaviourRegistry.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestSpecificBehaviourRegistry.class);
 
 
 	//Generic-o-rama! Is it just me or does Java start to gain the same aesthetic appeal as c++?

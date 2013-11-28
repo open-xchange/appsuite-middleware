@@ -95,7 +95,7 @@ import com.sun.mail.util.PropUtil;
 public class QueuingIMAPStore extends IMAPStore {
 
     /** The logger */
-    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(QueuingIMAPStore.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QueuingIMAPStore.class);
 
     /**
      * Gets the logger.

@@ -91,7 +91,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     private static final int DEFAULT_BUF_SIZE = 0x2000;
 
-    private static transient final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DataMailPart.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataMailPart.class);
 
     private static final int MB = 1048576;
 
@@ -327,7 +327,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         if (LOG.isInfoEnabled()) {
             LOG.info(new com.openexchange.java.StringAllocator("Data mail part exeeds ").append(
                 Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue()).append(
-                "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()));
+                "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()).toString());
         }
     }
 

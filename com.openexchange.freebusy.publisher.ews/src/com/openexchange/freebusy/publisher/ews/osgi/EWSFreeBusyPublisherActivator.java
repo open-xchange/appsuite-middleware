@@ -50,7 +50,6 @@
 package com.openexchange.freebusy.publisher.ews.osgi;
 
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.ews.EWSFactoryService;
@@ -70,7 +69,7 @@ import com.openexchange.user.UserService;
  */
 public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(EWSFreeBusyPublisherActivator.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EWSFreeBusyPublisherActivator.class);
 
     private ScheduledTimerTask publishTask = null;
 

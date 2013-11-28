@@ -74,7 +74,6 @@ import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -166,7 +165,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     private static final long serialVersionUID = -889739420660750770L;
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Folder.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Folder.class);
 
     private static final AdditionalFolderFieldList FIELDS = new AdditionalFolderFieldList();
 
@@ -714,7 +713,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 final JSONArray[] arrays = new JSONArray[size];
                                 final CompletionFuture<Object> completionFuture;
                                 {
-                                    final Log logger = LOG;
+                                    final org.slf4j.Logger logger = LOG;
                                     final List<Task<Object>> tasks = new ArrayList<Task<Object>>(size);
                                     int sz = accounts.size();
                                     int index = 0;
@@ -1585,7 +1584,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     final JSONArray[] arrays = new JSONArray[accountSize];
                     final CompletionFuture<Object> completionFuture;
                     {
-                        final Log logger = LOG;
+                        final org.slf4j.Logger logger = LOG;
                         final List<Task<Object>> tasks = new ArrayList<Task<Object>>(accountSize);
                         int sz = accounts.size();
                         for (int i = 0; i < sz; i++) {
@@ -2442,7 +2441,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         private final ServerSession session;
 
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
         private final MailAccount mailAccount;
 
@@ -2450,7 +2449,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         private final int index;
 
-        MailRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final Log logger, final MailAccount mailAccount, final int[] columns, final int index) {
+        MailRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final org.slf4j.Logger logger, final MailAccount mailAccount, final int[] columns, final int index) {
             this.arrays = arrays;
             this.session = session;
             this.logger = logger;
@@ -2517,7 +2516,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         private final ServerSession session;
 
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
         private final MessagingAccount messagingAccount;
 
@@ -2525,7 +2524,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         private final int index;
 
-        MessagingRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final Log logger, final MessagingAccount messagingAccount, final int[] columns, final int index) {
+        MessagingRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final org.slf4j.Logger logger, final MessagingAccount messagingAccount, final int[] columns, final int index) {
             this.arrays = arrays;
             this.session = session;
             this.logger = logger;

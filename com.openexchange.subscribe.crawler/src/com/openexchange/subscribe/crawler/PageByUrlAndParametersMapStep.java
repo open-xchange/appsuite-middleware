@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -73,7 +72,7 @@ public class PageByUrlAndParametersMapStep extends AbstractStep<HtmlPage, Object
 
     private Map<String, String> parameters;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PageByUrlAndParametersMapStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByUrlAndParametersMapStep.class);
 
     public PageByUrlAndParametersMapStep(){
 

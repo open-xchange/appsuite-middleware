@@ -61,8 +61,7 @@ import com.openexchange.session.Session;
  */
 public final class PropertyMapManagement {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(PropertyMapManagement.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyMapManagement.class);
 
     private static final PropertyMapManagement INSTANCE = new PropertyMapManagement();
 

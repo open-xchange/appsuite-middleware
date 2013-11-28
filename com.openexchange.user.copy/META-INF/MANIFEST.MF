@@ -50,5 +50,6 @@ Import-Package: com.openexchange.context,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Export-Package: com.openexchange.user.copy

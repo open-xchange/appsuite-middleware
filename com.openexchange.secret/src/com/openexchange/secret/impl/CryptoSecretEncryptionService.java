@@ -50,7 +50,6 @@
 package com.openexchange.secret.impl;
 
 import java.security.GeneralSecurityException;
-import org.apache.commons.logging.Log;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -70,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public class CryptoSecretEncryptionService<T> implements SecretEncryptionService<T> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CryptoSecretEncryptionService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CryptoSecretEncryptionService.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -101,8 +101,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Appointment sequencies are broken up into individual appointments and each occurrence of a sequence in the requested range is returned separately. The appointments are sorted in ascending order by the field start_date.")
 public final class AllAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(AllAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
     /**
      * Initializes a new {@link AllAction}.

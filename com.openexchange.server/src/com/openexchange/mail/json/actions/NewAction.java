@@ -55,7 +55,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -114,7 +113,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 responseDescription = "Object ID of the newly created/moved mail.")
 public final class NewAction extends AbstractMailAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(NewAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final String FLAGS = MailJSONField.FLAGS.getKey();

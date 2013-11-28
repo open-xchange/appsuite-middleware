@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -87,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class RTAction implements AJAXActionService {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(RTAction.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RTAction.class);
 
     public final static String ACKS = "acks";
 

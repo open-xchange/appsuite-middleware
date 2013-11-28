@@ -68,7 +68,7 @@ import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
  */
 public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrackerCustomizer<POP3StorageProvider,POP3StorageProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(POP3StorageProviderServiceTrackerCustomizer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3StorageProviderServiceTrackerCustomizer.class);
 
     private final BundleContext context;
 
@@ -118,11 +118,11 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
             }
             registrationMap.put(provider.getPOP3StorageName(), registrations);
             LOG.info(new StringBuilder(64).append("POP3 storage provider for name '").append(providerName).append(
-                "' successfully registered"));
+                "' successfully registered").toString());
             return true;
         }
         LOG.warn(new StringBuilder(64).append("POP3 storage provider for name '").append(providerName).append("' could not be added.").append(
-            " Another provider with the same name has already been registered."));
+            " Another provider with the same name has already been registered.").toString());
         return false;
     }
 

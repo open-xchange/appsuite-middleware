@@ -35,5 +35,6 @@ Import-Package: com.openexchange.capabilities,
  org.scribe.model,
  org.scribe.oauth,
  org.scribe.services,
- org.scribe.utils
+ org.scribe.utils,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.oauth.xing.osgi.XingOAuthActivator

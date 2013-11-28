@@ -69,7 +69,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public final class CollectionCharsetProvider extends CharsetProvider {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CollectionCharsetProvider.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CollectionCharsetProvider.class);
 
     private final Map<String, Charset> charsetMap;
 

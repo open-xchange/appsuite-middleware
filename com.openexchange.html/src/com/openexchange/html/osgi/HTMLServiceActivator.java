@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Properties;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
@@ -84,7 +83,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public class HTMLServiceActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HTMLServiceActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTMLServiceActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

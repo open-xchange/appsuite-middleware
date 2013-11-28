@@ -58,7 +58,6 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -79,7 +78,7 @@ public final class HtmlParser {
 
     private static final String FEATURE_RELAXED = "http://xmlpull.org/v1/doc/features.html#relaxed";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HtmlParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlParser.class);
 
     private static final int INT_IS_EMPTY_TAG = 1;
 

@@ -61,7 +61,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -81,7 +80,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 public class ContextLoader implements Filter<Integer, Context> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContextLoader.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextLoader.class);
 
     private final AdminCache cache;
 

@@ -54,7 +54,6 @@ import java.io.OutputStream;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -90,7 +89,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
     private static final String _invalidMethodError = "invalid method!";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(folders.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(folders.class);
 
     /**
      * Initializes a new {@link folders}

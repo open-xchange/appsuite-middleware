@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.exception.OXException;
@@ -204,7 +203,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
     private InfostoreSecurity security;
     private DBProvider provider;
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreWebdavFactory.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreWebdavFactory.class);
 
 
     @Override

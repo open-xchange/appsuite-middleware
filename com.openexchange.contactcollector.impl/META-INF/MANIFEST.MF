@@ -48,4 +48,5 @@ Import-Package: com.openexchange.api2,
  javax.mail.internet,
  javax.mail.internet.idn,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"

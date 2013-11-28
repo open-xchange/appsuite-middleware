@@ -72,7 +72,6 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
@@ -89,7 +88,7 @@ import com.openexchange.groupware.update.internal.UpdateProcess;
  */
 public final class UpdateTaskMBean implements DynamicMBean {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UpdateTaskMBean.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskMBean.class);
 
     private final MBeanInfo mbeanInfo;
 

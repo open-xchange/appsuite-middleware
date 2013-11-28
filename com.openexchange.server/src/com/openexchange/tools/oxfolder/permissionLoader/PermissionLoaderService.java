@@ -77,7 +77,6 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -104,7 +103,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
  */
 public final class PermissionLoaderService implements Runnable {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(PermissionLoaderService.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermissionLoaderService.class);
 
     private static volatile PermissionLoaderService instance;
 

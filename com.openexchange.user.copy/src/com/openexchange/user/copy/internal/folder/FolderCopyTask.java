@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -92,7 +91,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  */
 public class FolderCopyTask implements CopyUserTaskService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCopyTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCopyTask.class);
 
     private static final String SELECT_FOLDERS =
         "SELECT "+

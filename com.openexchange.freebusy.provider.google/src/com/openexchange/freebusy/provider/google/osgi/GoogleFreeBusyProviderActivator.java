@@ -49,7 +49,6 @@
 
 package com.openexchange.freebusy.provider.google.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 import com.openexchange.freebusy.provider.google.GoogleFreeBusyProvider;
@@ -63,7 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class GoogleFreeBusyProviderActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(GoogleFreeBusyProviderActivator.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GoogleFreeBusyProviderActivator.class);
 
     /**
      * Initializes a new {@link GoogleFreeBusyProviderActivator}.

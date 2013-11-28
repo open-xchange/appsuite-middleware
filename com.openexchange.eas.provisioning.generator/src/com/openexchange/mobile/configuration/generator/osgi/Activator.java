@@ -52,7 +52,6 @@ package com.openexchange.mobile.configuration.generator.osgi;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
@@ -71,7 +70,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     public static final String ALIAS = "/servlet/mobileconfig";
 

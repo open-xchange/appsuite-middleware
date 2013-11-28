@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class DeletePerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DeletePerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeletePerformer.class);
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

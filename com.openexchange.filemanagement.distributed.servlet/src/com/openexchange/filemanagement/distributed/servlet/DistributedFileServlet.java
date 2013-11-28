@@ -61,6 +61,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -109,10 +110,10 @@ public class DistributedFileServlet extends HttpServlet {
                 outStream.write(bytesRead);
             }
         } catch (OXException e) {
-            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error(e.getMessage(), e);
         } finally {
-            inStream.close();
-            outStream.close();
+            Streams.close(inStream);
+            Streams.close(outStream);
         }
     }
 
@@ -133,7 +134,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.getByID(id);
         } catch (OXException e) {
-            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error(e.getMessage(), e);
         }
     }
 
@@ -149,7 +150,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.removeByID(id);
         } catch (OXException e) {
-            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error(e.getMessage(), e);
         }
     }
 }

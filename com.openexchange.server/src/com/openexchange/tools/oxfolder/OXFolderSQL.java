@@ -94,7 +94,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderSQL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXFolderSQL.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderSQL.class);
 
     /**
      * Initializes a new OXFolderSQL

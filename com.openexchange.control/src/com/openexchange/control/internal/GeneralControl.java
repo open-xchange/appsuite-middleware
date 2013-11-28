@@ -72,7 +72,7 @@ import com.openexchange.version.Version;
  */
 public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GeneralControl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GeneralControl.class);
 
     private MBeanServer server;
 
@@ -312,7 +312,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
     @Override
     public void postRegister(final Boolean registrationDone) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
+            LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone).toString());
         }
     }
 

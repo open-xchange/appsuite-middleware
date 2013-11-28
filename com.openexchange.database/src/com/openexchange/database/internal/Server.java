@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -66,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public final class Server {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Server.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Server.class);
 
     private static final String PROPERTY_NAME = "SERVER_NAME";
 

@@ -51,16 +51,13 @@ package com.openexchange.tools.regex;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ParseCookiesTest extends TestCase {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(ParseCookiesTest.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParseCookiesTest.class);
 
     /**
      * @param name
@@ -75,11 +72,11 @@ public final class ParseCookiesTest extends TestCase {
         final String version = "$Version=0";
         assertTrue(RFC2616Regex.COOKIE_VERSION.matcher(version).matches());
 
-        LOG.info(RFC2616Regex.COOKIE_VALUE);
+        LOG.info(RFC2616Regex.COOKIE_VALUE.toString());
         final String simple = "sessionid=aaa713ea6275b42205f040c6614701b7";
         assertTrue(RFC2616Regex.COOKIE_VALUE.matcher(simple).matches());
 
-        LOG.info(RFC2616Regex.COOKIES);
+        LOG.info(RFC2616Regex.COOKIES.toString());
         final String firstCookie = "$Version=0; sessionid=aaa713ea6275b42205f040c6614701b7";
         assertTrue(RFC2616Regex.COOKIES.matcher(firstCookie).matches());
 

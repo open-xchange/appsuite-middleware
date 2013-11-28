@@ -27,5 +27,6 @@ Import-Package: com.openexchange.authentication,
  javax.mail.internet.idn,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.authentication.imap.osgi.ActivatorNew

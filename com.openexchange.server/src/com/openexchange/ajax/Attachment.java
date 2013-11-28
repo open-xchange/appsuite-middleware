@@ -62,7 +62,6 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -127,7 +126,7 @@ public class Attachment extends PermissionServlet {
         ATTACHMENT_BASE.setTransactional(true);
     }
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Attachment.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Attachment.class);
 
 
     private long maxUploadSize = -2;

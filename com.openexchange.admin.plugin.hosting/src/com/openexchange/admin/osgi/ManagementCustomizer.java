@@ -51,7 +51,6 @@ package com.openexchange.admin.osgi;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -65,7 +64,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class ManagementCustomizer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManagementCustomizer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementCustomizer.class);
 
     private final BundleContext context;
 

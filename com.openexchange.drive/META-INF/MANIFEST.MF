@@ -45,5 +45,6 @@ Import-Package: com.openexchange.ajax.container,
  javax.mail,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.service.event
+ org.osgi.service.event,
+ org.slf4j;version="1.7.5"
 Export-Package: com.openexchange.drive

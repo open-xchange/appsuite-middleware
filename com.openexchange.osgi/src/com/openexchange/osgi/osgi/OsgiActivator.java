@@ -49,7 +49,6 @@
 
 package com.openexchange.osgi.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -79,7 +78,7 @@ public class OsgiActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.loggerFor(OsgiActivator.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OsgiActivator.class);
         logger.info("starting bundle: com.openexchange.osgi");
         try {
             registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
@@ -96,7 +95,7 @@ public class OsgiActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.loggerFor(OsgiActivator.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OsgiActivator.class);
         logger.info("stopping bundle: com.openexchange.osgi");
         try {
             final ConsoleActivator consoleActivator = this.consoleActivator;

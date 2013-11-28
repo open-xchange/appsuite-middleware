@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
@@ -103,7 +102,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class LoginPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginPerformer.class);
 
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 

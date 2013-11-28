@@ -48,7 +48,6 @@
  */
 package com.openexchange.groupware.infostore.webdav;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.FolderEventInterface;
@@ -63,7 +62,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class LockCleaner implements FolderEventInterface, EventHandler {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(LockCleaner.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LockCleaner.class);
 
 	private final EntityLockManager infoLockManager;
 	private final FolderLockManager folderLockManager;
@@ -80,7 +79,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
             final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
             folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (final OXException e) {
-			LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
+			LOG.error("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
 		}
     }
 
@@ -102,7 +101,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
                 ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
                 infoLockManager.removeAll(id, session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()));
             } catch (OXException e) {
-                LOG.fatal("Couldn't remove locks from infoitem. Run the consistency tool.", e);
+                LOG.error("Couldn't remove locks from infoitem. Run the consistency tool.", e);
             } catch (NumberFormatException e) {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
                 LOG.debug(e.getMessage(), e);

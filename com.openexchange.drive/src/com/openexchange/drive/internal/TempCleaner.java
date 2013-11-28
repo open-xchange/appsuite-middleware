@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.checksum.ChecksumStore;
@@ -82,7 +81,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public class TempCleaner implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TempCleaner.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TempCleaner.class);
     private static final long MILLIS_PER_HOUR = 1000 * 60 * 60;
     private static final String PARAM_LAST_CLEANER_RUN = "com.openexchange.drive.lastCleanerRun";
 

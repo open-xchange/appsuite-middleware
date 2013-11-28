@@ -112,7 +112,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "(not IMAP: with timestamp): An JSON object containing all data of the requested mail. The fields of the object are listed in Detailed mail data. The fields id and attachment are not included. NOTE: Of course response is not a JSON object if either parameter hdr or parameter src are set to \"1\". Then the response contains plain text. Moreover if optional parameter save is set to \"1\" the complete message source is going to be directly written to output stream to open browser's save dialog.")
 public final class GetAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GetAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
     private static final byte[] CHUNK1 = "{\"data\":\"".getBytes();
     private static final byte[] CHUNK2 = "\"}".getBytes();

@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.CountDownLatch;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
@@ -72,8 +72,8 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
  */
 public final class CoyoteTask implements Task<Object> {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(CoyoteTask.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(CoyoteTask.class);
 
     /**
      * The client socket.
@@ -212,7 +212,7 @@ public final class CoyoteTask implements Task<Object> {
         try {
             s.close();
         } catch (final IOException e) {
-            final Log log = com.openexchange.log.Log.loggerFor(CoyoteTask.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CoyoteTask.class);
             if (log.isDebugEnabled()) {
                 log.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
             }

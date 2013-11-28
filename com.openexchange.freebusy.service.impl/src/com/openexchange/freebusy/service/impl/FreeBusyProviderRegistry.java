@@ -51,7 +51,6 @@ package com.openexchange.freebusy.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
 
 /**
@@ -63,7 +62,7 @@ import com.openexchange.freebusy.provider.FreeBusyProvider;
  */
 public class FreeBusyProviderRegistry {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(FreeBusyProviderRegistry.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyProviderRegistry.class);
 
     private final List<FreeBusyProvider> providers;
 

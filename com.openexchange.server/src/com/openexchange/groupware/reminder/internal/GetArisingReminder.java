@@ -53,7 +53,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -78,7 +77,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class GetArisingReminder {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GetArisingReminder.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetArisingReminder.class);
     private static final ReminderStorage STORAGE = ReminderStorage.getInstance();
 
     private final Session session;

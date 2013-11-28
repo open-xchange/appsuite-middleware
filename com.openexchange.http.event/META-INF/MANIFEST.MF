@@ -39,5 +39,6 @@ Import-Package: com.hazelcast.cluster,
  com.openexchange.server,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.http.event.osgi.HttpEventActivator

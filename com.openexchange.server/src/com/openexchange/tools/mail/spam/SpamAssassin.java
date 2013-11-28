@@ -67,7 +67,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class SpamAssassin {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SpamAssassin.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamAssassin.class);
 
     private static final String STR_SPAMASSASSIN = "SpamAssassin result: ";
 

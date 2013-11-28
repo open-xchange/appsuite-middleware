@@ -49,7 +49,6 @@
 
 package com.openexchange.report.internal;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.report.Constants;
@@ -62,7 +61,7 @@ import com.openexchange.server.Initialization;
  */
 public class ReportingInit implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReportingInit.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingInit.class);
 
     private final ManagementService managementService;
 

@@ -80,7 +80,7 @@ public class JSlobActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(JSlobActivator.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JSlobActivator.class);
         logger.info("Starting bundle: com.openexchange.jslob");
         try {
             /*

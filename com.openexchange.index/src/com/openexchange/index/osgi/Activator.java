@@ -50,7 +50,6 @@
 package com.openexchange.index.osgi;
 
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexManagementMBean;
@@ -68,7 +67,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
 
     @Override

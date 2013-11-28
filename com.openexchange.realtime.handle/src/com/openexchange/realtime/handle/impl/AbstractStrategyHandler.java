@@ -50,7 +50,6 @@
 package com.openexchange.realtime.handle.impl;
 
 import java.util.concurrent.BlockingQueue;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -65,7 +64,7 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public abstract class AbstractStrategyHandler<T extends Stanza> implements StrategyHandler<T>, Runnable {
     
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractStrategyHandler.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractStrategyHandler.class);
     
     protected final BlockingQueue<T> queue;
     

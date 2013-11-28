@@ -1,6 +1,5 @@
 package com.openexchange.ajax.contact;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.Contact;
@@ -15,7 +14,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug4409Test extends ContactTest {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug4409Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4409Test.class);
     private int objectId = -1;
 
 	public Bug4409Test(final String name) {

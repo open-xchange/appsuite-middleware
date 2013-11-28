@@ -54,7 +54,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.session.PutIfAbsent;
@@ -84,7 +83,7 @@ public final class SessionImpl implements PutIfAbsent {
     private volatile boolean tranzient;
     private final ConcurrentMap<String, Object> parameters;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
 
     /**
      * Initializes a new {@link SessionImpl}
@@ -163,7 +162,7 @@ public final class SessionImpl implements PutIfAbsent {
      * @param s The session to compare with
      * @param logger The logger
      */
-    public void logDiff(final SessionImpl s, final Log logger) {
+    public void logDiff(final SessionImpl s, final org.slf4j.Logger logger) {
         if (null == s || null == logger) {
             return;
         }
@@ -181,7 +180,7 @@ public final class SessionImpl implements PutIfAbsent {
         sb.append(String.format(format, "Local IP", localIp, s.localIp));
         sb.append(String.format(format, "Random-Token", randomToken, s.randomToken));
         sb.append(String.format(format, "Hash", hash, s.hash));
-        logger.info(sb);
+        logger.info(sb.toString());
     }
 
     /**

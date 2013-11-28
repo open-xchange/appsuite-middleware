@@ -77,7 +77,7 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  */
 public final class CheckPermissionOnInsert extends CheckPermission {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CheckPermissionOnInsert.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckPermissionOnInsert.class);
 
     /**
      * Initializes a new {@link CheckPermissionOnInsert}

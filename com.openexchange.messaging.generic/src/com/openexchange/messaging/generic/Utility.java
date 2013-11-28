@@ -185,12 +185,12 @@ public final class Utility {
         try {
             return future.get();
         } catch (final InterruptedException e) {
-            com.openexchange.log.Log.loggerFor(Utility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(Utility.class).error(e.getMessage(), e);
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            com.openexchange.log.Log.loggerFor(Utility.class).error(cause.getMessage(), cause);
+            org.slf4j.LoggerFactory.getLogger(Utility.class).error(cause.getMessage(), cause);
             return DEFAULT_MAIL_DATE_FORMAT;
         }
     }

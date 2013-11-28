@@ -55,7 +55,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -64,7 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class Tools {
 
-    public static final Map<String, Integer> getAllSchemata(final Log logger) throws SQLException, OXException {
+    public static final Map<String, Integer> getAllSchemata(final org.slf4j.Logger logger) throws SQLException, OXException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         final Map<String, Integer> schemaMap = new LinkedHashMap<String, Integer>(50); // Keep insertion order
         {

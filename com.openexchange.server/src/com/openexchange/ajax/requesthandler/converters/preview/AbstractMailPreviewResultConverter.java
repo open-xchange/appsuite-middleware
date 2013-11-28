@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -67,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 abstract class AbstractMailPreviewResultConverter implements ResultConverter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailPreviewResultConverter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailPreviewResultConverter.class);
 
     protected final AbstractPreviewResultConverter resultConverter;
 

@@ -51,7 +51,6 @@ package com.openexchange.management.internal;
 
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
@@ -69,7 +68,7 @@ public final class ManagementInit implements Initialization {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManagementInit.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementInit.class);
 
     /**
      * Prevent instantiation.

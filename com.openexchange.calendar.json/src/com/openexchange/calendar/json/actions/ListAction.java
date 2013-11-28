@@ -95,8 +95,8 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class ListAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(ListAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ListAction.class);
 
     /**
      * Initializes a new {@link ListAction}.

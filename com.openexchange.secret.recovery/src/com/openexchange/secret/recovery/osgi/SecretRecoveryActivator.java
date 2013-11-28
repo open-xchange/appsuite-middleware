@@ -51,7 +51,6 @@ package com.openexchange.secret.recovery.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -130,7 +129,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
              * Register appropriate event handler
              */
             {
-                final Log log = com.openexchange.log.Log.loggerFor(SecretRecoveryActivator.class);
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecretRecoveryActivator.class);
                 final EventHandler eventHandler = new EventHandler() {
 
                     @Override

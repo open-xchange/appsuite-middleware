@@ -54,7 +54,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
@@ -78,7 +77,7 @@ import com.openexchange.passwordchange.PasswordChangeService;
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManifestJSONActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestJSONActivator.class);
 
     /**
      * Initializes a new {@link ManifestJSONActivator}.

@@ -1,6 +1,5 @@
 package com.openexchange.webdav.xml.appointment;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -11,7 +10,7 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class Bug5933Test extends AppointmentTest {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug5933Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug5933Test.class);
 
 	public Bug5933Test(final String name) {
 		super(name);

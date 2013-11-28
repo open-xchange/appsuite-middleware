@@ -25,6 +25,7 @@ Import-Package: com.openexchange.ajax.osgi,
  com.openexchange.templating,
  com.openexchange.tools.session,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.openexchange.server

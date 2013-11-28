@@ -74,7 +74,7 @@ import org.xml.sax.InputSource;
  */
 public class QueryElevationComponent extends SearchComponent implements SolrCoreAware
 {
-  private static Logger log = LoggerFactory.getLogger(QueryElevationComponent.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(QueryElevationComponent.class);
   
   // Constants used in solrconfig.xml
   static final String FIELD_TYPE = "queryFieldType";

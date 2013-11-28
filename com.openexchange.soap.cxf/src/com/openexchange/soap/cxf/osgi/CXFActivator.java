@@ -52,7 +52,6 @@ package com.openexchange.soap.cxf.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.common.logging.LogUtils;
@@ -83,7 +82,7 @@ public class CXFActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(CXFActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
             LogUtils.setLoggerClass(CommonsLoggingLogger.class);

@@ -60,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -107,7 +106,7 @@ public class AppointmentWriter extends CalendarWriter {
     protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED,
             Appointment.RECURRENCE_ID };
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentWriter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentWriter.class);
 
     /**
      * Initializes a new {@link AppointmentWriter}.

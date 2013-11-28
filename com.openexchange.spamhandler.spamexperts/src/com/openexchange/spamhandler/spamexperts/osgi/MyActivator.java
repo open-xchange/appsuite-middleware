@@ -51,7 +51,6 @@ package com.openexchange.spamhandler.spamexperts.osgi;
 
 import static com.openexchange.spamhandler.spamexperts.osgi.MyServiceRegistry.getServiceRegistry;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 
 import com.openexchange.config.ConfigurationService;
@@ -65,7 +64,7 @@ import com.openexchange.user.UserService;
 
 public class MyActivator extends HousekeepingActivator {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(MyActivator.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MyActivator.class);
 
 	private HTTPServletRegistration servletRegistration;
 

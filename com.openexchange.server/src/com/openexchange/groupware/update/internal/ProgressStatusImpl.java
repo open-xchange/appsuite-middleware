@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.internal;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.update.ProgressState;
 
 /**
@@ -59,7 +58,7 @@ import com.openexchange.groupware.update.ProgressState;
  */
 public class ProgressStatusImpl implements ProgressState {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ProgressStatusImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ProgressStatusImpl.class);
 
     /**
      * Log every 10 seconds the state.

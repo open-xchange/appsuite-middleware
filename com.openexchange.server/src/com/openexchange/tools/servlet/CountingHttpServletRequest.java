@@ -62,7 +62,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.Parameterizable;
@@ -79,7 +78,7 @@ import com.openexchange.tools.stream.CountingInputStream;
  */
 public final class CountingHttpServletRequest implements HttpServletRequest, Parameterizable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CountingHttpServletRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CountingHttpServletRequest.class);
     private static final boolean INFO = LOG.isInfoEnabled();
 
     private static final String LINE_SEP = System.getProperty("line.separator");

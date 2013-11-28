@@ -64,8 +64,8 @@ import com.openexchange.mail.smal.impl.SmalMailProviderRegistry;
  */
 public final class SmalProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider, MailProvider> {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(SmalProviderServiceTracker.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(SmalProviderServiceTracker.class);
 
     private final BundleContext context;
 
@@ -89,11 +89,11 @@ public final class SmalProviderServiceTracker implements ServiceTrackerCustomize
         try {
             if (SmalMailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
                 LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                    "' successfully registered in SMAL registry."));
+                    "' successfully registered in SMAL registry.").toString());
             } else {
                 if (!Protocol.ALL.equals(protocol.toString())) {
                     LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                        "' could not be added to SMAL registry.").append(" Another provider which supports the protocol has already been registered."));
+                        "' could not be added to SMAL registry.").append(" Another provider which supports the protocol has already been registered.").toString());
                     context.ungetService(reference);
                 }
                 context.ungetService(reference);
@@ -119,7 +119,7 @@ public final class SmalProviderServiceTracker implements ServiceTrackerCustomize
                 final MailProvider provider = service;
                 SmalMailProviderRegistry.unregisterMailProvider(provider);
                 LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
-                    "' successfully unregistered from SMAL registry."));
+                    "' successfully unregistered from SMAL registry.").toString());
             } finally {
                 context.ungetService(reference);
             }

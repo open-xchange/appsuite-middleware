@@ -62,7 +62,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,7 +90,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
 
     private List<NameValuePair> parameters;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GMXAndWebDeAPIStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GMXAndWebDeAPIStep.class);
 
     public GMXAndWebDeAPIStep() {
         super();
@@ -183,7 +182,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     try {
                         base64Encoded = new String(encoder.encode(toEncode.getBytes("UTF-8")));
                     } catch (UnsupportedEncodingException e2) {
-                        LOG.error(e2);
+                        LOG.error(e2.toString());
                     }
 
                     // remove the whitespaces otherwise there is an error
@@ -257,7 +256,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     if (contactJSON.has("company")) {
                         contact.setCompany(contactJSON.getString("company"));
                     }
-                    
+
                     //setting the displayname
                     if (contactJSON.has("name") && contactJSON.has("firstName")){
                     	contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
@@ -466,11 +465,11 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     contacts.add(contact);
                     // An error in parsing one contact should not bring them all down
                 } catch (final JSONException e) {
-                    LOG.error(e);
+                    LOG.error(e.toString());
                 }
             }
         } catch (final JSONException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
         }
         return contacts;
     }

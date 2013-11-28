@@ -54,7 +54,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link RealtimeException}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class RealtimeException extends OXException {
@@ -239,7 +239,7 @@ public class RealtimeException extends OXException {
     }
 
     @Override
-    public void log(Log log) {
+    public void log(Logger log) {
         delegate.log(log);
     }
 

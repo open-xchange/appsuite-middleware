@@ -51,11 +51,9 @@ package com.openexchange.ajax.itip.actions;
 
 import java.util.List;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.itip.ITipAnalysisWriter;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.calendar.itip.ITipAnalysis;

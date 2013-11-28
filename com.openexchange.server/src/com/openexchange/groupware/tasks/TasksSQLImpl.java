@@ -52,7 +52,6 @@ package com.openexchange.groupware.tasks;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -71,7 +70,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class TasksSQLImpl implements TasksSQLInterface {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TasksSQLImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TasksSQLImpl.class);
 
     private final Session session;
 

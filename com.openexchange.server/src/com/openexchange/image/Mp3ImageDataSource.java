@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -106,7 +105,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class Mp3ImageDataSource implements ImageDataSource {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Mp3ImageDataSource.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Mp3ImageDataSource.class);
 
     private static final Mp3ImageDataSource INSTANCE = new Mp3ImageDataSource();
 

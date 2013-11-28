@@ -52,7 +52,6 @@ import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.CommonsLoggingLogger;
-import com.openexchange.log.Log;
 
 /**
  * {@link DocLiteralInInterceptor} - A rewrite of {@code org.apache.cxf.interceptor.DocLiteralInInterceptor} class for less strict parsing

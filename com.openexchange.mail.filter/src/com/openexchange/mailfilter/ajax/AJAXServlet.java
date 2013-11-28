@@ -56,7 +56,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
@@ -87,7 +86,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3006497622205429579L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AJAXServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXServlet.class);
 
     private static final String PARAMETER_SESSION = com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 

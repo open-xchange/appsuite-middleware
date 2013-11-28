@@ -52,7 +52,6 @@ package com.openexchange.subscribe.osgi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -77,7 +76,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AutoUpdateActivator extends HousekeepingActivator implements BundleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AutoUpdateActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoUpdateActivator.class);
 
     public static OSGiSubscriptionSourceDiscoveryCollector COLLECTOR;
 

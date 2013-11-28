@@ -62,7 +62,7 @@ import com.openexchange.counter.Counter;
  */
 public class MonitoringInfo {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MonitoringInfo.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringInfo.class);
 
     // Constants for connection types
 

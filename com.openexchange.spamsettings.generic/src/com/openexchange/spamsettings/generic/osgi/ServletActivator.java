@@ -50,7 +50,6 @@
 
 package com.openexchange.spamsettings.generic.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.DeferredActivator;
@@ -63,7 +62,7 @@ import com.openexchange.spamsettings.generic.service.SpamSettingService;
  */
 public class ServletActivator extends DeferredActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(ServletActivator.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
 
     private SpamSettingsServletRegisterer servletRegisterer;
 

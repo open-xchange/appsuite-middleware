@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @since solr 1.4
  */
 public class SnapShooter {
-  private static final Logger LOG = LoggerFactory.getLogger(SnapShooter.class.getName());
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SnapShooter.class.getName());
   private String snapDir = null;
   private SolrCore solrCore;
   private SimpleFSLockFactory lockFactory;

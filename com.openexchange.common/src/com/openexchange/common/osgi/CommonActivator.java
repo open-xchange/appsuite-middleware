@@ -76,7 +76,7 @@ public final class CommonActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        final Logger logger = LoggerFactory.getLogger(CommonActivator.class);
+        final org.slf4j.Logger logger = LoggerFactory.getLogger(CommonActivator.class);
         logger.info("Starting bundle: com.openexchange.common");
         try {
             // Add any start-up operations here
@@ -109,7 +109,7 @@ public final class CommonActivator implements BundleActivator {
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        final Logger logger = LoggerFactory.getLogger(CommonActivator.class);
+        final org.slf4j.Logger logger = LoggerFactory.getLogger(CommonActivator.class);
         logger.info("Stopping bundle: com.openexchange.common");
         try {
             // Add any shut-down operations here

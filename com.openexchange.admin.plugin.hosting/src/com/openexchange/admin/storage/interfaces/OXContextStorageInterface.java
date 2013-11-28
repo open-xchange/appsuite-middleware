@@ -53,7 +53,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -82,7 +81,7 @@ public abstract class OXContextStorageInterface {
      */
     private static Class<? extends OXContextStorageInterface> implementingClass;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXContextStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextStorageInterface.class);
 
     protected static final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
 

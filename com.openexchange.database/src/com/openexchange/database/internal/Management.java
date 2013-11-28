@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 
@@ -65,7 +64,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class Management {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Management.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Management.class);
 
     private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 

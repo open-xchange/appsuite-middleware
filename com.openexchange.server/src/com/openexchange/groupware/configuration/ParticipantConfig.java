@@ -50,7 +50,6 @@
 package com.openexchange.groupware.configuration;
 
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -64,7 +63,7 @@ public final class ParticipantConfig {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParticipantConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParticipantConfig.class);
 
     /**
      * Singleton instance.

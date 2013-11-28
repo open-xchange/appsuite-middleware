@@ -49,7 +49,6 @@
 
 package com.openexchange.version;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.version.internal.Numbers;
 
 /**
@@ -59,7 +58,7 @@ import com.openexchange.version.internal.Numbers;
  */
 public class Version {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Version.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Version.class);
 
     public static final String CODENAME = "Hyperion";
     public static final String NAME = "Open-Xchange";

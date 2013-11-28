@@ -45,7 +45,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   @SuppressWarnings("unused")
-  private static final Logger log = LoggerFactory.getLogger(KeyspaceServiceImpl.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(KeyspaceServiceImpl.class);
 
   private final String keyspaceName;
 

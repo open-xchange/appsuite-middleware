@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -74,7 +73,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class ResultIterator implements SearchIterator<Contact> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ResultIterator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResultIterator.class);
 
     private static final ContactField[] DLISTMEMBER_FIELDS = {
     	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED,
@@ -257,7 +256,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 					try {
 						searchIterator.close();
 					} catch (OXException e) {
-						LOG.warn(e);
+						LOG.warn(e.toString());
 					}
 				}
 			}

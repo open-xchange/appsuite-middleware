@@ -63,7 +63,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.Types;
@@ -94,7 +93,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  */
 public class InfostoreCopyTask implements CopyUserTaskService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreCopyTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreCopyTask.class);
 
     private static final String SELECT_INFOSTORE_MASTERS =
         "SELECT " +

@@ -49,7 +49,6 @@
 
 package com.openexchange.database.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -63,7 +62,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class TimerServiceCustomizer implements ServiceTrackerCustomizer<TimerService, TimerService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManagementServiceCustomizer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementServiceCustomizer.class);
 
     private final BundleContext context;
 

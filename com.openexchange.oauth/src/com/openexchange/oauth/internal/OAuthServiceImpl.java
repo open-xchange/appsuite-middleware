@@ -65,7 +65,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
@@ -129,7 +128,7 @@ import com.openexchange.tools.session.SessionHolder;
  */
 public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<PWUpdate>, EncryptedItemDetectorService, SecretMigrator, EncryptedItemCleanUpService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OAuthServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthServiceImpl.class);
 
     private final OAuthServiceMetaDataRegistry registry;
 
@@ -451,7 +450,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         try {
             new StatementBuilder().executeStatement(writeCon, command, values);
         } catch (final SQLException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
             if (writeCon != null) {

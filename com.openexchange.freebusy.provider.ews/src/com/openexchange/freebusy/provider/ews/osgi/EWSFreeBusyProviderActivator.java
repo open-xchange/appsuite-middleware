@@ -49,7 +49,6 @@
 
 package com.openexchange.freebusy.provider.ews.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.ews.EWSFactoryService;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
@@ -64,7 +63,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class EWSFreeBusyProviderActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(EWSFreeBusyProviderActivator.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EWSFreeBusyProviderActivator.class);
 
     /**
      * Initializes a new {@link EWSFreeBusyProviderActivator}.

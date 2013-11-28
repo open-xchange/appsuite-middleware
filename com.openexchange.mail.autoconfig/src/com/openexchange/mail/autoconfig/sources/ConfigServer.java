@@ -75,7 +75,7 @@ import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
  */
 public class ConfigServer extends AbstractConfigSource {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ConfigServer.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigServer.class);
 
     @Override
     public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {

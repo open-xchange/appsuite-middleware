@@ -53,7 +53,7 @@ public class CoreContainer
 {
   private static final String DEFAULT_DEFAULT_CORE_NAME = "collection1";
 
-  protected static Logger log = LoggerFactory.getLogger(CoreContainer.class);
+  protected static org.slf4j.Logger log = LoggerFactory.getLogger(CoreContainer.class);
   
   protected final Map<String, SolrCore> cores = new LinkedHashMap<String, SolrCore>();
   protected boolean persistent = false;

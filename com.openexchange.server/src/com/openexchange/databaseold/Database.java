@@ -50,7 +50,6 @@
 package com.openexchange.databaseold;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -62,7 +61,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class Database {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Database.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Database.class);
 
     private static volatile DatabaseService databaseService;
 

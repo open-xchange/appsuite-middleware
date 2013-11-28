@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.pooling.ExhaustedActions;
 import com.openexchange.pooling.PoolingException;
 import com.openexchange.pooling.ReentrantLockPool;
@@ -63,7 +62,7 @@ import com.openexchange.pooling.ReentrantLockPool;
  */
 public class ConnectionPool extends ReentrantLockPool<Connection> implements ConnectionPoolMBean {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(ConnectionPool.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConnectionPool.class);
 
     /**
      * Default time between checks if a connection still works.

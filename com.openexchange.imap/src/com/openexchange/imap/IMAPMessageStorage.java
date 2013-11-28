@@ -209,8 +209,8 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(IMAPMessageStorage.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(IMAPMessageStorage.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -3057,7 +3057,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         applyFlags = true;
                     } else if (DEBUG) {
                         LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
-                            " does not support user flags. Skipping forwarded flag."));
+                            " does not support user flags. Skipping forwarded flag.").toString());
                     }
                 }
                 /*
@@ -3075,7 +3075,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         applyFlags = true;
                     } else if (DEBUG) {
                         LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
-                            " does not support user flags. Skipping read-ack flag."));
+                            " does not support user flags. Skipping read-ack flag.").toString());
                     }
                 }
                 if (applyFlags) {
@@ -3193,7 +3193,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         applyFlags = true;
                     } else if (DEBUG) {
                         LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
-                            " does not support user flags. Skipping forwarded flag."));
+                            " does not support user flags. Skipping forwarded flag.").toString());
                     }
                 }
                 /*
@@ -3211,7 +3211,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         applyFlags = true;
                     } else if (DEBUG) {
                         LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
-                            " does not support user flags. Skipping read-ack flag."));
+                            " does not support user flags. Skipping read-ack flag.").toString());
                     }
                 }
                 if (applyFlags) {
@@ -3290,7 +3290,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
                 LOG.error(new com.openexchange.java.StringAllocator().append("Folder \"").append(imapFolder.getFullName()).append(
-                    "\" does not support user-defined flags. Update of color flag ignored."));
+                    "\" does not support user-defined flags. Update of color flag ignored.").toString());
                 return;
             }
             final OperationKey opKey = new OperationKey(Type.MSG_LABEL_UPDATE, accountId, new Object[] { fullName });
@@ -3370,7 +3370,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
                 LOG.error(new com.openexchange.java.StringAllocator().append("Folder \"").append(imapFolder.getFullName()).append(
-                    "\" does not support user-defined flags. Update of color flag ignored."));
+                    "\" does not support user-defined flags. Update of color flag ignored.").toString());
                 return;
             }
             final OperationKey opKey = new OperationKey(Type.MSG_LABEL_UPDATE, accountId, new Object[] { fullName });
@@ -3581,7 +3581,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     LOG.warn(
                         new com.openexchange.java.StringAllocator("SORT command on IMAP server \"").append(imapConfig.getServer()).append("\" failed with login ").append(
                             imapConfig.getLogin()).append(" (user=").append(session.getUserId()).append(", context=").append(
-                            session.getContextId()).append("): ").append(e.getMessage()),
+                            session.getContextId()).append("): ").append(e.getMessage()).toString(),
                         e);
                 }
             }

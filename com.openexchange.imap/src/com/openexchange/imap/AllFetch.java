@@ -60,7 +60,6 @@ import java.util.Date;
 import java.util.List;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.util.ImapUtility;
@@ -97,7 +96,7 @@ public final class AllFetch {
     /**
      * The logger constant.
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AllFetch.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllFetch.class);
 
     /**
      * Whether debug logging is enabled.
@@ -122,7 +121,7 @@ public final class AllFetch {
          * @throws MessagingException If a messaging error occurs
          * @throws OXException If a mail error occurs
          */
-        public abstract void handleItem(final Item item, final MailMessage m, final org.apache.commons.logging.Log logger) throws OXException;
+        public abstract void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException;
     }
 
     /**
@@ -135,7 +134,7 @@ public final class AllFetch {
         INTERNALDATE("INTERNALDATE", INTERNALDATE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final Log logger) {
+            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
                 m.setReceivedDate(((INTERNALDATE) item).getDate());
             }
         }),
@@ -145,7 +144,7 @@ public final class AllFetch {
         UID("UID", UID.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final Log logger) {
+            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
                 m.setMailId(Long.toString(((UID) item).uid));
             }
         }),
@@ -155,7 +154,7 @@ public final class AllFetch {
         FLAGS("FLAGS", FLAGS.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
+            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException {
                 MimeMessageConverter.parseFlags((FLAGS) item, m);
             }
         }),
@@ -165,7 +164,7 @@ public final class AllFetch {
         BODYSTRUCTURE("BODYSTRUCTURE", BODYSTRUCTURE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final Log logger) throws OXException {
+            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException {
                 final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
                 final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
                 sb.append(bs.type).append('/').append(bs.subtype);
@@ -189,7 +188,7 @@ public final class AllFetch {
         SIZE("RFC822.SIZE", RFC822SIZE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final Log logger) {
+            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
                 m.setSize(((RFC822SIZE) item).size);
             }
         }),
@@ -201,7 +200,7 @@ public final class AllFetch {
         ENVELOPE("ENVELOPE", ENVELOPE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final Log logger) {
+            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
                 final com.sun.mail.imap.protocol.ENVELOPE envelope = (ENVELOPE) item;
                 // Date
                 m.setSentDate(envelope.date);

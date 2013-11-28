@@ -51,7 +51,6 @@ package com.openexchange.realtime.json.impl;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -76,7 +75,7 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
  */
 public class RTProtocolImpl implements RTProtocol {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RTProtocol.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RTProtocol.class);
 
     private static final AtomicReference<RTProtocolImpl> PROTOCOL = new AtomicReference<RTProtocolImpl>();
 

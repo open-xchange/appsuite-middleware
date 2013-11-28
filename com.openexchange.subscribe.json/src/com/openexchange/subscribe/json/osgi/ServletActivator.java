@@ -66,7 +66,7 @@ import com.openexchange.subscribe.osgi.tools.WhiteboardSubscriptionSourceDiscove
  */
 public class ServletActivator extends AbstractSessionServletActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ServletActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
 
     private static final String SUBSCRIPTION_ALIAS_APPENDIX = "subscriptions";
 

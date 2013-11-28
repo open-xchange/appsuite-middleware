@@ -57,7 +57,6 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Comment;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -75,7 +74,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class ReplyParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(ReplyParticipants.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReplyParticipants.class);
 
     @Override
     public void emit(final Mode mode, final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {

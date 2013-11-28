@@ -52,7 +52,6 @@ package com.openexchange.service.indexing.impl.osgi;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import org.quartz.Scheduler;
 import org.quartz.service.QuartzService;
@@ -88,7 +87,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class IndexingActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IndexingActivator.class);
 
     private IndexingServiceImpl serviceImpl;
 

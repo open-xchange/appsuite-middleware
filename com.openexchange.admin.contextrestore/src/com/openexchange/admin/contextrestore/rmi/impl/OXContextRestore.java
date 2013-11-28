@@ -67,7 +67,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.output.NullWriter;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
@@ -100,9 +99,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
     public class RunParserResult {
 
         private final PoolIdSchemaAndVersionInfo result;
-        
+
         private final UpdateTaskInformation updateTaskInfo;
-        
+
         private final VersionInformation versionInfo;
 
         public RunParserResult(PoolIdSchemaAndVersionInfo result, UpdateTaskInformation updateTaskInfo, VersionInformation versionInfo) {
@@ -119,11 +118,11 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         public UpdateTaskInformation getUpdateTaskInfo() {
             return updateTaskInfo;
         }
-        
+
         public VersionInformation getVersionInfo() {
             return versionInfo;
         }
-        
+
     }
 
     /** The reference for ConfigDB name */
@@ -179,7 +178,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             private final int contextId;
             private final String schema;
             private final String fileName;
-            
+
             private Map<String, File> tempfilemap;
             private VersionInformation versionInformation;
             private UpdateTaskInformation updateTaskInformation;
@@ -704,7 +703,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
     }
 
-    protected final static Log LOG = com.openexchange.log.Log.loggerFor(OXContextRestore.class);
+    protected final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXContextRestore.class);
 
     private final BasicAuthenticator basicauth;
 
@@ -770,7 +769,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     contextInterface.delete(ctx, auth);
                 } catch (final NoSuchContextException e) {
                     // As we check for the existence beforehand this exception should never occur. Nevertheless we will log this
-                    LOG.fatal("FATAL:" + e.getMessage(), e);
+                    LOG.error("FATAL:" + e.getMessage(), e);
                 }
             }
             return instance.restorectx(ctx, result, getConfigDbName(optConfigDbName));

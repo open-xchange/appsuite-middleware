@@ -51,7 +51,7 @@ package com.openexchange.eventsystem.internal;
 
 import java.net.InetSocketAddress;
 import java.text.MessageFormat;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class TalkingStickEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TalkingStickEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TalkingStickEventHandler.class);
 
     private static final String TALKINGSTICK = "__talkingstick";
 

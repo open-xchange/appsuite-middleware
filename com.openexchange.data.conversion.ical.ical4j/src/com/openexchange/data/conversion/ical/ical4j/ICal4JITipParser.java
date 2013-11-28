@@ -66,7 +66,6 @@ import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Method;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
@@ -88,7 +87,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(ICal4JITipParser.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JITipParser.class);
 
     @Override
     public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {

@@ -55,7 +55,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -73,7 +72,7 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
-    private final static Log log = com.openexchange.log.Log.loggerFor(OXAuthMySQLStorage.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAuthMySQLStorage.class);
 
     /** */
     public OXAuthMySQLStorage() {

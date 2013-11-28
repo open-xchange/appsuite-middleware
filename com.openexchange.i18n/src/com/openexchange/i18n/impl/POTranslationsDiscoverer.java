@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.parsing.POParser;
 import com.openexchange.i18n.parsing.Translations;
@@ -69,7 +68,7 @@ import com.openexchange.java.Streams;
  */
 public class POTranslationsDiscoverer extends FileDiscoverer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(POTranslationsDiscoverer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POTranslationsDiscoverer.class);
 
     /**
      * Initializes a new {@link POTranslationsDiscoverer}.

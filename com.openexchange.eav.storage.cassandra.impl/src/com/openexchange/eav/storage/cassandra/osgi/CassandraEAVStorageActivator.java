@@ -49,8 +49,7 @@
 package com.openexchange.eav.storage.cassandra.osgi;
 
 import java.io.File;
-import org.apache.commons.logging.Log;
-
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.storage.cassandra.impl.CassandraEAVStorageImpl;
@@ -63,21 +62,13 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class CassandraEAVStorageActivator extends HousekeepingActivator {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(CassandraEAVStorageActivator.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CassandraEAVStorageActivator.class);
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-	 */
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return new Class[]{EmbeddedCassandraService.class, ConfigurationService.class};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.osgi.DeferredActivator#startBundle()
-	 */
 	@Override
 	protected void startBundle() throws Exception {
 		log.info("Starting bundle: com.openexchange.eav.storage.cassandra");

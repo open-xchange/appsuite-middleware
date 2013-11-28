@@ -71,7 +71,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
@@ -135,7 +134,7 @@ public final class SessionHandler {
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
     /** Logger */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(SessionHandler.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionHandler.class);
 
     /** If INFO logging is enabled for this class */
     private static final boolean INFO = LOG.isInfoEnabled();

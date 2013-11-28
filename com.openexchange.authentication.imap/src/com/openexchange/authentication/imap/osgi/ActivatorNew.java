@@ -50,7 +50,6 @@
 package com.openexchange.authentication.imap.osgi;
 
 import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.imap.impl.IMAPAuthentication;
@@ -63,7 +62,7 @@ import com.openexchange.user.UserService;
 
 public class ActivatorNew extends DeferredActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(ActivatorNew.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActivatorNew.class);
 
     private ServiceRegistration<AuthenticationService> registration;
 

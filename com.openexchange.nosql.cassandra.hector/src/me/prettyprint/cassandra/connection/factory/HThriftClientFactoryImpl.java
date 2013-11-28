@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HThriftClientFactoryImpl implements HClientFactory {
 
-  private static final Logger log = LoggerFactory.getLogger(HThriftClientFactoryImpl.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HThriftClientFactoryImpl.class);
   private TSSLTransportParameters params;
 
   /**

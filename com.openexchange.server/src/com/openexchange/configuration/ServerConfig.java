@@ -52,7 +52,6 @@ package com.openexchange.configuration;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -65,7 +64,7 @@ import com.openexchange.java.Strings;
  */
 public final class ServerConfig {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServerConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerConfig.class);
 
     /**
      * Singleton object.

@@ -74,7 +74,7 @@ import com.sun.mail.imap.IMAPFolder;
  */
 final class IMAPSessionStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IMAPSessionStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPSessionStorage.class);
 
     private final Object lock;
 

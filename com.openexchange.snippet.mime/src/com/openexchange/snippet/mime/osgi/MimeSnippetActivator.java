@@ -51,7 +51,6 @@ package com.openexchange.snippet.mime.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Constants;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -91,7 +90,7 @@ public class MimeSnippetActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.loggerFor(MimeSnippetActivator.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MimeSnippetActivator.class);
         logger.info("Starting bundle: com.openexchange.snippet.mime");
         try {
 

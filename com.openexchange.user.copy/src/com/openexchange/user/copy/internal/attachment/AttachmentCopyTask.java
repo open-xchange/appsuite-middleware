@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
@@ -94,7 +93,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  */
 public class AttachmentCopyTask implements CopyUserTaskService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentCopyTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentCopyTask.class);
 
     private static final String SELECT_ATTACHMENTS =
         "SELECT " +

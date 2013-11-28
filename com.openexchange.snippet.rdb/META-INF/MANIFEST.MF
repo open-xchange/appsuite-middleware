@@ -45,4 +45,6 @@ Import-Package: com.openexchange.cache,
  gnu.trove.procedure,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
+Require-Bundle: ch.qos.logback.classic

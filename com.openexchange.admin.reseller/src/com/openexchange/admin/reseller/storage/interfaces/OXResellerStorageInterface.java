@@ -76,7 +76,7 @@ public abstract class OXResellerStorageInterface {
      */
     private static Class<? extends OXResellerStorageInterface> implementingClass;
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerStorageInterface.class);
 
     protected static AdminCacheExtended cache = null;
 

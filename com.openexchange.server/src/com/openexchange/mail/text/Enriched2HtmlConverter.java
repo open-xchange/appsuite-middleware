@@ -62,7 +62,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class Enriched2HtmlConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Enriched2HtmlConverter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Enriched2HtmlConverter.class);
 
     private static enum ParaType {
 

@@ -39,7 +39,7 @@ import java.util.HashMap;
  * @version $Id: SolrIndexConfig.java 1133487 2011-06-08 18:02:22Z rmuir $
  */
 public class SolrIndexConfig {
-  public static final Logger log = LoggerFactory.getLogger(SolrIndexConfig.class);
+  public static final org.slf4j.Logger log = LoggerFactory.getLogger(SolrIndexConfig.class);
   
   public static final String defaultsName ="indexDefaults";
   final String defaultMergePolicyClassName;

@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -75,7 +74,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  */
 public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(LoginPageByFormActionStep.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginPageByFormActionStep.class);
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
 

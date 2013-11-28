@@ -51,7 +51,6 @@ package com.openexchange.ms.osgi;
 
 import java.text.MessageFormat;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.java.Strings;
@@ -99,7 +98,7 @@ public final class MsEventHandlerImpl implements EventHandler {
             }
         } catch (final Exception e) {
             // Ignore
-            final Log logger = com.openexchange.log.Log.loggerFor(MsActivator.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MsActivator.class);
             logger.warn(MessageFormat.format("Could not handle event with topic ''{0}'': \"{1}\"", event.getTopic(), e.getMessage()), e);
         }
     }

@@ -101,7 +101,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractMailAction implements AJAXActionService, MailActionConstants {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
@@ -333,7 +333,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
                 LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(
-                    ": ").append(view).append(". Using user's mail settings as fallback."));
+                    ": ").append(view).append(". Using user's mail settings as fallback.").toString());
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             }
         } else {

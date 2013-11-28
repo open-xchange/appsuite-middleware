@@ -61,7 +61,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -78,7 +77,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class OnlinePublicationServlet extends HttpServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OnlinePublicationServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OnlinePublicationServlet.class);
 
     private static final long serialVersionUID = 6966967169899449051L;
 

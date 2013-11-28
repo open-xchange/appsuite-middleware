@@ -131,8 +131,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The logger instance for {@link IMAPAccess} class.
      */
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(IMAPAccess.class);
+    private static final transient org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(IMAPAccess.class);
 
     /**
      * The max. temporary-down value; 5 Minutes.
@@ -681,7 +681,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     clientIp = ip;
                 } else if (DEBUG) {
                     LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
-                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n"));
+                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n").toString());
                 }
             } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
                 LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(

@@ -71,7 +71,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
@@ -132,7 +132,7 @@ public class MobileConfigServlet extends HttpServlet {
 
     }
 
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(MobileConfigServlet.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileConfigServlet.class);
 
     /**
      *

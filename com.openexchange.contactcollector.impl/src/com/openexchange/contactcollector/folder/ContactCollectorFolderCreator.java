@@ -52,7 +52,6 @@ package com.openexchange.contactcollector.folder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import org.apache.commons.logging.Log;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -79,7 +78,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  */
 public class ContactCollectorFolderCreator implements LoginHandlerService, NonTransient {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactCollectorFolderCreator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactCollectorFolderCreator.class);
 
     /**
      * Initializes a new {@link ContactCollectorFolderCreator}.
@@ -152,7 +151,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
                     System.currentTimeMillis()).getObjectID();
         } catch (final OXException folderException) {
             if (folderException.isPrefix("FLD") && folderException.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
-                LOG.info(new StringBuilder("Found Folder with name of contact collect folder. Guess this is the dedicated folder."));
+                LOG.info(new StringBuilder("Found Folder with name of contact collect folder. Guess this is the dedicated folder.").toString());
                 collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);
             }
         }
@@ -167,7 +166,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
-                ") successfully created for user ").append(userId).append(" in context ").append(cid));
+                ") successfully created for user ").append(userId).append(" in context ").append(cid).toString());
         }
     }
 

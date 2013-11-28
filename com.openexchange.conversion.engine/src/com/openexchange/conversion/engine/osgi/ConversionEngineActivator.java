@@ -63,8 +63,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class ConversionEngineActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(ConversionEngineActivator.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ConversionEngineActivator.class);
 
     /**
      * Initializes a new {@link ConversionEngineActivator}

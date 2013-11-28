@@ -51,11 +51,11 @@ package com.openexchange.file.storage.osgi;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
@@ -144,7 +144,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                 }
             }
             if (null == accountManager) {
-                final Log logger = com.openexchange.log.Log.loggerFor(OSGIFileStorageAccountManagerLookupService.class);
+                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIFileStorageAccountManagerLookupService.class);
                 final String ls = System.getProperty("line.separator");
                 logger.warn(ls + "    There is no file storage service available that provides account \"" + accountId + "\"." + ls +
                             "    Please ensure the appropriate " + FileStorageService.class.getSimpleName() + " is up and running." + ls +
@@ -189,7 +189,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                 if (null == providers.putIfAbsent(service, PRESENT)) {
                     return service;
                 }
-                final Log logger = com.openexchange.log.Log.loggerFor(OSGIFileStorageAccountManagerLookupService.Customizer.class);
+                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIFileStorageAccountManagerLookupService.Customizer.class);
                 if (logger.isWarnEnabled()) {
                     logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(service.getClass().getSimpleName()).append(
                         " could not be added. Provider is already present.").toString());

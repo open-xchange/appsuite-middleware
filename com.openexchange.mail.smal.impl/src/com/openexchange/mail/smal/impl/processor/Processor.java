@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
@@ -91,7 +90,7 @@ public class Processor {
     /**
      * The logger constant.
      */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(Processor.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Processor.class);
 
     /**
      * The singleton instance.

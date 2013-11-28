@@ -60,7 +60,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.context.ContextService;
@@ -91,7 +90,7 @@ public class freebusy extends HttpServlet {
 
     private static final long serialVersionUID = 6336387126907903347L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(freebusy.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(freebusy.class);
 
     private static final DateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
 

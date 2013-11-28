@@ -51,7 +51,6 @@ package com.openexchange.groupware.settings.extensions.osgi;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,7 +79,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class Activator extends HousekeepingActivator {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private static final String PREFERENCE_PATH = "preferencePath";
 

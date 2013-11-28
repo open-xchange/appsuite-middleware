@@ -53,7 +53,7 @@ import static com.openexchange.publish.json.PublicationJSONErrorMessage.THROWABL
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
@@ -108,5 +108,5 @@ public abstract class AbstractPublicationServlet extends PermissionServlet {
         }
     }
 
-    protected abstract Log getLog();
+    protected abstract Logger getLog();
 }

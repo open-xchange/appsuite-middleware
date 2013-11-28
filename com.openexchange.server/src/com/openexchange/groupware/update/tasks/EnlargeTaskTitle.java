@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Mapping;
@@ -74,7 +73,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(EnlargeTaskTitle.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EnlargeTaskTitle.class);
 
     /**
      * Default constructor.

@@ -60,7 +60,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -134,7 +133,7 @@ public class ContactTest extends AbstractAJAXTest {
 
     protected int userId = 0;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactTest.class);
 
     @Override
     protected void setUp() throws Exception {

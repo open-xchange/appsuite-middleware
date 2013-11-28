@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometContext;
 import org.glassfish.grizzly.comet.CometEvent;
 import org.glassfish.grizzly.comet.DefaultCometHandler;
@@ -74,7 +73,7 @@ import com.openexchange.java.Streams;
  */
 public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveCometHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveCometHandler.class);
     private static final List<DriveAction<? extends DriveVersion>> EMPTY_ACTIONS = Collections.emptyList();
 
     private final DriveSession session;

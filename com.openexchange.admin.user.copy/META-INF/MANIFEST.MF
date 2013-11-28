@@ -20,5 +20,6 @@ Import-Package: com.openexchange.admin.rmi.dataobjects,
  com.openexchange.user.copy,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-ClassPath: .

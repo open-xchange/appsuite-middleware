@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -88,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OXIntegration.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXIntegration.class);
 
     private static final String TEMPLATE_FOLDER_NAME = "OXMF Templates";
 
@@ -205,7 +204,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             return builder.toString();
 
         } catch (final UnsupportedEncodingException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             return null;
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);

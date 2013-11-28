@@ -25,5 +25,6 @@ Import-Package: com.microsoft.schemas.exchange.services._2006.messages,
  javax.xml.ws,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.freebusy.provider.ews.osgi.EWSFreeBusyProviderActivator

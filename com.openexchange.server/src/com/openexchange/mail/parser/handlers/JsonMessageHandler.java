@@ -70,7 +70,6 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -125,7 +124,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class JsonMessageHandler implements MailMessageHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(JsonMessageHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JsonMessageHandler.class);
 
     private static final String CONTENT = MailJSONField.CONTENT.getKey();
     private static final String DISPOSITION = MailJSONField.DISPOSITION.getKey();

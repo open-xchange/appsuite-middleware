@@ -215,7 +215,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
                     return DATE_FORMAT.parse(h.getValue());
                 } catch (final ParseException e) {
                     // IGNORE
-                    com.openexchange.log.Log.loggerFor(MessagingComparator.class).error("Comparison failed.", e);
+                    org.slf4j.LoggerFactory.getLogger(MessagingComparator.class).error("Comparison failed.", e);
                 }
             }
         }

@@ -58,7 +58,7 @@ import javax.mail.internet.MimeUtility;
 
 public class UUEncodedBodyPart {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UUEncodedBodyPart.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UUEncodedBodyPart.class);
 
     private static final String BEGIN = "begin";
 

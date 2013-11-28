@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.json.comet.internal;
 
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometContext;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.DriveEvent;
@@ -64,7 +63,7 @@ import com.openexchange.drive.json.LongPollingListenerFactory;
  */
 public class CometListenerFactory implements LongPollingListenerFactory {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CometListenerFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CometListenerFactory.class);
     private static final int PRIORITY = 10;
 
     private final CometContext<DriveEvent> cometContext;

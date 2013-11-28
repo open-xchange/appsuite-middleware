@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 */
 public class HThriftClient implements HClient {
 
-  private static Logger log = LoggerFactory.getLogger(HThriftClient.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(HThriftClient.class);
 
   private static final String NAME_FORMAT = "CassandraClient<%s-%d>";
 

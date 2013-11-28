@@ -72,8 +72,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractConfigAction implements AJAXActionService {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(AbstractConfigAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AbstractConfigAction.class);
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 

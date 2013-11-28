@@ -62,7 +62,7 @@ import com.openexchange.folderstorage.internal.FolderStorageRegistry;
  */
 public final class FolderStorageTracker implements ServiceTrackerCustomizer<FolderStorage,FolderStorage> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(FolderStorageTracker.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderStorageTracker.class);
 
     private final BundleContext context;
 

@@ -66,8 +66,8 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractCreateTableImpl implements CreateTableService {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(AbstractCreateTableImpl.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AbstractCreateTableImpl.class);
 
     /**
      * Initializes a new {@link AbstractCreateTableImpl}.

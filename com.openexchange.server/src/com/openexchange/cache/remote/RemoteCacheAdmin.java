@@ -64,7 +64,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RemoteCacheAdmin {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(RemoteCacheAdmin.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoteCacheAdmin.class);
 
 	private static final int REGISTRY_PORT = 57462;
 

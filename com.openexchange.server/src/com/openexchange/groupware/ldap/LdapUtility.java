@@ -59,7 +59,6 @@ import javax.naming.InvalidNameException;
 import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.configuration.DirectoryService;
@@ -75,7 +74,7 @@ public final class LdapUtility {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LdapUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapUtility.class);
 
     /**
      * Empty map.

@@ -64,7 +64,7 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CopyIMAPCommand.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyIMAPCommand.class);
 
     private static final long[] DEFAULT_RETVAL = new long[0];
 

@@ -71,7 +71,7 @@ import com.openexchange.java.Streams;
  */
 public final class PropertyWatcher implements FileListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(PropertyWatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyWatcher.class);
 
     private static final ConcurrentMap<String, PropertyWatcher> WATCHER_MAP = new ConcurrentHashMap<String, PropertyWatcher>();
 

@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -97,7 +96,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFileServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFileServlet.class);
 
     private static OXMFPublicationService infostorePublisher = null;
 

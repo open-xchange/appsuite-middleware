@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact.datasource;
 
 import java.io.InputStream;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.Data;
@@ -78,7 +77,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class UserImageDataSource implements ImageDataSource {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UserImageDataSource.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserImageDataSource.class);
     private static final String REGISTRATION_NAME = "com.openexchange.user.image";
     private static final String ALIAS = "/user/picture";
     private static final String ID_ARGUMENT = "com.openexchange.groupware.user.id";

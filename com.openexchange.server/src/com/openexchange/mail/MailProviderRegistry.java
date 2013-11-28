@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public final class MailProviderRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailProviderRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProviderRegistry.class);
 
     /**
      * Concurrent map used as set for mail providers
@@ -122,7 +122,7 @@ public final class MailProviderRegistry {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set in account ").append(accountId)
                         .append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                                ". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()));
+                                ". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()).toString());
             }
             protocol = MailProperties.getInstance().getDefaultMailProvider();
         } else {

@@ -53,7 +53,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -77,7 +76,7 @@ public abstract class OXUserStorageInterface {
      */
     private static Class<? extends OXUserStorageInterface> implementingClass;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXUserStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUserStorageInterface.class);
 
     protected static AdminCache cache = null;
 

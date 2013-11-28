@@ -80,7 +80,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 public class ResellerExtensionLoader implements Filter<Context, Context> {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ResellerExtensionLoader.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResellerExtensionLoader.class);
 
     private final AdminCache cache;
 

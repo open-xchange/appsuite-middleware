@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem. Note: The Filename may be added to the customary infostore path to suggest a filename to a Save-As dialog.")
 public final class GetDocumentAction extends AbstractAttachmentAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GetDocumentAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetDocumentAction.class);
 
     /**
      * Initializes a new {@link GetDocumentAction}.

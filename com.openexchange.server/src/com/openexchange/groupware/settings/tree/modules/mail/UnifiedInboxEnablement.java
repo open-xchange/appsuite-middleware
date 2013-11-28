@@ -65,7 +65,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class UnifiedInboxEnablement implements PreferencesItemService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UnifiedInboxEnablement.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxEnablement.class);
 
     /**
      * Default constructor.
@@ -124,8 +124,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                         LOG.warn(
                             new StringBuilder().append(enable ? "Enabling" : "Disabling").append(" of Unified Mail for user ").append(
                                 settings.getUserId()).append(" in context ").append(settings.getCid()).append(" aborted: ").append(
-                                e.getMessage()),
-                            e);
+                                e.getMessage()).toString(), e);
                     }
                     return;
                 }

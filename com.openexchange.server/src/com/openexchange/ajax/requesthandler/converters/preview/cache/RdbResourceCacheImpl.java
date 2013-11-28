@@ -59,7 +59,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
@@ -82,7 +81,7 @@ import com.openexchange.session.Session;
  */
 public final class RdbResourceCacheImpl implements ResourceCache, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbResourceCacheImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbResourceCacheImpl.class);
 
     /**
      * Initializes a new {@link RdbResourceCacheImpl}.

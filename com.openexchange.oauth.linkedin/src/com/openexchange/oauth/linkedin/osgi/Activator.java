@@ -51,7 +51,6 @@ package com.openexchange.oauth.linkedin.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -68,7 +67,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
     private OAuthService oauthService = null;
 
     public Activator() {

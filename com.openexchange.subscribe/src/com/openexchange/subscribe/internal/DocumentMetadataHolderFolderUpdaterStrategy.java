@@ -54,7 +54,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
@@ -79,7 +78,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdaterStrategy<DocumentMetadataHolder> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DocumentMetadataHolderFolderUpdaterStrategy.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DocumentMetadataHolderFolderUpdaterStrategy.class);
 
     final UserService users;
     final UserPermissionService userPermissions;

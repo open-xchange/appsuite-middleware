@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
@@ -63,7 +62,7 @@ public class RequestDBProvider implements DBProvider {
 
     private static final ThreadLocal<DBTransaction> txIds = new ThreadLocal<DBTransaction>();
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RequestDBProvider.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestDBProvider.class);
     private boolean commits = true;
 
 

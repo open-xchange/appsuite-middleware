@@ -85,7 +85,7 @@ import com.openexchange.session.Session;
  */
 public final class MimeProcessingUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeProcessingUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeProcessingUtility.class);
 
     /**
      * No instantiation
@@ -298,7 +298,7 @@ public final class MimeProcessingUtility {
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
+                    "\". Using fallback charset \"").append(fallback).append("\" instead.").toString(), e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
         }

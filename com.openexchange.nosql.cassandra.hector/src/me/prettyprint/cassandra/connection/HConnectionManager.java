@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class HConnectionManager {
 
-  private static final Logger log = LoggerFactory.getLogger(HConnectionManager.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HConnectionManager.class);
 
   private final ConcurrentMap<CassandraHost,HClientPool> hostPools;
   private final ConcurrentMap<CassandraHost,HClientPool> suspendedHostPools;

@@ -79,7 +79,7 @@ import com.openexchange.java.StringAllocator;
  */
 public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>, Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AbstractWriteTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractWriteTask.class);
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

@@ -59,7 +59,6 @@ import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -78,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ISPDB extends AbstractConfigSource {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ISPDB.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ISPDB.class);
 
     private static final String locationProperty = "com.openexchange.mail.autoconfig.ispdb";
 

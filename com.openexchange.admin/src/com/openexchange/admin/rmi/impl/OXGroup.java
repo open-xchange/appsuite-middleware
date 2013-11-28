@@ -100,7 +100,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     private AdminCache cache = null;
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXGroup.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXGroup.class);
 
     private PropertyHandler prop = null;
 

@@ -52,7 +52,6 @@ package com.openexchange.mail.cache;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -71,7 +70,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class MailAccessCacheEventListener implements EventHandlerRegistration {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailAccessCacheEventListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccessCacheEventListener.class);
 
     private volatile ServiceRegistration<EventHandler> serviceRegistration;
 

@@ -53,7 +53,6 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 
 /**
@@ -120,7 +119,7 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
                 }
             }
         } catch (final Exception e) {
-            final Log logger = com.openexchange.log.Log.loggerFor(CallbackRegistry.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CallbackRegistry.class);
             logger.error(e.getMessage(), e);
         }
     }

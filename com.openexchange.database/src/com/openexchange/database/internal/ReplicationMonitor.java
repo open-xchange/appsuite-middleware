@@ -59,7 +59,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -72,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public class ReplicationMonitor {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReplicationMonitor.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReplicationMonitor.class);
 
     private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this);
     private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this);

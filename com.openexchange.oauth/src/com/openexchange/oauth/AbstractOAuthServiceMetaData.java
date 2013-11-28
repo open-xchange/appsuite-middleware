@@ -52,7 +52,6 @@ package com.openexchange.oauth;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -67,7 +66,7 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractOAuthServiceMetaData.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractOAuthServiceMetaData.class);
 
     protected String id;
     protected String displayName;

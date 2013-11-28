@@ -97,7 +97,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private static final long serialVersionUID = -2580495494392812083L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccess.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccess.class);
 
     /*-
      * ############### MEMBERS ###############
@@ -755,7 +755,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Logs the trace of the thread that lastly obtained this access.
      *
      */
-    public void logTrace(final StringBuilder sBuilder, final org.apache.commons.logging.Log log) {
+    public void logTrace(final StringBuilder sBuilder, final org.slf4j.Logger log) {
         final Thread usingThread = this.usingThread;
         if (null != usingThread) {
             final Map<String, String> taskProps = usingThreadProperties;

@@ -8,7 +8,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.apache.solr.core.CoreContainer;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
@@ -62,7 +61,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SolrActivator extends HousekeepingActivator {
 
-    static Log LOG = com.openexchange.log.Log.loggerFor(SolrActivator.class);
+    static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrActivator.class);
 
     private volatile DelegationSolrAccessImpl delegationAccess;
 

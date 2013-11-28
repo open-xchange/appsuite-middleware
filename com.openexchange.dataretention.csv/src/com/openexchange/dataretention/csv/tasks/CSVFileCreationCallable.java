@@ -65,7 +65,7 @@ import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
  */
 final class CSVFileCreationCallable implements Callable<Boolean> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CSVFileCreationCallable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVFileCreationCallable.class);
 
     /**
      * Atomic counter for file creations.

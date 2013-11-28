@@ -62,7 +62,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,7 +81,7 @@ public class MSNServiceImpl implements MSNService {
 
     private final MSNOAuthActivator activator;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MSNServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MSNServiceImpl.class);
 
     public MSNServiceImpl(final MSNOAuthActivator activator){
         this.activator = activator;
@@ -230,7 +229,7 @@ public class MSNServiceImpl implements MSNService {
             	contacts.add(c);
             }
         } catch (JSONException x) {
-        	LOG.error(x);
+        	LOG.error(x.getMessage(), x);
         }
 
         return contacts;

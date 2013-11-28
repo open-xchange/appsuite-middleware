@@ -49,7 +49,6 @@
 
 package com.openexchange.textxtraction.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -74,7 +73,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(TextXtractionActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TextXtractionActivator.class);
         final String name = "com.openexchange.textxtraction";
         log.info("Starting bundle: " + name);
         try {
@@ -115,7 +114,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(TextXtractionActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TextXtractionActivator.class);
         final String name = "com.openexchange.textxtraction";
         log.info("Stopping bundle: " + name);
         try {

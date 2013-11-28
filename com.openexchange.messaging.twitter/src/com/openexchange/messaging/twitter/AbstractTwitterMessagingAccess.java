@@ -185,7 +185,7 @@ public abstract class AbstractTwitterMessagingAccess {
             newTwitterAccess.getFriendsTimeline(paging);
             return true;
         } catch (final OXException e) {
-            final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(AbstractTwitterMessagingAccess.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractTwitterMessagingAccess.class);
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }

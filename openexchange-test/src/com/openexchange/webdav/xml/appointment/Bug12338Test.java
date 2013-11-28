@@ -53,7 +53,6 @@ import static com.openexchange.webdav.xml.XmlServlet.NS;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -74,7 +73,7 @@ import com.openexchange.webdav.xml.framework.WebDAVClient;
  */
 public final class Bug12338Test extends AbstractWebDAVSession {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug12338Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug12338Test.class);
 
     public Bug12338Test(final String name) {
         super(name);

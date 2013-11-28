@@ -5,7 +5,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
 
 /*
  *
@@ -61,7 +60,7 @@ import org.apache.commons.logging.Log;
  */
 public class TokenUtils {
 
-	private static final Log log = com.openexchange.log.Log.loggerFor(TokenUtils.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TokenUtils.class);
 
 	/**
 	 * Method for calculating unique tokens for each node

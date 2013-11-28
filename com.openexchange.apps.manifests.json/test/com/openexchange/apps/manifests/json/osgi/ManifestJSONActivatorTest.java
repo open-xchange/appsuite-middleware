@@ -52,7 +52,6 @@ package com.openexchange.apps.manifests.json.osgi;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,7 +84,7 @@ public class ManifestJSONActivatorTest {
     /**
      * Logger for this class
      */
-    protected final static Log LOG = com.openexchange.log.Log.loggerFor(ManifestJSONActivatorTest.class);
+    protected final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestJSONActivatorTest.class);
 
     /**
      * Instance to test

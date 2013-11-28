@@ -81,7 +81,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
@@ -143,7 +142,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class OXContextMySQLStorage extends OXContextSQLStorage {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(OXContextMySQLStorage.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXContextMySQLStorage.class);
 
     private int CONTEXTS_PER_SCHEMA = 1;
 
@@ -595,7 +594,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getId().intValue());
                 cache.resetPoolMappingForContext(ctx.getId().intValue());
             } catch (final Exception ecp) {
-                LOG.fatal(
+                LOG.error(
                     "!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
                     ecp);
             }
@@ -624,11 +623,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getId().intValue());
                 cache.resetPoolMappingForContext(ctx.getId().intValue());
             } catch (final SQLException ecp) {
-                LOG.fatal(
+                LOG.error(
                     "!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
                     ecp);
             } catch (final PoolException ecp) {
-                LOG.fatal(
+                LOG.error(
                     "!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
                     ecp);
             }
@@ -2031,7 +2030,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         rsi = null;
                         rcon = null;
                     } catch (final ClassNotFoundException e) {
-                        LOG.fatal("Error counting users of db pool", e);
+                        LOG.error("Error counting users of db pool", e);
                         throw new OXContextException(e.toString());
                     } finally {
                         if (null != rsi) {

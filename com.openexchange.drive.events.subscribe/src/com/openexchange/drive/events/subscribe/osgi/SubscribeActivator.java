@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.events.subscribe.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -71,7 +70,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class SubscribeActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SubscribeActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SubscribeActivator.class);
 
     /**
      * Initializes a new {@link SubscribeActivator}.

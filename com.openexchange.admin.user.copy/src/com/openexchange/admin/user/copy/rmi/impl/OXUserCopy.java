@@ -50,7 +50,6 @@
 package com.openexchange.admin.user.copy.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -74,7 +73,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
 
     private static final String THE_GIVEN_SOURCE_USER_OBJECT_IS_NULL = "The given source user object is null";
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(OXUser.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUser.class);
 
     private final BundleContext context;
 

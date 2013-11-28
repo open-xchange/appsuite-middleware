@@ -56,7 +56,6 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -79,7 +78,7 @@ public final class KerberosUtils {
 
     public static final String SESSION_PRINCIPAL = "kerberosPrincipal";
 
-    public static final Log LOG = com.openexchange.log.Log.loggerFor(KerberosUtils.class);
+    public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosUtils.class);
 
     public static CallbackHandler getCallbackHandler(final String user, final String password) {
         return new CallbackHandler() {

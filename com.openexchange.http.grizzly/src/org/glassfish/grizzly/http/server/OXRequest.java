@@ -52,7 +52,6 @@ package org.glassfish.grizzly.http.server;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.nio.charset.Charset;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.ThreadCache;
 import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.http.server.util.Globals;
@@ -68,7 +67,7 @@ import com.openexchange.tools.servlet.http.Cookies;
  */
 public class OXRequest extends Request {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(OXRequest.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXRequest.class);
 
     private static final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
 

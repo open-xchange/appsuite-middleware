@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometContext;
 import org.glassfish.grizzly.comet.CometEvent.Type;
 import org.json.JSONException;
@@ -76,7 +75,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class CometListener implements LongPollingListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CometListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CometListener.class);
 
     private final DriveSession session;
     private final CometContext<DriveEvent> cometContext;

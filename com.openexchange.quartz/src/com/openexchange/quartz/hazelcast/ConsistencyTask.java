@@ -53,7 +53,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
 import org.quartz.JobKey;
 import org.quartz.TriggerKey;
@@ -72,7 +71,7 @@ import com.openexchange.quartz.hazelcast.predicates.AcquiredAndExecutingTriggers
  */
 public final class ConsistencyTask extends TimerTask {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConsistencyTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyTask.class);
 
     private final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers;
 

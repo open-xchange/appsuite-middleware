@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.impl;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -67,7 +66,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class InfostoreCleanUpEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreCleanUpEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreCleanUpEventHandler.class);
 
     private final EntityCleanUp entityCleanUp;
 

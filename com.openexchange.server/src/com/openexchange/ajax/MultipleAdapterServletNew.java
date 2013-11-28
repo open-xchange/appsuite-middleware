@@ -57,7 +57,6 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -102,7 +101,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MultipleAdapterServletNew.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleAdapterServletNew.class);
 
     private final AJAXActionServiceFactory factory;
 

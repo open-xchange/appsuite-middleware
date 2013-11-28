@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.FolderParser;
@@ -65,7 +64,7 @@ public final class Parser {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Parser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Parser.class);
 
     /**
      * Prevent instanciation.

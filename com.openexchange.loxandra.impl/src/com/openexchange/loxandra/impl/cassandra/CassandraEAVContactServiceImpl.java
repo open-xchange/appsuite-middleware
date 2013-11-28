@@ -84,7 +84,6 @@ import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.CounterQuery;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -108,7 +107,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 
 	private static String PERSONS_IN_FOLDER_ROW_KEY = "PersonsInFolder";
 
-	private static final Log log = com.openexchange.log.Log.loggerFor(CassandraEAVContactServiceImpl.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CassandraEAVContactServiceImpl.class);
 
 	/* Some Serializers */
 	private static final CompositeSerializer cs = CompositeSerializer.get();

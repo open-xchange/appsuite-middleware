@@ -3,15 +3,16 @@
  */
 package com.openexchange.folder;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import junit.framework.TestCase;
+import org.slf4j.Logger;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -25,8 +26,8 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -46,8 +47,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class FolderTest extends TestCase {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(FolderTest.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderTest.class);
 
     public final static int CONTEXT_ID = 1337;
 
@@ -849,7 +849,7 @@ public class FolderTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     private static MutableUserConfigurationStorage STORAGE = null;
 
     public static final MutableUserConfiguration getUserConfiguration(final Context ctx, final int userId)

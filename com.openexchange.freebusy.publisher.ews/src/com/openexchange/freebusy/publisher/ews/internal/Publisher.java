@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import com.microsoft.schemas.exchange.services._2006.types.BaseFolderType;
 import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services._2006.types.DisposalType;
@@ -93,7 +92,7 @@ import com.openexchange.user.UserService;
  */
 public class Publisher implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Publisher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Publisher.class);
 
     private final Map<String, FolderIdType> freeBusySubfolders;
     private final Session session;

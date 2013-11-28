@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -72,7 +71,7 @@ public class Sent implements PreferencesItemService {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Sent.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Sent.class);
 
     /**
      * Default constructor.

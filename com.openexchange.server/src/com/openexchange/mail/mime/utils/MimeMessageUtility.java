@@ -97,7 +97,6 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import org.apache.commons.logging.Log;
 import org.apache.james.mime4j.io.LineReaderInputStream;
 import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.stream.DefaultFieldBuilder;
@@ -152,7 +151,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class MimeMessageUtility {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageUtility.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageUtility.class);
     private static final boolean TRACE = LOG.isTraceEnabled();
     private static final boolean DEBUG = LOG.isDebugEnabled();
     private static final boolean WARN = LOG.isWarnEnabled();
@@ -1220,7 +1219,7 @@ public final class MimeMessageUtility {
                 for (final String sAddr : sAddrs) {
                     final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
                     if (TRACE) {
-                        LOG.trace(tmp);
+                        LOG.trace(tmp.toString());
                     }
                     addrList.add(tmp);
                 }
@@ -1231,7 +1230,7 @@ public final class MimeMessageUtility {
                     for (final String sAddr : sAddrs) {
                         final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
                         if (TRACE) {
-                            LOG.trace(tmp);
+                            LOG.trace(tmp.toString());
                         }
                     }
                     // Hm... single parse did not fail, throw original exception instead
@@ -2071,7 +2070,7 @@ public final class MimeMessageUtility {
             if (WARN) {
                 LOG.warn(
                     new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(
-                        charset).append("\". Using fallback charset \"").append(fallback).append("\" instead."),
+                        charset).append("\". Using fallback charset \"").append(fallback).append("\" instead.").toString(),
                     e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);

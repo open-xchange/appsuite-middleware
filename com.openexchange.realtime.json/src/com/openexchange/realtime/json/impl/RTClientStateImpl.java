@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.realtime.json.actions.SendAction;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
@@ -73,7 +72,7 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class RTClientStateImpl implements RTClientState {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SendAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendAction.class);
     
     private final ID id;
     private final Map<Long, EnqueuedStanza> resendBuffer = new HashMap<Long, EnqueuedStanza>();

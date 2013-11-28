@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,7 +67,7 @@ public class Appointment extends DataServlet {
 
     private static final long serialVersionUID = 8550664916596120436L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(Appointment.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Appointment.class);
 
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {

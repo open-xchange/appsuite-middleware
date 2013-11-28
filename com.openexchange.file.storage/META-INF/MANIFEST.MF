@@ -21,7 +21,8 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.json,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.file.storage.osgi.FileStorageActivator
 Export-Package: com.openexchange.file.storage,
  com.openexchange.file.storage.config,

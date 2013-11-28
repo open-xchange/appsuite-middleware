@@ -52,7 +52,6 @@ package com.openexchange.caching.events.ms.internal;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.events.CacheEvent;
@@ -72,7 +71,8 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class MsCacheEventHandler implements CacheListener, MessageListener<Map<String, Serializable>>, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandler.class);
+
     private static final String TOPIC_NAME = "cacheEvents-0";
     private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
 

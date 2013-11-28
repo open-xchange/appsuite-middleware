@@ -52,7 +52,6 @@ package com.openexchange.realtime.handle.impl.message;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.ChangeListener;
 import com.openexchange.realtime.directory.Resource;
@@ -70,7 +69,7 @@ import com.openexchange.realtime.packet.ID;
  */
 public class ResourceListener implements ChangeListener {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ResourceListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceListener.class);
 
     public ResourceListener() {
         super();

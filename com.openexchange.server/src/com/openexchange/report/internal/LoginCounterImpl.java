@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.management.MBeanException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.LoginCounterService;
@@ -78,14 +77,14 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class LoginCounterImpl implements LoginCounterService {
 
-    private final Log logger;
+    private final org.slf4j.Logger logger;
 
     /**
      * Initializes a new {@link LoginCounterImpl}.
      */
     public LoginCounterImpl() {
         super();
-        logger = com.openexchange.log.Log.loggerFor(ReportingMBean.class);
+        logger = org.slf4j.LoggerFactory.getLogger(ReportingMBean.class);
     }
 
     @Override

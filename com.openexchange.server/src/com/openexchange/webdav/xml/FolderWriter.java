@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.api2.FolderSQLInterface;
@@ -93,7 +92,7 @@ public class FolderWriter extends FolderChildWriter {
 
     protected int userId = -1;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderWriter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderWriter.class);
 
     public FolderWriter(final int userId) {
         this.userId = userId;

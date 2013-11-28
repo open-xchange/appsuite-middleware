@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -76,7 +75,7 @@ public class CachingUserStorage extends UserStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CachingUserStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingUserStorage.class);
 
     private static final String REGION_NAME = "User";
 

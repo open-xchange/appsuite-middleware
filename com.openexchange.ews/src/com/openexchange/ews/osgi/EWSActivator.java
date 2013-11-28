@@ -49,7 +49,6 @@
 
 package com.openexchange.ews.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.ews.EWSFactoryService;
 import com.openexchange.ews.ExchangeWebService;
 import com.openexchange.ews.internal.ExchangeWebServiceImpl;
@@ -62,7 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class EWSActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(EWSActivator.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EWSActivator.class);
 
     /**
      * Initializes a new {@link EWSActivator}.

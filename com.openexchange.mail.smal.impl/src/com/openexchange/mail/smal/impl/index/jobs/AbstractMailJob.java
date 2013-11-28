@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
@@ -91,7 +90,7 @@ public abstract class AbstractMailJob implements IndexingJob {
 
     public static final String IDS = "ids";
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailJob.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailJob.class);
 
     protected static final int CHUNK_SIZE = 100;
 

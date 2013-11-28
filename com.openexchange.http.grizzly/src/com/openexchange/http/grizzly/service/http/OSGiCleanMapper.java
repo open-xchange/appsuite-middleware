@@ -102,7 +102,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.Servlet;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.osgi.service.http.HttpContext;
 
@@ -115,7 +114,7 @@ import org.osgi.service.http.HttpContext;
  */
 class OSGiCleanMapper {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiCleanMapper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiCleanMapper.class);
     private static final ReentrantLock lock = new ReentrantLock();
     private static final TreeSet<String> aliasTree = new TreeSet<String>();
     private static final Map<String, HttpHandler> registrations = new HashMap<String, HttpHandler>(16);

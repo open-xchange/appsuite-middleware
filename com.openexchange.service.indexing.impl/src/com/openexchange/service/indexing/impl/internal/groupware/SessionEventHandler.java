@@ -51,7 +51,6 @@ package com.openexchange.service.indexing.impl.internal.groupware;
 
 import java.io.File;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigView;
@@ -91,7 +90,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class SessionEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionEventHandler.class);
 
 
     // TODO: move to infostore/server bundle and check if indexing is allowed

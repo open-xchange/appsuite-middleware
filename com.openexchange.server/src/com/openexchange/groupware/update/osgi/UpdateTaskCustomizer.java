@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.osgi;
 
 import java.util.Collection;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.update.internal.DynamicList;
  */
 public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<UpdateTaskProviderService, UpdateTaskProviderService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UpdateTaskCustomizer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskCustomizer.class);
 
     private final BundleContext context;
 

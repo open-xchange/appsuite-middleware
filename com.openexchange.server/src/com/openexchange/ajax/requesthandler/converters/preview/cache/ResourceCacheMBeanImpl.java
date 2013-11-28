@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import org.apache.commons.logging.Log;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 
 
@@ -83,8 +83,7 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
             try {
                 previewCache.clearFor(contextId);
             } catch (final Exception e) {
-                final Log log = com.openexchange.log.Log.loggerFor(ResourceCacheMBeanImpl.class);
-                log.error(e.getMessage(), e);
+                LoggerFactory.getLogger(ResourceCacheMBeanImpl.class).error(e.getMessage(), e);
                 throw new MBeanException(new Exception(e.getMessage()));
             }
         }

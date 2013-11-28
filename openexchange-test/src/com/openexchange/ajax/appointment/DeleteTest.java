@@ -4,7 +4,6 @@ package com.openexchange.ajax.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -12,7 +11,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class DeleteTest extends AppointmentTest {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DeleteTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteTest.class);
 
     public DeleteTest(final String name) {
         super(name);

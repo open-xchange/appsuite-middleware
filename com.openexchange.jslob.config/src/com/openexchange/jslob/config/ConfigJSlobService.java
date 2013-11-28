@@ -67,12 +67,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -106,7 +106,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class ConfigJSlobService implements JSlobService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigJSlobService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigJSlobService.class);
 
     private static final List<String> ALIASES = Arrays.asList("config");
 
@@ -276,7 +276,7 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigView view = getConfigViewFactory().getView();
         final Map<String, ComposedConfigProperty<String>> all = view.all();
         // Logger
-        final Log logger = com.openexchange.log.Log.loggerFor(ConfigJSlobService.class);
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigJSlobService.class);
         // Initialize resulting map
         final int initialCapacity = all.size() >> 1;
         final Map<String, Map<String, AttributedProperty>> preferenceItems = new HashMap<String, Map<String, AttributedProperty>>(

@@ -59,7 +59,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
@@ -81,7 +80,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileDeliveryServlet extends HttpServlet {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileDeliveryServlet.class);
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileDeliveryServlet.class);
 
     public static RandomTokenContainer<Map<String, Object>> PARAM_MAP = null;
     public static DataProviderRegistry DATA_PROVIDERS = null;

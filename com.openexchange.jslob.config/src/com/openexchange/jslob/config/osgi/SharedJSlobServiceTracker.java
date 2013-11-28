@@ -51,7 +51,6 @@ package com.openexchange.jslob.config.osgi;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
@@ -67,7 +66,7 @@ import com.openexchange.jslob.shared.SharedJSlobService;
  */
 public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<SharedJSlobService, SharedJSlobService> {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(SharedJSlobServiceTracker.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SharedJSlobServiceTracker.class);
 
     private final BundleContext context;
 

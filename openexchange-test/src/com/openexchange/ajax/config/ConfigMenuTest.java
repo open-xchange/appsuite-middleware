@@ -50,7 +50,6 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
@@ -69,7 +68,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigMenuTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigMenuTest.class);
 
     /**
      * Default constructor.

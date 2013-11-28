@@ -52,7 +52,6 @@ package com.openexchange.caldav.action;
 import java.io.IOException;
 import java.io.Writer;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -75,7 +74,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class WebdavMkCalendarAction extends AbstractAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavMkCalendarAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavMkCalendarAction.class);
 
     /**
      * Initializes a new {@link WebdavMkCalendarAction}.

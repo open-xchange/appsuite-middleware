@@ -52,7 +52,6 @@ package com.openexchange.webdav.xml;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.groupware.container.DataObject;
@@ -98,7 +97,7 @@ public class DataParser {
 
     private int inFolder;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DataParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataParser.class);
 
     protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws XmlPullParserException, IOException {
         if (isTag(parser, DataFields.OBJECT_ID, XmlServlet.NAMESPACE)) {

@@ -60,7 +60,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
@@ -78,7 +77,7 @@ import com.openexchange.server.ServiceHolderListener;
 
 public class I18nActivator extends HousekeepingActivator {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(I18nActivator.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nActivator.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

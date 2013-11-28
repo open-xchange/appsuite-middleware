@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
@@ -130,7 +129,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private boolean includePrivateAppointments;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarSql.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarSql.class);
 
     /**
      * Initializes a new {@link CalendarSql}.

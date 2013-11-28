@@ -25,5 +25,6 @@ Import-Package: com.openexchange.api2,
  com.openexchange.user,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.freebusy.provider.internal.osgi.InternalFreeBusyProviderActivator

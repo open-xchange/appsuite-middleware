@@ -57,7 +57,6 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.java.Streams;
@@ -120,7 +119,7 @@ public final class DirectoryService {
    /**
     * Logger.
     */
-   private static final Log LOG = com.openexchange.log.Log.loggerFor(DirectoryService.class);
+   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DirectoryService.class);
 
    /**
     * The customization properties for the directory service.
@@ -180,7 +179,7 @@ public final class DirectoryService {
                     try {
                         propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("ldap.properties");
                     } catch (final NullPointerException e) {
-                        LOG.fatal("Config file ldap.properties is not set in " + "ComfireConfig.");
+                        LOG.error("Config file ldap.properties is not set in " + "ComfireConfig.");
                     }
                     tmp = new Properties();
                     FileInputStream fis = null;

@@ -51,7 +51,6 @@ package com.openexchange.exception;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import org.apache.commons.logging.Log;
 
 /**
  * An enumeration for log levels.
@@ -76,11 +75,7 @@ public enum LogLevel {
     /**
      * Error log level.
      */
-    ERROR,
-    /**
-     * Fatal error code
-     */
-    FATAL;
+    ERROR;
 
     /**
      * Checks if this log level equals {@link #DEBUG}.
@@ -136,7 +131,7 @@ public enum LogLevel {
      * @param logger The logger
      * @return <code>true</code> if specified logger applies; otherwise <code>false</code>
      */
-    public boolean appliesTo(final Log logger) {
+    public boolean appliesTo(final org.slf4j.Logger logger) {
         switch (this) {
         case TRACE:
             return logger.isTraceEnabled();
@@ -148,8 +143,6 @@ public enum LogLevel {
             return logger.isWarnEnabled();
         case ERROR:
             return logger.isErrorEnabled();
-        case FATAL:
-            return logger.isFatalEnabled();
         default:
             return false;
         }
@@ -162,7 +155,7 @@ public enum LogLevel {
      * @param exception The exception
      * @param logger The logger
      */
-    public void log(final String logging, final OXException exception, final Log logger) {
+    public void log(final String logging, final OXException exception, final org.slf4j.Logger logger) {
         switch (this) {
         case TRACE:
             logger.trace(logging, exception);
@@ -178,9 +171,6 @@ public enum LogLevel {
             break;
         case ERROR:
             logger.error(logging, exception);
-            break;
-        case FATAL:
-            logger.fatal(logging, exception);
             break;
         default:
             break;
@@ -206,10 +196,7 @@ public enum LogLevel {
      * @param log The log instance
      * @return The appropriate log level
      */
-    public static LogLevel valueOf(final Log log) {
-        if (log.isFatalEnabled()) {
-            return FATAL;
-        }
+    public static LogLevel valueOf(final org.slf4j.Logger log) {
         if (log.isErrorEnabled()) {
             return ERROR;
         }

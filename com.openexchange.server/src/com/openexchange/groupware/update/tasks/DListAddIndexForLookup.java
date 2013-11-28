@@ -102,7 +102,7 @@ public final class DListAddIndexForLookup extends UpdateTaskAdapter {
     }
 
     private void createDListIndex(final Connection con, final String[] tables, final String name, final String... columns) throws SQLException {
-        final Logger log = LoggerFactory.getLogger(DListAddIndexForLookup.class);
+        final org.slf4j.Logger log = LoggerFactory.getLogger(DListAddIndexForLookup.class);
         final String[] cols = new String[columns.length + 1];
         cols[0] = "cid";
         System.arraycopy(columns, 0, cols, 1, columns.length);

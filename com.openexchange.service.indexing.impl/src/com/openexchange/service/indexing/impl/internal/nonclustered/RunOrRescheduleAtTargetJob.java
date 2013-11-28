@@ -52,7 +52,6 @@ package com.openexchange.service.indexing.impl.internal.nonclustered;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import org.apache.commons.logging.Log;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -89,7 +88,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 @DisallowConcurrentExecution
 public class RunOrRescheduleAtTargetJob implements Job {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RunOrRescheduleAtTargetJob.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RunOrRescheduleAtTargetJob.class);
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {

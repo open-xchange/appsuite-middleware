@@ -57,7 +57,6 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
@@ -70,7 +69,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RequestParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(RequestParticipants.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestParticipants.class);
 
     @Override
     protected void addUserAttendee(final int index, final UserParticipant userParticipant, final Context ctx, final T component, final U cObj) throws ConversionError {

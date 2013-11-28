@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import jcifs.Config;
-import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -79,7 +78,7 @@ import com.openexchange.session.Session;
  */
 public final class CIFSFileStorageService implements AccountAware {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFileStorageService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFileStorageService.class);
 
     private static final String SERVICE_ID = CIFSConstants.ID;
 

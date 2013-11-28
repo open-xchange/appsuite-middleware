@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.ms.Topic;
 
 /**
@@ -67,7 +66,7 @@ import com.openexchange.ms.Topic;
 public class DelayPushQueue implements Runnable {
 
     /** The logger */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DelayPushQueue.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DelayPushQueue.class);
 
     /** The special poison object */
     private static final DelayedPushMsObject POISON = new DelayedPushMsObject(null, 0, 0);

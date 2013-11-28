@@ -71,7 +71,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -99,7 +98,7 @@ import freemarker.template.TemplateExceptionHandler;
  */
 public class TemplateServiceImpl implements TemplateService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TemplateServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TemplateServiceImpl.class);
 
     /** The property for file path to templates */
     public static final String PATH_PROPERTY = "com.openexchange.templating.path";

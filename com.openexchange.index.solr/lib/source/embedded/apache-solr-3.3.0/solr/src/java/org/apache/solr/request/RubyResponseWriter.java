@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public class RubyResponseWriter extends org.apache.solr.response.RubyResponseWriter 
 {
-  private static Logger log = LoggerFactory.getLogger(RubyResponseWriter.class.getName());
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(RubyResponseWriter.class.getName());
 
   
   public RubyResponseWriter(){

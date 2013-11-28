@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.search.Order;
  */
 public final class ThreadSortTest extends AbstractMailTest {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ThreadSortTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadSortTest.class);
 
     String mailObject_25kb;
 

@@ -56,7 +56,6 @@ import java.io.InputStream;
 import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,7 +79,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class ConfigMenu extends SessionServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigMenu.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigMenu.class);
 
     /**
      * Size for the read buffer.

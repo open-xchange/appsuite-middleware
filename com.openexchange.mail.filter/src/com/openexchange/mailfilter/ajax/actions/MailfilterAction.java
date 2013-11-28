@@ -64,7 +64,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
-import org.apache.commons.logging.Log;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -112,7 +111,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(MailfilterAction.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MailfilterAction.class);
 
     private static final ConcurrentMap<Key, MailfilterAction> INSTANCES = new ConcurrentHashMap<Key, MailfilterAction>();
 

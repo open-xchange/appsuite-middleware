@@ -58,7 +58,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
@@ -75,7 +74,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class RequestReportingFilter implements Filter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RequestReportingFilter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
 
     // properties of long running eas requests
     private static final String EAS_URI = "/Microsoft-Server-ActiveSync";

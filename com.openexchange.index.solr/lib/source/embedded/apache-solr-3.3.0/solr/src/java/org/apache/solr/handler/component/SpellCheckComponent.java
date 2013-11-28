@@ -69,7 +69,7 @@ import org.apache.solr.util.plugin.SolrCoreAware;
  * @since solr 1.3
  */
 public class SpellCheckComponent extends SearchComponent implements SolrCoreAware, SpellingParams {
-  private static final Logger LOG = LoggerFactory.getLogger(SpellCheckComponent.class);
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SpellCheckComponent.class);
 
   public static final boolean DEFAULT_ONLY_MORE_POPULAR = false;
 

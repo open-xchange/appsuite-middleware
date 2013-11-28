@@ -87,7 +87,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MimeType2ExtMap {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeType2ExtMap.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeType2ExtMap.class);
 
     private static volatile Map<String, String> typeMap;
 

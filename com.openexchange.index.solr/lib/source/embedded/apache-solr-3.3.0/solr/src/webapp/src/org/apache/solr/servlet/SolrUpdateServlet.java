@@ -42,7 +42,7 @@ import org.apache.solr.common.util.FastWriter;
  */
 @Deprecated
 public class SolrUpdateServlet extends HttpServlet {
-  final Logger log = LoggerFactory.getLogger(SolrUpdateServlet.class);
+  final org.slf4j.Logger log = LoggerFactory.getLogger(SolrUpdateServlet.class);
 
   XmlUpdateRequestHandler legacyUpdateHandler;
   XMLResponseWriter xmlResponseWriter;

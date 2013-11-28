@@ -90,7 +90,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SpecialUseDefaultFolderChecker.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpecialUseDefaultFolderChecker.class);
 
     static final boolean DEBUG = LOG.isDebugEnabled();
 

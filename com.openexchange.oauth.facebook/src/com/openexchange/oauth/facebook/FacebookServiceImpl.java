@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,7 +78,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class FacebookServiceImpl implements FacebookService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookServiceImpl.class);
 
     private final com.openexchange.oauth.OAuthService oAuthService;
     private final OAuthServiceMetaDataFacebookImpl facebookMetaData;

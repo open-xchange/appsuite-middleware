@@ -178,7 +178,7 @@ public class OXContainerConverter {
 
     private static final String P_CLASS = "CLASS";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXContainerConverter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXContainerConverter.class);
 
     private static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
 
@@ -382,7 +382,7 @@ public class OXContainerConverter {
             AddAlarms(taskContainer, object);
             return taskContainer;
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }
@@ -1813,7 +1813,7 @@ public class OXContainerConverter {
                 try {
                     addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, Charsets.ISO_8859_1)));
                 } catch (final UnsupportedCharsetException e2) {
-                    LOG.error(e2);
+                    LOG.error(e2.toString());
                     throw new ConverterException(e2);
                 } catch (final URISyntaxException e) {
                     // Insert raw base64-encoded image bytes
@@ -2226,7 +2226,7 @@ public class OXContainerConverter {
                 object.addProperty(property);
             }
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }
@@ -2250,7 +2250,7 @@ public class OXContainerConverter {
                 object.addProperty(property);
             }
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }

@@ -127,7 +127,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXFolderManagerImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderManagerImpl.class);
 
     /**
      * No options.
@@ -1608,7 +1608,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 } catch (final OXException e) {
                     LOG.error(
                         new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
-                            "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()),
+                            "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()).toString(),
                         e);
                     throw e;
                 }

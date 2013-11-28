@@ -314,11 +314,11 @@ public class OXHttpServer extends HttpServer {
         for (final NetworkListener listener : listeners.values()) {
             configureListener(listener);
         }
-        
+
         if (serverConfig.isJmxEnabled()) {
             enableJMX();
         }
-        
+
         for (final NetworkListener listener : listeners.values()) {
             try {
                 listener.start();
@@ -686,7 +686,7 @@ public class OXHttpServer extends HttpServer {
             config.setMaxFormPostSize(listener.getMaxFormPostSize());
             config.setMaxBufferedPostSize(listener.getMaxBufferedPostSize());
             config.setDefaultQueryEncoding(Charsets.lookupCharset(GrizzlyConfig.getInstance().getDefaultEncoding()));
-            
+
 
             webServerFilter.setHttpHandler(httpHandlerChain);
 

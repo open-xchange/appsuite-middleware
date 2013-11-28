@@ -89,7 +89,7 @@ import com.openexchange.user.UserService;
  */
 public class DovecotEntity2ACL extends Entity2ACL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DovecotEntity2ACL.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DovecotEntity2ACL.class);
 
     private static final DovecotEntity2ACL INSTANCE = new DovecotEntity2ACL();
 
@@ -244,7 +244,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
                     "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
-                    "\nThe session user's ID is returned."));
+                    "\nThe session user's ID is returned.").toString());
             }
             return ids[pos];
         }
@@ -252,7 +252,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
         if (LOG.isWarnEnabled()) {
             LOG.warn(new com.openexchange.java.StringAllocator().append("Found multiple users with login \"").append(pattern).append(
                 "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
-                "\nThe first found user is returned."));
+                "\nThe first found user is returned.").toString());
         }
         return ids[0];
     }

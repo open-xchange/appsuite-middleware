@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -94,7 +93,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MicroformatServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MicroformatServlet.class);
 
     private static final String MODULE = "module";
 

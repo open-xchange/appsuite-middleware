@@ -80,7 +80,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class EventPool implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(EventPool.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPool.class);
 
     /**
      * The delay for a pooled event. TODO: Make configurable
@@ -268,7 +268,7 @@ public final class EventPool implements Runnable {
                 } while ((pooledEvent = queue.poll()) != null);
             }
         } catch (final Throwable t) {
-            com.openexchange.log.Log.loggerFor(EventPool.class).error(t.getMessage(), t);
+            org.slf4j.LoggerFactory.getLogger(EventPool.class).error(t.getMessage(), t);
         } finally {
             blocker.unblock();
         }

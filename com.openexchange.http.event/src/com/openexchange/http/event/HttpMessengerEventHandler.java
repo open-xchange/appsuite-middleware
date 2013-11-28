@@ -51,7 +51,6 @@ package com.openexchange.http.event;
 
 import java.net.InetSocketAddress;
 import java.text.MessageFormat;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
@@ -71,7 +70,7 @@ public final class HttpMessengerEventHandler implements EventHandler {
 
     private static final String TALKINGSTICK = "__talkingstick";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpMessengerEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpMessengerEventHandler.class);
 
     private final String mapName;
     private final ServiceLookup services;

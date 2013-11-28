@@ -60,7 +60,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.config.ConfigFileStorageAccount;
@@ -162,7 +162,7 @@ public final class ConfigFileStorageAccountParser {
                 ids.add(id);
             }
         }
-        final Log logger = com.openexchange.log.Log.loggerFor(ConfigFileStorageAccountParser.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigFileStorageAccountParser.class);
         if (ids.isEmpty()) {
             if (logger.isInfoEnabled()) {
                 logger.info("Found no pre-configured file storage accounts.");

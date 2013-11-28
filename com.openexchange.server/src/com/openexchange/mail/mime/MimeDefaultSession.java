@@ -113,7 +113,7 @@ public final class MimeDefaultSession {
                     final MailProperties mailProperties = MailProperties.getInstance();
                     final String defaultMimeCharset = mailProperties.getDefaultMimeCharset();
                     if (null == defaultMimeCharset) {
-                        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(MimeDefaultSession.class);
+                        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MimeDefaultSession.class);
                         if (log.isWarnEnabled()) {
                             log.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
                         }

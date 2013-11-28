@@ -54,7 +54,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
@@ -71,7 +70,7 @@ import com.openexchange.session.Session;
  */
 public class PushMsSession implements PutIfAbsent {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushMsSession.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsSession.class);
 
     /**
      * Deserializes a session from a map that was previously wrapped via {@link PushMsSession#wrap}.

@@ -55,7 +55,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 
 
@@ -67,7 +66,7 @@ import com.openexchange.exception.OXException;
  */
 public abstract class RunLoop<E> implements Runnable {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RunLoop.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RunLoop.class);
     
     protected final BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
 

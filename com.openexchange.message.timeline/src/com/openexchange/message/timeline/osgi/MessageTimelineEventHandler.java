@@ -51,7 +51,6 @@ package com.openexchange.message.timeline.osgi;
 
 import java.text.MessageFormat;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.message.timeline.MessageTimelineManagement;
@@ -67,7 +66,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class MessageTimelineEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MessageTimelineEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MessageTimelineEventHandler.class);
 
     /**
      * Initializes a new {@link MessageTimelineEventHandler}.

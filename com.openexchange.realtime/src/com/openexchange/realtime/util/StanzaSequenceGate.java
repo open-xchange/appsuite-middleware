@@ -58,8 +58,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -80,7 +80,7 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequenceGateMBean> {
 
-    private static org.apache.commons.logging.Log LOG = Log.loggerFor(StanzaSequenceGate.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(StanzaSequenceGate.class);
 
     /* Max. number of stanzas that will be buffered if one stanza is missing in the sequence */
     protected static final int BUFFER_SIZE = 20;
@@ -112,7 +112,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
     /**
      * Ensures a correct order of sequence numbers of incoming Stanzas.
-     * 
+     *
      * <ul>
      *   <li>Stanzas that don't carry a sequence number are directly handed over to the specific
      *   {@link StanzaSequenceGate#handleInternal(Stanza, ID)} implementation of the components that makes use of this StanzaSequenceGate
@@ -124,7 +124,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
      *       <li>If the buffer for creating a valid sequence is full Stanzas are discarded.</li>
      *     </ul>
      * </ul>
-     * 
+     *
      * @param stanza the incoming stanza
      * @param recipient the recipient of the incoming Stanza
      * @return If <code>false</code> an ACK shouldn't be sent to the client as the Stanza wasn't handled properly
@@ -138,7 +138,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
     /**
      * Ensures a correct order of sequence numbers of incoming Stanzas.
-     * 
+     *
      * <ul>
      *   <li>Stanzas that don't carry a sequence number are directly handed over to the specific
      *   {@link StanzaSequenceGate#handleInternal(Stanza, ID)} implementation of the components that makes use of this StanzaSequenceGate
@@ -150,7 +150,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
      *       <li>If the buffer for creating a valid sequence is full Stanzas are discarded.</li>
      *     </ul>
      * </ul>
-     * 
+     *
      * @param stanza the incoming stanza
      * @param recipient the recipient of the incoming Stanza
      * @param customAction a custom action that (if not null) should be used instead of the using component's handleInternal.
@@ -169,7 +169,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 //TODO: for 7.4 this shouldn't throw Exceptions at all. The class implementing the method has to handle it
                 try {
                     handleInternal(stanza, recipient);
-                    
+
                 } catch (Exception ex) {
                     throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(ex, ex.getMessage());
                 }
@@ -317,7 +317,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
         }
 
     }
-    
+
     /**
      * Resets the current threshold for the given ID and empties the buffer of Stanzas with now incorrect sequence numbers
      * @param constructedId The ID for that we want to reset the threshold
@@ -370,14 +370,14 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
         }
 
     }
-    
+
     // Management calls
     //======================================================================================================================================
-    
+
     private void notifyManagementNumberOfInboxes() {
         managementObject.setNumberOfInboxes(inboxes.size());
     }
-    
+
     private void notifyManagementSequenceNumbers() {
         HashMap<String, Long> basicSequenceNumbers = new HashMap<String, Long>(sequenceNumbers.size());
         for (Entry<ID, AtomicLong> entry : sequenceNumbers.entrySet()) {
@@ -388,7 +388,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
     private void notifyManagementInboxes() {
         notifyManagementNumberOfInboxes();
-        
+
         Map<String, List<Long>> clientSequenceMap = new HashMap<String, List<Long>>();
         for (Entry<ID, List<StanzaWithCustomAction>> entry : inboxes.entrySet()) {
             String client = entry.getKey().toString();

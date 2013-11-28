@@ -59,7 +59,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -76,7 +75,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class ServerUserSetting {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServerUserSetting.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerUserSetting.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

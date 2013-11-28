@@ -79,8 +79,8 @@ public final class TikaImageExtractingParser implements Parser {
 
     private static final long serialVersionUID = -8054020195071839180L;
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(TikaImageExtractingParser.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(TikaImageExtractingParser.class);
 
     private static final Set<MediaType> TYPES_IMAGE;
 

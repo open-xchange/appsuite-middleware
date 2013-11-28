@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
@@ -74,7 +73,7 @@ public class SimpleTranslator implements QueryTranslator {
 
     private FormalFieldParser parser;
 
-    private static Log log = com.openexchange.log.Log.loggerFor(SimpleTranslator.class);
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SimpleTranslator.class);
 
     @Override
     public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {

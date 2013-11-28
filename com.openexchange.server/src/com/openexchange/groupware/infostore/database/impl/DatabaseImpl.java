@@ -63,7 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -94,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class DatabaseImpl extends DBService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseImpl.class);
 
     private final static int DOCUMENT_VERSION_NUMBER_WITHOUT_FILE = 0;
 
@@ -1049,7 +1048,7 @@ public class DatabaseImpl extends DBService {
                     deleteVersionAction.undo();
                     throw e;
                 } catch (final OXException e1) {
-                    LOG.fatal("Can't roll back deleting versions. Run the consistency tool.", e1);
+                    LOG.error("Can't roll back deleting versions. Run the consistency tool.", e1);
                 }
             }
 

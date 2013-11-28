@@ -81,7 +81,6 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
 import org.apache.cassandra.utils.ByteBufferUtil;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,7 +94,7 @@ import com.openexchange.exception.OXException;
  */
 public class CassandraEAVStorageImpl implements EAVStorage {
 
-	private static final Log log = com.openexchange.log.Log.loggerFor(CassandraEAVStorageImpl.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CassandraEAVStorageImpl.class);
 
 	private static volatile Cluster cluster;
 	private static volatile Keyspace keyspace;
@@ -166,7 +165,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
 
 		if (kDef == null) {
-			log.fatal("Keyspace '" + keyspaceName + "' does not exist. Creating...");
+			log.error("Keyspace '" + keyspaceName + "' does not exist. Creating...");
 			createSchema();
 			log.info("done.");
 		}
@@ -192,7 +191,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		try {
 			cluster.addKeyspace(newKeyspace, false);
 		} catch (HectorException h) {
-			log.fatal(h.getMessage());
+			log.error(h.getMessage());
 		}
 	}
 

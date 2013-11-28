@@ -70,7 +70,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
  */
 public class DataWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DataWriter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataWriter.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

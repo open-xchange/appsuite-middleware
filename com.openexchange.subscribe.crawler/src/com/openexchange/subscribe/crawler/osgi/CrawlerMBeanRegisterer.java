@@ -54,7 +54,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -74,7 +73,7 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,O
 
     private final BundleContext context;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CrawlerMBeanRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CrawlerMBeanRegisterer.class);
 
     private ManagementService managementService;
 

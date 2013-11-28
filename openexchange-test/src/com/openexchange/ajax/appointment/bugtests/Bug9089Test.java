@@ -1,7 +1,6 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.exception.OXException;
@@ -12,7 +11,7 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class Bug9089Test extends AppointmentTest {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug9089Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9089Test.class);
 
 	public Bug9089Test(final String name) {
 		super(name);

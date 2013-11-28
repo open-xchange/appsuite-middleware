@@ -84,9 +84,8 @@ import javax.management.remote.JMXPrincipal;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import com.openexchange.java.Charsets;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.management.ManagementExceptionCode;
 
 /**
@@ -96,7 +95,7 @@ import com.openexchange.management.ManagementExceptionCode;
  */
 public abstract class AbstractAgent {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractAgent.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAgent.class);
 
     private static final class AbstractAgentSocketFactory implements RMIServerSocketFactory, Serializable {
 
@@ -456,7 +455,7 @@ public abstract class AbstractAgent {
             cs.start();
             connectors.put(url, cs);
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" started"));
+                LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" started").toString());
             }
             return url;
         } catch (final IOException e) {
@@ -477,7 +476,7 @@ public abstract class AbstractAgent {
         try {
             connector.stop();
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" stopped"));
+                LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" stopped").toString());
             }
         } catch (final IOException e) {
             LOG.error(new StringBuilder("JMX connector server on ").append(url).append(" could not be stopped").toString(), e);

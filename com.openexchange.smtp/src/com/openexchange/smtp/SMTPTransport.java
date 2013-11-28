@@ -147,7 +147,7 @@ import com.sun.mail.smtp.SMTPMessage;
  */
 public final class SMTPTransport extends MailTransport {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SMTPTransport.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPTransport.class);
 
     /**
      * The SMTP protocol name.

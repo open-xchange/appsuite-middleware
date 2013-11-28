@@ -61,7 +61,7 @@ import org.apache.solr.search.SolrIndexSearcher;
  * @since solr 1.3
  */
 public abstract class AbstractLuceneSpellChecker extends SolrSpellChecker {
-  public static final Logger log = LoggerFactory.getLogger(AbstractLuceneSpellChecker.class);
+  public static final org.slf4j.Logger log = LoggerFactory.getLogger(AbstractLuceneSpellChecker.class);
   
   public static final String SPELLCHECKER_ARG_NAME = "spellchecker";
   public static final String LOCATION = "sourceLocation";

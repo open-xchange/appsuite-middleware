@@ -49,11 +49,11 @@
 
 package com.openexchange.http.requestwatcher.osgi;
 
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.requestwatcher.internal.RequestWatcherServiceImpl;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
-import com.openexchange.log.Log;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -75,7 +75,7 @@ public class RequestWatcherActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws OXException {
-        final org.apache.commons.logging.Log log = Log.loggerFor(RequestWatcherActivator.class);
+        final Logger log = org.slf4j.LoggerFactory.getLogger(RequestWatcherActivator.class);
         if (log.isInfoEnabled()) {
             log.info("Starting RequestWatcher.");
         }
@@ -89,7 +89,7 @@ public class RequestWatcherActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = Log.loggerFor(RequestWatcherActivator.class);
+        final Logger log = org.slf4j.LoggerFactory.getLogger(RequestWatcherActivator.class);
         if (log.isInfoEnabled()) {
             log.info("Stopping RequestWatcher.");
         }

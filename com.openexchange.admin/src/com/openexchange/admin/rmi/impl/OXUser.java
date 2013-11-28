@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.idn.IDNA;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -106,7 +105,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
  */
 public class OXUser extends OXCommonImpl implements OXUserInterface {
 
-    private final static Log log = com.openexchange.log.Log.loggerFor(OXUser.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUser.class);
 
     private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
 

@@ -59,7 +59,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -146,7 +145,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     protected TimeZone timeZone = null;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentTest.class);
 
     private final List<Appointment> clean = new ArrayList<Appointment>();
 

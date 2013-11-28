@@ -146,7 +146,7 @@ public final class FacebookFQLGroupParser {
             if (null != localName) {
                 final ItemHandler itemHandler = ITEM_HANDLERS.get(localName);
                 if (null == itemHandler) {
-                    com.openexchange.log.Log.loggerFor(FacebookFQLGroupParser.class).warn("Un-handled item: " + localName);
+                    org.slf4j.LoggerFactory.getLogger(FacebookFQLGroupParser.class).warn("Un-handled item: " + localName);
                 } else {
                     itemHandler.handleItem(item, group);
                 }

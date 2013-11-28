@@ -93,8 +93,8 @@ public final class MessageUtility {
 
     private static final String STR_EMPTY = "";
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(MessageUtility.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MessageUtility.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

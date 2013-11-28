@@ -14,9 +14,10 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.tools.ssl,
  javax.net.ssl,
- javax.xml.ws,
  javax.xml.namespace,
+ javax.xml.ws,
  org.apache.commons.codec,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.ews.osgi.EWSActivator

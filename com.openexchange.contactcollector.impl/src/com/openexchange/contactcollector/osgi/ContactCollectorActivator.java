@@ -49,7 +49,6 @@
 
 package com.openexchange.contactcollector.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
@@ -132,7 +131,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         {
             final ConfigurationService cService = getService(ConfigurationService.class);
             if (!cService.getBoolProperty("com.openexchange.contactcollector.enabled", true)) {
-                final Log log = com.openexchange.log.Log.loggerFor(ContactCollectorActivator.class);
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ContactCollectorActivator.class);
                 log.info("Canceled start-up of bundle: com.openexchange.contactcollector. Disabled by configuration setting \"com.openexchange.contactcollector.enabled=false\"");
                 registerPreferenceItems();
                 return;

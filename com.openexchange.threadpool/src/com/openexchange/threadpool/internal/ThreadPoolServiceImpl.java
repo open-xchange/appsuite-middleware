@@ -81,7 +81,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolServiceImpl.class);
 
     /**
      * Creates a new {@link ThreadPoolServiceImpl} with the given properties.
@@ -185,7 +185,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             LOG.warn(new com.openexchange.java.StringAllocator(128).append("\n\n\tConfigured pool size of ").append(desiredCorePoolSize).append(
                 " through property \"com.openexchange.threadpool.corePoolSize\" does not obey the rule\n\tfor minimum core pool size: ").append(
                 Runtime.getRuntime().availableProcessors()).append(" (number of CPUs) + 1 = ").append(minCorePoolSize).append(". Using ").append(
-                minCorePoolSize).append(" as core pool size.\n"));
+                minCorePoolSize).append(" as core pool size.\n").toString());
             return minCorePoolSize;
         }
         return desiredCorePoolSize;

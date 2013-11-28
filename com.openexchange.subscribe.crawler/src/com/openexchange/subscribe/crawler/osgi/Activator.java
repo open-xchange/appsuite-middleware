@@ -57,7 +57,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -82,7 +81,7 @@ public class Activator implements BundleActivator {
 
     private ArrayList<ServiceRegistration<?>> services;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     public static final String DIR_NAME_PROPERTY = "com.openexchange.subscribe.crawler.path";
 

@@ -74,7 +74,7 @@ import com.openexchange.user.UserService;
  */
 public final class AliasesProvider {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AliasesProvider.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AliasesProvider.class);
 
     private static final AliasesProvider INSTANCE = new AliasesProvider();
 

@@ -53,14 +53,13 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavExistsAction extends AbstractAction {
     private boolean tolerateLockNull = false;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavExistsAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavExistsAction.class);
 
     private static final String NOT_FOUND = "There is nothing here, sorry.";
 

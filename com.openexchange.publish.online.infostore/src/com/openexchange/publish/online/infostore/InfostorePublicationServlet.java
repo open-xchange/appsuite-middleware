@@ -62,7 +62,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -90,7 +89,7 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private static final long serialVersionUID = 8929899129435791832L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostorePublicationServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostorePublicationServlet.class);
 
     private final String SELF_DESTRUCT = "selfDestruct";
 

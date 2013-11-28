@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
 
 /**
@@ -67,7 +66,7 @@ import com.openexchange.java.Streams;
  */
 public class FileCache {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(FileCache.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileCache.class);
 
     public interface Filter {
 

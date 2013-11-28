@@ -164,7 +164,7 @@ public final class LogLevelSelection extends HttpServlet {
         String value = ((String[]) p.getValue())[0];
 
         if (name.equals("submit")) continue;
-        Logger logger;
+        org.slf4j.Logger logger;
         LogManager logManager = LogManager.getLogManager();
         if ("root".equals(name)) {
           logger = logManager.getLogger("");
@@ -205,7 +205,7 @@ public final class LogLevelSelection extends HttpServlet {
     Enumeration<String> loggerNames = logManager.getLoggerNames();
     while (loggerNames.hasMoreElements()) {
       String name = loggerNames.nextElement();
-      Logger logger = Logger.getLogger(name);
+      org.slf4j.Logger logger = Logger.getLogger(name);
       LogWrapper wrapper = new LogWrapper(logger);
       roots.remove(wrapper); // Make sure add occurs
       roots.add(wrapper);
@@ -292,7 +292,7 @@ public final class LogLevelSelection extends HttpServlet {
       return null;
     }
 
-    public Logger logger = null;
+    public org.slf4j.Logger logger = null;
     public String name;
   }
 
@@ -308,5 +308,5 @@ public final class LogLevelSelection extends HttpServlet {
           // Level.ALL -- ignore.  It is useless.
   };
 
-  private Logger log = Logger.getLogger(getClass().getName());
+  private org.slf4j.Logger log = Logger.getLogger(getClass().getName());
 }

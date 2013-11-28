@@ -54,6 +54,7 @@ import static com.openexchange.folderstorage.outlook.sql.Utility.getDatabaseServ
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -177,9 +178,9 @@ public final class Delete {
                  * Backup failed
                  */
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Delete.class);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Backup failed.", e);
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
+                if (log.isDebugEnabled()) {
+                    log.debug("Backup failed.", e);
                 }
             } finally {
                 DBUtils.closeSQLStuff(stmt);
@@ -199,9 +200,9 @@ public final class Delete {
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Delete.class);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Backup failed.", e);
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
+                if (log.isDebugEnabled()) {
+                    log.debug("Backup failed.", e);
                 }
             } finally {
                 DBUtils.closeSQLStuff(stmt);
@@ -221,9 +222,9 @@ public final class Delete {
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Delete.class);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Backup failed.", e);
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
+                if (log.isDebugEnabled()) {
+                    log.debug("Backup failed.", e);
                 }
             } finally {
                 DBUtils.closeSQLStuff(stmt);

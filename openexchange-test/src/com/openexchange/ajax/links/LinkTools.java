@@ -53,7 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.Assert;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,7 +86,7 @@ public final class LinkTools extends Assert {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinkTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkTools.class);
 
     /**
      * Encoding.

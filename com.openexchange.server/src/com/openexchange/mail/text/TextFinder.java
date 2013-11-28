@@ -91,8 +91,8 @@ import com.openexchange.tools.tnef.TNEF2ICal;
  */
 public final class TextFinder {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(TextFinder.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(TextFinder.class);
 
     private boolean textIsHtml = false;
 
@@ -316,7 +316,7 @@ public final class TextFinder {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(
                     new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
+                        "\". Using fallback charset \"").append(fallback).append("\" instead.").toString(),
                     e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);

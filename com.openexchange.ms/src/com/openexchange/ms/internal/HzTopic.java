@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.openexchange.java.util.UUIDs;
@@ -74,7 +73,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class HzTopic<E> implements Topic<E> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HzTopic.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HzTopic.class);
 
     static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
     static final String MESSAGE_DATA_SENDER_ID = HzDataUtility.MESSAGE_DATA_SENDER_ID;
@@ -100,7 +99,7 @@ public final class HzTopic<E> implements Topic<E> {
         publishQueue = new HzDelayQueue<HzDelayed<E>>();
         // Timer task
         final TimerService timerService = Services.getService(TimerService.class);
-        final Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final Runnable r = new Runnable() {
 
             @Override

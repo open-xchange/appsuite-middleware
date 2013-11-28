@@ -69,7 +69,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
@@ -166,7 +165,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFacadeImpl.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
 
     private static final boolean INDEXING_ENABLED = false; //TODO: remove switch once we index infoitems
 

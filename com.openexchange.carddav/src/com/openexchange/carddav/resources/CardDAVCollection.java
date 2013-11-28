@@ -59,7 +59,6 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
@@ -90,7 +89,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
  */
 public abstract class CardDAVCollection extends AbstractCollection {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CardDAVCollection.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CardDAVCollection.class);
     private static final Pattern LEGACY_FOLDER_NAME = Pattern.compile("f\\d+_(\\d+).vcf");
     private static final long OVERRIDE_LEGACY_FOLDERS = 11;
 

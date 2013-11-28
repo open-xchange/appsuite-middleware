@@ -79,8 +79,8 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "An array of resource objects as described in Resource response.")
 public final class ListAction extends AbstractResourceAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(ListAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ListAction.class);
 
     /**
      * Initializes a new {@link ListAction}.

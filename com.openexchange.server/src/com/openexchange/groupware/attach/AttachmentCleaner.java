@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AttachmentCleaner.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentCleaner.class);
 
     private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission
 

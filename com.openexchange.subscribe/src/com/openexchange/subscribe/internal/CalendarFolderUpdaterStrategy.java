@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -74,7 +73,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<CalendarDataObject> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarFolderUpdaterStrategy.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarFolderUpdaterStrategy.class);
 
     private static final int SQL_INTERFACE = 1;
 

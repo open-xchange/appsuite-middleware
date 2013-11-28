@@ -76,7 +76,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  */
 public final class IMAPNotifierTask {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IMAPNotifierTask.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPNotifierTask.class);
 
     private final int accountId;
 

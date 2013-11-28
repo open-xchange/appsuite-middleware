@@ -64,7 +64,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer<HostnameService,HostnameService> {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HostnameServiceCustomizer.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HostnameServiceCustomizer.class);
 
 	private final BundleContext context;
 

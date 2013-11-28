@@ -66,7 +66,7 @@ import com.openexchange.spamhandler.cloudmark.CloudmarkSpamHandler;
  */
 public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CloudmarkSpamHandlerActivator.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CloudmarkSpamHandlerActivator.class);
 
 	/**
 	 * Initializes a new {@link CloudmarkSpamHandlerActivator}

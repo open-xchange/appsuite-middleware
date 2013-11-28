@@ -78,7 +78,7 @@ public class BlackWhiteListServlet extends DataServlet {
      */
     private static final long serialVersionUID = -929748663411398165L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(BlackWhiteListServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BlackWhiteListServlet.class);
 
     private static final String ADD = "add";
 

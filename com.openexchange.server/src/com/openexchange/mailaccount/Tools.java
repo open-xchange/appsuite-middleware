@@ -53,6 +53,7 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.Set;
+import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -60,7 +61,6 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
-import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -389,7 +389,7 @@ public final class Tools {
             final StringBuilder sb = new StringBuilder("Checking default folder full names for account ");
             sb.append(account.getId()).append(" failed with user ").append(userId);
             sb.append(" in context ").append(contextId);
-            com.openexchange.log.Log.loggerFor(AbstractMailAccountAction.class).warn(sb.toString(), e);
+            LoggerFactory.getLogger(Tools.class).warn(sb.toString(), e);
             return account;
         }
     }

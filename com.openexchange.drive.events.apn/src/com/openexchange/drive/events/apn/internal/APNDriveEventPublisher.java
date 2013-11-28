@@ -61,7 +61,6 @@ import javapns.notification.PayloadPerDevice;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
@@ -79,7 +78,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
     private final int STATUS_INVALID_TOKEN_SIZE = 5;
     private final int STATUS_INVALID_TOKEN = 8;
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(APNDriveEventPublisher.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventPublisher.class);
 
     private final APNAccess access;
 
@@ -118,7 +117,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             for (PushedNotification notification : notifications) {
                 if (notification.isSuccessful()) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(notification);
+                        LOG.debug(notification.toString());
                     }
                 } else {
                     LOG.warn("Unsuccessful push notification: " + notification);

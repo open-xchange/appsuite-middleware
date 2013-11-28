@@ -70,7 +70,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class SMTPActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SMTPActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPActivator.class);
 
     /**
      * Initializes a new {@link SMTPActivator}

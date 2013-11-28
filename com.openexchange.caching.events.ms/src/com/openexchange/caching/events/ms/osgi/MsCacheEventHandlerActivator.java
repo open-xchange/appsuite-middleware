@@ -49,7 +49,6 @@
 
 package com.openexchange.caching.events.ms.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -69,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandlerActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandlerActivator.class);
 
     /**
      * Initializes a new {@link MsCacheEventHandlerActivator}.

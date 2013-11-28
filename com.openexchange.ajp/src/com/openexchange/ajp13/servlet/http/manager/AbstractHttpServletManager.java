@@ -78,8 +78,8 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
     /**
      * The logger.
      */
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(AbstractHttpServletManager.class);
+    protected static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AbstractHttpServletManager.class);
 
     /**
      * The empty class array.
@@ -110,7 +110,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      * Creates the static servlets identified by servlet constructor map.
      */
     private final void createServlets(final Map<String, Constructor<?>> servletConstructorMap) {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(AbstractHttpServletManager.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractHttpServletManager.class);
         final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
         if (null == configLoader) {
             log.error("Aborting servlets' initialization: HTTP service has not been initialized since default servlet configuration loader is null.");
@@ -265,7 +265,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(64).append("New servlet \"").append(servlet.getClass().getCanonicalName()).append(
-                    "\" successfully registered to \"").append(path).append('"'));
+                    "\" successfully registered to \"").append(path).append('"').toString());
             }
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);

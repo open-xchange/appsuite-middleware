@@ -57,7 +57,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -80,7 +79,7 @@ import com.openexchange.session.Session;
  */
 public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OAuthServiceMetaDataMSNImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthServiceMetaDataMSNImpl.class);
 
     private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
 

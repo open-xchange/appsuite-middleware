@@ -26,7 +26,7 @@ public abstract class AbstractLockManager implements HLockManager {
   
   protected static final String DUMMY_VALUE = "v";
 
-  private static final Logger log = LoggerFactory.getLogger(AbstractLockManager.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(AbstractLockManager.class);
 
   protected Cluster cluster;
   protected Keyspace keyspace;

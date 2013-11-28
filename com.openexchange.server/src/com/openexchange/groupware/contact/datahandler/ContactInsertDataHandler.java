@@ -90,7 +90,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
  */
 public final class ContactInsertDataHandler implements DataHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ContactInsertDataHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactInsertDataHandler.class);
 
     private static final String[] ARGS = { "com.openexchange.groupware.contact.folder" };
 

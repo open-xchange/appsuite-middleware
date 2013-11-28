@@ -81,7 +81,6 @@ import java.util.Set;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
-import org.apache.commons.logging.Log;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -137,7 +136,7 @@ public final class Contacts {
 
     public static final int DATA_TRUNCATION = 54;
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(Contacts.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Contacts.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -675,7 +674,7 @@ public final class Contacts {
             final java.util.Date server_date = original.getLastModified();
             if (DEBUG) {
                 LOG.debug(new StringBuilder(
-                    "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()));
+                    "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()).toString());
             }
             if ((client_date != null) && (client_date.getTime() > -1) && (client_date.getTime() < server_date.getTime())) {
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
@@ -854,7 +853,7 @@ public final class Contacts {
 
             if (DEBUG) {
                 LOG.debug(new StringBuilder(
-                    "DEBUG: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + getStatementString(ps)));
+                    "DEBUG: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + getStatementString(ps)).toString());
             }
 
             if (co.getParentFolderID() != fid) {
@@ -1629,7 +1628,7 @@ public final class Contacts {
                 ps.setInt(8, cid);
 
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder("WRITE DLIST ").append(getStatementString(ps)));
+                    LOG.debug(new StringBuilder("WRITE DLIST ").append(getStatementString(ps)).toString());
                 }
 
                 ps.execute();
@@ -1772,7 +1771,7 @@ public final class Contacts {
                         ps.setString(8, dleo.getEmailaddress());
                         ps.setInt(12, cid);
                         if (DEBUG) {
-                            LOG.debug(new StringBuilder("UPDATE DLIST ").append(getStatementString(ps)));
+                            LOG.debug(new StringBuilder("UPDATE DLIST ").append(getStatementString(ps)).toString());
                         }
                         ps.execute();
                     }
@@ -1795,7 +1794,7 @@ public final class Contacts {
             ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
             ps.setInt(1, id);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)));
+                LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)).toString());
             }
             ps.execute();
         } catch (final SQLException e) {
@@ -1818,7 +1817,7 @@ public final class Contacts {
                     }
                     ps.setInt(4, cid);
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)));
+                        LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)).toString());
                     }
                     ps.execute();
                 }
@@ -1907,7 +1906,7 @@ public final class Contacts {
                 byte[] uuidBinary = UUIDs.toByteArray(uuid);
                 ps.setBytes(6, uuidBinary);
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder("INSERT LINKAGE ").append(getStatementString(ps)));
+                    LOG.debug(new StringBuilder("INSERT LINKAGE ").append(getStatementString(ps)).toString());
                 }
                 ps.addBatch();
             }
@@ -1985,7 +1984,7 @@ public final class Contacts {
                     ps.setInt(2, leo.getLinkID());
                     ps.setInt(3, cid);
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(getStatementString(ps)));
+                        LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(getStatementString(ps)).toString());
                     }
                     ps.execute();
                 }
@@ -2072,7 +2071,7 @@ public final class Contacts {
             ps.setInt(4, cid);
             ps.setLong(5, lastModified);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)));
+                LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)).toString());
             }
             ps.execute();
         } catch (final SQLException e) {
@@ -2098,7 +2097,7 @@ public final class Contacts {
             ps.setInt(6, contact_id);
             ps.setInt(7, cid);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)));
+                LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)).toString());
             }
             ps.execute();
         } catch (final SQLException e) {

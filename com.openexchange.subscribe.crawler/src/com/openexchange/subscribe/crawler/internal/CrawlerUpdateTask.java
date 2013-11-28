@@ -62,7 +62,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
@@ -77,7 +76,7 @@ public class CrawlerUpdateTask implements Runnable {
 
     private final ConfigurationService configurationService;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CrawlerUpdateTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CrawlerUpdateTask.class);
 
     private static final String UPDATE_DIRECTORY_PATH_PROPERTY = "com.openexchange.subscribe.crawler.updatepath";
 

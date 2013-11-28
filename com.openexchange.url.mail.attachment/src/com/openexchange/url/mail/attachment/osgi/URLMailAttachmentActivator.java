@@ -62,8 +62,8 @@ import com.openexchange.url.mail.attachment.URLMailAttachmentDataSource;
  */
 public final class URLMailAttachmentActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(URLMailAttachmentActivator.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(URLMailAttachmentActivator.class);
 
     private final String name;
 

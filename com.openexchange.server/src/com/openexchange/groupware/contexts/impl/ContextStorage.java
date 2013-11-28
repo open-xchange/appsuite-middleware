@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contexts.impl;
 
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -68,7 +67,7 @@ public abstract class ContextStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContextStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextStorage.class);
 
     /**
      * Singleton implementation.

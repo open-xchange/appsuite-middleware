@@ -50,7 +50,6 @@
 package com.openexchange.contacts.json.actions;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -89,7 +88,7 @@ requestBody = "",
 responseDescription = "")
 public class CopyAction extends ContactAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CopyAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyAction.class);
 
     /**
      * Initializes a new {@link CopyAction}.

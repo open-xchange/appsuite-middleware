@@ -67,7 +67,7 @@ import com.openexchange.concurrent.Synchronizer;
  */
 public final class AJPv13ServletOutputStream extends ServletOutputStream implements Synchronizable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AJPv13ServletOutputStream.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13ServletOutputStream.class);
 
     private static final String ERR_OUTPUT_CLOSED = "OutputStream is closed";
 

@@ -2,9 +2,9 @@
 package com.openexchange.filemanagement.distributed.osgi;
 
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
@@ -24,7 +24,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DistributedFileManagementActivator extends HousekeepingActivator {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(DistributedFileManagementActivator.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DistributedFileManagementActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

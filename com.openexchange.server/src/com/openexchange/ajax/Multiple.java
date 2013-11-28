@@ -66,7 +66,6 @@ import java.util.concurrent.CompletionService;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -110,7 +109,7 @@ import com.openexchange.tools.session.ServerSession;
 public class Multiple extends SessionServlet {
 
     private static final long serialVersionUID = 3029074251138469122L;
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(Multiple.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Multiple.class);
 
     private static final String ACTION = PARAMETER_ACTION;
 
@@ -608,7 +607,7 @@ public class Multiple extends SessionServlet {
 
     private static void logError(final Object message, final Session session, final Exception e) {
         LogProperties.putSessionProperties(session);
-        LOG.error(message, e);
+        LOG.error(message.toString(), e);
     }
 
     private static final class CallableImpl implements Callable<Object> {

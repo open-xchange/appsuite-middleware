@@ -57,7 +57,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.DefaultContactStorage;
@@ -97,7 +96,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbContactStorage extends DefaultContactStorage {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(RdbContactStorage.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactStorage.class);
     private static boolean PREFETCH_ATTACHMENT_INFO = true;
     private static int DELETE_CHUNK_SIZE = 50;
 

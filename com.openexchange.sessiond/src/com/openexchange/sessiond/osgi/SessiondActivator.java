@@ -51,7 +51,6 @@ package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -86,7 +85,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class SessiondActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessiondActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondActivator.class);
 
     private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 

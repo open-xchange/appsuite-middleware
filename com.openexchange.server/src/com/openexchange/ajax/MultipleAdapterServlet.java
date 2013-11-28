@@ -57,7 +57,6 @@ import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -84,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class MultipleAdapterServlet extends PermissionServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MultipleAdapterServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleAdapterServlet.class);
 
 
     @Override

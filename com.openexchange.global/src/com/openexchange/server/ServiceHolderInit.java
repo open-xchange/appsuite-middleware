@@ -66,7 +66,7 @@ import com.openexchange.java.Streams;
  */
 public final class ServiceHolderInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ServiceHolderInit.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServiceHolderInit.class);
 
     private static final String DEFAULT_TIMEOUT = "10000";
 

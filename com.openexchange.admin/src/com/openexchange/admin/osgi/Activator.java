@@ -50,7 +50,6 @@
 package com.openexchange.admin.osgi;
 
 import java.util.Dictionary;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -90,7 +89,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
@@ -115,10 +114,10 @@ public class Activator extends HousekeepingActivator {
             AdminDaemon.initCache(configurationService);
             daemon.initAccessCombinationsInCache();
         } catch (final OXGenericException e) {
-            log.fatal(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final ClassNotFoundException e) {
-            log.fatal(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw e;
         }
         track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
@@ -178,7 +177,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         cleanUp();
-        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         log.info("Stopping RMI...");
         final AdminDaemon daemon = this.daemon;
         if (null != daemon) {

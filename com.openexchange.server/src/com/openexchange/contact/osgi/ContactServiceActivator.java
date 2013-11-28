@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
@@ -70,7 +69,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ContactServiceActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(ContactServiceActivator.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactServiceActivator.class);
 
     /**
      * Initializes a new {@link ContactServiceActivator}.

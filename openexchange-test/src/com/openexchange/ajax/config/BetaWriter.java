@@ -51,7 +51,6 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Random;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -65,7 +64,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
  */
 public final class BetaWriter implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(BetaWriter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BetaWriter.class);
 
     private final User user;
     private boolean run = true;

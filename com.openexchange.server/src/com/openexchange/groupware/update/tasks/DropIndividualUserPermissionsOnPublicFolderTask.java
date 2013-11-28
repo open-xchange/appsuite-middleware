@@ -59,7 +59,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -81,7 +80,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DropIndividualUserPermissionsOnPublicFolderTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropIndividualUserPermissionsOnPublicFolderTask.class);
 
     public DropIndividualUserPermissionsOnPublicFolderTask() {
         super();

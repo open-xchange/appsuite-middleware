@@ -88,8 +88,8 @@ import com.openexchange.textxtraction.TextXtractExceptionCodes;
  */
 public final class TikaDocumentHandler {
 
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(TikaDocumentHandler.class);
+    protected static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(TikaDocumentHandler.class);
 
     protected final Detector detector;
 

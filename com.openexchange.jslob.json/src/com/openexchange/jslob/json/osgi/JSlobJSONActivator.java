@@ -50,7 +50,6 @@
 package com.openexchange.jslob.json.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -77,7 +76,7 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(JSlobJSONActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JSlobJSONActivator.class);
         registerModule(new JSlobActionFactory(this), "jslob");
         registerService(ResultConverter.class, new JSlobJSONResultConverter());
 
@@ -106,6 +105,6 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        com.openexchange.log.Log.loggerFor(JSlobJSONActivator.class).info("Bundle stopped: com.openexchange.jslob.json");
+        org.slf4j.LoggerFactory.getLogger(JSlobJSONActivator.class).info("Bundle stopped: com.openexchange.jslob.json");
     }
 }

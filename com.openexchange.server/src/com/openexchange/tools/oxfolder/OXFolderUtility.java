@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class OXFolderUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXFolderUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderUtility.class);
 
     private static final String STR_EMPTY = "";
 

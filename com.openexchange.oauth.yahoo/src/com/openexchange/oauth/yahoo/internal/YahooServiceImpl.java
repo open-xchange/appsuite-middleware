@@ -61,7 +61,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,7 +95,7 @@ public class YahooServiceImpl implements YahooService {
 
     private static final String SINGLE_CONTACT_URL = "http://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(YahooServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(YahooServiceImpl.class);
 
     private final Pattern patternGuid;
     private final YahooOAuthActivator activator;

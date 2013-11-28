@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,7 +100,7 @@ public class AttachmentRequest extends CommonRequest {
 
     private static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentRequest.class);
 
     private static final String DATASOURCE = "datasource";
 

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public class CommonParams implements org.apache.solr.common.params.CommonParams {
 
-  public static Logger log = LoggerFactory.getLogger(CommonParams.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(CommonParams.class);
   
 
   /** the default field list to be used */

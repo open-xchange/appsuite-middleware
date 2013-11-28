@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -72,7 +71,7 @@ import com.openexchange.java.Autoboxing;
 public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker {
 
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DeferredRegistryRegistration.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeferredRegistryRegistration.class);
 
     private R registry;
 

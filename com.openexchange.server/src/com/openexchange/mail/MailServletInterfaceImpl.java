@@ -83,6 +83,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -198,7 +199,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private static final int MAX_NUMBER_OF_MESSAGES_2_CACHE = 50;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailServletInterfaceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailServletInterfaceImpl.class);
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
@@ -2815,7 +2816,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Create runnable task
          */
         final Session s = session;
-        final org.apache.commons.logging.Log l = LOG;
+        final Logger l = LOG;
         final Runnable r = new Runnable() {
 
             @Override

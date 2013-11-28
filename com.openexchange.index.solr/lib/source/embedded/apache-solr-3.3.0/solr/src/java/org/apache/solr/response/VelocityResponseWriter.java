@@ -33,7 +33,7 @@ import java.util.Properties;
 public class VelocityResponseWriter implements QueryResponseWriter {
 
   // TODO: maybe pass this Logger to the template for logging from there?
-//  private static final Logger log = LoggerFactory.getLogger(VelocityResponseWriter.class);
+//  private static final org.slf4j.Logger log = LoggerFactory.getLogger(VelocityResponseWriter.class);
 
   public void write(Writer writer, SolrQueryRequest request, SolrQueryResponse response) throws IOException {
     VelocityEngine engine = getEngine(request);  // TODO: have HTTP headers available for configuring engine

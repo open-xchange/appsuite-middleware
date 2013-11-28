@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,7 +79,7 @@ public class UserContact {
 
 	public static final String ALL_ATTRIBUTES = "*";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UserContact.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserContact.class);
 
 	private final User user;
 	private final Contact contact;

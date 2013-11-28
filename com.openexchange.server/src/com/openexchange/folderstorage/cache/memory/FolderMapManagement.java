@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
  */
 public final class FolderMapManagement {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(FolderMapManagement.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderMapManagement.class);
 
     private static final FolderMapManagement INSTANCE = new FolderMapManagement();
 

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
 
-  private static final Logger log = LoggerFactory.getLogger(NodeAutoDiscoverService.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(NodeAutoDiscoverService.class);
 
   public static final int DEF_AUTO_DISCOVERY_DELAY = 30;
 

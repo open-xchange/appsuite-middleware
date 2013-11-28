@@ -51,7 +51,6 @@ package com.openexchange.mail.utils;
 
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
@@ -71,7 +70,7 @@ public class MsisdnUtility {
     /**
      * logger
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsisdnUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsisdnUtility.class);
 
     /**
      * Prevent instantiation of a new {@link MsisdnUtility}.

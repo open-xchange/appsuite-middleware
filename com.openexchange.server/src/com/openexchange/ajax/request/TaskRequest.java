@@ -53,7 +53,6 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class TaskRequest extends CalendarRequest {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskRequest.class);
 
     protected final static int[] _taskFields = {
         DataObject.OBJECT_ID,

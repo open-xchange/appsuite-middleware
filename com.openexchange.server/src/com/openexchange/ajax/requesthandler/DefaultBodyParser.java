@@ -52,7 +52,6 @@ package com.openexchange.ajax.requesthandler;
 import java.io.IOException;
 import java.io.Reader;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -70,7 +69,7 @@ import com.openexchange.java.UnsynchronizedStringReader;
  */
 public class DefaultBodyParser implements BodyParser {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultBodyParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultBodyParser.class);
 
     private static final DefaultBodyParser INSTANCE = new DefaultBodyParser();
 

@@ -54,7 +54,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.MessagingException;
-import org.apache.commons.logging.Log;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -79,7 +78,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class IMAPStoreCache {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(IMAPStoreCache.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPStoreCache.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 

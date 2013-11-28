@@ -237,7 +237,7 @@ import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
  */
 public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
 
-    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomThreadPoolExecutor.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomThreadPoolExecutor.class);
 
     static final Object PRESENT = new Object();
 

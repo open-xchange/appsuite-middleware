@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.reminder.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -64,7 +63,7 @@ import com.openexchange.java.Autoboxing;
  */
 public class TargetRegistryCustomizer implements ServiceTrackerCustomizer<TargetService, TargetService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TargetRegistryCustomizer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TargetRegistryCustomizer.class);
 
     private final BundleContext context;
 

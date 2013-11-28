@@ -51,7 +51,6 @@ package com.openexchange.indexedSearch.json.action;
 
 import java.util.List;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class MailSearchAction extends AbstractIndexAction {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(MailSearchAction.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailSearchAction.class);
 
     private final SearchHandler searchHandler;
 

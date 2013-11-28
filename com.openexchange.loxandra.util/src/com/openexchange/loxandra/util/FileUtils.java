@@ -60,14 +60,13 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import org.apache.commons.logging.Log;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
 public class FileUtils {
-	private static final Log log = com.openexchange.log.Log.loggerFor(FileUtils.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileUtils.class);
 
 	/**
 	 * Read data from a file and convert it to a byte array.
@@ -101,7 +100,7 @@ public class FileUtils {
 		} catch (FileNotFoundException ex) {
 			log.error("File not found.");
 		} catch (IOException ex) {
-			log.error(ex);
+			log.error(ex.getMessage(), ex);
 		}
 
 		return result;
@@ -126,7 +125,7 @@ public class FileUtils {
 	    } catch (FileNotFoundException ex) {
 	        log.error("File not found.");
 	    } catch (IOException ex) {
-	        log.error(ex);
+	        log.error(ex.getMessage(), ex);
 	    }
 
 	    return result;
@@ -163,7 +162,7 @@ public class FileUtils {
 		} catch (FileNotFoundException ex) {
 			log.error("File not found.");
 		} catch (IOException ex) {
-			log.error(ex);
+			log.error(ex.getMessage(), ex);
 		}
 	}
 

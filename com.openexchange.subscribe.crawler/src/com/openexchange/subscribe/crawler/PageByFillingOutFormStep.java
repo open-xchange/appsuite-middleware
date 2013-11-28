@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -75,7 +74,7 @@ public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
 
     private Map<String, String> parameters = new HashMap<String, String>();
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(PageByFillingOutFormStep.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByFillingOutFormStep.class);
 
     public PageByFillingOutFormStep(){
 
@@ -103,7 +102,7 @@ public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
                 LOG.debug("Page after submitting the form : \n" + output.getWebResponse().getContentAsString());
                 executedSuccessfully = true;
             } catch (IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
         }
     }

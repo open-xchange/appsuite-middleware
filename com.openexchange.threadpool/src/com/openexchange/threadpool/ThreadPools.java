@@ -71,7 +71,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class ThreadPools {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPools.class);
 
     /**
      * Initializes a new {@link ThreadPools}.

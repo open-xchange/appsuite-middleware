@@ -69,7 +69,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CalendarExtendDNColumnTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CalendarExtendDNColumnTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarExtendDNColumnTask.class);
 
     /**
      * Desired size for display name taken from ContactsFieldSizeUpdateTask.

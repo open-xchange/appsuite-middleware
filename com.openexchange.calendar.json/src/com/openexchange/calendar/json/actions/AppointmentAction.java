@@ -54,7 +54,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -264,7 +263,7 @@ public abstract class AppointmentAction implements AJAXActionService {
         }
     }
 
-    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final Log log) {
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final org.slf4j.Logger log) {
         final Participant[] participants = appointmentObj.getParticipants();
         if (participants == null) {
             return;

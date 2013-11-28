@@ -13,7 +13,8 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.jslob.osgi.JSlobActivator
 Export-Package: com.openexchange.jslob,
  com.openexchange.jslob.registry,

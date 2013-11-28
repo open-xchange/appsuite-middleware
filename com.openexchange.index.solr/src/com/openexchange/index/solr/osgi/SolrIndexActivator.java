@@ -49,7 +49,6 @@
 
 package com.openexchange.index.solr.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
@@ -85,7 +84,7 @@ import com.openexchange.user.UserService;
  */
 public class SolrIndexActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrIndexActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrIndexActivator.class);
 
     private SolrIndexFacadeService solrFacadeService;
 

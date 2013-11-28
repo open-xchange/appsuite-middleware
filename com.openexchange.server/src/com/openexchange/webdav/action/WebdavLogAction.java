@@ -55,7 +55,6 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -66,7 +65,7 @@ public class WebdavLogAction extends AbstractAction {
         add("AUTHORIZATION");
     }};
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavLogAction.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavLogAction.class);
 	private boolean logBody;
 	private boolean logResponse;
 
@@ -144,7 +143,7 @@ public class WebdavLogAction extends AbstractAction {
 					b.append('\n');
 				}
 				if (LOG.isTraceEnabled()) {
-					LOG.trace(b);
+					LOG.trace(b.toString());
 				}
 			} catch (final IOException x) {
 				LOG.debug("",x);

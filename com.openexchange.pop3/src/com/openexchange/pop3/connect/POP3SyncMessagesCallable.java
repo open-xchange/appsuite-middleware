@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public final class POP3SyncMessagesCallable implements Callable<Object> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(POP3SyncMessagesCallable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3SyncMessagesCallable.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -113,7 +113,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         }
         /*-
          * Refresh possible according to configured refresh rate
-         * 
+         *
          * Check refresh rate setting
          */
         final String server;
@@ -148,7 +148,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
             final int min = parseLoginDelaySeconds(capabilities);
             if (min >= 0 && (min * 1000) > refreshRate) {
                 LOG.warn(new StringBuilder(64).append("Refresh rate of ").append(refreshRate / 1000).append(
-                    "sec is lower than minimum allowed seconds between logins (").append(min).append("sec)"));
+                    "sec is lower than minimum allowed seconds between logins (").append(min).append("sec)").toString());
             }
         }
         if (DEBUG) {
@@ -204,7 +204,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
             // Fallback to 10 minutes
             LOG.warn(
                 new StringBuilder(128).append("Missing POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
-                    '"').append(". Using fallback of ").append(FALLBACK_MINUTES).append(" minutes."),
+                    '"').append(". Using fallback of ").append(FALLBACK_MINUTES).append(" minutes.").toString(),
                 new Throwable());
             return FALLBACK_MINUTES * 60L * 1000L;
         }
@@ -215,7 +215,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
             LOG.warn(
                 new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
                     "\" is not a number: ``").append(frequencyStr).append("''. Using fallback of ").append(FALLBACK_MINUTES).append(
-                    " minutes."),
+                    " minutes.").toString(),
                 e);
             minutes = FALLBACK_MINUTES;
         }

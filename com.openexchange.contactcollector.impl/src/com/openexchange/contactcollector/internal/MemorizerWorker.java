@@ -103,7 +103,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public final class MemorizerWorker {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MemorizerWorker.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MemorizerWorker.class);
 
     private static final boolean ALL_ALIASES = true;
 

@@ -51,7 +51,6 @@ package com.openexchange.secret.recovery.impl;
 
 import java.security.GeneralSecurityException;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -74,7 +73,7 @@ import com.openexchange.user.UserService;
  */
 public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator, EncryptedItemCleanUpService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FastSecretInconsistencyDetector.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FastSecretInconsistencyDetector.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

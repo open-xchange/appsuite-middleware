@@ -52,7 +52,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
 import org.xerial.snappy.SnappyServiceLookUp;
 
 import com.openexchange.config.ConfigurationService;
@@ -66,7 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class CassandraActivator extends HousekeepingActivator {
 	
-	private static Log log = com.openexchange.log.Log.loggerFor(CassandraActivator.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CassandraActivator.class);
 	
 	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
 	

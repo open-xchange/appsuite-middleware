@@ -79,7 +79,7 @@ public final class PushActivator extends HousekeepingActivator {
 
     private static final String CRLF = "\r\n";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(PushActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
 
     private static final String PROP_UDP_LISTEN_MULTICAST = "com.openexchange.push.mail.notify.udp_listen_multicast";
 
@@ -253,7 +253,7 @@ public final class PushActivator extends HousekeepingActivator {
             }
         }
 
-        LOG.info(sb);
+        LOG.info(sb.toString());
     }
 
     private void startUdpListener() throws OXException, IOException {

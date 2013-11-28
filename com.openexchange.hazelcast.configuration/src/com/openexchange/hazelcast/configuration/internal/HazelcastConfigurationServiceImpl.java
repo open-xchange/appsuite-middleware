@@ -62,7 +62,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.hazelcast.config.Config;
@@ -99,7 +98,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     private static final String NETWORK_JOIN_AWS = "aws";
 
     /** Named logger instance */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastConfigurationServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationServiceImpl.class);
 
     /** Name of the subdirectory containing the hazelcast data structure properties */
     private static final String DIRECTORY_NAME = "hazelcast";

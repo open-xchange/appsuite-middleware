@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
@@ -76,7 +75,7 @@ import com.openexchange.java.StringAllocator;
  */
 public final class DBUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DBUtils.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBUtils.class);
 
     public static final int IN_LIMIT = 1000;
 

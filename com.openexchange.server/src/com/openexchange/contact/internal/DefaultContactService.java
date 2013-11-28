@@ -52,7 +52,6 @@ package com.openexchange.contact.internal;
 import static com.openexchange.contact.internal.Tools.parse;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -73,7 +72,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public abstract class DefaultContactService implements ContactService {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultContactService.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultContactService.class);
 
     /**
      * Initializes a new {@link DefaultContactService}.

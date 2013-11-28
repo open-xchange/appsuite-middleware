@@ -55,7 +55,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -78,7 +77,7 @@ public class ConfigJump extends SessionServlet {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigJump.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigJump.class);
 
     /**
      * For serialization.

@@ -80,7 +80,7 @@ public final class DirectIO {
                         m.setAccessible(true);
                         cleanerMethod = m;
                     } catch (final Exception e) {
-                        final Logger log = org.slf4j.LoggerFactory.getLogger(DirectIO.class);
+                        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DirectIO.class);
                         log.error("Couldn't initialze Java Reflection method for \"cleaner\".", e);
                     }
                 }

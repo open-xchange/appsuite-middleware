@@ -49,7 +49,6 @@
 
 package com.openexchange.server.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -63,7 +62,7 @@ import com.openexchange.authorization.AuthorizationService;
  */
 public class AuthorizationCustomizer implements ServiceTrackerCustomizer<AuthorizationService, AuthorizationService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AuthorizationCustomizer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationCustomizer.class);
 
     private final BundleContext context;
 

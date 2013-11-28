@@ -63,7 +63,7 @@ import java.util.TreeMap;
  */
 public final class StringCache {
 
-    private static final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(StringCache.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StringCache.class);
 
     /**
      * Enabled ?

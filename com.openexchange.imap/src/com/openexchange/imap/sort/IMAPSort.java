@@ -87,7 +87,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class IMAPSort {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IMAPSort.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPSort.class);
 
     /**
      * No instantiation

@@ -96,7 +96,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import com.openexchange.log.Log;
+import org.slf4j.Logger;
 
 /**
  * Grizzly OSGi {@link HttpService} {@link ServiceFactory}.
@@ -107,7 +107,7 @@ import com.openexchange.log.Log;
  */
 public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(HttpServiceFactory.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceFactory.class);
 
     private final OSGiMainHandler mainHttpHandler;
 

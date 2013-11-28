@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -96,7 +95,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class VCardImporter extends ContactImporter implements OXExceptionConstants {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(VCardImporter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardImporter.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
     
     
@@ -248,7 +247,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                 list.add(importResult);
             }
         } catch (final UnsupportedEncodingException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);

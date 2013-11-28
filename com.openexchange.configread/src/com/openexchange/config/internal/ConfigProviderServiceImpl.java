@@ -57,7 +57,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
@@ -83,7 +82,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
 
     private ConfigurationService configService;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigProviderService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigProviderService.class);
 
     private final ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
 

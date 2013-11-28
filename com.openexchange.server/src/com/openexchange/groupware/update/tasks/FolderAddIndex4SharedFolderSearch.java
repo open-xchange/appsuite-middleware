@@ -55,7 +55,6 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -101,7 +100,7 @@ public final class FolderAddIndex4SharedFolderSearch extends UpdateTaskAdapter {
         try {
             con.setAutoCommit(false);
 
-            final Log log = com.openexchange.log.Log.loggerFor(FolderAddIndex4SharedFolderSearch.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FolderAddIndex4SharedFolderSearch.class);
 
             String[] tables = { "oxfolder_tree", "del_oxfolder_tree" };
             createIndexes(con, tables, new String[] { "cid", "parent" }, "parentIndex", log);
@@ -121,7 +120,7 @@ public final class FolderAddIndex4SharedFolderSearch extends UpdateTaskAdapter {
         }
     }
 
-    private void createIndexes(final Connection con, final String[] tables, final String[] fieldNames, final String name, final Log log) {
+    private void createIndexes(final Connection con, final String[] tables, final String[] fieldNames, final String name, final org.slf4j.Logger log) {
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
             try {

@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -102,7 +101,8 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class ICalExporter implements Exporter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ICalExporter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalExporter.class);
+
     private static final Date DATE_ZERO = new Date(0);
     private final static int[] _appointmentFields = {
         DataObject.OBJECT_ID,

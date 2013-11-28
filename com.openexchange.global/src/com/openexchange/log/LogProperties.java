@@ -358,7 +358,7 @@ public final class LogProperties {
             if (mdcAdapter instanceof LogbackMDCAdapter) {
                 return ((LogbackMDCAdapter) mdcAdapter).getPropertyMap();
             }
-            final Logger logger = LoggerFactory.getLogger(LogProperties.class);
+            final org.slf4j.Logger logger = LoggerFactory.getLogger(LogProperties.class);
             logger.warn("Unexpected MDC adapter: {}", mdcAdapter.getClass().getName());
             return Collections.unmodifiableMap(getPropertiesMap(mdcAdapter).get());
         } catch (Exception e) {

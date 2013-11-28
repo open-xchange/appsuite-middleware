@@ -56,7 +56,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.RecurrenceId;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -76,7 +75,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ChangeExceptions.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ChangeExceptions.class);
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private static volatile CalendarCollectionService calendarCollection;

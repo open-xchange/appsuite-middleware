@@ -65,7 +65,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.ContentStreamBase;
@@ -98,7 +97,7 @@ public class SolrServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7395630600887358848L;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(SolrServlet.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SolrServlet.class);
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 

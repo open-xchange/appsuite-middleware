@@ -61,7 +61,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
@@ -96,7 +95,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
     private com.openexchange.java.StringAllocator u1;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarAdministration.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarAdministration.class);
 
     private final Set<Integer> handledObjects = new HashSet<Integer>();
 
@@ -150,7 +149,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         try {
             removeAppointmentsWithOnlyTheUserAsParticipant(downgradeEvent.getSession(),downgradeEvent.getContext(),downgradeEvent.getNewUserConfiguration().getUserId(), downgradeEvent.getWriteCon());
         } catch (final SQLException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -198,7 +197,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
 
         } catch (final SQLException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             final CalendarCollection collection = new CalendarCollection();
@@ -267,7 +266,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 deleteFromView.executeUpdate();
             }
         } catch (final SQLException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             final CalendarCollection collection = new CalendarCollection();

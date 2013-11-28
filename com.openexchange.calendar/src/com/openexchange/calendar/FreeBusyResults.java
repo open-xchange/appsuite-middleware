@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -128,7 +127,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
     private String categories;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FreeBusyResults.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyResults.class);
 
     /*public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);

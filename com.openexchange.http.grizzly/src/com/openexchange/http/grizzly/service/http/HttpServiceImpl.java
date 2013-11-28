@@ -98,8 +98,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.slf4j.Logger;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.Log;
 
 /**
  * Grizzly OSGi HttpService implementation.
@@ -109,7 +109,9 @@ import com.openexchange.log.Log;
  * @since Jan 20, 2009
  */
 public class HttpServiceImpl implements HttpService {
-    private static final  org.apache.commons.logging.Log LOG = Log.loggerFor(HttpServiceImpl.class);
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceImpl.class);
+
     private final Bundle bundle;
     final OSGiMainHandler mainHttpHandler;
 

@@ -84,8 +84,8 @@ import com.openexchange.langdetect.LanguageDetectionService;
  */
 public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(Lc4jLanguageDetectionService.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(Lc4jLanguageDetectionService.class);
 
     /**
      * The singleton instance.

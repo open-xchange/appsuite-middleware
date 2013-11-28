@@ -19,7 +19,8 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.logging,
  org.eclipse.osgi.framework.console,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Export-Package: com.openexchange.osgi,
  com.openexchange.osgi.console,
  com.openexchange.osgi.util

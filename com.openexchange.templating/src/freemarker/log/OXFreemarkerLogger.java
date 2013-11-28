@@ -49,19 +49,17 @@
 
 package freemarker.log;
 
-import org.apache.commons.logging.Log;
-import freemarker.log.Logger;
 
 /**
  * {@link OXFreemarkerLogger}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFreemarkerLogger extends Logger {
 
-    private final Log logger;
+    private final org.slf4j.Logger logger;
 
-    public OXFreemarkerLogger(Log logger) {
+    public OXFreemarkerLogger(org.slf4j.Logger logger) {
         super();
         this.logger = logger;
     }
@@ -128,7 +126,7 @@ public final class OXFreemarkerLogger extends Logger {
 
     @Override
     public boolean isFatalEnabled() {
-        return logger.isFatalEnabled();
+        return logger.isErrorEnabled();
     }
 
 }

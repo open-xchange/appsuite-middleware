@@ -44,7 +44,7 @@ import org.apache.solr.search.SolrIndexSearcher;
  **/
 public class FileBasedSpellChecker extends AbstractLuceneSpellChecker {
 
-  private static final Logger log = LoggerFactory.getLogger(FileBasedSpellChecker.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(FileBasedSpellChecker.class);
 
   public static final String SOURCE_FILE_CHAR_ENCODING = "characterEncoding";
 

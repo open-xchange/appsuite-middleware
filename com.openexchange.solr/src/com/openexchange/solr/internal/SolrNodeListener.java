@@ -50,7 +50,6 @@
 package com.openexchange.solr.internal;
 
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
@@ -66,7 +65,7 @@ import com.hazelcast.query.SqlPredicate;
  */
 public class SolrNodeListener implements MembershipListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrNodeListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrNodeListener.class);
 
     private final HazelcastInstance hazelcast;
 

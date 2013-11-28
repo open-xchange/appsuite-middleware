@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SpellCheckCollator {
-  private static final Logger LOG = LoggerFactory.getLogger(SpellCheckCollator.class);
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SpellCheckCollator.class);
 
   public List<SpellCheckCollation> collate(SpellingResult result, String originalQuery, ResponseBuilder ultimateResponse,
                                            int maxCollations, int maxTries, int maxEvaluations) {

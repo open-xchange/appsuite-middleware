@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountPOP3Properties extends MailAccountProperties implements IPOP3Properties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccountPOP3Properties.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountPOP3Properties.class);
 
     /**
      * Initializes a new {@link MailAccountPOP3Properties}.
@@ -85,7 +85,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
 
         final String fallback = POP3Properties.getInstance().getPOP3AuthEnc();
         LOG.error(new StringBuilder(64).append("POP3 Authentication Encoding: Unsupported charset \"").append(pop3AuthEncStr).append(
-            "\". Setting to fallback: ").append(fallback).append('\n'));
+            "\". Setting to fallback: ").append(fallback).append('\n').toString());
         return fallback;
     }
 

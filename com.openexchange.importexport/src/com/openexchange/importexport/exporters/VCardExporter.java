@@ -55,7 +55,6 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
@@ -91,7 +90,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class VCardExporter implements Exporter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(VCardExporter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardExporter.class);
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,

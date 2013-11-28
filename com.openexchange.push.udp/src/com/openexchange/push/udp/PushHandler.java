@@ -57,7 +57,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -77,7 +76,7 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
  */
 public class PushHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushHandler.class);
 
     public PushHandler() {
         super();

@@ -55,7 +55,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -79,7 +78,7 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  */
 public final class CheckPermissionOnRemove extends CheckPermission {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CheckPermissionOnRemove.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckPermissionOnRemove.class);
 
     /**
      * Initializes a new {@link CheckPermissionOnRemove}

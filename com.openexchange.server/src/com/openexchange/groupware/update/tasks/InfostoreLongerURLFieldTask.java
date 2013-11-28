@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -63,7 +62,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 public class InfostoreLongerURLFieldTask  implements UpdateTask {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreLongerURLFieldTask.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreLongerURLFieldTask.class);
 
     @Override
     public int addedWithVersion() {

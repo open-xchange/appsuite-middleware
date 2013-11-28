@@ -75,7 +75,6 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -103,7 +102,7 @@ import com.openexchange.resource.Resource;
  */
 public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(Participants.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Participants.class);
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 

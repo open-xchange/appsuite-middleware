@@ -63,6 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
@@ -77,7 +78,6 @@ import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.Log;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -243,7 +243,7 @@ public final class ResponseWriter {
                     json.put(name, value);
                 }
             } else {
-                Log.loggerFor(ResponseWriter.class).warn("Response property discarded. Illegal property name: " + name == null ? "null" : name);
+                LoggerFactory.getLogger(ResponseWriter.class).warn("Response property discarded. Illegal property name: " + name == null ? "null" : name);
             }
         }
     }

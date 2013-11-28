@@ -59,7 +59,6 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
@@ -84,7 +83,7 @@ public class IDGeneratorTest extends TestCase {
 
     private static final int TIME = 20;
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(IDGeneratorTest.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IDGeneratorTest.class);
 
     static final Random rand = new Random(System.currentTimeMillis());
 
@@ -114,7 +113,7 @@ public class IDGeneratorTest extends TestCase {
             try {
                 stmt.execute(TEST_TABLE);
             } catch (SQLException e) {
-                LOG.fatal("Error while creating test table.", e);
+                LOG.error("Error while creating test table.", e);
                 fail("Error while creating test table.");
             }
             stmt.close();
@@ -160,7 +159,7 @@ public class IDGeneratorTest extends TestCase {
             try {
                 stmt.execute("DROP TABLE idGeneratorTest");
             } catch (SQLException e) {
-                LOG.fatal("Error while dropping table.", e);
+                LOG.error("Error while dropping table.", e);
             }
             stmt.close();
         } finally {
@@ -198,16 +197,16 @@ public class IDGeneratorTest extends TestCase {
                     try {
                         con.rollback();
                     } catch (SQLException e1) {
-                        LOG.fatal("Error while rollback.", e);
+                        LOG.error("Error while rollback.", e);
                     }
-                    LOG.fatal("Error while getting ID and inserting.", e);
+                    LOG.error("Error while getting ID and inserting.", e);
                     fail(e.getMessage());
                     return;
                 } finally {
                     try {
                         con.setAutoCommit(true);
                     } catch (SQLException e) {
-                        LOG.fatal("Error while setting autocommit true.", e);
+                        LOG.error("Error while setting autocommit true.", e);
                     }
                     DBPool.closeWriterSilent(context, con);
                 }

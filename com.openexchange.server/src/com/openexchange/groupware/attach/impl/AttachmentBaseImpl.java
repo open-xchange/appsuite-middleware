@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.activation.FileTypeMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -110,7 +109,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     private static final FetchMode fetchMode = FetchMode.PREFETCH;
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentBaseImpl.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentBaseImpl.class);
 
     private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
 
@@ -1145,13 +1144,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     delegate = new SearchIteratorAdapter<AttachmentMetadata>(values.iterator());
                 }
             } catch (final SearchIteratorException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
                 this.exception = e;
             } catch (final SQLException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
                 this.exception = e;
             } catch (final OXException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
                 this.exception = e;
             }
         }

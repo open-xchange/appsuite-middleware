@@ -86,8 +86,8 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated appointment, and maybe errors.")
 public final class UpdateAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(UpdateAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
 
     /**
      * Initializes a new {@link UpdateAction}.

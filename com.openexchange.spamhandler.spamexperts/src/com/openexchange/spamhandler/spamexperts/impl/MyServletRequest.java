@@ -16,7 +16,6 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -102,7 +101,7 @@ public final class MyServletRequest  {
 
 
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(MyServletRequest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MyServletRequest.class);
 
 	public static final String ACTION_GET_NEW_PANEL_SESSION = "generate_panel_session";
 

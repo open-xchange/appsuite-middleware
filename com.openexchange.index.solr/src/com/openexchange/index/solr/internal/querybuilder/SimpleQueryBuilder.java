@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import com.openexchange.exception.OXException;
@@ -89,7 +88,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
 
     private FieldConfiguration fieldConfig;
 
-    private static Log log = com.openexchange.log.Log.loggerFor(SimpleQueryBuilder.class);
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SimpleQueryBuilder.class);
 
     public SimpleQueryBuilder(String configPath, String moduleField, String accountField, String folderField, FieldConfiguration fieldConfig) throws BuilderException {
         config = new SimpleConfiguration(configPath);

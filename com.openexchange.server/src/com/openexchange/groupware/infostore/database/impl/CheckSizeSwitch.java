@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -69,7 +68,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class CheckSizeSwitch {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CheckSizeSwitch.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckSizeSwitch.class);
 
     private static Map<Metadata, Integer> SIZES = new HashMap<Metadata, Integer>();
     private final DBProvider provider;

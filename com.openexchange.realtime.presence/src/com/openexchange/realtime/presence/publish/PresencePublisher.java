@@ -51,7 +51,6 @@ package com.openexchange.realtime.presence.publish;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.ChangeListener;
 import com.openexchange.realtime.directory.Resource;
@@ -65,12 +64,12 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
 /**
  * {@link PresencePublisher} - Listen for Presence changes in the ResourceDirectory and publish these.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresencePublisher implements ChangeListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PresencePublisher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PresencePublisher.class);
 
     private ResourceDirectory resourceDirectory;
 
@@ -80,7 +79,7 @@ public class PresencePublisher implements ChangeListener {
 
     /**
      * Initializes a new {@link PresencePublisher}.
-     * 
+     *
      * @param resourceDirectory
      */
     public PresencePublisher(ResourceDirectory resourceDirectory) {
@@ -91,7 +90,7 @@ public class PresencePublisher implements ChangeListener {
 
     /**
      * Sets the ResourceDirectory to given value/reference.
-     * 
+     *
      * @param resourceDirectory The ResourceDirectory
      * @throws OXException
      */
@@ -157,7 +156,7 @@ public class PresencePublisher implements ChangeListener {
                             directedPresence.setTo(subscriber);
                             Map<ID, OXException> failures = messageDispatcher.send(directedPresence);
                             for (OXException oxe : failures.values()) {
-                                LOG.error(oxe);
+                                LOG.error(oxe.toString(), oxe);
                             }
                         }
                     }

@@ -54,7 +54,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
 
 /**
  * Utilities for database resource handling.
@@ -63,7 +62,7 @@ import org.apache.commons.logging.Log;
  */
 final class DBUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DBUtils.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBUtils.class);
 
     private DBUtils() {
         super();

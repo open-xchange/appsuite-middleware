@@ -66,7 +66,7 @@ public class SearchHandler extends RequestHandlerBase implements SolrCoreAware
   static int soTimeout = 0; //current default values
   static int connectionTimeout = 0; //current default values
 
-  protected static Logger log = LoggerFactory.getLogger(SearchHandler.class);
+  protected static org.slf4j.Logger log = LoggerFactory.getLogger(SearchHandler.class);
 
   protected List<SearchComponent> components = null;
 

@@ -55,7 +55,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.java.Streams;
 
@@ -73,7 +72,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 
 	private boolean isInit = false;
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(ReminderConfigImpl.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReminderConfigImpl.class);
 
 	public ReminderConfigImpl(final String propfile) {
 		if (isInit) {

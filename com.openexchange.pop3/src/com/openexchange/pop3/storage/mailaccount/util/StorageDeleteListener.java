@@ -148,7 +148,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
                     try {
                         enableForeignKeyChecks(con);
                     } catch (final SQLException e) {
-                        com.openexchange.log.Log.loggerFor(StorageDeleteListener.class).error(e.getMessage(), e);
+                        org.slf4j.LoggerFactory.getLogger(StorageDeleteListener.class).error(e.getMessage(), e);
                     }
                 }
             }

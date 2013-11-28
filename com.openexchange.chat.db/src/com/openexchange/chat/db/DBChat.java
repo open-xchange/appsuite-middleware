@@ -72,7 +72,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatStrings;
@@ -102,7 +101,7 @@ import com.openexchange.user.UserService;
  */
 public final class DBChat implements Chat {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DBChat.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBChat.class);
 
     private static abstract class SafeRunnable implements Runnable {
 

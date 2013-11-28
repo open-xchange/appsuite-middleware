@@ -68,10 +68,11 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.java.Streams;
-import com.openexchange.log.Log;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.Response;
 import com.openexchange.proxy.Restriction;
@@ -189,7 +190,7 @@ public class ProxyServlet extends SessionServlet {
             final Response response = new ResponseImpl(httpMethod);
             for (final Restriction restriction : registration.getRestrictions()) {
                 if (!restriction.allow(response)) {
-                    final org.apache.commons.logging.Log log = Log.valueOf(com.openexchange.log.Log.loggerFor(ProxyServlet.class));
+                    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServlet.class);
                     log.info("Status code 403 (FORBIDDEN): Restriction failed: " + restriction.getDescription());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Restriction failed: " + restriction.getDescription());
                     return;
@@ -283,7 +284,7 @@ public class ProxyServlet extends SessionServlet {
             try {
                 Streams.close(httpMethod.getResponseBodyAsStream());
             } catch (final IOException e) {
-                com.openexchange.log.Log.loggerFor(ProxyServlet.class).error(e.getMessage(), e);
+                LoggerFactory.getLogger(ProxyServlet.class).error(e.getMessage(), e);
             } finally {
                 /*
                  * We are done with the connection and that it can now be reused

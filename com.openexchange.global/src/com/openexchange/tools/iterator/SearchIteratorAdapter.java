@@ -52,7 +52,6 @@ package com.openexchange.tools.iterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SearchIteratorAdapter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchIteratorAdapter.class);
 
     private static final class EmptySearchIterator<T> implements SearchIterator<T> {
 

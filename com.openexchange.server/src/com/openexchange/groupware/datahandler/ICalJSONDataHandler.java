@@ -114,7 +114,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class ICalJSONDataHandler implements DataHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ICalJSONDataHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalJSONDataHandler.class);
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
@@ -241,7 +241,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                                 true);
                         if (recuResults.size() == 0) {
                             if (LOG.isWarnEnabled()) {
-                                LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));
+                                LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition).toString());
                             }
                             OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
                         }

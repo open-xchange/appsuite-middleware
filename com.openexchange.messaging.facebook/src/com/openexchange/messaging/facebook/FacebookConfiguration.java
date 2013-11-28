@@ -52,6 +52,7 @@ package com.openexchange.messaging.facebook;
 import java.text.MessageFormat;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -170,7 +171,7 @@ public final class FacebookConfiguration {
                 linkAfterLoginPattern = Pattern.compile(pattern);
             } catch (final PatternSyntaxException e) {
                 final String fallback = "(http://www.facebook.com/inbox/\\\\?ref=[a-z]*)";
-                com.openexchange.log.Log.loggerFor(FacebookConfiguration.class).error(
+                LoggerFactory.getLogger(FacebookConfiguration.class).error(
                     MessageFormat.format(
                         "Illegal regular expression for property ''com.openexchange.messaging.facebook.linkAfterLogin'': \"{0}.\". Using fallback pattern: \"{1}\"",
                         pattern,

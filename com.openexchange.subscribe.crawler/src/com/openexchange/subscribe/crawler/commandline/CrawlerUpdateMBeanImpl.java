@@ -51,7 +51,6 @@ package com.openexchange.subscribe.crawler.commandline;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.subscribe.crawler.osgi.Activator;
@@ -68,7 +67,7 @@ public final class CrawlerUpdateMBeanImpl extends StandardMBean implements Crawl
 
     private final Activator activator;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CrawlerUpdateMBeanImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CrawlerUpdateMBeanImpl.class);
 
     /**
      * Initializes a new {@link CrawlerUpdateMBeanImpl}.

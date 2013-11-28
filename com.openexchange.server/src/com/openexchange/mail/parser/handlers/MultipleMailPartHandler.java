@@ -91,7 +91,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class MultipleMailPartHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MultipleMailPartHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleMailPartHandler.class);
 
     private static final class TextMailPart extends MailPart {
 

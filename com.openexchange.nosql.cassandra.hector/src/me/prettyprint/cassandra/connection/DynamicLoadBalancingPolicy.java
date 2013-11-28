@@ -31,7 +31,7 @@ import com.google.common.collect.Maps;
 public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
   private static final long serialVersionUID = -1044985880174118325L;
-  private static final Logger log = LoggerFactory.getLogger(DynamicLoadBalancingPolicy.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(DynamicLoadBalancingPolicy.class);
   
   private final ScheduledExecutorService tasks = new ScheduledThreadPoolExecutor(1, new DaemonThreadPoolFactory(getClass()));
 

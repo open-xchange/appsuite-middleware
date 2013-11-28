@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,7 +43,7 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 
 	protected TimeZone timeZone = null;
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractVCardTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractVCardTest.class);
 
 	public AbstractVCardTest(final String name) {
 		super(name);

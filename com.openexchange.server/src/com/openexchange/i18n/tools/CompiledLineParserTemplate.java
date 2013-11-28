@@ -52,7 +52,6 @@ package com.openexchange.i18n.tools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link CompiledLineParserTemplate} - Compiles a template as per
@@ -65,7 +64,7 @@ import org.apache.commons.logging.Log;
  */
 public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CompiledLineParserTemplate.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompiledLineParserTemplate.class);
 
     private static final String STR_EMPTY = "";
 

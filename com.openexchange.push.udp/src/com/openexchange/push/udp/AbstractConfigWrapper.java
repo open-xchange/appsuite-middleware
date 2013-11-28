@@ -49,7 +49,6 @@
 
 package com.openexchange.push.udp;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -60,7 +59,7 @@ import com.openexchange.config.ConfigurationService;
 
 public abstract class AbstractConfigWrapper {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractConfigWrapper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConfigWrapper.class);
 
     public static String parseProperty(final ConfigurationService prop, final String name, final String value) {
         final String tmp = prop.getProperty(name, "");

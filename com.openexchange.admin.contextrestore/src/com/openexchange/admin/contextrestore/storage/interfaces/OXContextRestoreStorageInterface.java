@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.tools.PropertyHandlerExtended;
@@ -76,7 +75,7 @@ public abstract class OXContextRestoreStorageInterface {
      */
     private static Class<? extends OXContextRestoreStorageInterface> implementingClass;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXContextRestoreStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextRestoreStorageInterface.class);
 
     protected static PropertyHandlerExtended prop = new PropertyHandlerExtended(System.getProperties());
 

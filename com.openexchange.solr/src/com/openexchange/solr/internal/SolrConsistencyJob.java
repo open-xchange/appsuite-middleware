@@ -51,7 +51,6 @@ package com.openexchange.solr.internal;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -72,7 +71,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 @DisallowConcurrentExecution
 public class SolrConsistencyJob implements Job {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrConsistencyJob.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrConsistencyJob.class);
 
     public SolrConsistencyJob() {
         super();

@@ -121,7 +121,7 @@ public final class ManagementServiceTrackerCustomizer2 implements ServiceTracker
 
     void registerCacheMBean(final ManagementService management) {
         if (objectName == null) {
-            final Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer2.class);
+            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer2.class);
             try {
                 objectName = getObjectName(SessionThreadCountMBeanImpl.class.getName(), SessionThreadCountMBean.SESSION_THREAD_COUNT_DOMAIN);
                 management.registerMBean(objectName, new SessionThreadCountMBeanImpl(counter, sessiondServiceTracker));

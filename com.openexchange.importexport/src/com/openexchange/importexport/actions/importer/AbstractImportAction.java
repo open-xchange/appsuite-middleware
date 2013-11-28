@@ -51,7 +51,6 @@ package com.openexchange.importexport.actions.importer;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -93,7 +92,7 @@ public abstract class AbstractImportAction implements AJAXActionService {
             try {
                 new ImportWriter(jsonWriter, req.getSession()).writeObjects(importResult);
             } catch (JSONException e1) {
-                final Log logger = com.openexchange.log.Log.loggerFor(AbstractImportAction.class);
+                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractImportAction.class);
                 logger.error("JSON error", e1);
             }
             AJAXRequestResult result = new AJAXRequestResult(jsonWriter.getObject());

@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.mixins.DummySyncToken;
 import com.openexchange.exception.OXException;
@@ -81,7 +80,7 @@ public class RootCollection extends AbstractCollection {
     private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
     private static final String REDUCED_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.reducedAggregatedCollection";
     private static final String USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.userAgentForAggregatedCollection";
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RootCollection.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RootCollection.class);
     private static final String DISPLAY_NAME = "Addressbooks";
     private static final String AGGREGATED_FOLDER_ID = "Contacts"; // folder ID needs to be exactly "Contacts" for backwards compatibility
     private static final String AGGREGATED_DISPLAY_NAME = "All Contacts";

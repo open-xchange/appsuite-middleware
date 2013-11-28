@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @version $Id: Config.java 1075090 2011-02-27 17:20:30Z uschindler $
  */
 public class Config {
-  public static final Logger log = LoggerFactory.getLogger(Config.class);
+  public static final org.slf4j.Logger log = LoggerFactory.getLogger(Config.class);
   private static final XMLErrorLogger xmllog = new XMLErrorLogger(log);
 
   static final XPathFactory xpathFactory = XPathFactory.newInstance();

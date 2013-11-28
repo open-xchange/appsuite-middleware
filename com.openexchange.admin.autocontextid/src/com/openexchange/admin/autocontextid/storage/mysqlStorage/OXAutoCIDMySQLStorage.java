@@ -51,7 +51,6 @@ package com.openexchange.admin.autocontextid.storage.mysqlStorage;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.storage.sqlStorage.OXAutoCIDSQLStorage;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -66,7 +65,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
 
     private static AdminCache cache = null;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXAutoCIDMySQLStorage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAutoCIDMySQLStorage.class);
 
     static {
         cache = ClientAdminThreadExtended.cache;

@@ -62,7 +62,6 @@ import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.logging.Log;
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.NotificationConfiguration;
 import com.openexchange.calendar.itip.generators.NotificationMail;
@@ -109,7 +108,7 @@ import com.openexchange.user.UserService;
  */
 public class DefaultMailSenderService implements MailSenderService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultMailSenderService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultMailSenderService.class);
 
     private final ITipEmitter iTipEmitter;
 

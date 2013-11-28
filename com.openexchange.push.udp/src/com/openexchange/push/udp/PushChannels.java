@@ -58,7 +58,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 
 /**
@@ -72,7 +71,7 @@ public class PushChannels {
         INTERNAL, EXTERNAL;
     }
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushChannels.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushChannels.class);
 
     private DatagramSocket internalChannel = null;
     private DatagramSocket externalChannel = null;

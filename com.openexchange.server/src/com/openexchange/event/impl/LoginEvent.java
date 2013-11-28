@@ -51,7 +51,6 @@ package com.openexchange.event.impl;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -65,7 +64,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class LoginEvent {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginEvent.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginEvent.class);
 
     public static final String TOPIC = "com/openexchange/login";
 

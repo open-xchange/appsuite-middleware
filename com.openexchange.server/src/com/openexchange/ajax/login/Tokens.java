@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
@@ -83,7 +82,7 @@ import com.openexchange.user.UserService;
  */
 public final class Tokens implements LoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tokens.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tokens.class);
 
     private final LoginConfiguration conf;
 

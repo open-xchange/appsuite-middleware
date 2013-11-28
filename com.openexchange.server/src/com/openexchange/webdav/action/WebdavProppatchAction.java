@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -69,7 +68,7 @@ import com.openexchange.webdav.protocol.util.Utils;
 public class WebdavProppatchAction extends AbstractAction {
 
 	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavProppatchAction.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavProppatchAction.class);
 
 	private PropertyAction SET = null;
 	private static final PropertyAction REMOVE = new RemoveAction();

@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 
 public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXAdminPoolDBPool.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAdminPoolDBPool.class);
 
     private DatabaseService service;
 

@@ -55,7 +55,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
@@ -151,7 +150,7 @@ public final class EventQueue {
 
     private static volatile boolean isEnabled;
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(EventQueue.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventQueue.class);
 
     /*
      * +++++++++++++++ Appointment Event Lists +++++++++++++++
@@ -264,7 +263,7 @@ public final class EventQueue {
             throw new OXException().setLogMessage("Event system is being shut down and therefore does not accept new events.");
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("add EventObject: ").append(eventObj));
+            LOG.debug(new com.openexchange.java.StringAllocator("add EventObject: ").append(eventObj).toString());
         }
 
         if (!isEnabled) {

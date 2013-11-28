@@ -56,7 +56,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
-import org.apache.commons.logging.Log;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -72,7 +71,7 @@ import com.openexchange.subscribe.TargetFolderSession;
 
 public class MicroformatContactParser extends ContactHandler implements SubscriptionHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MicroformatContactParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MicroformatContactParser.class);
 
     protected Collection<Contact> contacts;
     protected SubscribeService service;

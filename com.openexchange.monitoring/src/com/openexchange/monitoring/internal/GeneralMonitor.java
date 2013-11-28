@@ -61,7 +61,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GeneralMonitor.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GeneralMonitor.class);
 
     private MBeanServer server;
 
@@ -135,7 +135,7 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
     @Override
     public void postRegister(final Boolean registrationDone) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone));
+            LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone).toString());
         }
     }
 

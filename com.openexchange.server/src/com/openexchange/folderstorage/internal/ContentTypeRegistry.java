@@ -74,7 +74,7 @@ import com.openexchange.java.Java7ConcurrentLinkedQueue;
  */
 public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ContentTypeRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContentTypeRegistry.class);
 
     private static final ContentTypeRegistry instance = new ContentTypeRegistry();
 

@@ -53,7 +53,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.WebdavPostAction;
@@ -108,7 +107,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class CaldavPerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavPerformer.class);
 
     private static CaldavPerformer INSTANCE = null;
 

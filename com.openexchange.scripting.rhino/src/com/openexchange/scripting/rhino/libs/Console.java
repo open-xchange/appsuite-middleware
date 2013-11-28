@@ -49,13 +49,13 @@
 
 package com.openexchange.scripting.rhino.libs;
 
-import org.apache.commons.logging.Log;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.scripting.rhino.JSON;
 
 public class Console {
@@ -70,10 +70,10 @@ public class Console {
 
 	}
 
-	private Log log = null;
+	private org.slf4j.Logger log = null;
 
 	public Console(String def) {
-		log = com.openexchange.log.Log.loggerFor(def);
+		log = LoggerFactory.getLogger(def);
 	}
 
 	public void log(Object... values) {
@@ -93,7 +93,7 @@ public class Console {
 	}
 
 	public void fatal(Object... values) {
-		log.fatal(toString(values));
+		log.error(toString(values));
 	}
 
 	public void info(Object... values) {

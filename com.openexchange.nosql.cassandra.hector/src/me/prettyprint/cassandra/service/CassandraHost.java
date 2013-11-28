@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public final class CassandraHost {
-  private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(CassandraHost.class);
 
   /**
    * The default port number to which we will connect

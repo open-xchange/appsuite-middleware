@@ -56,7 +56,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.calendar.RecurringResults;
@@ -75,7 +74,7 @@ import com.openexchange.groupware.container.CalendarObject;
  */
 public class RecurringCalculation {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RecurringCalculation.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RecurringCalculation.class);
 
     private final int recurring_type; // cdao.getRecurrenceType()
     private final int recurring_interval; // cdao.getInterval()

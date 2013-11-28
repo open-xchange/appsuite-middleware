@@ -70,7 +70,6 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -93,7 +92,7 @@ import com.openexchange.exception.OXException;
  */
 public class UCSAuthentication implements AuthenticationService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UCSAuthentication.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UCSAuthentication.class);
     private static Properties props;
 
     private static Hashtable<String, String> LDAP_CONFIG = null;
@@ -237,12 +236,12 @@ public class UCSAuthentication implements AuthenticationService {
 
                 if(emailattrib.size()!=1){
                     // more than one (String) props.get("LDAP_ATTRIBUTE") value found, cannot resolve correct context
-                    LOG.fatal("FATAL! More than one "+(String) props.get("LDAP_ATTRIBUTE")+" value found, cannot resolv correct context");
+                    LOG.error("FATAL! More than one "+(String) props.get("LDAP_ATTRIBUTE")+" value found, cannot resolv correct context");
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }else{
                     final String[] data  = ((String)emailattrib.get()).split("@");
                     if(data.length!=2){
-                        LOG.fatal("FATAL! Email address "+(String)emailattrib.get()+" could be splitted correctly!!");
+                        LOG.error("FATAL! Email address "+(String)emailattrib.get()+" could be splitted correctly!!");
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }else{
                         splitted[0] = data[1];

@@ -58,7 +58,6 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -77,7 +76,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailProperties implements IMailProperties {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailProperties.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProperties.class);
 
     private static volatile MailProperties instance;
 

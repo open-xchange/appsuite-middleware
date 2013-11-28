@@ -84,8 +84,8 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "If the appointment was created successfully, an object with the attribute id of the newly created appointment. If the appointment could not be created due to conflicts, the response body is an object with the field conflicts, which is an array of appointment objects which caused the conflict. Each appointment object which represents a resource conflict contains an additional field hard_conflict with the Boolean value true. If the user does not have read access to a conflicting appointment, only the fields id, start_date, end_date, shown_as and participants are present and the field participants contains only the participants which caused the conflict.")
 public final class NewAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(NewAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
     /**
      * Initializes a new {@link NewAction}.

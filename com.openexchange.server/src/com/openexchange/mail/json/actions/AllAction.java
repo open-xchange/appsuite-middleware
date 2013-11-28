@@ -54,6 +54,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -64,7 +65,6 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -94,7 +94,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response (not IMAP: with timestamp): An array with mail data. Each array element describes one mail and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
-    protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(AllAction.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 

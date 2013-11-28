@@ -47,5 +47,6 @@ Import-Package: com.openexchange.ajax,
  gnu.trove.map.hash,
  org.apache.commons.logging,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.calendar.json.osgi.AppointmentJSONActivator

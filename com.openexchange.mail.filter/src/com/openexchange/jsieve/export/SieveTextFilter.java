@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -193,7 +192,7 @@ public final class SieveTextFilter {
 
     private static final String LEGAL_FLAG_CHARS = "[a-zA-Z1-9]";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SieveTextFilter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SieveTextFilter.class);
 
     private static final String RULENAME_TAG = "Rulename: ";
 

@@ -54,7 +54,6 @@ import java.io.OutputStream;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -91,7 +90,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
     private static final long serialVersionUID = 5779820324953825111L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(calendar.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(calendar.class);
 
     /**
      * Initializes a new {@link calendar}.

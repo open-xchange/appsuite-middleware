@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.internal;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
@@ -64,7 +63,7 @@ import com.openexchange.java.Strings;
  */
 public class DirectLinkGenerator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DirectLinkGenerator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DirectLinkGenerator.class);
 
     private final SyncSession session;
     private final ConfigurationService configService;

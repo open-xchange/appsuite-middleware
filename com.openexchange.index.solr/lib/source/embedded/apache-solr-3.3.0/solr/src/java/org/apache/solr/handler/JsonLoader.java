@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @since solr 3.1
  */
 class JsonLoader extends ContentStreamLoader {
-  final static Logger log = LoggerFactory.getLogger( JsonLoader.class );
+  final static org.slf4j.Logger log = LoggerFactory.getLogger( JsonLoader.class );
   
   protected final UpdateRequestProcessor processor;
   protected final SolrQueryRequest req;

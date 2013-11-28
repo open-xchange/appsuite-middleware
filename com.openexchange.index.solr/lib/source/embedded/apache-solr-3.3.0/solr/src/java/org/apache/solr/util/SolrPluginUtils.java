@@ -63,7 +63,7 @@ import java.lang.reflect.InvocationTargetException;
  * default parameter settings.  
  */
 public class SolrPluginUtils {
-  final static Logger log = LoggerFactory.getLogger( SolrPluginUtils.class );
+  final static org.slf4j.Logger log = LoggerFactory.getLogger( SolrPluginUtils.class );
 
   /**
    * Set defaults on a SolrQueryRequest.

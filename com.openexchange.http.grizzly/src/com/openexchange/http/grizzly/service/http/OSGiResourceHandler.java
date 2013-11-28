@@ -97,7 +97,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
@@ -115,7 +114,7 @@ import org.osgi.service.http.HttpContext;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiResourceHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiResourceHandler.class);
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final String alias;
     private final String prefix;

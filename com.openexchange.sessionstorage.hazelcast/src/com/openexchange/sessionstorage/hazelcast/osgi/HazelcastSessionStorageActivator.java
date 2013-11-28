@@ -52,7 +52,6 @@ package com.openexchange.sessionstorage.hazelcast.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -83,7 +82,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(HazelcastSessionStorageActivator.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastSessionStorageActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

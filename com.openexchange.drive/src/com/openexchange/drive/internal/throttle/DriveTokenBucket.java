@@ -55,7 +55,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
@@ -72,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DriveTokenBucket implements TokenBucket {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveTokenBucket.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveTokenBucket.class);
     private static final int BUCKET_FILLS_PER_SECOND = 4;
 
     private final ConcurrentMap<String, Semaphore> bucketsPerSession;

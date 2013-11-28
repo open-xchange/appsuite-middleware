@@ -50,7 +50,6 @@
 package com.openexchange.ajax.session.actions;
 
 import java.io.IOException;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
@@ -71,7 +70,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginResponseParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginResponseParser.class);
 
     private String jvmRoute;
 

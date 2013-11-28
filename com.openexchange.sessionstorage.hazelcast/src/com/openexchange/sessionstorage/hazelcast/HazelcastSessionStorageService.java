@@ -61,7 +61,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -82,7 +81,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class HazelcastSessionStorageService implements SessionStorageService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastSessionStorageService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastSessionStorageService.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
     private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 

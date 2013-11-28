@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.caldav.Tools;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.exception.Category;
@@ -78,7 +77,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public abstract class CommonResource<T extends CommonObject> extends AbstractResource {
 
-    protected static Log LOG = com.openexchange.log.Log.loggerFor(CommonResource.class);
+    protected static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CommonResource.class);
     private static final int MAX_RETRIES = 3;
 
     private int retryCount = 0;

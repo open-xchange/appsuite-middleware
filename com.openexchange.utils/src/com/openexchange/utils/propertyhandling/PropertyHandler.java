@@ -51,7 +51,6 @@
 package com.openexchange.utils.propertyhandling;
 
 import javax.naming.ConfigurationException;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -66,11 +65,11 @@ import com.openexchange.utils.propertyhandling.internal.ConfigurationExceptionCo
  */
 public class PropertyHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PropertyHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyHandler.class);
 
     /**
      * Fetches the property (convenience method)
-     * 
+     *
      * @param <T>
      * @param configuration
      * @param prop
@@ -122,7 +121,7 @@ public class PropertyHandler {
 
     /**
      * Fetches the property
-     * 
+     *
      * @param <T>
      * @param configuration
      * @param prop
@@ -176,7 +175,7 @@ public class PropertyHandler {
      * @param registry the {@link ServiceLookup} to get the {@link ConfigurationService}
      * @param props an array of props which should be checked
      * @param bundlename the bundlename (needed for output of the properties)
-     * 
+     *
      * @throws ConfigurationException
      */
     public static void check(final ServiceLookup registry, final PropertyInterface[] props, final String bundlename) throws OXException {
@@ -189,7 +188,7 @@ public class PropertyHandler {
      * @param configuration the {@link ConfigurationService} from which the properties are read
      * @param props an array of props which should be checked
      * @param bundlename the bundlename (needed for output of the properties)
-     * 
+     *
      * @throws ConfigurationException
      */
     public static void check(final ConfigurationService configuration, final PropertyInterface[] props, final String bundlename) throws OXException {

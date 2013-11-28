@@ -50,7 +50,6 @@ package com.openexchange.nosql.cassandra;
 
 import java.io.IOException;
 import org.apache.cassandra.thrift.CassandraDaemon;
-import org.apache.commons.logging.Log;
 
 /**
  * An embedded Cassandra instance for OX.
@@ -59,7 +58,7 @@ import org.apache.commons.logging.Log;
  */
 public class EmbeddedCassandraService {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(EmbeddedCassandraService.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EmbeddedCassandraService.class);
 
 	private CassandraDaemon cassandraDaemon;
 

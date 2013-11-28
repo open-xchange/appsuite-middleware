@@ -52,7 +52,6 @@ package com.openexchange.file.storage.cifs.cache;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.openexchange.file.storage.cifs.CIFSFileStorageService;
 import com.openexchange.file.storage.cifs.CIFSServices;
 import com.openexchange.session.Session;
@@ -66,7 +65,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class SmbFileMapManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmbFileMapManagement.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmbFileMapManagement.class);
 
     private static final SmbFileMapManagement INSTANCE = new SmbFileMapManagement();
 

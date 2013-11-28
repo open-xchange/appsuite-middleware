@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,7 +72,7 @@ public class Group extends DataServlet {
 	 * For serialization.
 	 */
 	private static final long serialVersionUID = 6699123983027304951L;
-	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(Group.class);
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Group.class);
 
 	/**
 	 * {@inheritDoc}

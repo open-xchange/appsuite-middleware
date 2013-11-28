@@ -65,8 +65,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class ControlActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(ControlActivator.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ControlActivator.class);
 
     private volatile Thread shutdownHookThread;
 
@@ -138,9 +138,9 @@ public final class ControlActivator extends HousekeepingActivator {
     private static final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
         private final BundleContext bundleContext;
-        private final org.apache.commons.logging.Log logger;
+        private final org.slf4j.Logger logger;
 
-        ManagementServiceTrackerCustomizer(final BundleContext bundleContext, final org.apache.commons.logging.Log logger) {
+        ManagementServiceTrackerCustomizer(final BundleContext bundleContext, final org.slf4j.Logger logger) {
             super();
             this.bundleContext = bundleContext;
             this.logger = logger;

@@ -70,7 +70,7 @@ import com.openexchange.java.Streams;
  */
 public class JCSCacheInformation extends StandardMBean implements CacheInformationMBean {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(JCSCacheInformation.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JCSCacheInformation.class);
 
     private final CompositeCacheManager cacheHub;
 

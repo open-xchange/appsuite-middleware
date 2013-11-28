@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -177,8 +178,7 @@ public final class AJAXState {
             try {
                 handler.cleanUp(this);
             } catch (final Exception e) {
-                final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(AJAXState.class);
-                log.error("Failed closing handler: " + handler.getClass().getName(), e);
+                LoggerFactory.getLogger(AJAXState.class).error("Failed closing handler: " + handler.getClass().getName(), e);
             }
         }
         initializers.clear();

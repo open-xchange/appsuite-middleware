@@ -53,7 +53,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
 import me.prettyprint.cassandra.serializers.CompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
@@ -81,7 +80,7 @@ import com.openexchange.loxandra.impl.cassandra.transaction.TransactionManager;
  */
 public class Transaction {
 
-	private static final Log log = com.openexchange.log.Log.loggerFor(Transaction.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Transaction.class);
 
 	private UUID txKey;
 

@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -74,7 +73,7 @@ final class Reminder {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Reminder.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Reminder.class);
 
     /**
      * Prevent instantiation.

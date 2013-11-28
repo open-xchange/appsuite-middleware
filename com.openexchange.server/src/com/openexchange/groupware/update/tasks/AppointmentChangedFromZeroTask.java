@@ -53,7 +53,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -68,7 +67,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentChangedFromZeroTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentChangedFromZeroTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentChangedFromZeroTask.class);
 
     public AppointmentChangedFromZeroTask() {
         super();

@@ -73,8 +73,8 @@ import com.openexchange.server.ServiceLookup;
 }, responseDescription = "A JSON Object containing the fields \"use\" and \"quota\". \"use\" represents the use mail quota and the field \"quota\" represents the maximum. -1 represents an unlimited quota.")
 public final class MailAction extends AbstractQuotaAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(MailAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MailAction.class);
 
     /**
      * Initializes a new {@link MailAction}.

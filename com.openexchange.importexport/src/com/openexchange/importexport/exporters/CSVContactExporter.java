@@ -60,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -153,7 +152,7 @@ public class CSVContactExporter implements Exporter {
         Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20,
         Contact.DEFAULT_ADDRESS };
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CSVContactExporter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactExporter.class);
 
     @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) {

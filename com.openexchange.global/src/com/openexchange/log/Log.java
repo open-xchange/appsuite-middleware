@@ -55,25 +55,31 @@ package com.openexchange.log;
  * {@link Log} - The <code>org.apache.commons.logging.Log</code> using {@link LogService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use slf4j logger
  */
+@Deprecated
 public final class Log implements org.apache.commons.logging.Log {
 
     /**
-     * Gets the appropriate {@link org.apache.commons.logging.Log logger} for specified class.
+     * Gets the appropriate {@link org.slf4j.Logger logger} for specified class.
      *
      * @param clazz The class
      * @return The logger.
+     * @deprecated Use slf4j logger
      */
+    @Deprecated
     public static org.apache.commons.logging.Log loggerFor(final Class<?> clazz) {
         return valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
     }
 
     /**
-     * Gets the appropriate {@link org.apache.commons.logging.Log logger} for specified class.
+     * Gets the appropriate {@link org.slf4j.Logger logger} for specified class.
      *
      * @param clazz The class name
      * @return The logger.
+     * @deprecated Use slf4j logger
      */
+    @Deprecated
     public static org.apache.commons.logging.Log loggerFor(final String clazz) {
         return valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
     }
@@ -83,7 +89,9 @@ public final class Log implements org.apache.commons.logging.Log {
      *
      * @param log The {@link org.apache.commons.logging.Log} instance
      * @return The appropriate instance
+     * @deprecated Use slf4j logger
      */
+    @Deprecated
     public static org.apache.commons.logging.Log valueOf(final org.apache.commons.logging.Log log) {
         if (log instanceof Log) {
             return log;
@@ -95,7 +103,10 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Initializes a new {@link Log}.
+     *
+     * @deprecated Use slf4j logger
      */
+    @Deprecated
     private Log(final org.apache.commons.logging.Log delegate) {
         super();
         this.delegate = delegate;

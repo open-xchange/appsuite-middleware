@@ -56,7 +56,6 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -89,7 +88,7 @@ public class ListenerRegistrar implements DriveEventPublisher  {
         return INSTANCE;
     }
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ListenerRegistrar.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListenerRegistrar.class);
     private static final int EXPIRY_TIME = 300;
     private static final ListenerRegistrar INSTANCE = new ListenerRegistrar();
 

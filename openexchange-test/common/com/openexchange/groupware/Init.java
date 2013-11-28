@@ -61,7 +61,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajp13.AJPv13Config;
@@ -214,7 +213,7 @@ import com.openexchange.xml.spring.impl.DefaultSpringParser;
  */
 public final class Init {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Init.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Init.class);
 
     // private static Properties infostoreProps = null;
 

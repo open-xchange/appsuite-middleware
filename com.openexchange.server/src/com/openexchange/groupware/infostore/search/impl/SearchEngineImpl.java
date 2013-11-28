@@ -62,7 +62,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import org.apache.commons.logging.Log;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
@@ -97,7 +96,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class SearchEngineImpl extends DBService implements InfostoreSearchEngine {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(SearchEngineImpl.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchEngineImpl.class);
 
     private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 

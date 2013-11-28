@@ -64,7 +64,7 @@ import java.util.regex.Pattern;
  */
 public final class DateUtils {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DateUtils.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DateUtils.class);
 
     private static final DateFormat DATEFORMAT_RFC822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 

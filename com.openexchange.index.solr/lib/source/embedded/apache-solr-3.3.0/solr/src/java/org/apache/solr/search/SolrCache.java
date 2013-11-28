@@ -31,7 +31,7 @@ import java.io.IOException;
  * @version $Id: SolrCache.java 890250 2009-12-14 09:42:00Z shalin $
  */
 public interface SolrCache<K,V> extends SolrInfoMBean {
-  public final static Logger log = LoggerFactory.getLogger(SolrCache.class);
+  public final static org.slf4j.Logger log = LoggerFactory.getLogger(SolrCache.class);
 
 
   /**

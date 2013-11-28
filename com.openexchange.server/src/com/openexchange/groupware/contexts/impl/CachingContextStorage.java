@@ -51,7 +51,6 @@ package com.openexchange.groupware.contexts.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -68,7 +67,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingContextStorage extends ContextStorage {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(CachingContextStorage.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingContextStorage.class);
 
     private static final String REGION_NAME = "Context";
 

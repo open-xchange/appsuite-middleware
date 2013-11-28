@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ConsistencyPerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ConsistencyPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyPerformer.class);
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

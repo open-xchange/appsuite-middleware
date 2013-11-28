@@ -60,7 +60,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 
-import org.apache.commons.logging.Log;
 
 /**
  * This interface provides an abstraction to the storage of the group
@@ -77,7 +76,7 @@ public abstract class OXGroupStorageInterface {
      */
     private static Class<? extends OXGroupStorageInterface> implementingClass;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXGroupStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXGroupStorageInterface.class);
 
     protected static AdminCache cache = null;
 

@@ -29,7 +29,7 @@ import javax.xml.stream.XMLReporter;
 
 public final class XMLErrorLogger implements ErrorHandler,ErrorListener,XMLReporter {
 
-  private final Logger log;
+  private final org.slf4j.Logger log;
 
   public XMLErrorLogger(Logger log) {
     this.log = log;

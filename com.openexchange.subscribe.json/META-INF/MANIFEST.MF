@@ -75,4 +75,5 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"

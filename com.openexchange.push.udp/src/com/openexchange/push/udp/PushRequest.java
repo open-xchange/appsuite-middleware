@@ -54,7 +54,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Strings;
 import com.openexchange.exception.OXException;
 
@@ -77,7 +76,7 @@ public class PushRequest {
 
     private int currentLength;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushRequest.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -61,7 +61,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class Timeout implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Timeout.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Timeout.class);
 
     private final Lock lock;
 

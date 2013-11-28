@@ -38,7 +38,8 @@ Import-Package: cern.clhep,
  hep.aida.ref,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-ClassPath: .,
  lib/concurrent.jar,
  lib/fastutil-6.4.jar,

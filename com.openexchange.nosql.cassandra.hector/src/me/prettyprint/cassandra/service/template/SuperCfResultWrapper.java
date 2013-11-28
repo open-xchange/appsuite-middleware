@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @param <N> the super column's sub column name type
  */
 public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> implements SuperCfResult<K,SN,N> {
-  private static final Logger log = LoggerFactory.getLogger(SuperCfResultWrapper.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(SuperCfResultWrapper.class);
   
   private Map<SN,Map<N,HColumn<N,ByteBuffer>>> columns = new LinkedHashMap<SN,Map<N,HColumn<N,ByteBuffer>>>();
   private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;

@@ -66,7 +66,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
@@ -103,7 +102,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DispatcherServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherServlet.class);
 
     private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 

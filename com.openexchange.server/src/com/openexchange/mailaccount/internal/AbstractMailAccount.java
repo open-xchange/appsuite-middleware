@@ -71,7 +71,7 @@ import com.openexchange.tools.net.URITools;
  */
 public abstract class AbstractMailAccount implements MailAccount {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AbstractMailAccount.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAccount.class);
 
     private static final long serialVersionUID = -641194838598605274L;
 

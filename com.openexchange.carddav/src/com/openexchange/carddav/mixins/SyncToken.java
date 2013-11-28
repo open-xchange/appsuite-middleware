@@ -51,7 +51,6 @@ package com.openexchange.carddav.mixins;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.webdav.protocol.Protocol;
@@ -67,7 +66,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class SyncToken extends SingleXMLPropertyMixin {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SyncToken.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncToken.class);
 
     private final CardDAVCollection collection;
 	private Date lastModified = null;

@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.mapping.CardDAVMapper;
@@ -79,7 +78,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class ContactResource extends CardDAVResource {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactResource.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactResource.class);
 	private static final OXContainerConverter CONVERTER = new OXContainerConverter((TimeZone) null, (String) null);
 	private static final int MAX_RETRIES = 3;
 

@@ -61,7 +61,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
@@ -88,7 +87,7 @@ import com.openexchange.solr.rmi.RMISolrException;
  */
 public class DelegationSolrAccessImpl implements SolrAccessService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DelegationSolrAccessImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DelegationSolrAccessImpl.class);
 
     private final EmbeddedSolrAccessImpl embeddedAccess;
 

@@ -55,7 +55,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.cassandra.db.KeyspaceNotDefinedException;
-import org.apache.commons.logging.Log;
 import com.openexchange.loxandra.EAVContactFactoryService;
 import com.openexchange.loxandra.EAVContactService;
 
@@ -72,7 +71,7 @@ import me.prettyprint.hector.api.factory.HFactory;
  */
 public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFactoryService {
 
-	private static final Log log = com.openexchange.log.Log.loggerFor(CassandraEAVContactFactoryServiceImpl.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CassandraEAVContactFactoryServiceImpl.class);
 
 	private final static String DEFAULT_CONFIGURATION = "loxandra.properties";
 
@@ -124,7 +123,7 @@ public final class CassandraEAVContactFactoryServiceImpl implements EAVContactFa
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
 
 		if (kDef == null) {
-			log.fatal("Keyspace '" + keyspaceName + "' does not exist. Use the 'schema.cql' file to create a schema.", new KeyspaceNotDefinedException("'" + keyspaceName + "' does not exist." ));
+			log.error("Keyspace '" + keyspaceName + "' does not exist. Use the 'schema.cql' file to create a schema.", new KeyspaceNotDefinedException("'" + keyspaceName + "' does not exist." ));
 			return null;
 		}
 

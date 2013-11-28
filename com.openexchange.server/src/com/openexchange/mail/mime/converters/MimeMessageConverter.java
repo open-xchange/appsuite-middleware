@@ -137,7 +137,7 @@ import com.sun.mail.util.MessageRemovedIOException;
  */
 public final class MimeMessageConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageConverter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageConverter.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -182,8 +182,8 @@ public final class MimeMessageConverter {
         public static final String[] ALREADY_INSERTED_HEADERS = {
             MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
-        public static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.loggerFor(MailMessageFieldFiller.class);
+        public static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(MailMessageFieldFiller.class);
 
         /**
          * Fills a fields from source instance of {@link Message} in given destination instance of {@link MailMessage}.
@@ -576,7 +576,7 @@ public final class MimeMessageConverter {
                 MimeMessageConverter.saveChanges(message);
             } catch (final Exception x) {
                 // Content-Type cannot be sanitized
-                com.openexchange.log.Log.loggerFor(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
+                org.slf4j.LoggerFactory.getLogger(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
                 throw MimeMailException.handleMessagingException(e);
             }
             return multipartFor(message, contentType, false);
@@ -951,7 +951,7 @@ public final class MimeMessageConverter {
     private static final EnumMap<MailField, ExistenceChecker> CHECKER_MAP;
 
     static {
-        final org.apache.commons.logging.Log logger = LOG;
+        final org.slf4j.Logger logger = LOG;
 
         CHECKER_MAP = new EnumMap<MailField, ExistenceChecker>(MailField.class);
         final InternetAddress empty = null;
@@ -1438,7 +1438,7 @@ public final class MimeMessageConverter {
         MailField.class);
 
     static {
-        final org.apache.commons.logging.Log logger = LOG;
+        final org.slf4j.Logger logger = LOG;
         FILLER_MAP.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
             @Override

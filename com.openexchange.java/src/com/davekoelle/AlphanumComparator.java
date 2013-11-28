@@ -56,7 +56,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class AlphanumComparator implements Comparator<String> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlphanumComparator.class);
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(AlphanumComparator.class);
 
     private static final Map<Locale, Collator> COLLATOR_OVERRIDES;
 

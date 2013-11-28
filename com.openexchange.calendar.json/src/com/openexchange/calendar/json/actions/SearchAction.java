@@ -89,8 +89,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 responseDescription = "An array with appointment data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class SearchAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(SearchAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(SearchAction.class);
 
     /**
      * Initializes a new {@link SearchAction}.

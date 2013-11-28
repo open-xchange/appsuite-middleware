@@ -50,7 +50,6 @@
 package com.openexchange.oauth.dropbox;
 
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
 import com.dropbox.client2.DropboxAPI;
@@ -83,7 +82,7 @@ import com.openexchange.session.Session;
  */
 public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DropboxOAuthServiceMetaData.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxOAuthServiceMetaData.class);
 
     /**
      * Initializes a new {@link DropboxOAuthServiceMetaData}.

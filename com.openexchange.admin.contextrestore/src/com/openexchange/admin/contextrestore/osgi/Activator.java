@@ -51,7 +51,6 @@ package com.openexchange.admin.contextrestore.osgi;
 
 import java.rmi.Remote;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -72,7 +71,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         try {
             final BundleContext context = this.context;
             AdminCache.compareAndSetBundleContext(null, context);
@@ -93,7 +92,7 @@ public class Activator extends HousekeepingActivator {
             registerService(Remote.class, new OXContextRestore());
             log.info("RMI Interface for context restore registered.");
         } catch (final StorageException e) {
-            log.fatal("Error while creating instance for OXContextRestoreInterface interface", e);
+            log.error("Error while creating instance for OXContextRestoreInterface interface", e);
             throw e;
         }
     }

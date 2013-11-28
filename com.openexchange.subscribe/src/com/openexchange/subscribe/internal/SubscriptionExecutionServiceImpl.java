@@ -55,7 +55,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -80,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SubscriptionExecutionServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SubscriptionExecutionServiceImpl.class);
 
     /*-
      * -------------------------------- Guard stuff -------------------------------

@@ -57,7 +57,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link SpecificServiceChooser}
@@ -66,7 +65,7 @@ import org.apache.commons.logging.Log;
  */
 public class SpecificServiceChooser<T> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SpecificServiceChooser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpecificServiceChooser.class);
 
     private final SortedSet<WeightedRegistration<T>> general = new TreeSet<WeightedRegistration<T>>();
 
@@ -112,7 +111,7 @@ public class SpecificServiceChooser<T> {
 
     private void notNull(final T serviceInstance) {
         if(serviceInstance == null) {
-            LOG.fatal("Trying to register Null Service!");
+            LOG.error("Trying to register Null Service!");
             throw new NullPointerException("Service Instance may not be null!");
         }
     }

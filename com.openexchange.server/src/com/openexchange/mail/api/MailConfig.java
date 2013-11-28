@@ -339,7 +339,7 @@ public abstract class MailConfig {
                 return QuotedInternetAddress.toACE(mailAccount.getPrimaryAddress());
             } catch (final AddressException e) {
                 final String primaryAddress = mailAccount.getPrimaryAddress();
-                com.openexchange.log.Log.loggerFor(MailConfig.class).warn(
+                org.slf4j.LoggerFactory.getLogger(MailConfig.class).warn(
                     "Login source primary email address \"" + primaryAddress + "\" could not be converted to ASCII. Using unicode representation.",
                     e);
                 return primaryAddress;

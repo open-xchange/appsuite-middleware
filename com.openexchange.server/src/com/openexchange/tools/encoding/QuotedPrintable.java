@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.encoding;
 
-import org.apache.commons.logging.Log;
 
 /**
  * QuotedPrintable
@@ -59,7 +58,7 @@ import org.apache.commons.logging.Log;
 
 public final class QuotedPrintable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotedPrintable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotedPrintable.class);
 
     private QuotedPrintable() {
         super();

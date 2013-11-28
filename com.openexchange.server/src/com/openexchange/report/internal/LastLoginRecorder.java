@@ -49,7 +49,6 @@
 
 package com.openexchange.report.internal;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -67,7 +66,7 @@ import com.openexchange.user.UserService;
  */
 public class LastLoginRecorder implements LoginHandlerService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LastLoginRecorder.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LastLoginRecorder.class);
 
     private int maxClientCount = -1;
     private final UserService userService;

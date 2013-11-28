@@ -67,7 +67,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class MonitoringActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MonitoringActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringActivator.class);
 
     /**
      * Initializes a new {@link MonitoringActivator}

@@ -135,7 +135,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
         FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(RdbFolderSQLInterface.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbFolderSQLInterface.class);
 
     private final int userId;
     private final int[] groups;

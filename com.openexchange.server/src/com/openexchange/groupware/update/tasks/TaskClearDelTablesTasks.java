@@ -55,7 +55,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -77,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class TaskClearDelTablesTasks extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskClearDelTablesTasks.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskClearDelTablesTasks.class);
 
     /**
      * Initializes a new {@link TaskClearDelTablesTasks}.

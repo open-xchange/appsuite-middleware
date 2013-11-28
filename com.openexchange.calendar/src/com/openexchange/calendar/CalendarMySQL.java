@@ -82,7 +82,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
@@ -215,7 +214,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String CAL_TABLE_NAME = "prg_dates";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarMySQL.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarMySQL.class);
 
     private static final CalendarCollection COLLECTION = new CalendarCollection();
 
@@ -3708,7 +3707,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Remove participants:");
                 for (UserParticipant d : deleted_userparticipants) {
-                    LOG.debug(d.getIdentifier());
+                    LOG.debug(Integer.toString(d.getIdentifier()));
                 }
             }
             retval = true;

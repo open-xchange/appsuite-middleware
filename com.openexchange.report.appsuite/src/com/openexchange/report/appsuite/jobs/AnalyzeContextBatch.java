@@ -51,7 +51,6 @@ package com.openexchange.report.appsuite.jobs;
 
 import java.io.Serializable;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -75,7 +74,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
     
     private static final long serialVersionUID = -578253218760102061L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AnalyzeContextBatch.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AnalyzeContextBatch.class);
     
     private final String uuid;
     private String reportType;

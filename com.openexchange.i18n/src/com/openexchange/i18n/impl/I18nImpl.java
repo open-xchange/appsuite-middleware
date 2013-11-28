@@ -52,7 +52,6 @@ package com.openexchange.i18n.impl;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import org.apache.commons.logging.Log;
 import com.openexchange.i18n.I18nService;
 
 /**
@@ -60,7 +59,7 @@ import com.openexchange.i18n.I18nService;
  */
 public class I18nImpl implements I18nService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(I18nImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nImpl.class);
 
     private final ResourceBundle serverBundle;
 
@@ -82,7 +81,7 @@ public class I18nImpl implements I18nService {
             return serverBundle.getString(key);
         } catch (final MissingResourceException x) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("Missing key " + key + " for locale " + getLocale() + ". Using default."));
+                LOG.info(new StringBuilder("Missing key " + key + " for locale " + getLocale() + ". Using default.").toString());
             }
             return key;
         }

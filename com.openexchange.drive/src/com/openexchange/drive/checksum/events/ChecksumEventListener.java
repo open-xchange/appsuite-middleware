@@ -56,9 +56,9 @@ import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOL
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOPIC;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
@@ -90,7 +90,7 @@ public class ChecksumEventListener implements EventHandler {
         "OSX.OXDrive",
     });
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ChecksumEventListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ChecksumEventListener.class);
 
     /**
      * Initializes a new {@link ChecksumEventListener}.

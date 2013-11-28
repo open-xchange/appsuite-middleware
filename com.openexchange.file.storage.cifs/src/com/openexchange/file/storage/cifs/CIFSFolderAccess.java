@@ -59,7 +59,6 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileFilter;
 import org.apache.commons.httpclient.URI;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -79,7 +78,7 @@ import com.openexchange.session.Session;
  */
 public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileStorageFolderAccess {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFolderAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFolderAccess.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**

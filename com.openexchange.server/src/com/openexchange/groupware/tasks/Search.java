@@ -52,7 +52,6 @@ package com.openexchange.groupware.tasks;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -74,7 +73,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class Search {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Search.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Search.class);
 
     private final Context ctx;
 

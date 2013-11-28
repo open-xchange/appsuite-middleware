@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GetPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetPerformer.class);
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

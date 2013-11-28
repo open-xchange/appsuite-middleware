@@ -61,7 +61,6 @@ import java.util.concurrent.Future;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
@@ -93,7 +92,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class AutoLogin extends AbstractLoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AutoLogin.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoLogin.class);
 
     private final LoginConfiguration conf;
 

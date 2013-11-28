@@ -50,7 +50,6 @@
 package com.openexchange.publish.microformats.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
@@ -79,7 +78,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ServletActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServletActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
 
     private final PublicationServicesActivator activator;
     private volatile boolean registered;

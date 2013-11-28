@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -81,7 +80,7 @@ public final class Tools {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     /**
      * Prevent instantiation
@@ -207,7 +206,7 @@ public final class Tools {
                 Folder folder = folderByUser.get(I(internal.getIdentifier()));
                 if (null == folder) {
                     if (privat) {
-                        LOG.error(TaskExceptionCode.PARTICIPANT_FOLDER_INCONSISTENCY.create(I(internal.getIdentifier()), I(taskId), I(cid)));
+                        LOG.error(TaskExceptionCode.PARTICIPANT_FOLDER_INCONSISTENCY.create(I(internal.getIdentifier()), I(taskId), I(cid)).toString());
                     }
                     folder = new Folder(0, internal.getIdentifier());
                 }

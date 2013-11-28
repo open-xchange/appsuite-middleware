@@ -59,7 +59,6 @@ import javax.activation.MailcapCommandMap;
 import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -245,7 +244,7 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServerActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerActivator.class);
 
     /**
      * Constant for string: "identifier"

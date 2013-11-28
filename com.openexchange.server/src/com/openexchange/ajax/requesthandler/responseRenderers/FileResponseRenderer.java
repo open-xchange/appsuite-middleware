@@ -69,7 +69,6 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.openexchange.ajax.AJAXServlet;
@@ -116,7 +115,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class FileResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /** The default in-memory threshold of 1MB. */

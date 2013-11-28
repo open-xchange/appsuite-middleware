@@ -54,7 +54,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
@@ -68,7 +67,7 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class HashCalculator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HashCalculator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HashCalculator.class);
 
     private static final String USER_AGENT = LoginFields.USER_AGENT;
     private static final String CLIENT_PARAM = LoginFields.CLIENT_PARAM;
@@ -153,7 +152,7 @@ public class HashCalculator {
             }
             return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         return "";
     }

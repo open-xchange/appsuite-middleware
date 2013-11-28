@@ -65,7 +65,7 @@ import java.util.zip.DeflaterOutputStream;
  * @since solr 1.4
  */
 public class ReplicationHandler extends RequestHandlerBase implements SolrCoreAware {
-  private static final Logger LOG = LoggerFactory.getLogger(ReplicationHandler.class.getName());
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(ReplicationHandler.class.getName());
   SolrCore core;
 
   private SnapPuller snapPuller;

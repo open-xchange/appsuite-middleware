@@ -56,6 +56,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -123,8 +124,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
                     added.add(contentTypes[j]);
                 } else {
                     // No, already present
-                    final org.apache.commons.logging.Log log =
-                        com.openexchange.log.Log.loggerFor(OutlookFolderStorageRegistry.class);
+                    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OutlookFolderStorageRegistry.class);
                     if (log.isErrorEnabled()) {
                         log.error("Duplicate folder storage for content type \"" + contentTypes[j].toString() + "\"", new Throwable());
                     }

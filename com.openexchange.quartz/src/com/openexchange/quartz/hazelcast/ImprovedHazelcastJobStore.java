@@ -62,7 +62,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -101,7 +100,7 @@ import com.openexchange.quartz.hazelcast.predicates.TriggersForCalendarPredicate
  */
 public class ImprovedHazelcastJobStore implements JobStore {
 
-    protected static Log LOG = com.openexchange.log.Log.loggerFor(ImprovedHazelcastJobStore.class);
+    protected static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImprovedHazelcastJobStore.class);
 
     private SchedulerSignaler signaler;
 

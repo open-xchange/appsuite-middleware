@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * @version $Id: SolrEventListener.java 1052938 2010-12-26 20:21:48Z rmuir $
  */
 public interface SolrEventListener extends NamedListInitializedPlugin{
-  static final Logger log = LoggerFactory.getLogger(SolrCore.class);
+  static final org.slf4j.Logger log = LoggerFactory.getLogger(SolrCore.class);
 
 
   public void postCommit();

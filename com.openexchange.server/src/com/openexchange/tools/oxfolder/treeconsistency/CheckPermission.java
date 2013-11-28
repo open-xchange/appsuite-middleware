@@ -56,6 +56,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.container.FolderObject;
@@ -227,7 +228,7 @@ abstract class CheckPermission {
              * Finally deliver it
              */
             eventAdmin.sendEvent(event);
-            final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(CheckPermission.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CheckPermission.class);
             if (logger.isDebugEnabled()) {
                 logger.debug(new StringBuilder(64).append("Notified ").append("content-related").append("-wise changed folder \"").append(
                     folderId).append(" in context ").append(session.getContextId()).toString());

@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -82,7 +81,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
 
     private String identifyingCriteria;
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(AnchorsByLinkRegexStep.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AnchorsByLinkRegexStep.class);
 
     private boolean mayHaveEmptyOutput;
 

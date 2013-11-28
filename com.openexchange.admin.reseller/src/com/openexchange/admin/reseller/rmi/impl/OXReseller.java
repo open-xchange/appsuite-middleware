@@ -78,7 +78,7 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXReseller.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXReseller.class);
 
     private final BasicAuthenticator basicauth;
 

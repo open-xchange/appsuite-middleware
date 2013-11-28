@@ -59,7 +59,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -104,7 +103,7 @@ public class LinkedInServiceImpl implements LinkedInService {
 
     private final ServiceLookup services;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinkedInServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkedInServiceImpl.class);
 
     /**
      * Initializes a new {@link LinkedInServiceImpl}.

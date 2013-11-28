@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
 
 /**
@@ -63,7 +62,7 @@ import com.openexchange.java.Streams;
  */
 public class FileTemplate extends CompiledLineParserTemplate {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CompiledLineParserTemplate.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompiledLineParserTemplate.class);
 
     private final File file;
 

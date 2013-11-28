@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.AccountFolders;
@@ -82,7 +81,7 @@ import com.openexchange.session.Session;
  */
 public final class IndexAccessAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexAccessAdapter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IndexAccessAdapter.class);
 
     private static final IndexAccessAdapter INSTANCE = new IndexAccessAdapter();
 

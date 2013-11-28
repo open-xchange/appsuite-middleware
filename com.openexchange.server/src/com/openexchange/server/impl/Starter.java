@@ -52,7 +52,6 @@ package com.openexchange.server.impl;
 import java.text.NumberFormat;
 import java.util.Properties;
 import java.util.Stack;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.version.Version;
@@ -232,7 +231,7 @@ public class Starter implements Initialization {
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Starter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Starter.class);
 
     private final Stack<Initialization> started;
 

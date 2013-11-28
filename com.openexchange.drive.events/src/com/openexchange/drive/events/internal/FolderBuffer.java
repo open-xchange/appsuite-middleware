@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
@@ -67,7 +66,7 @@ import com.openexchange.session.Session;
  */
 public class FolderBuffer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderBuffer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderBuffer.class);
 
     private final int consolidationTime;
     private final int maxDelayTime ;

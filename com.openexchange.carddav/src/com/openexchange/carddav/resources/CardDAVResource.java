@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.java.Streams;
@@ -82,7 +81,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public abstract class CardDAVResource extends AbstractResource {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CardDAVResource.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CardDAVResource.class);
 
     /**
      * The prefix to be applied to all OX CardDAV entities

@@ -50,7 +50,6 @@
 package com.openexchange.osgi;
 
 import java.util.Stack;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -61,7 +60,7 @@ import org.osgi.framework.BundleContext;
  */
 public abstract class CompositeBundleActivator implements BundleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CompositeBundleActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositeBundleActivator.class);
 
     /**
      * The stack of activated {@link BundleActivator}s.

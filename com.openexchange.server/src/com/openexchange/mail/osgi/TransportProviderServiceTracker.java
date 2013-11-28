@@ -63,7 +63,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
  */
 public final class TransportProviderServiceTracker implements ServiceTrackerCustomizer<TransportProvider,TransportProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(TransportProviderServiceTracker.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TransportProviderServiceTracker.class);
 
     private final BundleContext context;
 
@@ -93,10 +93,10 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
              */
             if (TransportProviderRegistry.registerTransportProvider(protocol.toString(), addedService)) {
                 LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
-                    "' successfully registered"));
+                    "' successfully registered").toString());
             } else {
                 LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append(
-                    "' could not be added.").append("Another provider which supports the protocol has already been registered."));
+                    "' could not be added.").append("Another provider which supports the protocol has already been registered.").toString());
                 context.ungetService(reference);
                 return null;
             }
@@ -121,7 +121,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                     final TransportProvider provider = service;
                     TransportProviderRegistry.unregisterTransportProvider(provider);
                     LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(provider.getProtocol().toString()).append(
-                        "' successfully unregistered"));
+                        "' successfully unregistered").toString());
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }

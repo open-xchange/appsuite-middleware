@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -70,7 +69,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class DatabaseServiceImpl implements DatabaseService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceImpl.class);
 
     private final Pools pools;
     private final ConfigDatabaseService configDatabaseService;

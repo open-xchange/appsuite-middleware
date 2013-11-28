@@ -52,9 +52,9 @@ package com.openexchange.folder.json.actions;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -131,7 +131,7 @@ public final class DeleteAction extends AbstractFolderAction {
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final AJAXRequestResult result;
         if (failOnError) {
-            final Log log = com.openexchange.log.Log.loggerFor(DeleteAction.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
             final List<String> foldersWithError = new LinkedList<String>();
             boolean errorOccurred = false;
             for (int i = 0; i < len; i++) {
@@ -163,7 +163,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 try {
                     folderService.deleteFolder(treeId, folderId, timestamp, session);
                 } catch (final OXException e) {
-                    final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(DeleteAction.class);
+                    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
                     log.error(e.getMessage(), e);
                     e.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(e);

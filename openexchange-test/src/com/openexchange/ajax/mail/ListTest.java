@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import org.slf4j.Logger;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -63,7 +64,7 @@ import com.openexchange.mail.MailListField;
  */
 public final class ListTest extends AbstractMailTest {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListTest.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ListTest.class);
 
     /**
      * Default constructor.

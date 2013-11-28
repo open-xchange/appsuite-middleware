@@ -19,7 +19,8 @@
 
 package org.apache.jsieve;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
+
 
 /**
  * Specifies the positional extent of an element
@@ -29,7 +30,7 @@ import org.apache.commons.logging.Log;
  */
 public final class ScriptCoordinate {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(ScriptCoordinate.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptCoordinate.class);
 
     private final int startLineNumber;
     private final int startColumnNumber;
@@ -88,7 +89,7 @@ public final class ScriptCoordinate {
      */
     public SyntaxException syntaxException(CharSequence message) {
         if (LOG.isWarnEnabled()) {
-            LOG.warn(message);
+            LOG.warn(message.toString());
         }
         logDiagnosticsInfo(LOG);
         final String fullMessage = addStartLineAndColumn(message);
@@ -142,7 +143,7 @@ public final class ScriptCoordinate {
      * Logs diagnotic information about the script coordinate.
      * @param logger <code>Log</code>, not null
      */
-    public void logDiagnosticsInfo(Log logger) {
+    public void logDiagnosticsInfo(Logger logger) {
         if (logger.isInfoEnabled()) {
             logger.info("Expression starts line " + startLineNumber + " column " + startColumnNumber);
             logger.info("Expression ends line " + endLineNumber + " column " + endColumnNumber);
@@ -153,7 +154,7 @@ public final class ScriptCoordinate {
      * Logs diagnotic information about the script coordinate.
      * @param logger <code>Log</code>, not null
      */
-    public void debugDiagnostics(Log logger) {
+    public void debugDiagnostics(Logger logger) {
         if (logger.isDebugEnabled()) {
             logger.debug("Expression starts line " + startLineNumber + " column " + startColumnNumber);
             logger.debug("Expression ends line " + endLineNumber + " column " + endColumnNumber);

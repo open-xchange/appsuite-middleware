@@ -59,7 +59,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -175,7 +174,7 @@ public final class FacebookFQLStreamJsonParser {
                     // message.setHeader(MessagingHeader.KnownHeader.FROM.toString(), item.getTextContent());
                     final long fromId = streamInformation.optLong("actor_id", -1L);
                     if (fromId < 0) {
-                        com.openexchange.log.Log.loggerFor(FacebookFQLStreamJsonParser.class).warn(
+                        org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamJsonParser.class).warn(
                             new StringBuilder("Field actor_id cannot be parsed to a long: ``").append(streamInformation.opt("actor_id")).append("\u00b4\u00b4").toString());
                     }
                     message.setFromId(fromId);
@@ -473,7 +472,7 @@ public final class FacebookFQLStreamJsonParser {
                                 throw e;
                             }
                             // Something went wrong loading URL content... Ignore it
-                            com.openexchange.log.Log.loggerFor(FacebookFQLStreamJsonParser.class).debug("Couldn't load URL: " + sourceURL, e);
+                            org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamJsonParser.class).debug("Couldn't load URL: " + sourceURL, e);
                         }
                     } else {
                         final StringBuilder messageText = message.getMessageText();
@@ -689,7 +688,7 @@ public final class FacebookFQLStreamJsonParser {
                         if ("attachment".equals(name)) {
                             attachmentNode = streamElement.getJSONObject("attachment");
                         } else {
-                            com.openexchange.log.Log.loggerFor(FacebookFQLStreamJsonParser.class).warn("Un-handled item: " + name);
+                            org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamJsonParser.class).warn("Un-handled item: " + name);
                         }
                     } else {
                         itemHandler.handleItem(streamElement, message);
@@ -704,7 +703,7 @@ public final class FacebookFQLStreamJsonParser {
                 /*
                  * Empty message... ignore it!
                  */
-                com.openexchange.log.Log.loggerFor(FacebookFQLStreamJsonParser.class).warn("Empty Facebook message detected:\n" + streamElement);
+                org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamJsonParser.class).warn("Empty Facebook message detected:\n" + streamElement);
                 return null;
             }
             /*
@@ -721,7 +720,7 @@ public final class FacebookFQLStreamJsonParser {
                     if (!Strings.isEmpty(type)) {
                         final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(type);
                         if (null == attachmentHandler) {
-                            final Log logger = com.openexchange.log.Log.loggerFor(FacebookFQLStreamJsonParser.class);
+                            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamJsonParser.class);
                             logger.warn("Unknown attachment type: " + type);
                             logger.debug("Stream element:\n" + streamElement.toString(2));
                         } else {
@@ -739,7 +738,7 @@ public final class FacebookFQLStreamJsonParser {
                             if (null != sType) {
                                 final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(sType);
                                 if (null == attachmentHandler) {
-                                    final Log logger = com.openexchange.log.Log.loggerFor(FacebookFQLStreamJsonParser.class);
+                                    final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamJsonParser.class);
                                     logger.warn("Unknown attachment type: " + sType);
                                     logger.debug("Stream element:\n" + streamElement.toString(2));
                                 } else {
@@ -766,7 +765,7 @@ public final class FacebookFQLStreamJsonParser {
 
                     size = messageText.length();
                 } else {
-                    final Log logger = com.openexchange.log.Log.loggerFor(FacebookFQLStreamJsonParser.class);
+                    final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamJsonParser.class);
                     logger.debug("Stream element is an empty message:\n" + streamElement.toString(2));
                     return null;
                 }

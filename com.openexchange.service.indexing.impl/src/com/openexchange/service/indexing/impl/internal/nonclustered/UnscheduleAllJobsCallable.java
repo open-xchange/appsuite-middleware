@@ -53,7 +53,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
@@ -73,7 +72,7 @@ public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable
     
     private static final long serialVersionUID = -3020268885605197578L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleAllJobsCallable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnscheduleAllJobsCallable.class);
     
     private final int contextId;
     

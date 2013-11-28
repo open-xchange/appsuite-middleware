@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.AppointmentEventInterface;
@@ -81,7 +80,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinksEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinksEventHandler.class);
 
     public LinksEventHandler() {
         super();

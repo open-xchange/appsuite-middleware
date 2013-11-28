@@ -75,8 +75,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class ContactImageDataSource implements ImageDataSource {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(ContactImageDataSource.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ContactImageDataSource.class);
 
     private static final ContactImageDataSource INSTANCE = new ContactImageDataSource();
 

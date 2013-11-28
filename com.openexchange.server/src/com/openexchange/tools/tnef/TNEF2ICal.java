@@ -62,7 +62,6 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VAlarm;
@@ -103,7 +102,7 @@ import com.openexchange.i18n.tools.StringHelper;
  */
 public final class TNEF2ICal {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TNEF2ICal.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TNEF2ICal.class);
 
     private static final Pattern SPLIT_SEMICOLON = Pattern.compile(" *; *");
 

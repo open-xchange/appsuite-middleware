@@ -85,7 +85,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class MailPasswordUtil {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailPasswordUtil.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailPasswordUtil.class);
 
     /**
      * The key length.

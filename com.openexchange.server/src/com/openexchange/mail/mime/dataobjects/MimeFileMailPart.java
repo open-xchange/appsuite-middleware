@@ -79,8 +79,8 @@ public abstract class MimeFileMailPart extends MailPart {
 
     private static final long serialVersionUID = 257902073011243269L;
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(MimeFileMailPart.class);
+    private static final transient org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MimeFileMailPart.class);
 
     private final File file;
 

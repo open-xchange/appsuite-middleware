@@ -61,7 +61,6 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -88,7 +87,7 @@ public class ReminderHandler implements ReminderService {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReminderHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReminderHandler.class);
 
     final Context context;
 
@@ -530,7 +529,7 @@ public class ReminderHandler implements ReminderService {
                 retval.add(reminder);
             } catch (final SQLException e) {
                 // Nothing to do here. Missed one reminder.
-                LOG.error(ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage()));
+                LOG.error(ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage()).toString());
             }
         }
         return retval.toArray(new ReminderObject[retval.size()]);

@@ -231,7 +231,7 @@ public class ServletRequestWrapper implements ServletRequest {
             try {
                 ct = new ContentType(value);
             } catch (final OXException e) {
-                com.openexchange.log.Log.loggerFor(ServletRequestWrapper.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(ServletRequestWrapper.class).error(e.getMessage(), e);
                 throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, e, value);
             }
             if (ct.containsCharsetParameter()) {

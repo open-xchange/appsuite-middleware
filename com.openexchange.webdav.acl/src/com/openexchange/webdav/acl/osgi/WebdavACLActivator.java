@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.acl.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -64,7 +63,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class WebdavACLActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavACLActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavACLActivator.class);
 
     private volatile OSGiPropertyMixin mixin;
 

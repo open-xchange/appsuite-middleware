@@ -64,7 +64,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -143,7 +142,7 @@ public class AppointmentRequest extends CalendarRequest {
 
     private final AppointmentSqlFactoryService appointmentFactory;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentRequest.class);
 
     /**
      * Initializes a new {@link AppointmentRequest}.
@@ -920,7 +919,7 @@ public class AppointmentRequest extends CalendarRequest {
                     true);
                 if (recuResults.size() == 0) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(new com.openexchange.java.StringAllocator(32).append("No occurrence at position ").append(recurrencePosition));
+                        LOG.warn(new com.openexchange.java.StringAllocator(32).append("No occurrence at position ").append(recurrencePosition).toString());
                     }
                     throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
                 }

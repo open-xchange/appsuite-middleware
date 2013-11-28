@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -82,7 +81,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
     private static final long serialVersionUID = -7012370962672596682L;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXResource.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXResource.class);
 
     private final BasicAuthenticator basicauth;
 

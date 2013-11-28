@@ -68,7 +68,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
@@ -87,7 +86,7 @@ import com.openexchange.java.Strings;
  */
 public final class ConfigurationImpl implements ConfigurationService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigurationImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
 
     private static final String EXT = ".properties";
 
@@ -192,7 +191,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
 
         };
-        final Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final FileProcessor processor2 = new FileProcessor() {
 
             @Override
@@ -204,7 +203,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                     // IGNORE
                     return;
                 } catch (final RuntimeException x) {
-                    log.error(file, x);
+                    log.error(file.toString(), x);
                     throw x;
                 }
                 yamlPaths.put(file.getName(), file.getPath());
@@ -329,7 +328,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
         return defaultValue;
     }
-    
+
     @Override
     public List<String> getProperty(String name, String defaultValue, String separator) {
         String property = getProperty(name, defaultValue);
@@ -433,7 +432,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     /**
      * Watch a property for changes.
-     * 
+     *
      * @param name the name of the property to watch
      * @param propertyListener the PropertyListener to register for property changes
      * @return true if the property with the given name can be found and a watcher is added, else false
@@ -658,7 +657,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
             return builder.toString();
         } catch (final IOException x) {
-            LOG.fatal("Can't read file: " + file);
+            LOG.error("Can't read file: " + file);
             return null;
         } finally {
             Streams.close(reader);

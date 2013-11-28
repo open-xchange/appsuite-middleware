@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -72,7 +71,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
  */
 public final class GetTask {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GetTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetTask.class);
 
     private final Context ctx;
 

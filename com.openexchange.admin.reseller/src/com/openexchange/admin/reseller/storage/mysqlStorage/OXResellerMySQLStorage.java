@@ -100,7 +100,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     private static AdminCache cache = null;
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerMySQLStorage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerMySQLStorage.class);
 
     static {
         cache = ClientAdminThreadExtended.cache;

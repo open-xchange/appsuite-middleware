@@ -57,7 +57,6 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventFactoryService;
@@ -74,7 +73,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class PushMsListener implements MessageListener<Map<String, Object>> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushMsListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsListener.class);
 
     private volatile String hostName;
 

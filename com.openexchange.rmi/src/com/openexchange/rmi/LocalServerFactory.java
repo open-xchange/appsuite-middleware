@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 /**
  * {@link LocalServerFactory}
@@ -62,7 +62,7 @@ import org.apache.commons.logging.Log;
  */
 public class LocalServerFactory implements RMIServerSocketFactory {
 
-    private final Log Log = com.openexchange.log.Log.loggerFor(LocalServerFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalServerFactory.class);
 
     private final String hostname;
 
@@ -73,13 +73,13 @@ public class LocalServerFactory implements RMIServerSocketFactory {
     @Override
     public ServerSocket createServerSocket(final int port) throws IOException {
         if (hostname.equalsIgnoreCase("0")) {
-            if (Log.isInfoEnabled()) {
-                Log.info("Admindaemon will listen on all network devices!");
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Admindaemon will listen on all network devices!");
             }
             return new ServerSocket(port, 0, null);
         }
-        if (Log.isInfoEnabled()) {
-            Log.info("Admindaemon will listen on " + hostname + "!");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Admindaemon will listen on " + hostname + "!");
         }
         return new ServerSocket(port, 0, InetAddress.getByName(hostname));
     }

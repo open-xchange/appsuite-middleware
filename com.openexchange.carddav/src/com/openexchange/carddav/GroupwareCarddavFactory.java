@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -108,7 +107,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
 	private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
 	private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupwareCarddavFactory.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
 
 	private final FolderService folderService;
 	private final SessionHolder sessionHolder;

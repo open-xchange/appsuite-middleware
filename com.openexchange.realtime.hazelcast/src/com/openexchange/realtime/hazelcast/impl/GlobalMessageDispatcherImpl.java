@@ -65,7 +65,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
@@ -93,7 +92,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalMessageDispatcherImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalMessageDispatcherImpl.class);
 
     private final ResourceDirectory directory;
     

@@ -138,6 +138,6 @@ public final class AJPv13RequestBody extends AbstractAJPv13Request {
         super(payloadData, dataLength);
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AJPv13RequestBody.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13RequestBody.class);
 
 }

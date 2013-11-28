@@ -56,7 +56,6 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -72,7 +71,7 @@ import com.openexchange.osgi.console.ServiceStateLookup;
  */
 public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<Object,Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DependantServiceRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DependantServiceRegisterer.class);
 
     private final Lock lock = new ReentrantLock();
     private final BundleContext context;

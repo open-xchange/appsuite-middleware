@@ -57,7 +57,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 
 public class PropertyHandlerExtended extends PropertyHandler {
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(PropertyHandlerExtended.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PropertyHandlerExtended.class);
 
     // The following lines define the property values for the database implementations
     public static final String RESELLER_STORAGE = "RESELLER_STORAGE";

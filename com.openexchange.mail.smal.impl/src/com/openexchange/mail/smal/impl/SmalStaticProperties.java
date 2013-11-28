@@ -90,7 +90,7 @@ public final class SmalStaticProperties extends AbstractProtocolProperties {
 
     @Override
     protected void loadProperties0() throws OXException {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(SmalStaticProperties.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SmalStaticProperties.class);
 
         final StringBuilder logBuilder = new StringBuilder(256);
         logBuilder.append("\nLoading global SMAL properties...\n");

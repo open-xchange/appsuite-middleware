@@ -119,7 +119,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
 
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OXContext.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContext.class);
 
     private final OXAdminPoolDBPoolExtension pool;
 

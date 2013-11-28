@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  **/
 public abstract class ContentStreamHandlerBase extends RequestHandlerBase {
-  public static Logger log = LoggerFactory.getLogger(XmlUpdateRequestHandler.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(XmlUpdateRequestHandler.class);
 
   @Override
   public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws Exception {

@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
  */
 public final class PushUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(PushUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushUtility.class);
 
     /**
      * Initializes a new {@link PushUtility}.

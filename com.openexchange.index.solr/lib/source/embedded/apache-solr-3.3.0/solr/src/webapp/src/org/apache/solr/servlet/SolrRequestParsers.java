@@ -53,7 +53,7 @@ import org.apache.solr.request.SolrQueryRequestBase;
 
 public class SolrRequestParsers 
 {
-  final Logger log = LoggerFactory.getLogger(SolrRequestParsers.class);
+  final org.slf4j.Logger log = LoggerFactory.getLogger(SolrRequestParsers.class);
   
   // Should these constants be in a more public place?
   public static final String MULTIPART = "multipart";

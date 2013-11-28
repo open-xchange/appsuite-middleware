@@ -206,7 +206,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     /**
      * The logger.
      */
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OutlookFolderStorage.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OutlookFolderStorage.class);
 
     /**
      * The prepared full name.

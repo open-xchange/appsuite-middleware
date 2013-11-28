@@ -68,7 +68,7 @@ import org.slf4j.Logger;
  */
 public final class CharsetDetector {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CharsetDetector.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CharsetDetector.class);
 
     private static final String FALLBACK = "ISO-8859-1";
 

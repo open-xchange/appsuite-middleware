@@ -51,7 +51,6 @@ package com.openexchange.loxandra.json.action;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -71,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 		@Parameter(name = "folderUUID")})
 public class GetAllAction extends AbstractAction {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(GetAllAction.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GetAllAction.class);
 
 	/**
 	 * Constructor

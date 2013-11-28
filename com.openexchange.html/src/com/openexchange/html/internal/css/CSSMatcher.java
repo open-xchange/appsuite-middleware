@@ -61,7 +61,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
@@ -85,7 +84,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class CSSMatcher {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CSSMatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSSMatcher.class);
 
     /** Perform CSS sanitizing with respect to nested blocks */
     private static final boolean CONSIDER_NESTED_BLOCKS = true;

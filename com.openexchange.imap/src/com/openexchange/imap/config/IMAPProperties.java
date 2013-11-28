@@ -75,7 +75,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class IMAPProperties extends AbstractProtocolProperties implements IIMAPProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IMAPProperties.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPProperties.class);
 
     private static final IMAPProperties instance = new IMAPProperties();
 

@@ -66,7 +66,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.Collections;
 
@@ -88,7 +87,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
 
     protected static volatile boolean initialized;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TemplateListResourceBundle.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TemplateListResourceBundle.class);
 
     @Override
     protected Object handleGetObject(final String arg0) {
@@ -160,7 +159,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
             }
             templates.put(key, new StringTemplate(templateText.toString()));
         } catch (final IOException x) {
-            LOG.error(x);
+            LOG.error(x.toString());
         } finally {
             Streams.close(r);
         }

@@ -20,6 +20,7 @@ Import-Package: com.openexchange.ajax,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.service.http
+ org.osgi.service.http,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.blackwhitelist.osgi.Activator
 Export-Package: com.openexchange.blackwhitelist

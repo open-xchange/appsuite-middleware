@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JmxMonitoredMap<K, V> extends
         ConcurrentHashMap<String, SolrInfoMBean> {
-  private static final Logger LOG = LoggerFactory.getLogger(JmxMonitoredMap.class
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(JmxMonitoredMap.class
           .getName());
 
   private MBeanServer server = null;

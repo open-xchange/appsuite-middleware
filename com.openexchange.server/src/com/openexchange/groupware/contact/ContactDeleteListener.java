@@ -60,7 +60,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -80,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ContactDeleteListener implements DeleteListener {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(ContactDeleteListener.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactDeleteListener.class);
 
     /**
      * Initializes a new {@link ContactDeleteListener}

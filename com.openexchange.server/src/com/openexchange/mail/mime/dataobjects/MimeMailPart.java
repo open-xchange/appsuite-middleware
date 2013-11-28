@@ -67,6 +67,7 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
@@ -100,7 +101,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     private static final long serialVersionUID = -1142595512657302179L;
 
-    static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeMailPart.class);
+    static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMailPart.class);
 
     /**
      * The max. in-memory size in bytes.
@@ -301,7 +302,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             try {
                 ((ManagedMimeMessage) part).cleanUp();
             } catch (final Exception e) {
-                com.openexchange.log.Log.loggerFor(MimeMailPart.class).warn("Couldn't clean-up MIME resource.", e);
+                LoggerFactory.getLogger(MimeMailPart.class).warn("Couldn't clean-up MIME resource.", e);
             }
         }
     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.tokenlogin.json.actions;
 
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -70,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class TokenLoginAction implements AJAXActionService {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(TokenLoginAction.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TokenLoginAction.class);
 
     private final ServiceLookup lookup;
 

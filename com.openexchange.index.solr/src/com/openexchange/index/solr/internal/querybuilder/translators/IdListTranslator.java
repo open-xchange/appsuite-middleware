@@ -51,7 +51,6 @@ package com.openexchange.index.solr.internal.querybuilder.translators;
 
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
@@ -75,7 +74,7 @@ public class IdListTranslator implements QueryTranslator {
 
     private String handlerName;
 
-    private static Log log = com.openexchange.log.Log.loggerFor(IdListTranslator.class);
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IdListTranslator.class);
 
 
     @Override

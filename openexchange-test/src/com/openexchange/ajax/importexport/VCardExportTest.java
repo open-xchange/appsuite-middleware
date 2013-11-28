@@ -51,7 +51,6 @@ package com.openexchange.ajax.importexport;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
@@ -64,7 +63,7 @@ public class VCardExportTest extends AbstractVCardTest {
 
 	final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(ICalImportTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalImportTest.class);
 
 	public VCardExportTest(final String name) {
 		super(name);

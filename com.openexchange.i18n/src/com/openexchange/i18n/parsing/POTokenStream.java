@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 
@@ -63,7 +62,7 @@ import com.openexchange.java.Charsets;
  */
 final class POTokenStream {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(POTokenStream.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POTokenStream.class);
 
     private final InputStream stream;
 

@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.google.gdata.client.GoogleService.InvalidCredentialsException;
 import com.google.gdata.client.Service;
@@ -91,7 +90,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
 
     private String username, password;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GoogleAPIStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GoogleAPIStep.class);
 
     public GoogleAPIStep() {
         super();
@@ -290,15 +289,15 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
 
                     contacts.add(contact);
                 } catch (final NullPointerException e) {
-                    LOG.error(e);
+                    LOG.error(e.toString());
                 }
             }
         } catch (final MalformedURLException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         } catch (final IOException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         } catch (final InvalidCredentialsException e) {

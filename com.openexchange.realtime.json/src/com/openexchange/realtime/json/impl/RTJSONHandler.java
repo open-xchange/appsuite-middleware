@@ -56,14 +56,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.json.management.ManagementHouseKeeper;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTProtocol;
-import com.openexchange.realtime.json.management.ManagementHouseKeeper;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
@@ -80,12 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RTJSONHandler implements StanzaSender {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(RTJSONHandler.class);
-
     protected final StateManager stateManager = new StateManager();
-
     protected final RTProtocol protocol;
-
     protected final StanzaSequenceGate gate;
 
     JSONProtocolHandler protocolHandler;

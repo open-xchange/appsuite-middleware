@@ -52,7 +52,6 @@ package com.openexchange.image;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -77,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class ImageGetAction implements AJAXActionService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ImageGetAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageGetAction.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
     private static final boolean WARN = LOG.isWarnEnabled();
 

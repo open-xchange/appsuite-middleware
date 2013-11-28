@@ -50,7 +50,7 @@
 package com.openexchange.folder.json.osgi;
 
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
@@ -73,7 +73,7 @@ import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
  */
 public class FolderJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderJSONActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderJSONActivator.class);
 
     private String module;
 
@@ -147,7 +147,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             restore();
         } catch (final Exception e) {
-            com.openexchange.log.Log.loggerFor(FolderJSONActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(FolderJSONActivator.class).error(e.getMessage(), e);
             throw e;
         }
     }

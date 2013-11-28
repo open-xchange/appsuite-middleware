@@ -52,7 +52,6 @@ package com.openexchange.service.indexing.impl.internal.nonclustered;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -77,7 +76,7 @@ import com.openexchange.service.indexing.impl.internal.Tools;
  */
 public class ScheduleJobCallable implements Callable<Object>, Serializable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ScheduleJobCallable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScheduleJobCallable.class);
 
     private static final long serialVersionUID = 5900667348491833307L;
 

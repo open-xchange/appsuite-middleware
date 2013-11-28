@@ -50,6 +50,7 @@
 package com.openexchange.twitter.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -76,7 +77,7 @@ public final class TwitterConfiguration {
      * @param configurationService The configuration service needed to read properties
      */
     public static void configure(final ConfigurationService configurationService) {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(TwitterConfiguration.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterConfiguration.class);
         {
             final String property = configurationService.getProperty("com.openexchange.twitter.consumerKey");
             if (null == property) {

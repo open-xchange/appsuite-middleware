@@ -23,5 +23,6 @@ Import-Package: com.openexchange.groupware.contact,
  me.prettyprint.hector.api.query,
  me.prettyprint.hector.testutils,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"
 Bundle-ActivationPolicy: lazy

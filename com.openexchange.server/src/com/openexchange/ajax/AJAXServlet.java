@@ -90,7 +90,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.httpclient.URI;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -138,7 +137,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     private static final long serialVersionUID = 718576864014891156L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(AJAXServlet.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXServlet.class);
 
     // Modules
     public static final String MODULE_TASK = "tasks";
@@ -1262,7 +1261,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 try {
                     uploadListener.action(uploadEvent);
                 } catch (final OXException e) {
-                    LOG.error(new com.openexchange.java.StringAllocator(64).append("Failed upload listener: ").append(uploadListener.getClass()), e);
+                    LOG.error(new com.openexchange.java.StringAllocator(64).append("Failed upload listener: ").append(uploadListener.getClass()).toString(), e);
                 }
             }
         } finally {
@@ -1306,7 +1305,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     protected static void close(final Writer w) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(new com.openexchange.java.StringAllocator("Called close() with writer").append(w.toString()));
+            LOG.trace(new com.openexchange.java.StringAllocator("Called close() with writer").append(w.toString()).toString());
         }
         /*-
          *
@@ -1315,13 +1314,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 w.flush();
                 System.out.println("INFOSTORE: Flushed!");
             } catch (IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
             try {
                 w.close();
                 System.out.println("INFOSTORE: Closed!");
             } catch (IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
         } else {
             return;

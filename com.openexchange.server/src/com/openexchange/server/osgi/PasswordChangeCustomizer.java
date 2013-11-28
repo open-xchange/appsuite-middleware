@@ -63,7 +63,7 @@ import com.openexchange.passwordchange.service.PasswordChange;
  */
 public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer<PasswordChangeService,PasswordChangeService> {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(PasswordChangeCustomizer.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeCustomizer.class);
 
 	private final BundleContext context;
 

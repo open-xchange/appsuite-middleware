@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
@@ -88,7 +87,7 @@ public class InfostoreFolderJob implements IndexingJob {
 
     private static final int CHUNK_SIZE = 100;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFolderJob.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFolderJob.class);
 
 
     public InfostoreFolderJob() {

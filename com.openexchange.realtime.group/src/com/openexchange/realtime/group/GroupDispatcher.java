@@ -61,8 +61,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
@@ -89,7 +89,7 @@ import com.openexchange.server.ServiceLookup;
 public class GroupDispatcher implements ComponentHandle {
 
     /** The logger constant. */
-    static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
 
     /** The <code>ServiceLookup</code> reference. */
     public static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
@@ -107,7 +107,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     /** Action handler */
     private final ActionHandler handler;
-    
+
     private boolean isDisposed = false;
 
     /**

@@ -50,6 +50,7 @@
 package com.openexchange.unifiedinbox.utility;
 
 import java.util.concurrent.Callable;
+import org.slf4j.Logger;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -61,7 +62,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public abstract class LoggingCallable<V> implements Task<V> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(LoggingCallable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoggingCallable.class);
 
     private final Session session;
 
@@ -100,7 +101,7 @@ public abstract class LoggingCallable<V> implements Task<V> {
      *
      * @return The logger
      */
-    public org.apache.commons.logging.Log getLogger() {
+    public Logger getLogger() {
         return LOG;
     }
 

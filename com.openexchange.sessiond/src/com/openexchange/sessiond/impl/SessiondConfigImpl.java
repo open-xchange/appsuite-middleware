@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.SessiondProperty.SESSIOND_AUTOLOGIN;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 
@@ -61,7 +60,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public class SessiondConfigImpl implements SessiondConfigInterface {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessiondConfigImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondConfigImpl.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
     private static final long SHORT_CONTAINER_LIFE_TIME = 6L * 60L * 1000L;
     private static final long LONG_CONTAINER_LIFE_TIME = 60L * 60L * 1000L;

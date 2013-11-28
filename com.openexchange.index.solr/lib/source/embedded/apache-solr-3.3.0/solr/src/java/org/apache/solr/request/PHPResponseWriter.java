@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public class PHPResponseWriter extends org.apache.solr.response.PHPResponseWriter 
 {
-  private static Logger log = LoggerFactory.getLogger(PHPResponseWriter.class.getName());
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(PHPResponseWriter.class.getName());
 
   
   public PHPResponseWriter(){

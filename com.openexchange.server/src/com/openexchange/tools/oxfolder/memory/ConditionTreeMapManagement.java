@@ -57,7 +57,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.apache.commons.logging.Log;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -74,7 +73,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  */
 public final class ConditionTreeMapManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConditionTreeMapManagement.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConditionTreeMapManagement.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static volatile ConditionTreeMapManagement instance;
@@ -284,9 +283,9 @@ public final class ConditionTreeMapManagement {
     private final class LoadTreeMapRunnable implements Runnable {
 
         private final int contextId;
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
-        protected LoadTreeMapRunnable(final int contextId, final Log logger) {
+        protected LoadTreeMapRunnable(final int contextId, final org.slf4j.Logger logger) {
             super();
             this.contextId = contextId;
             this.logger = logger;
@@ -305,9 +304,9 @@ public final class ConditionTreeMapManagement {
     private static final class InitTreeMapCallable implements Callable<ConditionTreeMap> {
 
         private final int contextId;
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
-        protected InitTreeMapCallable(final int contextId, final Log logger) {
+        protected InitTreeMapCallable(final int contextId, final org.slf4j.Logger logger) {
             super();
             this.contextId = contextId;
             this.logger = logger;

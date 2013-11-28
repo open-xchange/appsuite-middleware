@@ -52,7 +52,6 @@ package com.openexchange.file.storage.json;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,7 +75,7 @@ public class FileMetadataWriter {
     /**
      * The logger constant.
      */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(FileMetadataWriter.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileMetadataWriter.class);
 
     /**
      * The {@link JSONHandler} constant.

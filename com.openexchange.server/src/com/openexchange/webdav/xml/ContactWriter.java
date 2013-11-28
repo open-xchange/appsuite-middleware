@@ -57,7 +57,6 @@ import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.Text;
@@ -119,7 +118,7 @@ public class ContactWriter extends CommonWriter {
 
     protected final static ContactField[] deleteFields = { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED };
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactWriter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactWriter.class);
 
     public ContactWriter() {
 
@@ -381,14 +380,14 @@ public class ContactWriter extends CommonWriter {
                  */
                 if (children.size() > 1) {
                     LOG.warn(new StringBuilder(128).append("Conflicting email address detected!").append(" Multiple elements named \"").append(
-                        name).append("\" already exist."));
+                        name).append("\" already exist.").toString());
                     return;
                 }
                 final Element elem = children.get(0);
                 final Text text = (Text) elem.getContent().get(0);
                 if (!new QuotedInternetAddress(text.getText()).equals(ia)) {
                     LOG.warn(new StringBuilder(128).append("Conflicting email address detected!").append(" An element named \"").append(
-                        name).append("\" already exists."));
+                        name).append("\" already exists.").toString());
                     return;
                 }
                 /*

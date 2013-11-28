@@ -69,8 +69,8 @@ import com.openexchange.session.Session;
  */
 public final class SmalProvider extends AllMailProvider {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(SmalProvider.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(SmalProvider.class);
 
     /**
      * SMAL protocol.

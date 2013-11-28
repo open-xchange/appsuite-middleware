@@ -70,7 +70,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
-import org.apache.commons.logging.Log;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -100,7 +99,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class ImageTransformationsImpl implements ImageTransformations {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(ImageTransformationsImpl.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationsImpl.class);
 
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;

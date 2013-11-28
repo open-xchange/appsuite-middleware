@@ -63,7 +63,7 @@ import com.openexchange.mobile.configuration.json.action.ActionTypes;
  */
 public class ActionServiceListener implements ServiceTrackerCustomizer<ActionService, ActionService> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ActionServiceListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActionServiceListener.class);
 
     private final BundleContext context;
 
@@ -88,7 +88,7 @@ public class ActionServiceListener implements ServiceTrackerCustomizer<ActionSer
                 return service;
             }
             getInstance().putActionService((ActionTypes)identifier, service);
-            LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully registered"));
+            LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully registered").toString());
         }
         return service;
     }
@@ -106,7 +106,7 @@ public class ActionServiceListener implements ServiceTrackerCustomizer<ActionSer
                     return;
                 }
                 getInstance().removeActionService((ActionTypes)identifier);
-                LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully unregistered"));
+                LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully unregistered").toString());
             }
         } finally {
             context.ungetService(reference);

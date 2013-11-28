@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,7 +70,7 @@ public class Reminder extends DataServlet {
 	 */
 	private static final long serialVersionUID = 7117849531568676025L;
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(Reminder.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Reminder.class);
 
 	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {

@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
@@ -87,7 +86,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public class SmalSessionEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalSessionEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmalSessionEventHandler.class);
 
     private static final int MAX_OFFSET = 60000 * 5;
 

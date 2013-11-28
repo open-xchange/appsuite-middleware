@@ -67,7 +67,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MailAccessWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccessWatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccessWatcher.class);
 
     private static final MailAccessDelayQueue MAIL_ACCESSES = new MailAccessDelayQueue();
 
@@ -184,11 +184,11 @@ public final class MailAccessWatcher {
     private static class WatcherTask implements Runnable {
 
         private final MailAccessDelayQueue queue;
-        private final org.apache.commons.logging.Log logger;
+        private final org.slf4j.Logger logger;
         private final String lineSeparator;
         private final MailAccessDelayQueue.ElementFilter filter;
 
-        public WatcherTask(final MailAccessDelayQueue mailAccesses, final org.apache.commons.logging.Log logger) {
+        public WatcherTask(final MailAccessDelayQueue mailAccesses, final org.slf4j.Logger logger) {
             super();
             queue = mailAccesses;
             this.logger = logger;

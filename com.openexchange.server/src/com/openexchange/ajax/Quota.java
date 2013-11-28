@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class Quota extends SessionServlet {
 
-	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Quota.class);
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Quota.class);
 
     private static final long serialVersionUID = 6477434510302882905L;
 

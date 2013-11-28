@@ -1,7 +1,6 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.exception.OXException;
@@ -36,7 +35,7 @@ public class Bug8724Test extends AppointmentTest {
 		Appointment.TIMEZONE
 	};
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug8724Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug8724Test.class);
 
 	public Bug8724Test(final String name) {
 		super(name);

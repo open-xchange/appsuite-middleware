@@ -52,7 +52,6 @@ package org.quartz.service.internal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
@@ -68,7 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public final class QuartzServiceImpl implements QuartzService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuartzServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuartzServiceImpl.class);
 
     private final Map<String, Scheduler> namedSchedulers = new HashMap<String, Scheduler>();
 

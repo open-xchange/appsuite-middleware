@@ -51,7 +51,6 @@
 package com.openexchange.hazelcast.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -85,7 +84,7 @@ public class HazelcastActivator extends HousekeepingActivator {
     /**
      * The logger for HazelcastActivator.
      */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
 
     /**
      * Initializes a new {@link HazelcastActivator}.

@@ -131,7 +131,7 @@ public final class CcTerm extends SearchTerm<String> {
             }
             return (getAllAddresses(addresses).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.loggerFor(CcTerm.class).warn("Error during search.", e);
+            org.slf4j.LoggerFactory.getLogger(CcTerm.class).warn("Error during search.", e);
             return false;
         }
     }

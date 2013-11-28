@@ -61,12 +61,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -77,7 +77,7 @@ import com.openexchange.log.LogProperties;
  */
 public class WrappingFilter implements Filter {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(WrappingFilter.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WrappingFilter.class);
 
     IPTools remoteIPFinder;
 

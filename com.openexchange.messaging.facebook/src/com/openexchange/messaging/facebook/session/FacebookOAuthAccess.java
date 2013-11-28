@@ -54,7 +54,6 @@ import java.io.Reader;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -87,7 +86,7 @@ import com.openexchange.session.Session;
  */
 public final class FacebookOAuthAccess {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookOAuthAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookOAuthAccess.class);
 
     /**
      * Gets the Facebook OAuth access for given Facebook messaging account.

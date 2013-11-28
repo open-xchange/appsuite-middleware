@@ -56,7 +56,6 @@ import java.util.LinkedList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -156,7 +155,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     private static final Namespace dav = Namespace.getNamespace("D", davUri);
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(XmlServlet.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XmlServlet.class);
 
     @Override
     public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {

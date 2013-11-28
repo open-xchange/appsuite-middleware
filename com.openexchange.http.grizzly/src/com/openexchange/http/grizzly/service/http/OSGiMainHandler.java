@@ -103,7 +103,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
@@ -135,7 +134,7 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
  */
 public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiMainHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiMainHandler.class);
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 

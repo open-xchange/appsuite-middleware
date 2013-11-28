@@ -64,7 +64,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
@@ -86,7 +85,7 @@ import com.openexchange.exception.OXException;
  */
 public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStorage {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(OXContextRestoreMySQLStorage.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXContextRestoreMySQLStorage.class);
 
     @Override
     public String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema, String configdbname) throws SQLException, IOException, OXContextRestoreException, StorageException {

@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -126,7 +125,7 @@ public class ICalImporter extends AbstractImporter {
     private static final int APP = 0;
 	private static final int TASK = 1;
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(ICalImporter.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalImporter.class);
 
 	@Override
     public boolean canImport(final ServerSession session, final Format format,

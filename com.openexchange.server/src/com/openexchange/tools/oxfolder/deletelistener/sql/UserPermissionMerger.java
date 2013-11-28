@@ -62,7 +62,7 @@ import com.openexchange.tools.oxfolder.deletelistener.Permission;
  */
 public final class UserPermissionMerger {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UserPermissionMerger.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserPermissionMerger.class);
 
 	/**
 	 * Initializes a new {@link UserPermissionMerger}

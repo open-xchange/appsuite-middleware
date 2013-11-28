@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
-import org.apache.commons.logging.Log;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
@@ -245,7 +244,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         try {
             return new Token(account.getToken(), account.getSecret());
         } catch (final RuntimeException e) {
-            final Log logger = com.openexchange.log.Log.loggerFor(ScribeGenericHTTPRequestBuilder.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ScribeGenericHTTPRequestBuilder.class);
             logger.warn("Associated OAuth \"" + account.getDisplayName() + " (" + account.getId() + ")\" account misses token information.");
             throw OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }

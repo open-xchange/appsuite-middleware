@@ -105,7 +105,7 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable(AGGREGATING_CONTACTS, getTableSQL(), contextId);
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(AggregatingContactTableService.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AggregatingContactTableService.class);
         if (logger.isInfoEnabled()) {
             logger.info("UpdateTask '" + AggregatingContactTableService.class.getSimpleName() + "' successfully performed!");
         }

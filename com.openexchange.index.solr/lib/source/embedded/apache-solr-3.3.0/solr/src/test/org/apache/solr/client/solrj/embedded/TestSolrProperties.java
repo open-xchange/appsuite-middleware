@@ -53,7 +53,7 @@ import org.w3c.dom.Node;
  * @since solr 1.3
  */
 public class TestSolrProperties extends LuceneTestCase {
-  protected static Logger log = LoggerFactory.getLogger(TestSolrProperties.class);
+  protected static org.slf4j.Logger log = LoggerFactory.getLogger(TestSolrProperties.class);
   protected CoreContainer cores = null;
   private File home;
   private File solrXml;

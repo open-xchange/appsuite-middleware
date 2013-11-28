@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -81,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailRequest {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailRequest.class);
 
     static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
     static final String FOLDER_ID = FolderChildFields.FOLDER_ID;

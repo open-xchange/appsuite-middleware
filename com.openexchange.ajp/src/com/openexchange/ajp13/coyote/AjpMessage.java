@@ -65,7 +65,7 @@ import com.openexchange.tools.codec.QuotedPrintable;
  */
 public final class AjpMessage {
 
-    private static final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(AjpMessage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AjpMessage.class);
 
     // ------------------------------------------------------------ Constructor
 

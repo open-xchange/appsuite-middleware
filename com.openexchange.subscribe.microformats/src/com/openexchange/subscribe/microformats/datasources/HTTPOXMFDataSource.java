@@ -52,7 +52,6 @@ package com.openexchange.subscribe.microformats.datasources;
 import java.io.IOException;
 import java.io.Reader;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
@@ -66,7 +65,7 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
 
     private static final String URL = "url";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HTTPOXMFDataSource.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTTPOXMFDataSource.class);
 
     @Override
     public Reader getData(Subscription subscription) throws OXException {

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail.filter.parser.action;
 
 import java.util.HashMap;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
@@ -61,7 +60,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ActionParserFactory {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(ActionParserFactory.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActionParserFactory.class);
 
 	final static HashMap<String, ActionParser> parserMap = new HashMap<String, ActionParser>();
 

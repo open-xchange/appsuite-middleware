@@ -67,7 +67,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -125,7 +124,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         /*
          * Logger
          */
-        final Log log = com.openexchange.log.Log.loggerFor(DuplicateContactCollectFolderRemoverTask.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DuplicateContactCollectFolderRemoverTask.class);
         /*
          * Progress state
          */
@@ -192,7 +191,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         }
     }
 
-    static void iterateUsersPerContext(final List<Integer> users, final Map<Locale, String> names, final int contextId, final ProgressState status, final Log log) throws OXException {
+    static void iterateUsersPerContext(final List<Integer> users, final Map<Locale, String> names, final int contextId, final ProgressState status, final org.slf4j.Logger log) throws OXException {
         /*
          * Create context instance
          */
@@ -241,7 +240,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         }
     }
 
-    private static void checkDuplicates4User(final Integer user, final Context ctx, final Map<Locale, String> names, final Connection writeCon, final Log log) {
+    private static void checkDuplicates4User(final Integer user, final Context ctx, final Map<Locale, String> names, final Connection writeCon, final org.slf4j.Logger log) {
         final int contextId = ctx.getContextId();
         /*
          * Process user
@@ -459,7 +458,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         }
     }
 
-    private static void deleteFolder(final int id, final int parent, final long now, final int userId, final Context ctx, final Connection con, final Log log) throws SQLException, OXException {
+    private static void deleteFolder(final int id, final int parent, final long now, final int userId, final Context ctx, final Connection con, final org.slf4j.Logger log) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             /*

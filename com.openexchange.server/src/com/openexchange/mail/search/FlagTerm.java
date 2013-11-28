@@ -115,7 +115,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
         try {
             msgFlags = msg.getFlags();
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.loggerFor(FlagTerm.class).warn("Error during search.", e);
+            org.slf4j.LoggerFactory.getLogger(FlagTerm.class).warn("Error during search.", e);
             return false;
         }
         return set ? msgFlags.contains(flagsObj) : !msgFlags.contains(flagsObj);

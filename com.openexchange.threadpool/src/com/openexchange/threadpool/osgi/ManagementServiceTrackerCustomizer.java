@@ -116,8 +116,8 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
 
     void registerCacheMBean(final ManagementService management) {
         if (objectName == null) {
-            final org.apache.commons.logging.Log LOG =
-                com.openexchange.log.Log.loggerFor(ManagementServiceTrackerCustomizer.class);
+            final org.slf4j.Logger LOG =
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer.class);
             try {
                 objectName = getObjectName(ThreadPoolInformation.class.getName(), ThreadPoolInformationMBean.THREAD_POOL_DOMAIN);
                 management.registerMBean(objectName, new ThreadPoolInformation(threadPoolService));
@@ -136,7 +136,7 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
             try {
                 management.unregisterMBean(objectName);
             } catch (final Exception e) {
-                com.openexchange.log.Log.loggerFor(ManagementServiceTrackerCustomizer.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer.class).error(e.getMessage(), e);
             } finally {
                 objectName = null;
             }

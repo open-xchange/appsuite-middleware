@@ -75,7 +75,6 @@ import net.htmlparser.jericho.HTMLElements;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.JerichoHandler;
@@ -721,7 +720,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(HTMLURLReplacerHandler.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HTMLURLReplacerHandler.class);
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);
@@ -1101,7 +1100,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            final Log LOG = com.openexchange.log.Log.loggerFor(FilterJerichoHandler.class);
+            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FilterJerichoHandler.class);
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {

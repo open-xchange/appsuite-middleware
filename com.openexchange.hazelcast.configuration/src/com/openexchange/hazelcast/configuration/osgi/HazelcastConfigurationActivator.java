@@ -50,7 +50,6 @@
 
 package com.openexchange.hazelcast.configuration.osgi;
 
-import org.apache.commons.logging.Log;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
@@ -67,7 +66,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class HazelcastConfigurationActivator extends HousekeepingActivator {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastConfigurationActivator.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationActivator.class);
 
     /**
      * Initializes a new {@link HazelcastActivator}.

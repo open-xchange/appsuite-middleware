@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -73,7 +72,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbSettingStorage extends SettingStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbSettingStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbSettingStorage.class);
 
     /**
      * SQL statement for loading one specific user setting.

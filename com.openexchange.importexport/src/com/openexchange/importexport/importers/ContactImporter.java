@@ -50,7 +50,6 @@
 package com.openexchange.importexport.importers;
 
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -74,7 +73,7 @@ public abstract class ContactImporter extends AbstractImporter {
         super(services);
     }
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactImporter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactImporter.class);
 
     /**
      * Defines the maximum number of implicit retries in case of truncation errors.

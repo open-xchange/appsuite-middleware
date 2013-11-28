@@ -61,7 +61,7 @@ import com.openexchange.mail.config.MailProperties;
  */
 public final class UnifiedInboxProperties extends AbstractProtocolProperties implements IUnifiedInboxProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(UnifiedInboxProperties.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxProperties.class);
 
     private static final UnifiedInboxProperties instance = new UnifiedInboxProperties();
 

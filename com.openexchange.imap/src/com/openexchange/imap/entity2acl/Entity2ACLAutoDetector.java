@@ -78,7 +78,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class Entity2ACLAutoDetector {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Entity2ACLAutoDetector.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Entity2ACLAutoDetector.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -189,7 +189,7 @@ public final class Entity2ACLAutoDetector {
         final Entity2ACL entity2Acl = imapServer.getImpl();
         if (DEBUG) {
             LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\tIMAP server [").append(imapConfig.getServer()).append(
-                "] greeting successfully mapped to: ").append(imapServer.getName()));
+                "] greeting successfully mapped to: ").append(imapServer.getName()).toString());
         }
         return entity2Acl;
     }

@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
@@ -68,7 +67,7 @@ import com.openexchange.java.Strings;
  */
 public class ResourceCaches {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCaches.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCaches.class);
 
     /**
      * Initializes a new {@link ResourceCaches}.

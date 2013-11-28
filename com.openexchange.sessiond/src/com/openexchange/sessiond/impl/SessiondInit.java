@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
@@ -65,7 +64,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
  */
 public class SessiondInit implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessiondInit.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondInit.class);
 
     private SessiondConfigInterface config;
 

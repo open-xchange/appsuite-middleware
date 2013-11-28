@@ -51,7 +51,6 @@ package com.openexchange.subscribe.crawler.osgi;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -81,7 +80,7 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer<Object, Obje
 
     private ConfigurationService configurationService;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CrawlerAutoUpdater.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CrawlerAutoUpdater.class);
 
     public CrawlerAutoUpdater(final BundleContext context, final Activator activator) {
         super();

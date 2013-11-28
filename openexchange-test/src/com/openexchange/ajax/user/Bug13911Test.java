@@ -50,7 +50,6 @@
 package com.openexchange.ajax.user;
 
 import java.util.Random;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -69,7 +68,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
  */
 public class Bug13911Test extends AbstractAJAXSession {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Bug13911Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug13911Test.class);
 
     private static final int[] COLUMNS = new int[] {
         Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.EMAIL1, Contact.MARK_AS_DISTRIBUTIONLIST,

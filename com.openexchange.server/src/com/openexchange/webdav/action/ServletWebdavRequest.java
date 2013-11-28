@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -72,7 +71,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 
 	private final ApacheURLDecoder decoder = new ApacheURLDecoder();
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(ServletWebdavRequest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletWebdavRequest.class);
 
 	public ServletWebdavRequest(final WebdavFactory factory, final HttpServletRequest req) {
 		super(factory);

@@ -56,7 +56,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -70,7 +69,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherWithDelegate {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactSwitcherForSimpleDateFormat.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactSwitcherForSimpleDateFormat.class);
 
     private static interface DateValidator {
 

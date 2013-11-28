@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -92,7 +91,7 @@ import com.openexchange.search.SearchTerm;
  */
 public class Executor {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Executor.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Executor.class);
 
     /**
      * Initializes a new {@link Executor}.

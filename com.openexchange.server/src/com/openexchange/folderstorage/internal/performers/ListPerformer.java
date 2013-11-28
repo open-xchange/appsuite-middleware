@@ -62,7 +62,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
-import org.apache.commons.logging.Log;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -97,7 +96,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ListPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListPerformer.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -302,7 +301,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
                     final FolderStorage tmp = entry.getKey();
                     final int[] indexes = entry.getValue().toArray();
-                    final Log log = LOG;
+                    final org.slf4j.Logger log = LOG;
                     completionService.submit(new ThreadPools.TrackableCallable<Object>() {
 
                         @Override
@@ -568,7 +567,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage tmp = entry.getKey();
             final int[] indexes = entry.getValue().toArray();
-            final Log log = LOG;
+            final org.slf4j.Logger log = LOG;
             completionService.submit(new ThreadPools.TrackableCallable<Object>() {
 
                 @Override

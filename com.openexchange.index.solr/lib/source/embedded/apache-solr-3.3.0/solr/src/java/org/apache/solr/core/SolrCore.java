@@ -83,7 +83,7 @@ import java.lang.reflect.Constructor;
 public final class SolrCore implements SolrInfoMBean {
   public static final String version="1.0";  
 
-  public static Logger log = LoggerFactory.getLogger(SolrCore.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(SolrCore.class);
 
   private String name;
   private String logid; // used to show what name is set

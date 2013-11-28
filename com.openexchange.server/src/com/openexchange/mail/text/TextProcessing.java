@@ -52,14 +52,14 @@ package com.openexchange.mail.text;
 import java.io.IOException;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.java.CharsetDetector;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -70,8 +70,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class TextProcessing {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(TextProcessing.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(TextProcessing.class);
 
     private static final String SPLIT_LINES = "\r?\n";
 
@@ -325,7 +325,7 @@ public final class TextProcessing {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(
                     new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
+                        "\". Using fallback charset \"").append(fallback).append("\" instead.").toString(),
                     e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);

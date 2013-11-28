@@ -53,7 +53,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -66,7 +65,7 @@ import com.openexchange.config.ConfigurationService;
 
 public class PluginStarter {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(PluginStarter.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PluginStarter.class);
 
     private static com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = null;
 
@@ -108,7 +107,7 @@ public class PluginStarter {
             LOG.error(e.getMessage(), e);
             throw e;
         } catch (final StorageException e) {
-            LOG.fatal("Error while creating one instance for RMI interface", e);
+            LOG.error("Error while creating one instance for RMI interface", e);
             throw e;
         }
     }

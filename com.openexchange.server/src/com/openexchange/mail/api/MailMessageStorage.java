@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.api;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -75,7 +74,7 @@ import com.openexchange.mail.text.TextFinder;
  */
 public abstract class MailMessageStorage implements IMailMessageStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailMessageStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageStorage.class);
 
     /**
      * The fields containing {@link MailField#FULL}.

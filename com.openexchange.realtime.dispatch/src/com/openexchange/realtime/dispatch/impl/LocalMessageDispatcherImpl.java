@@ -53,12 +53,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.management.ManagementHouseKeeper;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
@@ -67,18 +66,18 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
 
 /**
  * {@link LocalMessageDispatcherImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(MessageDispatcher.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalMessageDispatcherImpl.class);
 
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
-    
+
     private final StanzaSequenceGate gate;
-    
+
     public LocalMessageDispatcherImpl() {
         gate = new StanzaSequenceGate(LocalMessageDispatcher.class.getSimpleName()) {
 
@@ -108,7 +107,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                             throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
                     } else {
-                        LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()));
+                        LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()).toString());
                         throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
                     }
                 }

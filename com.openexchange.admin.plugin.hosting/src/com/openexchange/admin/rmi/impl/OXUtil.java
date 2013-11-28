@@ -55,7 +55,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -77,7 +76,7 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
  */
 public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
-    private final static Log log = com.openexchange.log.Log.loggerFor(OXUtil.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUtil.class);
 
     private final BasicAuthenticator basicauth;
 
@@ -211,7 +210,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(store);
+        log.debug(store.toString());
 
         if (!tool.existsStore(store.getId())) {
             throw new InvalidDataException("No such store");
@@ -235,7 +234,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
         basicauth.doAuthentication(auth);
 
-        log.debug(reason);
+        log.debug(reason.toString());
 
         if (reason.getText() == null || reason.getText().trim().length() == 0) {
             throw new InvalidDataException("Invalid reason text!");
@@ -285,7 +284,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db);
+        log.debug(db.toString());
 
         try {
             if (!db.mandatoryCreateMembersSet()) {
@@ -314,7 +313,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db);
+        log.debug(db.toString());
 
         try {
             if (!db.mandatoryDeleteMembersSet()) {
@@ -339,7 +338,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db);
+        log.debug(db.toString());
 
         try {
             if (!db.mandatoryRegisterMembersSet()) {
@@ -405,7 +404,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(srv);
+        log.debug(srv.toString());
 
         if (srv.getName().trim().length() == 0) {
             throw new InvalidDataException("Invalid server name");
@@ -431,7 +430,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
         basicauth.doAuthentication(null == auth ? new Credentials("","") : auth);
 
-        log.debug(database);
+        log.debug(database.toString());
         try {
             setIdOrGetIDFromNameAndIdObject(null, database);
         } catch (NoSuchObjectException e) {
@@ -460,7 +459,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(server);
+        log.debug(server.toString());
 
         try {
             setIdOrGetIDFromNameAndIdObject(null, server);
@@ -540,7 +539,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db);
+        log.debug(db.toString());
 
         try {
             setIdOrGetIDFromNameAndIdObject(null, db);

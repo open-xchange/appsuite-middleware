@@ -63,7 +63,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -80,7 +79,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbParticipantStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbParticipantStorage.class);
 
     /**
      * Default constructor.

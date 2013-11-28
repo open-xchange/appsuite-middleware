@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public class MailNotifyPushUdpSocketListener implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailNotifyPushUdpSocketListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushUdpSocketListener.class);
 
     private static final int MAX_UDP_PACKET_SIZE = 4+64+1;
 

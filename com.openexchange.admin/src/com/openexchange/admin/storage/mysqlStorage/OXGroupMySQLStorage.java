@@ -61,7 +61,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.properties.AdminProperties;
@@ -88,7 +87,7 @@ import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
  */
 public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDefaultValues {
 
-    private final static Log log = com.openexchange.log.Log.loggerFor(OXGroupMySQLStorage.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXGroupMySQLStorage.class);
 
     private void changeLastModifiedOnGroup(int ctxId, int groupId, Connection con) throws SQLException {
         PreparedStatement stmt = null;

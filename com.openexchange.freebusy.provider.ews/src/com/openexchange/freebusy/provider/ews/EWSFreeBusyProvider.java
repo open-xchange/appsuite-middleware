@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.AddressException;
-import org.apache.commons.logging.Log;
 import com.microsoft.schemas.exchange.services._2006.messages.FreeBusyResponseType;
 import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
 import com.openexchange.config.ConfigurationService;
@@ -87,7 +86,7 @@ public class EWSFreeBusyProvider implements FreeBusyProvider {
      * @see http://msdn.microsoft.com/en-us/library/exchangewebservices.freebusyviewoptionstype.timewindow.aspx
      */
     private static final int MAX_DAYS = 42;
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(EWSFreeBusyProvider.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EWSFreeBusyProvider.class);
 
     private final ExchangeWebService ews;
     private String[] emailSuffixes;

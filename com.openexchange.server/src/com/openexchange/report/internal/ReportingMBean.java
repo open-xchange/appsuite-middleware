@@ -77,7 +77,6 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -94,7 +93,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class ReportingMBean implements DynamicMBean {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReportingMBean.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingMBean.class);
 
     private final String[] totalNames = { "contexts", "users" };
 

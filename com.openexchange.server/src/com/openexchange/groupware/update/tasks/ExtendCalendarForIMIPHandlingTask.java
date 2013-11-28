@@ -56,7 +56,6 @@ import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -72,7 +71,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ExtendCalendarForIMIPHandlingTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendCalendarForIMIPHandlingTask.class);
 
     private final String[] TABLES = { "prg_dates", "del_dates" };
     private final Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };

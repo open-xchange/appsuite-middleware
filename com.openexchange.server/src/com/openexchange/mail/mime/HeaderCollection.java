@@ -67,13 +67,13 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -85,7 +85,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class HeaderCollection implements Serializable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HeaderCollection.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HeaderCollection.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -963,7 +963,7 @@ public class HeaderCollection implements Serializable {
      * Simple test method
      */
     public static final void test() {
-        final Log log2 = com.openexchange.log.Log.loggerFor(HeaderCollection.class);
+        final Logger log2 = org.slf4j.LoggerFactory.getLogger(HeaderCollection.class);
         try {
             final HeaderCollection hc = new HeaderCollection();
 
@@ -1026,7 +1026,7 @@ public class HeaderCollection implements Serializable {
             hc2.addHeader("Subject", "The simple subject");
             hc2.addHeader("Aaa", "dummy header here");
 
-            log2.info(Boolean.valueOf(hc.equals(hc2)));
+            log2.info(Boolean.toString(hc.equals(hc2)));
 
         } catch (final Exception e) {
             log2.error(e.getMessage(), e);

@@ -58,7 +58,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -74,7 +73,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 final class JobConsumer extends AbstractTask<Object> {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(JobConsumer.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JobConsumer.class);
 
     /**
      * The poison element.

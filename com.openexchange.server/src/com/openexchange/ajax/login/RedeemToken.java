@@ -53,7 +53,6 @@ import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -78,7 +77,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class RedeemToken implements LoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RedeemToken.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RedeemToken.class);
 
     private final LoginConfiguration conf;
 

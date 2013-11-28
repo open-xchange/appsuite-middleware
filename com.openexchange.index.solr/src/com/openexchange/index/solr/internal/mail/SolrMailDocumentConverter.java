@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
@@ -84,7 +83,7 @@ import com.openexchange.mail.text.TextFinder;
  */
 public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMessage> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrMailDocumentConverter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrMailDocumentConverter.class);
 
 
     public SolrMailDocumentConverter(FieldConfiguration fieldConfig) {

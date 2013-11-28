@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -73,7 +72,7 @@ import com.openexchange.sessiond.SessiondServiceExtended;
  */
 public class SessiondServiceImpl implements SessiondServiceExtended {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessiondServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondServiceImpl.class);
 
     private final Lock migrateLock;
 

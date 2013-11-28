@@ -64,8 +64,8 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
  */
 public class StringResponseRenderer implements ResponseRenderer {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(StringResponseRenderer.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(StringResponseRenderer.class);
 
     /**
      * Initializes a new {@link StringResponseRenderer}.

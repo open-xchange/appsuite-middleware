@@ -74,7 +74,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.apache.commons.logging.Log;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
@@ -96,7 +95,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ConditionTreeMap {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConditionTreeMap.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConditionTreeMap.class);
 
     private static final EmptyTIntSet EMPTY_SET = EmptyTIntSet.getInstance();
 
@@ -1000,9 +999,9 @@ public final class ConditionTreeMap {
     private final class InitEntityCallable implements Callable<ConditionTree> {
 
         private final int entity;
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
-        protected InitEntityCallable(final int entity, final Log logger) {
+        protected InitEntityCallable(final int entity, final org.slf4j.Logger logger) {
             super();
             this.entity = entity;
             this.logger = logger;

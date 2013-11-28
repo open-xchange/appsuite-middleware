@@ -64,8 +64,8 @@ import com.openexchange.java.Strings;
  */
 public class UUEncodedMultiPart {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(UUEncodedMultiPart.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UUEncodedMultiPart.class);
 
     private final List<UUEncodedPart> uuencodeParts;
 

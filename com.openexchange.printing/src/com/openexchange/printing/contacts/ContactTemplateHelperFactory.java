@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class ContactTemplateHelperFactory implements TemplateHelperFactory {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ContactTemplateHelperFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactTemplateHelperFactory.class);
 
 	private final ServiceLookup services;
 	

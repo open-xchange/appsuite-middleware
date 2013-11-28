@@ -52,7 +52,6 @@ package com.openexchange.drive.events.gcm.internal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.MulticastResult;
@@ -73,7 +72,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
 
     private static final int MULTICAST_LIMIT = 1000;
     private static final String SERIVCE_ID = "gcm";
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GCMDriveEventPublisher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMDriveEventPublisher.class);
 
     private final Sender sender;
 
@@ -116,7 +115,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                     LOG.warn("error publishing drive event", e);
                 }
                 if (null != result && LOG.isDebugEnabled()) {
-                    LOG.debug(result);
+                    LOG.debug(result.toString());
                 }
                 /*
                  * process resulst

@@ -55,7 +55,6 @@ import java.net.URLEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
@@ -69,7 +68,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class SQL {
 
-    public static final Log LOG = com.openexchange.log.Log.loggerFor(SQL.class);
+    public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SQL.class);
 
     public static String getCreateFileChecksumsTableStmt() {
         return "CREATE TABLE fileChecksums (" +

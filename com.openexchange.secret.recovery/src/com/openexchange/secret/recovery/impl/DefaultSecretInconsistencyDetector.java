@@ -51,7 +51,6 @@ package com.openexchange.secret.recovery.impl;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
@@ -65,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDetector {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultSecretInconsistencyDetector.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultSecretInconsistencyDetector.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

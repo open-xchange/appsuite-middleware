@@ -59,7 +59,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.Category;
@@ -97,7 +96,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 public class FolderCollection extends AbstractCollection implements OXWebdavResource {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCollection.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCollection.class);
 	private final InfostoreWebdavFactory factory;
 	private WebdavPath url;
 	private final PropertyHelper propertyHelper;

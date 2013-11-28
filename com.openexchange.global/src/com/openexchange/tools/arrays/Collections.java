@@ -58,7 +58,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
 
 /**
@@ -71,7 +70,7 @@ public final class Collections {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Collections.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Collections.class);
 
     /**
      * Prevent instantiation

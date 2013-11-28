@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
@@ -74,7 +73,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         this.cache = ClientAdminThread.cache;
     }
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXTaskMgmtImpl.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXTaskMgmtImpl.class);
 
     private void doAuth(final Credentials creds, final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException {
         if( cache.isMasterAdmin(creds) ) {

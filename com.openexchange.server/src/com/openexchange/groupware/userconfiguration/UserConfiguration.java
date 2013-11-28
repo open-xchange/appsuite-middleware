@@ -55,7 +55,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.StringAllocator;
@@ -69,7 +68,7 @@ public class UserConfiguration implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -8277899698366715803L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(UserConfiguration.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserConfiguration.class);
 
     /**
      * The permission bit for mail access.

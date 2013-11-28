@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.java.Streams;
 public final class CommandExecutor {
 
     /** The logger */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(CommandExecutor.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CommandExecutor.class);
 
     private final Process process;
 

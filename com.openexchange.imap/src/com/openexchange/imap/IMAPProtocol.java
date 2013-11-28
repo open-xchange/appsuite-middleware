@@ -52,7 +52,6 @@ package com.openexchange.imap;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
@@ -64,7 +63,7 @@ import com.openexchange.mail.Protocol;
  */
 public final class IMAPProtocol extends Protocol {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(IMAPProtocol.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPProtocol.class);
 
     private static final long serialVersionUID = 7946276250330261425L;
 

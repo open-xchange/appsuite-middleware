@@ -67,6 +67,7 @@ import org.apache.jcs.engine.control.CompositeCache;
 import org.apache.jcs.engine.control.group.GroupAttrName;
 import org.apache.jcs.engine.control.group.GroupId;
 import org.apache.jcs.engine.memory.MemoryCache;
+import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
@@ -79,7 +80,6 @@ import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
@@ -88,7 +88,7 @@ import com.openexchange.log.Log;
  */
 public final class JCSCache implements Cache, SupportsLocalOperations {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(JCSCache.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JCSCache.class);
 
     private static volatile Field cacheControlField;
     private static Field cacheControlField() {

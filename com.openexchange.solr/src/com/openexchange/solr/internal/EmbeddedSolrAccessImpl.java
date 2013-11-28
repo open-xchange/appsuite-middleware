@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
 import javax.xml.parsers.ParserConfigurationException;
-import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -91,7 +90,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
 
     private static final String IAE_MSG = "Parameter `%s` must not be null.";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(EmbeddedSolrAccessImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EmbeddedSolrAccessImpl.class);
 
     private CoreContainer coreContainer;
 
@@ -574,11 +573,11 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
      */
     private void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.fatal(MARKER + "Thread death" + MARKER, t);
+            LOG.error(MARKER + "Thread death" + MARKER, t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
-            LOG.fatal(
+            LOG.error(
                 MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
                 t);
             throw (VirtualMachineError) t;

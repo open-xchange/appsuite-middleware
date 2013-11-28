@@ -63,7 +63,7 @@ import com.openexchange.mail.api.MailProvider;
  */
 public final class MailProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider,MailProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailProviderServiceTracker.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProviderServiceTracker.class);
 
     private final BundleContext context;
 
@@ -90,10 +90,10 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
              */
             if (MailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
                 LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                    "' successfully registered"));
+                    "' successfully registered").toString());
             } else {
                 LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                    "' could not be added.").append(" Another provider which supports the protocol has already been registered."));
+                    "' could not be added.").append(" Another provider which supports the protocol has already been registered.").toString());
                 context.ungetService(reference);
                 return null;
             }
@@ -118,7 +118,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
                     final MailProvider provider = service;
                     MailProviderRegistry.unregisterMailProvider(provider);
                     LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
-                        "' successfully unregistered"));
+                        "' successfully unregistered").toString());
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }

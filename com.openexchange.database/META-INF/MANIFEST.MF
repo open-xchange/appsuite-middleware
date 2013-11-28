@@ -23,6 +23,7 @@ Import-Package: com.mysql.jdbc,
  javax.management.remote,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-Activator: com.openexchange.database.osgi.Activator
 Export-Package: com.openexchange.database

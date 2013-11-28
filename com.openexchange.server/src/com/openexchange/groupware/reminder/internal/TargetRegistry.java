@@ -52,7 +52,6 @@ package com.openexchange.groupware.reminder.internal;
 import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.TargetService;
@@ -64,7 +63,7 @@ import com.openexchange.groupware.reminder.TargetService;
  */
 public class TargetRegistry {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TargetRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TargetRegistry.class);
     private static final TargetRegistry SINGLETON = new TargetRegistry();
 
     private final TIntObjectMap<TargetService> registry = new TIntObjectHashMap<TargetService>();

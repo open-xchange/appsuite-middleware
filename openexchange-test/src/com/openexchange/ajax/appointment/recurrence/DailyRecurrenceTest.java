@@ -3,14 +3,13 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(DailyRecurrenceTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DailyRecurrenceTest.class);
 
 	public DailyRecurrenceTest(final String name) {
 		super(name);

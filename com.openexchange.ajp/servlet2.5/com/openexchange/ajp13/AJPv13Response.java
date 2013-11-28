@@ -592,7 +592,7 @@ public class AJPv13Response {
         try {
             writeHeader(name, value, sink);
         } catch (final AJPv13Exception e) {
-            com.openexchange.log.Log.loggerFor(AJPv13Response.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(AJPv13Response.class).error(e.getMessage(), e);
         }
     }
 

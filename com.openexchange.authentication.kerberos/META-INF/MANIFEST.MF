@@ -33,5 +33,6 @@ Import-Package: com.openexchange.ajax.fields,
  org.ietf.jgss,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Export-Package: com.openexchange.kerberos

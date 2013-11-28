@@ -39,7 +39,6 @@ package com.openexchange.groupware.contexts;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.Init;
@@ -53,7 +52,7 @@ public class LoginTest extends TestCase {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginTest.class);
 
     /**
      * How much logins?

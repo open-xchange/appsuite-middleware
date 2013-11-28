@@ -52,7 +52,6 @@
 package com.openexchange.groupware.configuration;
 
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -64,7 +63,7 @@ import com.openexchange.config.ConfigurationService;
 @Deprecated
 public abstract class AbstractConfigWrapper {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractConfigWrapper.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConfigWrapper.class);
 
 	public static String parseProperty(final Properties prop, final String name, final String value) {
 		String tmp = null;

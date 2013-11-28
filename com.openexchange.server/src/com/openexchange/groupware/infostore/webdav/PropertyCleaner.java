@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.FolderEventInterface;
@@ -65,7 +64,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 	private final PropertyStore infoProperties;
 	private final PropertyStore folderProperties;
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(PropertyCleaner.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyCleaner.class);
 
 	public PropertyCleaner(final PropertyStore folderProperties, final PropertyStore infoProperties){
 		this.folderProperties = folderProperties;

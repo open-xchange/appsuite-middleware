@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
@@ -80,7 +79,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
     private String url;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GoogleCalendarICalStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GoogleCalendarICalStep.class);
 
     public GoogleCalendarICalStep() {
         super();

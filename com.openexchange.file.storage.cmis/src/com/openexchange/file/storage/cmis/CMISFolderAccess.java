@@ -72,7 +72,6 @@ import org.apache.chemistry.opencmis.commons.enums.UnfileObject;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlEntryImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AccessControlPrincipalDataImpl;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -90,7 +89,7 @@ import com.openexchange.session.Session;
  */
 public final class CMISFolderAccess extends AbstractCMISAccess implements FileStorageFolderAccess {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CMISFolderAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CMISFolderAccess.class);
 
     private final CMISAccountAccess accountAccess;
 

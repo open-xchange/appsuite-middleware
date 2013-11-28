@@ -51,14 +51,13 @@ package com.openexchange.groupware.attach.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class FireDetachedEventAction extends AttachmentEventAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FireDetachedEventAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FireDetachedEventAction.class);
 
     @Override
     protected void undoAction() throws OXException {

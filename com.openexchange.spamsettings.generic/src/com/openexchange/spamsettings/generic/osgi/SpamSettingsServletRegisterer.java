@@ -51,7 +51,6 @@
 package com.openexchange.spamsettings.generic.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -64,7 +63,7 @@ import com.openexchange.spamsettings.generic.servlet.SpamSettingsServlet;
  */
 public class SpamSettingsServletRegisterer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SpamSettingsServletRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamSettingsServletRegisterer.class);
 
     /**
      * The {@link DefaultDeferringURLService} reference.

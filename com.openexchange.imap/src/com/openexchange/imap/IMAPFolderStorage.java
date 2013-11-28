@@ -134,7 +134,7 @@ import com.sun.mail.imap.Rights;
  */
 public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2 {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IMAPFolderStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -1011,7 +1011,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } catch (final Throwable e2) {
                     LOG.error(
                         new com.openexchange.java.StringAllocator().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "could not be deleted"),
+                            "could not be deleted").toString(),
                         e2);
                 }
             }
@@ -1030,7 +1030,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     } catch (final Throwable e2) {
                         LOG.error(
                             new com.openexchange.java.StringAllocator().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                                "\" could not be deleted"),
+                                "\" could not be deleted").toString(),
                             e2);
                     }
                 }
@@ -1046,7 +1046,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } catch (final Throwable e2) {
                     LOG.error(
                         new com.openexchange.java.StringAllocator().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "\" could not be deleted"),
+                            "\" could not be deleted").toString(),
                         e2);
                 }
             }
@@ -1061,7 +1061,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } catch (final Throwable e2) {
                     LOG.error(
                         new com.openexchange.java.StringAllocator().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "\" could not be deleted"),
+                            "\" could not be deleted").toString(),
                         e2);
                 }
             }
@@ -1197,7 +1197,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } catch (final MessagingException e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(new com.openexchange.java.StringAllocator(128).append("Subscription status of folder \"").append(renameMe.getFullName()).append(
-                            "\" and its subfolders could not be stored prior to rename operation"));
+                            "\" and its subfolders could not be stored prior to rename operation").toString());
                     }
                     subscriptionStatus = null;
                 }
@@ -1516,7 +1516,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     } catch (final MessagingException e) {
                         if (LOG.isWarnEnabled()) {
                             LOG.warn(new com.openexchange.java.StringAllocator(128).append("Subscription status of folder \"").append(moveMe.getFullName()).append(
-                                "\" and its subfolders could not be stored prior to rename operation"));
+                                "\" and its subfolders could not be stored prior to rename operation").toString());
                         }
                         subscriptionStatus = null;
                     }
@@ -2145,7 +2145,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     if (DEBUG) {
                         debug.setLength(0);
                         LOG.info(debug.append("Folder '").append(fullName).append("' cleared in ").append(
-                            System.currentTimeMillis() - startClear).append(STR_MSEC));
+                            System.currentTimeMillis() - startClear).append(STR_MSEC).toString());
                     }
                 } finally {
                     closeSafe(f);

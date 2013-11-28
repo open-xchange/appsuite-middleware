@@ -50,7 +50,6 @@
 package com.openexchange.api2;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.contexts.Context;
@@ -66,7 +65,7 @@ import com.openexchange.session.Session;
  */
 public class RdbLinkSQLInterface implements LinkSQLInterface {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbLinkSQLInterface.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbLinkSQLInterface.class);
 
     @Override
     public LinkObject[] getLinksOfObject(final int objectId, final int type, final int folder, final int user, final int[] group, final Session sessionobject) throws OXException {

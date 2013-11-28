@@ -105,8 +105,8 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  */
 public final class OXFolderIteratorSQL {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(OXFolderIteratorSQL.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(OXFolderIteratorSQL.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

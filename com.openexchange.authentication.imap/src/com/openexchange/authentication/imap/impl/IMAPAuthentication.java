@@ -64,7 +64,6 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -119,7 +118,7 @@ public class IMAPAuthentication implements AuthenticationService {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(IMAPAuthentication.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPAuthentication.class);
 
     private static Properties props;
 

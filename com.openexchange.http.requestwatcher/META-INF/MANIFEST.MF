@@ -18,5 +18,6 @@ Import-Package: com.openexchange.config,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"
 Export-Package: com.openexchange.http.requestwatcher.osgi.services

@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -78,7 +77,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ContactsRepairLinksAttachments implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactsRepairLinksAttachments.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsRepairLinksAttachments.class);
 
     public ContactsRepairLinksAttachments() {
         super();

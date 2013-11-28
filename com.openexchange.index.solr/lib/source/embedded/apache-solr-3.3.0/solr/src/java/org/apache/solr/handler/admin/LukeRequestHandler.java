@@ -81,7 +81,7 @@ import org.apache.solr.search.SolrIndexSearcher;
  */
 public class LukeRequestHandler extends RequestHandlerBase 
 {
-  private static Logger log = LoggerFactory.getLogger(LukeRequestHandler.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(LukeRequestHandler.class);
   
   public static final String NUMTERMS = "numTerms";
   public static final String DOC_ID = "docId";

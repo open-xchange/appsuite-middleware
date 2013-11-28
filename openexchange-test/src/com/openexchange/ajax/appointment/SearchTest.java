@@ -50,7 +50,6 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;
@@ -63,7 +62,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class SearchTest extends AppointmentTest {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SearchTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchTest.class);
 
     public SearchTest(final String name) {
         super(name);

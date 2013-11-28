@@ -51,7 +51,6 @@ package com.openexchange.groupware.calendar;
 
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest;
 import com.openexchange.groupware.container.Appointment;
@@ -68,7 +67,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarSqlTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarSqlTest.class);
 
     /**
      * Calendar fields.

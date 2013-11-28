@@ -132,7 +132,7 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IMAPFolderConverter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderConverter.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -707,7 +707,7 @@ public final class IMAPFolderConverter {
                     LOG.warn(
                         new com.openexchange.java.StringAllocator(256).append("ACLs could not be requested for folder ").append(imapFolder.getFullName()).append(
                             ". A newer ACL extension (RFC 4314) seems to be supported by IMAP server ").append(imapConfig.getServer()).append(
-                            ", which denies GETACL command if no ADMINISTER right is granted."),
+                            ", which denies GETACL command if no ADMINISTER right is granted.").toString(),
                         e);
                 }
                 addOwnACL(mailFolder);

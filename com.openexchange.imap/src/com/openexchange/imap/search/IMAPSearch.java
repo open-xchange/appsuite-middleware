@@ -86,8 +86,8 @@ import com.sun.mail.imap.protocol.MessageSet;
  */
 public final class IMAPSearch {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(IMAPSearch.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(IMAPSearch.class);
 
     /**
      * No instantiation

@@ -51,7 +51,6 @@ package com.openexchange.subscribe.parser;
 
 import java.util.Collection;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -69,7 +68,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class ContactHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactHandler.class);
 
     /**
      * Update or insert contacts from a subscription

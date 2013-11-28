@@ -55,7 +55,6 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -68,7 +67,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class AddAppointmentParticipantsIndexTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AddAppointmentParticipantsIndexTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AddAppointmentParticipantsIndexTask.class);
 
     public AddAppointmentParticipantsIndexTask() {
         super();

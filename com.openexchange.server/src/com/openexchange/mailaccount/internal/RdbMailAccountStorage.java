@@ -130,7 +130,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class RdbMailAccountStorage implements MailAccountStorageService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(RdbMailAccountStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbMailAccountStorage.class);
 
     private static final SecretEncryptionStrategy<GenericProperty> STRATEGY = MailPasswordUtil.STRATEGY;
 
@@ -1210,7 +1210,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     if (LOG.isDebugEnabled()) {
                         final String query = stmt.toString();
                         LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
-                            orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
+                            orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)).toString());
                     }
 
                     stmt.executeUpdate();
@@ -1284,7 +1284,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         if (LOG.isDebugEnabled()) {
                             final String query = stmt.toString();
                             LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
-                                orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
+                                orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)).toString());
                         }
 
                         stmt.executeUpdate();
@@ -1334,7 +1334,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             if (LOG.isDebugEnabled()) {
                                 final String query = stmt.toString();
                                 LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL insert query for attributes ").append(
-                                    orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
+                                    orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)).toString());
                             }
 
                             stmt.executeUpdate();

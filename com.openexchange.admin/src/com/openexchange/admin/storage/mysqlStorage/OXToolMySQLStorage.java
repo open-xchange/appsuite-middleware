@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -106,7 +105,7 @@ import com.openexchange.sql.grammar.UPDATE;
  */
 public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefaultValues {
 
-    private final static Log log = com.openexchange.log.Log.loggerFor(OXToolMySQLStorage.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolMySQLStorage.class);
 
     private static final String FALLBACK_LANGUAGE_CREATE = "en";
 

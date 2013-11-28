@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -80,7 +79,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
 
     private String titleExceptionsRegex, linkToTargetPage;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
 
     private boolean addPagesTogether;
 

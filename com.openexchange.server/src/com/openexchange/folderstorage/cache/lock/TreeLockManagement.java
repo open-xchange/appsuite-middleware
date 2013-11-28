@@ -56,7 +56,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.session.Session;
 
 /**
@@ -66,7 +65,7 @@ import com.openexchange.session.Session;
  */
 public final class TreeLockManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TreeLockManagement.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TreeLockManagement.class);
 
     private static final TreeLockManagement INSTANCE = new TreeLockManagement();
 

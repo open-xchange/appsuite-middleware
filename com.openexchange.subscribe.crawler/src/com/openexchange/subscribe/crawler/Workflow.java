@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.BrowserVersionFeatures;
@@ -89,7 +88,7 @@ public class Workflow {
 
     private boolean useThreadedRefreshHandler;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Workflow.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Workflow.class);
 
     private Activator activator;
 
@@ -154,7 +153,7 @@ public class Workflow {
         try {
             webClient.setUseInsecureSSL(true);
         } catch (GeneralSecurityException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
         }
         // ... and to javascript as well
         webClient.setThrowExceptionOnScriptError(false);

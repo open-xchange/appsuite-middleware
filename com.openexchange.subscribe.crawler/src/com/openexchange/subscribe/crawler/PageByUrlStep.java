@@ -51,7 +51,6 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -72,7 +71,7 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
 
     private boolean executedSuccessfully;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PageByUrlStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByUrlStep.class);
 
     public PageByUrlStep() {
 

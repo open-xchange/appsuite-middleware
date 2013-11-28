@@ -51,7 +51,6 @@ package com.openexchange.admin.autocontextid.osgi;
 
 import java.sql.SQLException;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
@@ -64,7 +63,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     @Override
     public void startBundle() throws Exception {
@@ -85,7 +84,7 @@ public class Activator extends HousekeepingActivator {
             LOG.error(e.getMessage(), e);
             throw e;
         } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }

@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -179,7 +178,7 @@ public final class FolderStorageActivator implements BundleActivator {
 
     }
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderStorageActivator.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderStorageActivator.class);
 
 	private List<ServiceRegistration<?>> serviceRegistrations;
 

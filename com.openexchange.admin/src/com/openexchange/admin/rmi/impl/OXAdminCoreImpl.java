@@ -51,7 +51,6 @@ package com.openexchange.admin.rmi.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
@@ -59,7 +58,7 @@ import com.openexchange.admin.rmi.OXAdminCoreInterface;
 
 public class OXAdminCoreImpl implements OXAdminCoreInterface {
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXAdminCoreImpl.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAdminCoreImpl.class);
 
     private BundleContext context = null;
 

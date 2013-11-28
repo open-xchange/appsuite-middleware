@@ -62,7 +62,6 @@ import static com.openexchange.tools.update.Tools.existsIndex;
 import static com.openexchange.tools.update.Tools.existsPrimaryKey;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -75,7 +74,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CorrectIndexes6_10 implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CorrectIndexes6_10.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CorrectIndexes6_10.class);
 
     public CorrectIndexes6_10() {
         super();

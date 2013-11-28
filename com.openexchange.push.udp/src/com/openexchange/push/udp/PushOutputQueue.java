@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventFactoryService;
@@ -83,7 +82,7 @@ public class PushOutputQueue implements Runnable {
 
     private static volatile boolean isInit;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushOutputQueue.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushOutputQueue.class);
 
     private static volatile PushConfiguration pushConfigInterface;
 

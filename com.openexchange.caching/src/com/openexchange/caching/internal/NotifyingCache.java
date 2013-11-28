@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheKey;
@@ -66,7 +67,6 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 
 /**
  * {@link NotifyingCache}
@@ -78,13 +78,13 @@ import com.openexchange.log.Log;
  */
 public class NotifyingCache implements Cache, CacheListener {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(NotifyingCache.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(NotifyingCache.class);
 
     private static final AtomicReference<EventAdmin> EVENT_ADMIN_REF = new AtomicReference<EventAdmin>();
 
     /**
      * Sets the event admin.
-     * 
+     *
      * @param eventAdmin The event admin or <code>null</code>
      */
     public static void setEventAdmin(final EventAdmin eventAdmin) {

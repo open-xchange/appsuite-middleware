@@ -53,6 +53,7 @@ import java.text.MessageFormat;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
@@ -66,7 +67,7 @@ public final class DropboxEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DropboxEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxEventHandler.class);
 
     /**
      * Whether logger allows debug.

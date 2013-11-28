@@ -50,7 +50,6 @@
 package com.openexchange.groupware.tasks;
 
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -67,7 +66,7 @@ public final class Task2Links {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Task2Links.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Task2Links.class);
 
     /**
      * Prevent instantiation

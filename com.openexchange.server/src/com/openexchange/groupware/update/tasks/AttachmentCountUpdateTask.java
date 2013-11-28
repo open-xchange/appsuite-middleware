@@ -57,7 +57,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -75,7 +74,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(AttachmentCountUpdateTask.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentCountUpdateTask.class);
 
     /**
      * Finds all appointments, where the field numberOfAttachments does not match the real amount of attachments.

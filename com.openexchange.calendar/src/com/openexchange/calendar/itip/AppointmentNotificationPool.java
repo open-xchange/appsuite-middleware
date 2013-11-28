@@ -59,7 +59,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
@@ -86,7 +85,7 @@ import com.openexchange.timer.TimerService;
  */
 public class AppointmentNotificationPool implements
 		AppointmentNotificationPoolService, Runnable {
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentNotificationPool.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentNotificationPool.class);
 
 	// TODO: Keep shared folder owner, if possible
 

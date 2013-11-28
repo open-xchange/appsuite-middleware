@@ -53,7 +53,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -102,7 +101,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class CarddavPerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CarddavPerformer.class);
 
     private static volatile CarddavPerformer INSTANCE = null;
 

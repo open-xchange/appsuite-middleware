@@ -59,7 +59,6 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
@@ -75,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultDispatcher implements Dispatcher {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultDispatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDispatcher.class);
 
     private final ConcurrentMap<StrPair, Boolean> fallbackSessionActionsCache;
     private final ConcurrentMap<StrPair, Boolean> omitSessionActionsCache;

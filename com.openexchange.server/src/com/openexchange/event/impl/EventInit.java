@@ -49,7 +49,6 @@
 
 package com.openexchange.event.impl;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -72,7 +71,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 public class EventInit implements Initialization {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(EventInit.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventInit.class);
     private boolean started;
 
 

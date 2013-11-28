@@ -97,7 +97,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EventListener;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.util.MimeType;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
@@ -109,7 +108,7 @@ import org.osgi.service.http.HttpContext;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OSGiServletContext extends WebappContext {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiServletContext.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiServletContext.class);
     /**
      * {@link HttpContext} providing OSGi integration.
      */

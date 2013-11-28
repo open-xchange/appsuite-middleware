@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.user.copy.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -68,7 +67,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         try {
             AdminCache.compareAndSetBundleContext(null, context);
             ConfigurationService configurationService = getService(ConfigurationService.class);
@@ -84,7 +83,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         try {
             closeTrackers();
             cleanUp();

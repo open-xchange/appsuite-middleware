@@ -62,7 +62,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -89,7 +88,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class FolderCacheManager {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCacheManager.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCacheManager.class);
 
     private static volatile FolderCacheManager instance;
 

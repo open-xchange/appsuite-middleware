@@ -57,7 +57,6 @@ import java.util.Locale;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
@@ -99,7 +98,7 @@ import com.openexchange.user.UserService;
  */
 public class SolrIndexFacadeService implements IndexFacadeService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrIndexFacadeService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrIndexFacadeService.class);
 
     private final ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>> accessMap;
 

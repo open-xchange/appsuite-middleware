@@ -57,7 +57,6 @@ import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.util.TimeZones;
 import net.fortuna.ical4j.zoneinfo.outlook.OutlookTimeZoneRegistryFactory;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -81,7 +80,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
  */
 public final class EmitterTools {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(EmitterTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EmitterTools.class);
     private static volatile CalendarCollectionService calendarCollection;
 
     private final TimeZoneRegistry registry;

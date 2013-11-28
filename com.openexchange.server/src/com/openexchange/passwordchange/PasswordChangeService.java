@@ -83,7 +83,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public abstract class PasswordChangeService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(PasswordChangeService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeService.class);
 
     /**
      * Initializes a new {@link PasswordChangeService}

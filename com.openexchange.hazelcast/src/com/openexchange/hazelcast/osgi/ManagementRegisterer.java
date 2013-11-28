@@ -52,7 +52,6 @@ package com.openexchange.hazelcast.osgi;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -68,7 +67,7 @@ import com.openexchange.management.ManagementService;
  */
 final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManagementRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementRegisterer.class);
 
     private final BundleContext context;
     private volatile ObjectName objectName;

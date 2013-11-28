@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -80,7 +79,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactFolderUpdaterStrategy.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactFolderUpdaterStrategy.class);
 
     private static final int SQL_INTERFACE = 1;
 

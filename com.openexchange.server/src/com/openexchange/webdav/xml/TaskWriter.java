@@ -70,7 +70,6 @@ import static com.openexchange.webdav.xml.fields.TaskFields.TRIP_METER;
 import java.io.OutputStream;
 import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.api2.TasksSQLInterface;
@@ -137,7 +136,7 @@ public class TaskWriter extends CalendarWriter {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskWriter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskWriter.class);
 
     /**
      * Initializes a new {@link TaskWriter}

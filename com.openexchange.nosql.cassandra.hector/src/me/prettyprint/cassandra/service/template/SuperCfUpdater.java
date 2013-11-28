@@ -53,7 +53,7 @@ import me.prettyprint.hector.api.beans.HColumn;
  *          the child column name type in a super column
  */
 public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
-  private static final Logger log = LoggerFactory.getLogger(SuperCfUpdater.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(SuperCfUpdater.class);
   protected SuperCfTemplate<K,SN, N> template;
   private List<SN> sColumnNames;
   private int sColPos;

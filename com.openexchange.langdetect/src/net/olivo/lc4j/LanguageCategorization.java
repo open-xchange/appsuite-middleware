@@ -51,8 +51,8 @@ import cern.colt.function.IntComparator;
  * @version $Id$
  */
 public class LanguageCategorization {
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(LanguageCategorization.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(LanguageCategorization.class);
 	/** Enable debugging? */
 	private static final boolean DEBUG = LOG.isDebugEnabled();
 	/** Default buffer size. */
@@ -359,7 +359,7 @@ public class LanguageCategorization {
 					} catch ( final EOFException e ) {
 						break;
 					} catch ( final IllegalArgumentException e ) {
-						LOG.error( e );
+						LOG.error( e.getMessage(), e );
 						break;
 					}
 

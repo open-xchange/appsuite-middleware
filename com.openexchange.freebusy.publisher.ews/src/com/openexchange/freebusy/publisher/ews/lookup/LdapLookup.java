@@ -58,7 +58,6 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
-import org.apache.commons.logging.Log;
 import com.openexchange.ews.EWSExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.publisher.ews.Tools;
@@ -73,7 +72,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public class LdapLookup extends Lookup {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LdapLookup.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapLookup.class);
 
     private String baseDN;
     private final String uri;

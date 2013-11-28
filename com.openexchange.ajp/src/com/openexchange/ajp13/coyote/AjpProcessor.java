@@ -77,6 +77,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -98,7 +99,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -114,7 +114,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
-    protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(AjpProcessor.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AjpProcessor.class);
 
     private static final boolean TRACE = LOG.isTraceEnabled();
 
@@ -476,7 +476,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         final int foo = HexUtils.DEC[0];
         if (TRACE) {
-            LOG.trace(Integer.valueOf(foo));
+            LOG.trace(Integer.toString(foo));
         }
     }
 
@@ -1810,7 +1810,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * Different JVM route detected -> Discard
                              */
                             if (DEBUG) {
-                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
+                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id).toString());
                             }
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
@@ -1836,7 +1836,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
+                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()).toString());
                             }
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
@@ -1868,7 +1868,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * But this host defines a JVM route
                              */
                             if (DEBUG) {
-                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
+                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()).toString());
                             }
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
@@ -1894,7 +1894,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
+                                LOG.debug(new com.openexchange.java.StringAllocator("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()).toString());
                             }
                             current.setPath("/");
                             final String domain = extractDomainValue(id);

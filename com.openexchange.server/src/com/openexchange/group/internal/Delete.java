@@ -55,7 +55,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -83,7 +82,7 @@ public final class Delete {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Delete.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Delete.class);
 
     /**
      * Context.

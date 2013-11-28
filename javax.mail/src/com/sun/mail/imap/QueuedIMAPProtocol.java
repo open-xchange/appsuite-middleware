@@ -65,7 +65,7 @@ import com.sun.mail.util.MailLogger;
  */
 public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<QueuedIMAPProtocol> {
 
-    private static final Logger LOG = QueuingIMAPStore.getLog();
+    private static final org.slf4j.Logger LOG = QueuingIMAPStore.getLog();
 
     /** The associated queuing IMAP store */
     protected volatile QueuingIMAPStore store;

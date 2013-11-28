@@ -55,7 +55,7 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -100,7 +100,7 @@ public final class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
     }
 
     private void createMyIndex(final Connection con, final String[] tables, final String fieldName, final String name) {
-        final Log log = com.openexchange.log.Log.loggerFor(CalendarAddIndex2DatesMembers.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CalendarAddIndex2DatesMembers.class);
         final String[] columns = { "cid", fieldName };
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {

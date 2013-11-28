@@ -96,7 +96,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     private static final long serialVersionUID = 1097727980840011436L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ReferencedMailPart.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReferencedMailPart.class);
 
     protected static final int DEFAULT_BUF_SIZE = 0x2000;
 
@@ -197,7 +197,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             if (LOG.isInfoEnabled()) {
                 LOG.info(new com.openexchange.java.StringAllocator("Referenced mail part exeeds ").append(
                     Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue()).append(
-                    "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()));
+                    "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()).toString());
             }
         }
         if (!containsFileName() && referencedPart.containsFileName()) {

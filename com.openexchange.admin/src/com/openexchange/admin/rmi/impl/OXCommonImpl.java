@@ -49,7 +49,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -75,7 +74,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  */
 public abstract class OXCommonImpl {
 
-    private final static Log log = com.openexchange.log.Log.loggerFor(OXCommonImpl.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
 
     protected final OXToolStorageInterface tool;
 

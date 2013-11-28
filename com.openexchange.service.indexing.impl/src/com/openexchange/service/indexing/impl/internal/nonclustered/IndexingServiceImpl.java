@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import org.apache.commons.logging.Log;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -84,7 +83,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public class IndexingServiceImpl implements IndexingService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IndexingServiceImpl.class);
 
     @Override
     public void scheduleJobWithProgressiveInterval(JobInfo info, Date startDate, long timeout, long initialInterval, int progressionRate, int priority, boolean onlyResetProgression) throws OXException {

@@ -54,7 +54,6 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.io.SizeAwareInputStream;
@@ -63,7 +62,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavPutAction extends AbstractAction {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavPutAction.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPutAction.class);
 
 	@Override
 	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {

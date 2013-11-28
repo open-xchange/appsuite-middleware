@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.microformats.hCard.HCard;
 import org.microformats.hCard.HCard.Address;
 import org.microformats.hCard.HCard.Email;
@@ -212,7 +211,7 @@ public class HCardToContactTransformer {
             OXContainerConverter.loadImageFromURL(c, uri.toString());
         } catch (final ConverterException e) {
             // log error, but don't fail. Simply don't store an image
-            final Log LOG = com.openexchange.log.Log.loggerFor(HCardToContactTransformer.class);
+            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HCardToContactTransformer.class);
             LOG.warn("Couldn't load image.", e);
             // Add warning
             final Throwable cause = e.getCause();

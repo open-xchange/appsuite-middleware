@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JmxMonitor {
 
-  private final Logger log = LoggerFactory.getLogger(getClass());
+  private final org.slf4j.Logger log = LoggerFactory.getLogger(getClass());
 
   private MBeanServer mbs;
   private static JmxMonitor monitorInstance;

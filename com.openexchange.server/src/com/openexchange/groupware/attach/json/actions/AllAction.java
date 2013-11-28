@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "An array with attachment data. Each array element describes one attachment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractAttachmentAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AllAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
     /**
      * Initializes a new {@link AllAction}.

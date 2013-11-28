@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -113,7 +112,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class InternalList {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InternalList.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InternalList.class);
 
     private static final InternalList SINGLETON = new InternalList();
 

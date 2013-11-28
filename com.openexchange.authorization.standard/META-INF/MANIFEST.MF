@@ -16,4 +16,5 @@ Import-Package: com.openexchange.authorization,
  com.openexchange.log,
  com.openexchange.osgi,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"

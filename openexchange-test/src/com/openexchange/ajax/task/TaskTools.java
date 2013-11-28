@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.Assert;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -99,7 +98,7 @@ import com.openexchange.tools.URLParameter;
  */
 public final class TaskTools extends Assert {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskTools.class);
 
     private static final String ENCODING = "UTF-8";
 

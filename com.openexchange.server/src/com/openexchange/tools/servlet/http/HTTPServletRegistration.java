@@ -51,7 +51,6 @@ package com.openexchange.tools.servlet.http;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -66,7 +65,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpService> {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(HTTPServletRegistration.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTTPServletRegistration.class);
 
     private final Servlet servlet;
 
@@ -107,10 +106,10 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
             service.registerServlet(alias, servlet, null, null);
             return service;
         } catch (final ServletException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             context.ungetService(reference);
         } catch (final NamespaceException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             context.ungetService(reference);
         }
         return null;

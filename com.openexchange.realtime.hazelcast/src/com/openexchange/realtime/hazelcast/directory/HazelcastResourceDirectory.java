@@ -56,7 +56,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
@@ -91,7 +90,7 @@ import com.openexchange.timer.TimerService;
 public class HazelcastResourceDirectory extends DefaultResourceDirectory implements ManagementAware<HazelcastResourceDirectoryMBean> {
 
     /** The logger */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastResourceDirectory.class);
 
     /** Mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random. */
     private final String id_map;

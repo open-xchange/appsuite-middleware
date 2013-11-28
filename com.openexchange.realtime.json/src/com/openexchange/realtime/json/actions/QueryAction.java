@@ -56,7 +56,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -122,7 +121,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class QueryAction extends RTAction {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(QueryAction.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QueryAction.class);
     private final ServiceLookup services;
     private final StanzaSequenceGate gate;
     private final StateManager stateManager;

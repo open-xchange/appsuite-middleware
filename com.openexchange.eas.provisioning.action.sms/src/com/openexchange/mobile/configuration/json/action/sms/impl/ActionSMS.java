@@ -67,7 +67,7 @@ import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningSe
  */
 public class ActionSMS implements ActionService {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MobilityProvisioningServlet.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningServlet.class);
 
 	public ProvisioningResponse handleAction(
 			final ProvisioningInformation provisioningInformation){

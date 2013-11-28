@@ -49,7 +49,6 @@
 
 package com.openexchange.carddav.mixins;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.resources.CardDAVCollection;
@@ -69,7 +68,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CTag extends SingleXMLPropertyMixin {
 
-	protected static final Log LOG = com.openexchange.log.Log.loggerFor(CTag.class);
+	protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CTag.class);
 
 	private final GroupwareCarddavFactory factory;
     private final CardDAVCollection collection;

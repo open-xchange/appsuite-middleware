@@ -64,7 +64,7 @@ import com.openexchange.realtime.packet.IDEventHandler;
  */
 public class StateManager {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(StateManager.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StateManager.class);
     
     private final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
 

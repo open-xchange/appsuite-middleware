@@ -53,7 +53,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import org.apache.commons.logging.Log;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -78,8 +78,8 @@ import org.apache.commons.logging.Log;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CommonsLoggingLogger extends AbstractDelegatingLogger {
-    
-    private final Log logger;
+
+    private final org.slf4j.Logger logger;
 
     /**
      * Initializes a new {@link CommonsLoggingLogger}.
@@ -88,7 +88,7 @@ public class CommonsLoggingLogger extends AbstractDelegatingLogger {
      */
     public CommonsLoggingLogger(final Class<?> clazz) {
         super(clazz.getName(), null);
-        logger = com.openexchange.log.Log.loggerFor(clazz);
+        logger = LoggerFactory.getLogger(clazz);
     }
 
     /**
@@ -99,7 +99,7 @@ public class CommonsLoggingLogger extends AbstractDelegatingLogger {
      */
     public CommonsLoggingLogger(final String name, final String resourceBundleName) {
         super(name, resourceBundleName);
-        logger = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.loggerFor(name));
+        logger = LoggerFactory.getLogger(name);
     }
 
     @Override

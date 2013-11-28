@@ -55,7 +55,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.event.impl.EventClient;
@@ -292,8 +291,7 @@ public final class Delete {
                     }
                 } catch (final Exception e) {
                     // Ignore
-                    final Log log = com.openexchange.log.Log.loggerFor(Delete.class);
-                    log.error(e.getMessage(), e);
+                    org.slf4j.LoggerFactory.getLogger(Delete.class).error(e.getMessage(), e);
                 }
             }
         }

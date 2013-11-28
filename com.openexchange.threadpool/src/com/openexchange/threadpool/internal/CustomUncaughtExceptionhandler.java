@@ -81,8 +81,8 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(final Thread t, final Throwable e) {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CustomUncaughtExceptionhandler.class);
-        LOG.fatal("Thread terminated with exception: " + t.getName(), e);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomUncaughtExceptionhandler.class);
+        LOG.error("Thread terminated with exception: " + t.getName(), e);
         /*
          * Gather thread information
          */
@@ -96,7 +96,7 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
             appendStackTrace(stackMap.get(thread), sb, lineSeparator);
             sb.append(lineSeparator);
         }
-        LOG.fatal(sb.toString());
+        LOG.error(sb.toString());
     }
 
     private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {

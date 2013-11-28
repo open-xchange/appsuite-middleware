@@ -50,7 +50,6 @@
 package com.openexchange.smtp.config;
 
 import java.nio.charset.Charset;
-import org.apache.commons.logging.Log;
 import com.openexchange.mail.transport.config.MailAccountTransportProperties;
 import com.openexchange.mailaccount.MailAccount;
 
@@ -61,7 +60,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountSMTPProperties extends MailAccountTransportProperties implements ISMTPProperties {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailAccountSMTPProperties.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountSMTPProperties.class);
 
     private final MailAccount mailAccount;
 
@@ -88,7 +87,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         }
         final String fallback = SMTPProperties.getInstance().getSmtpAuthEnc();
         LOG.error(new StringBuilder(64).append("SMTP Auth Encoding: Unsupported charset \"").append(smtpAuthEncStr).append(
-            "\". Setting to fallback ").append(fallback));
+            "\". Setting to fallback ").append(fallback).toString());
         return fallback;
     }
 

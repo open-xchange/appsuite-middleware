@@ -119,7 +119,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
         try {
             val = msg.getHeader(hdr[0]);
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.loggerFor(HeaderTerm.class).warn("Error during search.", e);
+            org.slf4j.LoggerFactory.getLogger(HeaderTerm.class).warn("Error during search.", e);
             return false;
         }
         if ((val == null || val.length == 0) && (hdr[1] == null)) {

@@ -70,7 +70,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
  */
 public final class MailMessageComparator implements Comparator<MailMessage> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailMessageComparator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageComparator.class);
 
     private static final String STR_EMPTY = "";
 

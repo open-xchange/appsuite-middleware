@@ -62,7 +62,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.CPFactory;
@@ -101,7 +100,7 @@ public class CPServlet extends PermissionServlet {
 
     private static final long serialVersionUID = -5186422014968264569L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CPServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CPServlet.class);
 
     private static final String APPOINTMENTS = "appointments";
 

@@ -55,7 +55,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.importexport.formats.Format;
@@ -76,7 +75,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
         super(services);
     }
 
-    public static Log LOG = com.openexchange.log.Log.loggerFor(CSVImportAction.class);
+    public static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVImportAction.class);
 
 	private Importer importer;
 

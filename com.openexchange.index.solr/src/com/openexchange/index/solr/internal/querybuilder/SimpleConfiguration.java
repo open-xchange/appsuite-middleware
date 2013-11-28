@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
 
 /**
@@ -75,7 +74,7 @@ import com.openexchange.java.Streams;
  */
 public class SimpleConfiguration implements Configuration {
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(SimpleConfiguration.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SimpleConfiguration.class);
 
     private final Map<String, String> rawMapping;
     private final Map<String, List<String>> dictionary;

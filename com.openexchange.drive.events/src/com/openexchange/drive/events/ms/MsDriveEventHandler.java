@@ -52,7 +52,6 @@ package com.openexchange.drive.events.ms;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.internal.DriveEventServiceImpl;
@@ -70,7 +69,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class MsDriveEventHandler implements DriveEventPublisher, MessageListener<Map<String, Serializable>> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsDriveEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsDriveEventHandler.class);
     private static final String TOPIC_NAME = "driveEvents-0";
     private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
 

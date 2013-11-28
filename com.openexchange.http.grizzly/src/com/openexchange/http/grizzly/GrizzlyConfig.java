@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -68,7 +67,7 @@ import com.openexchange.server.Initialization;
  */
 public class GrizzlyConfig implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GrizzlyConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyConfig.class);
 
     private static final GrizzlyConfig instance = new GrizzlyConfig();
 

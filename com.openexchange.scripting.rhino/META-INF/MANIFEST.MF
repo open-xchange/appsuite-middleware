@@ -10,7 +10,8 @@ Import-Package: com.openexchange.log,
  com.openexchange.osgi,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j;version="1.7.5"
 Bundle-ClassPath: .,
  lib/js.jar
 Export-Package: com.openexchange.scripting.rhino,

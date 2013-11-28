@@ -130,7 +130,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MIMEStructureHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MIMEStructureHandler.class);
 
     private static final MailDateFormat MAIL_DATE_FORMAT;
 
@@ -1022,7 +1022,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
+                    "\". Using fallback charset \"").append(fallback).append("\" instead.").toString(), e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
         }
@@ -1071,7 +1071,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
+                    "\". Using fallback charset \"").append(fallback).append("\" instead.").toString(), e);
             }
             return MessageUtility.readStream(isp.getInputStream(), fallback);
         }

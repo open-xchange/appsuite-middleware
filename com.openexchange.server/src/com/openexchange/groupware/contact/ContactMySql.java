@@ -61,8 +61,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.java.Strings;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.sqlinjectors.IntSQLInjector;
@@ -79,6 +77,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -98,7 +97,7 @@ public class ContactMySql implements ContactSql {
 
     private static final String STR_PERCENT = "%";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactMySql.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactMySql.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -975,7 +974,7 @@ public class ContactMySql implements ContactSql {
     public void iFtrashDistributionList(final boolean delete, final int id, final int cid, final Statement smt) throws SQLException {
         if (delete) {
             if (DEBUG) {
-                LOG.debug(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ").append(cid));
+                LOG.debug(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ").append(cid).toString());
             }
             smt.execute(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ").append(cid).toString());
         } else {

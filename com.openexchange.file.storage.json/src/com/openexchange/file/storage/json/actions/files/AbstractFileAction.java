@@ -51,7 +51,6 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractFileAction implements AJAXActionService {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractFileAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFileAction.class);
 
 
     private static final FileMetadataWriter fileWriter = new FileMetadataWriter();

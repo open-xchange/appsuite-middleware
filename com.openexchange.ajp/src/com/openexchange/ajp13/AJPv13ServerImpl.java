@@ -55,7 +55,7 @@ import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.ajp13.coyote.sockethandler.CoyoteSocketHandler;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
@@ -71,7 +71,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AJPv13ServerImpl.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13ServerImpl.class);
 
     private static final DecimalFormat DF = new DecimalFormat("0000");
 
@@ -268,13 +268,13 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     private static final class GateRunnable implements Runnable {
 
-        private final transient org.apache.commons.logging.Log logger;
+        private final transient org.slf4j.Logger logger;
 
         private final Runnable task;
 
         private final CountDownLatch latch;
 
-        public GateRunnable(final CountDownLatch latch, final Runnable task, final Log logger) {
+        public GateRunnable(final CountDownLatch latch, final Runnable task, final org.slf4j.Logger logger) {
             super();
             this.task = task;
             this.latch = latch;

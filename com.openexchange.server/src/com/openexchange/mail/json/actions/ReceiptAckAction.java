@@ -67,8 +67,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class ReceiptAckAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(ReceiptAckAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ReceiptAckAction.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

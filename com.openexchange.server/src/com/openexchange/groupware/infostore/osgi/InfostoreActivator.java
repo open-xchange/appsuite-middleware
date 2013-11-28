@@ -56,7 +56,6 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -211,7 +210,7 @@ public class InfostoreActivator implements BundleActivator {
             configTracker.open();
             
         } catch (final Exception e) {
-            final Log logger = com.openexchange.log.Log.loggerFor(InfostoreActivator.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Starting InfostoreActivator failed.", e);
             throw e;
         }
@@ -236,7 +235,7 @@ public class InfostoreActivator implements BundleActivator {
                 this.registrations = null;
             }
         } catch (final Exception e) {
-            final Log logger = com.openexchange.log.Log.loggerFor(InfostoreActivator.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Stopping InfostoreActivator failed.", e);
             throw e;
         }

@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -92,7 +91,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class AppointmentState extends LinkableState {
 
-    private static final Log LOGGER = com.openexchange.log.Log.loggerFor(AppointmentState.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AppointmentState.class);
 
     private final TemplateReplacement actionRepl;
 

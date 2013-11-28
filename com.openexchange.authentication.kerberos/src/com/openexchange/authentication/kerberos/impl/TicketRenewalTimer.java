@@ -57,7 +57,6 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.security.auth.Subject;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
@@ -76,7 +75,7 @@ import com.openexchange.timer.TimerService;
  */
 class TicketRenewalTimer implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TicketRenewalTimer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TicketRenewalTimer.class);
 
     private final Session session;
     private final KerberosService kerberosService;

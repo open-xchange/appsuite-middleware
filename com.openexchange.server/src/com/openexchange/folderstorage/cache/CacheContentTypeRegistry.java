@@ -68,7 +68,7 @@ import com.openexchange.java.Java7ConcurrentLinkedQueue;
  */
 public final class CacheContentTypeRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CacheContentTypeRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheContentTypeRegistry.class);
 
     private static final CacheContentTypeRegistry instance = new CacheContentTypeRegistry();
 

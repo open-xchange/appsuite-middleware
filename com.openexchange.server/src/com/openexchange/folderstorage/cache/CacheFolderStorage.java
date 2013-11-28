@@ -69,7 +69,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -129,7 +128,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class CacheFolderStorage implements FolderStorage {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(CacheFolderStorage.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {
@@ -301,7 +300,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     /*
                      * Traverse mail accounts in separate task
                      */
-                    final Log log = LOG;
+                    final org.slf4j.Logger log = LOG;
                     final boolean debugEnabled = log.isDebugEnabled();
                     final Runnable task = new Runnable() {
 
@@ -631,8 +630,8 @@ public final class CacheFolderStorage implements FolderStorage {
                     ids = Collections.singletonList(id);
                 }
             } catch (final Exception e) {
-                final org.apache.commons.logging.Log log =
-                    com.openexchange.log.Log.loggerFor(CacheFolderStorage.class);
+                final org.slf4j.Logger log =
+                    org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
                 if (log.isDebugEnabled()) {
                     log.debug(e.getMessage(), e);
                 }

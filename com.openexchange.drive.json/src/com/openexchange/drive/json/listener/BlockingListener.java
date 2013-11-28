@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveAction;
@@ -74,7 +73,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class BlockingListener implements LongPollingListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(BlockingListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BlockingListener.class);
 
     private final DriveSession session;
     private final ReentrantLock lock;

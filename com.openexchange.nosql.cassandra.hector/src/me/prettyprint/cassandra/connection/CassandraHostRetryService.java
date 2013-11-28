@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
-  private static Logger log = LoggerFactory.getLogger(CassandraHostRetryService.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(CassandraHostRetryService.class);
 
   public static final int DEF_QUEUE_SIZE = -1;
   public static final int DEF_RETRY_DELAY = 10;

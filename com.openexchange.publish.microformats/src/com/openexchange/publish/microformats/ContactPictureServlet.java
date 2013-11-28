@@ -59,7 +59,6 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -92,7 +91,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String CONTACT_ID = "contactId";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactPictureServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactPictureServlet.class);
 
     private static OXMFPublicationService contactPublisher = null;
 

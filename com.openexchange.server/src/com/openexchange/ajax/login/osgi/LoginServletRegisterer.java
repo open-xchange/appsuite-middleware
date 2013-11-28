@@ -54,7 +54,6 @@ import java.util.Hashtable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -75,7 +74,7 @@ import com.openexchange.login.ConfigurationProperty;
  */
 public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginServletRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginServletRegisterer.class);
     private static final String SERVLET_PATH_APPENDIX = "login";
 
     private final BundleContext context;

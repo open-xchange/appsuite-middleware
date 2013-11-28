@@ -89,7 +89,7 @@ import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
  */
 public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(FolderObjectIterator.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderObjectIterator.class);
 
     /**
      * The empty folder iterator

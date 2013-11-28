@@ -103,7 +103,7 @@ public class FacebookArchiveImporter extends AbstractImporter {
                 results = delegate.importData(sessObj, format, zis, folders, optionalParams);
             }
         } catch (final IOException e) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(FacebookArchiveImporter.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FacebookArchiveImporter.class);
             log.error("Unexpected exception.", e);
         } finally {
             Streams.close(zis, is);

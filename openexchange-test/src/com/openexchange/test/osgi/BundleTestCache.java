@@ -55,6 +55,7 @@ import java.net.MalformedURLException;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -75,7 +76,7 @@ import com.openexchange.tools.URLParameter;
  */
 public final class BundleTestCache extends AbstractBundleTest {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(BundleTestCache.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BundleTestCache.class);
 
     private static final String BUNDLE_ID = "com.openexchange.caching";
 

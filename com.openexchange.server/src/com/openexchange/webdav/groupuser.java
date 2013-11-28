@@ -59,7 +59,6 @@ import java.sql.Timestamp;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -105,7 +104,7 @@ public final class groupuser extends PermissionServlet {
 
     private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified > ?";
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(groupuser.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(groupuser.class);
 
     @Override
     protected Interface getInterface() {

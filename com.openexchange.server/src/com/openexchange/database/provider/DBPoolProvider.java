@@ -51,14 +51,13 @@ package com.openexchange.database.provider;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 
 public class DBPoolProvider implements DBProvider {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DBPoolProvider.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBPoolProvider.class);
 
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException {

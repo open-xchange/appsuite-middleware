@@ -79,8 +79,8 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted resources. New, modified and deleted resources are represented by JSON objects as described in Resource response.")
 public final class UpdatesAction extends AbstractResourceAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(UpdatesAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
 
     /**
      * Initializes a new {@link UpdatesAction}.

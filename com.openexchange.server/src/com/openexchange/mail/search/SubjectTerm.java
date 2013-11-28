@@ -100,7 +100,7 @@ public final class SubjectTerm extends SearchTerm<String> {
         try {
             subject = msg.getSubject();
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.loggerFor(SubjectTerm.class).warn("Error during search.", e);
+            org.slf4j.LoggerFactory.getLogger(SubjectTerm.class).warn("Error during search.", e);
             return false;
         }
         if (subject != null) {

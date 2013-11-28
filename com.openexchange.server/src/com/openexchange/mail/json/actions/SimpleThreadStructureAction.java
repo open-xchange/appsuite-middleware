@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -63,7 +64,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -89,7 +89,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class SimpleThreadStructureAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
-    protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(SimpleThreadStructureAction.class);
+    protected static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SimpleThreadStructureAction.class);
 
     protected static final boolean DEBUG = LOG.isDebugEnabled();
 

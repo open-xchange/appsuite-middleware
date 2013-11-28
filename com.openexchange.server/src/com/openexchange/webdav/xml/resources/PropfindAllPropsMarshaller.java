@@ -50,7 +50,6 @@
 package com.openexchange.webdav.xml.resources;
 
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -59,7 +58,7 @@ import com.openexchange.webdav.protocol.WebdavStatusImpl;
 
 public class PropfindAllPropsMarshaller extends PropertiesMarshaller {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(PropfindAllPropsMarshaller.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropfindAllPropsMarshaller.class);
 
 	public PropfindAllPropsMarshaller(final String uriPrefix, final String charset) {
 		super(uriPrefix,charset);
@@ -72,7 +71,7 @@ public class PropfindAllPropsMarshaller extends PropertiesMarshaller {
 			final Iterable<WebdavProperty> iterable =  resource.getAllProps();
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_OK, resource.getUrl(), iterable));
 		} catch (final OXException e) {
-			LOG.debug(e);
+			LOG.debug(e.getMessage(), e);
 		}
 		return multistatus;
 	}

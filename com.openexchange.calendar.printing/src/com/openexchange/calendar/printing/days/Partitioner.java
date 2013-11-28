@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
@@ -77,7 +76,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class Partitioner {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Partitioner.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Partitioner.class);
     private final CPParameters params;
     private final CPCalendar cal;
     private final AppointmentSQLInterface appointmentSql;

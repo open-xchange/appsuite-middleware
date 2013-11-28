@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 */
 public abstract class BaseCharFilterFactory implements CharFilterFactory {
 
-  public static final Logger log = LoggerFactory.getLogger(BaseCharFilterFactory.class);
+  public static final org.slf4j.Logger log = LoggerFactory.getLogger(BaseCharFilterFactory.class);
 
   /** The init args */
   protected Map<String,String> args;

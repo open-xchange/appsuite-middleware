@@ -94,7 +94,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.threadpool");
@@ -193,7 +193,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("stopping bundle: com.openexchange.threadpool");
@@ -229,7 +229,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         if (LOG.isInfoEnabled()) {
             LOG.info("Appeared service: " + clazz.getName());
         }
@@ -237,7 +237,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         if (LOG.isInfoEnabled()) {
             LOG.info("Disappeared service: " + clazz.getName());
         }

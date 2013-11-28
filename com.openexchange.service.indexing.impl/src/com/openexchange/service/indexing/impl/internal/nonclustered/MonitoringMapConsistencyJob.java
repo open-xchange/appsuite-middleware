@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -73,7 +72,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  */
 public class MonitoringMapConsistencyJob implements Job {
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MonitoringMapConsistencyJob.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringMapConsistencyJob.class);
     
     public static final String NODE_NAME = "nodeName";
     

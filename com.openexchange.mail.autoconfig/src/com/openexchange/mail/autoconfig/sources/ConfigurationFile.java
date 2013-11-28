@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ConfigurationFile extends AbstractConfigSource {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ConfigurationFile.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationFile.class);
 
     private static final String locationProperty = "com.openexchange.mail.autoconfig.path";
 

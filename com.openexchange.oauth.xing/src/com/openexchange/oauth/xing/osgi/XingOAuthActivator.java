@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.xing.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.xing.XingOAuthServiceMetaData;
@@ -78,7 +77,7 @@ public final class XingOAuthActivator extends HousekeepingActivator {
         try {
             registerService(OAuthServiceMetaData.class, new XingOAuthServiceMetaData(config));
         } catch (final IllegalStateException e) {
-            final Log log = com.openexchange.log.Log.loggerFor(XingOAuthActivator.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(XingOAuthActivator.class);
             log.warn("Could not start-up XING OAuth service: " + e.getMessage(), e);
         }
     }

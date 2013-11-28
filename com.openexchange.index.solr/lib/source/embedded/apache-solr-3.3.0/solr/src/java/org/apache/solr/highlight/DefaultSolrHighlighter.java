@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
 public class DefaultSolrHighlighter extends SolrHighlighter implements PluginInfoInitialized
 {
 
-  public static Logger log = LoggerFactory.getLogger(DefaultSolrHighlighter.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(DefaultSolrHighlighter.class);
   
   private SolrCore solrCore;
 

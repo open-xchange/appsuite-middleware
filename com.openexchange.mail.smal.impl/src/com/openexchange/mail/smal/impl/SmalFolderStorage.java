@@ -52,7 +52,6 @@ package com.openexchange.mail.smal.impl;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailSortField;
@@ -77,7 +76,7 @@ import com.openexchange.session.Session;
  */
 public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced, IMailFolderStorageDelegator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalFolderStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmalFolderStorage.class);
 
     private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
 

@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -81,8 +82,7 @@ public final class PushActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.loggerFor(PushActivator.class))));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.push");
@@ -116,8 +116,7 @@ public final class PushActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.loggerFor(PushActivator.class))));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.push");
@@ -139,7 +138,6 @@ public final class PushActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
         return null;
     }
 

@@ -51,7 +51,6 @@ package com.openexchange.drive.sync.optimize;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.actions.AbstractAction;
@@ -64,7 +63,7 @@ import com.openexchange.drive.comparison.VersionMapper;
  */
 public abstract class AbstractActionOptimizer<T extends DriveVersion> implements ActionOptimizer<T> {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractActionOptimizer.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractActionOptimizer.class);
 
     protected final VersionMapper<T> mapper;
 

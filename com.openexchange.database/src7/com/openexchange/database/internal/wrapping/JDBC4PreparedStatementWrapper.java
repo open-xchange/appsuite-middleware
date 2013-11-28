@@ -69,7 +69,6 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link JDBC4PreparedStatementWrapper}
@@ -78,7 +77,7 @@ import org.apache.commons.logging.Log;
  */
 public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrapper implements PreparedStatement {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(JDBC4PreparedStatementWrapper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JDBC4PreparedStatementWrapper.class);
 
     private final PreparedStatement delegate;
     private final JDBC4ConnectionReturner con;

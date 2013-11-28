@@ -67,8 +67,8 @@ import com.openexchange.tools.regex.RFC2616Regex;
  */
 public final class CookieParser {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(CookieParser.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(CookieParser.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -124,7 +124,7 @@ public final class CookieParser {
                     continue;
                 }
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new com.openexchange.java.StringAllocator(32).append("Special cookie ").append(name).append(" not handled, yet!"));
+                    LOG.info(new com.openexchange.java.StringAllocator(32).append("Special cookie ").append(name).append(" not handled, yet!").toString());
                 }
             }
             if (prevEnd != -1) {

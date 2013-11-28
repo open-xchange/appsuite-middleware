@@ -54,7 +54,6 @@ import java.util.Hashtable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.tools.AdminCache;
@@ -66,7 +65,7 @@ public class TaskManager {
 
     private final PropertyHandler prop;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(TaskManager.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TaskManager.class);
 
     private final Hashtable<Integer, ExtendedFutureTask<?>> jobs = new Hashtable<Integer, ExtendedFutureTask<?>>();
 

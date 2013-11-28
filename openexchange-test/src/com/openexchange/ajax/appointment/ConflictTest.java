@@ -7,7 +7,6 @@ import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -27,7 +26,7 @@ import com.openexchange.tools.URLParameter;
 
 public class ConflictTest extends AppointmentTest {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(ConflictTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConflictTest.class);
 
 	public ConflictTest(final String name) {
 		super(name);

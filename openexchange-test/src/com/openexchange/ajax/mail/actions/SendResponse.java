@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import org.slf4j.Logger;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.configuration.AJAXConfig;
@@ -63,8 +64,7 @@ import com.openexchange.mail.MailPath;
  */
 public final class SendResponse extends AbstractAJAXResponse {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SendResponse.class);
+	private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SendResponse.class);
 
 	private String[] folderAndID;
 

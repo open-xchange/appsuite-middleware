@@ -79,8 +79,8 @@ import com.openexchange.server.ServiceLookup;
 responseDescription = "An JSON array with the ids that was not deleted.")
 public final class DeleteAction extends AbstractReminderAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(DeleteAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
 
     /**
      * Initializes a new {@link DeleteAction}.

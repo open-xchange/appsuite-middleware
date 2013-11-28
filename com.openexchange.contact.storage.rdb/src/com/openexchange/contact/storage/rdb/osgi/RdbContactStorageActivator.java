@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.rdb.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
@@ -70,7 +69,7 @@ import com.openexchange.quota.QuotaService;
  */
 public class RdbContactStorageActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(RdbContactStorageActivator.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactStorageActivator.class);
 
     /**
      * Initializes a new {@link RdbContactStorageActivator}.

@@ -75,7 +75,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.Header;
@@ -122,7 +121,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final long serialVersionUID = -8308340875362868795L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionServlet.class);
 
     private static final boolean INFO = LOG.isInfoEnabled();
 

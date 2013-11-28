@@ -92,8 +92,8 @@ public abstract class MailMessage extends MailPart {
 
     private static final long serialVersionUID = 8585899349289256569L;
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(MailMessage.class);
+    private static final transient org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MailMessage.class);
 
     private static final String HDR_REFERENCES = MessageHeaders.HDR_REFERENCES;
     private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;

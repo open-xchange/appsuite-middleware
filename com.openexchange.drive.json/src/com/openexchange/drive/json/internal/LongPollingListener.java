@@ -52,7 +52,6 @@ package com.openexchange.drive.json.internal;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.session.Session;
 
@@ -63,7 +62,7 @@ import com.openexchange.session.Session;
  */
 public class LongPollingListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LongPollingListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LongPollingListener.class);
 
     private final String rootFolderID;
     private final Session session;

@@ -71,7 +71,7 @@ import com.openexchange.user.UserService;
  */
 public final class ScriptPasswordChange extends PasswordChangeService {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ScriptPasswordChange.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptPasswordChange.class);
 
 	/**
 	 * Initializes a new {@link ScriptPasswordChange}
@@ -170,12 +170,12 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		        }
 		    }
 		} catch (final IOException e) {
-			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
+			LOG.error("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
 			throw ServiceExceptionCode.IO_ERROR.create(e);
 		} catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-			LOG.fatal("Error while changing password for user "+usern+" in context "+cid+"\n",e);
+			LOG.error("Error while changing password for user "+usern+" in context "+cid+"\n",e);
 			throw ServiceExceptionCode.IO_ERROR.create(e);
 		}
 

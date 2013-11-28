@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.online.infostore.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -64,7 +63,7 @@ import com.openexchange.userconf.UserPermissionService;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private static final String ALIAS = InfostoreDocumentPublicationService.PREFIX;
     private InfostorePublicationServlet servlet;

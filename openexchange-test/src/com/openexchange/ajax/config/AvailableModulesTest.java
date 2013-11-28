@@ -50,7 +50,6 @@
 package com.openexchange.ajax.config;
 
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -64,7 +63,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  */
 public class AvailableModulesTest extends AbstractAJAXSession {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AvailableModulesTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AvailableModulesTest.class);
 
     public AvailableModulesTest(final String name) {
         super(name);

@@ -79,8 +79,8 @@ public final class UnifiedInboxFolderConverter {
 
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(UnifiedInboxFolderConverter.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UnifiedInboxFolderConverter.class);
 
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 

@@ -80,7 +80,7 @@ import com.openexchange.server.impl.Version;
  */
 public class ServletContextWrapper implements ServletContext {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ServletContextWrapper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletContextWrapper.class);
 
     private static final int OX_SERVLET_MAJOR = 6;
 

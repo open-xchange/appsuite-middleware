@@ -66,7 +66,6 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileFilter;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -92,7 +91,7 @@ import com.openexchange.tx.TransactionException;
  */
 public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageIgnorableVersionFileAccess/*, FileStorageSequenceNumberProvider*/ {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFileAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final FileStorageAccountAccess accountAccess;
@@ -485,7 +484,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 data.close();
             } catch (final IOException e) {
-                com.openexchange.log.Log.loggerFor(CIFSFileAccess.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class).error(e.getMessage(), e);
             }
         }
     }

@@ -65,7 +65,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class FolderWriter {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(FolderWriter.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderWriter.class);
     static final boolean WARN = LOG.isWarnEnabled();
 
     /**

@@ -63,7 +63,7 @@ import com.google.common.net.InetAddresses;
  */
 public class IPTools {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IPTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IPTools.class);
 
     public final static String COMMA_SEPARATOR = ",";
 

@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.CreateTableService;
 
 
@@ -65,7 +64,7 @@ import com.openexchange.database.CreateTableService;
  */
 public class CreateTableRegistry {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CreateTableRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateTableRegistry.class);
 
     private static final CreateTableRegistry SINGLETON = new CreateTableRegistry();
 

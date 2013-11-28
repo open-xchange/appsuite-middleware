@@ -60,11 +60,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.slf4j.Logger;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
@@ -81,7 +81,7 @@ import com.openexchange.timer.TimerService;
  */
 public class AJPv13TaskWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(AJPv13TaskWatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13TaskWatcher.class);
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -157,7 +157,7 @@ public class AJPv13TaskWatcher {
         private static final long MAX_PROC_TIME = 0L;
 
         private final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks;
-        private final org.apache.commons.logging.Log log;
+        private final org.slf4j.Logger log;
         private final ThreadPoolService threadPoolService;
 
         /**
@@ -173,7 +173,7 @@ public class AJPv13TaskWatcher {
          * @param threadPoolService The thread pool service
          * @param log The logger instance to use
          */
-        public TimerTaskRunnable(final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks, final ThreadPoolService threadPoolService, final String lineSeparator, final org.apache.commons.logging.Log log) {
+        public TimerTaskRunnable(final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks, final ThreadPoolService threadPoolService, final String lineSeparator, final org.slf4j.Logger log) {
             super();
             this.lineSeparator = lineSeparator;
             this.tasks = tasks;
@@ -257,7 +257,7 @@ public class AJPv13TaskWatcher {
         private final AtomicInteger processing;
         private final AtomicInteger exceeded;
         private final String lineSeparator;
-        private final org.apache.commons.logging.Log log;
+        private final org.slf4j.Logger log;
         private final long now;
         private final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks;
 
@@ -271,7 +271,7 @@ public class AJPv13TaskWatcher {
          * @param logExceededTasks Whether to log exceeded tasks
          * @param log The logger
          */
-        public TaskRunCallable(ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks, final long now, final long maxLogTime, final long max, final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final String lineSeparator, final org.apache.commons.logging.Log log) {
+        public TaskRunCallable(ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks, final long now, final long maxLogTime, final long max, final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final String lineSeparator, final org.slf4j.Logger log) {
             super();
             this.tasks = tasks;
             this.lineSeparator = lineSeparator;
@@ -329,7 +329,7 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
                     logBuilder.append(lineSeparator);
-                    log.info(logBuilder, t);
+                    log.info(logBuilder.toString(), t);
                 } else {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(2048);
                     final Map<String, String> sorted = new TreeMap<String, String>();
@@ -354,7 +354,7 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    log.info(logBuilder, t);
+                    log.info(logBuilder.toString(), t);
                 }
             }
             if (max > 0 && task.getProcessingStartTime() < max) {

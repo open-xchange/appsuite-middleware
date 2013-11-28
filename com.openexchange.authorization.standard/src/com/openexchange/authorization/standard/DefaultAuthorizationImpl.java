@@ -50,7 +50,6 @@
 package com.openexchange.authorization.standard;
 
 import java.lang.reflect.UndeclaredThrowableException;
-import org.apache.commons.logging.Log;
 import com.openexchange.authorization.AuthorizationExceptionCodes;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.context.ContextExceptionCodes;
@@ -65,7 +64,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public final class DefaultAuthorizationImpl implements AuthorizationService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultAuthorizationImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAuthorizationImpl.class);
 
     private static final DefaultAuthorizationImpl INSTANCE = new DefaultAuthorizationImpl();
 

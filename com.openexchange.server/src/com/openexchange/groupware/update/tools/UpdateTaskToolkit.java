@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -85,7 +84,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class UpdateTaskToolkit {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UpdateTaskToolkit.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskToolkit.class);
 
     private static final Object LOCK = new Object();
 

@@ -39,7 +39,7 @@ import java.io.IOException;
  *
  **/
 public class MMapDirectoryFactory extends DirectoryFactory {
-  private transient static Logger log = LoggerFactory.getLogger(MMapDirectoryFactory.class);
+  private transient static org.slf4j.Logger log = LoggerFactory.getLogger(MMapDirectoryFactory.class);
   boolean unmapHack;
   private int maxChunk;
 

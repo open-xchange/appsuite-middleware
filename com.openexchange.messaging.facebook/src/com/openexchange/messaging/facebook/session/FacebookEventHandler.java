@@ -66,7 +66,7 @@ public final class FacebookEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(FacebookEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookEventHandler.class);
 
     /**
      * Whether logger allows debug.

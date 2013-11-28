@@ -74,7 +74,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class StorageUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(StorageUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StorageUtility.class);
 
     /*
      * Public constants

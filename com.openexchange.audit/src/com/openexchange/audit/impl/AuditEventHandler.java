@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
 import org.apache.commons.lang.Validate;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.api2.FolderSQLInterface;
@@ -85,7 +84,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AuditEventHandler implements EventHandler {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(AuditEventHandler.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuditEventHandler.class);
 
     private static final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

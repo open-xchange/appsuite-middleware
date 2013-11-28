@@ -69,7 +69,7 @@ import com.openexchange.tools.net.URITools;
  */
 public final class MailAccountDescription implements Serializable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailAccountDescription.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountDescription.class);
 
     private static final long serialVersionUID = -2443656355399068302L;
 

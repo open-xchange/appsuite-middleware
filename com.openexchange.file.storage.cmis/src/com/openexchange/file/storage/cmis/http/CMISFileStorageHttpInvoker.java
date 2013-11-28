@@ -72,7 +72,6 @@ import org.apache.chemistry.opencmis.client.bindings.spi.http.HttpUtils.Response
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
 import org.apache.chemistry.opencmis.commons.impl.UrlBuilder;
-import org.apache.commons.logging.Log;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -104,7 +103,7 @@ import com.openexchange.java.Streams;
  */
 public class CMISFileStorageHttpInvoker extends AbstractHttpInvoker {
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(CMISFileStorageHttpInvoker.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CMISFileStorageHttpInvoker.class);
 
     /**
      * The HTTPS identifier constant.

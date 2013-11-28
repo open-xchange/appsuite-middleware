@@ -114,7 +114,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
         final int contextId = params.getContextId();
         createTable("messagingAccount", getMessagingAccountTable(), contextId);
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.loggerFor(MessagingGenericCreateTableTask.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MessagingGenericCreateTableTask.class);
         if (logger.isInfoEnabled()) {
             logger.info("UpdateTask '" + MessagingGenericCreateTableTask.class.getSimpleName() + "' successfully performed!");
         }

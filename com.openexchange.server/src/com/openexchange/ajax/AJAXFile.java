@@ -71,6 +71,7 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -103,7 +104,7 @@ public final class AJAXFile extends PermissionServlet {
      */
     private static final long serialVersionUID = 1L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AJAXFile.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXFile.class);
 
     private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
 

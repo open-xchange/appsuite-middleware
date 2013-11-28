@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.Assert;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -89,7 +88,7 @@ public final class ConfigTools extends Assert {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigTools.class);
 
     /**
      * URL of the AJAX config interface.

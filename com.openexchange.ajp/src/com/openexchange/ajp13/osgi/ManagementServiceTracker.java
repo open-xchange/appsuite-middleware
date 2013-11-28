@@ -51,7 +51,6 @@ package com.openexchange.ajp13.osgi;
 
 import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 import javax.management.MalformedObjectNameException;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.management.ManagementService;
@@ -64,7 +63,7 @@ import com.openexchange.osgi.BundleServiceTracker;
  */
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ManagementServiceTracker.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class);
     private final AJPv13Activator activator;
 
     /**

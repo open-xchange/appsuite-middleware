@@ -52,7 +52,6 @@ package com.openexchange.admin.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -79,7 +78,7 @@ public abstract class OXUtilStorageInterface {
      */
     private static Class<? extends OXUtilStorageInterface> implementingClass;
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(OXUtilStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUtilStorageInterface.class);
 
     protected static AdminCacheExtended cache = null;
 

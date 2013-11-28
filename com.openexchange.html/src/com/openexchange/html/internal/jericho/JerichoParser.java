@@ -64,7 +64,6 @@ import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
@@ -79,7 +78,7 @@ import com.openexchange.java.Strings;
  */
 public final class JerichoParser {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(JerichoParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

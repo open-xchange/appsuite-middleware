@@ -51,7 +51,6 @@ package com.openexchange.ajax.request;
 
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
@@ -70,7 +69,7 @@ public class CalendarRequest {
 
     protected TimeZone timeZone;
 
-    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final Log log){
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final org.slf4j.Logger log){
 		final Participant[] participants = appointmentObj.getParticipants();
 		if(participants == null) {
             return;

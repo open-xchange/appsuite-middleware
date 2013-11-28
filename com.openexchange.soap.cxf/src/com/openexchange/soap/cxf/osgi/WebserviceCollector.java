@@ -55,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
-import org.apache.commons.logging.Log;
 import org.apache.cxf.interceptor.DocLiteralInInterceptor;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.message.Message;
@@ -75,7 +74,7 @@ import com.openexchange.soap.cxf.WebserviceName;
  */
 public class WebserviceCollector implements ServiceListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebserviceCollector.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebserviceCollector.class);
 
     private static final String WEBSERVICE_NAME = "WebserviceName";
 

@@ -54,7 +54,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link PushRegistryListenerThread}
@@ -66,7 +65,7 @@ public class PushRegistryListenerThread extends Thread {
 
     private static final AtomicInteger instances = new AtomicInteger(0);
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushRegistryListenerThread.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushRegistryListenerThread.class);
 
     private final DatagramSocket datagramSocket;
 

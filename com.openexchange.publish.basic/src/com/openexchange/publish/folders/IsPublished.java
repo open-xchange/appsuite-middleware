@@ -60,7 +60,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -77,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class IsPublished implements AdditionalFolderField {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(IsPublished.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IsPublished.class);
 
     private static final TIntSet ID_BLACKLIST;
     static {

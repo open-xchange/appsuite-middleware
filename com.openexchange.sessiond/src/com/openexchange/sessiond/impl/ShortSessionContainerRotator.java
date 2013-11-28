@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import org.apache.commons.logging.Log;
 
 /**
  * This timer rotates the containers in the SessionHandler.
@@ -58,7 +57,7 @@ import org.apache.commons.logging.Log;
  */
 public class ShortSessionContainerRotator implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ShortSessionContainerRotator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShortSessionContainerRotator.class);
 
     public ShortSessionContainerRotator() {
         super();

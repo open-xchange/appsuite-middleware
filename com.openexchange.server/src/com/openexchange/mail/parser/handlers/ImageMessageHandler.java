@@ -79,7 +79,7 @@ import com.openexchange.version.Version;
  */
 public final class ImageMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ImageMessageHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageMessageHandler.class);
 
     private final String cid;
 

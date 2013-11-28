@@ -56,7 +56,6 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.apache.commons.logging.Log;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -69,7 +68,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 public class PushMulticastSocket implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushMulticastSocket.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMulticastSocket.class);
 
     private Future<Object> thread;
 

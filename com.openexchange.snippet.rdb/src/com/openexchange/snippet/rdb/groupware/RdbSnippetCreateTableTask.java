@@ -54,7 +54,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -167,7 +166,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
-        final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetCreateTableTask.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetCreateTableTask.class);
         if (logger.isInfoEnabled()) {
             logger.info("UpdateTask '" + RdbSnippetCreateTableTask.class.getSimpleName() + "' successfully performed!");
         }

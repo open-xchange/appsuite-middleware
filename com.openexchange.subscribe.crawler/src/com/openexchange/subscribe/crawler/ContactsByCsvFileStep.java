@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.contact.ContactUtil;
@@ -72,7 +71,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {
 
     private Map<Integer, String> fieldMapping;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactsByCsvFileStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsByCsvFileStep.class);
 
     public ContactsByCsvFileStep() {
         super();

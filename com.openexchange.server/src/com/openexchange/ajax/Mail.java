@@ -207,7 +207,7 @@ import com.openexchange.tools.versit.utility.VersitUtility;
  */
 public class Mail extends PermissionServlet implements UploadListener {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(Mail.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Mail.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -827,7 +827,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (DEBUG) {
             final long d = System.currentTimeMillis() - start;
             LOG.debug(new com.openexchange.java.StringAllocator(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append(
-                "mail?action=all performed in ").append(d).append("msec"));
+                "mail?action=all performed in ").append(d).append("msec").toString());
         }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
@@ -1173,7 +1173,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (DEBUG) {
             final long d = System.currentTimeMillis() - s;
             LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append(
-                "mail?action=get performed in ").append(d).append("msec"));
+                "mail?action=get performed in ").append(d).append("msec").toString());
         }
         return response;
     }
@@ -1485,7 +1485,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (DEBUG) {
                         final long d = System.currentTimeMillis() - s;
                         LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append(
-                            "mail?action=get performed in ").append(d).append("msec served from message storage"));
+                            "mail?action=get performed in ").append(d).append("msec served from message storage").toString());
                     }
                 }
             } finally {
@@ -1568,7 +1568,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
                 LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                    ". Using user's mail settings as fallback."));
+                    ". Using user's mail settings as fallback.").toString());
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             }
         } else {
@@ -2525,7 +2525,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     usmNoSave.setAllowHTMLImages(false);
                 } else {
                     LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                        ". Using user's mail settings as fallback."));
+                        ". Using user's mail settings as fallback.").toString());
                 }
             }
             /*
@@ -2795,7 +2795,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                             LOG.warn(new StringBuilder(64).append("Mail account ").append(accountId).append(" for user ").append(
                                 session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                                " has no drafts folder. Saving draft to default account's draft folder."));
+                                " has no drafts folder. Saving draft to default account's draft folder.").toString());
                             // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
                             composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
@@ -3275,7 +3275,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (DEBUG) {
             final long d = System.currentTimeMillis() - start;
             LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append(
-                "mail?action=list performed in ").append(d).append("msec"));
+                "mail?action=list performed in ").append(d).append("msec").toString());
         }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
@@ -4996,7 +4996,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                             LOG.warn(new StringBuilder(64).append("Mail account ").append(accountId).append(" for user ").append(
                                 session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                                " has no drafts folder. Saving draft to default account's draft folder."));
+                                " has no drafts folder. Saving draft to default account's draft folder.").toString());
                             // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
                         }

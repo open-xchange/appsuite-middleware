@@ -92,7 +92,7 @@ public final class GlobalActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
             final Initialization initialization = new com.openexchange.server.ServerInitialization();
             this.initialization = initialization;
@@ -195,7 +195,7 @@ public final class GlobalActivator implements BundleActivator {
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
             final List<ServiceTracker<?, ?>> trackers = this.trackers;
             if (null != trackers) {

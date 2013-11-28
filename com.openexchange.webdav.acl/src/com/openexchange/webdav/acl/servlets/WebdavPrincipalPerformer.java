@@ -53,7 +53,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -99,7 +98,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavPrincipalPerformer implements SessionHolder{
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavPrincipalPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPrincipalPerformer.class);
 
     private static WebdavPrincipalPerformer INSTANCE = null;
 

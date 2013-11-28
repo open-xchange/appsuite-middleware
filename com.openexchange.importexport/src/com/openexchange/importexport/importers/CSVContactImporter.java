@@ -63,7 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -101,7 +100,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CSVContactImporter extends AbstractImporter {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(CSVContactImporter.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactImporter.class);
 
 	private LinkedList<ContactFieldMapper> mappers;
 

@@ -83,8 +83,8 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "The JSON representation of the updated reminder.")
 public final class RemindAgainAction extends AbstractReminderAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(RemindAgainAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(RemindAgainAction.class);
 
     /**
      * Initializes a new {@link RemindAgainAction}.

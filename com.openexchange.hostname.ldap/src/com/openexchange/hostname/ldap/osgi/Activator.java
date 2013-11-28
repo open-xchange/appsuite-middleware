@@ -49,7 +49,6 @@
 
 package com.openexchange.hostname.ldap.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -64,7 +63,7 @@ import com.openexchange.osgi.ServiceRegistry;
 
 public class Activator extends HousekeepingActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private LDAPHostnameService hostnameservice;
 

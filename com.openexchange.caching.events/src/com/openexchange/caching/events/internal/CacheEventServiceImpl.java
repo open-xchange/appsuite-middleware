@@ -55,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
@@ -69,7 +68,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class CacheEventServiceImpl implements CacheEventService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CacheEventServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheEventServiceImpl.class);
 
     private final ConcurrentMap<String, List<CacheListener>> cacheRegionListeners;
     private final List<CacheListener> cacheListeners;

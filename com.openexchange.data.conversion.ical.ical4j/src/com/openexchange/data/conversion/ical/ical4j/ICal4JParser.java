@@ -85,7 +85,6 @@ import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.util.CompatibilityHints;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
@@ -115,7 +114,7 @@ public class ICal4JParser implements ICalParser {
 
     private static final Charset UTF8 = Charsets.UTF_8;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ICal4JParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JParser.class);
 
     private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {

@@ -2,7 +2,6 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -18,7 +17,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class MultipleTest extends AppointmentTest {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MultipleTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleTest.class);
 
     public MultipleTest(final String name) {
         super(name);

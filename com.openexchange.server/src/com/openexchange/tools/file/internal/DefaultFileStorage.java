@@ -60,6 +60,7 @@ import java.io.RandomAccessFile;
 import java.util.HashSet;
 import java.util.Set;
 import javax.activation.MimetypesFileTypeMap;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.file.external.FileStorage;
@@ -211,7 +212,7 @@ public abstract class DefaultFileStorage implements FileStorage {
                 try {
                     eraf.close();
                 } catch (IOException e) {
-                    com.openexchange.log.Log.loggerFor(HashingFileStorage.class)
+                    LoggerFactory.getLogger(DefaultFileStorage.class)
                         .warn("error closing random access file", e);
                 }
             }

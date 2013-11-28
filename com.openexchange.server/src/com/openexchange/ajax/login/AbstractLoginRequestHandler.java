@@ -56,7 +56,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,7 +91,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public abstract class AbstractLoginRequestHandler implements LoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractLoginRequestHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractLoginRequestHandler.class);
 
     /**
      * @return a boolean value indicated if an auto login should proceed afterwards

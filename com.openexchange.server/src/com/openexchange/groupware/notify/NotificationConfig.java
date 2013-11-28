@@ -52,7 +52,6 @@ package com.openexchange.groupware.notify;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -65,7 +64,7 @@ import com.openexchange.tools.conf.AbstractConfig;
  */
 public class NotificationConfig extends AbstractConfig implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(NotificationConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationConfig.class);
 
     public enum NotificationProperty{
 

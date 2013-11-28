@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -403,7 +402,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private final List<OXException> warnings = new ArrayList<OXException>(2);
 
     private boolean has_next;
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CalendarOperation.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarOperation.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private ResultSet co_rs;

@@ -107,8 +107,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "flags", optional = true, description = "In case the mail should be stored with status \"read\" (e.g. mail has been read already in the client inbox), the parameter \"flags\" has to be included. If no \"folder\" parameter is specified, this parameter must not be included. For infos about mail flags see Detailed mail data spec.") }, requestBody = "The MIME Data Block.", responseDescription = "Object ID of the newly created/moved mail.")
 public final class ImportAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(ImportAction.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ImportAction.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

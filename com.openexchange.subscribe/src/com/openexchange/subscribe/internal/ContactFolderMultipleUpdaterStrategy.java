@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -83,7 +82,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     private static final int SESSION = 3;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactFolderMultipleUpdaterStrategy.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactFolderMultipleUpdaterStrategy.class);
 
     // All columns need to be loaded here as we keep the original, not the update and no data may be lost
     private static final ContactField[] COMPARISON_FIELDS = ContactField.values();

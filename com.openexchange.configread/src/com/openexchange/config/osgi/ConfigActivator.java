@@ -68,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class ConfigActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ConfigActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigActivator.class);
 
     private volatile ServiceReference<ManagedService> managedServiceReference;
 

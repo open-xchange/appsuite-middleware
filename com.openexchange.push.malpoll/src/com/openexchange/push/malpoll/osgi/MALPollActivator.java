@@ -87,7 +87,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MALPollActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MALPollActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MALPollActivator.class);
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -263,7 +263,7 @@ public final class MALPollActivator extends HousekeepingActivator {
         /*
          * Create either an executor starter or a caller-run starter
          */
-        final org.apache.commons.logging.Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final Starter starter;
         if (parallel) {
             /*

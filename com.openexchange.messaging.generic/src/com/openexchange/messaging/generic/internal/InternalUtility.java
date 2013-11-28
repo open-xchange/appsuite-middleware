@@ -320,7 +320,7 @@ public final class InternalUtility {
         try {
             return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (final NumberFormatException e) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(Utility.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Utility.class);
             if (log.isDebugEnabled()) {
                 log.debug("Inbvalid color label: " + cl, e);
             }

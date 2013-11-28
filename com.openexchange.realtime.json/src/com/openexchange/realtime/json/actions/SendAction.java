@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -129,7 +128,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SendAction extends RTAction  {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SendAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendAction.class);
 
     private final JSONProtocolHandler protocolHandler;
     private final StateManager stateManager;

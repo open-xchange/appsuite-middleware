@@ -87,7 +87,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
  */
 public final class ContactJSONDataHandler implements DataHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ContactJSONDataHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactJSONDataHandler.class);
 
     private static final String[] ARGS = {};
 

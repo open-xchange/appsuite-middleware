@@ -64,7 +64,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.internal.I18n;
 import com.openexchange.i18n.LocalizableStrings;
@@ -86,7 +85,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     // ([A-Za-z_]+)\((".*"),
     // $1($1_MSG,
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXException.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXException.class);
 
     private static final long serialVersionUID = 2058371531364916608L;
 
@@ -543,7 +542,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param log The logger
      */
-    public void log(final Log log) {
+    public void log(final org.slf4j.Logger log) {
         final LogLevel logLevel = getCategories().get(0).getLogLevel();
         if (!logLevel.appliesTo(log)) {
             return;

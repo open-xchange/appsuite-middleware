@@ -56,7 +56,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.facebook.api.FacebookException;
 import com.facebook.api.FacebookJaxbRestClient;
 import com.facebook.api.ProfileField;
@@ -75,7 +74,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements LoginStep {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookAPIStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookAPIStep.class);
 
     String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, apiKey, secret, birthdayPattern;
 

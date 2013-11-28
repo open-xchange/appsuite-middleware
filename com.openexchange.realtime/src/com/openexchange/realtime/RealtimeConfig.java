@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -79,7 +78,7 @@ import com.openexchange.server.Initialization;
  */
 public class RealtimeConfig implements Initialization, ManagementAware<RealtimeConfigMBean> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RealtimeConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RealtimeConfig.class);
 
     private static final RealtimeConfig instance = new RealtimeConfig();
 

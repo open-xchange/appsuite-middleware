@@ -58,6 +58,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -219,8 +220,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
                 if (null == map.putIfAbsent(addMe.getId(), addMe)) {
                     return service;
                 }
-                final org.apache.commons.logging.Log logger =
-                    com.openexchange.log.Log.loggerFor(OSGIMessagingServiceRegistry.Customizer.class);
+                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIMessagingServiceRegistry.Customizer.class);
                 if (logger.isWarnEnabled()) {
                     logger.warn(new StringBuilder(128).append("Messaging service ").append(addMe.getDisplayName()).append(
                         " could not be added to registry. Another service is already registered with identifier: ").append(addMe.getId()).toString());

@@ -52,7 +52,6 @@ package com.openexchange.groupware.notify;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.Types;
@@ -75,7 +74,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public abstract class LinkableState implements State {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LinkableState.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkableState.class);
 
     protected static volatile Template object_link_template;
 

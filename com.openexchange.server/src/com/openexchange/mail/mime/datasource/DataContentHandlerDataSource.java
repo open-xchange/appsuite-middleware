@@ -55,7 +55,6 @@ import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import javax.activation.DataContentHandler;
 import javax.activation.DataSource;
-import org.apache.commons.logging.Log;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -72,7 +71,7 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 public final class DataContentHandlerDataSource implements DataSource {
 
     /** The logger */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(DataContentHandlerDataSource.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataContentHandlerDataSource.class);
 
     private final DataContentHandler dch;
     private final Object object;

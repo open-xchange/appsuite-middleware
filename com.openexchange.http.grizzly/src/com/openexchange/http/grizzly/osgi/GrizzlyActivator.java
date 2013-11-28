@@ -50,7 +50,6 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.util.concurrent.ExecutorService;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.KeepAlive;
 import org.glassfish.grizzly.http.ajp.AjpAddOn;
@@ -92,7 +91,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws OXException {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(GrizzlyActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
         try {
             Services.setServiceLookup(this);
 
@@ -199,7 +198,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(GrizzlyActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
 
         Services.setServiceLookup(null);
 

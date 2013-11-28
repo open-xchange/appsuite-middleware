@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
@@ -83,7 +82,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public final class LoginTools {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginTools.class);
 
     private LoginTools() {
         super();

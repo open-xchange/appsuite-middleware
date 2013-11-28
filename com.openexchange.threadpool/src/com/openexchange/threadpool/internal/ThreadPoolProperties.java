@@ -193,7 +193,7 @@ public final class ThreadPoolProperties {
             workQueue = "synchronous";
             refusedExecutionBehavior = "abort";
         }
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolProperties.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolProperties.class);
         if (LOG.isInfoEnabled()) {
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
             sb.append("Thread Pool Configuration:\n");

@@ -101,8 +101,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailConverter implements ResultConverter, MailActionConstants {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(MailConverter.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MailConverter.class);
 
     private static final MailConverter INSTANCE = new MailConverter();
 

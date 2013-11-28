@@ -52,7 +52,6 @@ package com.openexchange.tools.webdav;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -72,7 +71,7 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class WebDAVSessionStore {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebDAVSessionStore.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebDAVSessionStore.class);
 
     private static final WebDAVSessionStore instance = new WebDAVSessionStore();
 

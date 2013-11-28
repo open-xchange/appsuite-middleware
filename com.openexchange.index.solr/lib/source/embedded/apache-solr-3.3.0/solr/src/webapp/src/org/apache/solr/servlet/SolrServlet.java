@@ -51,7 +51,7 @@ import org.apache.solr.response.SolrQueryResponse;
 @Deprecated
 public class SolrServlet extends HttpServlet {
     
-  final Logger log = LoggerFactory.getLogger(SolrServlet.class);
+  final org.slf4j.Logger log = LoggerFactory.getLogger(SolrServlet.class);
   private boolean hasMulticore = false;
     
   private static final Charset UTF8 = Charset.forName("UTF-8");

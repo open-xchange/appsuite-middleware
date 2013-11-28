@@ -57,7 +57,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
@@ -185,7 +184,7 @@ public class SQL {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SQL.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SQL.class);
 
     private SQL() {
         super();

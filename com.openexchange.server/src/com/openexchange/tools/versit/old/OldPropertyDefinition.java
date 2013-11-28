@@ -57,7 +57,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.MimeUtility;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
@@ -71,7 +70,7 @@ public class OldPropertyDefinition {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OldPropertyDefinition.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OldPropertyDefinition.class);
 
     private final Map<String, OldParamDefinition> Params = new HashMap<String, OldParamDefinition>();
 

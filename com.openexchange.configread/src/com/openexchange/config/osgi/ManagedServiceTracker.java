@@ -51,13 +51,13 @@ package com.openexchange.config.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 
 
@@ -92,10 +92,10 @@ public final class ManagedServiceTracker extends ServiceTracker<ManagedService, 
                 return service;
             }
         } catch (final ConfigurationException e) {
-            final Log log = com.openexchange.log.Log.loggerFor(ManagedServiceTracker.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ManagedServiceTracker.class);
             log.warn("Cannot configure Apache Felix Web Console", e);
         } catch (final RuntimeException e) {
-            final Log log = com.openexchange.log.Log.loggerFor(ManagedServiceTracker.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ManagedServiceTracker.class);
             log.warn("Cannot configure Apache Felix Web Console", e);
         }
         if (serviceObtained) {

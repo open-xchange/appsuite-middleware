@@ -76,7 +76,6 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -166,7 +165,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     private static final String STR_UNKNOWN = "UNKNOWN";
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(ParticipantNotify.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParticipantNotify.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -210,7 +209,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 message = msg.message.toString();
             }
             LOG.debug(new StringBuilder().append("Sending message to: ").append(msg.addresses).append("\n=====[").append(msg.title).append(
-                "]====\n\n").append(message).append("\n\n"));
+                "]====\n\n").append(message).append("\n\n").toString());
         }
 
         int fuid = msg.folderId;
@@ -2142,7 +2141,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Checks if the participant is included in the participants array.
-     * 
+     *
      * @param toSearch - the participant to search for
      * @param participants - the array to search within
      * @return true, if the toSearch participant is included within the array. Otherwise false.

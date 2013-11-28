@@ -57,8 +57,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -72,6 +70,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Marker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceRegistry;
@@ -116,54 +115,44 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
 
     }
 
-    private class Logger implements Log {
+    private class Logger implements org.slf4j.Logger {
 
-        private final Log delegate;
+        private final org.slf4j.Logger delegate;
 
         private final String prefixString;
 
-        public Logger(final Log log, final Class<?> clazz) {
+        public Logger(final org.slf4j.Logger log, final Class<?> clazz) {
             this.delegate = log;
             this.prefixString = "Logged for " + clazz.getCanonicalName() + ": ";
         }
 
         @Override
-        public void debug(Object message) {
+        public void debug(String message) {
             this.delegate.debug(prefixString + message);
         }
 
         @Override
-        public void debug(Object message, Throwable t) {
+        public void debug(String message, Throwable t) {
             this.delegate.debug(prefixString + message, t);
         }
 
         @Override
-        public void error(Object message) {
+        public void error(String message) {
             this.delegate.error(prefixString + message);
         }
 
         @Override
-        public void error(Object message, Throwable t) {
+        public void error(String message, Throwable t) {
             this.delegate.error(prefixString + message, t);
         }
 
         @Override
-        public void fatal(Object message) {
-            this.delegate.fatal(prefixString + message);
-        }
-
-        @Override
-        public void fatal(Object message, Throwable t) {
-            this.delegate.fatal(prefixString + message, t);
-        }
-
-        @Override
-        public void info(Object message) {
+        public void info(String message) {
             this.delegate.info(prefixString + message);
         }
 
         @Override
-        public void info(Object message, Throwable t) {
+        public void info(String message, Throwable t) {
             this.delegate.info(prefixString + message, t);
         }
 
@@ -175,11 +164,6 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
         @Override
         public boolean isErrorEnabled() {
             return this.delegate.isErrorEnabled();
-        }
-
-        @Override
-        public boolean isFatalEnabled() {
-            return this.delegate.isFatalEnabled();
         }
 
         @Override
@@ -198,24 +182,255 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
         }
 
         @Override
-        public void trace(Object message) {
+        public void trace(String message) {
             this.delegate.trace(prefixString + message);
         }
 
         @Override
-        public void trace(Object message, Throwable t) {
+        public void trace(String message, Throwable t) {
             this.delegate.trace(prefixString + message, t);
         }
 
         @Override
-        public void warn(Object message) {
+        public void warn(String message) {
             this.delegate.warn(prefixString + message);
         }
 
         @Override
-        public void warn(Object message, Throwable t) {
+        public void warn(String message, Throwable t) {
             this.delegate.warn(prefixString + message, t);
         }
+
+        @Override
+        public String getName() {
+            return delegate.getName();
+        }
+
+        @Override
+        public void trace(String format, Object arg) {
+            delegate.trace(prefixString + format, arg);
+        }
+
+        @Override
+        public void trace(String format, Object arg1, Object arg2) {
+            delegate.trace(prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void trace(String format, Object... arguments) {
+            delegate.trace(prefixString + format, arguments);
+        }
+
+        @Override
+        public boolean isTraceEnabled(Marker marker) {
+            return delegate.isTraceEnabled(marker);
+        }
+
+        @Override
+        public void trace(Marker marker, String msg) {
+            delegate.trace(marker, prefixString + msg);
+        }
+
+        @Override
+        public void trace(Marker marker, String format, Object arg) {
+            delegate.trace(marker, prefixString + format, arg);
+        }
+
+        @Override
+        public void trace(Marker marker, String format, Object arg1, Object arg2) {
+            delegate.trace(marker, prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void trace(Marker marker, String format, Object... argArray) {
+            delegate.trace(marker, prefixString + format, argArray);
+        }
+
+        @Override
+        public void trace(Marker marker, String msg, Throwable t) {
+            delegate.trace(marker, prefixString + msg, t);
+        }
+
+        @Override
+        public void debug(String format, Object arg) {
+            delegate.debug(prefixString + format, arg);
+        }
+
+        @Override
+        public void debug(String format, Object arg1, Object arg2) {
+            delegate.debug(prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void debug(String format, Object... arguments) {
+            delegate.debug(prefixString + format, arguments);
+        }
+
+        @Override
+        public boolean isDebugEnabled(Marker marker) {
+            return delegate.isDebugEnabled(marker);
+        }
+
+        @Override
+        public void debug(Marker marker, String msg) {
+            delegate.debug(marker, prefixString + msg);
+        }
+
+        @Override
+        public void debug(Marker marker, String format, Object arg) {
+            delegate.debug(marker, prefixString + format, arg);
+        }
+
+        @Override
+        public void debug(Marker marker, String format, Object arg1, Object arg2) {
+            delegate.debug(marker, prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void debug(Marker marker, String format, Object... arguments) {
+            delegate.debug(marker, prefixString + format, arguments);
+        }
+
+        @Override
+        public void debug(Marker marker, String msg, Throwable t) {
+            delegate.debug(marker, prefixString + msg, t);
+        }
+
+        @Override
+        public void info(String format, Object arg) {
+            delegate.info(prefixString + format, arg);
+        }
+
+        @Override
+        public void info(String format, Object arg1, Object arg2) {
+            delegate.info(prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void info(String format, Object... arguments) {
+            delegate.info(prefixString + format, arguments);
+        }
+
+        @Override
+        public boolean isInfoEnabled(Marker marker) {
+            return delegate.isInfoEnabled(marker);
+        }
+
+        @Override
+        public void info(Marker marker, String msg) {
+            delegate.info(marker, prefixString + msg);
+        }
+
+        @Override
+        public void info(Marker marker, String format, Object arg) {
+            delegate.info(marker, prefixString + format, arg);
+        }
+
+        @Override
+        public void info(Marker marker, String format, Object arg1, Object arg2) {
+            delegate.info(marker, prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void info(Marker marker, String format, Object... arguments) {
+            delegate.info(marker, prefixString + format, arguments);
+        }
+
+        @Override
+        public void info(Marker marker, String msg, Throwable t) {
+            delegate.info(marker, prefixString + msg, t);
+        }
+
+        @Override
+        public void warn(String format, Object arg) {
+            delegate.warn(prefixString + format, arg);
+        }
+
+        @Override
+        public void warn(String format, Object... arguments) {
+            delegate.warn(prefixString + format, arguments);
+        }
+
+        @Override
+        public void warn(String format, Object arg1, Object arg2) {
+            delegate.warn(prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public boolean isWarnEnabled(Marker marker) {
+            return delegate.isWarnEnabled(marker);
+        }
+
+        @Override
+        public void warn(Marker marker, String msg) {
+            delegate.warn(marker, prefixString + msg);
+        }
+
+        @Override
+        public void warn(Marker marker, String format, Object arg) {
+            delegate.warn(marker, prefixString + format, arg);
+        }
+
+        @Override
+        public void warn(Marker marker, String format, Object arg1, Object arg2) {
+            delegate.warn(marker, prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void warn(Marker marker, String format, Object... arguments) {
+            delegate.warn(marker, prefixString + format, arguments);
+        }
+
+        @Override
+        public void warn(Marker marker, String msg, Throwable t) {
+            delegate.warn(marker, prefixString + msg, t);
+        }
+
+        @Override
+        public void error(String format, Object arg) {
+            delegate.error(prefixString + format, arg);
+        }
+
+        @Override
+        public void error(String format, Object arg1, Object arg2) {
+            delegate.error(prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void error(String format, Object... arguments) {
+            delegate.error(prefixString + format, arguments);
+        }
+
+        @Override
+        public boolean isErrorEnabled(Marker marker) {
+            return delegate.isErrorEnabled(marker);
+        }
+
+        @Override
+        public void error(Marker marker, String msg) {
+            delegate.error(marker, prefixString + msg);
+        }
+
+        @Override
+        public void error(Marker marker, String format, Object arg) {
+            delegate.error(marker, prefixString + format, arg);
+        }
+
+        @Override
+        public void error(Marker marker, String format, Object arg1, Object arg2) {
+            delegate.error(marker, prefixString + format, arg1, arg2);
+        }
+
+        @Override
+        public void error(Marker marker, String format, Object... arguments) {
+            delegate.error(marker, prefixString + format, arguments);
+        }
+
+        @Override
+        public void error(Marker marker, String msg, Throwable t) {
+            delegate.error(marker, prefixString + msg, t);
+        }
+
 
     }
 
@@ -313,7 +528,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
         }
     }
 
-    static Log LOG = com.openexchange.log.Log.loggerFor(OSGiAbstractor.class);
+    static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiAbstractor.class);
 
     static ServiceRegistry registry;
 
@@ -393,7 +608,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                     // Just log...
                     LOG.error("Error while shutting down \"" + bundleName + "\" bundle: " + e.getMessage(), e);
                 }
-            } 
+            }
             m_context.addBundleListener(listener);
         }
     }
@@ -715,7 +930,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
 
     /**
      * Adds a service implementation to the framework
-     * 
+     *
      * @param clazz The class or interface the service you want to add is implementing
      * @param implementation An instance of your implementing class, note that this class must implement the interface {@link AbstractInitializer}
      * @param dictionary A dictionary which can contain object, which will be attached to the service in OSGi
@@ -731,7 +946,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
 
     /**
      * Adds a service implementation to the framework. This variant of the method is used if you depend on services which are registered with a different name and thus need to be looked up through a different OSGi service class filter
-     * 
+     *
      * @param clazz The class or interface the service you want to add is implementing
      * @param implementation An instance of your implementing class, note that this class must implement the interface {@link AbstractInitializer}
      * @param dictionary A dictionary which can contain object, which will be attached to the service in OSGi
@@ -756,7 +971,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
      * Adds a service to the registry of this bundle. The service can be fetched later by calling one of the methods provided by the
      * {@link ServiceLookup} interface. Or by calling {@link #getServiceStatic(Class)} if you don't have the instance of this class
      * available
-     * 
+     *
      * @param service the name of the service class you want to add
      * @param required if this service is required for your bundle or not, if it's required your bundle will shutdown if the service is not
      *            available any more
@@ -774,7 +989,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
      * Adds a service to the registry of this bundle. The service can be fetched later by calling one of the methods provided by the
      * {@link ServiceLookup} interface. Or by calling {@link #getServiceStatic(Class)} if you don't have the instance of this class
      * available
-     * 
+     *
      * @param serviceAndClass the name of the service class the OSGi filter should use and the real service class
      * @param required if this service is required for your bundle or not, if it's required your bundle will shutdown if the service is not
      *            available any more
@@ -806,7 +1021,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
 
     /**
      * If this bundle is already correctly started (all Required Services are available)
-     * 
+     *
      * @return
      */
     public final static boolean isStarted() {

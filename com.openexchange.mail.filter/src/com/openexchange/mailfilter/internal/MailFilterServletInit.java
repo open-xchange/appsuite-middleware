@@ -73,7 +73,7 @@ public class MailFilterServletInit implements Initialization {
      */
     public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MailFilterServletInit.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterServletInit.class);
 
 	private static final MailFilterServletInit instance = new MailFilterServletInit();
 

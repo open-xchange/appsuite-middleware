@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class GetStructureAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GetStructureAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetStructureAction.class);
 
     /**
      * Initializes a new {@link GetStructureAction}.

@@ -66,7 +66,6 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,7 +93,7 @@ public class JsonClient {
         }
     };
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(JsonClient.class);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JsonClient.class);
 
     private final String apiKey;
     private final String apiEndpoint;

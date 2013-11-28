@@ -68,8 +68,8 @@ public final class RemoveFolderJob extends AbstractMailSyncJob {
 
     private static final String SIMPLE_NAME = RemoveFolderJob.class.getSimpleName();
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.loggerFor(RemoveFolderJob.class);
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(RemoveFolderJob.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
