@@ -50,6 +50,7 @@
 package com.openexchange.log;
 
 
+
 /**
  * {@link Log} - The <code>org.apache.commons.logging.Log</code> using {@link LogService}.
  *
@@ -64,7 +65,7 @@ public final class Log implements org.apache.commons.logging.Log {
      * @return The logger.
      */
     public static org.apache.commons.logging.Log loggerFor(final Class<?> clazz) {
-        return valueOf(com.openexchange.log.Log.loggerFor(clazz));
+        return valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
     }
 
     /**
@@ -74,7 +75,7 @@ public final class Log implements org.apache.commons.logging.Log {
      * @return The logger.
      */
     public static org.apache.commons.logging.Log loggerFor(final String clazz) {
-        return valueOf(com.openexchange.log.Log.loggerFor(clazz));
+        return valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
     }
 
     /**
