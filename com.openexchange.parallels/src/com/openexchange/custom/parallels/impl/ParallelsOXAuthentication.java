@@ -67,7 +67,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
@@ -89,7 +88,7 @@ import com.openexchange.user.UserService;
  */
 public class ParallelsOXAuthentication implements AuthenticationService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ParallelsOXAuthentication.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsOXAuthentication.class);
 
     /**
      * Default constructor.

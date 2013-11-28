@@ -73,7 +73,6 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -92,7 +91,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactStorage extends DefaultContactStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapContactStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LdapContactStorage.class);
     private static final ContactField[] DISTLISTMEMBER_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
         ContactField.OBJECT_ID, ContactField.DISPLAY_NAME,ContactField.SUR_NAME, ContactField.GIVEN_NAME
     };

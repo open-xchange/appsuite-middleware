@@ -63,7 +63,6 @@ import com.openexchange.contact.storage.ldap.internal.CachingLdapContactStorage;
 import com.openexchange.contact.storage.ldap.internal.LdapContactStorage;
 import com.openexchange.contact.storage.ldap.internal.Tools;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link LdapContactStorageFactory}
@@ -74,7 +73,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class LdapContactStorageFactory {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapContactStorageFactory.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LdapContactStorageFactory.class);
 
     private LdapContactStorageFactory() {
         super();
