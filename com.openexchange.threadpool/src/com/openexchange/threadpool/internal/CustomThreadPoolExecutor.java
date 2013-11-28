@@ -83,6 +83,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.slf4j.Logger;
 import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.threadpool.AbstractTask;
@@ -236,7 +237,7 @@ import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
  */
 public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(CustomThreadPoolExecutor.class);
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomThreadPoolExecutor.class);
 
     static final Object PRESENT = new Object();
 
@@ -771,6 +772,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         /**
          * Run a single task between before/after methods.
+         *
+         * @throws RuntimeException If task execution fails unexpectedly
          */
         private void runTask(final Runnable task) {
             final ReentrantLock runLock = this.runLock;
@@ -825,6 +828,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
             } catch (final InterruptedException ie) {
                 // fall through
+            } catch (final RuntimeException re) {
+                // Task execution failed horribly
+                LOG.error("Task execution failed unexpectedly", re);
             } finally {
                 workerDone(this);
             }
@@ -1024,11 +1030,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     }
                 }
             } catch (final Exception e) {
-                LOG.fatal(
-                    MessageFormat.format(
-                        "{0} thread aborted execution due to an exception! TimerService is no more active!",
-                        currentThread.getName()),
-                    e);
+                LOG.error(MessageFormat.format("{0} thread aborted execution due to an exception! TimerService is no more active!", currentThread.getName()), e);
             }
         }
     }
@@ -1270,18 +1272,18 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                 logBuilder.append("msec");
                                 final Throwable t = new Throwable();
                                 t.setStackTrace(thread.getStackTrace());
-                                LOG.info(logBuilder, t);
+                                LOG.info(logBuilder.toString(), t);
                             }
                         }
                         if (poisoned) {
                             return;
                         }
                     } catch (final Exception e) {
-                        LOG.fatal("Watcher run aborted due to an exception!", e);
+                        LOG.error("Watcher run aborted due to an exception!", e);
                     }
                 }
             } catch (final Exception e) {
-                LOG.fatal("Watcher aborted execution due to an exception! Watcher is no more active!", e);
+                LOG.error("Watcher aborted execution due to an exception! Watcher is no more active!", e);
             }
         }
 
@@ -1602,20 +1604,29 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     protected void beforeExecute(final Thread thread, final Runnable r) {
         activeCount.incrementAndGet();
+        thread.setUncaughtExceptionHandler(CustomUncaughtExceptionhandler.getInstance());
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
             final Task<?> task = customFutureTask.getTask();
             task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
             // MDC map for executing thread
-            MDC.setContextMap(customFutureTask.getMdc());
+            {
+                final Map<String, Object> mdc = customFutureTask.getMdc();
+                if (null != mdc) {
+                    MDC.setContextMap(mdc);
+                }
+            }
             // Check if trackable
             if (customFutureTask.isTrackable()) {
                 activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, customFutureTask.getMdc());
             }
         } else if (r instanceof MdcProvider) {
             // MDC map for executing thread
-            MDC.setContextMap(((MdcProvider) r).getMdc());
+            final Map<String, Object> mdc = ((MdcProvider) r).getMdc();
+            if (null != mdc) {
+                MDC.setContextMap(mdc);
+            }
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");
         }

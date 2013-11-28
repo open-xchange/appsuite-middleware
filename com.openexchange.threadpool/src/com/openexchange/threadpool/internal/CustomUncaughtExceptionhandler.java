@@ -59,10 +59,23 @@ import java.util.Map;
  */
 final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
 
+    private static final CustomUncaughtExceptionhandler INSTANCE = new CustomUncaughtExceptionhandler();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static CustomUncaughtExceptionhandler getInstance() {
+        return INSTANCE;
+    }
+
+    // ---------------------------------------------------------------------------------------------- //
+
     /**
      * Initializes a new {@link CustomUncaughtExceptionhandler}.
      */
-    public CustomUncaughtExceptionhandler() {
+    private CustomUncaughtExceptionhandler() {
         super();
     }
 
