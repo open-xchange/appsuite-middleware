@@ -18,8 +18,9 @@
 	... add the OXException category filter here ...
     -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    	<target>System.err</target>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-        	<pattern>%date open-xchange %-5level [%logger][%thread]: %class,%method %msg%n</pattern>
+        	<pattern>%date{yyyy-MM-dd HH:mm:ss} logged at %class.%method\(%class{0}.java:%line\)%n %-5level %msg%n</pattern>
         	<immediateFlush>false</immediateFlush>
         </encoder>
     </appender>
