@@ -47,9 +47,10 @@
  *
  */
 
-package ch.qos.logback.classic.encoder;
+package com.openexchange.logback.extensions;
 
 import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 
 
 /**

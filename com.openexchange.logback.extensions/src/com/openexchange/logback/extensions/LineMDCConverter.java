@@ -47,7 +47,7 @@
  *
  */
 
-package ch.qos.logback.classic.encoder;
+package com.openexchange.logback.extensions;
 
 import static ch.qos.logback.core.util.OptionHelper.extractDefaultReplacement;
 import java.util.Map;
