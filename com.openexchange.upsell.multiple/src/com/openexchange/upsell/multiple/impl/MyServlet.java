@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
@@ -81,7 +82,8 @@ public final class MyServlet extends DataServlet {
      *
      */
     private static final long serialVersionUID = -8914926421736440078L;
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MyServlet.class);
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MyServlet.class);
 
     public MyServlet() {
         super();
