@@ -19,7 +19,7 @@
     -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.err</target>
-        <encoder class="ch.qos.logback.classic.encoder.ExtendedPatternLayoutEncoder">
+        <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
             <!-- %date{yyyy-MM-dd HH:mm:ss.SSS} -->
             <pattern>%date{yyyy-MM-dd HH:mm:ss} logged at %class.%method\(%class{0}.java:%line\)%n%lmdc %-5level %msg%n</pattern>
             <immediateFlush>false</immediateFlush>

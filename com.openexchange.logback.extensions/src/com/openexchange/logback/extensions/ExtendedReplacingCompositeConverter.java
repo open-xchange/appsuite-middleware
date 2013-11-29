@@ -47,7 +47,7 @@
  *
  */
 
-package ch.qos.logback.classic.encoder;
+package com.openexchange.logback.extensions;
 
 import java.util.List;
 import java.util.regex.Pattern;
