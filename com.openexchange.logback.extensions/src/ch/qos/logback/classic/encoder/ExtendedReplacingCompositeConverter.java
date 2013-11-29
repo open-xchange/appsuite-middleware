@@ -49,23 +49,58 @@
 
 package ch.qos.logback.classic.encoder;
 
-import ch.qos.logback.classic.PatternLayout;
-
+import java.util.List;
+import java.util.regex.Pattern;
+import ch.qos.logback.core.pattern.ReplacingCompositeConverter;
 
 /**
- * {@link ExtendedPatternLayoutEncoder} - Puts additional converters to <code>PatternLayout</code>'s default converter mapping.
+ * {@link ExtendedReplacingCompositeConverter} - Extends <code>ReplacingCompositeConverter</code> by support for line-feeds specified in
+ * replacement string; e.g.
+ *
+ * <pre>
+ *  %ereplace(%msg){'n','\n'} // Replace every character 'n' in log message with a line-feed
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ExtendedPatternLayoutEncoder extends PatternLayoutEncoder {
+public class ExtendedReplacingCompositeConverter<E> extends ReplacingCompositeConverter<E> {
+
+    private Pattern pattern;
+    private String replacement;
 
     /**
-     * Initializes a new {@link ExtendedPatternLayoutEncoder}.
+     * Initializes a new {@link ExtendedReplacingCompositeConverter}.
      */
-    public ExtendedPatternLayoutEncoder() {
+    public ExtendedReplacingCompositeConverter() {
         super();
-        PatternLayout.defaultConverterMap.put("lmdc", LineMDCConverter.class.getName());
-        PatternLayout.defaultConverterMap.put("ereplace", ExtendedReplacingCompositeConverter.class.getName());
+    }
+
+    @Override
+    public void start() {
+        final List<String> optionList = getOptionList();
+        if (optionList == null) {
+            addError("at least two options are expected whereas you have declared none");
+            return;
+        }
+
+        final int numOpts = optionList.size();
+
+        if (numOpts < 2) {
+            addError("at least two options are expected whereas you have declared only " + numOpts + "as [" + optionList + "]");
+            return;
+        }
+        pattern = Pattern.compile(optionList.get(0));
+        // Support line-feeds
+        replacement = optionList.get(1).replaceAll("%n|(\\\\r)?\\\\n", System.getProperty("line.separator"));
+        super.start();
+    }
+
+    @Override
+    protected String transform(final E event, final String in) {
+        if (!started) {
+            return in;
+        }
+        return pattern.matcher(in).replaceAll(replacement);
     }
 
 }
