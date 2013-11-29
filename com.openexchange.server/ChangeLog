@@ -1,3 +1,7 @@
+* 2013-11-29 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29495: Removed port 587 from list of secure smtp ports
+
 * 2013-11-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29655: Added possibility to change appointments, if external organizer and UID is given (OLOX2 requirement).
