@@ -19,9 +19,9 @@
     -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     	<target>System.err</target>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <encoder class="ch.qos.logback.classic.encoder.ExtendedPatternLayoutEncoder">
         	<!-- %date{yyyy-MM-dd HH:mm:ss.SSS} -->
-        	<pattern>%date{yyyy-MM-dd HH:mm:ss} logged at %class.%method\(%class{0}.java:%line\)%n %-5level %msg%n</pattern>
+        	<pattern>%date{yyyy-MM-dd HH:mm:ss} logged at %class.%method\(%class{0}.java:%line\)%n%lmdc%-5level %msg%n</pattern>
         	<immediateFlush>false</immediateFlush>
         </encoder>
     </appender>
@@ -61,8 +61,7 @@
         <appender-ref ref="ASYNC" />
     </root>
     
-    <!-- Package based logging -->
-    <logger name="org.apache.jcs" level="WARN"/>
+    <!-- Package based logging. Possible levels: TRACE, DEBUG, INFO, WARN and ERROR -->
 
     <!-- Important note: -->
     <!-- The following option ensures, that all login relevant information is logged correctly. Such information is essential to detect -->
@@ -74,4 +73,33 @@
     <!-- session issues and potential security breaches arising thereof. -->
     <logger name="com.openexchange.login.internal.LoginPerformer" level="INFO"/>
     <logger name="com.openexchange.sessiond.impl.SessionHandler" level="INFO"/>
+    
+    <logger name="sun.rmi" level="INFO"/>
+    <logger name="org.apache" level="WARN"/>
+    <logger name="com.sun" level="INFO"/>
+    <logger name="javax.management" level="INFO"/>
+    <logger name="javax.jmdns" level="WARN"/>
+    <logger name="com.hazelcast" level="WARN"/>
+    <logger name="org.glassfish.grizzly" level="WARN"/>
+    
+    <!-- Set to FINE to log SOAP requests for debugging purpose -->
+    <logger name="org.apache.cxf" level="WARN"/>
+    <logger name="com.openexchange.soap.cxf.logger" level="WARN"/>
+    
+    <!-- Set org.jaudiotagger to SEVERE -->
+    <logger name="org.jaudiotagger" level="ERROR"/>
+    
+    <!-- Set global documentconverter logging level to WARNING -->
+    <logger name="com.openexchange.documentconverter.impl.Manager" level="WARN"/>
+    
+    <!-- Reduce log level for htmlunit.jar -->
+    <logger name="com.gargoylesoftware.htmlunit" level="WARN"/>
+    
+    <!-- Log access to UI files -->
+    <!-- <logger name="com.openexchange.appsuite" level="DEBUG"/> -->
+    
+    <!--  A switch to control which exceptions are logged to the log file -->
+	<!--  Set this to ALL to log all exceptions -->
+	<logger name="com.openexchange.ajax.requesthandler.DispatcherServlet" level="INFO"/>
+
 </configuration>
