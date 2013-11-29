@@ -1,6 +1,7 @@
 * 2013-11-29 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 29495: Removed port 587 from list of secure smtp ports
+ - Fix for bug 30050: Extended logging for folders
 
 * 2013-11-29 - thorben.betten@open-xchange.com
 
