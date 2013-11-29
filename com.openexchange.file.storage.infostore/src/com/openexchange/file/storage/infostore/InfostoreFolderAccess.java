@@ -231,11 +231,19 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
+        return moveFolder(folderId, newParentId, null);
+    }
+
+    @Override
+    public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
         final FolderService service = Services.getService(FolderService.class);
         final ParsedFolder folder = new ParsedFolder();
         folder.setID(folderId);
         folder.setParentID(newParentId);
         folder.setTreeID(REAL_TREE_ID);
+        if (null != newName) {
+            folder.setName(newName);
+        }
         service.updateFolder(folder, null, session, null);
         return folder.getNewID() == null ? folderId : folder.getNewID();
     }

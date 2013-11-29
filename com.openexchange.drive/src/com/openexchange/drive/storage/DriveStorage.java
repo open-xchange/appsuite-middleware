@@ -380,13 +380,13 @@ public class DriveStorage {
         }
         if (false == oldParentPath.equals(newParentPath)) {
             /*
-             * perform move
+             * perform move / rename
              */
-            folderID = getFolderAccess().moveFolder(folderID, newParentFolder.getId());
-        }
-        if (false == oldName.equals(newName)) {
+            folderID = oldName.equals(newName) ? getFolderAccess().moveFolder(folderID, newParentFolder.getId()) :
+                getFolderAccess().moveFolder(folderID, newParentFolder.getId(), newName);
+        } else if (false == oldName.equals(newName)) {
             /*
-             * perform rename
+             * perform rename only
              */
             folderID = getFolderAccess().renameFolder(folderID, newName);
         }

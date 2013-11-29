@@ -377,6 +377,12 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
     }
 
     @Override
+    public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
+        String movedFolder = moveFolder(folderId, newParentId);
+        return renameFolder(movedFolder, newName);
+    }
+
+    @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
         try {
             if (FileStorageFolder.ROOT_FULLNAME.equals(folderId) || rootUrl.equals(folderId)) {

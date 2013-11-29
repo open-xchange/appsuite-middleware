@@ -187,6 +187,11 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
 
     @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
+        return moveFolder(folderId, newParentId, null);
+    }
+
+    @Override
+    public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
         try {
             final String path = toPath(folderId);
             final int pos = path.lastIndexOf('/');
@@ -195,7 +200,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                 dropboxAPI.move(
                     path,
                     new StringAllocator("/".equals(newParentPath) ? "" : newParentPath).append('/').append(
-                        pos < 0 ? path : path.substring(pos + 1)).toString());
+                        null != newName ? newName : (pos < 0 ? path : path.substring(pos + 1))).toString());
             return toId(moved.path);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {

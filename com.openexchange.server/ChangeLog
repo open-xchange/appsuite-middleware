@@ -1,3 +1,7 @@
+* 2013-11-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30070: Use single operation for moving and renaming folders 
+
 * 2013-11-28 - marcus.klein@open-xchange.com
 
  - Fix for bug 30063: Do no try to roll back to the save point if MySQL did already a complete transaction rollback.

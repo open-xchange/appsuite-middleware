@@ -1047,7 +1047,10 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
+    private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent=?,changing_date=?,changed_from=?,fname=? " +
+        "WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
+        "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);"
+    ;
 
     private static final String SQL_MOVE_SELECT = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ?";
 
@@ -1079,9 +1082,18 @@ public final class OXFolderSQL {
                 pst.setInt(1, dest.getObjectID());
                 pst.setLong(2, lastModified);
                 pst.setInt(3, src.getType() == FolderObject.SYSTEM_TYPE ? ctx.getMailadmin() : userId);
-                pst.setInt(4, ctx.getContextId());
-                pst.setInt(5, src.getObjectID());
-                executeUpdate(pst);
+                pst.setString(4, src.getFolderName());
+                pst.setInt(5, ctx.getContextId());
+                pst.setInt(6, src.getObjectID());
+                pst.setInt(7, ctx.getContextId());
+                pst.setInt(8, dest.getObjectID());
+                pst.setInt(9, dest.getObjectID());
+                pst.setString(10, src.getFolderName());
+                pst.setInt(11, src.getObjectID());
+                if (0 == executeUpdate(pst)) {
+                    // due to already existing subfolder with the same name
+                    throw new SQLException("Entry not updated");
+                }
                 pst.close();
                 pst = null;
                 /*
