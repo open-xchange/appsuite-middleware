@@ -51,6 +51,7 @@ package com.openexchange.logback.extensions;
 
 import static ch.qos.logback.core.util.OptionHelper.extractDefaultReplacement;
 import java.util.Map;
+import java.util.TreeMap;
 import ch.qos.logback.classic.pattern.MDCConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
@@ -108,8 +109,8 @@ public class LineMDCConverter extends MDCConverter {
      */
     private String outputMDCForAllKeys(final Map<String, String> mdcPropertyMap) {
         final String ls = System.getProperty("line.separator");
-        final StringBuilder buf = new StringBuilder();
-        for (final Map.Entry<String, String> entry : mdcPropertyMap.entrySet()) {
+        final StringBuilder buf = new StringBuilder(1536);
+        for (final Map.Entry<String, String> entry : new TreeMap<String, String>(mdcPropertyMap).entrySet()) {
             // format: key0=value0\nkey1=value1
             buf.append(' ').append(entry.getKey()).append('=').append(entry.getValue()).append(ls);
         }
