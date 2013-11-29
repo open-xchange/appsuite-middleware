@@ -1,3 +1,7 @@
+* 2013-11-29 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 29655: Added possibility to change appointments, if external organizer and UID is given (OLOX2 requirement).
+
 * 2013-11-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30070: Use single operation for moving and renaming folders 

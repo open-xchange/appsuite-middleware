@@ -2585,7 +2585,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
             prep = getPreparedStatement(readcon, loadAppointment(cdao.getObjectID(), cdao.getContext()));
             rs = getResultSet(prep);
-            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.UPDATE, action_folder, checkPermissions);
+            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.UPDATE, action_folder, checkPermissions, cdao.getOrganizer(), cdao.getUid());
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch (final OXException oxe) {
