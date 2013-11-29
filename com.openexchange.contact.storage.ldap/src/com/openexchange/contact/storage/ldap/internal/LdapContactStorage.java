@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.naming.ldap.SortKey;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
@@ -91,7 +91,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactStorage extends DefaultContactStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LdapContactStorage.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorage.class);
+
     private static final ContactField[] DISTLISTMEMBER_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
         ContactField.OBJECT_ID, ContactField.DISPLAY_NAME,ContactField.SUR_NAME, ContactField.GIVEN_NAME
     };

@@ -58,10 +58,10 @@ import javax.naming.ldap.Control;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortKey;
+import org.slf4j.Logger;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
 import com.openexchange.contact.storage.ldap.config.LdapConfig.SearchScope;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.session.Session;
 
 /**
@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public class LdapExecutor  {
 
-    private static org.apache.commons.logging.Log LOG = Log.loggerFor(LdapExecutor.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapExecutor.class);
 
     private final LdapFactory factory;
     private final LdapContext context;

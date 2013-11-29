@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -94,7 +95,7 @@ public class LdapGlobalFolderCreator {
 
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(LdapGlobalFolderCreator.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapGlobalFolderCreator.class);
 
     public static FolderIDAndAdminID createGlobalFolder(int contextID, String foldername) throws OXException, SQLException {
         // First search for a folder with the name if is doesn't exist create it

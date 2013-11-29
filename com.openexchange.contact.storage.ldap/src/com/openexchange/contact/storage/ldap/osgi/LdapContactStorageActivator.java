@@ -49,7 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.osgi;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.storage.ContactStorage;
@@ -75,7 +75,7 @@ import com.openexchange.user.UserService;
  */
 public class LdapContactStorageActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.loggerFor(LdapContactStorageActivator.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageActivator.class);
 
     /**
      * Initializes a new {@link LdapContactStorageActivator}.

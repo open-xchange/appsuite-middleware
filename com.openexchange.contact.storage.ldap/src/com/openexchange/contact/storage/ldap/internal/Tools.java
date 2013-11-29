@@ -59,7 +59,7 @@ import java.util.Properties;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
@@ -76,7 +76,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public final class Tools  {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tools.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
+
     private static final String DIRECTORY_NAME = "contact-storage-ldap";
 
     private Tools() {

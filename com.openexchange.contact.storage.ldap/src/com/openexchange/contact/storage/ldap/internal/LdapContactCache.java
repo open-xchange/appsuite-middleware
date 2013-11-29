@@ -62,6 +62,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.contact.SortOptions;
@@ -82,7 +83,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactCache {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(LdapContactCache.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactCache.class);
+
     private static final EnumSet<ContactField> CACHED_FIELDS = EnumSet.of(
         ContactField.CONTEXTID, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID,
         ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.CREATED_BY,
@@ -163,7 +165,7 @@ public class LdapContactCache {
             return contacts;
         }
     }
-    
+
     /**
      * @return If the cache is already filled with objects.
      */

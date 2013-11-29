@@ -54,7 +54,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
 import com.openexchange.contact.storage.ldap.config.LdapConfig.IDMapping;
@@ -73,7 +73,7 @@ import com.openexchange.exception.OXException;
  */
 public final class LdapContactStorageFactory {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LdapContactStorageFactory.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageFactory.class);
 
     private LdapContactStorageFactory() {
         super();
