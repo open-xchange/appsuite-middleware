@@ -297,7 +297,7 @@ public class ParallelsSpamdService implements SpamdService {
             LOG.error(xml_rpc_response);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
         } catch (final OXException e) {
-            LOG.fatal("error loading user object from session", e);
+            LOG.error("error loading user object from session", e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
         } catch (final URIException e) {
             LOG.error("error sending request to xmlrpc service",e);
