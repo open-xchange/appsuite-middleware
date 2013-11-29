@@ -62,6 +62,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -870,7 +871,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    com.openexchange.log.Log.loggerFor(MIMEMultipartMailPart.DataSourceDataAccess.class).error(e.getMessage(), e);
+                    LoggerFactory.getLogger(MIMEMultipartMailPart.DataSourceDataAccess.class).error(e.getMessage(), e);
                 }
             }
         }

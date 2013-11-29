@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
@@ -45,7 +45,7 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAcce
 
 public class OXResellerUserServicePortTypeImpl implements OXResellerUserServicePortType {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OXResellerUserServicePortTypeImpl.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OXResellerUserServicePortTypeImpl.class);
 
     public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<OXUserInterface>();
 
