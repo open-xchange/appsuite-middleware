@@ -66,7 +66,7 @@
 
     <!-- Important note: -->
     <!-- The following option ensures, that all login relevant information is logged correctly. Such information is essential to detect -->
-    <!-- and to address session issues, pontentially caused by 3rd parties. -->
+    <!-- and to address session issues, potentially caused by 3rd parties. -->
     <!-- Open-Xchange strongly suggests NOT to modify this configuration setting unless you are forced to do so by specific legal -->
     <!-- requirements, e.g. privacy regulations. -->
     <!-- -->
