@@ -57,7 +57,6 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.xml.sax.helpers
 Bundle-ClassPath: lib/jackrabbit-webdav-2.1.0.jar,
  lib/jcr-2.0.jar,
- lib/log4j-1.2.14.jar,
  lib/jackrabbit-jcr-commons-2.1.0.jar,
  .
 Bundle-Activator: com.openexchange.file.storage.webdav.osgi.WebDAVFileStorageActivator
