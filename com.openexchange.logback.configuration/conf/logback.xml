@@ -17,26 +17,36 @@
 	
 	... add the OXException category filter here ...
     -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        	<pattern>%date open-xchange %-5level [%logger][%thread]: %class,%method %msg%n</pattern>
+        	<immediateFlush>false</immediateFlush>
+        </encoder>
+    </appender>
 
-    <root level="INFO">
-        <appender-ref ref="ASYNC" />
-    </root>
-    
+    <appender name="CONSOLE" class="ch.qos.logback.classic.net.SyslogAppender">
+    	<syslogHost>localhost</syslogHost>
+    	<facility>local2</facility>
+         <suffixPattern>[%thread] %logger %msg</suffixPattern>
+         <!--
+         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+        	<pattern>%date open-xchange %-5level [%logger][%thread]: %class,%method %msg%n</pattern>
+        	<immediateFlush>false</immediateFlush>
+        </encoder> -->
+    </appender>
+ 
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
         <discardingThreshold>0</discardingThreshold>
         <includeCallerData>true</includeCallerData>
         <appender-ref ref="CONSOLE" />
     </appender>
-
-    <appender name="CONSOLE" class="ch.qos.logback.classic.net.SyslogAppender">
-    	<syslogHost>localhost</syslogHost>
-    	<facility>local2</facility>
-        <encoder>
-        	<pattern>%date open-xchange %-5level [%logger][%thread]: %class,%method %msg%n</pattern>
-        </encoder>
-    </appender>
-
+    
+    <root level="INFO">
+        <appender-ref ref="ASYNC" />
+        <appender-ref ref="STDOUT" />
+    </root>
+    
     <!-- Package based logging -->
     <logger name="org.apache.jcs" level="WARN"/>
 
