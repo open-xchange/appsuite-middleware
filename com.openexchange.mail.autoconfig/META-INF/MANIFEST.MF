@@ -33,7 +33,7 @@ Import-Package: com.openexchange.config.cascade,
  org.apache.commons.logging,
  org.kxml2.io,
  org.osgi.framework,
- org.slf4j;version="1.7.5",
+ org.slf4j,
  org.xmlpull.v1
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

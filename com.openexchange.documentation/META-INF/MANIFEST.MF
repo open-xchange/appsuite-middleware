@@ -13,7 +13,7 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.documentation,
  com.openexchange.documentation.annotations,
  com.openexchange.documentation.descriptions

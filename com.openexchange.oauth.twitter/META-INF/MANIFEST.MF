@@ -17,5 +17,5 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.tools.session,
  org.apache.commons.logging,
  org.osgi.framework,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-Activator: com.openexchange.oauth.twitter.osgi.TwitterOAuthActivator

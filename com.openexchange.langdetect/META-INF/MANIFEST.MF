@@ -39,7 +39,7 @@ Import-Package: cern.clhep,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-ClassPath: .,
  lib/concurrent.jar,
  lib/fastutil-6.4.jar,

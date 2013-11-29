@@ -20,5 +20,5 @@ Import-Package: com.openexchange.exception,
  javax.management.remote.rmi,
  javax.management.timer,
  org.apache.commons.logging,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.management

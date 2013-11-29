@@ -16,5 +16,5 @@ Import-Package: com.openexchange.authentication,
  javax.naming.ldap,
  org.apache.commons.logging,
  org.osgi.framework,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

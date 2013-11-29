@@ -49,7 +49,7 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.service.http,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.jsieve.commands,
  com.openexchange.jsieve.export,
  com.openexchange.jsieve.export.exceptions,

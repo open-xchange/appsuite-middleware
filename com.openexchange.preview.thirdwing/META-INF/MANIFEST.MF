@@ -21,7 +21,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.tools.regex,
  org.apache.commons.logging,
  org.osgi.framework,
- org.slf4j;version="1.7.5"
+ org.slf4j
 DynamicImport-Package: *
 Bundle-ClassPath: .,
  lib/thirdwing.jar,

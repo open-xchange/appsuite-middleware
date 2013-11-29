@@ -13,5 +13,5 @@ Bundle-ActivationPolicy: lazy
 Import-Package: com.openexchange.log,
  org.apache.commons.logging,
  org.osgi.framework,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.version

@@ -21,5 +21,5 @@ Import-Package: com.openexchange.config,
  javax.mail.internet.idn,
  org.apache.commons.logging,
  org.osgi.framework,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-Activator: com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerActivator

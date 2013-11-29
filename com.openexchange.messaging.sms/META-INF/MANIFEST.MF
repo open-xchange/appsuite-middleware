@@ -30,6 +30,6 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.messaging.sms.service
 

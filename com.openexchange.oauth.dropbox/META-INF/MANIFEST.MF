@@ -71,7 +71,7 @@ Import-Package: com.openexchange.config,
  org.scribe.oauth,
  org.scribe.services,
  org.scribe.utils,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-Activator: com.openexchange.oauth.dropbox.osgi.DropboxOAuthActivator
 Bundle-ClassPath: .,
  lib/dropbox-java-sdk-1.5.3.jar,

@@ -39,5 +39,5 @@ Import-Package: com.openexchange.ajax.container,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker;version="1.5.1",
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.drive.events

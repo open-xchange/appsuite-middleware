@@ -35,6 +35,6 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-Activator: com.openexchange.jslob.config.osgi.ConfigJSlobActivator
 Export-Package: com.openexchange.jslob.config

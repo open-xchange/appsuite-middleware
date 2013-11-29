@@ -21,6 +21,6 @@ Import-Package: com.hazelcast.config,
  org.eclipse.osgi.framework.console;version="1.1.0",
  org.osgi.framework,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-ClassPath: .
 Export-Package: com.openexchange.hazelcast.configuration

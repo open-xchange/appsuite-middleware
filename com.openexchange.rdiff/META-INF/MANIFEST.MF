@@ -47,5 +47,5 @@ Import-Package: com.openexchange.exception,
  org.apache.log4j.varia,
  org.apache.log4j.xml,
  org.osgi.framework,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.rdiff

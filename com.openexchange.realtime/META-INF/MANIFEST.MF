@@ -32,7 +32,7 @@ Import-Package: com.google.common.base,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
  org.osgi.service.event,
- org.slf4j;version="1.7.5",
+ org.slf4j,
  sun.misc
 Export-Package: com.openexchange.realtime,
  com.openexchange.realtime.exception,

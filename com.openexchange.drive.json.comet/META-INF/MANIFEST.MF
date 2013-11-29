@@ -34,4 +34,4 @@ Import-Package: com.openexchange.ajax,
  org.glassfish.grizzly.http.server,
  org.json,
  org.osgi.framework,
- org.slf4j;version="1.7.5"
+ org.slf4j

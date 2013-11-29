@@ -72,7 +72,7 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.publish.helpers,
  com.openexchange.publish.interfaces,
  com.openexchange.publish.osgi.tools,

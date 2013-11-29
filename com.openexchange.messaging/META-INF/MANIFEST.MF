@@ -16,7 +16,7 @@ Import-Package: com.openexchange.config.cascade,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Export-Package: com.openexchange.messaging,
  com.openexchange.messaging.registry
 Bundle-Activator: com.openexchange.messaging.osgi.MessagingActivator

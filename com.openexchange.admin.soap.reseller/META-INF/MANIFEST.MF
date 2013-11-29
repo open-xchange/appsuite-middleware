@@ -47,7 +47,7 @@ Import-Package: com.openexchange.admin.plugins,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Require-Bundle: com.openexchange.admin.reseller;bundle-version="6.21.0"
 Bundle-Activator: com.openexchange.admin.soap.reseller.osgi.SoapResellerActivator
 Bundle-ClassPath: .

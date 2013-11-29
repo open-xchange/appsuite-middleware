@@ -27,6 +27,6 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-Activator: com.openexchange.index.osgi.Activator
 

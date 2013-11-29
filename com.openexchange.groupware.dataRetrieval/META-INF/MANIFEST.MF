@@ -32,6 +32,6 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-Activator: com.openexchange.groupware.dataRetrieval.osgi.DataRetrievalActivator
 Export-Package: com.openexchange.groupware.dataRetrieval

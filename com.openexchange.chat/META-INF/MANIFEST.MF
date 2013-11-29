@@ -18,7 +18,7 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-ClassPath: .,
  lib/dom4j-1.6.1.jar,
  lib/smack-3.2.1.jar,

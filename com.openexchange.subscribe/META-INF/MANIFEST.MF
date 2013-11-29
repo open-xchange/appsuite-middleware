@@ -80,7 +80,7 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5",
+ org.slf4j,
  org.xml.sax,
  org.xml.sax.helpers
 Export-Package: com.openexchange.subscribe,

@@ -57,6 +57,6 @@ Import-Package: com.openexchange.caching,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.unifiedinbox.osgi.UnifiedInboxActivator

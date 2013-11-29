@@ -129,7 +129,7 @@ Import-Package: com.hazelcast.cluster,
  org.quartz.utils.counter,
  org.quartz.utils.counter.sampled,
  org.quartz.xml,
- org.slf4j;version="1.7.5"
+ org.slf4j
 Bundle-Activator: com.openexchange.service.indexing.impl.osgi.IndexingActivator
 Export-Package: com.openexchange.service.indexing.impl.infostore,
  com.openexchange.service.indexing.impl.internal
