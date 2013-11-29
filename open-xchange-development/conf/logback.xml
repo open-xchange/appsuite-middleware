@@ -17,14 +17,27 @@
 	
 	... add the OXException category filter here ...
     -->
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
         	<pattern>%date open-xchange %-5level [%logger][%thread]: %class,%method %msg%n</pattern>
         	<immediateFlush>false</immediateFlush>
         </encoder>
     </appender>
 
-    <appender name="CONSOLE" class="ch.qos.logback.classic.net.SyslogAppender">
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<!-- Support multiple-JVM writing to the same log file -->
+    	<prudent>true</prudent>
+    	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      		<fileNamePattern>logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
+      		<maxHistory>30</maxHistory> 
+    	</rollingPolicy>
+
+    	<encoder>
+      		<pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    	</encoder>
+  	</appender>
+
+    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
     	<syslogHost>localhost</syslogHost>
     	<facility>local2</facility>
          <suffixPattern>[%thread] %logger %msg</suffixPattern>
@@ -44,7 +57,6 @@
     
     <root level="INFO">
         <appender-ref ref="ASYNC" />
-        <appender-ref ref="STDOUT" />
     </root>
     
     <!-- Package based logging -->
