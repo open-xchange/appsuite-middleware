@@ -1075,9 +1075,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     private void move(final int folderId, final int targetFolderId, final int createdBy, String newName, final FolderObject storageSrc, final long lastModified) throws OXException {
         /*
-         * Folder is already in target folder
+         * Folder is already in target folder and does not need to be renamed
          */
-        if (storageSrc.getParentFolderID() == targetFolderId && null == newName) {
+        if (storageSrc.getParentFolderID() == targetFolderId && (null == newName || newName.equals(storageSrc.getFolderName()))) {
             return;
         }
         /*
