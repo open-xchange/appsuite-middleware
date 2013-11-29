@@ -343,14 +343,13 @@ public class OXMFPublicationService extends AbstractPublicationService {
         String re3="(\\/)"; // Any Single Character 2
         String re4="(\\d+)";    // Integer Number 1
         String re5="(\\/)"; // Any Single Character 3
-        String re6="((?:[a-z][a-z]+))"; // Word 3
+        String re6="((?:\\w+))"; // Word 3
 
-        Pattern p = Pattern.compile(re1+re2+re3+re4+re5+re6,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Pattern p = Pattern.compile(re1 + re2 + re3 + re4 + re5 + re6, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher m = p.matcher(URL);
-        if (m.find())
-        {
-            String contextId=m.group(3);
-            String site=m.group(5);
+        if (m.find()) {
+            String contextId = m.group(3);
+            String site = m.group(5);
 
             final Context ctx = service.getContext(Integer.parseInt(contextId));
             return getPublication(ctx, site);

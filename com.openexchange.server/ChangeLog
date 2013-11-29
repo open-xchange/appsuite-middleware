@@ -2,6 +2,10 @@
 
  - Fix for bug 29495: Removed port 587 from list of secure smtp ports
 
+* 2013-11-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30069: Fixed regex to match a publication URL to support any word character, but not only alphabetic ones
+
 * 2013-11-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29655: Added possibility to change appointments, if external organizer and UID is given (OLOX2 requirement).
