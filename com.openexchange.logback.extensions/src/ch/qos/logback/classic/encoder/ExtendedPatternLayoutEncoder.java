@@ -53,7 +53,7 @@ import ch.qos.logback.classic.PatternLayout;
 
 
 /**
- * {@link ExtendedPatternLayoutEncoder}
+ * {@link ExtendedPatternLayoutEncoder} - Puts additional converters to <code>PatternLayout</code>'s default converter mapping.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -55,7 +55,7 @@ import ch.qos.logback.classic.pattern.MDCConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
- * {@link LineMDCConverter}
+ * {@link LineMDCConverter} - Output each key-value-pair contained in MDC in a separate line.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
