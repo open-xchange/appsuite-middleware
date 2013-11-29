@@ -60,7 +60,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
@@ -598,6 +597,29 @@ public final class LogProperties {
         }
         logString = logBuilder.toString();
         return logString;
+    }
+
+    /**
+     * For convenience.
+     *
+     * @return Always <code>true</code>
+     * @deprecated Use slf4j logging
+     */
+    @Deprecated
+    public static boolean isEnabled() {
+        return true;
+    }
+
+    /**
+     * For convenience.
+     *
+     * @return The log properties
+     * @deprecated Please use slf4j MDC to manage log properties
+     */
+    @Deprecated
+    public static Props getLogProperties() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
