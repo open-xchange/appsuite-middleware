@@ -60,7 +60,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -78,7 +78,8 @@ import com.openexchange.user.UserService;
 
 public class ParallelsSpamdService implements SpamdService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsSpamdService.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsSpamdService.class);
+
     private static final String POA_SPAM_PROVIDER_ATTRIBUTE_NAME = "POA_SPAM_PROVIDER";
 
     private final Configuration config;
@@ -97,8 +98,8 @@ public class ParallelsSpamdService implements SpamdService {
 
         /**
          * 1. sent primary email address via xmlrpc to smtpserver of user to port specified in config
-         * 
-         * 
+         *
+         *
          *   <?xml version="1.0"?>
 		 		<methodCall>
 				<methodName>pem.spamassassin</methodName>
@@ -112,26 +113,26 @@ public class ParallelsSpamdService implements SpamdService {
 				</param>
 				</params>
 				</methodCall>
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
          * 2. read response from xmlrpc and parse hostname and username
          * which will then be returned in the spamdprovider.
          * port of spamd process will always be read from config file.
-         * 
+         *
          * ERROR response:
-         * 
+         *
          * <?xml version="1.0" encoding="utf-8"?>
 <methodResponse>
 <fault>
@@ -158,7 +159,7 @@ public class ParallelsSpamdService implements SpamdService {
          *
          *
          *  SUCCESS RESPONSE:
-         * 
+         *
          *  <?xml version="1.0" encoding="utf-8"?>
 <methodResponse>
 <params>
@@ -182,15 +183,15 @@ public class ParallelsSpamdService implements SpamdService {
 </param>
 </params>
 </methodResponse>
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
+         *
+         *
+         *
+         *
+         *
+         *
          * 3. set attributes in session object to remember the spam settings
          * so that no 2nd request must be made to the xmlrpc to keep the load low.
-         * 
+         *
          */
 
         HttpClient http_client = new HttpClient();
