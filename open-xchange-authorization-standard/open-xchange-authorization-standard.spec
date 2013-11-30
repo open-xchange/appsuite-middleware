@@ -15,6 +15,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Module implementing the default authorization
+Autoreqprov:   no
 Provides:      open-xchange-authorization
 Requires:      open-xchange-core >= @OXVERSION@
 

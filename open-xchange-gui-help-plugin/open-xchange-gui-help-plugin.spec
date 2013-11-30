@@ -14,6 +14,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Open-Xchange GUI Help Server Plug-In
+Autoreqprov:   no
 Requires:	open-xchange-core
 
 %description

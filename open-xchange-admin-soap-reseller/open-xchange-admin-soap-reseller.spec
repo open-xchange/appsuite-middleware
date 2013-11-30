@@ -16,6 +16,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        SOAP interfaces for the reseller administration level
+Autoreqprov:   no
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:	open-xchange-admin-reseller >= @OXVERSION@
 Provides:	open-xchange-admin-plugin-reseller-soap = %{version}

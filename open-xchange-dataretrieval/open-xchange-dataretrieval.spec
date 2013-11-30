@@ -14,6 +14,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend data retrieval extension
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 
 

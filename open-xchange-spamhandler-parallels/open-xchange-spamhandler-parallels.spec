@@ -16,6 +16,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Spam handler for Parallels extensions
+Autoreqprov:   no
 Requires:       open-xchange-parallels >= @OXVERSION@
 Requires:       open-xchange-spamhandler-spamassassin >= @OXVERSION@
 

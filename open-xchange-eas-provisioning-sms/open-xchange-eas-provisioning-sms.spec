@@ -15,6 +15,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       EAS provisioning extension to sent provisioning to mobile phones via SMS
+Autoreqprov:   no
 Requires:      open-xchange-eas-provisioning-core >= @OXVERSION@
 Provides:      open-xchange-eas-provisioning-action
 Provides:      open-xchange-mobile-configuration-json-action-sms = %{version}

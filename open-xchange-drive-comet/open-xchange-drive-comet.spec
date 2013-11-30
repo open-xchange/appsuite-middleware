@@ -16,6 +16,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Drive push implementation using Comet and using less system resources
+Autoreqprov:   no
 Requires:       open-xchange-drive >= @OXVERSION@
 Requires:       open-xchange-grizzly >= @OXVERSION@
 

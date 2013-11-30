@@ -15,6 +15,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Source1:       open-xchange.init
 Summary:       The Open-Xchange backend
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-authentication
 Requires:      open-xchange-authorization

@@ -14,6 +14,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Xerces Compat for IBM Java
+Autoreqprov:   no
 Requires:       java-ibm >= 1.6.0
 Provides:       open-xchange-xerces
 Conflicts:      open-xchange-xerces-sun

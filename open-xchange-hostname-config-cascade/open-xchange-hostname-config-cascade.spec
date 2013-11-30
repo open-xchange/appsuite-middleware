@@ -15,6 +15,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       This extension provides a HostnameService using information from the config cascade
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-config-cascade-hostname = %{version}
 Obsoletes:     open-xchange-config-cascade-hostname <= %{version}

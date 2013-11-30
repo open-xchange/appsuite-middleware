@@ -15,6 +15,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       This bundle provides a service which reads hostnames for the contexts from an LDAP
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description

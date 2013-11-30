@@ -15,6 +15,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        This bundle provides a generic interface for spam settings
+Autoreqprov:   no
 Requires:       open-xchange-messaging >= @OXVERSION@
 
 %description

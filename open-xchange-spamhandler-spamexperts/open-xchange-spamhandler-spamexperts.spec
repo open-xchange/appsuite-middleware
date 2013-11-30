@@ -15,6 +15,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open-Xchange Spamexperts Plugin
+Autoreqprov:   no
 Requires:       open-xchange-core
 Provides:       open-xchange-spamhandler
 Conflicts:      open-xchange-spamhandler-default

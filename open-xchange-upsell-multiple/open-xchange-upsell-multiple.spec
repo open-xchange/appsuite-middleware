@@ -16,6 +16,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The multiple Open-Xchange upsell multiple bundle
+Autoreqprov:   no
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-admin >= @OXVERSION@
 Provides:       open-xchange-upsell-generic = %{version}

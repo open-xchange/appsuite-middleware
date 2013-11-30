@@ -14,6 +14,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       3rd party OSGi bundles used by the Open-Xchange backend
+Autoreqprov:   no
 PreReq:        /usr/sbin/useradd
 Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common <= %{version}

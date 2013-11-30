@@ -14,6 +14,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/ 
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       log4j library bundle and xml configuration file
+Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-commons-logging-log4j = %{version}
 Obsoletes:     open-xchange-commons-logging-log4j <= %{version}

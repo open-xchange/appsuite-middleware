@@ -15,6 +15,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Xerces Compat for Sun Java
+Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-xerces
 Conflicts:     open-xchange-xerces-ibm

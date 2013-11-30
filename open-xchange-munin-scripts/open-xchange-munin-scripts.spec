@@ -14,6 +14,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
+Autoreqprov:   no
 Requires:	   open-xchange-core >= @OXVERSION@
 Requires:      munin-node
 Conflicts:     open-xchange-munin-scripts-jolokia

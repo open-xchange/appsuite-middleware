@@ -16,6 +16,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        SOAP interface for extension to copy user into other contexts
+Autoreqprov:   no
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:       open-xchange-admin-user-copy >= @OXVERSION@
 Provides:       open-xchange-admin-plugin-user-copy-soap = %{version}
