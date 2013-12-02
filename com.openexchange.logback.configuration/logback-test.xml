@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<configuration scan="true" scanPeriod="30 seconds" debug="false">
-    <!-- Enable JMX default configurator
-    <jmxConfigurator /> -->
+<configuration scan="true" scanPeriod="30 seconds" debug="true">
+    <!-- sends logs to logback-beagle -->
+    <!-- http://logback.qos.ch/beagle/index.html -->
+    <consolePlugin />
+
+    <!-- Enable JMX default configurator -->
+    <jmxConfigurator />
 
     <!-- Enable the following logger if you would like to filter logging for specific user, session or context -->
     <!-- Use the following keys for MDCKey ... -->
@@ -17,33 +21,17 @@
 
     ... add the OXException category filter here ...
     -->
-
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/open-xchange/open-xchange.log.0</file>
-        <rollingPolicy class="com.openexchange.logback.extensions.FixedWindowRollingPolicy">
-            <fileNamePattern>/var/log/open-xchange/open-xchange.log.%i</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>99</maxIndex>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>2MB</maxFileSize>
-        </triggeringPolicy>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
             <pattern>%d{"MMM d, yyyy H:m:s a"} %class %method%n%level: %message%n%lmdc%exception{full}%n</pattern>
         </encoder>
-    </appender>
-
-    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
-        <syslogHost>localhost</syslogHost>
-        <facility>local2</facility>
-        <suffixPattern>%d open-xchange %-5p [%c][%t]: %C,%M %m%n</suffixPattern>
     </appender>
 
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
         <discardingThreshold>0</discardingThreshold>
         <includeCallerData>true</includeCallerData>
-        <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE" />
     </appender>
 
     <root level="INFO">

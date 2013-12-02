@@ -345,8 +345,8 @@ public class DispatcherServlet extends SessionServlet {
             {
                 final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
                 final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
-    			final String action = requestDataTools.getAction(httpRequest);
-    			session = getSession(httpRequest, dispatcher, module, action);
+                final String action = requestDataTools.getAction(httpRequest);
+                session = getSession(httpRequest, dispatcher, module, action);
                 /*
                  * Parse AJAXRequestData
                  */
@@ -439,12 +439,8 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private void logException(final Exception e, final LogLevel logLevel) {
-        final String msg;
-        {
-            final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
-            logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
-            msg = logBuilder.toString();
-        }
+        final String msg = "Error processing request.";
+
         if (null == logLevel) {
             LOG.error(msg, e);
         } else {
@@ -486,13 +482,13 @@ public class DispatcherServlet extends SessionServlet {
         return session;
     }
 
-	private ServerSession fakeSession() {
-		final UserImpl user = new UserImpl();
-		user.setAttributes(new HashMap<String, Set<String>>(1));
-		return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
-	}
+    private ServerSession fakeSession() {
+        final UserImpl user = new UserImpl();
+        user.setAttributes(new HashMap<String, Set<String>>(1));
+        return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
+    }
 
-	/**
+    /**
      * Sends a proper response to requesting client after request has been orderly dispatched.
      *
      * @param requestData The AJAX request data
