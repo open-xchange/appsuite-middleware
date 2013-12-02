@@ -53,6 +53,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -74,14 +76,15 @@ public class AuditConfigurationTest {
     /**
      * Mock for the {@link ConfigurationService}
      */
+    @Mock
     private ConfigurationService configurationService;
 
     /**
-     * @throws java.lang.Exception
+     * {@inheritDoc}
      */
     @Before
-    public void setUp() throws Exception {
-        configurationService = PowerMockito.mock(ConfigurationService.class);
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test(expected = OXException.class)
@@ -98,7 +101,6 @@ public class AuditConfigurationTest {
 
         boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
         Assert.assertTrue(fileAccessLogging);
-
     }
 
     @Test
@@ -109,5 +111,4 @@ public class AuditConfigurationTest {
         boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
         Assert.assertFalse(fileAccessLogging);
     }
-
 }

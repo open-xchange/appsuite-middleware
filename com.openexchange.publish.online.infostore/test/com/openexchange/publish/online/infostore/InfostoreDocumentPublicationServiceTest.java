@@ -51,7 +51,9 @@ package com.openexchange.publish.online.infostore;
 
 import junit.framework.TestCase;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -67,17 +69,17 @@ import com.openexchange.publish.Publication;
  */
 @RunWith(PowerMockRunner.class)
 public class InfostoreDocumentPublicationServiceTest extends TestCase{
+
+    @InjectMocks
     private InfostoreDocumentPublicationService publicationService;
 
+    @Mock
     private IDBasedFileAccessFactory fileAccessFactory = null;
 
     @Override
     public void setUp() {
-        this.fileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
-
-        this.publicationService = new InfostoreDocumentPublicationService(this.fileAccessFactory);
+        MockitoAnnotations.initMocks(this);
     }
-
 
     public void testAddSecretBeforeCreate() throws OXException {
         Publication publication = new Publication();

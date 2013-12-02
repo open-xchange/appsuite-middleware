@@ -64,7 +64,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -93,7 +95,7 @@ public class TokenLoginServiceImplTest {
     /**
      * Instance to test
      */
-    private TokenLoginServiceImpl tokenLoginServiceImpl = null;
+    private TokenLoginServiceImpl tokenLoginServiceImpl;
 
     /**
      * Idle time required for the constructor
@@ -108,21 +110,25 @@ public class TokenLoginServiceImplTest {
     /**
      * Mock of the {@link ConfigurationService}
      */
+    @Mock
     private ConfigurationService configService;
 
     /**
      * Mock of the {@link Session}
      */
+    @Mock
     private Session session;
 
     /**
      * Mock of the {@link ContextService}
      */
+    @Mock
     private ContextService contextService;
 
     /**
      * Mock of the {@link SessiondService}
      */
+    @Mock
     private SessiondService sessiondService;
 
     /**
@@ -143,18 +149,12 @@ public class TokenLoginServiceImplTest {
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
-
-        // MEMBERS
-        this.configService = PowerMockito.mock(ConfigurationService.class);
-        this.session = PowerMockito.mock(Session.class);
-        this.contextService = PowerMockito.mock(ContextService.class);
-        this.sessiondService = PowerMockito.mock(SessiondService.class);
 
         // BEHAVIOUR
         PowerMockito.when(session.getContextId()).thenReturn(424242669);
         PowerMockito.when(session.getSessionID()).thenReturn("8a07c5a2e4974a75ae70bd9a36198f03");
-
     }
 
     @Test(expected = IllegalArgumentException.class)

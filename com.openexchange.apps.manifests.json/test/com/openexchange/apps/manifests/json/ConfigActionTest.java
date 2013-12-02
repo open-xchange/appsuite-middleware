@@ -60,7 +60,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -91,6 +93,7 @@ public class ConfigActionTest {
     /**
      * Mock for {@link ServerConfigServicesLookup}
      */
+    @Mock
     private ServerConfigServicesLookup serverConfigServicesLookup = null;
 
     private JSONArray manifests = new JSONArray();
@@ -98,17 +101,22 @@ public class ConfigActionTest {
     /**
      * Mock for the service lookup
      */
+    @Mock
     private AJAXModuleActivator serviceLookup = null;
 
     /**
      * Mock for the ServerSession
      */
+    @Mock
     private ServerSession serverSession = null;
 
+    @Mock
     private AJAXRequestData ajaxRequestData = null;
 
+    @Mock
     private ConfigurationService configurationService;
 
+    @Mock
     private Properties properties;
 
     /**
@@ -116,17 +124,10 @@ public class ConfigActionTest {
      */
     @Before
     public void setUp() {
-        // MEMBERS
-        this.serverConfigServicesLookup = PowerMockito.mock(ServerConfigServicesLookup.class);
-        this.serviceLookup = PowerMockito.mock(AJAXModuleActivator.class);
-        this.serverSession = PowerMockito.mock(ServerSession.class);
-        this.ajaxRequestData = PowerMockito.mock(AJAXRequestData.class);
-        this.configurationService = PowerMockito.mock(ConfigurationService.class);
-        this.properties = PowerMockito.mock(Properties.class);
+        MockitoAnnotations.initMocks(this);
 
         // SERVICES
         Mockito.when(this.serviceLookup.getService(ConfigurationService.class)).thenReturn(this.configurationService);
-        PowerMockito.when(configurationService.getProperty(Matchers.anyString())).thenReturn("theStringPropertyValue");
         PowerMockito.when(configurationService.getPropertiesInFolder(Matchers.anyString())).thenReturn(this.properties);
         Map<String, Object> defaultMap = new HashMap<String, Object>();
         Map<String, Object> map = new HashMap<String, Object>();

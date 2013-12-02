@@ -59,9 +59,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.MockitoAnnotations;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -84,6 +86,7 @@ public class TemplateServiceImplTest {
     /**
      * Instance under test
      */
+    @InjectMocks
     private TemplateServiceImpl templateService = null;
 
     /**
@@ -99,21 +102,25 @@ public class TemplateServiceImplTest {
     /**
      * Mock of the {@link ConfigurationService}
      */
+    @Mock
     private ConfigurationService configService;
 
     /**
      * Mock of the {@link OXFolderHelper}
      */
+    @Mock
     private OXFolderHelper folders;
 
     /**
      * Mock of the {@link OXInfostoreHelper}
      */
+    @Mock
     private OXInfostoreHelper infostore;
 
     /**
      * Mock of the {@link Session}
      */
+    @Mock
     private Session session;
 
     /**
@@ -129,11 +136,7 @@ public class TemplateServiceImplTest {
 
     @Before
     public void setUp() {
-        // MEMBERS
-        this.configService = PowerMockito.mock(ConfigurationService.class);
-        this.session = PowerMockito.mock(Session.class);
-        this.folders = PowerMockito.mock(OXFolderHelper.class);
-        this.infostore = PowerMockito.mock(OXInfostoreHelper.class);
+        MockitoAnnotations.initMocks(this);
 
         Mockito.when(this.configService.getProperty(TemplateServiceImpl.PATH_PROPERTY)).thenReturn("thePath");
     }

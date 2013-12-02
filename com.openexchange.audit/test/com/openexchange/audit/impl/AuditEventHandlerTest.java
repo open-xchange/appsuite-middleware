@@ -56,6 +56,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.Event;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -130,6 +131,8 @@ public class AuditEventHandlerTest {
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         PowerMockito.mockStatic(AuditConfiguration.class);
         PowerMockito.mockStatic(UserStorage.class);
         PowerMockito.mockStatic(ContextStorage.class);

@@ -58,8 +58,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
@@ -90,6 +93,7 @@ public class ManifestJSONActivatorTest {
     /**
      * Instance to test
      */
+    @InjectMocks
     private ManifestJSONActivator manifestJSONActivator = null;
 
     /**
@@ -98,23 +102,23 @@ public class ManifestJSONActivatorTest {
     @Rule
     protected TemporaryFolder folder = new TemporaryFolder();
 
+    @Mock
     private BundleContext bundleContext;
 
+    @Mock
     private Bundle bundle;
 
+    @Mock
     private ConfigurationService configurationService;
 
+    @Mock
     private Properties properties;
 
     @Before
     public void setUp() throws Exception {
-        this.manifestJSONActivator = new ManifestJSONActivator();
+        MockitoAnnotations.initMocks(this);
 
-        // MEMBERS
-        this.bundleContext = PowerMockito.mock(BundleContext.class);
-        this.bundle = PowerMockito.mock(Bundle.class);
-        this.configurationService = PowerMockito.mock(ConfigurationService.class);
-        this.properties = PowerMockito.mock(Properties.class);
+        this.manifestJSONActivator = new ManifestJSONActivator();
 
         // SERVICES
         PowerMockito.when(configurationService.getProperty(Matchers.anyString())).thenReturn("theStringPropertyValue");
