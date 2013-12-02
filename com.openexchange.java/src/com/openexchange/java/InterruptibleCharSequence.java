@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,70 @@
  *
  */
 
-package com.openexchange.html;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
+package com.openexchange.java;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link InterruptibleCharSequence} - A <code>CharSequence</code> that can notice thread interrupts.
+ * <p>
+ * Originally developed by <a href="http://gojomo.blogspot.de/">Gordon Mohr (@gojomo)</a> in Heritrix project (<a
+ * href="crawler.archive.org">crawler.archive.org</a>).
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ Bug26237Test.class, Bug26611Test.class, Bug27335Test.class, Bug27708Test.class, CSSMatcherTest.class, Bug30114Test.class })
-public class UnitTests {
+public final class InterruptibleCharSequence implements CharSequence {
 
-    private UnitTests() {
-        super();
+    /**
+     * Gets an {@link InterruptibleCharSequence} instance for given {@link CharSequence} instance.
+     *
+     * @param charSequence The char sequence
+     * @return An {@link InterruptibleCharSequence} instance for given {@link CharSequence} instance
+     */
+    public static InterruptibleCharSequence valueOf(final CharSequence charSequence) {
+        if (null == charSequence) {
+            return null;
+        }
+        if (charSequence instanceof InterruptibleCharSequence) {
+            return (InterruptibleCharSequence) charSequence;
+        }
+        return new InterruptibleCharSequence(charSequence);
     }
+
+    // ------------------------------------------------------------------------------------------------------------- //
+
+    private final CharSequence inner;
+
+    /**
+     * Initializes a new {@link InterruptibleCharSequence}.
+     *
+     * @param cs The char sequence to delegate to
+     */
+    private InterruptibleCharSequence(final CharSequence cs) {
+        super();
+        this.inner = cs;
+    }
+
+    @Override
+    public char charAt(final int index) {
+        if (Thread.interrupted()) { // clears flag if set
+            throw new RuntimeException(new InterruptedException());
+        }
+        // counter++;
+        return inner.charAt(index);
+    }
+
+    @Override
+    public int length() {
+        return inner.length();
+    }
+
+    @Override
+    public CharSequence subSequence(final int start, final int end) {
+        return new InterruptibleCharSequence(inner.subSequence(start, end));
+    }
+
+    @Override
+    public String toString() {
+        return inner.toString();
+    }
+
 }
