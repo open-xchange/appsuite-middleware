@@ -20,7 +20,7 @@ Requires:       open-xchange-admin-soap >= @OXVERSION@
 Requires:       open-xchange-spamhandler
 Provides:       open-xchange-authentication
 Provides:       open-xchange-custom-parallels = %{version}
-Obsoletes:      open-xchange-custom-parallels <= %{version}
+Obsoletes:      open-xchange-custom-parallels < %{version}
 Conflicts:      open-xchange-authentication-database open-xchange-authentication-ldap open-xchange-authentication-imap open-xchange-authentication-kerberos
 
 %description

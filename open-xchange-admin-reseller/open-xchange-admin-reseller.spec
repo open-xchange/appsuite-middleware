@@ -21,7 +21,7 @@ Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Requires:      open-xchange-admin-autocontextid >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-reseller = %{version}
-Obsoletes:     open-xchange-admin-plugin-reseller <= %{version}
+Obsoletes:     open-xchange-admin-plugin-reseller < %{version}
 
 %description
 This extension adds the reseller administration level to the administrative RMI interface. The master administrator can now create reseller

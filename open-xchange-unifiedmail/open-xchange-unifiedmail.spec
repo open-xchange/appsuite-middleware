@@ -17,7 +17,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Extension to combine all mail storage accounts into a virtual single one
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Obsoletes:     open-xchange-unifiedinbox <= @OXVERSION@
+Obsoletes:     open-xchange-unifiedinbox < @OXVERSION@
 Provides:      open-xchange-unifiedinbox = @OXVERSION@
 
 %description

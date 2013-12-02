@@ -18,7 +18,7 @@ Summary:       This extension provides a HostnameService using information from 
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-config-cascade-hostname = %{version}
-Obsoletes:     open-xchange-config-cascade-hostname <= %{version}
+Obsoletes:     open-xchange-config-cascade-hostname < %{version}
 
 %description
 Using this extension the hostname for contexts can be configured using the config cascade.

@@ -20,7 +20,7 @@ Autoreqprov:   no
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-admin >= @OXVERSION@
 Provides:       open-xchange-upsell-generic = %{version}
-Obsoletes:      open-xchange-upsell-generic <= %{version}
+Obsoletes:      open-xchange-upsell-generic < %{version}
 
 %description
 The multiple Open-Xchange upsell multiple bundle

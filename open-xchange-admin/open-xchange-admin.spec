@@ -18,19 +18,19 @@ Summary:       The Open-Xchange backend administration extension
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-hosting = %{version}
-Obsoletes:     open-xchange-admin-plugin-hosting <= %{version}
+Obsoletes:     open-xchange-admin-plugin-hosting < %{version}
 Provides:      open-xchange-admin-lib = %{version}
-Obsoletes:     open-xchange-admin-lib <= %{version}
+Obsoletes:     open-xchange-admin-lib < %{version}
 Provides:      open-xchange-admin-plugin-hosting-client = %{version}
-Obsoletes:     open-xchange-admin-plugin-hosting-client <= %{version}
+Obsoletes:     open-xchange-admin-plugin-hosting-client < %{version}
 Provides:      open-xchange-admin-plugin-hosting-doc = %{version}
-Obsoletes:     open-xchange-admin-plugin-hosting-doc <= %{version}
+Obsoletes:     open-xchange-admin-plugin-hosting-doc < %{version}
 Provides:      open-xchange-admin-client = %{version}
-Obsoletes:     open-xchange-admin-client <= %{version}
+Obsoletes:     open-xchange-admin-client < %{version}
 Provides:      open-xchange-admin-plugin-hosting-lib = %{version}
-Obsoletes:     open-xchange-admin-plugin-hosting-lib <= %{version}
+Obsoletes:     open-xchange-admin-plugin-hosting-lib < %{version}
 Provides:      open-xchange-admin-doc = %{version}
-Obsoletes:     open-xchange-admin-doc <= %{version}
+Obsoletes:     open-xchange-admin-doc < %{version}
 %if 0%{?suse_version}
 Requires:      mysql-client >= 5.0.0
 %endif

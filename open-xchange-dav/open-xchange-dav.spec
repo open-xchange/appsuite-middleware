@@ -20,13 +20,13 @@ Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-freebusy >= @OXVERSION@
 Provides:      open-xchange-caldav = %{version}
-Obsoletes:     open-xchange-caldav <= %{version}
+Obsoletes:     open-xchange-caldav < %{version}
 Provides:      open-xchange-carddav = %{version}
-Obsoletes:     open-xchange-carddav <= %{version}
+Obsoletes:     open-xchange-carddav < %{version}
 Provides:      open-xchange-webdav-directory = %{version}
-Obsoletes:     open-xchange-webdav-directory <= %{version}
+Obsoletes:     open-xchange-webdav-directory < %{version}
 Provides:      open-xchange-webdav-acl = %{version}
-Obsoletes:     open-xchange-webdav-acl <= %{version}
+Obsoletes:     open-xchange-webdav-acl < %{version}
 
 %description
 The Open-Xchange CardDAV and CalDAV implementation.

@@ -20,7 +20,7 @@ Autoreqprov:   no
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:	open-xchange-admin-reseller >= @OXVERSION@
 Provides:	open-xchange-admin-plugin-reseller-soap = %{version}
-Obsoletes:	open-xchange-admin-plugin-reseller-soap <= %{version}
+Obsoletes:	open-xchange-admin-plugin-reseller-soap < %{version}
 
 %description
 This package installs the SOAP interfaces for the reseller level administration RMI interfaces. See the open-xchange-admin-reseller package

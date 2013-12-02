@@ -17,10 +17,10 @@ Summary:       3rd party OSGi bundles used by the Open-Xchange backend
 Autoreqprov:   no
 PreReq:        /usr/sbin/useradd
 Provides:      open-xchange-common = %{version}
-Obsoletes:     open-xchange-common <= %{version}
+Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-activation = %{version}
-Obsoletes:     open-xchange-activation <= %{version}
-%if 0%{?rhel_version} && 0%{?rhel_version} <= 599
+Obsoletes:     open-xchange-activation < %{version}
+%if 0%{?rhel_version} && 0%{?rhel_version} < 599
 # rhel needs special handling because on rhel5 supplementary bea java will be installed by default
 # bug id #22563
 Requires:      java-sun >= 1.6.0

@@ -18,11 +18,11 @@ Summary:       The Open-Xchange backend publish extension
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-publish-json = %{version}
-Obsoletes:     open-xchange-publish-json <= %{version}
+Obsoletes:     open-xchange-publish-json < %{version}
 Provides:      open-xchange-publish-microformats = %{version}
-Obsoletes:     open-xchange-publish-microformats <= %{version}
+Obsoletes:     open-xchange-publish-microformats < %{version}
 Provides:      open-xchange-templating-json = %{version}
-Obsoletes:     open-xchange-templating-json <= %{version}
+Obsoletes:     open-xchange-templating-json < %{version}
 
 %description
 Add the feature to publish content to the backend installation.

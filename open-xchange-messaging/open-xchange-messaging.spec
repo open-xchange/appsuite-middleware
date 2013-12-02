@@ -28,12 +28,12 @@ Provides:       open-xchange-messaging-json = %{version}
 Provides:       open-xchange-messaging-rss = %{version}
 Provides:       open-xchange-messaging-twitter = %{version}
 Provides:       open-xchange-twitter = %{version}
-Obsoletes:      open-xchange-messaging-facebook <= %{version}
-Obsoletes:      open-xchange-messaging-generic <= %{version}
-Obsoletes:      open-xchange-messaging-json <= %{version}
-Obsoletes:      open-xchange-messaging-rss <= %{version}
-Obsoletes:      open-xchange-messaging-twitter <= %{version}
-Obsoletes:      open-xchange-twitter <= %{version}
+Obsoletes:      open-xchange-messaging-facebook < %{version}
+Obsoletes:      open-xchange-messaging-generic < %{version}
+Obsoletes:      open-xchange-messaging-json < %{version}
+Obsoletes:      open-xchange-messaging-rss < %{version}
+Obsoletes:      open-xchange-messaging-twitter < %{version}
+Obsoletes:      open-xchange-twitter < %{version}
 
 %description
 Adds the feature to use messaging services to the backend installation.

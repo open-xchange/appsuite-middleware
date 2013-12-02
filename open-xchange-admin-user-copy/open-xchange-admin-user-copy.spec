@@ -20,11 +20,11 @@ Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-user-copy = %{version}
-Obsoletes:     open-xchange-admin-plugin-user-copy <= %{version}
+Obsoletes:     open-xchange-admin-plugin-user-copy < %{version}
 Provides:      open-xchange-admin-plugin-user-copy-client = %{version}
-Obsoletes:     open-xchange-admin-plugin-user-copy-client <= %{version}
+Obsoletes:     open-xchange-admin-plugin-user-copy-client < %{version}
 Provides:      open-xchange-user-copy = %{version}
-Obsoletes:     open-xchange-user-copy <= %{version}
+Obsoletes:     open-xchange-user-copy < %{version}
 
 %description
 This package installs administrative OSGi bundles that provide the extension to copy a user into another context. This is mainly used to

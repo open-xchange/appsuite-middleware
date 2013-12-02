@@ -22,19 +22,19 @@ Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-oauth >= @OXVERSION@
 Requires:      open-xchange-xerces
 Provides:      open-xchange-subscribe-crawler = %{version}
-Obsoletes:     open-xchange-subscribe-crawler <= %{version}
+Obsoletes:     open-xchange-subscribe-crawler < %{version}
 Provides:      open-xchange-subscribe-facebook = %{version}
-Obsoletes:     open-xchange-subscribe-facebook <= %{version}
+Obsoletes:     open-xchange-subscribe-facebook < %{version}
 Provides:      open-xchange-subscribe-json = %{version}
-Obsoletes:     open-xchange-subscribe-json <= %{version}
+Obsoletes:     open-xchange-subscribe-json < %{version}
 Provides:      open-xchange-subscribe-linkedin = %{version} 
-Obsoletes:     open-xchange-subscribe-linkedin <= %{version}
+Obsoletes:     open-xchange-subscribe-linkedin < %{version}
 Provides:      open-xchange-subscribe-microformats = %{version}
-Obsoletes:     open-xchange-subscribe-microformats <= %{version}
+Obsoletes:     open-xchange-subscribe-microformats < %{version}
 Provides:      open-xchange-subscribe-msn = %{version}
-Obsoletes:     open-xchange-subscribe-msn <= %{version}
+Obsoletes:     open-xchange-subscribe-msn < %{version}
 Provides:      open-xchange-subscribe-yahoo = %{version}
-Obsoletes:     open-xchange-subscribe-yahoo <= %{version}
+Obsoletes:     open-xchange-subscribe-yahoo < %{version}
 
 %description
 Adds the feature to subscribe to third party services or

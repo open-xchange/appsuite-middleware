@@ -18,19 +18,19 @@ Summary:       The Open-Xchange OAuth implementation
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-http-deferrer = %{version}
-Obsoletes:     open-xchange-http-deferrer <= %{version}
+Obsoletes:     open-xchange-http-deferrer < %{version}
 Provides:      open-xchange-oauth-facebook = %{version}
-Obsoletes:     open-xchange-oauth-facebook <= %{version}
+Obsoletes:     open-xchange-oauth-facebook < %{version}
 Provides:      open-xchange-oauth-json = %{version}
-Obsoletes:     open-xchange-oauth-json <= %{version}
+Obsoletes:     open-xchange-oauth-json < %{version}
 Provides:      open-xchange-oauth-linkedin = %{version}
-Obsoletes:     open-xchange-oauth-linkedin <= %{version}
+Obsoletes:     open-xchange-oauth-linkedin < %{version}
 Provides:      open-xchange-oauth-msn = %{version}
-Obsoletes:     open-xchange-oauth-msn <= %{version}
+Obsoletes:     open-xchange-oauth-msn < %{version}
 Provides:      open-xchange-oauth-twitter = %{version}
-Obsoletes:     open-xchange-oauth-twitter <= %{version}
+Obsoletes:     open-xchange-oauth-twitter < %{version}
 Provides:      open-xchange-oauth-yahoo = %{version}
-Obsoletes:     open-xchange-oauth-yahoo <= %{version}
+Obsoletes:     open-xchange-oauth-yahoo < %{version}
 
 
 %description

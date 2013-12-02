@@ -17,7 +17,7 @@ Summary:       log4j library bundle and xml configuration file
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Provides:      open-xchange-commons-logging-log4j = %{version}
-Obsoletes:     open-xchange-commons-logging-log4j <= %{version}
+Obsoletes:     open-xchange-commons-logging-log4j < %{version}
 
 %description
 log4j library bundle and xml configuration file

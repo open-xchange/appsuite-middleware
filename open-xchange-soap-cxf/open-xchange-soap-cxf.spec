@@ -18,7 +18,7 @@ Summary:       Bundle to offer SOAP webservices as discovered in the OSGi system
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-axis2 = %{version}
-Obsoletes:     open-xchange-axis2 <= %{version}
+Obsoletes:     open-xchange-axis2 < %{version}
 
 %description
 Bundle to offer SOAP webservices as discovered in the OSGi system

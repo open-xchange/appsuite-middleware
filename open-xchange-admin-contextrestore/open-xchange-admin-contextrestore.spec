@@ -20,7 +20,7 @@ Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-contextrestore = %{version}
-Obsoletes:     open-xchange-admin-plugin-contextrestore <= %{version}
+Obsoletes:     open-xchange-admin-plugin-contextrestore < %{version}
 
 %description
 This package adds the OSGi bundle that allows to restore a complete context from a MySQL database dump file. Only the table rows for the

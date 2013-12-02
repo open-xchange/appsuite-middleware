@@ -20,9 +20,9 @@ Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-autocontextid = %{version}
-Obsoletes:     open-xchange-admin-plugin-autocontextid <= %{version}
+Obsoletes:     open-xchange-admin-plugin-autocontextid < %{version}
 Provides:      open-xchange-admin-plugin-autocontextid-client = %{version}
-Obsoletes:     open-xchange-admin-plugin-autocontextid-client <= %{version}
+Obsoletes:     open-xchange-admin-plugin-autocontextid-client < %{version}
 
 %description
 This package adds the administrative OSGi bundle that creates for every newly created context a straight rising context identifier. Without

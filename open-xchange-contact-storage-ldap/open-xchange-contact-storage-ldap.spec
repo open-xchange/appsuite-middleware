@@ -18,7 +18,7 @@ Summary:       Contact storage provider using a LDAP server as backend
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-contacts-ldap = %{version}
-Obsoletes:     open-xchange-contacts-ldap <= %{version}
+Obsoletes:     open-xchange-contacts-ldap < %{version}
 
 %description
 Contact storage provider using a LDAP server as backend

@@ -20,7 +20,7 @@ Autoreqprov:   no
 Requires:       open-xchange-soap-cxf >= @OXVERSION@
 Requires:       open-xchange-admin-user-copy >= @OXVERSION@
 Provides:       open-xchange-admin-plugin-user-copy-soap = %{version}
-Obsoletes:      open-xchange-admin-plugin-user-copy-soap <= %{version}
+Obsoletes:      open-xchange-admin-plugin-user-copy-soap < %{version}
 
 %description
 This package installs the OSGi bundle that provides the administrative SOAP interface to copy users into other contexts. SOAP allows
