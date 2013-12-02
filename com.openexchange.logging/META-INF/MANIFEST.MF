@@ -6,8 +6,19 @@ Bundle-Version: 7.4.1
 Bundle-Activator: com.openexchange.logging.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.osgi,
+Import-Package: ch.qos.logback.classic;version="1.0.13",
+ ch.qos.logback.classic.filter;version="1.0.13",
+ ch.qos.logback.classic.joran;version="1.0.13",
+ ch.qos.logback.classic.turbo;version="1.0.13",
+ ch.qos.logback.core;version="1.0.13",
+ ch.qos.logback.core.filter;version="1.0.13",
+ ch.qos.logback.core.spi;version="1.0.13",
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.management,
+ com.openexchange.osgi,
  com.openexchange.server,
  org.apache.commons.logging,
  org.apache.log4j;resolution:=optional,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"

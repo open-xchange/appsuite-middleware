@@ -49,14 +49,32 @@
 
 package com.openexchange.logging.osgi;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.logging.mbean.LogbackConfiguration;
+import com.openexchange.logging.mbean.LogbackConfigurationMBean;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Activator extends HousekeepingActivator {
+    
+    private static final Logger logger = LoggerFactory.getLogger(Activator.class);
+    
+    private ObjectName logbackConfObjName;
+    
+    private LogbackConfigurationMBean logbackConfMBean;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -83,5 +101,44 @@ public class Activator extends HousekeepingActivator {
             // Log4J is not installed.
         }
         */
+        registerLoggingConfigurationMBean();
+    }
+    
+    /**
+     * Register the LoggingConfigurationMBean
+     */
+    private void registerLoggingConfigurationMBean() {
+        try {
+            logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
+            logbackConfMBean = new LogbackConfiguration();
+            track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+                @Override
+                public void added(ServiceReference<ManagementService> ref, ManagementService service) {
+                    try {
+                        service.registerMBean(logbackConfObjName, logbackConfMBean);
+                    } catch (OXException e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
+                    try {
+                        service.unregisterMBean(logbackConfObjName);
+                    } catch (OXException e) {
+                        logger.warn(e.getMessage(), e);
+                    }
+                }
+            });
+            
+        } catch (MalformedObjectNameException e) {
+            logger.error(e.getMessage(), e);
+        } catch (NullPointerException e) {
+            logger.error(e.getMessage(), e);
+        } catch (NotCompliantMBeanException e) {
+            logger.error(e.getMessage(), e);
+        }
+        
     }
 }
