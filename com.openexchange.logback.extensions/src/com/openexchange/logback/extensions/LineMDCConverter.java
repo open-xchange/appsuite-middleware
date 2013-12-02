@@ -100,7 +100,7 @@ public class LineMDCConverter extends MDCConverter {
             return outputMDCForAllKeys(mdcPropertyMap);
         }
 
-        final String value = event.getMDCPropertyMap().get(key);
+        final String value = mdcPropertyMap.get(key);
         return value == null ? defaultValue : value;
     }
 
