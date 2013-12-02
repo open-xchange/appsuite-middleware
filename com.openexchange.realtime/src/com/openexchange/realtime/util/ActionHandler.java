@@ -56,10 +56,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.Asynchronous;
+import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -131,45 +136,73 @@ public class ActionHandler {
         Collection<PayloadTree> payloads = stanza.getPayloads(new ElementPath("action"));
         for (PayloadTree payloadTree : payloads) {
             String name = payloadTree.getRoot().getData().toString();
-            try {
-                if (options == null) {
-                    Method method = methods.get(name.toLowerCase());
-                    if (method != null) {
-                       Object result = method.invoke(handler, new Object[]{stanza});
-                       if (result != null && Boolean.class.isInstance(result)) {
-                           return (Boolean) result;
-                       } else {
-                           return true;
-                       }
-                    }
-                    options = new HashMap<String, Object>();
-                }
-                
-                Method method = methodsWithProperties.get(name.toLowerCase());
+            if (options == null) {
+                Method method = methods.get(name.toLowerCase());
                 if (method != null) {
-                    Object result = method.invoke(handler, new Object[]{stanza, options}); 
-                    if (result != null && Boolean.class.isInstance(result)) {
-                        return (Boolean) result;
-                    } else {
-                        return true;
-                    }
+                   return invoke(method, handler, stanza, null);
                 }
-            } catch (InvocationTargetException e) {
-                Throwable cause = e.getCause();
-                if (OXException.class.isInstance(cause)) {
-                    throw (OXException) cause;
-                }
-                throw new OXException(e);
-            } catch (IllegalArgumentException e) {
-                throw new OXException(e);
-            } catch (IllegalAccessException e) {
-                throw new OXException(e);
+                options = new HashMap<String, Object>();
+            }
+            
+            Method method = methodsWithProperties.get(name.toLowerCase());
+            if (method != null) {
+                return invoke(method, handler, stanza, options);
             }
         }
         
         return false;
     }
     
+    
+    private boolean invoke(final Method method, final Object handler, final Stanza stanza, final Map<String, Object> options) throws OXException {
+        try {
+            if (isAsynchronous(method)) {
+                ThreadPoolService threads = RealtimeServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                threads.submit(new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        if (options != null) {
+                            method.invoke(handler, new Object[]{stanza, options}); 
+                        } else {
+                            method.invoke(handler, new Object[]{stanza});
+                        }
+                        return null;
+                    }
+                    
+                });
+                return true;
+            } else {
+                Object result = null;
+                if (options != null) {
+                    result = method.invoke(handler, new Object[]{stanza, options}); 
+                } else {
+                    result = method.invoke(handler, new Object[]{stanza});
+                }
+                if (result != null && Boolean.class.isInstance(result)) {
+                    return (Boolean) result;
+                } else {
+                    return true;
+                }
+            }
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (OXException.class.isInstance(cause)) {
+                throw (OXException) cause;
+            }
+            throw new OXException(e);
+        } catch (IllegalArgumentException e) {
+            throw new OXException(e);
+        } catch (IllegalAccessException e) {
+            throw new OXException(e);
+        }
+   }
+
+    public static boolean isAsynchronous(Method method) {
+        Asynchronous annotation = method.getAnnotation(Asynchronous.class);
+        return annotation != null;
+    }
+
     public static PayloadTree getMethodCall(String methodName) {
         return new PayloadTree(
             PayloadTreeNode.builder()
