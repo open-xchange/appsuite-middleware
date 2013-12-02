@@ -23,7 +23,7 @@
     -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
-            <pattern>%d{"MMM d, yyyy H:m:s a"} %class %method%n%level: %message%n%lmdc%exception{full}%n</pattern>
+            <pattern>%d{"MMM d, yyyy H:m:s a"} %class.%method\(%class{0}.java:%line\)%n%level: %message%lmdc%exception{full}%n</pattern>
         </encoder>
     </appender>
 
