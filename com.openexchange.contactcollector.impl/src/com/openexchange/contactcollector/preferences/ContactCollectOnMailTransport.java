@@ -49,6 +49,7 @@
 
 package com.openexchange.contactcollector.preferences;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -104,7 +105,18 @@ public class ContactCollectOnMailTransport implements PreferencesItemService {
             public void writeValue(
                 final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
-                ServerUserSetting.getInstance().setContactCollectOnMailTransport(ctx.getContextId(), user.getId(), value);
+                final ServerUserSetting sus = ServerUserSetting.getInstance();
+                if (value != getPrevValue(session).booleanValue()) {
+                    sus.setContactCollectOnMailTransport(ctx.getContextId(), user.getId(), value);
+                }
+            }
+
+            private Boolean getPrevValue(final Session session) throws OXException {
+                final Map<String, Object> map = (Map<String, Object>) session.getParameter("__serverUserSetting");
+                if (null != map) {
+                    return (Boolean) map.get("contactCollectOnMailTransport");
+                }
+                return ServerUserSetting.getInstance().isContactCollectOnMailTransport(session.getContextId(), session.getUserId());
             }
         };
     }
