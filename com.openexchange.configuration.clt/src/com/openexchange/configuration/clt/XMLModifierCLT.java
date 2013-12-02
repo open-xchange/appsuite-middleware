@@ -101,9 +101,9 @@ public class XMLModifierCLT {
     private static int configureXML(String[] args) {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
-        options.addOption(createOption("i", "in", true, "XML document is read from this file.", true));
-        options.addOption(createOption("o", "out", true, "Modified XML document is written to this file.", true));
-        options.addOption(createOption("x", "xpath", true, "XPath to the element that should be modified.", true));
+        options.addOption(createOption("i", "in", true, "XML document is read from this file.", false));
+        options.addOption(createOption("o", "out", true, "Modified XML document is written to this file.", false));
+        options.addOption(createOption("x", "xpath", true, "XPath to the element that should be modified.", false));
         options.addOption(createOption("a", "add", true, "XML file that should be added to the element denotes by the XPath.", false));
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
