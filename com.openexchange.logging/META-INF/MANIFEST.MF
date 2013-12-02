@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.filter,
  ch.qos.logback.classic.joran,
+ ch.qos.logback.classic.spi,
  ch.qos.logback.classic.turbo,
  ch.qos.logback.core,
  ch.qos.logback.core.filter,

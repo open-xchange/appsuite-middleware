@@ -49,6 +49,9 @@
 
 package com.openexchange.logging.mbean;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
@@ -56,7 +59,9 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.spi.TurboFilterList;
 import ch.qos.logback.classic.turbo.MDCFilter;
+import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
 
@@ -66,51 +71,109 @@ import com.openexchange.log.LogProperties.Name;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class LogbackConfiguration extends StandardMBean implements LogbackConfigurationMBean {
-
-    private static final Logger logger = LoggerFactory.getLogger(LogbackConfiguration.class);
-
+    
+    private static final Logger LOG = LoggerFactory.getLogger(LogbackConfiguration.class);
+    
     private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-
+    
     private final JoranConfigurator configurator = new JoranConfigurator();
-
-    private static enum MDCKey {userId, contextId, sessionId};
-
-    private static final String sessionPackage = "com.openexchange.session";
-
+    
+    private final Map<String, TurboFilter> turboFilterCache = new HashMap<String, TurboFilter>();
+    
     /**
      * Initializes a new {@link LogbackConfiguration}.
-     * @throws NotCompliantMBeanException
+     * @throws NotCompliantMBeanException 
      */
     public LogbackConfiguration() throws NotCompliantMBeanException {
         super(LogbackConfigurationMBean.class);
         configurator.setContext(loggerContext);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterContext(int)
+     */
     @Override
     public void filterContext(int contextID) {
-        //if (logger.isDebugEnabled())
-            logger.info("new context filter for context " + contextID);
-            loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_CONTEXT_ID, Integer.toString(contextID), FilterReply.ACCEPT));
+        if (LOG.isDebugEnabled())
+            LOG.debug("new context filter for context " + contextID);
+        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT));
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterUser(int, int)
+     */
     @Override
     public void filterUser(int userID, int contextID) {
-        logger.info("new user filter for user " + userID + "and context " + contextID);
-        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_USER_ID, Integer.toString(userID), FilterReply.ACCEPT));
-        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_CONTEXT_ID, Integer.toString(contextID), FilterReply.ACCEPT));
+        LOG.info("new user filter for user " + userID + "and context " + contextID);
+        //loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_USER_ID.getName(), Integer.toString(userID), FilterReply.ACCEPT));
+        //loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT));
+        ExtendedMDCFilter filter = new ExtendedMDCFilter(userID + ":" + contextID);
+        filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
+        filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
+        loggerContext.addTurboFilter(filter);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterSession(java.lang.String)
+     */
     @Override
     public void filterSession(String sessionID) {
-        logger.info("new session filter for session " + sessionID);
-        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_SESSION_ID, sessionID, FilterReply.ACCEPT));
+        LOG.info("new session filter for session " + sessionID);
+        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, FilterReply.ACCEPT));        
     }
-
+    
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#setLogLevel(java.lang.String, java.lang.String)
+     */
     @Override
-    public void setLogLevel(String logger, String level) {
-        loggerContext.getLogger(logger).setLevel(Level.valueOf(level));
+    public void setLogLevel(String level, String logger) {
+        List<ch.qos.logback.classic.Logger> loggers = loggerContext.getLoggerList();
+        for (ch.qos.logback.classic.Logger l : loggers) {
+            if (l.getName().equals(logger)) {
+                l.setLevel(Level.valueOf(level));
+                LOG.info("Setting log level to " + level);
+            }
+        }
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#resetLogger(java.lang.String)
+     */
+    @Override
+    public void resetLogger(String logger) {
+        //TODO
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeContextFilter(int)
+     */
+    @Override
+    public void removeContextFilter(int contextID) {
+        removeFilter(Name.SESSION_CONTEXT_ID, Integer.toString(contextID));
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeUserFilter(int, int)
+     */
+    @Override
+    public void removeUserFilter(int userID, int contextID) {
+        //removeFilter(new ExtendedMDCFilter(userID + ":" + contextID));
+        //removeFilter(Name.SESSION_CONTEXT_ID, Integer.toString(contextID));
+        //removeFilter(Name.SESSION_USER_ID, Integer.toString(userID));
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeSessionFilter(java.lang.String)
+     */
+    @Override
+    public void removeSessionFilter(String sessionID) {
+        removeFilter(Name.SESSION_SESSION_ID, sessionID);        
+    }
+    
     /**
      * Create an MDCFilter based on the specified key/value/filter
      * @param key
@@ -118,46 +181,32 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @param onMatch
      * @return
      */
-    private final MDCFilter createMDCFilter(Name key, String value, FilterReply onMatch) {
+    private final MDCFilter createMDCFilter(String key, String value, FilterReply onMatch) {
         MDCFilter filter = new MDCFilter();
         filter.setName(key.toString());
         filter.setValue(value);
         filter.setOnMatch(onMatch.toString());
+        
+        StringBuilder builder = new StringBuilder();
+        builder.append(key.toString()).append("=").append(value);
+        turboFilterCache.put(builder.toString(), filter);
+        
         return filter;
     }
-
+    
     /**
-     * Create an MDCKey
+     * Remove the specified filter
      * @param key
-     * @return
+     * @param value
      */
-    private final String composeMDCKey(MDCKey key) {
+    private final void removeFilter(Name key, String value) {
         StringBuilder builder = new StringBuilder();
-        builder.append(sessionPackage).append(key.toString());
-        return builder.toString();
+        builder.append(key).append("=").append(value);
+        
+        TurboFilterList list = loggerContext.getTurboFilterList();
+        if (list.remove(turboFilterCache.get(builder.toString()))) {
+            turboFilterCache.remove(builder.toString());
+        }
     }
 
-    @Override
-    public void resetLogger(String logger) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void removeContextFilter(int contextID) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void removeUserFilter(int userID, int contextID) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void removeSessionFilter(String sessionID) {
-        // TODO Auto-generated method stub
-
-    }
 }

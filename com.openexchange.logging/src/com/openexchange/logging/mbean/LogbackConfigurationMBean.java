@@ -49,7 +49,6 @@
 
 package com.openexchange.logging.mbean;
 
-
 /**
  * {@link LogbackConfigurationMBean}
  *
@@ -87,7 +86,7 @@ public interface LogbackConfigurationMBean {
      * @param logger
      * @param level
      */
-    public void setLogLevel(String logger, String level);
+    public void setLogLevel(String level, String logger);
     
     /**
      * Resets the specified logger as specified in {@link LoggerContext#reset}
@@ -113,4 +112,5 @@ public interface LogbackConfigurationMBean {
      * @param sessionID
      */
     public void removeSessionFilter(String sessionID);
-}
+    
+}    
