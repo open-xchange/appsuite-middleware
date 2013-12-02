@@ -64,11 +64,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -376,12 +376,12 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.setInt(pos++, taskId);
             for (final ExternalParticipant participant : participants) {
                 pos = 3;
-                stmt.setString(pos++, participant.getMail());
+                stmt.setString(pos++, StorageType.DELETED.equals(type) ? "" : participant.getMail());
                 final String displayName = participant.getDisplayName();
                 if (null == displayName) {
                     stmt.setNull(pos++, java.sql.Types.VARCHAR);
                 } else {
-                    stmt.setString(pos++, displayName);
+                    stmt.setString(pos++, StorageType.DELETED.equals(type) ? "" : displayName);
                 }
                 stmt.addBatch();
             }

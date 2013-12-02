@@ -419,8 +419,7 @@ public final class SQL {
         selectAll.setLength(selectAll.length() - 1);
         ALL_FIELDS = selectAll.toString();
 
-        final StorageType[] activeDelete = new StorageType[] {
-            StorageType.ACTIVE, StorageType.DELETED };
+        final StorageType[] activeDelete = new StorageType[] { StorageType.ACTIVE, StorageType.DELETED };
         final String tableName = "@tableName@";
 
         TASK_TABLES.put(StorageType.ACTIVE, "task");

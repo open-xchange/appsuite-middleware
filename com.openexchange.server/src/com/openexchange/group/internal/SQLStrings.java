@@ -82,11 +82,9 @@ public final class SQLStrings {
         GROUP_TABLES.put(DELETED, "del_groups");
         final String tableName = "@tableName@";
 
-        final String sql = "INSERT INTO " + tableName + "(cid,id,identifier,"
-            + "displayName,lastModified,gidNumber) VALUES (?,?,?,?,?,?)";
+        final String sql = "INSERT INTO " + tableName + "(cid,id,identifier," + "displayName,lastModified,gidNumber) VALUES (?,?,?,?,?,?)";
         for (final StorageType type : StorageType.values()) {
-            INSERT_GROUP.put(type, sql.replaceAll(tableName, GROUP_TABLES
-                .get(type)));
+            INSERT_GROUP.put(type, sql.replaceAll(tableName, GROUP_TABLES.get(type)));
         }
     }
 }

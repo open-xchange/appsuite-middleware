@@ -94,8 +94,8 @@ public class RdbGroupStorage extends GroupStorage {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, group.getIdentifier());
-            stmt.setString(pos++, group.getSimpleName());
-            stmt.setString(pos++, group.getDisplayName());
+            stmt.setString(pos++, StorageType.DELETED.equals(type) ? "" : group.getSimpleName());
+            stmt.setString(pos++, StorageType.DELETED.equals(type) ? "" : group.getDisplayName());
             stmt.setLong(pos++, group.getLastModified().getTime());
             stmt.setInt(pos++, 65534);
             stmt.execute();

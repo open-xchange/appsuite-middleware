@@ -6,6 +6,7 @@
 
  - Fix for bug 30119: Avoid superfluous database updates on JSlob write-back requests
  - Fix for bug 30114: Properly sanitize CSS selectors
+ - Fix for bug 29809: Drop personal in formation leftovers from backup tables
 
 * 2013-11-29 - jan.bauerdick@open-xchange.com
 
