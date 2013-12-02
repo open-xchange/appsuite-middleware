@@ -51,16 +51,14 @@ package com.openexchange.logging.mbean;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.LogProperties.Name;
+import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.filter.LevelFilter;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.turbo.MDCFilter;
 import ch.qos.logback.core.spi.FilterReply;
+import com.openexchange.log.LogProperties.Name;
 
 /**
  * {@link LogbackConfiguration}
@@ -68,30 +66,26 @@ import ch.qos.logback.core.spi.FilterReply;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class LogbackConfiguration extends StandardMBean implements LogbackConfigurationMBean {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(LogbackConfiguration.class);
-    
+
     private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-    
+
     private final JoranConfigurator configurator = new JoranConfigurator();
-    
+
     private static enum MDCKey {userId, contextId, sessionId};
-    
+
     private static final String sessionPackage = "com.openexchange.session";
-    
+
     /**
      * Initializes a new {@link LogbackConfiguration}.
-     * @throws NotCompliantMBeanException 
+     * @throws NotCompliantMBeanException
      */
     public LogbackConfiguration() throws NotCompliantMBeanException {
         super(LogbackConfigurationMBean.class);
         configurator.setContext(loggerContext);
     }
-    
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterContext(int)
-     */
     @Override
     public void filterContext(int contextID) {
         //if (logger.isDebugEnabled())
@@ -99,9 +93,6 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
             loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_CONTEXT_ID, Integer.toString(contextID), FilterReply.ACCEPT));
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterUser(int, int)
-     */
     @Override
     public void filterUser(int userID, int contextID) {
         logger.info("new user filter for user " + userID + "and context " + contextID);
@@ -109,24 +100,17 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_CONTEXT_ID, Integer.toString(contextID), FilterReply.ACCEPT));
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterSession(java.lang.String)
-     */
     @Override
     public void filterSession(String sessionID) {
         logger.info("new session filter for session " + sessionID);
-        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_SESSION_ID, sessionID, FilterReply.ACCEPT));        
+        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_SESSION_ID, sessionID, FilterReply.ACCEPT));
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#setLogLevel(java.lang.String, java.lang.String)
-     */
+
     @Override
     public void setLogLevel(String logger, String level) {
         loggerContext.getLogger(logger).setLevel(Level.valueOf(level));
     }
-    
+
     /**
      * Create an MDCFilter based on the specified key/value/filter
      * @param key
@@ -141,7 +125,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         filter.setOnMatch(onMatch.toString());
         return filter;
     }
-    
+
     /**
      * Create an MDCKey
      * @param key
@@ -153,43 +137,27 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         return builder.toString();
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#resetLogger(java.lang.String)
-     */
     @Override
     public void resetLogger(String logger) {
         // TODO Auto-generated method stub
-        
+
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeContextFilter(int)
-     */
     @Override
     public void removeContextFilter(int contextID) {
         // TODO Auto-generated method stub
-        
+
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeUserFilter(int, int)
-     */
     @Override
     public void removeUserFilter(int userID, int contextID) {
         // TODO Auto-generated method stub
-        
+
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeSessionFilter(java.lang.String)
-     */
     @Override
     public void removeSessionFilter(String sessionID) {
         // TODO Auto-generated method stub
-        
+
     }
 }
