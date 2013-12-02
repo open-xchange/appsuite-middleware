@@ -5,6 +5,7 @@
 * 2013-12-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 30119: Avoid superfluous database updates on JSlob write-back requests
+ - Fix for bug 30114: Properly sanitize CSS selectors
 
 * 2013-11-29 - jan.bauerdick@open-xchange.com
 
