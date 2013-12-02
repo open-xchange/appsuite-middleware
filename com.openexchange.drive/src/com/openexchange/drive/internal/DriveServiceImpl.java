@@ -346,7 +346,7 @@ public class DriveServiceImpl implements DriveService {
         }
         final Quota[] quota = driveSession.getStorage().getQuota();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Got quota for root folder '" + session.getRootFolderID() + "': " + quota);
+            LOG.debug("Got quota for root folder '" + session.getRootFolderID() + "': " + (null != quota ? Arrays.toString(quota) : ""));
         }
         final String manageLink = new DirectLinkGenerator(driveSession).getQuotaLink();
         return new DriveQuota() {
