@@ -1,3 +1,7 @@
+* 2013-12-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30100: Include causing throwable for java.io.FileNotFoundException 
+
 * 2013-11-29 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 29495: Removed port 587 from list of secure smtp ports
