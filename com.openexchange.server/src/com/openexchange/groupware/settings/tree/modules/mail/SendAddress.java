@@ -116,6 +116,15 @@ public class SendAddress implements PreferencesItemService {
 
             @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
+                final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
+                UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
+                if (null == settings) {
+                    return;
+                }
+                final String newAlias = setting.getSingleValue().toString();
+                if (settings.getSendAddr().equals(newAlias)) {
+                    return;
+                }
                 try {
                     // Add mail aliases
                     final Set<InternetAddress> allAliases;
@@ -140,14 +149,11 @@ public class SendAddress implements PreferencesItemService {
                     allAliases.add(new QuotedInternetAddress(user.getMail(), false));
 
                     // Add default sender address
-                    final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
                     {
-                        final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
                         allAliases.add(new QuotedInternetAddress(settings.getSendAddr(), false));
                     }
 
                     // Determine the new mail address to set as default sender address
-                    final String newAlias = setting.getSingleValue().toString();
                     final InternetAddress aliasToCheck;
                     {
                         final int pos = newAlias.indexOf('/');
@@ -164,7 +170,7 @@ public class SendAddress implements PreferencesItemService {
                         throw SettingExceptionCodes.INVALID_VALUE.create(newAlias, setting.getName());
                     }
 
-                    final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
+                    settings = storage.getUserSettingMail(user.getId(), ctx);
                     if (null != settings) {
                         settings.setSendAddr(newAlias);
                         storage.saveUserSettingMail(settings, user.getId(), ctx);

@@ -111,17 +111,21 @@ public class LineWrap implements PreferencesItemService {
             @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
-                final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
-                if (null != settings) {
+                final UserSettingMail usm = storage.getUserSettingMail(user.getId(), ctx);
+                if (null != usm) {
                     final String s = setting.getSingleValue().toString();
                     if (!isEmpty(s)) {
                         try {
+                            int autoLinebreak;
                             try {
-                                settings.setAutoLinebreak(Integer.parseInt(s));
+                                autoLinebreak = (Integer.parseInt(s));
                             } catch (NumberFormatException e) {
-                                settings.setAutoLinebreak(new BigInteger(s).intValue());
+                                autoLinebreak = (new BigInteger(s).intValue());
                             }
-                            storage.saveUserSettingMail(settings, user.getId(), ctx);
+                            if (autoLinebreak != usm.getAutoLinebreak()) {
+                                usm.setAutoLinebreak(autoLinebreak);
+                                storage.saveUserSettingMail(usm, user.getId(), ctx);
+                            }
                         } catch (final NumberFormatException e) {
                             throw SettingExceptionCodes.JSON_READ_ERROR.create(e);
                         }

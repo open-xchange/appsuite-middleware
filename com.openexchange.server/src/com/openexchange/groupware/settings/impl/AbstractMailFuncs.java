@@ -105,8 +105,11 @@ public abstract class AbstractMailFuncs implements IValueHandler {
         final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
         final int userId = user.getId();
         final UserSettingMail settings = storage.loadUserSettingMail(userId, ctx);
+        final int prevBitsValue = settings.getBitsValue();
         setValue(settings, setting.getSingleValue().toString());
-        storage.saveUserSettingMailBits(settings, userId, ctx);
+        if (settings.getBitsValue() != prevBitsValue) {
+            storage.saveUserSettingMailBits(settings, userId, ctx);
+        }
     }
 
 	/**
