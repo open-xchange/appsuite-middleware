@@ -49,62 +49,42 @@
 
 package com.openexchange.configuration.clt;
 
+import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 /**
- * {@link XMLModifierCLT} is a command line tool to maintain XML configuration files. Currently it only allows to add new XML fragments at
- * defined positions in the existing XML configuration file.
+ * {@link Log4jModificationsCLT}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class XMLModifierCLT {
+public class Log4jModificationsCLT {
 
     private static final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    private static final TransformerFactory tf = TransformerFactory.newInstance();
-    private static final XPathFactory xf = XPathFactory.newInstance();
 
-    public XMLModifierCLT() {
+    public Log4jModificationsCLT() {
         super();
     }
 
     public static void main(String[] args) {
-        System.exit(configureXML(args));
+        System.exit(writeLog4JModifications(args));
     }
 
-    private static int configureXML(String[] args) {
+    private static int writeLog4JModifications(String[] args) {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
         options.addOption(createOption("i", "in", true, "XML document is read from this file.", false));
-        options.addOption(createOption("o", "out", true, "Modified XML document is written to this file.", false));
-        options.addOption(createOption("x", "xpath", true, "XPath to the element that should be modified.", false));
-        options.addOption(createOption("a", "add", true, "XML file that should be added to the element denotes by the XPath.", false));
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
@@ -115,66 +95,29 @@ public class XMLModifierCLT {
         }
         if (cmd.hasOption('h')) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("xmlModifierCLT", "Can modify XML configuration files. Currently only allows to add XML fragments.", options, null, false);
+            formatter.printHelp("log4JModificationsCLT", "Reads a log4j.xml and outputs modified logger levels as JUL properties format.", options, null, false);
             return 0;
         }
         final DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();
+            db.setEntityResolver(new ClassloaderEntityResolver());
         } catch (ParserConfigurationException e) {
             System.out.println("Can not configure XML parser: " + e.getMessage());
             e.printStackTrace();
             return 1;
         }
-        final Transformer transformer;
         try {
-            transformer = tf.newTransformer();
-        } catch (TransformerConfigurationException e) {
-            System.out.println("Can not configure XML writer: " + e.getMessage());
-            e.printStackTrace();
-            return 1;
-        }
-        try {
+            Document original = db.parse(Log4jModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml"));
             File input = new File(cmd.getOptionValue('i'));
             if (!input.exists() || !input.isFile() || !input.canRead()) {
                 System.out.println("Can not open input file: \"" + input.getAbsolutePath() + "\".");
                 return 1;
             }
-            File output = new File(cmd.getOptionValue('o'));
-            if (!output.canWrite()) {
-                System.out.println("Can not write to output file: \"" + output.getAbsolutePath() + "\".");
-                return 1;
-            }
             Document document = db.parse(input);
-            // Modify
-            XPath path = xf.newXPath();
-            XPathExpression expression = path.compile(cmd.getOptionValue('x'));
-            if (cmd.hasOption('a')) {
-                File add = new File(cmd.getOptionValue('a'));
-                if (!add.exists() || !add.isFile() || !add.canRead()) {
-                    System.out.println("Can not open XML fragment to add: \"" + add.getAbsolutePath() + "\".");
-                    return 1;
-                }
-                Element element2Add = db.parse(add).getDocumentElement();
-                Node imported = document.importNode(element2Add, true);
-                Node element = (Node) expression.evaluate(document, XPathConstants.NODE);
-                element.appendChild(imported);
-            } else {
-                // Nothing to do.
-            }
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.getOutputProperties().store(System.out, "Properties");
-            transformer.transform(new DOMSource(document), new StreamResult(output));
+            // Find differences
         } catch (SAXException e) {
             System.out.println("Can not parse XML document: " + e.getMessage());
-            e.printStackTrace();
-            return 1;
-        } catch (XPathExpressionException e) {
-            System.out.println("Can not parse XPath expression: " + e.getMessage());
-            e.printStackTrace();
-            return 1;
-        } catch (TransformerException e) {
-            System.out.println("Can not write XML document" + e.getMessage());
             e.printStackTrace();
             return 1;
         } catch (IOException e) {
@@ -185,9 +128,4 @@ public class XMLModifierCLT {
         return 0;
     }
 
-    static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {
-        Option option = new Option(shortArg, longArg, hasArg, description);
-        option.setRequired(required);
-        return option;
-    }
 }
