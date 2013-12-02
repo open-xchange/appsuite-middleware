@@ -155,7 +155,7 @@ public class DriveServiceImpl implements DriveService {
                 DirectoryActionExecutor executor = new DirectoryActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES);
                 executor.execute(syncResult.getActionsForServer());
             } catch (OXException e) {
-                if (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES) {
+                if (0 == retryCount || (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES)) {
                     retryCount++;
                     int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
                     driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + "), trying again in " +
@@ -210,7 +210,7 @@ public class DriveServiceImpl implements DriveService {
                 FileActionExecutor executor = new FileActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES, path);
                 executor.execute(syncResult.getActionsForServer());
             } catch (OXException e) {
-                if (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES) {
+                if (0 == retryCount || (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES)) {
                     retryCount++;
                     int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
                     driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + "), trying again in " +
