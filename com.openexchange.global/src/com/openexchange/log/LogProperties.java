@@ -190,11 +190,11 @@ public final class LogProperties {
         /**
          * com.openexchange.http.grizzly.session
          */
-        GRIZZLY_HTTP_SESSION("com.openexchange.http.grizzly.session"),
+        GRIZZLY_HTTP_SESSION("com.openexchange.grizzly.session"),
         /**
          * com.openexchange.http.grizzly.userAgent
          */
-        GRIZZLY_USER_AGENT("com.openexchange.http.grizzly.userAgent"),
+        GRIZZLY_USER_AGENT("com.openexchange.grizzly.userAgent"),
         /**
          * javax.servlet.servletPath
          */
