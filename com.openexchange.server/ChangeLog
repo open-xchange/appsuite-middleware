@@ -1,3 +1,7 @@
+* 2013-12-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29816: Added "TLSv1" to enabled protocols accepted by Open-Xchange as a client
+
 * 2013-12-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30100: Include causing throwable for java.io.FileNotFoundException 
