@@ -1,6 +1,7 @@
 * 2013-12-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 29816: Added "TLSv1" to enabled protocols accepted by Open-Xchange as a client
+ - Fix for bug 30135: Added null guard when parsing user attributes delivered via SOAP
 
 * 2013-12-02 - tobias.friedrich@open-xchange.com
 

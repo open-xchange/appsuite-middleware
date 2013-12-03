@@ -409,7 +409,8 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         final java.util.List<SOAPMapEntry> entries = soapStringMapMap.getEntries();
         final Map<String, Map<String, String>> map = new HashMap<String, Map<String,String>>(entries.size());
         for (final SOAPMapEntry soapMapEntry : entries) {
-            map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
+            if (null != soapMapEntry)
+                map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
         }
         return map;
     }
@@ -421,7 +422,8 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         final java.util.List<Entry> entries = soapStringMap.getEntries();
         final Map<String, String> map = new HashMap<String, String>(entries.size());
         for (final Entry entry : entries) {
-            map.put(entry.getKey(), entry.getValue());
+            if (null != entry)
+                map.put(entry.getKey(), entry.getValue());
         }
         return map;
     }
