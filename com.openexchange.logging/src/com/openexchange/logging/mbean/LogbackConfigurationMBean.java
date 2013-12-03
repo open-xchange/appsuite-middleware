@@ -114,14 +114,14 @@ public interface LogbackConfigurationMBean {
      * 
      * @return
      */
-    public Set<String> getLoggers();
+    public Set<String> listLoggers();
     
     /**
      * Returns a list with all logging filters
      * 
      * @return
      */
-    public Set<String> getFilters();
+    public Set<String> listFilters();
     
     /**
      * Removes all filters

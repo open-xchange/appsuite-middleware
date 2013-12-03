@@ -238,7 +238,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getLoggers()
      */
     @Override
-    public Set<String> getLoggers() {
+    public Set<String> listLoggers() {
         Set<String> loggers = new HashSet<String>();
         System.out.println(loggerContext.getLoggerList());
         StringBuilder builder = new StringBuilder();
@@ -254,7 +254,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getFilters()
      */
     @Override
-    public Set<String> getFilters() {
+    public Set<String> listFilters() {
         Set<String> filters = new HashSet<String>();
         for(TurboFilter tf  : loggerContext.getTurboFilterList()) {
             filters.add(tf.getName());
