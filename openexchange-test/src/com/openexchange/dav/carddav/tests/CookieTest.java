@@ -49,30 +49,48 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import junit.framework.Assert;
+import org.apache.commons.httpclient.Header;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import com.openexchange.dav.PropertyNames;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.carddav.CardDAVTest;
 
 /**
- * {@link CardDAVTestSuite} - Testsuite for the CardDAV interface.
+ * {@link CookieTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CardDAVTestSuite {
+public class CookieTest extends CardDAVTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(CurrentUserPrincipalTest.class);
-        suite.addTestSuite(OptionsTest.class);
-        suite.addTestSuite(CollectionsTest.class);
-        suite.addTestSuite(PrincipalPropertiesTest.class);
-        suite.addTestSuite(AddressbookPropertiesTest.class);
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(UpdateTest.class);
-        suite.addTestSuite(DeleteTest.class);
-        suite.addTestSuite(MoveTest.class);
-        suite.addTestSuite(UpgradeTest.class);
-        suite.addTestSuite(ImageTest.class);
-        suite.addTestSuite(CookieTest.class);
-        return suite;
+	public CookieTest(String name) {
+		super(name);
+	}
+
+    public void testNoSessionCookieForCalDAV() throws Exception {
+        /*
+         * execute simple propfind
+         */
+        DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.PRINCIPAL_URL);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/",
+                DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        try {
+            Assert.assertEquals("unexpected http status", StatusCodes.SC_MULTISTATUS,
+                getWebDAVClient().getHttpClient().executeMethod(propFind));
+        } finally {
+            release(propFind);
+        }
+        Header[] headers = propFind.getResponseHeaders("Set-Cookie");
+        if (null != headers) {
+            for (Header header : headers) {
+                if (header.getValue().contains("JSESSIONID")) {
+                    Assert.fail(header.getName());
+                }
+            }
+        }
     }
+
 }
