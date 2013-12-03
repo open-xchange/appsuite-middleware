@@ -5099,7 +5099,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String SQL_BACKUP_MEMBERS = "INSERT INTO del_dates_members SELECT * FROM prg_dates_members WHERE cid = ? AND object_id = ?";
 
-    private static final String SQL_BACKUP_RIGHTS = "INSERT INTO del_date_rights (cid, object_id, id, type) SELECT prg_date_rights.cid, prg_date_rights.object_id, prg_date_rights.id, prg_date_rights.type FROM prg_date_rights WHERE cid = ? AND object_id = ?";
+    private static final String SQL_BACKUP_RIGHTS = "INSERT INTO del_date_rights (cid, object_id, id, type) SELECT prg_date_rights.cid, prg_date_rights.object_id, prg_date_rights.id, prg_date_rights.type FROM prg_date_rights WHERE prg_date_rights.cid = ? AND prg_date_rights.object_id = ?";
 
     private static final String SQL_BACKUP_DATES =
         "INSERT INTO del_dates (creating_date,created_from,changing_date,changed_from,fid,pflag,cid,intfield01,intfield02,uid,filename) " +
