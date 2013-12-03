@@ -137,8 +137,6 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
             if (change) {
                 final Context server_ctx = oxres.getData(ctx, auth);
                 ctx.setLoginMappings(server_ctx.getLoginMappings());
-            } else {
-                ctx.addLoginMapping(ctx.getIdAsString());
             }
             // add new mappings
             if (add_mappings != null) {

@@ -156,7 +156,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public final String getIdAsString() {
-        return String.valueOf(this.id);
+        return null == id ? null : id.toString();
     }
 
     @Override
@@ -191,6 +191,9 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      * Add a single login mapping entry.
      */
     public final void addLoginMapping(final String mapping) {
+        if (null == mapping) {
+            return;
+        }
         if (this.login_mappings == null) {
             this.login_mappings = new HashSet<String>();
         }
@@ -198,16 +201,26 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public final void addLoginMappings(final Collection<String> mapping) {
+        if (null == mapping) {
+            return;
+        }
         if (this.login_mappings == null) {
             this.login_mappings = new HashSet<String>();
         }
-        this.login_mappings.addAll(mapping);
+        for (final String sMapping : mapping) {
+            if (null == sMapping) {
+                this.login_mappings.add(sMapping);
+            }
+        }
     }
 
     /*
      * Remove a login mapping.
      */
     public final boolean removeLoginMapping(final String mapping) {
+        if (null == mapping) {
+            return false;
+        }
         if (null != this.login_mappings) {
             return this.login_mappings.remove(mapping);
         } else {
@@ -216,6 +229,9 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public final boolean removeLoginMappings(final Collection<String> mapping) {
+        if (null == mapping) {
+            return false;
+        }
         if (null != this.login_mappings) {
             return this.login_mappings.removeAll(mapping);
         } else {
@@ -402,7 +418,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     public String[] getMandatoryMembersRegister() {
         return null;
     }
-    
+
     /**
      * Gets the quotas
      * <pre>
@@ -414,7 +430,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     public List<Object[]> getQuotas() {
         return Collections.unmodifiableList(quotas);
     }
-    
+
     /**
      * Sets the quotas
      * <pre>
