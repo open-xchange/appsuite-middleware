@@ -7939,7 +7939,7 @@ msgid ""
 "The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr ""
 
-#. Cannot find mail account for user \"%2$s\".
+#. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."
 msgstr ""
@@ -7990,7 +7990,7 @@ msgstr ""
 msgid "A mail account with the given E-Mail address already exists."
 msgstr ""
 
-#. The mail account name \"%1$s\" is not valid.
+#. The mail account name "%1$s" is not valid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:89
 msgid "The mail account name \"%1$s\" is not valid."
 msgstr ""
@@ -8005,9 +8005,14 @@ msgstr ""
 msgid "Unable to connect to mail server."
 msgstr ""
 
-#. The given host name \"%1$s\" is invalid.
+#. The given host name "%1$s" is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:98
 msgid "The given host name \"%1$s\" is invalid."
+msgstr ""
+
+#. The given host name "%1$s" is not allowed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:101
+msgid "The given host name \"%1$s\" is not allowed."
 msgstr ""
 
 #. *
