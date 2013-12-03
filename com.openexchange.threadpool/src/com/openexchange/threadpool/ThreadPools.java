@@ -270,6 +270,38 @@ public final class ThreadPools {
     }
 
     /**
+     * Takes from given completion service, ignoring its results.
+     *
+     * @param <R> The result type
+     * @param <E> The exception type
+     * @param completionService The completion service to take from
+     * @param size The number of tasks performed by completion service
+     * @param factory The exception factory to launder a possible {@link ExecutionException} or {@link InterruptedException}
+     * @return A list of results taken from completion service
+     * @throws E If taking from completion service fails
+     * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
+     * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
+     * @throws Error If cause is an unchecked {@link Error}
+     * @see #launderThrowable(ExecutionException, Class)
+     * @see #DEFAULT_EXCEPTION_FACTORY
+     */
+    public static <R, E extends Exception> void awaitCompletionService(final CompletionService<R> completionService, final int size, final ExpectedExceptionFactory<E> factory) throws E {
+        /*
+         * Wait for completion
+         */
+        try {
+            for (int i = 0; i < size; i++) {
+                completionService.take().get();
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw factory.newUnexpectedError(e);
+        } catch (final ExecutionException e) {
+            throw launderThrowable(e, factory.getType());
+        }
+    }
+
+    /**
      * Handles given {@link Throwable} in a safe way.
      * <p>
      * This method is helpful when dealing with {@link ExecutionException}:
