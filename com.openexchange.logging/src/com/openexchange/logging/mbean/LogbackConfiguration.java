@@ -94,9 +94,16 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     @Override
     public void filterContext(int contextID) {
-        if (LOG.isDebugEnabled())
-            LOG.debug("new context filter for context " + contextID);
-        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT));
+        if (LOG.isDebugEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("New context filter created for context with ID \"")
+                   .append(contextID)
+                   .append("\" and policy \"")
+                   .append("ACCEPT")
+                   .append("\"");
+            LOG.debug(builder.toString());
+        }
+        loggerContext.addTurboFilter(createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT));
     }
 
     /* (non-Javadoc)
@@ -104,12 +111,28 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     @Override
     public void filterUser(int userID, int contextID) {
-        LOG.info("new user filter for user " + userID + "and context " + contextID);
-        //loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_USER_ID.getName(), Integer.toString(userID), FilterReply.ACCEPT));
-        //loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT));
-        ExtendedMDCFilter filter = new ExtendedMDCFilter(userID + ":" + contextID);
+        if (LOG.isDebugEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("New user filter created for user with ID \"")
+                   .append(userID)
+                   .append("\", context with ID \"")
+                   .append(contextID)
+                   .append("\" and policy \"")
+                   .append("ACCEPT")
+                   .append("\"");
+            LOG.debug(builder.toString());
+        }
+
+        ExtendedMDCFilter filter = new ExtendedMDCFilter();
         filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
         filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
+        filter.setOnMatch(FilterReply.ACCEPT);
+        
+        StringBuilder builder = new StringBuilder();
+        builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)))
+               .append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
+        turboFilterCache.put(builder.toString(), filter);
+        
         loggerContext.addTurboFilter(filter);
     }
 
@@ -118,8 +141,16 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     @Override
     public void filterSession(String sessionID) {
-        LOG.info("new session filter for session " + sessionID);
-        loggerContext.addTurboFilter(createMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, FilterReply.ACCEPT));        
+        if (LOG.isDebugEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("New session filter created for session with ID \"")
+                   .append(sessionID)
+                   .append("\" and policy \"")
+                   .append("ACCEPT")
+                   .append("\"");
+            LOG.debug(builder.toString());
+        }
+        loggerContext.addTurboFilter(createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, FilterReply.ACCEPT));        
     }
     
     /*
@@ -131,8 +162,12 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         List<ch.qos.logback.classic.Logger> loggers = loggerContext.getLoggerList();
         for (ch.qos.logback.classic.Logger l : loggers) {
             if (l.getName().equals(logger)) {
+                if (LOG.isDebugEnabled()) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("Setting global log level to \"").append(level).append("\"");
+                    LOG.debug(builder.toString());
+                }
                 l.setLevel(Level.valueOf(level));
-                LOG.info("Setting log level to " + level);
             }
         }
     }
@@ -151,7 +186,14 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     @Override
     public void removeContextFilter(int contextID) {
-        removeFilter(Name.SESSION_CONTEXT_ID, Integer.toString(contextID));
+        removeFilter(createKey(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID)));
+        if (LOG.isDebugEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("Removed context filter with context ID \"")
+                   .append(contextID)
+                   .append("\"");
+            LOG.debug(builder.toString());
+        }
     }
 
 
@@ -160,9 +202,10 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     @Override
     public void removeUserFilter(int userID, int contextID) {
-        //removeFilter(new ExtendedMDCFilter(userID + ":" + contextID));
-        //removeFilter(Name.SESSION_CONTEXT_ID, Integer.toString(contextID));
-        //removeFilter(Name.SESSION_USER_ID, Integer.toString(userID));
+        StringBuilder builder = new StringBuilder();
+        builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)))
+               .append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
+        removeFilter(builder.toString());
     }
 
 
@@ -171,7 +214,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     @Override
     public void removeSessionFilter(String sessionID) {
-        removeFilter(Name.SESSION_SESSION_ID, sessionID);        
+        removeFilter(createKey(Name.SESSION_SESSION_ID.getName(), sessionID));        
     }
     
     /**
@@ -181,15 +224,12 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @param onMatch
      * @return
      */
-    private final MDCFilter createMDCFilter(String key, String value, FilterReply onMatch) {
-        MDCFilter filter = new MDCFilter();
-        filter.setName(key.toString());
-        filter.setValue(value);
-        filter.setOnMatch(onMatch.toString());
+    private final ExtendedMDCFilter createExtendedMDCFilter(String key, String value, FilterReply onMatch) {
+        ExtendedMDCFilter filter = new ExtendedMDCFilter();
+        filter.addTuple(key, value);
+        filter.setOnMatch(onMatch);
         
-        StringBuilder builder = new StringBuilder();
-        builder.append(key.toString()).append("=").append(value);
-        turboFilterCache.put(builder.toString(), filter);
+        turboFilterCache.put(createKey(key, value), filter);
         
         return filter;
     }
@@ -199,14 +239,22 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @param key
      * @param value
      */
-    private final void removeFilter(Name key, String value) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(key).append("=").append(value);
-        
+    private final void removeFilter(String key) {
         TurboFilterList list = loggerContext.getTurboFilterList();
-        if (list.remove(turboFilterCache.get(builder.toString()))) {
-            turboFilterCache.remove(builder.toString());
+        if (list.remove(turboFilterCache.get(key))) {
+            turboFilterCache.remove(key);
         }
     }
-
+    
+    /**
+     * Create key
+     * @param key
+     * @param value
+     * @return
+     */
+    private String createKey(String key, String value) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(key).append("=").append(value);
+        return builder.toString();
+    }
 }

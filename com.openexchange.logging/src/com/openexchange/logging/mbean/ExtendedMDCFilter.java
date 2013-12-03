@@ -62,48 +62,14 @@ import ch.qos.logback.core.spi.FilterReply;
 /**
  * {@link ExtendedMDCFilter}
  *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ExtendedMDCFilter extends TurboFilter {
     
     private Set<Tuple> tuples = new HashSet<Tuple>();
     
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ExtendedMDCFilter other = (ExtendedMDCFilter) obj;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
-    }
-
-    private final String name;
-    
-    public ExtendedMDCFilter(String n) {
-        name = n;
-    }
+    private FilterReply onMatch;
     
     /* (non-Javadoc)
      * @see ch.qos.logback.classic.turbo.TurboFilter#decide(org.slf4j.Marker, ch.qos.logback.classic.Logger, ch.qos.logback.classic.Level, java.lang.String, java.lang.Object[], java.lang.Throwable)
@@ -115,28 +81,48 @@ public class ExtendedMDCFilter extends TurboFilter {
             String v = MDC.get(t.getKey());
             if (v == null)
                 return FilterReply.NEUTRAL;
-            else {
-                if (!v.equals(t.getValue())) {
-                    return FilterReply.NEUTRAL;
-                }
-            }
+            else if (!v.equals(t.getValue()))
+                return FilterReply.NEUTRAL;
         }
             
-        return FilterReply.ACCEPT;
+        return onMatch;
     }
     
+    /**
+     * Add a tuple for this filter
+     * @param k
+     * @param v
+     */
     public void addTuple(String k, String v) {
         tuples.add(new Tuple(k,v));
     }
     
-    public String getName() {
-        return name;
+    /**
+     * Set on match rule
+     * @param fr
+     */
+    public final void setOnMatch(FilterReply fr) {
+        onMatch = fr;
     }
     
-    //TODO clean me :)
+    /**
+     * Nested {@link Tuple} class.
+     *
+     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+     */
     private class Tuple {
         private String key;
         private String value;
+        
+        /**
+         * Initializes a new {@link Tuple}.
+         * @param k
+         * @param v
+         */
+        public Tuple(String k, String v) {
+            key = k;
+            value = v;
+        }
         
         
         /* (non-Javadoc)
@@ -190,17 +176,6 @@ public class ExtendedMDCFilter extends TurboFilter {
             return key;
         }
 
-        
-        /**
-         * Sets the key
-         *
-         * @param key The key to set
-         */
-        public void setKey(String key) {
-            this.key = key;
-        }
-
-        
         /**
          * Gets the value
          *
@@ -210,22 +185,10 @@ public class ExtendedMDCFilter extends TurboFilter {
             return value;
         }
 
-        
         /**
-         * Sets the value
-         *
-         * @param value The value to set
+         * Get outer type
+         * @return
          */
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        public Tuple(String k, String v) {
-            key = k;
-            value = v;
-        }
-
-
         private ExtendedMDCFilter getOuterType() {
             return ExtendedMDCFilter.this;
         }
