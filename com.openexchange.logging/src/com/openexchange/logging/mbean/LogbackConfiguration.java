@@ -262,6 +262,25 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         return filters;
     }
     
+
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeAllFilters()
+     */
+    @Override
+    public synchronized void removeAllFilters() {
+        TurboFilterList list = loggerContext.getTurboFilterList();
+        StringBuilder builder = new StringBuilder();
+        for(String key : turboFilterCache.keySet()) {
+            list.remove(turboFilterCache.get(key));
+            if (LOG.isDebugEnabled()) {
+                builder.setLength(0);
+                builder.append("Removing filter ").append(key);
+                LOG.debug(builder.toString());
+            }
+        }
+        turboFilterCache.clear();
+    }
+
     /**
      * Create an MDCFilter based on the specified key/value/filter
      * @param key

@@ -122,4 +122,9 @@ public interface LogbackConfigurationMBean {
      * @return
      */
     public Set<String> getFilters();
+    
+    /**
+     * Removes all filters
+     */
+    public void removeAllFilters();
 }    
