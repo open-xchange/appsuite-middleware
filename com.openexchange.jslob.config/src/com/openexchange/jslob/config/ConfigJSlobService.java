@@ -663,10 +663,7 @@ public final class ConfigJSlobService implements JSlobService {
 
             // Set (or replace) JSlob
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
-            if (null == attributes) {
-                // Store JSlob in common storage
-                getStorage().store(new JSlobId(SERVICE_ID, id, userId, contextId), jsonJSlob);
-            } else {
+            if (null != attributes) {
                 // A config cascade change because identifier refers to a preference item
                 final ConfigView view = getConfigViewFactory().getView(userId, contextId);
                 for (final AttributedProperty attributedProperty : attributes.values()) {
