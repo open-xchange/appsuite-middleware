@@ -52,9 +52,16 @@ package com.openexchange.configuration.clt;
 import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -62,6 +69,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -72,6 +81,7 @@ import org.xml.sax.SAXException;
 public class Log4jModificationsCLT {
 
     private static final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    private static final XPathFactory xf = XPathFactory.newInstance();
 
     public Log4jModificationsCLT() {
         super();
@@ -116,8 +126,21 @@ public class Log4jModificationsCLT {
             }
             Document document = db.parse(input);
             // Find differences
+            Set<Logger> origLogger = parseLogger(original);
+            Set<Logger> configuredLogger = parseLogger(document);
+            Set<Logger> added = new HashSet<Logger>(configuredLogger);
+            added.removeAll(origLogger);
+            Properties properties = new Properties();
+            for (Logger logger : added) {
+                properties.put(logger.getName() + ".level", logger.getLevel());
+            }
+            properties.store(System.out, "file-logging.properties");
         } catch (SAXException e) {
             System.out.println("Can not parse XML document: " + e.getMessage());
+            e.printStackTrace();
+            return 1;
+        } catch (XPathExpressionException e) {
+            System.out.println("Can not parse XPath expression: " + e.getMessage());
             e.printStackTrace();
             return 1;
         } catch (IOException e) {
@@ -128,4 +151,17 @@ public class Log4jModificationsCLT {
         return 0;
     }
 
+    private static Set<Logger> parseLogger(Document original) throws XPathExpressionException {
+        XPath path = xf.newXPath();
+        NodeList list = (NodeList) path.compile("/configuration/logger/@name").evaluate(original, XPathConstants.NODESET);
+        Set<Logger> retval = new HashSet<Logger>(list.getLength());
+        for (int i = 0; i < list.getLength(); i++) {
+            Node nameAttribute = list.item(i);
+            final String name = nameAttribute.getNodeValue();
+            Node valueAttribute = (Node) path.compile("//level/@value").evaluate(nameAttribute, XPathConstants.NODE);
+            final String value = valueAttribute.getNodeValue();
+            retval.add(new Logger(name, value));
+        }
+        return retval;
+    }
 }
