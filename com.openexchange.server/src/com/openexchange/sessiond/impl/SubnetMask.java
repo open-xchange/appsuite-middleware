@@ -4,6 +4,7 @@ package com.openexchange.sessiond.impl;
 import java.math.BigInteger;
 import java.util.regex.Pattern;
 import org.apache.commons.net.util.SubnetUtils;
+import com.openexchange.java.IPAddressUtil;
 
 /*
  *

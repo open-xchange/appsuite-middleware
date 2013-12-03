@@ -2,6 +2,7 @@
 
  - Fix for bug 29816: Added "TLSv1" to enabled protocols accepted by Open-Xchange as a client
  - Fix for bug 30135: Added null guard when parsing user attributes delivered via SOAP
+ - Fix for bug 30115: Introduced possibility to specify an IP-based black-list for mail account hosts
 
 * 2013-12-02 - tobias.friedrich@open-xchange.com
 
