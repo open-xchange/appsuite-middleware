@@ -50,8 +50,9 @@
 package com.openexchange.logging.mbean;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
@@ -60,7 +61,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.TurboFilterList;
-import ch.qos.logback.classic.turbo.MDCFilter;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
@@ -86,6 +86,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     public LogbackConfiguration() throws NotCompliantMBeanException {
         super(LogbackConfigurationMBean.class);
+        loggerContext.getTurboFilterList().get(0).setName("DEFAULT");
         configurator.setContext(loggerContext);
     }
 
@@ -103,7 +104,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                    .append("\"");
             LOG.debug(builder.toString());
         }
-        loggerContext.addTurboFilter(createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT));
+        
+        createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT);
     }
 
     /* (non-Javadoc)
@@ -122,18 +124,34 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                    .append("\"");
             LOG.debug(builder.toString());
         }
-
-        ExtendedMDCFilter filter = new ExtendedMDCFilter();
-        filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
-        filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
-        filter.setOnMatch(FilterReply.ACCEPT);
         
         StringBuilder builder = new StringBuilder();
         builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)))
                .append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
-        turboFilterCache.put(builder.toString(), filter);
-        
-        loggerContext.addTurboFilter(filter);
+        String key = builder.toString();
+
+        if (!turboFilterCache.containsKey(key)) {
+            ExtendedMDCFilter filter = new ExtendedMDCFilter();
+            filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
+            filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
+            filter.setOnMatch(FilterReply.ACCEPT);
+            filter.setName(key);
+            
+            turboFilterCache.put(builder.toString(), filter);
+            loggerContext.addTurboFilter(filter);
+        } else {
+            if (LOG.isDebugEnabled()) {
+                builder.setLength(0);
+                builder.append("Duplicate user filter for user with ID \"")
+                        .append(userID)
+                       .append("\", context with ID \"")
+                       .append(contextID)
+                       .append("\" and policy \"")
+                       .append("ACCEPT")
+                       .append("\"");
+                LOG.debug(builder.toString());
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -150,36 +168,26 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                    .append("\"");
             LOG.debug(builder.toString());
         }
-        loggerContext.addTurboFilter(createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, FilterReply.ACCEPT));        
+        createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, FilterReply.ACCEPT);        
     }
     
     /*
      * (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#setLogLevel(java.lang.String, java.lang.String)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#setLogLevel(java.lang.String, java.lang.String[])
      */
     @Override
-    public void setLogLevel(String level, String logger) {
-        List<ch.qos.logback.classic.Logger> loggers = loggerContext.getLoggerList();
-        for (ch.qos.logback.classic.Logger l : loggers) {
-            if (l.getName().equals(logger)) {
-                if (LOG.isDebugEnabled()) {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("Setting global log level to \"").append(level).append("\"");
-                    LOG.debug(builder.toString());
-                }
-                l.setLevel(Level.valueOf(level));
+    public void setLogLevel(String level, String[] loggers) {
+        for (String s : loggers) {
+            loggerContext.getLogger(s).setLevel(Level.valueOf(level));
+            if (LOG.isDebugEnabled()) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("Setting log level for \"")
+                        .append(s)
+                        .append("\" to \"").append(level).append("\"");
+                LOG.debug(builder.toString());
             }
         }
     }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#resetLogger(java.lang.String)
-     */
-    @Override
-    public void resetLogger(String logger) {
-        //TODO
-    }
-
 
     /* (non-Javadoc)
      * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeContextFilter(int)
@@ -196,7 +204,6 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
     }
 
-
     /* (non-Javadoc)
      * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeUserFilter(int, int)
      */
@@ -206,8 +213,18 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)))
                .append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
         removeFilter(builder.toString());
+        if (LOG.isDebugEnabled()) {
+            builder.setLength(0);
+            builder.append("Removed user filter for user with ID \"")
+                   .append(userID)
+                   .append("\", context with ID \"")
+                   .append(contextID)
+                   .append("\" and policy \"")
+                   .append("ACCEPT")
+                   .append("\"");
+            LOG.debug(builder.toString());
+        }
     }
-
 
     /* (non-Javadoc)
      * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeSessionFilter(java.lang.String)
@@ -217,6 +234,34 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         removeFilter(createKey(Name.SESSION_SESSION_ID.getName(), sessionID));        
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getLoggers()
+     */
+    @Override
+    public Set<String> getLoggers() {
+        Set<String> loggers = new HashSet<String>();
+        System.out.println(loggerContext.getLoggerList());
+        StringBuilder builder = new StringBuilder();
+        for(ch.qos.logback.classic.Logger l : loggerContext.getLoggerList()) {
+            builder.setLength(0);
+            builder.append("Logger: ").append(l.getName()).append(", Level: ").append(l.getLevel());
+            loggers.add(builder.toString());
+        }
+        return loggers;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getFilters()
+     */
+    @Override
+    public Set<String> getFilters() {
+        Set<String> filters = new HashSet<String>();
+        for(TurboFilter tf  : loggerContext.getTurboFilterList()) {
+            filters.add(tf.getName());
+        }
+        return filters;
+    }
+    
     /**
      * Create an MDCFilter based on the specified key/value/filter
      * @param key
@@ -224,14 +269,29 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @param onMatch
      * @return
      */
-    private final ExtendedMDCFilter createExtendedMDCFilter(String key, String value, FilterReply onMatch) {
-        ExtendedMDCFilter filter = new ExtendedMDCFilter();
-        filter.addTuple(key, value);
-        filter.setOnMatch(onMatch);
+    private final void createExtendedMDCFilter(String key, String value, FilterReply onMatch) {
+        String k = createKey(key, value);
+        if (!turboFilterCache.containsKey(k)) {
+            ExtendedMDCFilter filter = new ExtendedMDCFilter();
+            filter.addTuple(key, value);
+            filter.setOnMatch(onMatch);
+            filter.setName(k);
         
-        turboFilterCache.put(createKey(key, value), filter);
-        
-        return filter;
+            turboFilterCache.put(createKey(key, value), filter);
+            loggerContext.addTurboFilter(filter);
+        } else {
+            if (LOG.isDebugEnabled()) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("Duplicate filter for \"")
+                        .append(key)
+                        .append("\" with ID \"")
+                        .append(value)
+                       .append("\" and policy \"")
+                       .append("ACCEPT")
+                       .append("\"");
+                LOG.debug(builder.toString());
+            }
+        }
     }
     
     /**

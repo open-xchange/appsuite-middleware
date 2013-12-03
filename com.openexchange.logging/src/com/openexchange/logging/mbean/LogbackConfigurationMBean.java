@@ -49,6 +49,8 @@
 
 package com.openexchange.logging.mbean;
 
+import java.util.Set;
+
 /**
  * {@link LogbackConfigurationMBean}
  *
@@ -82,17 +84,11 @@ public interface LogbackConfigurationMBean {
     public void filterSession(String sessionID);
     
     /**
-     * Set the specified level for the specified logger
-     * @param logger
+     * Set the specified level for the specified loggers
+     * @param loggers
      * @param level
      */
-    public void setLogLevel(String level, String logger);
-    
-    /**
-     * Resets the specified logger as specified in {@link LoggerContext#reset}
-     * @param logger
-     */
-    public void resetLogger(String logger);
+    public void setLogLevel(String level, String[] loggers);
     
     /**
      * Remove the context filter
@@ -113,4 +109,17 @@ public interface LogbackConfigurationMBean {
      */
     public void removeSessionFilter(String sessionID);
     
+    /**
+     * Returns a list with all loggers of the system along with their log level.
+     * 
+     * @return
+     */
+    public Set<String> getLoggers();
+    
+    /**
+     * Returns a list with all logging filters
+     * 
+     * @return
+     */
+    public Set<String> getFilters();
 }    
