@@ -472,6 +472,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
                 Participant[] participants = cimp.getParticipants(cdao, readcon).getList();
                 cdao.setParticipants(participants);
+                
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));
                 cdao.setTimezone(setString(i++, load_resultset));
@@ -492,6 +493,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setOrganizer(org);
                 }
                 cdao.setUid(setString(i++, load_resultset));
+                
+                //Context of check is critical. TODO: Make independent!
+                checkGeneralPermissions(oid, inFolder, readcon, so, ctx, action_folder, check_permissions, cdao, check_special_action, organizer, uniqueId);
+                
                 cdao.setFilename(setString(i++, load_resultset));
                 cdao.setSequence(setInt(i++, load_resultset));
                 cdao.setOrganizerId(setInt(i++, load_resultset));
@@ -499,7 +504,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setPrincipalId(setInt(i++, load_resultset));
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
                 
-                checkPermissions(oid, inFolder, readcon, so, ctx, action, action_folder, check_permissions, cdao, check_special_action, organizer, uniqueId);
+                //Context of check is critical. TODO: Make independent!
+                checkShared(oid, inFolder, so, action, action_folder, check_permissions, cdao, check_special_action);
+                //Context of check is critical. TODO: Make independent!
+                checkMove(oid, inFolder, readcon, so, ctx, action, action_folder, check_permissions, cdao);
                 
                 if (cdao.containsRecurrenceID()) {
                     cdao.setRecurrenceCalculator(setInt(i++, load_resultset));
@@ -531,12 +539,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             load_resultset.close();
         }
         return cdao;
-    }
-
-    private void checkPermissions(final int oid, final int inFolder, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder, final boolean check_permissions, final CalendarDataObject cdao, int check_special_action, String organizer, String uniqueId) throws OXException {
-        checkGeneralPermissions(oid, inFolder, readcon, so, ctx, action_folder, check_permissions, cdao, check_special_action, organizer, uniqueId);
-        checkShared(oid, inFolder, so, action, action_folder, check_permissions, cdao, check_special_action);
-        checkMove(oid, inFolder, readcon, so, ctx, action, action_folder, check_permissions, cdao);
     }
 
     private void checkGeneralPermissions(final int oid, final int inFolder, final Connection readcon, final Session so, final Context ctx, final int action_folder, boolean check_permissions, final CalendarDataObject cdao, int check_special_action, String organizer, String uniqueId) throws OXException {
