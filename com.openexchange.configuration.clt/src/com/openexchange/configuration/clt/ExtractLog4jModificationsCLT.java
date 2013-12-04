@@ -51,7 +51,9 @@ package com.openexchange.configuration.clt;
 
 import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -74,16 +76,16 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * {@link Log4jModificationsCLT}
+ * {@link ExtractLog4jModificationsCLT}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Log4jModificationsCLT {
+public class ExtractLog4jModificationsCLT {
 
     private static final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     private static final XPathFactory xf = XPathFactory.newInstance();
 
-    public Log4jModificationsCLT() {
+    public ExtractLog4jModificationsCLT() {
         super();
     }
 
@@ -95,12 +97,13 @@ public class Log4jModificationsCLT {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
         options.addOption(createOption("i", "in", true, "XML document is read from this file.", false));
+        options.addOption(createOption("o", "out", true, "JUL properties configuration file is written to this file. If this option is omitted the output will be written to STDOUT.", false));
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
             cmd = parser.parse(options, args, true);
         } catch (ParseException e) {
-            System.out.println("Parsing the command line failed: " + e.getMessage());
+            System.err.println("Parsing the command line failed: " + e.getMessage());
             return 1;
         }
         if (cmd.hasOption('h')) {
@@ -113,15 +116,16 @@ public class Log4jModificationsCLT {
             db = dbf.newDocumentBuilder();
             db.setEntityResolver(new ClassloaderEntityResolver());
         } catch (ParserConfigurationException e) {
-            System.out.println("Can not configure XML parser: " + e.getMessage());
+            System.err.println("Can not configure XML parser: " + e.getMessage());
             e.printStackTrace();
             return 1;
         }
+        OutputStream os = null;
         try {
-            Document original = db.parse(Log4jModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml"));
+            Document original = db.parse(ExtractLog4jModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml"));
             File input = new File(cmd.getOptionValue('i'));
             if (!input.exists() || !input.isFile() || !input.canRead()) {
-                System.out.println("Can not open input file: \"" + input.getAbsolutePath() + "\".");
+                System.err.println("Can not open input file: \"" + input.getAbsolutePath() + "\".");
                 return 1;
             }
             Document document = db.parse(input);
@@ -134,19 +138,38 @@ public class Log4jModificationsCLT {
             for (Logger logger : added) {
                 properties.put(logger.getName() + ".level", logger.getLevel());
             }
-            properties.store(System.out, "file-logging.properties");
+            if (cmd.hasOption('o')) {
+                File output = new File(cmd.getOptionValue('o'));
+                if (!output.createNewFile() && !output.canWrite()) {
+                    System.err.println("Can not write to output file: \"" + output.getAbsolutePath() + "\".");
+                    return 1;
+                }
+                os = new FileOutputStream(output);
+            } else {
+                os = System.out;
+            }
+            properties.store(os, "file-logging.properties");
         } catch (SAXException e) {
-            System.out.println("Can not parse XML document: " + e.getMessage());
+            System.err.println("Can not parse XML document: " + e.getMessage());
             e.printStackTrace();
             return 1;
         } catch (XPathExpressionException e) {
-            System.out.println("Can not parse XPath expression: " + e.getMessage());
+            System.err.println("Can not parse XPath expression: " + e.getMessage());
             e.printStackTrace();
             return 1;
         } catch (IOException e) {
-            System.out.println("Can not read XML file: " + e.getMessage());
+            System.err.println("Can not read XML file: " + e.getMessage());
             e.printStackTrace();
             return 1;
+        } finally {
+            if (null != os) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return 1;
+                }
+            }
         }
         return 0;
     }
