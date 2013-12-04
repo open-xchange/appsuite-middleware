@@ -1,6 +1,7 @@
 * 2013-12-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 30154: Don't abort importing Google contacts if no more contact images are allowed to be fetched due to temporary rate limiting
+ - Fix for bug 30146: Doubled accepted length of HTML content when performing in-depth sanitizing (white-list, etc.)
 
 * 2013-12-04 - tobias.friedrich@open-xchange.com
 
