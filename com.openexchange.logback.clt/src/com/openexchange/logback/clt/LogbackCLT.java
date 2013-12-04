@@ -101,7 +101,7 @@ public class LogbackCLT {
         options.addOption(createOption("s", "session", true, false, "The session id for which to enable logging", false));
         options.addOption(createOption("l", "level", true, false, "Define the log level", false));
         options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
-        options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system", false));
+        options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2>", false));
         options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
         options.addOptionGroup(og);
     }
@@ -112,7 +112,7 @@ public class LogbackCLT {
      * @param shortName short name of the option 
      * @param longName long name of the option
      * @param hasArgs whether it has arguments
-     * @param hasOptArgs TODO
+     * @param hasOptArgs whether it has optional arguments
      * @param description short description
      * @param mandatory whether it is mandatory
      * @return
@@ -215,16 +215,12 @@ public class LogbackCLT {
                 }
             }
         } catch (InstanceNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (MBeanException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (ReflectionException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -267,7 +263,10 @@ public class LogbackCLT {
      */
     private static final void printUsage() {
         HelpFormatter hf = new HelpFormatter();
-        hf.printHelp("logback [-a | -d] [ [-u <userid> -c <contextid>] \n | [-s <sessionid>] \n  | [-c <contextid>] ] \n -l <loglevel> <logger name 1> ... <logger name n> \n -lf \n -ll \n -h", options);
+        hf.printHelp("logback [-a | -d] [ [-u <userid> -c <contextid>] \n | [-s <sessionid>] \n  | [-c <contextid>] ] \n -l <loglevel> <logger name 1> ... <logger name n> \n -lf \n -ll \n -h", 
+            null, 
+            options, 
+            "\n\nThe flags -a and -d  and the options -c and -s are mutually exclusive.");
         System.exit(-1);
     }
     

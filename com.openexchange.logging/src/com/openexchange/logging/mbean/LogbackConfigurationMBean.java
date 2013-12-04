@@ -64,10 +64,13 @@ public interface LogbackConfigurationMBean {
     
     public static final String VALUE = "Logging Configuration";
     
+    static final String DESCRIPTION = "Management Bean for the Logback Configuration";
+    
     /**
      * Filter context
      * @param contextID
      */
+    @MBeanMethodAnnotation (description="Create a filter for the specified contextID", parameters={"contextID"}, parameterDescriptions={"The contextID for which to apply the filter"})
     public void filterContext(int contextID);
     
     /**
@@ -75,12 +78,14 @@ public interface LogbackConfigurationMBean {
      * @param userID
      * @param contextID
      */
+    @MBeanMethodAnnotation (description="Create a filter for the specified userID contextID combo", parameters={"userID", "contextID"}, parameterDescriptions={"The userID for which to apply the filter", "The contextID for which to apply the filter"})
     public void filterUser(int userID, int contextID);
     
     /**
      * Filter session
      * @param sessionID
      */
+    @MBeanMethodAnnotation (description="Create a filter for the specified sessionID", parameters={"sessionID"}, parameterDescriptions={"The sessionID for which to apply the filter"})
     public void filterSession(String sessionID);
     
     /**
@@ -88,12 +93,14 @@ public interface LogbackConfigurationMBean {
      * @param loggers
      * @param level
      */
+    @MBeanMethodAnnotation (description="Set the log level for the specified set of loggers", parameters={"level", "loggers"}, parameterDescriptions={"The desired log level for the specified loggers", "Loggers for which to apply the specified log level"})
     public void setLogLevel(String level, String[] loggers);
     
     /**
      * Remove the context filter
      * @param contextID
      */
+    @MBeanMethodAnnotation (description="Remove the context filter for the specified contextID", parameters={"contextID"}, parameterDescriptions={"The contextID for which to remove the logging filter"})
     public void removeContextFilter(int contextID);
     
     /**
@@ -101,12 +108,14 @@ public interface LogbackConfigurationMBean {
      * @param userID
      * @param contextID
      */
+    @MBeanMethodAnnotation (description="Remove the user filter for the specified userID, contextID combo", parameters={"userID", "contextID"}, parameterDescriptions={"The userID for which to remove the logging filter", "The contextID for which to remove the logging filter"})
     public void removeUserFilter(int userID, int contextID);
     
     /**
      * Remove the session filter
      * @param sessionID
      */
+    @MBeanMethodAnnotation (description="Remove the session filter for the specified sessionID", parameters={"sessionID"}, parameterDescriptions={"The sessionID for which to remove the logging filter"})
     public void removeSessionFilter(String sessionID);
     
     /**
@@ -114,6 +123,7 @@ public interface LogbackConfigurationMBean {
      * 
      * @return
      */
+    @MBeanMethodAnnotation (description="Return a list with all system's loggers along with their assigned log level", parameters={}, parameterDescriptions={})
     public Set<String> listLoggers();
     
     /**
@@ -122,6 +132,7 @@ public interface LogbackConfigurationMBean {
      * @param loggers
      * @return
      */
+    @MBeanMethodAnnotation (description="Return a list with the specified system's loggers along with their assigned log level", parameters={"loggers"}, parameterDescriptions={"Specified loggers to return"})
     public Set<String> getLevelForLoggers(String[] loggers);
     
     /**
@@ -129,11 +140,13 @@ public interface LogbackConfigurationMBean {
      * 
      * @return
      */
+    @MBeanMethodAnnotation (description="Return a list with all logging filters", parameters={}, parameterDescriptions={})
     public Set<String> listFilters();
     
     /**
      * Removes all filters
      */
+    @MBeanMethodAnnotation (description="Remove all logging filters", parameters={}, parameterDescriptions={})
     public void removeAllFilters();
     
     

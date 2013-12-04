@@ -49,10 +49,14 @@
 
 package com.openexchange.logging.mbean;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
@@ -80,6 +84,12 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     
     private final Map<String, TurboFilter> turboFilterCache = new HashMap<String, TurboFilter>();
     
+    private final Map<String, String> methodDescriptions = new HashMap<String, String>();
+    
+    private final Map<String, String[]> methodParameters = new HashMap<String, String[]>();
+    
+    private final Map<String, String[]> methodParameterDescriptions = new HashMap<String, String[]>();
+    
     /**
      * Initializes a new {@link LogbackConfiguration}.
      * @throws NotCompliantMBeanException 
@@ -88,6 +98,21 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         super(LogbackConfigurationMBean.class);
         loggerContext.getTurboFilterList().get(0).setName("DEFAULT");
         configurator.setContext(loggerContext);
+        
+        Class<?> [] interfaces = this.getClass().getInterfaces();
+        if (interfaces.length == 1) { //just in case, should always be equals to 1
+            Method[] methods = interfaces[0].getMethods(); 
+            for(Method m : methods) {
+                if (m.isAnnotationPresent(MBeanMethodAnnotation.class)) {
+                    MBeanMethodAnnotation a = m.getAnnotation(MBeanMethodAnnotation.class);
+                    methodParameters.put(m.getName(), a.parameters());
+                    methodDescriptions.put(m.getName(), a.description());
+                    methodParameterDescriptions.put(m.getName(), a.parameterDescriptions());
+                }
+            }
+        } else {
+            LOG.error("Cannot initialize annotations");
+        }
     }
 
     /* (non-Javadoc)
@@ -296,7 +321,50 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
         return l;
     }
-
+    
+    /*
+     * (non-Javadoc)
+     * @see javax.management.StandardMBean#getDescription(javax.management.MBeanOperationInfo)
+     */
+    @Override
+    protected final String getDescription(MBeanInfo info) {
+        return DESCRIPTION;
+    }
+    
+    
+    /*
+     * (non-Javadoc)
+     * @see javax.management.StandardMBean#getDescription(javax.management.MBeanOperationInfo)
+     */
+    @Override
+    protected final String getDescription(MBeanOperationInfo info) {
+        return methodDescriptions.get(info.getName());
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see javax.management.StandardMBean#getDescription(javax.management.MBeanOperationInfo, javax.management.MBeanParameterInfo, int)
+     */
+    @Override
+    protected final String getDescription(MBeanOperationInfo op, MBeanParameterInfo param, int sequence) {
+        String[] v = methodParameterDescriptions.get(op.getName());
+        if (v == null || v.length == 0 || sequence > v.length)
+            return super.getDescription(op, param, sequence);
+        return v[sequence];
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see javax.management.StandardMBean#getParameterName(javax.management.MBeanOperationInfo, javax.management.MBeanParameterInfo, int)
+     */
+    @Override
+    protected final String getParameterName(MBeanOperationInfo op, MBeanParameterInfo param, int sequence) {
+        String[] v = methodParameters.get(op.getName());
+        if (v == null || v.length == 0 || sequence > v.length)
+            return super.getDescription(op, param, sequence);
+        return v[sequence];
+    }
+    
     /**
      * Create an MDCFilter based on the specified key/value/filter
      * @param key
