@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/com.openexchange.server/src/com/openexchange/groupware/update/tools/console/UpdateTaskForceCLT.java"/>
+<listEntry value="/com.openexchange.oxscripts.clt/src/com/openexchange/groupware/update/tools/console/UpdateTaskForceCLT.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.openexchange.groupware.update.tools.console.UpdateTaskForceCLT"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--help"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.openexchange.server"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.openexchange.oxscripts.clt"/>
 </launchConfiguration>

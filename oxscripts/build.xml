@@ -45,18 +45,8 @@
         <copy todir="${sbinInstallDir}" overwrite="true">
             <fileset dir="${patchSbinDir}"/>
         </copy>
-        <chmod perm="755" file="${sbinInstallDir}/checkconsistency"/>
         <chmod perm="755" file="${sbinInstallDir}/checkconfigconsistency"/>
-    	<chmod perm="755" file="${sbinInstallDir}/clearpreviewcache"/>
-        <chmod perm="755" file="${sbinInstallDir}/closesessions"/>
-        <chmod perm="755" file="${sbinInstallDir}/forceupdatetask"/>
-        <chmod perm="755" file="${sbinInstallDir}/getmissingservices"/>
-        <chmod perm="755" file="${sbinInstallDir}/listExecutedUpdateTasks"/>
-        <chmod perm="755" file="${sbinInstallDir}/logincounter"/>
-    	<chmod perm="755" file="${sbinInstallDir}/lastlogintimestamp"/>
     	<chmod perm="755" file="${sbinInstallDir}/open-xchange"/>
-        <chmod perm="755" file="${sbinInstallDir}/restoregabdefaults"/>
-        <chmod perm="755" file="${sbinInstallDir}/runupdate"/>
 
     </target>
 
@@ -71,7 +61,7 @@
             <fileset dir="${sbinDir}"/>
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
-        <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency clearpreviewcache closesessions forceupdatetask getmissingservices listExecutedUpdateTasks logincounter lastlogintimestamp open-xchange restoregabdefaults runupdate">
+        <replace dir="${patchSbinDir}" includes="checkconfigconsistency open-xchange">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>

@@ -55,6 +55,9 @@ import javax.management.ObjectName;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.logging.mbean.LogbackConfiguration;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
@@ -70,6 +73,10 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public class Activator extends HousekeepingActivator {
 
+    private static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
+
+    private static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
+
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
     private ObjectName logbackConfObjName;
@@ -84,9 +91,23 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        new com.openexchange.logging.internal.LogbackCorrector().correct();
-
+        logger.info("starting bundle com.openexchange.logging");
+        configureJavaUtilLogging();
+        overrideLoggerLevels();
         registerLoggingConfigurationMBean();
+    }
+
+    private void configureJavaUtilLogging() {
+        // We configure a special j.u.l handler that routes logging to slf4j
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+    }
+
+    private void overrideLoggerLevels() {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        for (final String className : new String[] { LOGIN_PERFORMER, SESSION_HANDLER }) {
+            loggerContext.getLogger(className).setLevel(Level.INFO);
+        }
     }
 
     /**

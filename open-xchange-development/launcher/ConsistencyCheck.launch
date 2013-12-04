@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <stringAttribute key="bad_container_name" value="/open-xchange-development/launche"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/com.openexchange.server/src/com/openexchange/consistency/ConsistencyCheck.java"/>
+<listEntry value="/com.openexchange.oxscripts.clt/src/com/openexchange/consistency/ConsistencyCheck.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.openexchange.consistency.ConsistencyCheck"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="repair context 73536486 missing_file_for_infoitem delete missing_file_for_attachment delete missing_entry_for_file delete"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.openexchange.server"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.openexchange.oxscripts.clt"/>
 </launchConfiguration>
