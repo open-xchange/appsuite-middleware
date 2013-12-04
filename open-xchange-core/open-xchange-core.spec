@@ -882,6 +882,9 @@ fi
 # SoftwareChange_Request-1747
 ox_add_property com.openexchange.log.suppressedCategories USER_INPUT /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-1760
+ox_add_property com.openexchange.mail.account.blacklist "" /opt/open-xchange/etc/mail.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
