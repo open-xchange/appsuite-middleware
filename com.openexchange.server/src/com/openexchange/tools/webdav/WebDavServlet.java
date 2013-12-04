@@ -191,9 +191,6 @@ public abstract class WebDavServlet extends HttpServlet {
      */
     @Override
     protected void service(final HttpServletRequest request, final HttpServletResponse resp) throws ServletException, IOException {
-        // create a new HttpSession if it's missing
-        request.getSession(true);
-
         if (isServletDisabled() && isDisabledByProperty()) {
             resp.setContentType("text/html; charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, getDisabledMessage());
