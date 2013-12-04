@@ -280,6 +280,22 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
         turboFilterCache.clear();
     }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getLevelForLogger(java.lang.String)
+     */
+    @Override
+    public Set<String> getLevelForLoggers(String[] loggers) {
+        Set<String> l = new HashSet<String>();
+        StringBuilder builder = new StringBuilder();
+        for (String s : loggers) {
+            ch.qos.logback.classic.Logger logger = loggerContext.getLogger(s);
+            builder.setLength(0);
+            builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
+            l.add(builder.toString());
+        }
+        return l;
+    }
 
     /**
      * Create an MDCFilter based on the specified key/value/filter

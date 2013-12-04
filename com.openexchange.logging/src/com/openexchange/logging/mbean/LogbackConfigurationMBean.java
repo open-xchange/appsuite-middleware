@@ -117,6 +117,14 @@ public interface LogbackConfigurationMBean {
     public Set<String> listLoggers();
     
     /**
+     * Return a list with only the specified loggers
+     * 
+     * @param loggers
+     * @return
+     */
+    public Set<String> getLevelForLoggers(String[] loggers);
+    
+    /**
      * Returns a list with all logging filters
      * 
      * @return
@@ -127,4 +135,6 @@ public interface LogbackConfigurationMBean {
      * Removes all filters
      */
     public void removeAllFilters();
+    
+    
 }    

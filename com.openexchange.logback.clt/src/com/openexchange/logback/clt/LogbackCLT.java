@@ -90,19 +90,19 @@ public class LogbackCLT {
     
     private static final Options options = new Options();
     static {
-        Option add = createOption("a", "add", false, "Flag to add the filter", true);
-        Option del = createOption("d", "delete", false, "Flag to delete the filter", true);
+        Option add = createOption("a", "add", false, false, "Flag to add the filter", true);
+        Option del = createOption("d", "delete", false, false, "Flag to delete the filter", true);
         
         OptionGroup og = new OptionGroup();
         og.addOption(add).addOption(del);
         
-        options.addOption(createOption("u", "user", true, "The user id for which to enable logging", false));
-        options.addOption(createOption("c", "context", true, "The context id for which to enable logging", false));
-        options.addOption(createOption("s", "session", true, "The session id for which to enable logging", false));
-        options.addOption(createOption("l", "level", true, "Define the log level", false));
-        options.addOption(createOption("h", "help", false, "Print usage of the command line tool", false));
-        options.addOption(createOption("ll", "list-loggers", false, "Get a list with all loggers of the system", false));
-        options.addOption(createOption("lf", "list-filters", false, "Get a list with all logging filters of the system", false));
+        options.addOption(createOption("u", "user", true, false, "The user id for which to enable logging", false));
+        options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", false));
+        options.addOption(createOption("s", "session", true, false, "The session id for which to enable logging", false));
+        options.addOption(createOption("l", "level", true, false, "Define the log level", false));
+        options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
+        options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system", false));
+        options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
         options.addOptionGroup(og);
     }
     
@@ -112,12 +112,13 @@ public class LogbackCLT {
      * @param shortName short name of the option 
      * @param longName long name of the option
      * @param hasArgs whether it has arguments
+     * @param hasOptArgs TODO
      * @param description short description
      * @param mandatory whether it is mandatory
      * @return
      */
     @SuppressWarnings("static-access")
-    private static final Option createOption(String shortName, String longName, boolean hasArgs, String description, boolean mandatory) {
+    private static final Option createOption(String shortName, String longName, boolean hasArgs, boolean hasOptArgs, String description, boolean mandatory) {
         return OptionBuilder.withLongOpt(longName).hasArg(hasArgs).withDescription(description).isRequired(mandatory).create(shortName);
     }
 
@@ -162,8 +163,14 @@ public class LogbackCLT {
                 method = "listFilters";
                 params = null;
             } else if (cl.hasOption("ll")) {
-                method = "listLoggers";
-                params = null;
+                String[] llargs = cl.getArgs();
+                if (llargs.length > 0) {
+                    method = "getLevelForLoggers";
+                    params = new Object[]{llargs};
+                } else {
+                    method = "listLoggers";
+                    params = null;
+                }
             } else {
                 printUsage();
             }
