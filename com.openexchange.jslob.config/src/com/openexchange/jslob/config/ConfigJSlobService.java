@@ -96,6 +96,7 @@ import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.log.LogFactory;
+import com.openexchange.preferences.ServerUserSettingLoader;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -627,32 +628,36 @@ public final class ConfigJSlobService implements JSlobService {
 
             final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
             if (equiv != null) {
-                final SettingStorage stor = SettingStorage.getInstance(session);
-                final ConfigTree configTree = ConfigTree.getInstance();
-                final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
-
-                for (final Entry<String, Object> entry : jObject.entrySet()) {
-                    String path = attribute2ConfigTreeMap.get(entry.getKey());
-                    if (path != null) {
-                        pathsToPurge.add(Arrays.asList(new JSONPathElement(entry.getKey())));
-                        if (path.length() > 0 && path.charAt(0) == '/') {
-                            path = path.substring(1);
-                        }
-                        if (path.endsWith("/")) {
-                            path = path.substring(0, path.length() - 1);
-                        }
-                        try {
-                            final Setting setting = configTree.getSettingByPath(path);
-                            setting.setSingleValue(entry.getValue());
-                            saveSettingWithSubs(stor, setting);
-                        } catch (OXException x) {
-                            if (SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
-                                LOG.error("Ignoring update to unmappable path", x);
-                            } else {
-                                throw x;
+                session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
+                try {
+                    final SettingStorage stor = SettingStorage.getInstance(session);
+                    final ConfigTree configTree = ConfigTree.getInstance();
+                    final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
+                    for (final Entry<String, Object> entry : jObject.entrySet()) {
+                        String path = attribute2ConfigTreeMap.get(entry.getKey());
+                        if (path != null) {
+                            pathsToPurge.add(Arrays.asList(new JSONPathElement(entry.getKey())));
+                            if (path.length() > 0 && path.charAt(0) == '/') {
+                                path = path.substring(1);
+                            }
+                            if (path.endsWith("/")) {
+                                path = path.substring(0, path.length() - 1);
+                            }
+                            try {
+                                final Setting setting = configTree.getSettingByPath(path);
+                                setting.setSingleValue(entry.getValue());
+                                saveSettingWithSubs(stor, setting);
+                            } catch (OXException x) {
+                                if (SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
+                                    LOG.error("Ignoring update to unmappable path", x);
+                                } else {
+                                    throw x;
+                                }
                             }
                         }
                     }
+                } finally {
+                    session.setParameter("__serverUserSetting", null);
                 }
             }
 

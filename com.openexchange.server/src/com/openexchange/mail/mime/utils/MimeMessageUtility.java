@@ -59,7 +59,6 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -115,6 +114,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
@@ -136,6 +136,9 @@ import com.openexchange.mail.utils.CP932EmojiMapping;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -2104,21 +2107,28 @@ public final class MimeMessageUtility {
      */
     public static InputStream getStreamFromPart(final Part part) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final PipedInputStream pin = new PipedInputStream(pos);
-        new Thread(new Runnable() {
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+
+        final Runnable r = new Runnable() {
 
             @Override
             public void run() {
                 try {
                     part.writeTo(pos);
                 } catch (final Exception e) {
-                    // Ignore
-                    LOG.warn("Error while writing part to stream", e);
+                    pin.setException(e);
                 } finally {
                     Streams.close(pos);
                 }
             }
-        }, "MimeMessageUtility.getStreamFromPart").start();
+        };
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        if (null == threadPool) {
+            new Thread(r, "MimeMessageUtility.getStreamFromPart").start();
+        } else {
+            threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+        }
+
         return pin;
     }
 
@@ -2132,21 +2142,28 @@ public final class MimeMessageUtility {
     public static InputStream getStreamFromMailPart(final MailPart part) throws OXException {
         try {
             final PipedOutputStream pos = new PipedOutputStream();
-            final PipedInputStream pin = new PipedInputStream(pos);
-            new Thread(new Runnable() {
+            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+
+            final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
                     try {
                         part.writeTo(pos);
                     } catch (final Exception e) {
-                        // Ignore
-                        LOG.warn("Error while writing part to stream", e);
+                        pin.setException(e);
                     } finally {
                         Streams.close(pos);
                     }
                 }
-            }, "MimeMessageUtility.getStreamFromMailPart").start();
+            };
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null == threadPool) {
+                new Thread(r, "MimeMessageUtility.getStreamFromMailPart").start();
+            } else {
+                threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+            }
+
             return pin;
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {

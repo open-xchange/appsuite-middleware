@@ -55,7 +55,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
@@ -70,6 +69,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -86,6 +86,9 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -846,21 +849,31 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      */
     private static InputStream getStreamFromPart(final Part part) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final PipedInputStream pin = new PipedInputStream(pos);
-        new Thread(new Runnable() {
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
 
-            @Override
-            public void run() {
-                try {
-                    part.writeTo(pos);
-                } catch (final Exception e) {
-                    // Ignore
-                    LOG.warn("Error while writing part to stream", e);
-                } finally {
-                    Streams.close(pos);
+        {
+            final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        part.writeTo(pos);
+                    } catch (final Exception e) {
+                        // Ignore
+                        pin.setException(e);
+                    } finally {
+                        Streams.close(pos);
+                    }
                 }
+            };
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null == threadPool) {
+                new Thread(r, "MimeMailPart.getStreamFromPart").start();
+            } else {
+                threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
             }
-        }, "MimeMailPart.getStreamFromPart").start();
+        }
+
         return stripEmptyStartingLine(pin);
     }
 
@@ -873,21 +886,30 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      */
     private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final PipedInputStream pin = new PipedInputStream(pos);
-        new Thread(new Runnable() {
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
 
-            @Override
-            public void run() {
-                try {
-                    multipart.writeTo(pos);
-                } catch (final Exception e) {
-                    // Ignore
-                    LOG.warn("Error while writing part to stream", e);
-                } finally {
-                    Streams.close(pos);
+        {
+            final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        multipart.writeTo(pos);
+                    } catch (final Exception e) {
+                        pin.setException(e);
+                    } finally {
+                        Streams.close(pos);
+                    }
                 }
+            };
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null == threadPool) {
+                new Thread(r, "MimeMailPart.getStreamFromMultipart").start();
+            } else {
+                threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
             }
-        }, "MimeMailPart.getStreamFromMultipart").start();
+        }
+
         return stripEmptyStartingLine(pin);
     }
 

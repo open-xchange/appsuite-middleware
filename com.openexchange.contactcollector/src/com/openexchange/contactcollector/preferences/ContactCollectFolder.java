@@ -49,6 +49,7 @@
 
 package com.openexchange.contactcollector.preferences;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -111,7 +112,17 @@ public class ContactCollectFolder implements PreferencesItemService {
                 } catch (final NumberFormatException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue(), "contactCollectFolder");
                 }
-                ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), user.getId(), value);
+                if (null == value || !value.equals(getPrevValue(session))) {
+                    ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), user.getId(), value);
+                }
+            }
+
+            private Integer getPrevValue(final Session session) throws OXException {
+                final Map<String, Object> map = (Map<String, Object>) session.getParameter("__serverUserSetting");
+                if (null != map) {
+                    return (Integer) map.get("contact_collect_folder");
+                }
+                return ServerUserSetting.getInstance().getContactCollectionFolder(session.getContextId(), session.getUserId());
             }
         };
     }

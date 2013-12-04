@@ -83,6 +83,18 @@ public final class ThreadPools {
     }
 
     /**
+     * Gets the {@link ExecutorService} view on registered thread pool.
+     * <p>
+     * <b>Note</b>: Shut-down operations are not permitted and will throw an {@link UnsupportedOperationException}.
+     *
+     * @return The {@link ExecutorService} view on registered thread pool
+     */
+    public static ExecutorService getExecutorService() {
+        final ThreadPoolService pool = ThreadPoolActivator.REF_THREAD_POOL.get();
+        return null == pool ? null : pool.getExecutor();
+    }
+
+    /**
      * Gets registered thread pool.
      *
      * @return The thread pool or <code>null</code>

@@ -56,8 +56,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.Constants;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -150,6 +152,13 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              */
             REF_THREAD_POOL.set(threadPool);
             registerService(ThreadPoolService.class, threadPool);
+            {
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
+                dict.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
+                dict.put(Constants.SERVICE_DESCRIPTION, "The Open-Xchange ExecutorService");
+                dict.put(Constants.SERVICE_VENDOR, "Open-Xchange Inc.");
+                registerService(ExecutorService.class, threadPool.getExecutor(), dict);
+            }
             final TimerService timerService = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             REF_TIMER.set(timerService);
             registerService(TimerService.class, timerService);
