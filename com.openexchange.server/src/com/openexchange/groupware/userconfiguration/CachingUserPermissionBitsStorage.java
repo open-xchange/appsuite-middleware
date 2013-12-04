@@ -53,8 +53,6 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
@@ -81,8 +79,6 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     private transient final UserPermissionBitsStorage delegateStorage;
 
-    private final Lock cacheWriteLock;
-
     private volatile Cache cache;
 
     private volatile UserPermissionBitsStorage fallback;
@@ -95,7 +91,6 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
      */
     public CachingUserPermissionBitsStorage() throws OXException {
         super();
-        cacheWriteLock = new ReentrantLock();
         this.delegateStorage = new RdbUserPermissionBitsStorage();
         cacheAvailabilityListener = new CacheAvailabilityListener() {
 
@@ -230,16 +225,10 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         if (cache == null) {
             return;
         }
-        cacheWriteLock.lock();
         try {
             cache.clear();
         } catch (final RuntimeException rte) {
-            /*
-             * Swallow
-             */
             LOG.warn("A runtime error occurred.", rte);
-        } finally {
-            cacheWriteLock.unlock();
         }
     }
 
@@ -249,12 +238,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         if (cache == null) {
             return;
         }
-        cacheWriteLock.lock();
-        try {
-            cache.remove(getKey(userId, ctx, cache));
-        } finally {
-            cacheWriteLock.unlock();
-        }
+        cache.remove(getKey(userId, ctx, cache));
     }
 
     @Override
@@ -275,13 +259,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     private UserPermissionBits load(final Cache cache, final Context ctx, final int userId) throws OXException {
         final UserPermissionBits perm = delegateStorage.getUserPermissionBits(userId, ctx);
-        cacheWriteLock.lock();
-        try {
-            cache.put(getKey(userId, ctx, cache), perm.clone(), false);
-        } finally {
-            cacheWriteLock.unlock();
-        }
-
+        cache.put(getKey(userId, ctx, cache), perm.clone(), false);
         return perm;
     }
 
@@ -317,13 +295,8 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     private UserPermissionBits[] load(final Cache cache, final Context ctx, final TIntList userIds) throws OXException {
         final UserPermissionBits[] perms = delegateStorage.getUserPermissionBits(ctx, userIds.toArray());
-        cacheWriteLock.lock();
-        try {
-            for (final UserPermissionBits userPermissionBits : perms) {
-                cache.put(getKey(userPermissionBits.getUserId(), ctx, cache), userPermissionBits.clone(), false);
-            }
-        } finally {
-            cacheWriteLock.unlock();
+        for (final UserPermissionBits userPermissionBits : perms) {
+            cache.put(getKey(userPermissionBits.getUserId(), ctx, cache), userPermissionBits.clone(), false);
         }
         return perms;
     }
