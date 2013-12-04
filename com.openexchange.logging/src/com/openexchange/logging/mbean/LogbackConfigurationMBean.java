@@ -124,7 +124,15 @@ public interface LogbackConfigurationMBean {
      * @return
      */
     @MBeanMethodAnnotation (description="Return a list with all system's loggers along with their assigned log level", parameters={}, parameterDescriptions={})
-    public Set<String> listLoggers();
+    public Set<String> listAllLoggers();
+    
+    /**
+     * Return a list with all loggers that were dynamically modified along with their assigned log level
+     * 
+     * @return
+     */
+    @MBeanMethodAnnotation (description="Return a list with all loggers that were dynamically modified along with their assigned log level", parameters={}, parameterDescriptions={})
+    public Set<String> listDynamicallyModifiedLoggers();
     
     /**
      * Return a list with only the specified loggers

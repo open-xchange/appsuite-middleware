@@ -52,6 +52,7 @@ package com.openexchange.logging.mbean;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.management.MBeanInfo;
@@ -83,6 +84,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     private final JoranConfigurator configurator = new JoranConfigurator();
     
     private final Map<String, TurboFilter> turboFilterCache = new HashMap<String, TurboFilter>();
+    
+    private final Map<String, Level> dynamicallyModifiedLoggers = new HashMap<String, Level>();
     
     private final Map<String, String> methodDescriptions = new HashMap<String, String>();
     
@@ -203,7 +206,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     @Override
     public void setLogLevel(String level, String[] loggers) {
         for (String s : loggers) {
-            loggerContext.getLogger(s).setLevel(Level.valueOf(level));
+            Level l = Level.valueOf(level);
+            loggerContext.getLogger(s).setLevel(l);
+            dynamicallyModifiedLoggers.put(s, l);
             if (LOG.isDebugEnabled()) {
                 StringBuilder builder = new StringBuilder();
                 builder.append("Setting log level for \"")
@@ -263,7 +268,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getLoggers()
      */
     @Override
-    public Set<String> listLoggers() {
+    public Set<String> listAllLoggers() {
         Set<String> loggers = new HashSet<String>();
         System.out.println(loggerContext.getLoggerList());
         StringBuilder builder = new StringBuilder();
@@ -320,6 +325,25 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
             l.add(builder.toString());
         }
         return l;
+    }
+    
+
+    /* (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#listDynamicallyModifiedLoggers()
+     */
+    @Override
+    public Set<String> listDynamicallyModifiedLoggers() {
+        Set<String> loggers = new HashSet<String>();
+        Iterator<String> keys = dynamicallyModifiedLoggers.keySet().iterator();
+        StringBuilder builder = new StringBuilder();
+        while(keys.hasNext()) {
+            String k = keys.next();
+            ch.qos.logback.classic.Logger logger = loggerContext.getLogger(k);
+            builder.setLength(0);
+            builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
+            loggers.add(builder.toString());
+        }
+        return loggers;
     }
     
     /*
