@@ -69,11 +69,11 @@ import com.openexchange.osgi.SimpleRegistryListener;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Activator extends HousekeepingActivator {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
-    
+
     private ObjectName logbackConfObjName;
-    
+
     private LogbackConfigurationMBean logbackConfMBean;
 
     @Override
@@ -84,26 +84,11 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        /*
-         * Uncomment if a suitable solution is available that does not break other log4j settings, e.g. as used in USM module
-         */
-        /*-
-         *
-        new com.openexchange.logging.internal.JdkCorrector().correct();
-        try {
-            Class<?> clazz = Class.forName("org.apache.log4j.Logger");
-            if (null != clazz) {
-                com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector corrector =
-                    (com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector) Class.forName("com.openexchange.logging.internal.Log4JCorrector").newInstance();
-                corrector.correct();
-            }
-        } catch (Throwable t) {
-            // Log4J is not installed.
-        }
-        */
+        new com.openexchange.logging.internal.LogbackCorrector().correct();
+
         registerLoggingConfigurationMBean();
     }
-    
+
     /**
      * Register the LoggingConfigurationMBean
      */
@@ -131,7 +116,7 @@ public class Activator extends HousekeepingActivator {
                     }
                 }
             });
-            
+
         } catch (MalformedObjectNameException e) {
             logger.error(e.getMessage(), e);
         } catch (NullPointerException e) {
@@ -139,6 +124,6 @@ public class Activator extends HousekeepingActivator {
         } catch (NotCompliantMBeanException e) {
             logger.error(e.getMessage(), e);
         }
-        
+
     }
 }

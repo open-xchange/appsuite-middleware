@@ -49,39 +49,34 @@
 
 package com.openexchange.logging.internal;
 
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 
 /**
- * {@link JdkCorrector}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link LogbackCorrector} sets the correct log level for Logback if someone changed it within the default configuration.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.2
  */
-public final class JdkCorrector implements LoggingCorrector {
+public final class LogbackCorrector implements LoggingCorrector {
 
-    public JdkCorrector() {
+    /**
+     * Initializes a new {@link LogbackCorrector}.
+     */
+    public LogbackCorrector() {
         super();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void correct() {
-        final LogManager manager = LogManager.getLogManager();
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
         for (final String className : new String[] { Constants.LOGIN_PERFORMER, Constants.SESSION_HANDLER }) {
-            LogFactory.getLog(className);
-            Logger logger = manager.getLogger(className);
-            if (null == logger) {
-                continue;
-            }
-            logger.setLevel(Level.INFO);
-            do {
-                for (final Handler handler : logger.getHandlers()) {
-                    handler.setLevel(Level.INFO);
-                }
-                logger = logger.getParent();
-            } while (null != logger);
+            loggerContext.getLogger(className).setLevel(Level.INFO);
         }
     }
 }
