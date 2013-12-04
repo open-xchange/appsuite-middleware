@@ -96,6 +96,19 @@ public class Activator extends HousekeepingActivator {
         overrideLoggerLevels();
         registerLoggingConfigurationMBean();
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     */
+    @Override
+    protected void stopBundle() throws Exception {
+        ManagementService managementService = LoggingServiceLookup.getService(ManagementService.class);
+        if (managementService != null && logbackConfObjName != null) {
+            managementService.unregisterMBean(logbackConfObjName);
+            logbackConfMBean = null;
+        }
+    }
 
     private void configureJavaUtilLogging() {
         // We configure a special j.u.l handler that routes logging to slf4j
@@ -145,6 +158,5 @@ public class Activator extends HousekeepingActivator {
         } catch (NotCompliantMBeanException e) {
             logger.error(e.getMessage(), e);
         }
-
     }
 }
