@@ -27,6 +27,10 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.codec.digest,
  org.apache.commons.codec.net,
  org.apache.commons.logging,
+ org.apache.log4j,
+ org.apache.log4j.helpers,
+ org.apache.log4j.spi,
+ org.apache.log4j.xml,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.rdiff
