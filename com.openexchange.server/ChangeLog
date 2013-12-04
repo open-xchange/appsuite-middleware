@@ -1,3 +1,7 @@
+* 2013-12-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30154: Don't abort importing Google contacts if no more contact images are allowed to be fetched due to temporary rate limiting
+
 * 2013-12-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29847: Don't create HTTP session implicitly 
