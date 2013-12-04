@@ -69,7 +69,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  * {@link Activator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @author <a href="mailto:marcus.klein@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Activator extends HousekeepingActivator {
 
