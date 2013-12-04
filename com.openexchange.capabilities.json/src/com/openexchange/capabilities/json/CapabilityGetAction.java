@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
@@ -60,32 +61,33 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CapabilityAllAction}
+ * {@link CapabilityGetAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @DispatcherNotes(noSession = true)
-public class CapabilityAllAction implements AJAXActionService {
+public class CapabilityGetAction implements AJAXActionService {
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link CapabilityAllAction}.
+     * Initializes a new {@link CapabilityGetAction}.
      *
      * @param services The service look-up
-     * @param capabilityFilter2 The bundle context
      */
-    public CapabilityAllAction(final ServiceLookup services) {
+    public CapabilityGetAction(ServiceLookup services) {
         super();
         this.services = services;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Get capabilities
+        // Get capability
+        String id = requestData.checkParameter("id");
         CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(
             session.getUserId(), session.getContextId(), true);
-        return null == capabilities ? new AJAXRequestResult() : new AJAXRequestResult(capabilities.asSet(), "capability");
+        Capability capability = null != capabilities ? capabilities.get(id) : null;
+        return null == capability ? new AJAXRequestResult() : new AJAXRequestResult(capability, "capability");
     }
 
 }

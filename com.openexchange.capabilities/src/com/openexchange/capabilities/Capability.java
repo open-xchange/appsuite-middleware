@@ -60,23 +60,16 @@ import java.util.Map;
 public class Capability {
 
     private String id;
-    private boolean backendSupport;
     private final Map<String, String> attributes = new HashMap<String, String>();
 
     /**
      * Initializes a new {@link Capability}.
+     *
+     * @param id The identifier of the capability
      */
     public Capability(String id) {
-        this(id, true);
-    }
-
-    /**
-     * Initializes a new {@link Capability}.
-     */
-    public Capability(String id, boolean backendSupport) {
         super();
         this.id = id;
-        this.backendSupport = backendSupport;
     }
 
     public String getId() {
@@ -85,15 +78,6 @@ public class Capability {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public boolean isSupportedByBackend() {
-        return backendSupport;
-    }
-
-    public Capability setBackendSupport(boolean backendSupport) {
-        this.backendSupport = backendSupport;
-        return this;
     }
 
     public Map<String, String> getAttributes() {
@@ -139,7 +123,7 @@ public class Capability {
         }
         return true;
     }
-    
+
     @Override
     public String toString() {
         return id;
