@@ -347,10 +347,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     @Override
     protected final String getDescription(MBeanOperationInfo op, MBeanParameterInfo param, int sequence) {
-        String[] v = methodParameterDescriptions.get(op.getName());
-        if (v == null || v.length == 0 || sequence > v.length)
-            return super.getDescription(op, param, sequence);
-        return v[sequence];
+        return getMBeanOperationInfo(methodParameterDescriptions, op, param, sequence);
     }
     
     /*
@@ -359,7 +356,20 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     @Override
     protected final String getParameterName(MBeanOperationInfo op, MBeanParameterInfo param, int sequence) {
-        String[] v = methodParameters.get(op.getName());
+        return getMBeanOperationInfo(methodParameters, op, param, sequence);
+    }
+    
+    /**
+     * Delegate method for MBeanOperationInfo
+     * 
+     * @param map
+     * @param op
+     * @param param
+     * @param sequence
+     * @return
+     */
+    private final String getMBeanOperationInfo(Map<String, String[]> map, MBeanOperationInfo op, MBeanParameterInfo param, int sequence) {
+        String[] v = map.get(op.getName());
         if (v == null || v.length == 0 || sequence > v.length)
             return super.getDescription(op, param, sequence);
         return v[sequence];
