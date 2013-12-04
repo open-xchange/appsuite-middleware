@@ -169,15 +169,21 @@ public class LogbackCLT {
                     method = "listAllLoggers";
                     params = null;
                 }
+            } else if (cl.hasOption("h")) {
+                printUsage();
+                System.exit(0);
             } else {
                 printUsage();
+                System.exit(-1);
             }
             
             invokeMBeanMethod(method, params, getSignatureOf(method));
+            System.exit(1);
             
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             printUsage();
+            System.exit(-1);
         }
     }
 
@@ -247,6 +253,7 @@ public class LogbackCLT {
         System.out.println("Error: Unknown log level: \"" + value + "\".");
         System.out.println("Requires a valid log level: {OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}\n");
         printUsage();
+        System.exit(-1);
         
         return false;
     }
@@ -262,6 +269,7 @@ public class LogbackCLT {
         } catch (NumberFormatException e) {
             System.out.println("Error: Requires an integer value.\n");
             printUsage();
+            System.exit(-1);
         }
         return -1;
     }
@@ -275,7 +283,6 @@ public class LogbackCLT {
             null, 
             options, 
             "\n\nThe flags -a and -d are mutually exclusive.");
-        System.exit(-1);
     }
     
     /**
