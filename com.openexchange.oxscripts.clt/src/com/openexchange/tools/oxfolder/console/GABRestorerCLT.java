@@ -69,6 +69,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.console.JMXAuthenticatorImpl;
 import com.openexchange.tools.oxfolder.GABRestorerMBean;
 import com.openexchange.tools.oxfolder.GABRestorerMBeanImpl;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -160,7 +161,7 @@ public class GABRestorerCLT {
                 environment = null;
             } else {
                 environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(new String[] { jmxLogin, jmxPassword }));
+                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
             }
 
             final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");

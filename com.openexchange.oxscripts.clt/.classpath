@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
@@ -15,5 +16,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.5-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
 	<classpathentry kind="lib" path="/com.openexchange.common/lib/backport-util-concurrent-3.1.jar" sourcepath="/com.openexchange.common/lib/backport-util-concurrent-3.1.jar"/>
+	<classpathentry kind="src" path="/com.openexchange.management.impl"/>
+	<classpathentry kind="src" path="/com.openexchange.osgi"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

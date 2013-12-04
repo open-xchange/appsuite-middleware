@@ -75,4 +75,4 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 CLASSPATH="-classpath @classpath@"
 
 umask 066
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.osgi.mbean.DeferredActivatorCLT $@
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.osgi.clt.DeferredActivatorCLT $@

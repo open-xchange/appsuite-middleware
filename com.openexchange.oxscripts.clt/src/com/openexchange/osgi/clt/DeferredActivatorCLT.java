@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.osgi.mbean;
+package com.openexchange.osgi.clt;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -73,7 +73,9 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.osgi.console.JMXAuthenticatorImpl;
+import com.openexchange.management.console.JMXAuthenticatorImpl;
+import com.openexchange.osgi.mbean.DeferredActivatorMBean;
+import com.openexchange.osgi.mbean.DeferredActivatorMBeanImpl;
 
 /**
  * {@link DeferredActivatorCLT}
