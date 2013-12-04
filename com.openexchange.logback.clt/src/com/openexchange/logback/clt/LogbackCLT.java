@@ -224,6 +224,7 @@ public class LogbackCLT {
                 builder.setCharAt(builder.length() - 2, '}'); //replace last comma "," with a curly bracket "}"
                 builder.append("succeeded.\n");
                 System.out.println(builder.toString());
+                return;
             }
         } catch (InstanceNotFoundException e) {
             e.printStackTrace();
@@ -238,6 +239,7 @@ public class LogbackCLT {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+        System.exit(-1);
     }
     
     /**
