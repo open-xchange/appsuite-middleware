@@ -105,7 +105,7 @@
 * 2013-11-19 - marc.arens@open-xchange.com
 
  - Fix for bug 29851: Keep Stanza to send proper client acks before recasting for local/remote delivery
- 
+
 * 2013-11-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 29438: Deal with changing User-Agent identifier when Apple Media Player jumps in
@@ -120,7 +120,7 @@
 
  - Fix for bug 29794: Prevent concurrent cleanup via mutual exclusion
  - Fix for bug 29795: Prevent concurrent cleanup via mutual exclusion
- 
+
 * 2013-11-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 29824: Don't re-distribute already remotely received events

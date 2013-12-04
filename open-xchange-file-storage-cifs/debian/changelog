@@ -1,3 +1,9 @@
+open-xchange-file-storage-cifs (7.4.1-6) stable; urgency=low
+
+  * Build for patch 2013-11-28
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 03 Dec 2013 10:17:17 +0100
+
 open-xchange-file-storage-cifs (7.4.1-5) stable; urgency=low
 
   * Fifth candidate for 7.4.1 release
