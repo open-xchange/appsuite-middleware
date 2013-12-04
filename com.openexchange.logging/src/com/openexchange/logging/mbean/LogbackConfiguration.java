@@ -270,12 +270,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     @Override
     public Set<String> listAllLoggers() {
         Set<String> loggers = new HashSet<String>();
-        System.out.println(loggerContext.getLoggerList());
-        StringBuilder builder = new StringBuilder();
         for(ch.qos.logback.classic.Logger l : loggerContext.getLoggerList()) {
-            builder.setLength(0);
-            builder.append("Logger: ").append(l.getName()).append(", Level: ").append(l.getLevel());
-            loggers.add(builder.toString());
+            loggers.add(getLoggerNameAndLevel(l));
         }
         return loggers;
     }
@@ -317,12 +313,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     @Override
     public Set<String> getLevelForLoggers(String[] loggers) {
         Set<String> l = new HashSet<String>();
-        StringBuilder builder = new StringBuilder();
         for (String s : loggers) {
-            ch.qos.logback.classic.Logger logger = loggerContext.getLogger(s);
-            builder.setLength(0);
-            builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
-            l.add(builder.toString());
+            l.add(getLoggerNameAndLevel(loggerContext.getLogger(s)));
         }
         return l;
     }
@@ -335,13 +327,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     public Set<String> listDynamicallyModifiedLoggers() {
         Set<String> loggers = new HashSet<String>();
         Iterator<String> keys = dynamicallyModifiedLoggers.keySet().iterator();
-        StringBuilder builder = new StringBuilder();
         while(keys.hasNext()) {
-            String k = keys.next();
-            ch.qos.logback.classic.Logger logger = loggerContext.getLogger(k);
-            builder.setLength(0);
-            builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
-            loggers.add(builder.toString());
+            loggers.add(getLoggerNameAndLevel(loggerContext.getLogger(keys.next())));
         }
         return loggers;
     }
@@ -453,5 +440,17 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         StringBuilder builder = new StringBuilder();
         builder.append(key).append("=").append(value);
         return builder.toString();
+    }
+    
+    /**
+     * Get a stringified version of logger name and level
+     * 
+     * @param logger
+     * @return
+     */
+    private String getLoggerNameAndLevel(ch.qos.logback.classic.Logger logger) {
+       StringBuilder builder = new StringBuilder();
+       builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
+       return builder.toString();
     }
 }

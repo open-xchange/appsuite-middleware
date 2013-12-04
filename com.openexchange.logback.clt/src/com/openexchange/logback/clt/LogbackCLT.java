@@ -274,7 +274,7 @@ public class LogbackCLT {
         hf.printHelp("logback [-a | -d] [ [-u <userid> -c <contextid>] \n | [-s <sessionid>] \n  | [-c <contextid>] ] \n -l <loglevel> <logger name 1> ... <logger name n> \n -lf \n -ll \n -h", 
             null, 
             options, 
-            "\n\nThe flags -a and -d  and the options -c and -s are mutually exclusive.");
+            "\n\nThe flags -a and -d are mutually exclusive.");
         System.exit(-1);
     }
     
