@@ -5,34 +5,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.test.performance.realtime/lib/slf4j-api-1.7.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logging"/>
-	<classpathentry kind="lib" path="/workspace/git/backend/com.openexchange.bundles/jars/logback-classic-1.0.13.jar" sourcepath="/workspace/git/backend/com.openexchange.bundles/jars/logback-classic-1.0.13.jar">
-		<accessrules>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/boolex/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/db/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/db/names/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/encoder/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/filter/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/gaffer/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/helpers/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/html/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/jmx/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/joran/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/joran/action/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/jul/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/log4j/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/net/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/net/server/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/pattern/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/pattern/color/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/selector/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/selector/servlet/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/sift/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/spi/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/turbo/*"/>
-			<accessrule kind="accessible" pattern="ch/qos/logback/classic/util/*"/>
-			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
-		</accessrules>
-	</classpathentry>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-classic-1.0.13.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-core-1.0.13.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
