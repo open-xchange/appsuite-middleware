@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.config;
 
-import org.apache.commons.lang.math.Range;
-
 
 /**
  * {@link IPRange} - An IP range of either IPv4 or IPv6 addresses.
@@ -61,11 +59,6 @@ public class IPRange {
 
     private final com.openexchange.sessiond.impl.IPRange delegate;
 
-    public IPRange(final Range ipv4Range, final Range ipv6Range) {
-        super();
-        delegate = new com.openexchange.sessiond.impl.IPRange(ipv4Range, ipv6Range);
-    }
-
     /**
      * Initializes a new {@link IPRange}.
      */
@@ -74,14 +67,12 @@ public class IPRange {
         this.delegate = delegate;
     }
 
-    public Range getIpv4Range() {
-        return delegate.getIpv4Range();
-    }
-
-    public Range getIpv6Range() {
-        return delegate.getIpv6Range();
-    }
-
+    /**
+     * Checks if passed IP address is contained in this range.
+     *
+     * @param ipAddress The IP address to check
+     * @return <code>true</code> if contained; else <code>false</code>
+     */
     public boolean contains(final String ipAddress) {
         return delegate.contains(ipAddress);
     }
