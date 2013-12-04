@@ -103,10 +103,12 @@ public class Activator extends HousekeepingActivator {
      */
     @Override
     protected void stopBundle() throws Exception {
+        logger.info("stopping bundle com.openexchange.logging");
         ManagementService managementService = LoggingServiceLookup.getService(ManagementService.class);
         if (managementService != null && logbackConfObjName != null) {
             managementService.unregisterMBean(logbackConfObjName);
             logbackConfMBean = null;
+            logger.info("LoggingConfigurationMBean successfully unregistered.");
         }
     }
 
