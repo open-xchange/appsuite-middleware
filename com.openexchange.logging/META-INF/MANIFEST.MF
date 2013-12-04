@@ -31,6 +31,6 @@ Import-Package: ch.qos.logback.classic,
  org.osgi.framework,
  org.slf4j,
  org.slf4j.bridge,
- org.slf4j.helpers;version="1.7.5",
- org.slf4j.impl;version="1.7.5",
- org.slf4j.spi;version="1.7.5"
+ org.slf4j.helpers,
+ org.slf4j.impl,
+ org.slf4j.spi
