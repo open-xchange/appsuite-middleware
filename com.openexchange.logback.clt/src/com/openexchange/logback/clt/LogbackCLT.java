@@ -72,7 +72,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.jmx.JMXConfigurator;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
 
 /**
@@ -82,11 +81,7 @@ import com.openexchange.logging.mbean.LogbackConfigurationMBean;
  */
 public class LogbackCLT {
     
-    private static ObjectName logbackConfObjName;
-    
-    private static MBeanServerConnection mbeanServerConnection;
-    
-    private static final int jmxPort = 9999;
+    private static final String serviceURL = "service:jmx:rmi:///jndi/rmi://localhost:9999/server";
     
     private static final Options options = new Options();
     static {
@@ -127,16 +122,16 @@ public class LogbackCLT {
      * @throws ParseException 
      */
     public static void main(String[] args) {
-        String sessionID = null;
-        int contextID = 0;
-        int userID = 0;
-        
         CommandLineParser parser = new PosixParser();
         
         try {
             CommandLine cl = parser.parse(options, args);
             String method = null;
             Object[] params = null;
+            
+            String sessionID = null;
+            int contextID = 0;
+            int userID = 0;
             
             if (cl.hasOption("s")) {
                 sessionID = cl.getOptionValue("s");
@@ -184,19 +179,6 @@ public class LogbackCLT {
     }
 
     /**
-     * Connect to the JMXService
-     */
-    private static final void connect() {
-        try {
-            JMXServiceURL jmxServiceURL = new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(jmxPort).append("/server").toString());
-            JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL);
-            mbeanServerConnection = jmxConnector.getMBeanServerConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    /**
      * Invoke the specified MBean method with the specified signature and specified parameters
      * @param methodName
      * @param params
@@ -205,14 +187,26 @@ public class LogbackCLT {
     @SuppressWarnings("unchecked")
     private static final void invokeMBeanMethod(String methodName, Object[] params, String[] signature) {
         try {
-            connect();
-            Object o = mbeanServerConnection.invoke(getLogBackConfigurationObjectName(), methodName, params, signature);
+            ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
+            JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL);
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL);
+            MBeanServerConnection mbeanServerConnection = jmxConnector.getMBeanServerConnection();
+            
+            Object o = mbeanServerConnection.invoke(logbackConfObjName, methodName, params, signature);
             if (o instanceof Set) {
                 Set<String> set = (Set<String>) o;
                 Iterator<String> i = set.iterator();
                 while(i.hasNext()) {
                     System.out.println(i.next());
                 }
+            } else {
+                StringBuilder builder = new StringBuilder();
+                builder.append("Operation ").append(methodName).append(" with parameters: {");
+                for(Object p : params)
+                    builder.append(p).append(", ");
+                builder.setCharAt(builder.length() - 2, '}'); //replace last comma "," with a curly bracket "}"
+                builder.append("succeeded.\n");
+                System.out.println(builder.toString());
             }
         } catch (InstanceNotFoundException e) {
             e.printStackTrace();
@@ -221,6 +215,10 @@ public class LogbackCLT {
         } catch (ReflectionException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
     }
@@ -248,14 +246,13 @@ public class LogbackCLT {
      * @return
      */
     private static final int getIntValue(String value) {
-        int i = 0;
         try {
-            i = Integer.parseInt(value);
+            return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             System.out.println("Error: Requires an integer value.\n");
             printUsage();
         }
-        return i;
+        return -1;
     }
     
     /**
@@ -268,24 +265,6 @@ public class LogbackCLT {
             options, 
             "\n\nThe flags -a and -d  and the options -c and -s are mutually exclusive.");
         System.exit(-1);
-    }
-    
-    /**
-     * Get the {@link JMXConfigurator} {@link ObjectName}
-     * 
-     * @return
-     */
-    private static final ObjectName getLogBackConfigurationObjectName() {
-        if (logbackConfObjName == null) {
-            try {
-                logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
-            } catch (MalformedObjectNameException e) {
-                e.printStackTrace();
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        }
-        return logbackConfObjName;
     }
     
     /**
