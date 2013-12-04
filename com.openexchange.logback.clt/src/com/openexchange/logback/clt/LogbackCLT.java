@@ -201,9 +201,17 @@ public class LogbackCLT {
                 }
             } else {
                 StringBuilder builder = new StringBuilder();
-                builder.append("Operation ").append(methodName).append(" with parameters: {");
-                for(Object p : params)
-                    builder.append(p).append(", ");
+                builder.append("Operation '").append(methodName).append("' with parameters: {");
+                for(Object p : params) {
+                    if (p instanceof String[]) {
+                        String[] s = (String[]) p;
+                        for(String str : s) {
+                            builder.append(str).append(", ");
+                        }
+                    } else {
+                        builder.append(p).append(", ");
+                    }
+                }
                 builder.setCharAt(builder.length() - 2, '}'); //replace last comma "," with a curly bracket "}"
                 builder.append("succeeded.\n");
                 System.out.println(builder.toString());
