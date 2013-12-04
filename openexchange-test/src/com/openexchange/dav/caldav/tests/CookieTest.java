@@ -49,11 +49,11 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import junit.framework.Assert;
 import org.apache.commons.httpclient.Header;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.junit.Assert;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -83,6 +83,9 @@ public class CookieTest extends CalDAVTest {
         } finally {
             release(propFind);
         }
+        /*
+         * check for Set-Cookie header
+         */
         Header[] headers = propFind.getResponseHeaders("Set-Cookie");
         if (null != headers) {
             for (Header header : headers) {
