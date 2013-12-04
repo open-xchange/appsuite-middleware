@@ -88,6 +88,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.net"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.osgi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,/com.openexchange.oxscripts.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.proxy"/>
