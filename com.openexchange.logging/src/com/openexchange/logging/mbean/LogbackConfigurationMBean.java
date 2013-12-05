@@ -101,6 +101,7 @@ public interface LogbackConfigurationMBean {
      * Overrides Exception categories to be suppressed (comma separated).
      * @param categories
      */
+    @MBeanMethodAnnotation (description="Overrides Exception categories to be suppressed (comma separated).", parameters={"categories"}, parameterDescriptions={"The categories to be suppressed when logging."})
     public void overrideExceptionCategories(String categories);
     
     /**
