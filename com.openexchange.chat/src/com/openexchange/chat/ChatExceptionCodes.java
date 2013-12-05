@@ -50,77 +50,78 @@
 package com.openexchange.chat;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Enumeration about all {@link OXException}s.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum ChatExceptionCodes implements OXExceptionCode {
+public enum ChatExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    ERROR(ChatExceptionMessages.ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(ChatExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
     /**
      * Method is not supported.
      */
-    UNSUPPORTED_OPERATION(ChatExceptionMessages.UNSUPPORTED_OPERATION_MSG, Category.CATEGORY_ERROR, 3),
+    UNSUPPORTED_OPERATION("Method is not supported.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 3),
     /**
      * No account found with identifier "%1$s".
      */
-    ACCOUNT_NOT_FOUND(ChatExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 4),
+    ACCOUNT_NOT_FOUND("No account found with identifier \"%1$s\".", ChatExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * Invalid presence packet.
      */
-    INVALID_PRESENCE_PACKET(ChatExceptionMessages.INVALID_PRESENCE_PACKET_MSG, Category.CATEGORY_ERROR, 5),
+    INVALID_PRESENCE_PACKET("Invalid presence packet.", ChatExceptionMessages.INVALID_PRESENCE_PACKET_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * A chat with identifier "%1$s" already exists.
      */
-    CHAT_ALREADY_EXISTS(ChatExceptionMessages.CHAT_ALREADY_EXISTS_MSG, Category.CATEGORY_ERROR, 6),
+    CHAT_ALREADY_EXISTS("A chat with identifier \"%1$s\" already exists.", ChatExceptionMessages.CHAT_ALREADY_EXISTS_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Chat member "%1$s" already exists in chat "%2$s".
      */
-    CHAT_MEMBER_ALREADY_EXISTS(ChatExceptionMessages.CHAT_MEMBER_ALREADY_EXISTS_MSG, Category.CATEGORY_ERROR, 7),
+    CHAT_MEMBER_ALREADY_EXISTS("Chat member \"%1$s\" already exists in chat \"%2$s\".", ChatExceptionMessages.CHAT_MEMBER_ALREADY_EXISTS_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * No chat found with identifier "%1$s".
      */
-    CHAT_NOT_FOUND(ChatExceptionMessages.CHAT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 8),
+    CHAT_NOT_FOUND("No chat found with identifier \"%1$s\".", ChatExceptionMessages.CHAT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * Unknown chat service: %1$s
      */
-    UNKNOWN_CHAT_SERVICE(ChatExceptionMessages.UNKNOWN_CHAT_SERVICE_MSG, Category.CATEGORY_ERROR, 9),
+    UNKNOWN_CHAT_SERVICE("Unknown chat service: %1$s", ChatExceptionMessages.UNKNOWN_CHAT_SERVICE_MSG, Category.CATEGORY_ERROR, 9),
     /**
      * No message found with identifier "%1$s" in chat "%2$s".
      */
-    MESSAGE_NOT_FOUND(ChatExceptionMessages.MESSAGE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
+    MESSAGE_NOT_FOUND("No message found with identifier \"%1$s\" in chat \"%2$s\".", ChatExceptionMessages.MESSAGE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
     /**
      * No member found with identifier "%1$s".
      */
-    MEMBER_NOT_FOUND(ChatExceptionMessages.MEMBER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 11),
+    MEMBER_NOT_FOUND("No member found with identifier \"%1$s\".", ChatExceptionMessages.MEMBER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 11),
     /**
      * Invalid conversation identifier: "%1$s"
      */
-    INVALID_CONVERSATION_ID(ChatExceptionMessages.INVALID_CONVERSATION_ID_MSG, Category.CATEGORY_USER_INPUT, 12),
+    INVALID_CONVERSATION_ID("Invalid conversation identifier: \"%1$s\"", ChatExceptionMessages.INVALID_CONVERSATION_ID_MSG, Category.CATEGORY_USER_INPUT, 12),
     /**
      * Invalid roster identifier: "%1$s"
      */
-    INVALID_ROSTER_ID(ChatExceptionMessages.INVALID_ROSTER_ID_MSG, Category.CATEGORY_USER_INPUT, 13),
+    INVALID_ROSTER_ID("Invalid roster identifier: \"%1$s\"", ChatExceptionMessages.INVALID_ROSTER_ID_MSG, Category.CATEGORY_USER_INPUT, 13),
     /**
      * Posted message is too long.
      */
-    MESSAGE_TOO_LONG(ChatExceptionMessages.MESSAGE_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 14),
+    MESSAGE_TOO_LONG("Posted message is too long.", ChatExceptionMessages.MESSAGE_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 14),
     /**
      * Subject is too long and is therefore truncated.
      */
-    SUBJECT_TOO_LONG(ChatExceptionMessages.SUBJECT_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 14)
+    SUBJECT_TOO_LONG("Subject is too long and is therefore truncated.", ChatExceptionMessages.SUBJECT_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 14)
 
     ;
 
@@ -131,11 +132,14 @@ public enum ChatExceptionCodes implements OXExceptionCode {
     private final int number;
 
     private final String message;
+    
+    private final String displayMessage;
 
 
-    private ChatExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private ChatExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         number = detailNumber;
+        this.displayMessage = displayMessage;
         this.category = category;
     }
 
@@ -192,5 +196,13 @@ public enum ChatExceptionCodes implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }
