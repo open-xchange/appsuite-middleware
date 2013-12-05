@@ -226,6 +226,23 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
     }
 
+    @Override
+    public void overrideExceptionCategories(String categories) {
+        if (LOG.isDebugEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("Setting suppressed Exception Categories to \"")
+                   .append(categories)
+                   .append("\"");
+            LOG.debug(builder.toString());
+        }
+        ExceptionCategoryFilter.setCategories(categories);
+    }
+    
+    @Override
+    public String getExceptionCategories() {
+        return ExceptionCategoryFilter.getCategories();
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeContextFilter(int)
      */

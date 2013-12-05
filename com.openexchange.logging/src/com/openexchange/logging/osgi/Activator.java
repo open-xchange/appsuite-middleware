@@ -58,7 +58,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.logging.mbean.CategoryPropertyListener;
+import com.openexchange.logging.mbean.ExceptionCategoryFilter;
 import com.openexchange.logging.mbean.LogbackConfiguration;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
 import com.openexchange.management.ManagementService;
@@ -78,6 +81,8 @@ public class Activator extends HousekeepingActivator {
     private static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
 
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
+    
+    private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
     private ObjectName logbackConfObjName;
 
@@ -85,8 +90,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
@@ -95,6 +99,13 @@ public class Activator extends HousekeepingActivator {
         configureJavaUtilLogging();
         overrideLoggerLevels();
         registerLoggingConfigurationMBean();
+        addExceptionCategoryFilter();
+    }
+
+    private void addExceptionCategoryFilter() {
+        String suppressedCategories = getService(ConfigurationService.class).getProperty("com.openexchange.log.suppressedCategories", "USER_INPUT", new CategoryPropertyListener());
+        ExceptionCategoryFilter.setCategories(suppressedCategories);
+        loggerContext.addTurboFilter(new ExceptionCategoryFilter());
     }
     
     /*

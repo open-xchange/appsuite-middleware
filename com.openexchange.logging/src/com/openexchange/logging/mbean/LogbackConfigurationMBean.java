@@ -98,6 +98,17 @@ public interface LogbackConfigurationMBean {
     public void setLogLevel(String level, String[] loggers);
     
     /**
+     * Overrides Exception categories to be suppressed (comma separated).
+     * @param categories
+     */
+    public void overrideExceptionCategories(String categories);
+    
+    /**
+     * Returns the Exception categories to be suppressed (comma separated).
+     */
+    public String getExceptionCategories();
+
+    /**
      * Remove the context filter
      * @param contextID
      */
