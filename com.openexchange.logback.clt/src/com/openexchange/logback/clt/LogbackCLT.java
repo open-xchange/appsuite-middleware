@@ -93,11 +93,13 @@ public class LogbackCLT {
         
         options.addOption(createOption("u", "user", true, false, "The user id for which to enable logging", false));
         options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", false));
+        options.addOption(createOption("ec", "exception-category", true, false, "The exception category to supress", false));
         options.addOption(createOption("s", "session", true, false, "The session id for which to enable logging", false));
         options.addOption(createOption("l", "level", true, false, "Define the log level", false));
         options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
         options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
         options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
+        options.addOption(createOption("le", "list-exception-category", false, false, "Get a list with all supressed exception categories", false));
         options.addOptionGroup(og);
     }
     
@@ -147,6 +149,9 @@ public class LogbackCLT {
                     method = cl.hasOption("a") ? "filterContext" : "removeContextFilter";
                     params = new Object[]{contextID};
                 }
+            } else if (cl.hasOption("ec")) {
+                method = cl.hasOption("a") ? "addCategory" : "removeCategory";
+                params = new Object[]{cl.getArgs()};
             } else if (cl.hasOption("l")) {
                 String level = cl.getOptionValue("l");
                 String[] logLevelValues = cl.getArgs(); 
@@ -154,6 +159,9 @@ public class LogbackCLT {
                     params = new Object[] {level, logLevelValues};
                     method = "setLogLevel";
                 }
+            } else if (cl.hasOption("le")) {
+                method = "listCategories";
+                params = null;
             } else if (cl.hasOption("lf")) {
                 method = "listFilters";
                 params = null;
