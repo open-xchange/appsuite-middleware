@@ -49,9 +49,9 @@
 
 package com.openexchange.configuration.clt;
 
+import static com.openexchange.configuration.clt.ConvertJUL2LogbackCLT.determineOutput;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -80,6 +80,7 @@ import org.apache.commons.cli.PosixParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -108,7 +109,7 @@ public class XMLModifierCLT {
         options.addOption(createOption("i", "in", true, "XML document is read from this file.", false));
         options.addOption(createOption("o", "out", true, "Modified XML document is written to this file.", false));
         options.addOption(createOption("x", "xpath", true, "XPath to the element that should be modified.", false));
-        options.addOption(createOption("a", "add", true, "XML file that should be added to the element denotes by the XPath.", false));
+        options.addOption(createOption("a", "add", true, "XML file that should be added to the element denotes by the XPath. - can be used to read from STDIN.", false));
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
@@ -117,7 +118,7 @@ public class XMLModifierCLT {
             System.err.println("Parsing the command line failed: " + e.getMessage());
             return 1;
         }
-        if (cmd.hasOption('h')) {
+        if (cmd.hasOption('h') || 0 == args.length) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("xmlModifierCLT", "Can modify XML configuration files. Currently only allows to add XML fragments.", options, null, false);
             return 0;
@@ -138,49 +139,46 @@ public class XMLModifierCLT {
             e.printStackTrace();
             return 1;
         }
-        InputStream is = null;
-        OutputStream os = null;
+        Document document = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
+        if (null == document) {
+            return 1;
+        }
         try {
-            if (cmd.hasOption('i')) {
-                File input = new File(cmd.getOptionValue('i'));
-                if (!input.exists() || !input.isFile() || !input.canRead()) {
-                    System.err.println("Can not open input file: \"" + input.getAbsolutePath() + "\".");
-                    return 1;
-                }
-                is = new FileInputStream(input);
-            } else {
-                is = System.in;
-            }
-            if (cmd.hasOption('o')) {
-                File output = new File(cmd.getOptionValue('o'));
-                if (!output.canWrite()) {
-                    System.err.println("Can not write to output file: \"" + output.getAbsolutePath() + "\".");
-                    return 1;
-                }
-                os = new FileOutputStream(output);
-            } else {
-                os = System.out;
-            }
-            Document document = db.parse(is);
             // Modify
             XPath path = xf.newXPath();
             XPathExpression expression = path.compile(cmd.getOptionValue('x'));
             if (cmd.hasOption('a')) {
-                File add = new File(cmd.getOptionValue('a'));
-                if (!add.exists() || !add.isFile() || !add.canRead()) {
-                    System.err.println("Can not open XML fragment to add: \"" + add.getAbsolutePath() + "\".");
-                    return 1;
+                InputStream addIs = determineInput("-".equals(cmd.getOptionValue('a')), cmd.getOptionValue('a'));
+                final Document add;
+                try {
+                    add = db.parse(addIs);
+                } finally {
+                    addIs.close();
                 }
-                Element element2Add = db.parse(add).getDocumentElement();
-                Node imported = document.importNode(element2Add, true);
-                Node element = (Node) expression.evaluate(document, XPathConstants.NODE);
-                element.appendChild(imported);
+                Element rootElement = add.getDocumentElement();
+                NodeList childNodes = rootElement.getChildNodes();
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    Node element2Add = childNodes.item(i);
+                    if (Node.ELEMENT_NODE != element2Add.getNodeType()) {
+                        continue;
+                    }
+                    Node imported = document.importNode(element2Add, true);
+                    Node element = (Node) expression.evaluate(document, XPathConstants.NODE);
+                    element.appendChild(imported);
+                }
             } else {
                 System.err.println("Unknown operation mode.");
             }
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.getOutputProperties().store(System.out, "Properties");
-            transformer.transform(new DOMSource(document), new StreamResult(os));
+            final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
+            if (null == os) {
+                return 1;
+            }
+            try {
+                transformer.transform(new DOMSource(document), new StreamResult(os));
+            } finally {
+                os.close();
+            }
         } catch (SAXException e) {
             System.err.println("Can not parse XML document: " + e.getMessage());
             e.printStackTrace();
@@ -197,18 +195,6 @@ public class XMLModifierCLT {
             System.err.println("Can not read XML file: " + e.getMessage());
             e.printStackTrace();
             return 1;
-        } finally {
-            try {
-                if (null != is) {
-                    is.close();
-                }
-                if (null != os) {
-                    os.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return 1;
-            }
         }
         return 0;
     }
@@ -217,5 +203,61 @@ public class XMLModifierCLT {
         Option option = new Option(shortArg, longArg, hasArg, description);
         option.setRequired(required);
         return option;
+    }
+
+    static Document parseInput(boolean stdin, String filename) {
+        return parseInput(determineInput(stdin, filename));
+    }
+
+    static Document parseInput(InputStream is) {
+        if (null == is) {
+            return null;
+        }
+        final DocumentBuilder db;
+        try {
+            db = dbf.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            System.err.println("Can not configure XML parser: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+        final Document document;
+        try {
+            try {
+                document = db.parse(is);
+            } finally {
+                is.close();
+            }
+        } catch (SAXException e) {
+            System.err.println("Can not parse XML document: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            System.err.println("Can not read XML file: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+        return document;
+    }
+
+    static InputStream determineInput(boolean stdin, String filename) {
+        final InputStream is;
+        if (!stdin) {
+            File input = new File(filename);
+            if (!input.exists() || !input.isFile() || !input.canRead()) {
+                System.err.println("Can not open input file: \"" + input.getAbsolutePath() + "\".");
+                return null;
+            }
+            try {
+                is = new FileInputStream(input);
+            } catch (IOException e) {
+                System.err.println("Can not read input file: " + e.getMessage());
+                e.printStackTrace();
+                return null;
+            }
+        } else {
+            is = System.in;
+        }
+        return is;
     }
 }

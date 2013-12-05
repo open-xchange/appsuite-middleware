@@ -50,8 +50,8 @@
 package com.openexchange.configuration.clt;
 
 import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
+import static com.openexchange.configuration.clt.XMLModifierCLT.determineInput;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -127,63 +127,82 @@ public class ConvertJUL2LogbackCLT {
             e.printStackTrace();
             return 1;
         }
-        Properties properties = new Properties();
-        InputStream is = null;
-        OutputStream os = null;
+        Properties properties = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
+        if (null == properties) {
+            return 1;
+        }
         try {
-            if (cmd.hasOption('i')) {
-                File input = new File(cmd.getOptionValue('i'));
-                if (!input.exists() || !input.isFile() || !input.canRead()) {
-                    System.err.println("Can not open input file: \"" + input.getAbsolutePath() + "\".");
-                    return 1;
-                }
-                is = new FileInputStream(input);
-            } else {
-                is = System.in;
-            }
-            properties.load(is);
             Document document = db.newDocument();
             convert(properties, document);
-            if (cmd.hasOption('o')) {
-                File output = new File(cmd.getOptionValue('o'));
-                if (!output.createNewFile() && !output.canWrite()) {
-                    System.err.println("Can not write to output file: \"" + output.getAbsolutePath() + "\".");
-                    return 1;
-                }
-                os = new FileOutputStream(output);
-            } else {
-                os = System.out;
+            final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
+            if (null == os) {
+                return 1;
             }
-            transformer.transform(new DOMSource(document), new StreamResult(os));
+            try {
+                transformer.transform(new DOMSource(document), new StreamResult(os));
+            } finally {
+                os.close();
+            }
         } catch (IOException e) {
-            System.err.println("Can not read XML file: " + e.getMessage());
+            System.err.println("Can not write file: " + e.getMessage());
             e.printStackTrace();
             return 1;
         } catch (TransformerException e) {
             System.err.println("Can not write XML document" + e.getMessage());
             e.printStackTrace();
             return 1;
-        } finally {
-            try {
-                if (null != is) {
-                    is.close();
-                }
-                if (null != os) {
-                    os.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return 1;
-            }
         }
         return 0;
     }
 
     private static void convert(Properties properties, Document document) {
+        Element configuration = document.createElement("configuration");
+        document.appendChild(configuration);
         for (String name : properties.stringPropertyNames()) {
             Element logger = document.createElement("logger");
-            document.appendChild(logger);
+            configuration.appendChild(logger);
             logger.setAttribute(name, properties.getProperty(name));
         }
+    }
+
+    private static Properties parseInput(boolean stdin, String filename) {
+        Properties properties = new Properties();
+        try {
+            final InputStream is = determineInput(stdin, filename);
+            if (null == is) {
+                return null;
+            }
+            try {
+                properties.load(is);
+            } finally {
+                is.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Can not read XML file: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+        return properties;
+    }
+
+    static OutputStream determineOutput(boolean stdout, String filename) {
+        OutputStream os = null;
+        if (!stdout) {
+            File output = new File(filename);
+            try {
+                if (!output.createNewFile() && !output.canWrite()) {
+                    System.err.println("Can not write to output file: \"" + output.getAbsolutePath() + "\".");
+                    return null;
+                }
+                os = new FileOutputStream(output);
+            } catch (IOException e) {
+                System.err.println("Can not write output file: " + e.getMessage());
+                e.printStackTrace();
+                return null;
+            }
+        } else {
+            os = System.out;
+        }
+        return os;
     }
 }

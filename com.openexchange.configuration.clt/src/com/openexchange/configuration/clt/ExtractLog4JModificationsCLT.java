@@ -76,16 +76,16 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * {@link ExtractLog4jModificationsCLT}
+ * {@link ExtractLog4JModificationsCLT}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ExtractLog4jModificationsCLT {
+public class ExtractLog4JModificationsCLT {
 
     private static final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     private static final XPathFactory xf = XPathFactory.newInstance();
 
-    public ExtractLog4jModificationsCLT() {
+    public ExtractLog4JModificationsCLT() {
         super();
     }
 
@@ -122,7 +122,7 @@ public class ExtractLog4jModificationsCLT {
         }
         OutputStream os = null;
         try {
-            Document original = db.parse(ExtractLog4jModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml"));
+            Document original = db.parse(ExtractLog4JModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml"));
             File input = new File(cmd.getOptionValue('i'));
             if (!input.exists() || !input.isFile() || !input.canRead()) {
                 System.err.println("Can not open input file: \"" + input.getAbsolutePath() + "\".");
