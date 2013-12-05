@@ -165,7 +165,7 @@ public class ConvertJUL2LogbackCLT {
         }
     }
 
-    private static Properties parseInput(boolean stdin, String filename) {
+    static Properties parseInput(boolean stdin, String filename) {
         Properties properties = new Properties();
         try {
             final InputStream is = determineInput(stdin, filename);

@@ -120,7 +120,7 @@ public class XMLModifierCLT {
         }
         if (cmd.hasOption('h') || 0 == args.length) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("xmlModifierCLT", "Can modify XML configuration files. Currently only allows to add XML fragments.", options, null, false);
+            formatter.printHelp("xmlModifier", "Can modify XML configuration files. Currently only allows to add XML fragments.", options, null, false);
             return 0;
         }
         final DocumentBuilder db;

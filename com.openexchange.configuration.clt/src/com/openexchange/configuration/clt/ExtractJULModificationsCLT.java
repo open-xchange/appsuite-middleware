@@ -51,53 +51,36 @@ package com.openexchange.configuration.clt;
 
 import static com.openexchange.configuration.clt.ConvertJUL2LogbackCLT.determineOutput;
 import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
-import static com.openexchange.configuration.clt.XMLModifierCLT.parseInput;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 /**
- * {@link ExtractLog4JModificationsCLT}
+ * {@link ExtractJULModificationsCLT}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ExtractLog4JModificationsCLT {
+public class ExtractJULModificationsCLT {
 
-    private static final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    private static final XPathFactory xf = XPathFactory.newInstance();
-
-    public ExtractLog4JModificationsCLT() {
+    public ExtractJULModificationsCLT() {
         super();
     }
 
     public static void main(String[] args) {
-        System.exit(writeLog4JModifications(args));
+        System.exit(writeJULModifications(args));
     }
 
-    private static int writeLog4JModifications(String[] args) {
+    private static int writeJULModifications(String[] args) {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
-        options.addOption(createOption("i", "in", true, "XML document is read from this file. If omitted the input will be read from STDIN.", false));
-        options.addOption(createOption("o", "out", true, "JUL properties configuration file is written to this file. If this option is omitted the output will be written to STDOUT.", false));
+        options.addOption(createOption("i", "in", true, "Java Util logging properties configuration file to read. If omitted this will be read vom STDIN.", false));
+        options.addOption(createOption("o", "out", true, "Added JUL logger will be written as properties configuration to this file. If this option is omitted the output will be written to STDOUT.", false));
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
@@ -108,64 +91,33 @@ public class ExtractLog4JModificationsCLT {
         }
         if (cmd.hasOption('h')) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("log4JModifications", "Reads a log4j.xml and outputs modified logger levels as JUL properties format.", options, null, false);
+            formatter.printHelp("extractJULModifications", "Extracts modified logger levels from file-logging.properties.", options, null, false);
             return 0;
         }
-        final DocumentBuilder db;
-        try {
-            db = dbf.newDocumentBuilder();
-            db.setEntityResolver(new ClassloaderEntityResolver());
-        } catch (ParserConfigurationException e) {
-            System.err.println("Can not configure XML parser: " + e.getMessage());
-            e.printStackTrace();
+        Properties properties = ConvertJUL2LogbackCLT.parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
+        if (null == properties) {
             return 1;
         }
+        Properties original = new Properties();
         try {
-            Document original = db.parse(ExtractLog4JModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml"));
-            Document document = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
-            // Find differences
-            Set<Logger> origLogger = parseLogger(original);
-            Set<Logger> configuredLogger = parseLogger(document);
-            Set<Logger> added = new HashSet<Logger>(configuredLogger);
-            added.removeAll(origLogger);
-            Properties properties = new Properties();
-            for (Logger logger : added) {
-                properties.put(logger.getName() + ".level", logger.getLevel());
+            original.load(ExtractJULModificationsCLT.class.getClassLoader().getResourceAsStream("file-logging.properties"));
+            Properties added = new Properties();
+            added.putAll(properties);
+            for (String name : original.stringPropertyNames()) {
+                added.remove(name);
             }
             // Write output
             final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
             try {
-                properties.store(os, "file-logging.properties");
+                added.store(os, "added loggers in file-logging.properties");
             } finally {
                 os.close();
             }
-        } catch (SAXException e) {
-            System.err.println("Can not parse XML document: " + e.getMessage());
-            e.printStackTrace();
-            return 1;
-        } catch (XPathExpressionException e) {
-            System.err.println("Can not parse XPath expression: " + e.getMessage());
-            e.printStackTrace();
-            return 1;
         } catch (IOException e) {
-            System.err.println("Can not read XML file: " + e.getMessage());
+            System.err.println("Can not read file: " + e.getMessage());
             e.printStackTrace();
             return 1;
         }
         return 0;
-    }
-
-    private static Set<Logger> parseLogger(Document original) throws XPathExpressionException {
-        XPath path = xf.newXPath();
-        NodeList list = (NodeList) path.compile("/configuration/logger/@name").evaluate(original, XPathConstants.NODESET);
-        Set<Logger> retval = new HashSet<Logger>(list.getLength());
-        for (int i = 0; i < list.getLength(); i++) {
-            Node nameAttribute = list.item(i);
-            final String name = nameAttribute.getNodeValue();
-            Node valueAttribute = (Node) path.compile("//level/@value").evaluate(nameAttribute, XPathConstants.NODE);
-            final String value = valueAttribute.getNodeValue();
-            retval.add(new Logger(name, value));
-        }
-        return retval;
     }
 }
