@@ -11,6 +11,7 @@ Bundle-ClassPath: .,
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.capabilities,
  com.openexchange.config,
+ com.openexchange.configuration,
  com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.file.storage,
@@ -44,9 +45,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.tools.strings,
  com.openexchange.tx,
  javax.mail,
- javax.management,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.service.event,
- org.osgi.util.tracker;version="1.5.1"
+ org.osgi.service.event
 Export-Package: com.openexchange.drive

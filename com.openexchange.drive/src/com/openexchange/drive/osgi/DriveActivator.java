@@ -70,14 +70,12 @@ import com.openexchange.drive.internal.throttle.BucketInputStream;
 import com.openexchange.drive.internal.throttle.DriveTokenBucket;
 import com.openexchange.drive.internal.throttle.ThrottlingDriveService;
 import com.openexchange.drive.management.DriveConfig;
-import com.openexchange.drive.management.ManagementRegisterer;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -126,11 +124,6 @@ public class DriveActivator extends HousekeepingActivator {
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, ChecksumEventListener.getHandledTopics());
         registerService(EventHandler.class, new ChecksumEventListener(), serviceProperties);
-        /*
-         * register management mbean dynamically
-         */
-        track(ManagementService.class, new ManagementRegisterer(context));
-        openTrackers();
     }
 
     @Override
