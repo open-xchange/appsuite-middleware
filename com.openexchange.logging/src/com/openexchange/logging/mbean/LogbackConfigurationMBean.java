@@ -50,6 +50,7 @@
 package com.openexchange.logging.mbean;
 
 import java.util.Set;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link LogbackConfigurationMBean}

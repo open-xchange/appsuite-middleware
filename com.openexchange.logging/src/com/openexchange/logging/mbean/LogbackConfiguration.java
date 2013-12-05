@@ -69,6 +69,7 @@ import ch.qos.logback.classic.spi.TurboFilterList;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link LogbackConfiguration}

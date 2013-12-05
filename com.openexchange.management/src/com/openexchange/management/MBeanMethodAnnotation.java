@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.logging.mbean;
+package com.openexchange.management;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
