@@ -76,12 +76,12 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
+    protected static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
 
-    private static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
+    protected static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
 
-    private static final Logger logger = LoggerFactory.getLogger(Activator.class);
-    
+    private static Logger logger = LoggerFactory.getLogger(Activator.class);
+
     private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
     private ObjectName logbackConfObjName;
@@ -107,7 +107,7 @@ public class Activator extends HousekeepingActivator {
         ExceptionCategoryFilter.setCategories(suppressedCategories);
         loggerContext.addTurboFilter(new ExceptionCategoryFilter());
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
@@ -129,10 +129,17 @@ public class Activator extends HousekeepingActivator {
         SLF4JBridgeHandler.install();
     }
 
-    private void overrideLoggerLevels() {
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+    /**
+     * Overrides the log level for LoginPerformer and SessionHandler in case that the administrator removed or changed the logging level.
+     */
+    protected void overrideLoggerLevels() {
         for (final String className : new String[] { LOGIN_PERFORMER, SESSION_HANDLER }) {
-            loggerContext.getLogger(className).setLevel(Level.INFO);
+            ch.qos.logback.classic.Logger lLogger = loggerContext.getLogger(className);
+            if (lLogger != null) {
+                lLogger.setLevel(Level.INFO);
+            } else {
+                logger.warn("Not able to override the log level to INFO for class: " + className);
+            }
         }
     }
 

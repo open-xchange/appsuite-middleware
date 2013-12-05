@@ -82,11 +82,6 @@ import com.openexchange.test.mock.assertion.ServiceMockActivatorAsserter;
 public class ManifestJSONActivatorTest {
 
     /**
-     * Logger for this class
-     */
-    protected final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestJSONActivatorTest.class);
-
-    /**
      * Instance to test
      */
     private ManifestJSONActivator manifestJSONActivator = null;
