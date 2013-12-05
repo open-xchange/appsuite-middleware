@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Remote Events Bundle
+Bundle-SymbolicName: com.openexchange.events.remote
+Bundle-Version: 7.4.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Activator: com.openexchange.events.remote.osgi.RemoteEventsActivator
+Bundle-ClassPath: .
+Import-Package: com.openexchange.config,
+ com.openexchange.crypto,
+ com.openexchange.event,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.ms,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.util.tracker

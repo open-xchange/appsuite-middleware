@@ -1,3 +1,7 @@
+* 2013-12-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30123: Remotely distribute and handle password change event  
+
 * 2013-12-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 30154: Don't abort importing Google contacts if no more contact images are allowed to be fetched due to temporary rate limiting
