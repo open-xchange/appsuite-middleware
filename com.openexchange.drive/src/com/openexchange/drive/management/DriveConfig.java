@@ -49,22 +49,17 @@
 
 package com.openexchange.drive.management;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
@@ -87,7 +82,6 @@ public class DriveConfig implements Initialization {
     }
 
     private final AtomicBoolean started;
-    private final List<DriveProperty> driveProperties;
 
     private boolean useTempFolder;
     private long cleanerInterval;
@@ -96,8 +90,6 @@ public class DriveConfig implements Initialization {
     private int maxBandwidthPerClient;
     private int maxConcurrentSyncOperations;
     private String directLinkQuota;
-    private boolean diagnostics;
-    private Set<String> diagnosticsUsers;
     private Pattern excludedFilenamesPattern;
     private String shortProductName;
     private int minApiVersion;
@@ -121,7 +113,6 @@ public class DriveConfig implements Initialization {
     private DriveConfig() {
         super();
         this.started = new AtomicBoolean();
-        this.driveProperties = initProperties(this);
     }
 
     @Override
@@ -133,10 +124,7 @@ public class DriveConfig implements Initialization {
         /*
          * register properties
          */
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class, true);
-        for (DriveProperty driveProperty : driveProperties) {
-            driveProperty.register(configService);
-        }
+        load(DriveServiceLookup.getService(ConfigurationService.class, true));
     }
 
     @Override
@@ -145,41 +133,6 @@ public class DriveConfig implements Initialization {
             LOG.warn("Not started - aborting.");
             return;
         }
-        /*
-         * unregister properties
-         */
-        if (null != driveProperties && 0 < driveProperties.size()) {
-            ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class, false);
-            if (null != configService) {
-                for (DriveProperty driveProperty : driveProperties) {
-                    driveProperty.unregister(configService);
-                }
-            } else {
-                LOG.warn("Unable to access config service, unable to unregister property listeners");
-            }
-        }
-    }
-
-    /**
-     * Gets a value indicating if the supplied session is configured to write the (server-side) diagnostics log or not.
-     *
-     * @param session The session to check
-     * @return <code>true</code> if diagnostic logging is enabled for the session, <code>false</code>, otherwise
-     */
-    public boolean isDiagnostics(ServerSession session) {
-        if (isDiagnostics()) {
-            return true;
-        } else if (null != session && 0 < diagnosticsUsers.size()) {
-            return diagnosticsUsers.contains(session.getLogin()) ||
-                diagnosticsUsers.contains("*@" + session.getContextId()) ||
-                diagnosticsUsers.contains(session.getUserId() + '@' + session.getContextId()) ||
-                diagnosticsUsers.contains(session.getLoginName() + '@' + session.getContextId()) ||
-                diagnosticsUsers.contains(session.getUserId() + '@' + session.getContext().getName()) ||
-                diagnosticsUsers.contains(session.getLoginName() + '@' + session.getContext().getName()) ||
-                diagnosticsUsers.contains("*@" + session.getContext().getName())
-            ;
-        }
-        return false;
     }
 
     /**
@@ -192,30 +145,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the useTempFolder
-     *
-     * @param useTempFolder The useTempFolder to set
-     */
-    public void setUseTempFolder(boolean useTempFolder) {
-        this.useTempFolder = useTempFolder;
-    }
-
-    /**
      * Gets the cleanerInterval
      *
      * @return The cleanerInterval
      */
     public long getCleanerInterval() {
         return cleanerInterval;
-    }
-
-    /**
-     * Sets the cleanerInterval
-     *
-     * @param cleanerInterval The cleanerInterval to set
-     */
-    public void setCleanerInterval(long cleanerInterval) {
-        this.cleanerInterval = cleanerInterval;
     }
 
     /**
@@ -228,30 +163,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the cleanerMaxAge
-     *
-     * @param cleanerMaxAge The cleanerMaxAge to set
-     */
-    public void setCleanerMaxAge(long cleanerMaxAge) {
-        this.cleanerMaxAge = cleanerMaxAge;
-    }
-
-    /**
      * Gets the maxBandwidth
      *
      * @return The maxBandwidth
      */
     public int getMaxBandwidth() {
         return maxBandwidth;
-    }
-
-    /**
-     * Sets the maxBandwidth
-     *
-     * @param maxBandwidth The maxBandwidth to set
-     */
-    public void setMaxBandwidth(int maxBandwidth) {
-        this.maxBandwidth = maxBandwidth;
     }
 
     /**
@@ -264,65 +181,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the maxBandwidthPerClient
-     *
-     * @param maxBandwidthPerClient The maxBandwidthPerClient to set
-     */
-    public void setMaxBandwidthPerClient(int maxBandwidthPerClient) {
-        this.maxBandwidthPerClient = maxBandwidthPerClient;
-    }
-
-    /**
      * Gets the maxConcurrentSyncOperations
      *
      * @return The maxConcurrentSyncOperations
      */
     public int getMaxConcurrentSyncOperations() {
         return maxConcurrentSyncOperations;
-    }
-
-    /**
-     * Sets the maxConcurrentSyncOperations
-     *
-     * @param maxConcurrentSyncOperations The maxConcurrentSyncOperations to set
-     */
-    public void setMaxConcurrentSyncOperations(int maxConcurrentSyncOperations) {
-        this.maxConcurrentSyncOperations = maxConcurrentSyncOperations;
-    }
-
-    /**
-     * Gets the diagnostics
-     *
-     * @return The diagnostics
-     */
-    public boolean isDiagnostics() {
-        return diagnostics;
-    }
-
-    /**
-     * Sets the diagnostics
-     *
-     * @param diagnostics The diagnostics to set
-     */
-    public void setDiagnostics(boolean diagnostics) {
-        this.diagnostics = diagnostics;
-    }
-
-    /**
-     * Gets the diagnosticsUsers
-     *
-     * @return The diagnosticsUsers
-     */
-    public Set<String> getDiagnosticsUsers() {
-        return Collections.unmodifiableSet(diagnosticsUsers);
-    }
-
-    public boolean addDiagnisticsUser(String user) {
-        return diagnosticsUsers.add(user);
-    }
-
-    public boolean removeDiagnisticsUser(String user) {
-        return diagnosticsUsers.remove(user);
     }
 
     /**
@@ -335,227 +199,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the directLinkQuota
-     *
-     * @param directLinkQuota The directLinkQuota to set
-     */
-    public void setDirectLinkQuota(String directLinkQuota) {
-        this.directLinkQuota = directLinkQuota;
-    }
-
-    /**
-     * Initializes all drive properties for the supplied {@link DriveConfig} instance.
-     *
-     * @param config The parent drive config
-     * @return The drive properties
-     */
-    private static List<DriveProperty> initProperties(final DriveConfig config) {
-        List<DriveProperty> properties = new ArrayList<DriveProperty>();
-        properties.add(new DriveProperty("com.openexchange.drive.useTempFolder", "true", false) {
-
-            @Override
-            protected void set(String value) {
-                config.useTempFolder = Boolean.valueOf(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.cleaner.interval", "1D", false) {
-
-            @Override
-            protected void set(String value) {
-                config.cleanerInterval = TimeSpanParser.parseTimespan(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.cleaner.maxAge", "1D", false) {
-
-            @Override
-            protected void set(String value) {
-                config.cleanerMaxAge = TimeSpanParser.parseTimespan(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.maxBandwidth", "-1", false) {
-
-            @Override
-            protected void set(String value) {
-                config.maxBandwidth = Strings.isEmpty(value) ? -1 : parseBytes(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.maxBandwidthPerClient", "-1", false) {
-
-            @Override
-            protected void set(String value) {
-                config.maxBandwidthPerClient = Strings.isEmpty(value) ? -1 : parseBytes(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.maxConcurrentSyncOperations", "-1", false) {
-
-            @Override
-            protected void set(String value) {
-                config.maxConcurrentSyncOperations = Strings.isEmpty(value) ? -1 : Integer.valueOf(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.directLinkQuota", "[protocol]://[hostname]", false) {
-
-            @Override
-            protected void set(String value) {
-                config.directLinkQuota = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.diagnostics", "false", true) {
-
-            @Override
-            protected void set(String value) {
-                config.diagnostics = Boolean.valueOf(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.diagnosticsUsers", null, true) {
-
-            @Override
-            protected void set(String value) {
-                Set<String> diagnosticsUsers = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-                if (false == Strings.isEmpty(value)) {
-                    diagnosticsUsers.addAll(Strings.splitAndTrim(value, ","));
-                }
-                config.diagnosticsUsers = diagnosticsUsers;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.excludedFilesPattern", "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r", false) {
-
-            @Override
-            protected void set(String value) {
-                config.excludedFilenamesPattern = Pattern.compile(value, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.shortProductName", "OX Drive", false) {
-
-            @Override
-            protected void set(String value) {
-                config.shortProductName = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.minApiVersion", String.valueOf(DriveConstants.DEFAULT_MIN_API_VERSION), false) {
-
-            @Override
-            protected void set(String value) {
-                config.minApiVersion = Strings.isEmpty(value) ? DriveConstants.DEFAULT_MIN_API_VERSION : Integer.valueOf(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.maxDirectoryActions", "1000", false) {
-
-            @Override
-            protected void set(String value) {
-                config.maxDirectoryActions = Strings.isEmpty(value) ? 1000 : Integer.valueOf(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.maxFileActions", "500", false) {
-
-            @Override
-            protected void set(String value) {
-                config.maxFileActions = Strings.isEmpty(value) ? 500 : Integer.valueOf(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.directLinkFragmentsFile", "m=infostore&f=[folder]&i=[object]", false) {
-
-            @Override
-            protected void set(String value) {
-                config.directLinkFragmentsFile = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.directLinkFile", "[protocol]://[hostname]/[uiwebpath]#[filefragments]", false) {
-
-            @Override
-            protected void set(String value) {
-                config.directLinkFile = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.previewImageSize", "800x800", false) {
-
-            @Override
-            protected void set(String value) {
-                config.previewImageSize = parseDimensions(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.thumbnailImageSize", "100x100", false) {
-
-            @Override
-            protected void set(String value) {
-                config.thumbnailImageSize = parseDimensions(value);
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.imageLinkImageFile", "[protocol]://[hostname]/[dispatcherPrefix]/files" +
-            "?action=document&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
-            "&width=[width]&height=[height]&rotate=true", false) {
-
-            @Override
-            protected void set(String value) {
-                config.imageLinkImageFile = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.imageLinkAudioFile", "[protocol]://[hostname]/[dispatcherPrefix]/image/file/" +
-            "mp3Cover?folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]", false) {
-
-            @Override
-            protected void set(String value) {
-                config.imageLinkAudioFile = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.imageLinkDocumentFile", "[protocol]://[hostname]/[dispatcherPrefix]/files?action=" +
-                    "document&format=preview_image&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
-                    "&width=[width]&height=[height]", false) {
-
-            @Override
-            protected void set(String value) {
-                config.imageLinkDocumentFile = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.directLinkFragmentsDirectory", "m=infostore&f=[folder]", false) {
-
-            @Override
-            protected void set(String value) {
-                config.directLinkFragmentsDirectory = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.drive.directLinkDirectory", "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]", false) {
-
-            @Override
-            protected void set(String value) {
-                config.directLinkDirectory = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.UIWebPath", "/ox6/index.html", false) {
-
-            @Override
-            protected void set(String value) {
-                config.uiWebPath = value;
-            }
-        });
-        properties.add(new DriveProperty("com.openexchange.dispatcher.prefix", "ajax", false) {
-
-            @Override
-            protected void set(String value) {
-                config.dispatcherPrefix = value;
-            }
-        });
-
-
-        return properties;
-    }
-
-    /**
      * Gets the excludedFilenamesPattern
      *
      * @return The excludedFilenamesPattern
      */
     public Pattern getExcludedFilenamesPattern() {
         return excludedFilenamesPattern;
-    }
-
-    /**
-     * Sets the excludedFilenamesPattern
-     *
-     * @param excludedFilenamesPattern The excludedFilenamesPattern to set
-     */
-    public void setExcludedFilenamesPattern(Pattern excludedFilenamesPattern) {
-        this.excludedFilenamesPattern = excludedFilenamesPattern;
     }
 
     /**
@@ -568,30 +217,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the shortProductName
-     *
-     * @param shortProductName The shortProductName to set
-     */
-    public void setShortProductName(String shortProductName) {
-        this.shortProductName = shortProductName;
-    }
-
-    /**
      * Gets the minApiVersion
      *
      * @return The minApiVersion
      */
     public int getMinApiVersion() {
         return minApiVersion;
-    }
-
-    /**
-     * Sets the minApiVersion
-     *
-     * @param minApiVersion The minApiVersion to set
-     */
-    public void setMinApiVersion(int minApiVersion) {
-        this.minApiVersion = minApiVersion;
     }
 
     /**
@@ -604,30 +235,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the maxDirectoryActions
-     *
-     * @param maxDirectoryActions The maxDirectoryActions to set
-     */
-    public void setMaxDirectoryActions(int maxDirectoryActions) {
-        this.maxDirectoryActions = maxDirectoryActions;
-    }
-
-    /**
      * Gets the maxFileActions
      *
      * @return The maxFileActions
      */
     public int getMaxFileActions() {
         return maxFileActions;
-    }
-
-    /**
-     * Sets the maxFileActions
-     *
-     * @param maxFileActions The maxFileActions to set
-     */
-    public void setMaxFileActions(int maxFileActions) {
-        this.maxFileActions = maxFileActions;
     }
 
     /**
@@ -640,30 +253,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the directLinkFragmentsFile
-     *
-     * @param directLinkFragmentsFile The directLinkFragmentsFile to set
-     */
-    public void setDirectLinkFragmentsFile(String directLinkFragmentsFile) {
-        this.directLinkFragmentsFile = directLinkFragmentsFile;
-    }
-
-    /**
      * Gets the directLinkFile
      *
      * @return The directLinkFile
      */
     public String getDirectLinkFile() {
         return directLinkFile;
-    }
-
-    /**
-     * Sets the directLinkFile
-     *
-     * @param directLinkFile The directLinkFile to set
-     */
-    public void setDirectLinkFile(String directLinkFile) {
-        this.directLinkFile = directLinkFile;
     }
 
     /**
@@ -676,30 +271,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the thumbnailImageSize
-     *
-     * @param thumbnailImageSize The thumbnailImageSize to set
-     */
-    public void setThumbnailImageSize(int[] thumbnailImageSize) {
-        this.thumbnailImageSize = thumbnailImageSize;
-    }
-
-    /**
      * Gets the previewImageSize
      *
      * @return The previewImageSize
      */
     public int[] getPreviewImageSize() {
         return previewImageSize;
-    }
-
-    /**
-     * Sets the previewImageSize
-     *
-     * @param previewImageSize The previewImageSize to set
-     */
-    public void setPreviewImageSize(int[] previewImageSize) {
-        this.previewImageSize = previewImageSize;
     }
 
     /**
@@ -712,30 +289,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the imageLinkDocumentFile
-     *
-     * @param imageLinkDocumentFile The imageLinkDocumentFile to set
-     */
-    public void setImageLinkDocumentFile(String imageLinkDocumentFile) {
-        this.imageLinkDocumentFile = imageLinkDocumentFile;
-    }
-
-    /**
      * Gets the directLinkDirectory
      *
      * @return The directLinkDirectory
      */
     public String getDirectLinkDirectory() {
         return directLinkDirectory;
-    }
-
-    /**
-     * Sets the directLinkDirectory
-     *
-     * @param directLinkDirectory The directLinkDirectory to set
-     */
-    public void setDirectLinkDirectory(String directLinkDirectory) {
-        this.directLinkDirectory = directLinkDirectory;
     }
 
     /**
@@ -748,30 +307,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the directLinkFragmentsDirectory
-     *
-     * @param directLinkFragmentsDirectory The directLinkFragmentsDirectory to set
-     */
-    public void setDirectLinkFragmentsDirectory(String directLinkFragmentsDirectory) {
-        this.directLinkFragmentsDirectory = directLinkFragmentsDirectory;
-    }
-
-    /**
      * Gets the imageLinkAudioFile
      *
      * @return The imageLinkAudioFile
      */
     public String getImageLinkAudioFile() {
         return imageLinkAudioFile;
-    }
-
-    /**
-     * Sets the imageLinkAudioFile
-     *
-     * @param imageLinkAudioFile The imageLinkAudioFile to set
-     */
-    public void setImageLinkAudioFile(String imageLinkAudioFile) {
-        this.imageLinkAudioFile = imageLinkAudioFile;
     }
 
     /**
@@ -784,30 +325,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the imageLinkImageFile
-     *
-     * @param imageLinkImageFile The imageLinkImageFile to set
-     */
-    public void setImageLinkImageFile(String imageLinkImageFile) {
-        this.imageLinkImageFile = imageLinkImageFile;
-    }
-
-    /**
      * Gets the uiWebPath
      *
      * @return The uiWebPath
      */
     public String getUiWebPath() {
         return uiWebPath;
-    }
-
-    /**
-     * Sets the uiWebPath
-     *
-     * @param uiWebPath The uiWebPath to set
-     */
-    public void setUiWebPath(String uiWebPath) {
-        this.uiWebPath = uiWebPath;
     }
 
     /**
@@ -820,12 +343,95 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Sets the dispatcherPrefix
+     * Loads all relevant drive properties from the configuration service.
      *
-     * @param dispatcherPrefix The dispatcherPrefix to set
+     * @param configService The configuration service
+     * @throws OXException
      */
-    public void setDispatcherPrefix(String dispatcherPrefix) {
-        this.dispatcherPrefix = dispatcherPrefix;
+    private void load(ConfigurationService configService) throws OXException {
+        /*
+         * general
+         */
+        minApiVersion = configService.getIntProperty("com.openexchange.drive.minApiVersion", DriveConstants.DEFAULT_MIN_API_VERSION);
+        shortProductName = configService.getProperty("com.openexchange.drive.shortProductName", "OX Drive");
+        try {
+            excludedFilenamesPattern = Pattern.compile(configService.getProperty("com.openexchange.drive.excludedFilesPattern",
+                "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        } catch (PatternSyntaxException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.drive.excludedFilesPattern");
+        }
+        /*
+         * temp cleaner
+         */
+        useTempFolder = configService.getBoolProperty("com.openexchange.drive.useTempFolder", true);
+        final long MILLIS_PER_HOUR = 1000 * 60 * 60;
+        String cleanerIntervalValue = configService.getProperty("com.openexchange.drive.cleaner.interval", "1D");
+        try {
+            cleanerInterval = TimeSpanParser.parseTimespan(cleanerIntervalValue);
+        } catch (IllegalArgumentException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, cleanerIntervalValue);
+        }
+        if (MILLIS_PER_HOUR > cleanerInterval) {
+            LOG.warn("The configured interval of '" + cleanerIntervalValue +
+                "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
+            cleanerInterval = MILLIS_PER_HOUR;
+        }
+        String cleanerMaxAgeValue = configService.getProperty("com.openexchange.drive.cleaner.maxAge", "1D");
+        try {
+            cleanerMaxAge = TimeSpanParser.parseTimespan(cleanerMaxAgeValue);
+        } catch (IllegalArgumentException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, cleanerMaxAgeValue);
+        }
+        if (MILLIS_PER_HOUR > cleanerMaxAge) {
+            LOG.warn("The configured interval of '" + cleanerMaxAgeValue +
+                "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
+            cleanerMaxAge = MILLIS_PER_HOUR;
+        }
+        /*
+         * throttling
+         */
+        maxBandwidth = configService.getIntProperty("com.openexchange.drive.maxBandwidth", -1);
+        maxBandwidthPerClient = configService.getIntProperty("com.openexchange.drive.maxBandwidthPerClient", -1);
+        maxConcurrentSyncOperations = configService.getIntProperty("com.openexchange.drive.maxConcurrentSyncOperations", -1);
+        maxDirectoryActions = configService.getIntProperty("com.openexchange.drive.maxDirectoryActions", 1000);
+        maxFileActions = configService.getIntProperty("com.openexchange.drive.maxFileActions", 500);
+        /*
+         * direct link templates
+         */
+        directLinkQuota = configService.getProperty("com.openexchange.drive.directLinkQuota", "[protocol]://[hostname]");
+        directLinkFragmentsFile = configService.getProperty("com.openexchange.drive.directLinkFragmentsFile",
+            "m=infostore&f=[folder]&i=[object]");
+        directLinkFile = configService.getProperty("com.openexchange.drive.directLinkFile",
+            "[protocol]://[hostname]/[uiwebpath]#[filefragments]");
+        previewImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.previewImageSize", "800x800"));
+        thumbnailImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.thumbnailImageSize", "100x100"));
+        imageLinkImageFile = configService.getProperty("com.openexchange.drive.imageLinkImageFile",
+            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&folder=[folder]&id=[object]&version=[version]&" +
+            "delivery=download&scaleType=contain&width=[width]&height=[height]&rotate=true");
+        imageLinkAudioFile = configService.getProperty("com.openexchange.drive.imageLinkAudioFile",
+            "[protocol]://[hostname]/[dispatcherPrefix]/image/file/mp3Cover?folder=[folder]&id=[object]&version=[version]&" +
+            "delivery=download&scaleType=contain&width=[width]&height=[height]");
+        imageLinkDocumentFile = configService.getProperty("com.openexchange.drive.imageLinkDocumentFile",
+            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&format=preview_image&folder=[folder]&id=[object]&" +
+            "version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]");
+        directLinkFragmentsDirectory = configService.getProperty("com.openexchange.drive.directLinkFragmentsDirectory",
+            "m=infostore&f=[folder]");
+        directLinkDirectory = configService.getProperty("com.openexchange.drive.directLinkDirectory",
+            "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]");
+        uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+        dispatcherPrefix = configService.getProperty("com.openexchange.dispatcher.prefix", "ajax");
+    }
+
+    private static int[] parseDimensions(String value) throws OXException {
+        int idx = value.indexOf('x');
+        if (1 > idx) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(value);
+        }
+        try {
+            return new int[] { Integer.parseInt(value.substring(0, idx)), Integer.parseInt(value.substring(idx + 1)) };
+        } catch (NumberFormatException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(1, value);
+        }
     }
 
 }

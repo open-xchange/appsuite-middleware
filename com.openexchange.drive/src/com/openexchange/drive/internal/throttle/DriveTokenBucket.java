@@ -121,9 +121,15 @@ public class DriveTokenBucket implements TokenBucket {
         }
     }
 
+    /**
+     * Stops filling up the token bucket by canceling the periodic filler task.
+     */
     public void stop() {
         if (null != bucketFillerTask) {
-            bucketFillerTask.cancel();
+            LOG.debug("Cancelling bucket filler task...");
+            if (bucketFillerTask.cancel()) {
+                LOG.info("Bucket filler task cancelled.");
+            }
         }
     }
 
