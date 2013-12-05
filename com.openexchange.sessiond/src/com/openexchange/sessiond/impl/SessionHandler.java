@@ -713,7 +713,8 @@ public final class SessionHandler {
 
                 @Override
                 public Void call() throws Exception {
-                    sessionStorage.changePassword(sessionid, newPassword);
+                    Session wrappedSession = obfuscator.wrap(currentSession);
+                    sessionStorage.changePassword(sessionid, wrappedSession.getPassword());
                     return null;
                 }
             };
