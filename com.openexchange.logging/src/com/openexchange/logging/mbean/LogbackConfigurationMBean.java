@@ -106,8 +106,10 @@ public interface LogbackConfigurationMBean {
     
     /**
      * Returns the Exception categories to be suppressed (comma separated).
+     * @return
      */
-    public String getExceptionCategories();
+    @MBeanMethodAnnotation (description="Returns the Exception categories to be suppressed.", parameters={}, parameterDescriptions={})
+    public Set<String> listExceptionCategories();
 
     /**
      * Remove the context filter

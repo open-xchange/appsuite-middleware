@@ -85,6 +85,8 @@ public class LogbackCLT {
     
     private static final String serviceURL = "service:jmx:rmi:///jndi/rmi://localhost:9999/server";
     
+    private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
+    
     private static final Options options = new Options();
     static {
         Option add = createOption("a", "add", false, false, "Flag to add the filter", true);
@@ -276,9 +278,9 @@ public class LogbackCLT {
         Level l = Level.toLevel(value, null);
         if (l != null)
             return true;
-        
-        System.out.println("Error: Unknown log level: \"" + value + "\".");
-        System.out.println("Requires a valid log level: {OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}\n");
+        StringBuilder builder = new StringBuilder();
+        builder.append("Error: Unknown log level: \"").append(value).append("\".")
+                .append("Requires a valid log level: ").append(validLogLevels).append("\n");
         printUsage(-1);
         
         return false;
@@ -291,18 +293,23 @@ public class LogbackCLT {
             Category.EnumCategory.valueOf(Category.EnumCategory.class, category);
                 return true;
         } catch (IllegalArgumentException e) {
-            System.out.println("Error: Unknown category: \"" + category + "\".");
             StringBuilder builder = new StringBuilder();
-            builder.append("Requires a valid log level: {");
-            for(Category.EnumCategory c : Category.EnumCategory.values()) {
-                builder.append(c.toString()).append(", ");
-            }
-            builder.setCharAt(builder.length() - 2, '}');
-            builder.append("\n");
+            builder.append("Error: Unknown category: \"").append(category).append("\".\"\n")
+                   .append("Requires a valid category: ").append(getValidCategories()).append("\n");
             System.out.println(builder.toString());
             printUsage(-1);
         }
         return false;
+    }
+    
+    private static final String getValidCategories() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        for(Category.EnumCategory c : Category.EnumCategory.values()) {
+            builder.append(c.toString()).append(", ");
+        }
+        builder.setCharAt(builder.length() - 2, '}');
+        return builder.toString();
     }
     
     /**
@@ -327,10 +334,11 @@ public class LogbackCLT {
      */
     private static final void printUsage(int exitCode) {
         HelpFormatter hf = new HelpFormatter();
-        hf.printHelp("logback [-a | -d] [ [-u <userid> -c <contextid>] \n | [-s <sessionid>] \n  | [-c <contextid>] ] \n -l <loglevel> <logger name 1> ... <logger name n> \n -lf \n -ll \n -h", 
+        hf.setWidth(120);
+        hf.printHelp("logback [-a | -d] [ [-u <userid> -c <contextid>] \n | [-s <sessionid>] \n  | [-c <contextid>] ] \n-l <loglevel> <logger name 1> ... <logger name n> \n-lf \n-ll \n-oec <category 1> ... <category n> \n-le \n-h", 
             null, 
             options, 
-            "\n\nThe flags -a and -d are mutually exclusive.");
+            "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories());
         System.exit(exitCode);
     }
     

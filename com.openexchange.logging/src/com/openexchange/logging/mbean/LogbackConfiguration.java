@@ -238,9 +238,17 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         ExceptionCategoryFilter.setCategories(categories);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#listExceptionCategories()
+     */
     @Override
-    public String getExceptionCategories() {
-        return ExceptionCategoryFilter.getCategories();
+    public Set<String> listExceptionCategories() {
+        Set<String> categories = new HashSet<String>();
+        for (String category : ExceptionCategoryFilter.getCategories().split(",")) {
+            categories.add(category.trim());
+        }
+        return categories;
     }
 
     /* (non-Javadoc)
