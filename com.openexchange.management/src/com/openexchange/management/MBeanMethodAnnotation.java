@@ -57,7 +57,8 @@ import java.lang.annotation.Target;
 /**
  * {@link MBeanMethodAnnotation}
  * Annotation that provides information about the description, the method parameters and parameters descriptions for an MBean.
- * Usage examples can be found in {@link com.openexchange.logging.mbean.LogbackConfiguration}
+ * Usage examples can be found in {@link com.openexchange.logging.mbean.LogbackConfiguration} 
+ * and {@link com.openexchange.logging.mbean.LogbackConfigurationMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
