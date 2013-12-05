@@ -51,6 +51,7 @@ package com.openexchange.event;
 
 import java.util.Map;
 import java.util.Set;
+import org.osgi.service.event.Event;
 import com.openexchange.session.Session;
 
 
@@ -60,6 +61,39 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface CommonEvent {
+
+    /**
+     * Add this property (with any or without a value) to any {@link Event} to make this event being distributed to remote nodes in the
+     * cluster. The following limitations apply to remote event publication:
+     * <ul>
+     * <li>Only events whose topic starts with "<code>com/openexchange</code>" are considered</li>
+     * <li>Only event properties that are POJOs, i.e. java objects whose class starts with <code>java.lang.</code>, are used</li>
+     * <li>As an exception, <code>com.openexchange.session.Session</code>s are serialized for remote distribution</li>
+     * </ul>
+     * <p/>Example usage:<p/>
+     * <code>
+     * Map&lt;String, Object&gt; props = new HashMap&lt;String, Object&gt;();<br/>
+     * props.put("myProperty", myValue);<br/>
+     * // ...<br/>
+     * props.put(com.openexchange.event.CommonEvent, null);<br/>
+     * props.put("myProperty", myValue);<br/>
+     * getService(EventAdmin.class).postEvent(new Event("com/openexchange/my/topic", props));<br/>
+     * </code>
+     */
+    String PUBLISH_MARKER = "__publishRemote";
+
+    /**
+     * To distinguish between remotely received events and local ones, events received from other nodes in the cluster contain a
+     * property with this name.
+     * <p/>Example usage:<p/>
+     * <code>
+     * public void handleEvent(Event event) {<br/>
+     *     if (event.containsProperty(CommonEvent.REMOTE_MARKER)) {<br/>
+     *         // ...<br/>
+     * }<br/>
+     * </code>
+     */
+    String REMOTE_MARKER = "__isRemoteEvent";
 
     /**
      * The event key for common events.
