@@ -96,6 +96,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     
     /**
      * Initializes a new {@link LogbackConfiguration}.
+     * 
+     * Reads the MBean annotations and adds those to the method* maps. 
+     * 
      * @throws NotCompliantMBeanException 
      */
     public LogbackConfiguration() throws NotCompliantMBeanException {
