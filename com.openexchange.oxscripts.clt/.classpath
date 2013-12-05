@@ -18,5 +18,8 @@
 	<classpathentry kind="lib" path="/com.openexchange.common/lib/backport-util-concurrent-3.1.jar" sourcepath="/com.openexchange.common/lib/backport-util-concurrent-3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.management.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.osgi"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jul-to-slf4j-1.7.5.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logback.configuration"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logback.extensions"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
