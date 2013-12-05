@@ -99,7 +99,10 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     public LogbackConfiguration() throws NotCompliantMBeanException {
         super(LogbackConfigurationMBean.class);
-        loggerContext.getTurboFilterList().get(0).setName("DEFAULT");
+        
+        if (loggerContext.getTurboFilterList().size() > 0)
+            loggerContext.getTurboFilterList().get(0).setName("DEFAULT");
+        
         configurator.setContext(loggerContext);
         
         Class<?> [] interfaces = this.getClass().getInterfaces();
