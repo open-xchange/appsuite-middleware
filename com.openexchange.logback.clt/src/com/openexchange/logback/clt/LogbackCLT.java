@@ -71,7 +71,9 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.lang.ArrayUtils;
 import ch.qos.logback.classic.Level;
+import com.openexchange.exception.Category;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
 
 /**
@@ -93,7 +95,7 @@ public class LogbackCLT {
         
         options.addOption(createOption("u", "user", true, false, "The user id for which to enable logging", false));
         options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", false));
-        options.addOption(createOption("ec", "exception-category", true, false, "The exception category to supress", false));
+        options.addOption(createOption("oec", "override-exception-categories", true, false, "Override the exception categories to be suppressed", false));
         options.addOption(createOption("s", "session", true, false, "The session id for which to enable logging", false));
         options.addOption(createOption("l", "level", true, false, "Define the log level", false));
         options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
@@ -149,18 +151,36 @@ public class LogbackCLT {
                     method = cl.hasOption("a") ? "filterContext" : "removeContextFilter";
                     params = new Object[]{contextID};
                 }
-            } else if (cl.hasOption("ec")) {
-                method = cl.hasOption("a") ? "addCategory" : "removeCategory";
-                params = new Object[]{cl.getArgs()};
+            } else if (cl.hasOption("oec")) {
+                method = "overrideExceptionCategories";
+                String[] v = cl.getOptionValues("oec");
+                String[] oeca = cl.getArgs();
+                Object[] oneArrayToRuleThemAll = ArrayUtils.addAll(v, oeca);
+                if (oneArrayToRuleThemAll.length > 0) {
+                    StringBuilder builder = new StringBuilder();
+                    for (Object o : oneArrayToRuleThemAll) {
+                        if (o instanceof String) {
+                            String s = ((String) o).toUpperCase();
+                            if (isValidCategory(s))
+                                builder.append(s).append(",");
+                        } else {
+                            printUsage(-1);
+                        }
+                    }
+                    params = new Object[] {builder.subSequence(0, builder.length() - 1).toString()};    
+                } else {
+                    printUsage(-1);
+                }
+                
             } else if (cl.hasOption("l")) {
                 String level = cl.getOptionValue("l");
-                String[] logLevelValues = cl.getArgs(); 
+                String[] logLevelValues = cl.getArgs();
                 if (isValidLogLevel(level)) {
                     params = new Object[] {level, logLevelValues};
                     method = "setLogLevel";
                 }
             } else if (cl.hasOption("le")) {
-                method = "listCategories";
+                method = "listExceptionCategories";
                 params = null;
             } else if (cl.hasOption("lf")) {
                 method = "listFilters";
@@ -178,11 +198,9 @@ public class LogbackCLT {
                     params = null;
                 }
             } else if (cl.hasOption("h")) {
-                printUsage();
-                System.exit(0);
+                printUsage(0);
             } else {
-                printUsage();
-                System.exit(-1);
+                printUsage(-1);
             }
             
             invokeMBeanMethod(method, params, getSignatureOf(method));
@@ -190,8 +208,7 @@ public class LogbackCLT {
             
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            printUsage();
-            System.exit(-1);
+            printUsage(-1);
         }
     }
 
@@ -262,9 +279,29 @@ public class LogbackCLT {
         
         System.out.println("Error: Unknown log level: \"" + value + "\".");
         System.out.println("Requires a valid log level: {OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}\n");
-        printUsage();
-        System.exit(-1);
+        printUsage(-1);
         
+        return false;
+    }
+    
+    private static final boolean isValidCategory(String category) {
+        if (category == null || category.equals("null"))
+            return false;
+        try {
+            Category.EnumCategory.valueOf(Category.EnumCategory.class, category);
+                return true;
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: Unknown category: \"" + category + "\".");
+            StringBuilder builder = new StringBuilder();
+            builder.append("Requires a valid log level: {");
+            for(Category.EnumCategory c : Category.EnumCategory.values()) {
+                builder.append(c.toString()).append(", ");
+            }
+            builder.setCharAt(builder.length() - 2, '}');
+            builder.append("\n");
+            System.out.println(builder.toString());
+            printUsage(-1);
+        }
         return false;
     }
     
@@ -278,21 +315,23 @@ public class LogbackCLT {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             System.out.println("Error: Requires an integer value.\n");
-            printUsage();
-            System.exit(-1);
+            printUsage(-1);
         }
         return -1;
     }
     
     /**
      * Print usage
+     * 
+     * @param exitCode
      */
-    private static final void printUsage() {
+    private static final void printUsage(int exitCode) {
         HelpFormatter hf = new HelpFormatter();
         hf.printHelp("logback [-a | -d] [ [-u <userid> -c <contextid>] \n | [-s <sessionid>] \n  | [-c <contextid>] ] \n -l <loglevel> <logger name 1> ... <logger name n> \n -lf \n -ll \n -h", 
             null, 
             options, 
             "\n\nThe flags -a and -d are mutually exclusive.");
+        System.exit(exitCode);
     }
     
     /**
