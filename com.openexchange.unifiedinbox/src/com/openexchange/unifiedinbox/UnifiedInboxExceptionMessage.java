@@ -67,13 +67,13 @@ public class UnifiedInboxExceptionMessage implements LocalizableStrings {
     }
 
     // Unified Mail does not support to create folders.
-    public final static String CREATE_DENIED_MSG = "Unified Mail does not support to create folders.";
+    public final static String CREATE_DENIED_MSG = "Unified Mail does not support folder creation.";
 
     // Unified Mail does not support to delete folders.
-    public final static String DELETE_DENIED_MSG = "Unified Mail does not support to delete folders.";
+    public final static String DELETE_DENIED_MSG = "Unified Mail does not support folder deletion.";
 
     // Unified Mail does not support to update folders.
-    public final static String UPDATE_DENIED_MSG = "Unified Mail does not support to update folders.";
+    public final static String UPDATE_DENIED_MSG = "Unified Mail does not support folder update.";
 
     // Unified Mail does not support to move messages.
     public final static String MOVE_MSGS_DENIED_MSG = "Unified Mail does not support to move messages.";
@@ -97,13 +97,13 @@ public class UnifiedInboxExceptionMessage implements LocalizableStrings {
     public final static String CLEAR_NOT_SUPPORTED_MSG = "Unified Mail does not support to clear INBOX folder.";
 
     // No connection available to access mailbox
-    public final static String NOT_CONNECTED_MSG = "No connection available to access mailbox";
+    public final static String NOT_CONNECTED_MSG = "No connection available to access mailbox.";
 
     // Unknown default folder fullname: %1$s.
     public final static String UNKNOWN_DEFAULT_FOLDER_INDEX_MSG = "Unknown default folder full name: %1$s.";
 
     // Move operation aborted. Source and destination folder are equal.
-    public final static String NO_EQUAL_MOVE_MSG = "Move operation aborted. Source and destination folder are equal.";
+    public final static String NO_EQUAL_MOVE_MSG = "Move operation aborted. Source and destination folder are the same.";
 
     // Request aborted due to timeout of %1$s %2$s.
     public final static String TIMEOUT_MSG = "Request aborted due to timeout of %1$s %2$s.";
