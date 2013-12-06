@@ -58,14 +58,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class DropboxExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
     // A Dropbox error occurred: %1$s
     public static final String DROPBOX_ERROR_MSG = "A Dropbox error occurred: %1$s";
 
     // Invalid Dropbox URL: %1$s
-    public static final String INVALID_DROPBOX_URL_MSG = "Invalid Dropbox URL: %1$s";
+    public static final String INVALID_DROPBOX_URL_MSG = "You provided an invalid Dropbox URL: %1$s";
 
     // Dropbox URL does not denote a directory: %1$s
     public static final String NOT_A_FOLDER_MSG = "Dropbox URL does not denote a directory: %1$s";
@@ -83,7 +80,7 @@ public final class DropboxExceptionMessages implements LocalizableStrings {
     public static final String NOT_A_FILE_MSG = "Dropbox URL does not denote a file: %1$s";
 
     // Missing file name.
-    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
+    public static final String MISSING_FILE_NAME_MSG = "Missing file name. Please provide one and try again.";
 
     // Versioning not supported by Dropbox file storage.
     public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by Dropbox file storage.";

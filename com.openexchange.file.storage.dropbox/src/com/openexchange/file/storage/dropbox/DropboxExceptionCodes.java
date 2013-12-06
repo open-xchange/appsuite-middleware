@@ -50,21 +50,22 @@
 package com.openexchange.file.storage.dropbox;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link DropboxExceptionCodes} - Enumeration of all errors.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum DropboxExceptionCodes implements OXExceptionCode {
+public enum DropboxExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(DropboxExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * A Dropbox error occurred: %1$s
      */
@@ -72,43 +73,43 @@ public enum DropboxExceptionCodes implements OXExceptionCode {
     /**
      * Invalid Dropbox URL: %1$s
      */
-    INVALID_DROPBOX_URL(DropboxExceptionMessages.INVALID_DROPBOX_URL_MSG, Category.CATEGORY_ERROR, 3),
+    INVALID_DROPBOX_URL("Invalid Dropbox URL: %1$s", DropboxExceptionMessages.INVALID_DROPBOX_URL_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * Dropbox URL does not denote a directory: %1$s
      */
-    NOT_A_FOLDER(DropboxExceptionMessages.NOT_A_FOLDER_MSG, Category.CATEGORY_ERROR, 4),
+    NOT_A_FOLDER("Dropbox URL does not denote a directory: %1$s", DropboxExceptionMessages.NOT_A_FOLDER_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * The Dropbox resource does not exist: %1$s
      */
-    NOT_FOUND(DropboxExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
+    NOT_FOUND("he Dropbox resource does not exist: %1$s", DropboxExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * Update denied for Dropbox resource: %1$s
      */
-    UPDATE_DENIED(DropboxExceptionMessages.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 6),
+    UPDATE_DENIED("Update denied for Dropbox resource: %1$s", DropboxExceptionMessages.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Delete denied for Dropbox resource: %1$s
      */
-    DELETE_DENIED(DropboxExceptionMessages.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 7),
+    DELETE_DENIED("Delete denied for Dropbox resource: %1$s", DropboxExceptionMessages.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 7),
     /**
      * Dropbox URL does not denote a file: %1$s
      */
-    NOT_A_FILE(DropboxExceptionMessages.NOT_A_FILE_MSG, Category.CATEGORY_ERROR, 8),
+    NOT_A_FILE("Dropbox URL does not denote a file: %1$s", DropboxExceptionMessages.NOT_A_FILE_MSG, Category.CATEGORY_ERROR, 8),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(DropboxExceptionMessages.MISSING_FILE_NAME_MSG, Category.CATEGORY_ERROR, 12),
+    MISSING_FILE_NAME("Missing file name.", DropboxExceptionMessages.MISSING_FILE_NAME_MSG, Category.CATEGORY_ERROR, 12),
     /**
      * Versioning not supported by Dropbox file storage.
      */
-    VERSIONING_NOT_SUPPORTED(DropboxExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 13),
+    VERSIONING_NOT_SUPPORTED("Versioning not supported by Dropbox file storage.", DropboxExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 13),
     /**
      * Missing configuration for account "%1$s".
      */
-    MISSING_CONFIG(DropboxExceptionMessages.MISSING_CONFIG_MSG, Category.CATEGORY_CONFIGURATION, 14),
+    MISSING_CONFIG("Missing configuration for account \"%1$s\".", DropboxExceptionMessages.MISSING_CONFIG_MSG, Category.CATEGORY_CONFIGURATION, 14),
     /**
      * Bad or expired access token. Need to re-authenticate user.
      */
-    UNLINKED_ERROR(DropboxExceptionMessages.UNLINKED_ERROR_MSG, Category.CATEGORY_CONFIGURATION, 15),
+    UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", DropboxExceptionMessages.UNLINKED_ERROR_MSG, Category.CATEGORY_CONFIGURATION, 15),
 
     ;
 
@@ -117,11 +118,18 @@ public enum DropboxExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private final String displayMessage;
 
     private DropboxExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, null, category, detailNumber);
+    }
+    
+    private DropboxExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
-        this.detailNumber = detailNumber;
         this.category = category;
+        this.detailNumber = detailNumber;
+        this.displayMessage = (displayMessage == null) ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -177,5 +185,13 @@ public enum DropboxExceptionCodes implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }
