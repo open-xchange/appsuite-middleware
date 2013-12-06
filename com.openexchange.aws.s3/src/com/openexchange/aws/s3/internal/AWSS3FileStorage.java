@@ -282,7 +282,11 @@ public class AWSS3FileStorage implements FileStorage {
         } catch (OXException e) {
             throw FileStorageCodes.NOT_ELIMINATED.create(e);
         } catch (AmazonClientException e) {
-            throw FileStorageCodes.NOT_ELIMINATED.create(wrap(e));
+            final OXException oxe = wrap(e);
+            if (!FileStorageCodes.FILE_NOT_FOUND.equals(oxe)) {
+                throw FileStorageCodes.NOT_ELIMINATED.create(oxe);
+            }
+            // Ignore non-existing file(s) as it is about being deleted anyway
         }
     }
 
