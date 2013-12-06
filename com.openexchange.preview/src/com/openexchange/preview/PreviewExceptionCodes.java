@@ -49,26 +49,24 @@
 
 package com.openexchange.preview;
 
-import static com.openexchange.conversion.DataExceptionMessages.ERROR_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.IO_ERROR_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.TRUNCATED_MSG;
-import static com.openexchange.conversion.DataExceptionMessages.UNABLE_TO_CHANGE_DATA_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Enumeration about all {@link OXException}s.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum PreviewExceptionCodes implements OXExceptionCode {
+public enum PreviewExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    ERROR(ERROR_MSG, CATEGORY_ERROR, 1),
+    ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1),
     /**
      * The following field(s) are too long: %1$s
      */
@@ -76,11 +74,11 @@ public enum PreviewExceptionCodes implements OXExceptionCode {
     /**
      * Unable to change data. (%1$s)
      */
-    UNABLE_TO_CHANGE_DATA(UNABLE_TO_CHANGE_DATA_MSG, CATEGORY_USER_INPUT, 3),
+    UNABLE_TO_CHANGE_DATA("Unable to change data. (%1$s)", CATEGORY_USER_INPUT, 3),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(IO_ERROR_MSG, CATEGORY_ERROR, 4),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 4),
     /**
      * Thumbnail image not available.
      */
@@ -97,12 +95,19 @@ public enum PreviewExceptionCodes implements OXExceptionCode {
     private final int number;
 
     private final String message;
+    
+    private final String displayMessage;
 
 
     private PreviewExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, null, category, detailNumber);
+    }
+    
+    private PreviewExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = (displayMessage == null) ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -158,5 +163,13 @@ public enum PreviewExceptionCodes implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }
