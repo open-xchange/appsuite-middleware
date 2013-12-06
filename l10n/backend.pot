@@ -2791,11 +2791,7 @@ msgstr ""
 msgid "User %1$s has no mail module access due to user configuration"
 msgstr ""
 
-#. *
-#. * No access to mail folder %1$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:79
 msgid "No access to mail folder %1$s"
 msgstr ""
 
@@ -2805,11 +2801,7 @@ msgid ""
 "context=%5$s)"
 msgstr ""
 
-#. *
-#. * No lookup access to mail folder %1$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:83
 msgid "No lookup access to mail folder %1$s"
 msgstr ""
 
@@ -2819,11 +2811,7 @@ msgid ""
 "%4$s, context=%5$s)"
 msgstr ""
 
-#. *
-#. * No read access on mail folder %1$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:80
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:87
 msgid "No read access to mail folder %1$s"
 msgstr ""
 
@@ -2833,11 +2821,7 @@ msgid ""
 "%4$s, context=%5$s)"
 msgstr ""
 
-#. *
-#. * No delete access on mail folder %1$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:91
 msgid "No delete access to mail folder %1$s"
 msgstr ""
 
@@ -2847,11 +2831,7 @@ msgid ""
 "%4$s, context=%5$s)"
 msgstr ""
 
-#. *
-#. * No insert access on mail folder %1$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:88
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:95
 msgid "No insert access to mail folder %1$s"
 msgstr ""
 
@@ -2861,11 +2841,7 @@ msgid ""
 "%4$s, context=%5$s)"
 msgstr ""
 
-#. *
-#. * No administer access on mail folder %1$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:99
 msgid "No administer access to mail folder %1$s"
 msgstr ""
 
@@ -2885,11 +2861,7 @@ msgid ""
 "%4$s, context=%5$s)"
 msgstr ""
 
-#. *
-#. * No keep-seen access on mail folder %1$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:100
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:107
 msgid "No keep-seen access to mail folder %1$s"
 msgstr ""
 
@@ -2899,11 +2871,7 @@ msgid ""
 "%4$s, context=%5$s)"
 msgstr ""
 
-#. *
-#. * Folder %1$s does not allow subfolders.
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:104
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:111
 msgid "Folder %1$s does not allow subfolders."
 msgstr ""
 
@@ -3084,11 +3052,7 @@ msgid ""
 "%4$s, context=%5$s). Switching to application-based sorting."
 msgstr ""
 
-#. *
-#. * Unknown search field: %1$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:162
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:172
 msgid "Unknown search field: %1$s"
 msgstr ""
 
@@ -3098,11 +3062,7 @@ msgid ""
 "context=%5$s)"
 msgstr ""
 
-#. *
-#. * Mail folder %1$s must not be moved to subsequent folder %2$s
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:176
 msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
 msgstr ""
 
@@ -3129,11 +3089,7 @@ msgid ""
 "smaller messages first."
 msgstr ""
 
-#. *
-#. * Missing %1$s folder in mail move operation
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:174
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:185
 msgid "Missing %1$s folder in mail move operation"
 msgstr ""
 
@@ -3186,11 +3142,7 @@ msgid ""
 "server %4$s with login %5$s (user=%6$s, context=%7$s)"
 msgstr ""
 
-#. *
-#. * Not allowed to open folder %1$s due to missing read access
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:194
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:205
 msgid "Not allowed to open folder %1$s due to missing read access"
 msgstr ""
 
@@ -3229,11 +3181,7 @@ msgid ""
 "%3$s (user=%4$s, context=%5$s)"
 msgstr ""
 
-#. *
-#. * Versit object %1$s could not be saved
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:206
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:217
 msgid "Versit object could not be saved"
 msgstr ""
 
@@ -3269,19 +3217,11 @@ msgid ""
 "login %3$s (user=%4$s, context=%5$s)"
 msgstr ""
 
-#. *
-#. * Missing personal namespace
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:220
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:237
 msgid "Missing personal namespace"
 msgstr ""
 
-#. *
-#. * Parsing thread-sort string failed: %1$s.
-#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:222
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:241
 msgid "Parsing thread-sort string failed: %1$s."
 msgstr ""
 
@@ -4147,10 +4087,72 @@ msgid "Password changed successfully. Please logout and login back again."
 msgstr ""
 
 #. *
+#. * No access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:79
+msgid ""
+"You do not have the appropriate permissions to access the mail folder %1$s"
+msgstr ""
+
+#. *
+#. * No lookup access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:83
+msgid "You do not have the appropriate permissions to lookup mail folder %1$s"
+msgstr ""
+
+#. *
+#. * No read access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:87
+msgid "You do not have the appropriate permissions to read mail folder %1$s"
+msgstr ""
+
+#. *
+#. * No delete access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:91
+msgid "You do not have the appropriate permissions to delete mail folder %1$s"
+msgstr ""
+
+#. *
+#. * No insert access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:95
+msgid ""
+"You do not have the appropriate permissions to insert to mail folder %1$s"
+msgstr ""
+
+#. *
+#. * No administer access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:99
+msgid ""
+"You do not have the appropriate permissions to administer mail folder %1$s"
+msgstr ""
+
+#. *
 #. * No write access to POP3 folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:103
-msgid "No write access to POP3 folder %1$s"
+msgid ""
+"You do not have the appropriate permissions to write to POP3 folder %1$s"
+msgstr ""
+
+#. *
+#. * No keep-seen access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:107
+msgid ""
+"You do not have the appropriate permissions to keep seen messages in mail "
+"folder %1$s"
+msgstr ""
+
+#. *
+#. * Folder %1$s does not allow subfolders.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:111
+msgid "You cannot create subfolders in folder %1$s."
 msgstr ""
 
 #. *
@@ -4218,6 +4220,20 @@ msgid ""
 msgstr ""
 
 #. *
+#. * Unknown search field: %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:172
+msgid "The suppied search field \"%1$s\" is unknown."
+msgstr ""
+
+#. *
+#. * Mail folder %1$s must not be moved to subsequent folder %2$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:176
+msgid "Moving mail folder %1$s to subsequent folder %2$s is not allowed."
+msgstr ""
+
+#. *
 #. * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
 #. * In that case, please try to empty your deleted items first, or delete smaller messages first.
 #.
@@ -4229,12 +4245,20 @@ msgid ""
 msgstr ""
 
 #. *
+#. * Missing %1$s folder in mail move operation
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:185
+msgid ""
+"Missing %1$s folder in mail move operation. Please provide one and try again."
+msgstr ""
+
+#. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:189
 msgid ""
-"Message move aborted for user %1$s. Source and destination folder are equal: "
-"%2$s"
+"Message move aborted for user %1$s. Source and destination folders are the "
+"same: %2$s"
 msgstr ""
 
 #. *
@@ -4261,197 +4285,185 @@ msgid ""
 msgstr ""
 
 #. *
-#. * POP3 server does not support capability "THREAD=REFERENCES"
+#. * Not allowed to open folder %1$s due to missing read access
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:221
-msgid "POP3 server does not support capability \"THREAD=REFERENCES\""
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:205
+msgid ""
+"You do not have the appropriate permissions to open folder %1$s due to "
+"missing read access"
 msgstr ""
 
 #. *
-#. * A protocol exception occurred during execution of an POP3 request: %1$s
+#. * Versit object %1$s could not be saved
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:225
-msgid "A protocol exception occurred during execution of a POP3 request: %1$s"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:217
+msgid "Versit object (i.e. vCard or vCalendar) could not be saved"
+msgstr ""
+
+#. *
+#. * POP3 server does not support capability "THREAD=REFERENCES"
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:221
+msgid "Thread sorting is not supported by the server."
 msgstr ""
 
 #. *
 #. * POP3 does not support to move folders.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:229
-msgid "POP3 does not support to move folders."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:225
+msgid "Moving folders is not supported by the server."
 msgstr ""
 
 #. *
 #. * Sort field %1$s is not supported via POP3 SORT command
 #.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:229
+msgid "The sort field you supplied is unsupported."
+msgstr ""
+
+#. *
+#. * Missing personal namespace
+#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:233
-msgid "Sort field %1$s is not supported via POP3 SORT command"
+msgid "Missing personal namespace. Please provide one and try again."
 msgstr ""
 
 #. *
 #. * POP3 does not support to create folders.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:245
-msgid "POP3 does not support to create folders."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:237
+msgid "The creation of folders is not supported by the server."
 msgstr ""
 
 #. *
 #. * POP3 does not support to delete folders.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:249
-msgid "POP3 does not support to delete folders."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:241
+msgid "The deletion of folders is not supported by the server."
 msgstr ""
 
 #. *
 #. * POP3 does not support to update folders.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:253
-msgid "POP3 does not support to update folders."
-msgstr ""
-
-#. *
-#. * A SQL error occurred: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:257
-msgid "A SQL error occurred: %1$s."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:245
+msgid "Updating folders is not supported by the server."
 msgstr ""
 
 #. *
 #. * POP3 does not support to move messages.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:261
-msgid "POP3 does not support to move messages."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:249
+msgid "Moving messages is not supported by the server."
 msgstr ""
 
 #. *
 #. * POP3 does not support to copy messages.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:265
-msgid "POP3 does not support to copy messages."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:253
+msgid "Copying messages is not supported by the server."
 msgstr ""
 
 #. *
 #. * POP3 does not support to append messages.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:269
-msgid "POP3 does not support to append messages."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:257
+msgid "Appending to messages is not supported by the server."
 msgstr ""
 
 #. *
 #. * POP3 does not support draft messages.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:273
-msgid "POP3 does not support draft messages."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:261
+msgid "Draft messages are not supported by the server."
 msgstr ""
 
 #. *
 #. * Missing POP3 storage name for user %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:277
-msgid "Missing POP3 storage name for user %1$s in context %2$s."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:265
+msgid ""
+"The POP3 storage name is missing for user %1$s. Please provide one and try "
+"again."
 msgstr ""
 
 #. *
 #. * Missing POP3 storage for user %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:281
-msgid "Missing POP3 storage for user %1$s in context %2$s."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:269
+msgid ""
+"The POP3 storage is missing for user %1$s. Please provide one and try again"
 msgstr ""
 
 #. *
 #. * POP3 default folder %1$s must not be moved.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:285
-msgid "POP3 default folder %1$s must not be moved."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:273
+msgid "You are not allowed to move the POP3 default folder %1$s."
 msgstr ""
 
 #. *
 #. * POP3 default folder %1$s must not be renamed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:289
-msgid "POP3 default folder %1$s must not be renamed."
-msgstr ""
-
-#. *
-#. * Inconsistency detected in UIDL map.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:293
-msgid "Inconsistency detected in UIDL map."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:277
+msgid "You are not allowed to rename the POP3 default folder %1$s."
 msgstr ""
 
 #. *
 #. * Missing POP3 storage path for user %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:297
-msgid "Missing POP3 storage path for user %1$s in context %2$s."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:281
+msgid ""
+"The POP3 storage path is missing for user %1$s. Please provide one and try "
+"again."
 msgstr ""
 
 #. *
 #. * Illegal move operation.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:301
-msgid "Illegal move operation."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:285
+msgid "The move operation you want to execute is not allowed."
 msgstr ""
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s).<br>
 #. * Error message from server: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:306
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:290
 msgid ""
-"Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Error message from server: %5$s"
+"Login delay denies connecting to server %1$s with login %2$s. Error message "
+"from server: %5$s"
 msgstr ""
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
 #. * Error message from server: %6$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:311
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:295
 msgid ""
-"Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds. Error message from server: %6$s"
-msgstr ""
-
-#. *
-#. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:315
-msgid ""
-"Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, "
-"context=%5$s)."
+"Login delay denies connecting to server %1$s with login %2$s. Try again in "
+"%5$s seconds. Error message from server: %6$s"
 msgstr ""
 
 #. *
 #. * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:319
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:299
 msgid ""
-"POP3 storage path \"%1$s\" cannot be created for user %2$s in context %3$s."
-msgstr ""
-
-#. *
-#. * Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s
-#. * (user=%4$s, context=%5$s).
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:324
-msgid ""
-"Due to missing required capability %1$s POP3 messages are fetched and "
-"removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, "
-"context=%5$s)."
+"The POP3 storage path is invalid. POP3 storage path \"%1$s\" cannot be "
+"created for user %2$s"
 msgstr ""
 
 #. *
 #. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:328
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:303
 msgid ""
 "Validation of POP3 credentials is disabled due to possible login "
 "restrictions by provider. Otherwise subsequent login attempt might not work."
 msgstr ""
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:331
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:306
 msgid ""
 "POP3 messages cannot be imported because of existing quota constraints on "
 "primary mail account. Please free some space."
