@@ -106,7 +106,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "INDEX (cid, intfield02),"
         + "INDEX (cid, timestampfield01),"
         + "INDEX (cid, timestampfield02),"
-        + "INDEX `uidIndex` (cid, uid)"
+        + "INDEX `uidIndex` (cid, uid(255))"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
@@ -190,7 +190,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "INDEX (cid, intfield02),"
         + "INDEX (cid, timestampfield01),"
         + "INDEX (cid, timestampfield02),"
-        + "INDEX `uidIndex` (cid, uid)"
+        + "INDEX `uidIndex` (cid, uid(255))"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
