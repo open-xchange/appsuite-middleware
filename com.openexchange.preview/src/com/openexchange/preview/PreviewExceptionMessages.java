@@ -59,20 +59,15 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class PreviewExceptionMessages implements LocalizableStrings {
 
-    public static final String ERROR_MSG = "An error occurred: %1$s";
+    public static final String TRUNCATED_MSG = "The following field(s) are too long: %1$s. Please shorten the values and try again";
 
-    public static final String TRUNCATED_MSG = "The following field(s) are too long: %1$s";
-
-    public static final String UNABLE_TO_CHANGE_DATA_MSG = "Unable to change data. (%1$s)";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    public static final String UNABLE_TO_CHANGE_DATA_MSG = "The data you provided (%1$s) cannot undergo to a change.";
 
     // Thumbnail image not available.
     public static final String THUMBNAIL_NOT_AVAILABLE = "Thumbnail image not available.";
 
     // No preview service for MIME type %1$s
-    public static final String NO_PREVIEW_SERVICE = "No preview service for MIME type %1$s";
+    public static final String NO_PREVIEW_SERVICE = "The preview service for MIME type %1$s is currently not available. Please try again later";
 
     /**
      * Prevent instantiation.
