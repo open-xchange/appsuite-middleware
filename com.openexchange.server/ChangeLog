@@ -1,3 +1,7 @@
+* 2013-12-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30191: Explicitly specify number of bytes of 'uid' VARCHAR column considered in index
+
 * 2013-11-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 29914: Cleansed all duplicate log4j occurrences from runtime system
