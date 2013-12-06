@@ -117,18 +117,6 @@ public abstract class AbstractFolder implements Folder, Serializable {
 
     protected Map<String, Object> meta = new HashMap<String, Object>();
 
-
-    @Override
-    public Map<String, Object> getMeta() {
-        return meta;
-    }
-
-
-    @Override
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
-    }
-
     /**
      * Initializes an empty {@link AbstractFolder}.
      */
@@ -180,6 +168,16 @@ public abstract class AbstractFolder implements Folder, Serializable {
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    @Override
+    public void setMeta(final Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     @Override
@@ -443,7 +441,7 @@ public abstract class AbstractFolder implements Folder, Serializable {
     }
 
     @Override
-    public void setSupportedCapabilities(Set<String> capabilities) {
+    public void setSupportedCapabilities(final Set<String> capabilities) {
         this.supportedCapabilities = capabilities;
     }
 

@@ -558,7 +558,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
         }
         final boolean performMove = fo.containsParentFolderID();
-        if (fo.containsPermissions() || fo.containsModule()) {
+        if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
             if (performMove) {
                 move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), fo.getFolderName(), getFolderFromMaster(fo.getObjectID()), lastModified);
             }

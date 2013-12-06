@@ -366,6 +366,29 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * Gets the {@link Map map} view for this JSON object.
+     *
+     * @return The map
+     */
+    public Map<String, Object> asMap() {
+        final Map<String, Object> retval = new HashMap<String, Object>(myHashMap.size());
+        for (final Map.Entry<String, ? extends Object> entry : myHashMap.entrySet()) {
+            final Object value = entry.getValue();
+            if (value instanceof JSONValue) {
+                final JSONValue jsonValue = (JSONValue) value;
+                if (jsonValue.isArray()) {
+                    retval.put(entry.getKey(), jsonValue.toArray().asList());
+                } else {
+                    retval.put(entry.getKey(), jsonValue.toObject().asMap());
+                }
+            } else {
+                retval.put(entry.getKey(), value);
+            }
+        }
+        return retval;
+    }
+
+    /**
      * Fills JSONObject with the given source string. This method is dedicated for <b>re-using</b> a JSONObject in combination with the
      * <code>reset()</code> method, since it gives the same possibility as the common-used <code>JSONObject(String string)</code> constructor
      * to create a JSONObject from a string.

@@ -47,52 +47,66 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.groupware.update.tasks;
+
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * FolderChildFields
+ * {@link AddMetaForOXFolderTable} - Extende folder tables by "meta" JSON BLOB.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public interface FolderFields extends FolderChildFields {
+public class AddMetaForOXFolderTable extends UpdateTaskAdapter {
 
-	public static final String TITLE = "title";
+    /**
+     * Initializes a new {@link AddMetaForOXFolderTable}.
+     */
+    public AddMetaForOXFolderTable() {
+        super();
+    }
 
-	public static final String MODULE = "module";
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int ctxId = params.getContextId();
+        Connection con = Database.getNoTimeout(ctxId, true);
+        boolean rollback = false;
+        try {
+            startTransaction(con);
+            rollback = true;
+            if (!Tools.columnExists(con, "oxfolder_tree", "meta")) {
+                Tools.addColumns(con, "oxfolder_tree", new Column("meta", "BLOB DEFAULT NULL"));
+            }
+            if (!Tools.columnExists(con, "del_oxfolder_tree", "meta")) {
+                Tools.addColumns(con, "del_oxfolder_tree", new Column("meta", "BLOB DEFAULT NULL"));
+            }
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.backNoTimeout(ctxId, true, con);
+        }
+    }
 
-	public static final String TYPE = "type";
-
-	public static final String SUBFOLDERS = "subfolders";
-
-	public static final String OWN_RIGHTS = "own_rights";
-
-	public static final String PERMISSIONS = "permissions";
-
-	public static final String SUMMARY = "summary";
-
-	public static final String STANDARD_FOLDER = "standard_folder";
-
-	public static final String TOTAL = "total";
-
-	public static final String NEW = "new";
-
-	public static final String UNREAD = "unread";
-
-	public static final String DELETED = "deleted";
-
-	public static final String CAPABILITIES = "capabilities";
-
-	public static final String BITS = "bits";
-
-	public static final String RIGHTS = "rights";
-
-	public static final String ENTITY = "entity";
-
-	public static final String GROUP = "group";
-
-	public static final String SUBSCRIBED = "subscribed";
-
-	public static final String SUBSCR_SUBFLDS = "subscr_subflds";
-
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
+    }
 }

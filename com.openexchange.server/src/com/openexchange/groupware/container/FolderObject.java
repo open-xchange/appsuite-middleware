@@ -336,8 +336,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     protected boolean b_fullName;
 
-    private Map<String, Object> meta;
-
     /**
      * Initializes a new {@link FolderObject}
      */
@@ -1791,12 +1789,37 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             FolderObject.SYSTEM_TYPE);
     }
 
+    /**
+     * Sets the meta map with arbitrary properties.
+     * <p>
+     * Delegates to {@link #setMap(Map)}
+     *
+     * @param map The meta map
+     */
     public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
+        setMap(meta);
     }
 
+    /**
+     * Gets (optionally) the meta map with arbitrary properties.
+     * <p>
+     * Delegates to {@link #getMap()}
+     *
+     * @return The meta map or <code>null</code>
+     */
     public Map<String, Object> getMeta() {
-        return meta;
+        return getMap();
+    }
+
+    /**
+     * Checks if this object contains a map.
+     * <p>
+     * Delegates to {@link #containsMap()}
+     *
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsMeta() {
+        return containsMap();
     }
 
 }

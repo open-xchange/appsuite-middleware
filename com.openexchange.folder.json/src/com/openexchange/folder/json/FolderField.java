@@ -164,8 +164,14 @@ public enum FolderField {
      * The permission's group flag
      */
     GROUP(-1, "group"),
-
-    META(23, "meta");
+    /**
+     * The meta field
+     */
+    META(7, "meta"),
+    /**
+     * The alternative meta field
+     */
+    META_ALT(23, "meta");
 
     private final int column;
 

@@ -169,8 +169,12 @@ public class FolderParser {
             final OCLPermission[] perms = parseOCLPermission(jsonArr, fo.containsObjectID() ? Integer.valueOf(fo.getObjectID()) : null);
             fo.setPermissionsAsArray(perms);
         }
-        if (jsonObj.has(FolderFields.META) && !jsonObj.isNull(FolderFields.META)) {
-            fo.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(jsonObj.getJSONObject("meta")));
+        if (jsonObj.has(FolderFields.META)) {
+            if (jsonObj.isNull(FolderFields.META)) {
+                fo.setMeta(null);
+            } else {
+                fo.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(jsonObj.getJSONObject("meta")));
+            }
         }
     }
 

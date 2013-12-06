@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.folder.json.services;
+
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 
 /**
- * FolderChildFields
+ * {@link MetaContributors} - Provides access to {@link MetaContributorRegistry} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public interface FolderFields extends FolderChildFields {
+public final class MetaContributors {
 
-	public static final String TITLE = "title";
+    /**
+     * Initializes a new {@link MetaContributors}.
+     */
+    private MetaContributors() {
+        super();
+    }
 
-	public static final String MODULE = "module";
+    private static final AtomicReference<MetaContributorRegistry> REGISTRY_REF = new AtomicReference<MetaContributorRegistry>();
 
-	public static final String TYPE = "type";
+    /**
+     * Sets the registry
+     *
+     * @param registry The registry to set
+     */
+    public static void setRegistry(final MetaContributorRegistry registry) {
+        REGISTRY_REF.set(registry);
+    }
 
-	public static final String SUBFOLDERS = "subfolders";
-
-	public static final String OWN_RIGHTS = "own_rights";
-
-	public static final String PERMISSIONS = "permissions";
-
-	public static final String SUMMARY = "summary";
-
-	public static final String STANDARD_FOLDER = "standard_folder";
-
-	public static final String TOTAL = "total";
-
-	public static final String NEW = "new";
-
-	public static final String UNREAD = "unread";
-
-	public static final String DELETED = "deleted";
-
-	public static final String CAPABILITIES = "capabilities";
-
-	public static final String BITS = "bits";
-
-	public static final String RIGHTS = "rights";
-
-	public static final String ENTITY = "entity";
-
-	public static final String GROUP = "group";
-
-	public static final String SUBSCRIBED = "subscribed";
-
-	public static final String SUBSCR_SUBFLDS = "subscr_subflds";
+    /**
+     * Gets the registry
+     *
+     * @return The registry or <code>null</code>
+     */
+    public static MetaContributorRegistry getRegistry() {
+        return REGISTRY_REF.get();
+    }
 
 }
