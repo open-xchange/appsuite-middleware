@@ -50,9 +50,11 @@
 package com.openexchange.messaging.twitter;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link TwitterMessagingExceptionCodes} - Enumeration of all {@link OXException}s.
@@ -60,16 +62,16 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
+public enum TwitterMessagingExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(TwitterMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1),
     /**
      * Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.
      */
-    INVALID_ACCOUNT(TwitterMessagingExceptionMessages.INVALID_ACCOUNT_MSG, CATEGORY_ERROR, 2),
+    INVALID_ACCOUNT("Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.", TwitterMessagingExceptionMessages.INVALID_ACCOUNT_MSG, CATEGORY_ERROR, 2),
 
 
     ;
@@ -80,11 +82,14 @@ public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private final String displayMessage;
 
-    private TwitterMessagingExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private TwitterMessagingExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage;
     }
 
     @Override
@@ -140,5 +145,13 @@ public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }
