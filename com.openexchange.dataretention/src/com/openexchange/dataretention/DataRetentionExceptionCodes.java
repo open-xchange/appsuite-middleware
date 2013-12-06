@@ -50,25 +50,26 @@
 package com.openexchange.dataretention;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link DataRetentionExceptionMessages} - The error messages for data retention exceptions.
+ * {@link DataRetentionExceptionCodes} - The error messages for data retention exceptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum DataRetentionExceptionMessages implements OXExceptionCode {
+public enum DataRetentionExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Data retention failed: %1$s.
      */
-    ERROR(DataRetentionExceptionStrings.ERROR_MSG, CATEGORY_ERROR, 1),
+    ERROR("Data retention failed: %1$s.", CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s.
      */
-    IO(DataRetentionExceptionStrings.IO_MSG, CATEGORY_ERROR, 2);
+    IO("An I/O error occurred: %1$s.", CATEGORY_ERROR, 2);
 
     /**
      * Message of the exception.
@@ -92,7 +93,7 @@ public enum DataRetentionExceptionMessages implements OXExceptionCode {
      * @param category category.
      * @param detailNumber detail number.
      */
-    private DataRetentionExceptionMessages(final String message, final Category category, final int detailNumber) {
+    private DataRetentionExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         number = detailNumber;
@@ -151,5 +152,10 @@ public enum DataRetentionExceptionMessages implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return OXExceptionStrings.MESSAGE;
     }
 }
