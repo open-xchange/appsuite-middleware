@@ -102,7 +102,7 @@ public class Activator extends HousekeepingActivator {
         addExceptionCategoryFilter();
     }
 
-    private void addExceptionCategoryFilter() {
+    protected void addExceptionCategoryFilter() {
         String suppressedCategories = getService(ConfigurationService.class).getProperty("com.openexchange.log.suppressedCategories", "USER_INPUT", new CategoryPropertyListener());
         ExceptionCategoryFilter.setCategories(suppressedCategories);
         loggerContext.addTurboFilter(new ExceptionCategoryFilter());
@@ -123,7 +123,7 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    private void configureJavaUtilLogging() {
+    protected void configureJavaUtilLogging() {
         // We configure a special j.u.l handler that routes logging to slf4j
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
@@ -146,7 +146,7 @@ public class Activator extends HousekeepingActivator {
     /**
      * Register the LoggingConfigurationMBean
      */
-    private void registerLoggingConfigurationMBean() {
+    protected void registerLoggingConfigurationMBean() {
         try {
             logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
             logbackConfMBean = new LogbackConfiguration();

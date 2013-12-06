@@ -114,4 +114,17 @@ public class ActivatorTest {
         Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
         Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
     }
+
+    @Test
+    public void testStartBundle_ensureOverrideLoggerLevelsCalled_Successfull() throws Exception {
+        Activator activatorSpy = Mockito.spy(new Activator());
+        Mockito.doNothing().when(activatorSpy).overrideLoggerLevels();
+        Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean();
+        Mockito.doNothing().when(activatorSpy).addExceptionCategoryFilter();
+
+        activatorSpy.startBundle();
+
+        Mockito.verify(activatorSpy, Mockito.times(1)).overrideLoggerLevels();
+    }
 }
