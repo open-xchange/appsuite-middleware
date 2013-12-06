@@ -167,11 +167,7 @@ public enum FolderField {
     /**
      * The meta field
      */
-    META(7, "meta"),
-    /**
-     * The alternative meta field
-     */
-    META_ALT(23, "meta");
+    META(23, "meta");
 
     private final int column;
 

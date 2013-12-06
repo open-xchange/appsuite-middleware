@@ -521,6 +521,7 @@ public final class FolderWriter {
                 jsonPutter.put(FolderField.SUBSCR_SUBFLDS.getName(), Boolean.valueOf(folder.hasSubscribedSubfolders()));
             }
         });
+        // Capabilities
         m.put(FolderField.CAPABILITIES.getColumn(), new FolderFieldWriter() {
 
             @Override
@@ -530,22 +531,19 @@ public final class FolderWriter {
             }
         });
         // Meta
-        {
-            final FolderFieldWriter fieldWriter = new FolderFieldWriter() {
-                @Override
-                public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                    // Get meta map
-                    Map<String, Object> map = folder.getMeta();
-                    // Invoke contribution service
-                    map = contributeTo(map, folder, folder.getSession());
+        m.put(FolderField.META.getColumn(), new FolderFieldWriter() {
+            @Override
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                // Get meta map
+                Map<String, Object> map = folder.getMeta();
+                // Invoke contribution service
+                map = contributeTo(map, folder, folder.getSession());
 
-                    jsonPutter.put(FolderField.META.getName(), null == map || map.isEmpty() ? JSONObject.NULL : JSONCoercion.coerceToJSON(map));
-                }
+                jsonPutter.put(FolderField.META.getName(), null == map || map.isEmpty() ? JSONObject.NULL : JSONCoercion.coerceToJSON(map));
+            }
 
-            };
-            m.put(FolderField.META.getColumn(), fieldWriter);
-            m.put(FolderField.META_ALT.getColumn(), fieldWriter);
-        }
+        });
+        // Supported capabilities
         m.put(FolderField.SUPPORTED_CAPABILITIES.getColumn(), new FolderFieldWriter() {
 
             @Override
