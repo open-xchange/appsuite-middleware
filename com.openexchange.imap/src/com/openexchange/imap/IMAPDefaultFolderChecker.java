@@ -346,7 +346,9 @@ public class IMAPDefaultFolderChecker {
              */
             for (int i = 0; i < fullNames.length; i++) {
                 final String fullName = fullNames[i];
-                if (!isEmpty(fullName) && (fullName.indexOf(sep) > 0 || !fullName.equals(names[i]))) {
+                if (isEmpty(fullName)) {
+                    fullNames[i] = null;
+                } else if ((fullName.indexOf(sep) > 0) || !fullName.equals(names[i])) {
                     fullNames[i] = null;
                 }
             }
