@@ -1091,7 +1091,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.sms/src/com/openexchange/messaging/sms/service/SMSMessagingExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:63
@@ -1354,7 +1353,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:69
 msgid "A JSON error occurred: %1$s"
@@ -1520,7 +1518,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:224
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
 msgid "A SQL error occurred: %1$s"
 msgstr ""
@@ -1710,7 +1707,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:66
@@ -2213,7 +2209,6 @@ msgstr ""
 #. A HTTP error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:75
 msgid "A HTTP error occurred: %1$s"
 msgstr ""
 
@@ -2339,7 +2334,6 @@ msgstr ""
 
 #. The string cannot be parsed to a valid URL.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:82
 msgid "The string cannot be parsed to a valid URL."
 msgstr ""
 
@@ -2403,34 +2397,6 @@ msgstr ""
 #. %s is replaced with the implementations name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:98
 msgid "Automatic login is not supported."
-msgstr ""
-
-#. *
-#. * A put into the cache failed.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:71
-msgid "Put into cache failed."
-msgstr ""
-
-#. *
-#. * The default element attributes could not be retrieved
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:76
-msgid "The default element attributes could not be retrieved"
-msgstr ""
-
-#. *
-#. * Remove on cache failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:81
-msgid "Remove on cache failed"
-msgstr ""
-
-#. *
-#. * Cache %s could not be initialized due to following error: %s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/cache/OXCachingExceptionMessage.java:86
-msgid "Cache %s could not be initialized due to following error: %s"
 msgstr ""
 
 #. Unknown problem: "%s".
@@ -3901,54 +3867,29 @@ msgstr ""
 msgid "A security problem occurred: %1$s"
 msgstr ""
 
-#. Response is not of type: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:72
-msgid "Response is not of type: %1$s"
-msgstr ""
-
-#. Unexpected status %1$s (%2$s)
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:78
-msgid "Unexpected status %1$s (%2$s)"
-msgstr ""
-
-#. Invalid URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:81
-msgid "Invalid URL: %1$s"
+#. Account not found with identifier %1$s for user %2$s in context %3$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:63
+msgid "Account not found with identifier %1$s for user %2$s"
 msgstr ""
 
 #. Unknown OAuth service meta data: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:72
 msgid "Unknown OAuth service meta data: %1$s"
 msgstr ""
 
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
 msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
 msgstr ""
 
 #. Unsupported OAuth service: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:93
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
 msgid "Unsupported OAuth service: %1$s"
 msgstr ""
 
 #. Missing argument: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:96
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
 msgid "Missing argument: %1$s"
-msgstr ""
-
-#. An OAuth error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:99
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:90
-msgid "An OAuth error occurred: %1$s"
-msgstr ""
-
-#. No OAuth provider found for identifier %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:102
-msgid "No OAuth provider found for identifier %1$s."
 msgstr ""
 
 #. Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
@@ -3957,6 +3898,11 @@ msgid ""
 "Your '%1$s' password changed. You have to authorize the server to use your "
 "account with the new password. To do so, go to Configuration -> My Social "
 "Configuration -> Accounts. Then try again."
+msgstr ""
+
+#. An OAuth error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:90
+msgid "An OAuth error occurred: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:92
@@ -8186,33 +8132,21 @@ msgstr ""
 msgid "Provide well-formed HTML."
 msgstr ""
 
-#. An I/O error occurred: %1$s. Was trying to get the service at %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
-msgid "An I/O error occurred: %1$s. Was trying to get the service at %2$s."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:79
-msgid "Try again later."
-msgstr ""
-
-#. A HTTP error occurred: %1$s. Was trying to get the service at %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:70
-msgid "A HTTP Error occurred: %1$s. Was trying to get the service at %2$s."
-msgstr ""
-
 #. Can only post to external subscription sources.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:74
-msgid "Can only post to external subscription sources."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
+msgid "You can only post to external subscription sources."
 msgstr ""
 
 #. Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:69
 msgid ""
 "Could not fetch site at %1$s. Please check the spelling or whether you can "
 "reach the site in your browser."
+msgstr ""
+
+#. The string cannot be parsed to a valid URL.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
+msgid "You provided an invalid URL."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.msn/src/com/openexchange/subscribe/msn/FormStrings.java:62
