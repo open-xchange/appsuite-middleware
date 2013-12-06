@@ -60,6 +60,7 @@ import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
@@ -123,7 +124,7 @@ public class DriveServiceImpl implements DriveService {
     public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions,
         List<DirectoryVersion> clientVersions) throws OXException {
         /*
-         * check api version first
+         * check (hard) version restrictions
          */
         if (session.getApiVersion() < DriveConfig.getInstance().getMinApiVersion()) {
             OXException error = DriveExceptionCodes.CLIENT_OUTDATED.create();
@@ -131,6 +132,19 @@ public class DriveServiceImpl implements DriveService {
             actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
             return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
         }
+        DriveClientVersion clientVersion = session.getClientVersion();
+        if (null != clientVersion) {
+            DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType());
+            if (0 > clientVersion.compareTo(hardVersionLimit)) {
+                OXException error = DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit);
+                List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
+                actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
+                return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
+            }
+        }
+        /*
+         * sync folders
+         */
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateDirectoryVersions(originalVersions);
         DriveVersionValidator.validateDirectoryVersions(clientVersions);
@@ -172,6 +186,16 @@ public class DriveServiceImpl implements DriveService {
              */
             if (syncResult.isEmpty()) {
                 TempCleaner.cleanUpIfNeeded(driveSession);
+            }
+            /*
+             * check (soft) version restrictions
+             */
+            if (null != clientVersion) {
+                DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType());
+                if (0 > clientVersion.compareTo(softVersionLimit)) {
+                    OXException error = DriveExceptionCodes.CLIENT_VERSION_UPDATE_AVAILABLE.create(clientVersion, softVersionLimit);
+                    syncResult.addActionForClient(new ErrorDirectoryAction(null, null, null, error, false, false));
+                }
             }
             /*
              * return actions for client

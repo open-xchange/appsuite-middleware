@@ -49,15 +49,19 @@
 
 package com.openexchange.drive.management;
 
+import java.util.EnumMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.drive.DriveClientType;
+import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.strings.TimeSpanParser;
@@ -106,6 +110,9 @@ public class DriveConfig implements Initialization {
     private String directLinkDirectory;
     private String uiWebPath;
     private String dispatcherPrefix;
+
+    private EnumMap<DriveClientType, DriveClientVersion> softMinimumVersions;
+    private EnumMap<DriveClientType, DriveClientVersion> hardMinimumVersions;
 
     /**
      * Initializes a new {@link DriveConfig}.
@@ -420,6 +427,35 @@ public class DriveConfig implements Initialization {
             "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]");
         uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
         dispatcherPrefix = configService.getProperty("com.openexchange.dispatcher.prefix", "ajax");
+        /*
+         * version restrictions
+         */
+        softMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
+        hardMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
+        softMinimumVersions.put(DriveClientType.WINDOWS,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.softMinimum", "0")));
+        hardMinimumVersions.put(DriveClientType.WINDOWS,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.hardMinimum", "0")));
+        softMinimumVersions.put(DriveClientType.MAC_OS,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.macos.softMinimum", "0")));
+        hardMinimumVersions.put(DriveClientType.MAC_OS,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.macos.hardMinimum", "0")));
+        softMinimumVersions.put(DriveClientType.ANDROID,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.android.softMinimum", "0")));
+        softMinimumVersions.put(DriveClientType.IOS,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.ios.softMinimum", "0")));
+        hardMinimumVersions.put(DriveClientType.ANDROID,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.android.hardMinimum", "0")));
+        hardMinimumVersions.put(DriveClientType.IOS,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.ios.hardMinimum", "0")));
+    }
+
+    private static DriveClientVersion parseClientVersion(String value) throws OXException {
+        try {
+            return Strings.isEmpty(value) ? DriveClientVersion.VERSION_0 : new DriveClientVersion(value);
+        } catch (IllegalArgumentException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(value);
+        }
     }
 
     private static int[] parseDimensions(String value) throws OXException {
@@ -432,6 +468,28 @@ public class DriveConfig implements Initialization {
         } catch (NumberFormatException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(1, value);
         }
+    }
+
+    /**
+     * Gets the (soft) minimum version limit for the supplied client type
+     *
+     * @param clientType The client type to get the limit for
+     * @return The configured limit, or {@link DriveClientVersion#VERSION_0} if not defined
+     */
+    public DriveClientVersion getSoftMinimumVersion(DriveClientType clientType) {
+        DriveClientVersion version = softMinimumVersions.get(clientType);
+        return null != version ? version : DriveClientVersion.VERSION_0;
+    }
+
+    /**
+     * Gets the (hard) minimum version limit for the supplied client type
+     *
+     * @param clientType The client type to get the limit for
+     * @return The configured limit, or {@link DriveClientVersion#VERSION_0} if not defined
+     */
+    public DriveClientVersion getHardMinimumVersion(DriveClientType clientType) {
+        DriveClientVersion version = hardMinimumVersions.get(clientType);
+        return null != version ? version : DriveClientVersion.VERSION_0;
     }
 
 }

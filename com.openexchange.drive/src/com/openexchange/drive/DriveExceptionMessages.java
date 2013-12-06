@@ -84,6 +84,7 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String CONFLICTING_FILENAME_MSG = "The file name \"%1$s\" is conflicting.";
     public static final String REPEATED_SYNC_PROBLEMS_MSG = "The directory \"%1$s\" caused repeated synchronization problems.";
     public static final String CLIENT_OUTDATED_MSG = "The client application you're using is outdated and no longer supported - please upgrade to a newer version.";
+    public static final String CLIENT_VERSION_UPDATE_AVAILABLE_MSG = "A newer version of your client application is available for download.";
 
     /**
      * Prevent instantiation.

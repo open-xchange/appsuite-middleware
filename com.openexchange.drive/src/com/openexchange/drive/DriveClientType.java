@@ -49,91 +49,71 @@
 
 package com.openexchange.drive;
 
-import java.util.List;
-import java.util.Locale;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.java.Strings;
 
 /**
- * {@link DriveSession}
+ * {@link DriveClientType}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveSession {
+public enum DriveClientType {
 
     /**
-     * The session parameter used to hold the client's push token
+     * An unknown client
      */
-    static final String PARAMETER_PUSH_TOKEN = "com.openexchange.drive.pushToken";
+    UNKNOWN(null),
 
     /**
-     * Gets the underlying server session.
+     * The windows desktop client
+     */
+    WINDOWS("OpenXchange.HTTPClient.OXDrive"),
+
+    /**
+     * The Mac OS desktop client
+     */
+    MAC_OS("OSX.OXDrive"),
+
+    /**
+     * The iOS mobile client
+     */
+    IOS("OpenXchange.iosClient.OXDrive"),
+
+    /**
+     * The Android mobile client
+     */
+    ANDROID("ox-client.android.normal.hdpi"),
+    ;
+
+    private String clientString;
+
+    private DriveClientType(String clientString) {
+        this.clientString = clientString;
+    }
+
+    /**
+     * Gets the client string identifier as set by the client, e.g. "OpenXchange.HTTPClient.OXDrive".
      *
-     * @return The server session
+     * @return The client string
      */
-    ServerSession getServerSession();
+    public String getClientString() {
+        return clientString;
+    }
 
     /**
-     * Get the identifier of the referenced root folder on the server.
+     * Gets the drive client type matching the supplied client string.
      *
-     * @return The root folder ID.
+     * @param clientString The client string to parse
+     * @return The drive client type, or {@link #UNKNOWN} if unknown.
      */
-    String getRootFolderID();
-
-    /**
-     * Gets a friendly name identifying the client device from a user's point of view, e.g. "My Tablet PC".
-     *
-     * @return The devie name, or <code>null</code> if not defined
-     */
-    String getDeviceName();
-
-    /**
-     * Gets a value indicating whether the diagnostics trace is requested from the client or not.
-     *
-     * @return <code>Boolean.TRUE</code> if tracing is enabled, <code>null</code> or <code>Boolean.FALSE</code>, othwerwise.
-     */
-    Boolean isDiagnostics();
-
-    /**
-     * Gets the locale of the session's user.
-     *
-     * @return The locale
-     */
-    Locale getLocale();
-
-    /**
-     * Gets the host data of the underlying request.
-     *
-     * @return The hostname
-     */
-    HostData getHostData();
-
-    /**
-     * Gets the file metadata fields relevant for the client.
-     *
-     * @return The file metadata fields, or <code>null</code> if not specified
-     */
-    List<DriveFileField> getFields();
-
-    /**
-     * Gets the API version targeted by the client
-     *
-     * @return The API version, or <code>0</code> if using the initial version
-     */
-    int getApiVersion();
-
-    /**
-     * Gets the client version.
-     *
-     * @return The client version
-     */
-    DriveClientVersion getClientVersion();
-
-    /**
-     * Gets the client type.
-     *
-     * @return The client type, or {@link DriveClientType#UNKNOWN} if not known
-     */
-    DriveClientType getClientType();
+    public static DriveClientType parse(String clientString) {
+        if (false == Strings.isEmpty(clientString)) {
+            for (DriveClientType driveClient : DriveClientType.values()) {
+                if (clientString.equals(driveClient.clientString)) {
+                    return driveClient;
+                }
+            }
+        }
+        return UNKNOWN;
+    }
 
 }

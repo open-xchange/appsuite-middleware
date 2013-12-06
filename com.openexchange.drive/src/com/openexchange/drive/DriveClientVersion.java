@@ -49,91 +49,74 @@
 
 package com.openexchange.drive;
 
-import java.util.List;
-import java.util.Locale;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.tools.session.ServerSession;
-
 /**
- * {@link DriveSession}
+ * {@link DriveClientVersion}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveSession {
+public class DriveClientVersion implements Comparable<DriveClientVersion> {
 
     /**
-     * The session parameter used to hold the client's push token
+     * The version "0".
      */
-    static final String PARAMETER_PUSH_TOKEN = "com.openexchange.drive.pushToken";
+    public static final DriveClientVersion VERSION_0 = new DriveClientVersion("0");
+
+    private final String version;
+    private final int[] versionParts;
 
     /**
-     * Gets the underlying server session.
+     * Initializes a new {@link DriveClientVersion}.
      *
-     * @return The server session
+     * @param version The version string, matching the pattern <code>^[0-9]+(\.[0-9]+)*$</code>.
+     * @throws IllegalArgumentException If the version has an unexpected format
      */
-    ServerSession getServerSession();
+    public DriveClientVersion(String version) throws IllegalArgumentException {
+        super();
+        if (null == version || false == version.matches("^[0-9]+(\\.[0-9]+)*$")) {
+            throw new IllegalArgumentException(version);
+        }
+        this.version = version;
+        String[] parts = version.split("\\.");
+        this.versionParts = new int[parts.length];
+        try {
+            for (int i = 0; i < parts.length; i++) {
+                versionParts[i] = Integer.parseInt(parts[i]);
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(version, e);
+        }
+    }
 
     /**
-     * Get the identifier of the referenced root folder on the server.
+     * Gets the version string
      *
-     * @return The root folder ID.
+     * @return The version string
      */
-    String getRootFolderID();
+    public String getVersion() {
+        return version;
+    }
 
-    /**
-     * Gets a friendly name identifying the client device from a user's point of view, e.g. "My Tablet PC".
-     *
-     * @return The devie name, or <code>null</code> if not defined
-     */
-    String getDeviceName();
+    @Override
+    public int compareTo(DriveClientVersion other) {
+        if (null == other) {
+            return 1;
+        }
+        int maxLength = Math.max(versionParts.length, other.versionParts.length);
+        for (int i = 0; i < maxLength; i++) {
+            int thisPart = i < versionParts.length ? versionParts[i] : 0;
+            int otherPart = i < other.versionParts.length ? other.versionParts[i] : 0;
+            if (thisPart < otherPart) {
+                return -1;
+            } else if (thisPart > otherPart) {
+                return 1;
+            }
+        }
+        return 0;
+    }
 
-    /**
-     * Gets a value indicating whether the diagnostics trace is requested from the client or not.
-     *
-     * @return <code>Boolean.TRUE</code> if tracing is enabled, <code>null</code> or <code>Boolean.FALSE</code>, othwerwise.
-     */
-    Boolean isDiagnostics();
-
-    /**
-     * Gets the locale of the session's user.
-     *
-     * @return The locale
-     */
-    Locale getLocale();
-
-    /**
-     * Gets the host data of the underlying request.
-     *
-     * @return The hostname
-     */
-    HostData getHostData();
-
-    /**
-     * Gets the file metadata fields relevant for the client.
-     *
-     * @return The file metadata fields, or <code>null</code> if not specified
-     */
-    List<DriveFileField> getFields();
-
-    /**
-     * Gets the API version targeted by the client
-     *
-     * @return The API version, or <code>0</code> if using the initial version
-     */
-    int getApiVersion();
-
-    /**
-     * Gets the client version.
-     *
-     * @return The client version
-     */
-    DriveClientVersion getClientVersion();
-
-    /**
-     * Gets the client type.
-     *
-     * @return The client type, or {@link DriveClientType#UNKNOWN} if not known
-     */
-    DriveClientType getClientType();
+    @Override
+    public String toString() {
+        return version;
+    }
 
 }
