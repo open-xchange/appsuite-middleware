@@ -61,10 +61,6 @@ import com.openexchange.groupware.update.FullPrimaryKeySupportService;
  */
 public class CreateCalendarTables extends AbstractCreateTableImpl {
 
-    public static void main(String[] args) {
-        System.out.println(CREATE_DEL_DATE_EXTERNAL);
-    }
-
     /**
      * Table name of prg_dates table
      */
