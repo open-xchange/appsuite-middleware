@@ -263,7 +263,7 @@ public final class DownloadUtility {
                     contentType.setCharsetParameter("UTF-8");
                     sz = sink.getLength();
                     in = sink.getClosingStream();
-                    sink = null; // Set to null to avoid premature closing
+                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
             } else if (contentType.startsWith("text/plain")) {
                 /*-
@@ -292,7 +292,7 @@ public final class DownloadUtility {
                     if (null != sink) {
                         sz = sink.getLength();
                         in = sink.getClosingStream();
-                        sink = null; // Set to null to avoid premature closing
+                        sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                     }
                     sContentDisposition = "attachment";
                 } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
@@ -333,7 +333,7 @@ public final class DownloadUtility {
                     contentType.setCharsetParameter("UTF-8");
                     sz = sink.getLength();
                     in = sink.getClosingStream();
-                    sink = null; // Set to null to avoid premature closing
+                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
@@ -361,7 +361,7 @@ public final class DownloadUtility {
                          */
                         if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
                             final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
-                            sink = null; // Set to null to avoid premature closing
+                            sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                             return ret;
                         }
                     } else {
@@ -381,7 +381,7 @@ public final class DownloadUtility {
                                  */
                                 if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
                                     final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
-                                    sink = null; // Set to null to avoid premature closing
+                                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                                     return ret;
                                 }
                             } else {
@@ -403,7 +403,7 @@ public final class DownloadUtility {
                              */
                             if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
                                 final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
-                                sink = null; // Set to null to avoid premature closing
+                                sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                                 return ret;
                             }
                         } else if (!contentType.isMimeType(detectedCT)) {
@@ -417,7 +417,7 @@ public final class DownloadUtility {
                      * New combined input stream (with original size)
                      */
                     in = sink.getClosingStream();
-                    sink = null; // Set to null to avoid premature closing
+                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
             } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)), true)) {
                 /*
