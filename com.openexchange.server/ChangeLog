@@ -2,6 +2,7 @@
 
  - Fix for bug 30190: Fixed parsing of CLI call
  - Fix for bug 29729: Ignore possible "404 Not Found" HTTP error if S3 bucket is supposed to be deleted anyway
+ - Fix for bug 27640: Properly decode "Subject" header in JSON MIME representation
 
 * 2013-12-05 - tobias.friedrich@open-xchange.com
 
