@@ -23,6 +23,9 @@
         <level value="INFO"/> 
     </logger>
     <logger name="com.openexchange.sessiond.impl.SessionHandler">
+        <level value="WARN"/> 
+    </logger>
+    <logger name="com.openexchange.sessiond.impl.SessionHandler123">
         <level value="INFO"/> 
     </logger>
     <root>

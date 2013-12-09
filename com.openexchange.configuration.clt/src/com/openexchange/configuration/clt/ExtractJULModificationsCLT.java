@@ -103,8 +103,15 @@ public class ExtractJULModificationsCLT {
             original.load(ExtractJULModificationsCLT.class.getClassLoader().getResourceAsStream("file-logging.properties"));
             Properties added = new Properties();
             added.putAll(properties);
+            //new
             for (String name : original.stringPropertyNames()) {
                 added.remove(name);
+            }
+            //changed
+            for (String name : original.stringPropertyNames()) {
+                if (properties.containsKey(name) && !properties.getProperty(name).equals(original.getProperty(name))) {
+                    added.put(name, properties.getProperty(name));
+                }
             }
             // Write output
             final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
