@@ -1,3 +1,7 @@
+* 2013-12-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27640: Properly decode "Subject" header in JSON MIME representation
+
 * 2013-12-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 29816: Added "TLSv1" to enabled protocols accepted by Open-Xchange as a client
