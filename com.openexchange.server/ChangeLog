@@ -4,7 +4,8 @@
 
 * 2013-12-09 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 29729: Skip filestorage deletion if bucket no longer exists 
+ - Fix for bug 29729: Skip filestorage deletion if bucket no longer exists
+ - Fix for bug 30204: Don't try and restore task status if not previously set
 
 * 2013-12-09 - thorben.betten@open-xchange.com
 
