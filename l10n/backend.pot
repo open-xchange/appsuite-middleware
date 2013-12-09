@@ -2227,22 +2227,7 @@ msgstr ""
 #. * The required service %1$s is temporary not available. Please try again later.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/server/ServiceExceptionMessage.java:71
-msgid ""
-"The required service %1$s is temporary not available. Please try again later."
-msgstr ""
-
-#. *
-#. * An I/O error occurred
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/server/ServiceExceptionMessage.java:76
-msgid "An I/O error occurred"
-msgstr ""
-
-#. *
-#. * Service initialization failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/server/ServiceExceptionMessage.java:81
-msgid "Service initialization failed"
+msgid "A required service is temporarily unavailable. Please try again later."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:61
