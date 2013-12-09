@@ -9,6 +9,7 @@
 * 2013-12-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 29954: Enable support for EAS favorite folder if property "com.openexchange.usm.eas.allow_folder_selection" is set to "true"
+ - Fix for bug 29350: Explicitly check folder permissions, not folder visibility which may also be granted through administer permission
 
 * 2013-12-06 - thorben.betten@open-xchange.com
 

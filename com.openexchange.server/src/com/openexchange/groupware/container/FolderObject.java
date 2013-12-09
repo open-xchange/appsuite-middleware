@@ -1249,6 +1249,10 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     }
 
     private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserPermissionBits userPermissionBits) {
+        return calcEffectiveUserPermission(userId, userPermissionBits, true);
+    }
+
+    private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserPermissionBits userPermissionBits, final boolean considerSystemPermissions) {
         final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), getCreatedBy(), userPermissionBits);
         final int[] idArr;
         {
@@ -1264,7 +1268,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         int odp = 0;
         boolean admin = false;
         for (final OCLPermission oclPerm : getPermissions()) {
-            if (Arrays.binarySearch(idArr, oclPerm.getEntity()) >= 0) {
+            if ((considerSystemPermissions || !oclPerm.isSystem()) && Arrays.binarySearch(idArr, oclPerm.getEntity()) >= 0) {
                 // Folder permission
                 int cur = oclPerm.getFolderPermission();
                 if (cur > fp) {
