@@ -432,10 +432,12 @@ public class DriveConfig implements Initialization {
          */
         softMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
         hardMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
-        softMinimumVersions.put(DriveClientType.WINDOWS,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.softMinimum", "0")));
-        hardMinimumVersions.put(DriveClientType.WINDOWS,
-            parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.hardMinimum", "0")));
+        softMinimumVersions.put(DriveClientType.WINDOWS, parseClientVersion(
+            configService.getProperty("com.openexchange.drive.version.windows.softMinimum",
+            configService.getProperty("com.openexchange.drive.windows.version", "0"))));
+        hardMinimumVersions.put(DriveClientType.WINDOWS, parseClientVersion(
+            configService.getProperty("com.openexchange.drive.version.windows.hardMinimum",
+            configService.getProperty("com.openexchange.drive.windows.minimumVersion", "0"))));
         softMinimumVersions.put(DriveClientType.MAC_OS,
             parseClientVersion(configService.getProperty("com.openexchange.drive.version.macos.softMinimum", "0")));
         hardMinimumVersions.put(DriveClientType.MAC_OS,
