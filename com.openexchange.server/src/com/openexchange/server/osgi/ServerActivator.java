@@ -142,7 +142,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.log.CommonsLoggingLogger;
+import com.openexchange.log.Slf4jLogger;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
@@ -363,7 +363,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CONTEXT = context;
         {
             // Set logger
-            JSONObject.setLogger(new CommonsLoggingLogger(JSONValue.class));
+            JSONObject.setLogger(new Slf4jLogger(JSONValue.class));
             // JSON configuration
             final ConfigurationService service = getService(ConfigurationService.class);
             JSONObject.setMaxSize(service.getIntProperty("com.openexchange.json.maxSize", 2500));
