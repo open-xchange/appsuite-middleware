@@ -193,10 +193,13 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                            freeRessourcesFor(id);
+                            freeResourcesFor(id);
                         }
                     });
                 } else {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Found another number: " + meantime + "in the meantime for the SequencePrincipal: " + stanza.getSequencePrincipal());
+                    }
                     threshold = meantime;
                 }
             }
@@ -338,8 +341,14 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
     }
 
 
-    public void freeRessourcesFor(ID sequencePrincipal) {
-        sequenceNumbers.remove(sequencePrincipal);
+    public void freeResourcesFor(ID sequencePrincipal) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Freeing Ressources for SequencePrincipal: " + sequencePrincipal);
+        }
+        AtomicLong removedSequence = sequenceNumbers.remove(sequencePrincipal);
+        if(removedSequence == null) {
+            LOG.error("Couldn't remove sequenceNumber for SequencePrincipal: " + sequencePrincipal);
+        }
         inboxes.remove(sequencePrincipal);
         notifyManagementSequenceNumbers();
         notifyManagementInboxes();

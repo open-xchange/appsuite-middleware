@@ -122,6 +122,11 @@ public class IDComponentsParser {
         Validate.notNull(components, "Missing obligatory parameter components");
         Validate.notEmpty(input, "Missing obligatory parameter input");
 
+        /*
+         * ID parsing modes  
+         *  marc.arens@premium/1234
+         * |----0-----|---1---|-2--|
+         */
         int mode = 0;
         boolean escape = false;
         StringBuilder b = new StringBuilder();
@@ -163,7 +168,7 @@ public class IDComponentsParser {
                 }
             }
         }
-        
+
         switch (mode) {
         case 0: components.user = b.toString(); break;
         case 1: components.context = b.toString(); break;

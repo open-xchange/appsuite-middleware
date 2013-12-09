@@ -63,7 +63,6 @@ import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 
 
@@ -100,7 +99,7 @@ public class ActionHandler {
     private final Map<String, Method> methodsWithProperties = new HashMap<String, Method>();
     private final Map<String, Method> methods = new HashMap<String, Method>();
 
-    public ActionHandler(Class klass) {
+    public ActionHandler(Class<?> klass) {
         for (Method method: klass.getMethods()) {
             boolean accessible = Modifier.isPublic(method.getModifiers());
             

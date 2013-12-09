@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
@@ -349,6 +348,12 @@ public class ID implements Serializable {
         return b.toString();
     }
 
+    /**
+     * If the given input string contains any of the candidate characters those will be escaped via '\'
+     * @param str The input string
+     * @param chars The characters to escape in the input string 
+     * @return The given input string with the candidate characters escaped via '\'
+     */
     private String escape(String str, char...chars) {
         StringBuilder b = new StringBuilder();
         for(char c: str.toCharArray()) {

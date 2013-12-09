@@ -364,7 +364,8 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     /**
-     * Stamp a stanza with the selector for this recipient
+     * Stamp a stanza with the selector for this recipient. Furthermore this sets this GroupDispatcher as SequencePrincipal for this Stanza
+     * and uses the GroupDispatchers current sequence number for sending this Stanza.
      */
     public void stamp(Stanza s) {
         s.setSelector(getStamp(s.getTo()));
