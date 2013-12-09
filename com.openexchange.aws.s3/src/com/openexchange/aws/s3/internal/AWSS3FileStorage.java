@@ -268,12 +268,31 @@ public class AWSS3FileStorage implements FileStorage {
     public void remove() throws OXException {
         try {
             /*
-             * delete contained files
+             * check if bucket exists first
              */
-            SortedSet<String> fileList = getFileList();
-            if (null != fileList && 0 < fileList.size()) {
-                String[] identifiers = fileList.toArray(new String[fileList.size()]);
-                amazonS3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(identifiers));
+            if (false == amazonS3.doesBucketExist(bucketName)) {
+                LOG.warn("Bucket \"" + bucketName + "\" does not exists - skipping deletion.");
+                return;
+            }
+            /*
+             * try and delete all contained files repeatedly
+             */
+            final int RETRY_COUNT = 10;
+            for (int i = 0; i < RETRY_COUNT; i++) {
+                try {
+                    SortedSet<String> fileList = getFileList();
+                    if (null == fileList || 0 == fileList.size()) {
+                        break; // no more files found
+                    }
+                    String[] identifiers = fileList.toArray(new String[fileList.size()]);
+                    amazonS3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(identifiers));
+                } catch (MultiObjectDeleteException e) {
+                    if (i < RETRY_COUNT - 1) {
+                        LOG.warn("Not all files in bucket deleted yet, trying again.", e);
+                    } else {
+                        throw FileStorageCodes.NOT_ELIMINATED.create("Not all files in bucket deleted after " + i + " tries, giving up.", e);
+                    }
+                }
             }
             /*
              * delete bucket
@@ -282,11 +301,7 @@ public class AWSS3FileStorage implements FileStorage {
         } catch (OXException e) {
             throw FileStorageCodes.NOT_ELIMINATED.create(e);
         } catch (AmazonClientException e) {
-            final OXException oxe = wrap(e);
-            if (!FileStorageCodes.FILE_NOT_FOUND.equals(oxe)) {
-                throw FileStorageCodes.NOT_ELIMINATED.create(oxe);
-            }
-            // Ignore non-existing file(s) as it is about being deleted anyway
+            throw FileStorageCodes.NOT_ELIMINATED.create(wrap(e));
         }
     }
 
