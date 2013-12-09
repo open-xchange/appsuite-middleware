@@ -58,9 +58,11 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -142,6 +144,10 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         return cache.newCacheKey(ctx.getContextId(), userId);
     }
 
+    private final static CacheKey getKey(final int userId, final int contextId, final Cache cache) {
+        return cache.newCacheKey(contextId, userId);
+    }
+
     /**
      * Initializes cache reference
      *
@@ -186,9 +192,17 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         }
     }
 
+    @Override
+    public UserPermissionBits getUserPermissionBits(final int userId, final int contextId) throws OXException {
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return getFallback().getUserPermissionBits(userId, contextId);
+        }
+        return get(cache, contextId, userId);
+    }
 
     @Override
-    public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
+    public UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(userId, ctx);
@@ -197,12 +211,12 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
+    public UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(ctx, users);
         }
-        int[] userIds = new int[users.length];
+        final int[] userIds = new int[users.length];
         for (int i = 0; i < users.length; i++) {
             userIds[i] = users[i].getId();
         }
@@ -211,7 +225,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
+    public UserPermissionBits[] getUserPermissionBits(final Context ctx, final int[] userIds) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(ctx, userIds);
@@ -233,7 +247,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
+    public void removeUserPermissionBits(final int userId, final Context ctx) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
             return;
@@ -242,9 +256,23 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
-    public void saveUserPermissionBits(int permissionBits, int userId, Context ctx) throws OXException {
+    public void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException {
         delegateStorage.saveUserPermissionBits(permissionBits, userId, ctx);
         removeUserPermissionBits(userId, ctx);
+    }
+
+    private UserPermissionBits get(final Cache cache, final int contextId, final int userId) throws OXException {
+        final CacheKey key = getKey(userId, contextId, cache);
+        final Object object = cache.get(key);
+        if (object != null) {
+            return ((UserPermissionBits) object).clone();
+        }
+
+        final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+        if (null == contextService) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
+        }
+        return load(cache, contextService.getContext(contextId), userId);
     }
 
     private UserPermissionBits get(final Cache cache, final Context ctx, final int userId) throws OXException {
