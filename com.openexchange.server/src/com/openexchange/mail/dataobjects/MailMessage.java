@@ -1633,9 +1633,6 @@ public abstract class MailMessage extends MailPart {
     /**
      * Gets the implementation-specific unique ID of this mail in its mail folder. The ID returned by this method is used in storages to
      * refer to a mail.
-     * <p>
-     * <b>Note</b> If ID is numeric, max. 52 bits may be used in returned value which implies a max. allowed value of
-     * <code>4503599627370495</code>.
      *
      * @return The ID of this mail or <code>null</code> if not available.
      */
@@ -1644,9 +1641,6 @@ public abstract class MailMessage extends MailPart {
     /**
      * Sets the implementation-specific unique mail ID of this mail in its mail folder. The ID returned by this method is used in storages
      * to refer to a mail.
-     * <p>
-     * <b>Note</b> If ID is numeric, max. 52 bits may be used in specified value which implies a max. allowed value of
-     * <code>4503599627370495</code>.
      *
      * @param id The mail ID or <code>null</code> to indicate its absence
      */
