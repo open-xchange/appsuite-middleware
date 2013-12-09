@@ -68,16 +68,6 @@ public class ServiceExceptionMessage implements LocalizableStrings {
     /**
      * The required service %1$s is temporary not available. Please try again later.
      */
-    public final static String SERVICE_UNAVAILABLE_MSG = "The required service %1$s is temporary not available. Please try again later.";
-
-    /**
-     * An I/O error occurred
-     */
-    public final static String IO_ERROR_MSG = "An I/O error occurred";
-
-    /**
-     * Service initialization failed
-     */
-    public final static String SERVICE_INITIALIZATION_FAILED_MSG = "Service initialization failed";
+    public final static String SERVICE_UNAVAILABLE_MSG = "A required service is temporarily unavailable. Please try again later.";
 
 }
