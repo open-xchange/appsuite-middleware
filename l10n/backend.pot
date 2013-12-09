@@ -1384,10 +1384,6 @@ msgstr ""
 #. An I/O error occurred: %1$s
 #. * An I/O error occurred: %1$s
 #. An I/O error occurred: %1$s
-#. *
-#. * An I/O error occurred: %1$s
-#.
-#. An I/O error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eventsystem/src/com/openexchange/eventsystem/EventSystemExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:72
@@ -1395,7 +1391,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:106
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ms/src/com/openexchange/ms/MsExceptionMessages.java:66
@@ -2321,13 +2316,9 @@ msgstr ""
 
 #. * The following needed service is missing: \"%1$s\"
 #. The following needed service is missing: "%1$s"
-#. *
-#. * The following needed service is missing: \"%1$s\"
-#.
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -3298,78 +3289,6 @@ msgstr ""
 msgid "Unparseable HTTP response: %1$s"
 msgstr ""
 
-#. *
-#. * MBean registration denied: ManagementAgent is not running.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:71
-msgid "MBean registration denied: ManagementAgent is not running."
-msgstr ""
-
-#. *
-#. * Malformed object name: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:76
-msgid "Malformed object name: %1$s"
-msgstr ""
-
-#. *
-#. * Not compliant MBean: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:81
-msgid "Not compliant MBean: %1$s"
-msgstr ""
-
-#. *
-#. * MBean registration error: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:86
-msgid "MBean registration error: %1$s"
-msgstr ""
-
-#. *
-#. * MBean already exists: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:91
-msgid "MBean already exists: %1$s"
-msgstr ""
-
-#. *
-#. * MBean not found: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:96
-msgid "MBean not found: %1$s"
-msgstr ""
-
-#. *
-#. * Malformed URL: %1$s
-#.
-#. Malformed URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:101
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:69
-msgid "Malformed URL: %1$s"
-msgstr ""
-
-#. *
-#. * Unknown host error: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:111
-msgid "Unknown host error: %1$s"
-msgstr ""
-
-#. *
-#. * Remote error: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:116
-msgid "Remote error: %1$s"
-msgstr ""
-
-#. *
-#. * A JMX connector is already bound to URL %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:121
-msgid "A JMX connector is already bound to URL %1$s."
-msgstr ""
-
 #. Maximum number of messages already stored for client %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:69
 msgid "Maximum number of messages already stored for client %1$s"
@@ -4113,6 +4032,11 @@ msgstr ""
 #. Duplicate proxy registration: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:66
 msgid "Duplicate proxy registration: %1$s"
+msgstr ""
+
+#. Malformed URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:69
+msgid "Malformed URL: %1$s"
 msgstr ""
 
 #. HTTP request to VoipNow server %1$s failed. Status line: %2$s
@@ -8127,24 +8051,6 @@ msgstr ""
 #. Invalid format in search query.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:88
 msgid "Invalid format in search query."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tx/src/com/openexchange/tx/TransactionExceptionMessages.java:61
-msgid ""
-"This transaction could not be fully undone. Some components are probably not "
-"consistent anymore. Run the recovery tool."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tx/src/com/openexchange/tx/TransactionExceptionMessages.java:63
-msgid "Cannot commit transaction to write DB"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tx/src/com/openexchange/tx/TransactionExceptionMessages.java:65
-msgid "Cannot roll back transaction in write DB"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tx/src/com/openexchange/tx/TransactionExceptionMessages.java:67
-msgid "Cannot finish transaction"
 msgstr ""
 
 #. Unified Mail does not support to create folders.
