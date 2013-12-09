@@ -205,8 +205,11 @@ public final class JSONInputStream extends InputStream {
 
         private String replaceSupplementaryCodePoints(final String str) {
             final Matcher m = patternSupplementaryCodePoints.matcher(str);
+            if (!m.find()) {
+                return str;
+            }
             final StringBuffer sb = new StringBuffer(str.length());
-            while (m.find()) {
+            do {
                 int codePoint = Integer.parseInt(m.group(1), 16);
                 if (Character.isSupplementaryCodePoint(codePoint)) {
                     final char[] chars = Character.toChars(codePoint);
@@ -216,7 +219,7 @@ public final class JSONInputStream extends InputStream {
                     }
                     m.appendReplacement(sb, Matcher.quoteReplacement(tmp.toString()));
                 }
-            }
+            } while (m.find());
             m.appendTail(sb);
             return sb.toString();
         }

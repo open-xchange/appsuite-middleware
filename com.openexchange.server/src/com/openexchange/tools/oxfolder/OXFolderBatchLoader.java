@@ -55,6 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.getIN;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TObjectProcedure;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,9 +65,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -203,7 +208,7 @@ public final class OXFolderBatchLoader {
                     // Compose statement
                     final int[] currentIds = com.openexchange.tools.arrays.Arrays.extract(folderIds, i, IN_LIMIT);
                     final String sql = getIN(
-                        "SELECT parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,fuid FROM #TABLE# WHERE cid=? AND fuid IN (",
+                        "SELECT parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,fuid,meta FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
                     stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sql).replaceFirst(table));
                     int pos = 1;
@@ -228,6 +233,18 @@ public final class OXFolderBatchLoader {
                             folderObj.setDefaultFolder(false);
                         } else {
                             folderObj.setDefaultFolder(defaultFolder > 0);
+                        }
+                        {
+                            final InputStream jsonBlobStream = rs.getBinaryStream(13);
+                            if (!rs.wasNull() && null != jsonBlobStream) {
+                                try {
+                                    folderObj.setMeta(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
+                                } catch (final JSONException e) {
+                                    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, Integer.toString(fuid), Integer.toString(ctx.getContextId()));
+                                } finally {
+                                    Streams.close(jsonBlobStream);
+                                }
+                            }
                         }
                         folders.put(fuid, folderObj);
                     }

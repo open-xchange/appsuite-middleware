@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,59 @@
  *
  */
 
-package com.openexchange.drive.management;
+package com.openexchange.events.remote.internal;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
-import com.openexchange.management.ManagementExceptionCode;
-import com.openexchange.management.ManagementService;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ManagementRegisterer}
+ * {@link Services}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
-
-    private final BundleContext context;
-    private final ObjectName objectName;
+public class Services {
 
     /**
-     * Initializes a new {@link ManagementRegisterer}.
-     *
-     * @param context The bundle context
+     * Initializes a new {@link Services}.
      */
-    public ManagementRegisterer(BundleContext context) throws OXException {
+    private Services() {
         super();
-        this.context = context;
-        try {
-            this.objectName = new ObjectName("com.openexchange.drive", "name", "Drive Configuration");
-        } catch (MalformedObjectNameException e) {
-            throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e);
-        }
     }
 
-    @Override
-    public ManagementService addingService(ServiceReference<ManagementService> reference) {
-        ManagementService management = context.getService(reference);
-        try {
-            management.registerMBean(objectName, new DriveConfigMBeanImpl());
-        } catch (OXException e) {
-            LOG.error("Error registering MBean", e);
-        } catch (NotCompliantMBeanException e) {
-            LOG.error("Error registering MBean", e);
-        }
-        return management;
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    public void modifiedService(ServiceReference<ManagementService> reference, ManagementService service) {
-        // Nothing to do.
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
-    @Override
-    public void removedService(ServiceReference<ManagementService> reference, ManagementService service) {
-        try {
-            service.unregisterMBean(objectName);
-        } catch (OXException e) {
-            LOG.error("Error unregistering MBean", e);
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
         }
-        context.ungetService(reference);
+        return service;
     }
 
 }

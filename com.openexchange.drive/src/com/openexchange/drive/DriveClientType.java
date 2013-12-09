@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,73 @@
  *
  */
 
-package com.openexchange.drive.management;
+package com.openexchange.drive;
 
-import java.util.Set;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
+import com.openexchange.java.Strings;
 
 /**
- * {@link DriveConfigMBeanImpl}
+ * {@link DriveClientType}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveConfigMBeanImpl extends StandardMBean implements DriveConfigMBean {
+public enum DriveClientType {
 
     /**
-     * Initializes a new {@link DriveConfigMBeanImpl}.
-     *
-     * @throws NotCompliantMBeanException
+     * An unknown client
      */
-    public DriveConfigMBeanImpl() throws NotCompliantMBeanException {
-        super(DriveConfigMBean.class);
+    UNKNOWN(null),
+
+    /**
+     * The windows desktop client
+     */
+    WINDOWS("OpenXchange.HTTPClient.OXDrive"),
+
+    /**
+     * The Mac OS desktop client
+     */
+    MAC_OS("OSX.OXDrive"),
+
+    /**
+     * The iOS mobile client
+     */
+    IOS("OpenXchange.iosClient.OXDrive"),
+
+    /**
+     * The Android mobile client
+     */
+    ANDROID("ox-client.android.normal.hdpi"),
+    ;
+
+    private String clientString;
+
+    private DriveClientType(String clientString) {
+        this.clientString = clientString;
     }
 
-    @Override
-    public void setDiagnostics(boolean diagnostics) {
-        DriveConfig.getInstance().setDiagnostics(diagnostics);
+    /**
+     * Gets the client string identifier as set by the client, e.g. "OpenXchange.HTTPClient.OXDrive".
+     *
+     * @return The client string
+     */
+    public String getClientString() {
+        return clientString;
     }
 
-    @Override
-    public boolean getDiagnostics() {
-        return DriveConfig.getInstance().isDiagnostics();
-    }
-
-    @Override
-    public Set<String> getDiagnosticsUsers() {
-        return DriveConfig.getInstance().getDiagnosticsUsers();
-    }
-
-    @Override
-    public boolean addDiagnosticsUser(String user) {
-        return DriveConfig.getInstance().addDiagnisticsUser(user);
-    }
-
-    @Override
-    public boolean removeDiagnosticsUser(String user) {
-        return DriveConfig.getInstance().removeDiagnisticsUser(user);
+    /**
+     * Gets the drive client type matching the supplied client string.
+     *
+     * @param clientString The client string to parse
+     * @return The drive client type, or {@link #UNKNOWN} if unknown.
+     */
+    public static DriveClientType parse(String clientString) {
+        if (false == Strings.isEmpty(clientString)) {
+            for (DriveClientType driveClient : DriveClientType.values()) {
+                if (clientString.equals(driveClient.clientString)) {
+                    return driveClient;
+                }
+            }
+        }
+        return UNKNOWN;
     }
 
 }

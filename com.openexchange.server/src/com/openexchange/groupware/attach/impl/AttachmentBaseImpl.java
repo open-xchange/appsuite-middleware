@@ -533,13 +533,28 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         attachment.setCreatedBy(user.getId());
         if (attachment.getId() == NEW) {
             Connection writeCon = null;
+            boolean afterReading = true;
             try {
                 writeCon = getWriteConnection(ctx);
-                attachment.setId(getId(ctx, writeCon));
+
+                // Acquire new identifier dependent on connection's auto-commit flag
+                final int newId;
+                if (writeCon.getAutoCommit()) {
+                    newId = IDGenerator.getId(ctx, Types.ATTACHMENT);
+                }else {
+                    newId = IDGenerator.getId(ctx, Types.ATTACHMENT, writeCon);
+                    afterReading = false;
+                }
+
+                attachment.setId(newId);
             } catch (final SQLException e) {
                 throw AttachmentExceptionCodes.GENERATIING_ID_FAILED.create(e);
             } finally {
-                releaseWriteConnection(ctx, writeCon);
+                if (afterReading) {
+                    releaseWriteConnectionAfterReading(ctx, writeCon);
+                } else {
+                    releaseWriteConnection(ctx, writeCon);
+                }
             }
         }
 
@@ -549,13 +564,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             final String mimetypes = FileTypeMap.getDefaultFileTypeMap().getContentType(attachment.getFilename());
             attachment.setFileMIMEType(mimetypes);
         }
-    }
-
-    private int getId(final Context ctx, final Connection writeCon) throws SQLException {
-        if (writeCon.getAutoCommit()) {
-            return IDGenerator.getId(ctx, Types.ATTACHMENT);
-        }
-        return IDGenerator.getId(ctx, Types.ATTACHMENT, writeCon);
     }
 
     private String saveFile(final InputStream data, final AttachmentMetadata attachment, final Context ctx) throws OXException, OXException {

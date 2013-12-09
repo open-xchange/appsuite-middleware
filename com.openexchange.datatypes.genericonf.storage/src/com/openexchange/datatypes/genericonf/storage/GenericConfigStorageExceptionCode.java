@@ -50,19 +50,20 @@
 package com.openexchange.datatypes.genericonf.storage;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link GenericConfigStorageErrorMessage}
+ * {@link GenericConfigStorageExceptionCode}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public enum GenericConfigStorageErrorMessage implements OXExceptionCode {
+public enum GenericConfigStorageExceptionCode implements DisplayableOXExceptionCode {
 
-    SQLException(CATEGORY_ERROR, 1, GenericConfigurationStorageExceptionMessage.SQL_EXCEPTION_MSG),
-    UnsupportedObjectType(CATEGORY_ERROR, 2, GenericConfigurationStorageExceptionMessage.UNSUPPORTED_OBJECT_TYPE_MSG);
+    SQLException(CATEGORY_ERROR, 1, "A SQL error occurred: %1$s"),
+    UnsupportedObjectType(CATEGORY_ERROR, 2, "Object type is not supported: %1$s");
 
     private Category category;
 
@@ -70,7 +71,7 @@ public enum GenericConfigStorageErrorMessage implements OXExceptionCode {
 
     private String message;
 
-    private GenericConfigStorageErrorMessage(final Category category, final int errorCode, final String message) {
+    private GenericConfigStorageExceptionCode(final Category category, final int errorCode, final String message) {
         this.category = category;
         this.errorCode = errorCode;
         this.message = message;
@@ -129,6 +130,11 @@ public enum GenericConfigStorageErrorMessage implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return OXExceptionStrings.MESSAGE;
     }
 
 }

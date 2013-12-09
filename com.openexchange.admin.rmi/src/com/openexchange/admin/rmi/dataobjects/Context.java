@@ -195,7 +195,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
             return;
         }
         if (this.login_mappings == null) {
-            this.login_mappings = new HashSet<String>();
+            this.login_mappings = new HashSet<String>(4);
         }
         this.login_mappings.add(mapping);
     }
@@ -205,10 +205,10 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
             return;
         }
         if (this.login_mappings == null) {
-            this.login_mappings = new HashSet<String>();
+            this.login_mappings = new HashSet<String>(4);
         }
         for (final String sMapping : mapping) {
-            if (null == sMapping) {
+            if (null != sMapping) {
                 this.login_mappings.add(sMapping);
             }
         }

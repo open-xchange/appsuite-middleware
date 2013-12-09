@@ -56,7 +56,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.dataretention.DataRetentionExceptionMessages;
+import com.openexchange.dataretention.DataRetentionExceptionCodes;
 
 /**
  * {@link CSVDataRetentionConfig} - The configuration for CSV data retention.
@@ -137,11 +137,11 @@ public final class CSVDataRetentionConfig {
             final String directoryStr = configurationService.getProperty("com.openexchange.dataretention.dir", "/var/log/open-xchange").trim();
             directory = new File(directoryStr);
             if (!directory.exists()) {
-                throw DataRetentionExceptionMessages.IO.create("Directory \"" + directoryStr + "\" does not exist.");
+                throw DataRetentionExceptionCodes.IO.create("Directory \"" + directoryStr + "\" does not exist.");
             } else if (!directory.isDirectory()) {
-                throw DataRetentionExceptionMessages.IO.create("Pathname \"" + directoryStr + "\" does not denote a directoy.");
+                throw DataRetentionExceptionCodes.IO.create("Pathname \"" + directoryStr + "\" does not denote a directoy.");
             } else if (!directory.canWrite()) {
-                throw DataRetentionExceptionMessages.IO.create("Directory \"" + directoryStr + "\" does not grant write permission.");
+                throw DataRetentionExceptionCodes.IO.create("Directory \"" + directoryStr + "\" does not grant write permission.");
             }
             if (null != logBuilder) {
                 logBuilder.append("\n\tcom.openexchange.dataretention.dir=").append(directory.getPath());

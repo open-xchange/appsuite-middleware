@@ -47,35 +47,66 @@
  *
  */
 
-package com.openexchange.conversion.servlet;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link ConversionServletExceptionMessage}
+ * {@link AddMetaForOXFolderTable} - Extende folder tables by "meta" JSON BLOB.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ConversionServletExceptionMessage implements LocalizableStrings {
+public class AddMetaForOXFolderTable extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link ConversionServletExceptionMessage}.
+     * Initializes a new {@link AddMetaForOXFolderTable}.
      */
-    private ConversionServletExceptionMessage() {
+    public AddMetaForOXFolderTable() {
         super();
     }
 
-    // A JSON error occurred: %1$s
-    public final static String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int ctxId = params.getContextId();
+        Connection con = Database.getNoTimeout(ctxId, true);
+        boolean rollback = false;
+        try {
+            startTransaction(con);
+            rollback = true;
+            if (!Tools.columnExists(con, "oxfolder_tree", "meta")) {
+                Tools.addColumns(con, "oxfolder_tree", new Column("meta", "BLOB DEFAULT NULL"));
+            }
+            if (!Tools.columnExists(con, "del_oxfolder_tree", "meta")) {
+                Tools.addColumns(con, "del_oxfolder_tree", new Column("meta", "BLOB DEFAULT NULL"));
+            }
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.backNoTimeout(ctxId, true, con);
+        }
+    }
 
-    // Missing parameter %1$s
-    public final static String MISSING_PARAM_MSG = "Missing parameter %1$s";
-
-    // Unsupported value in parameter %1$s: %2$s
-    public final static String UNSUPPORTED_PARAM_MSG = "Unsupported value in parameter %1$s: %2$s";
-
-    // Unsupported method %1$s
-    public final static String UNSUPPORTED_METHOD_MSG = "Unsupported method %1$s";
-
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
+    }
 }

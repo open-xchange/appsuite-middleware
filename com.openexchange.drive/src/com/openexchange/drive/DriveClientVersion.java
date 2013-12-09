@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,76 @@
  *
  */
 
-package com.openexchange.drive.management;
-
-import java.util.Set;
+package com.openexchange.drive;
 
 /**
- * {@link DriveConfigMBean}
+ * {@link DriveClientVersion}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveConfigMBean {
+public class DriveClientVersion implements Comparable<DriveClientVersion> {
 
     /**
-     * Enables or disables diagnostics logging at <code>INFO</code>-level for all users.
-     *
-     * @param diagnostics <code>true</code> to enable the diagnostics log, <code>false</code> to disable it
+     * The version "0".
      */
-    void setDiagnostics(boolean diagnostics);
+    public static final DriveClientVersion VERSION_0 = new DriveClientVersion("0");
+
+    private final String version;
+    private final int[] versionParts;
 
     /**
-     * Gets a value indicating whether diagnostic logging for all users is enabled or not.
+     * Initializes a new {@link DriveClientVersion}.
      *
-     * @return <code>true</code> if diagnostics logging is enabled, <code>false</code>, otherwise
+     * @param version The version string, matching the pattern <code>^[0-9]+(\.[0-9]+)*$</code>.
+     * @throws IllegalArgumentException If the version has an unexpected format
      */
-    boolean getDiagnostics();
+    public DriveClientVersion(String version) throws IllegalArgumentException {
+        super();
+        if (null == version || false == version.matches("^[0-9]+(\\.[0-9]+)*$")) {
+            throw new IllegalArgumentException(version);
+        }
+        this.version = version;
+        String[] parts = version.split("\\.");
+        this.versionParts = new int[parts.length];
+        try {
+            for (int i = 0; i < parts.length; i++) {
+                versionParts[i] = Integer.parseInt(parts[i]);
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(version, e);
+        }
+    }
 
     /**
-     * Gets a list of users where diagnostics logging is enabled.
+     * Gets the version string
      *
-     * @return The users
+     * @return The version string
      */
-    Set<String> getDiagnosticsUsers();
+    public String getVersion() {
+        return version;
+    }
 
-    /**
-     * Adds a user for for diagnostics logging.
-     *
-     * @param user The user in the format <code>username@context</code> or <code>userId@contextId</code>
-     * @return <code>true</code> if the user was added successfully, <code>false</code>, otherwise
-     */
-    boolean addDiagnosticsUser(String user);
+    @Override
+    public int compareTo(DriveClientVersion other) {
+        if (null == other) {
+            return 1;
+        }
+        int maxLength = Math.max(versionParts.length, other.versionParts.length);
+        for (int i = 0; i < maxLength; i++) {
+            int thisPart = i < versionParts.length ? versionParts[i] : 0;
+            int otherPart = i < other.versionParts.length ? other.versionParts[i] : 0;
+            if (thisPart < otherPart) {
+                return -1;
+            } else if (thisPart > otherPart) {
+                return 1;
+            }
+        }
+        return 0;
+    }
 
-    /**
-     * Removes a user from diagnostics logging
-     *
-     * @param user The user to remove
-     * @return <code>true</code> if the user was removed successfully, <code>false</code>, otherwise
-     */
-    boolean removeDiagnosticsUser(String user);
+    @Override
+    public String toString() {
+        return version;
+    }
 
 }

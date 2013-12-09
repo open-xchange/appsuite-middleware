@@ -61,7 +61,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageExceptionCode;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -134,7 +134,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             } catch (final SQLException e) {
             }
             LOG.error(x.getMessage(), x);
-            throw GenericConfigStorageErrorMessage.SQLException.create(x, x.getMessage());
+            throw GenericConfigStorageExceptionCode.SQLException.create(x, x.getMessage());
         } finally {
             tx.close();
             if(connectionHandling) {
@@ -186,7 +186,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 content.put(name, value);
             }
         } catch (final SQLException x) {
-            throw GenericConfigStorageErrorMessage.SQLException.create(x, null == stmt ? x.getMessage() : stmt.toString());
+            throw GenericConfigStorageExceptionCode.SQLException.create(x, null == stmt ? x.getMessage() : stmt.toString());
         } finally {
             if (stmt != null) {
                 try {
@@ -326,7 +326,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
 
         } catch (final SQLException e) {
-            throw GenericConfigStorageErrorMessage.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
+            throw GenericConfigStorageExceptionCode.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
         } finally {
             if(stmt != null) {
                 try {

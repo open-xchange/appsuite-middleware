@@ -68,6 +68,7 @@ public abstract class SystemObject implements Serializable {
      * The map with arbitrary properties.
      */
     protected transient Map<String, Object> map;
+    protected boolean b_map;
 
     private Map<String, Serializable> serializableMap;
 
@@ -93,6 +94,7 @@ public abstract class SystemObject implements Serializable {
         if (null == map) {
             map = new LinkedHashMap<String, Object>(12);
             this.map = map;
+            b_map = true;
         }
         map.put(name, value);
     }
@@ -146,6 +148,24 @@ public abstract class SystemObject implements Serializable {
      */
     public void setMap(final Map<String, ? extends Object> map) {
         this.map = null == map ? null : new LinkedHashMap<String, Object>(map);
+        b_map = true;
+    }
+
+    /**
+     * Removes the map.
+     */
+    public void removeMap() {
+        this.map = null;
+        b_map = false;
+    }
+
+    /**
+     * Checks if this object contains a map.
+     *
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsMap() {
+        return b_map;
     }
 
     /**

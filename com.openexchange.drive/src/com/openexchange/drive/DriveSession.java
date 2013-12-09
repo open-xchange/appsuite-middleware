@@ -122,4 +122,18 @@ public interface DriveSession {
      */
     int getApiVersion();
 
+    /**
+     * Gets the client version.
+     *
+     * @return The client version
+     */
+    DriveClientVersion getClientVersion();
+
+    /**
+     * Gets the client type.
+     *
+     * @return The client type, or {@link DriveClientType#UNKNOWN} if not known
+     */
+    DriveClientType getClientType();
+
 }

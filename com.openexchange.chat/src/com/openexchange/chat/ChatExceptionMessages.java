@@ -59,20 +59,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class ChatExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Method is not supported.
-    public static final String UNSUPPORTED_OPERATION_MSG = "Method is not supported.";
-
     // No account found with identifier "%1$s".
-    public static final String ACCOUNT_NOT_FOUND_MSG = "No account found with identifier \"%1$s\".";
+    public static final String ACCOUNT_NOT_FOUND_MSG = "The account \"%1$s\" was not found.";
 
     // Invalid presence packet. A presence packet provides the status as well as the status message; e.g. "Online" + "At work"
-    public static final String INVALID_PRESENCE_PACKET_MSG = "Invalid presence packet.";
+    public static final String INVALID_PRESENCE_PACKET_MSG = "Invalid presence status.";
 
     // A chat with identifier "%1$s" already exists.
     public static final String CHAT_ALREADY_EXISTS_MSG = "A chat with identifier \"%1$s\" already exists.";
@@ -81,22 +72,22 @@ public final class ChatExceptionMessages implements LocalizableStrings {
     public static final String CHAT_MEMBER_ALREADY_EXISTS_MSG = "Chat member \"%1$s\" already exists in chat \"%2$s\".";
 
     // No chat found with identifier "%1$s".
-    public static final String CHAT_NOT_FOUND_MSG = "No chat found with identifier \"%1$s\".";
+    public static final String CHAT_NOT_FOUND_MSG = "Chat with identifier \"%1$s\" does not exist.";
 
     // Unknown chat service: %1$s
-    public static final String UNKNOWN_CHAT_SERVICE_MSG = "Unknown chat service: %1$s";
+    public static final String UNKNOWN_CHAT_SERVICE_MSG = "The requested chat service \"%1$s\" is unknown.";
 
     // No message found with identifier "%1$s" in chat "%2$s".
-    public static final String MESSAGE_NOT_FOUND_MSG = "No message found with identifier \"%1$s\" in chat \"%2$s\".";
+    public static final String MESSAGE_NOT_FOUND_MSG = "Message with identifier \"%1$s\" does not exist in chat \"%2$s\".";
 
     // No member found with identifier "%1$s".
-    public static final String MEMBER_NOT_FOUND_MSG = "No member found with identifier \"%1$s\".";
+    public static final String MEMBER_NOT_FOUND_MSG = "Member with identified \"%1$s\" does not exist.";
 
     // Invalid conversation identifier: "%1$s"
     public static final String INVALID_CONVERSATION_ID_MSG = "Invalid chat identifier: \"%1$s\"";
 
     // Invalid roster identifier: "%1$s". A roster is the list of chat buddies/contacts that a chat user knows about and about whom he receives frequent updates about their presence/availability.
-    public static final String INVALID_ROSTER_ID_MSG = "Invalid roster identifier: \"%1$s\"";
+    public static final String INVALID_ROSTER_ID_MSG = "The provided roster identifier \"%1$s\" is invalid.";
 
     // Posted message is too long.
     public static final String MESSAGE_TOO_LONG_MSG = "Posted message is too long.";

@@ -50,33 +50,34 @@
 package com.openexchange.capabilities;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link CapabilityExceptionCodes} - Enumeration of all {@link OXException}s known in capability module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum CapabilityExceptionCodes implements OXExceptionCode {
+public enum CapabilityExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(CapabilityExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(CapabilityExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 2),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(CapabilityExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 3),
+    JSON_ERROR("A JSON error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 3),
     /**
-     * A SQL error occurred: %1$s
+     * An SQL error occurred: %1$s
      */
-    SQL_ERROR(CapabilityExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 4);
+    SQL_ERROR("An SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG, CATEGORY_ERROR, 4);
 
     /**
      * The error code prefix for capability module.
@@ -86,12 +87,15 @@ public enum CapabilityExceptionCodes implements OXExceptionCode {
     private final Category category;
 
     private final int detailNumber;
+    
+    private final String displayMessage;
 
     private final String message;
 
-    private CapabilityExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private CapabilityExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
+        this.displayMessage = displayMessage;
         this.category = category;
     }
 
@@ -148,5 +152,13 @@ public enum CapabilityExceptionCodes implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }

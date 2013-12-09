@@ -65,16 +65,14 @@ public class Tracer {
     private static final int MAX_SIZE = 20000;
 
     private final StringAllocator traceLog;
-    private final boolean serverDiagnostics;
 
     /**
      * Initializes a new {@link Tracer}.
      *
      * @param clientDiagnostics Whether to write a diagnostics log or not.
      */
-    public Tracer(Boolean clientDiagnostics, boolean serverDiagnostics) {
+    public Tracer(Boolean clientDiagnostics) {
         super();
-        this.serverDiagnostics = serverDiagnostics;
         this.traceLog = null != clientDiagnostics && clientDiagnostics.booleanValue() ? new StringAllocator() : null;
     }
 
@@ -86,9 +84,7 @@ public class Tracer {
     public void trace(Object message) {
         if (isTraceEnabled()) {
             String msg = String.valueOf(message);
-            if (serverDiagnostics && LOG.isInfoEnabled()) {
-                LOG.info(msg);
-            } else if (LOG.isTraceEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 LOG.trace(msg);
             }
             if (null != traceLog) {
@@ -122,7 +118,7 @@ public class Tracer {
      * @return <code>true</code> if tracing is enabled, <code>false</code>, otherwise
      */
     public boolean isTraceEnabled() {
-        return LOG.isTraceEnabled() || null != traceLog || serverDiagnostics && LOG.isInfoEnabled();
+        return LOG.isTraceEnabled() || null != traceLog;
     }
 
 }

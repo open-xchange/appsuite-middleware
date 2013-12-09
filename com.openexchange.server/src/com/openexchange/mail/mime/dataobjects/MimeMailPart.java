@@ -69,6 +69,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -652,6 +653,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
         if (content instanceof InputStream) {
             return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+        }
+        if (content instanceof String) {
+            return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
         }
         return null;
     }

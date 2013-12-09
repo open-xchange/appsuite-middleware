@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,43 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.storage;
+package com.openexchange.folder.json.services;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 
 /**
- * {@link GenericConfigurationStorageExceptionMessage}
+ * {@link MetaContributors} - Provides access to {@link MetaContributorRegistry} instance.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GenericConfigurationStorageExceptionMessage implements LocalizableStrings {
+public final class MetaContributors {
 
     /**
-     * Initializes a new {@link GenericConfigurationStorageExceptionMessage}.
+     * Initializes a new {@link MetaContributors}.
      */
-    private GenericConfigurationStorageExceptionMessage() {
+    private MetaContributors() {
         super();
     }
 
-    public final static String SQL_EXCEPTION_MSG = "A SQL error occurred: %1$s";
+    private static final AtomicReference<MetaContributorRegistry> REGISTRY_REF = new AtomicReference<MetaContributorRegistry>();
 
-    public final static String UNSUPPORTED_OBJECT_TYPE_MSG = "Object type is not supported: %1$s";
+    /**
+     * Sets the registry
+     *
+     * @param registry The registry to set
+     */
+    public static void setRegistry(final MetaContributorRegistry registry) {
+        REGISTRY_REF.set(registry);
+    }
+
+    /**
+     * Gets the registry
+     *
+     * @return The registry or <code>null</code>
+     */
+    public static MetaContributorRegistry getRegistry() {
+        return REGISTRY_REF.get();
+    }
 
 }

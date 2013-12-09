@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -741,6 +741,7 @@ if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
 fi
 
 # SoftwareChange_Request-1564
+VALUE=""
 [ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
 TOVALUE=$(ox_read_property com.openexchange.hazelcast.group.name /opt/open-xchange/etc/hazelcast.properties)
 if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
@@ -923,6 +924,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Dec 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-09
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-10
 * Tue Dec 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-28
 * Wed Nov 20 2013 Marcus Klein <marcus.klein@open-xchange.com>

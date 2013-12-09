@@ -1,3 +1,30 @@
+* 2013-12-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30145: Have to clear variable in post installation script before using it.
+
+* 2013-12-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29729: Skip filestorage deletion if bucket no longer exists
+ - Fix for bug 30204: Don't try and restore task status if not previously set
+
+* 2013-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29954: Enable support for EAS favorite folder if property "com.openexchange.usm.eas.allow_folder_selection" is set to "true"
+ - Fix for bug 29350: Explicitly check folder permissions, not folder visibility which may also be granted through administer permission
+ - Fix for bug 29631: Return connection with "after-reading" flag if not used for write access
+
+* 2013-12-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30190: Fixed parsing of CLI call
+ - Fix for bug 29729: Ignore possible "404 Not Found" HTTP error if S3 bucket is supposed to be deleted anyway
+ - Fix for bug 27640: Properly decode "Subject" header in JSON MIME representation
+ - Fix for bug 30191: Explicitly specify number of bytes of 'uid' VARCHAR column considered in index
+
+* 2013-12-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30123: Remotely distribute and handle password change event  
+ - Fix for bug 30186: Obfuscate sensitive data on update operation in distributed map  
+
 * 2013-12-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 30154: Don't abort importing Google contacts if no more contact images are allowed to be fetched due to temporary rate limiting

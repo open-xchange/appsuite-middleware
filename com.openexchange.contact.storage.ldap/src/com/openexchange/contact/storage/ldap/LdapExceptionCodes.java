@@ -50,9 +50,10 @@
 package com.openexchange.contact.storage.ldap;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link LdapExceptionCodes}
@@ -61,172 +62,175 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum LdapExceptionCodes implements OXExceptionCode {
+public enum LdapExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * LDAP contacts cannot be deleted
      */
-    DELETE_NOT_POSSIBLE(LdapExceptionMessages.DELETE_NOT_POSSIBLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1),
+    DELETE_NOT_POSSIBLE("LDAP contacts cannot be deleted", Category.CATEGORY_PERMISSION_DENIED, 1,
+        LdapExceptionMessages.DELETE_NOT_POSSIBLE_MSG),
 
     /**
      * An error occured while trying to read an LDAP attribute: %s
      */
-    ERROR_GETTING_ATTRIBUTE(LdapExceptionMessages.ERROR_GETTING_ATTRIBUTE_MSG, Category.CATEGORY_ERROR, 2),
+    ERROR_GETTING_ATTRIBUTE("An error occured while trying to read an LDAP attribute: %s", Category.CATEGORY_ERROR, 2),
 
     /**
      * The given value "%s" is not possible for a sort field
      */
-    SORT_FIELD_NOT_POSSIBLE(LdapExceptionMessages.SORT_FIELD_NOT_POSSIBLE_MSG, Category.CATEGORY_ERROR, 3),
+    SORT_FIELD_NOT_POSSIBLE("The given value \"%s\" is not possible for a sort field", Category.CATEGORY_ERROR, 3),
 
     /**
      * Contacts cannot be inserted in LDAP
      */
-    INSERT_NOT_POSSIBLE(LdapExceptionMessages.INSERT_NOT_POSSIBLE_MSG, Category.CATEGORY_PERMISSION_DENIED, 4),
+    INSERT_NOT_POSSIBLE("Contacts cannot be inserted in LDAP", Category.CATEGORY_PERMISSION_DENIED, 4,
+        LdapExceptionMessages.INSERT_NOT_POSSIBLE_MSG),
 
     /**
      * The folderid object is null. This is an internal error. Please notify Open-Xchange
      */
-    FOLDERID_OBJECT_NULL(LdapExceptionMessages.FOLDERID_OBJECT_NULL_MSG, Category.CATEGORY_ERROR, 5),
+    FOLDERID_OBJECT_NULL("The folderid object is null. This is an internal error. Please notify Open-Xchange.", Category.CATEGORY_ERROR, 5),
 
     /**
      * The search object contains more than one folder id. This is not supported by this implementation
      */
-    TOO_MANY_FOLDERS(LdapExceptionMessages.TOO_MANY_FOLDERS_MSG, Category.CATEGORY_ERROR, 6),
+    TOO_MANY_FOLDERS("The search object contains more than one folder id. This is not supported by this implementation.",
+        Category.CATEGORY_ERROR, 6),
 
     /**
      * The mapping table doesn't contain the string uid %s, so it has never been accessed before
      */
-    NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND(LdapExceptionMessages.NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND_MSG, Category.CATEGORY_ERROR, 7),
+    NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND("The mapping table does not contain the long uid %s i.e., it has never been accessed before",
+        Category.CATEGORY_ERROR, 7),
 
     /**
      * Multi-values are not allowed for date attribute: %s
      */
-    MULTIVALUE_NOT_ALLOWED_DATE(LdapExceptionMessages.MULTIVALUE_NOT_ALLOWED_DATE_MSG, Category.CATEGORY_ERROR, 8),
+    MULTIVALUE_NOT_ALLOWED_DATE("Multi-values are not allowed for date attribute: %s", Category.CATEGORY_ERROR, 8),
 
     /**
      * Multi-values are not allowed for int attribute: %s
      */
-    MULTIVALUE_NOT_ALLOWED_INT(LdapExceptionMessages.MULTIVALUE_NOT_ALLOWED_INT_MSG, Category.CATEGORY_ERROR, 9),
+    MULTIVALUE_NOT_ALLOWED_INT("Multi-values are not allowed for int attribute: %s", Category.CATEGORY_ERROR, 9),
 
     /**
      * Error while trying to create connection to LDAP server: %s
      */
-    INITIAL_LDAP_ERROR(LdapExceptionMessages.INITIAL_LDAP_ERROR_MSG, Category.CATEGORY_ERROR, 10),
+    INITIAL_LDAP_ERROR("Error while trying to create connection to LDAP server: %s", Category.CATEGORY_ERROR, 10,
+        LdapExceptionMessages.INITIAL_LDAP_ERROR_MSG),
 
     /**
      * The LDAP search for the user contains too many results
      */
-    TOO_MANY_USER_RESULTS(LdapExceptionMessages.TOO_MANY_USER_RESULTS_MSG, Category.CATEGORY_ERROR, 11),
+    TOO_MANY_USER_RESULTS("The LDAP search for the user contains too many results", Category.CATEGORY_ERROR, 11,
+        LdapExceptionMessages.TOO_MANY_USER_RESULTS_MSG),
 
     /**
      * The LDAP search for the user object "%s" gave no results
      */
-    NO_USER_RESULTS(LdapExceptionMessages.NO_USER_RESULTS_MSG, Category.CATEGORY_ERROR, 12),
+    NO_USER_RESULTS("The LDAP search for the user object \"%s\" gave no results", Category.CATEGORY_ERROR, 12,
+        LdapExceptionMessages.NO_USER_RESULTS_MSG),
 
     /**
      * An error occurred while trying to get the user object from the database
      */
-    ERROR_GETTING_USER_Object(LdapExceptionMessages.ERROR_GETTING_USER_Object_MSG, Category.CATEGORY_ERROR, 13),
+    ERROR_GETTING_USER_Object("An error occurred while trying to get the user object from the database", Category.CATEGORY_ERROR, 13),
 
     /**
      * The given userLoginSource is not possible: %s
      */
-    GIVEN_USER_LOGIN_SOURCE_NOT_FOUND(LdapExceptionMessages.GIVEN_USER_LOGIN_SOURCE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 14),
+    GIVEN_USER_LOGIN_SOURCE_NOT_FOUND("The given userLoginSource is not possible: %s", Category.CATEGORY_ERROR, 14),
 
     /**
      * The imap login for user "%s" is null
      */
-    IMAP_LOGIN_NULL(LdapExceptionMessages.IMAP_LOGIN_NULL_MSG, Category.CATEGORY_CONFIGURATION, 15),
+    IMAP_LOGIN_NULL("The imap login for user \"%s\" is null", Category.CATEGORY_CONFIGURATION, 15),
 
     /**
      * The primary mail for user "%s" is null
      */
-    PRIMARY_MAIL_NULL(LdapExceptionMessages.PRIMARY_MAIL_NULL_MSG, Category.CATEGORY_CONFIGURATION, 16),
+    PRIMARY_MAIL_NULL("The primary mail for user \"%s\" is null", Category.CATEGORY_CONFIGURATION, 16),
 
     /**
      * The E-Mail address "%s" for distributionentry is invalid
      */
-    MAIL_ADDRESS_DISTRI_INVALID(LdapExceptionMessages.MAIL_ADDRESS_DISTRI_INVALID_MSG, Category.CATEGORY_CONFIGURATION, 17),
+    MAIL_ADDRESS_DISTRI_INVALID("The E-Mail address \"%s\" for distributionentry is invalid", Category.CATEGORY_CONFIGURATION, 17),
 
     /**
      * The contact type "%s" is not known
      */
-    UNKNOWN_CONTACT_TYPE(LdapExceptionMessages.UNKNOWN_CONTACT_TYPE_MSG, Category.CATEGORY_CONFIGURATION, 18),
+    UNKNOWN_CONTACT_TYPE("The contact type \"%s\" is not known", Category.CATEGORY_CONFIGURATION, 18),
 
     /**
      * The attribute "%s" is missing for object "%s"
      */
-    MISSING_ATTRIBUTE(LdapExceptionMessages.MISSING_ATTRIBUTE_MSG, Category.CATEGORY_CONFIGURATION, 19),
+    MISSING_ATTRIBUTE("The attribute \"%s\" is missing for object \"%s\"", Category.CATEGORY_CONFIGURATION, 19),
 
     /**
      * No values mapping table found
      */
-    NO_VALUES_MAPPING_TABLE_FOUND(LdapExceptionMessages.NO_VALUES_MAPPING_TABLE_FOUND_MSG, Category.CATEGORY_ERROR, 20),
+    NO_VALUES_MAPPING_TABLE_FOUND("No values mapping table found", Category.CATEGORY_ERROR, 20),
 
     /**
      * No keys mapping table found
      */
-    NO_KEYS_MAPPING_TABLE_FOUND(LdapExceptionMessages.NO_KEYS_MAPPING_TABLE_FOUND_MSG, Category.CATEGORY_ERROR, 21),
+    NO_KEYS_MAPPING_TABLE_FOUND("No keys mapping table found", Category.CATEGORY_ERROR, 21),
 
     /**
      * An error occurred while trying to get the defaultNamingContext attribute
      */
-    ERROR_GETTING_DEFAULT_NAMING_CONTEXT(LdapExceptionMessages.ERROR_GETTING_DEFAULT_NAMING_CONTEXT_MSG, Category.CATEGORY_ERROR, 22),
+    ERROR_GETTING_DEFAULT_NAMING_CONTEXT("An error occurred while trying to get the defaultNamingContext attribute",
+        Category.CATEGORY_ERROR, 22),
 
     /**
      * The contact object with id "%s" could not be found in folder "%s"
      */
-    CONTACT_NOT_FOUND(LdapExceptionMessages.CONTACT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 23),
+    CONTACT_NOT_FOUND("The contact object with id \"%s\" could not be found in folder \"%s\"", Category.CATEGORY_ERROR, 23),
 
     /**
      * An error occurred: %1$s
      */
-    ERROR(LdapExceptionMessages.ERROR_MSG, Category.CATEGORY_ERROR, 100),
+    ERROR("An error occurred: %s", Category.CATEGORY_ERROR, 100),
 
     /**
      * This storage can't handle context %1$d
      */
-    INVALID_CONTEXT(LdapExceptionMessages.INVALID_CONTEXT_MSG, CATEGORY_ERROR, 101),
+    INVALID_CONTEXT("This storage can't handle context %d", CATEGORY_ERROR, 101),
 
     /**
      * This storage can't handle folder %1$s
      */
-    INVALID_FOLDER(LdapExceptionMessages.INVALID_FOLDER_MSG, CATEGORY_ERROR, 102),
+    INVALID_FOLDER("This storage can't handle folder %s", CATEGORY_ERROR, 102),
 
     /**
      * No mapping for object %1$s, folder %2$s, context %3$d found
      */
-    NO_MAPPED_LDAP_ID(LdapExceptionMessages.NO_MAPPED_LDAP_ID_MSG, CATEGORY_ERROR, 103),
-
-    /**
-     * No mapping for LDAP identifier %1$s found
-     */
-//    NO_MAPPED_OX_ID(LdapExceptionMessages.NO_MAPPED_OX_ID_MSG, CATEGORY_ERROR, 104),
+    NO_MAPPED_LDAP_ID("No mapping for object %s, folder %s, context %d found", CATEGORY_ERROR, 103),
 
     /**
      * The configuration value %1$s is missing
      */
-    MISSING_CONFIG_VALUE(LdapExceptionMessages.MISSING_CONFIG_VALUE_MSG, CATEGORY_CONFIGURATION, 105),
+    MISSING_CONFIG_VALUE("The configuration value %s is missing", CATEGORY_CONFIGURATION, 105),
 
     /**
      * The configuration value %s is wrong or missing
      */
-    WRONG_OR_MISSING_CONFIG_VALUE(LdapExceptionMessages.WRONG_OR_MISSING_CONFIG_VALUE_MSG, CATEGORY_CONFIGURATION, 106),
+    WRONG_OR_MISSING_CONFIG_VALUE("The configuration value %s is wrong or missing", CATEGORY_CONFIGURATION, 106),
 
     /**
      * An internal LDAP error occurred: %1$s
      */
-    LDAP_ERROR(LdapExceptionMessages.LDAP_ERROR_MSG, Category.CATEGORY_ERROR, 107),
+    LDAP_ERROR("An internal LDAP error occurred: %s", Category.CATEGORY_ERROR, 107),
 
     /**
      * Unable to map contact property \"%s\"
      */
-    UNKNOWN_CONTACT_PROPERTY(LdapExceptionMessages.UNKNOWN_CONTACT_PROPERTY_MSG, Category.CATEGORY_CONFIGURATION, 108),
+    UNKNOWN_CONTACT_PROPERTY("Unable to map contact property \"%s\"", Category.CATEGORY_CONFIGURATION, 108),
 
     /**
      * An internal LDAP sort error occurred: %1$s
      */
-    LDAP_SORT_ERROR(LdapExceptionMessages.LDAP_SORT_ERROR_MSG, Category.CATEGORY_ERROR, 109),
+    LDAP_SORT_ERROR("An internal LDAP sort error occurred: %s", Category.CATEGORY_ERROR, 109),
     ;
 
     private static final String PREFIX = "LDAP";
@@ -234,11 +238,17 @@ public enum LdapExceptionCodes implements OXExceptionCode {
     private final Category category;
     private final int number;
     private final String message;
+    private final String displayMessage;
 
-    private LdapExceptionCodes(String message, Category category, int detailNumber) {
+    private LdapExceptionCodes(String message, Category category, int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
+    }
+    
+    private LdapExceptionCodes(String message, Category category, int detailNumber) {
+        this(message, category, detailNumber, null);
     }
 
     @Override
@@ -259,6 +269,11 @@ public enum LdapExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

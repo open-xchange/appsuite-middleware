@@ -99,7 +99,7 @@ public class SyncSession {
     public SyncSession(DriveSession session) {
         super();
         this.session = session;
-        this.tracer = new Tracer(session.isDiagnostics(), DriveConfig.getInstance().isDiagnostics(session.getServerSession()));
+        this.tracer = new Tracer(session.isDiagnostics());
         if (isTraceEnabled()) {
             trace("Creating new sync session for user " + session.getServerSession().getLoginName() + " (" +
                 session.getServerSession().getUserId() + ") in context " + session.getServerSession().getContextId() +

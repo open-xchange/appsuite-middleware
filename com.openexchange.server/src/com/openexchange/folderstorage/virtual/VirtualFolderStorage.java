@@ -67,6 +67,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.concurrent.CallerRunsCompletionService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -100,6 +101,7 @@ import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.folderstorage.virtual.sql.Select;
 import com.openexchange.folderstorage.virtual.sql.Update;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -181,23 +183,38 @@ public final class VirtualFolderStorage implements FolderStorage {
         return folder;
     }
 
-    private static boolean doCheckConsistency() {
-        return false;
+    private static volatile Boolean considerFavoriteFoldersForEAS;
+    private static boolean considerFavoriteFoldersForEAS() {
+        Boolean tmp = considerFavoriteFoldersForEAS;
+        if (null == tmp) {
+            synchronized (VirtualFolderStorage.class) {
+                tmp = considerFavoriteFoldersForEAS;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final boolean defaultValue = false;
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.usm.eas.allow_folder_selection", defaultValue));
+                    considerFavoriteFoldersForEAS = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
     }
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters params) throws OXException {
-        if (!doCheckConsistency()) {
-            return;
-        }
-        if (FOLDER_TREE_EAS.equals(treeId)) {
+        if (considerFavoriteFoldersForEAS() && FOLDER_TREE_EAS.equals(treeId)) {
             final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+            boolean rollback = false;
             try {
                 /*
                  * Default calendar folder
                  */
                 FolderStorage realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, CalendarContentType.getInstance());
                 checkOpenedStorage(realStorage, params, false, openedStorages);
+                rollback = true;
                 String folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, CalendarContentType.getInstance(), PrivateType.getInstance(), params);
                 final MemoryTree tree = MemoryTable.getMemoryTableFor(params.getSession()).getTree(unsignedInt(treeId), params.getSession());
                 if (!tree.containsFolder(folderID)) {
@@ -266,16 +283,15 @@ public final class VirtualFolderStorage implements FolderStorage {
                 for (final FolderStorage folderStorage : openedStorages) {
                     folderStorage.commitTransaction(params);
                 }
-            } catch (final OXException e) {
-                for (final FolderStorage folderStorage : openedStorages) {
-                    folderStorage.rollback(params);
-                }
-                throw e;
+                rollback = false;
             } catch (final RuntimeException e) {
-                for (final FolderStorage folderStorage : openedStorages) {
-                    folderStorage.rollback(params);
-                }
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                if (rollback) {
+                    for (final FolderStorage folderStorage : openedStorages) {
+                        folderStorage.rollback(params);
+                    }
+                }
             }
         }
     }

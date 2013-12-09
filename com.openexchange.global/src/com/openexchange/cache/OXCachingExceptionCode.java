@@ -50,30 +50,31 @@
 package com.openexchange.cache;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for the caching exception
  */
-public enum OXCachingExceptionCode implements OXExceptionCode {
+public enum OXCachingExceptionCode implements DisplayableOXExceptionCode {
     /**
      * A put into the cache failed.
      */
-    FAILED_PUT(OXCachingExceptionMessage.FAILED_PUT_MSG, CATEGORY_ERROR, 1),
+    FAILED_PUT("A put into the cache failed.", CATEGORY_ERROR, 1),
     /**
      * The default element attributes could not be retrieved
      */
-    FAILED_ATTRIBUTE_RETRIEVAL(OXCachingExceptionMessage.FAILED_ATTRIBUTE_RETRIEVAL_MSG, CATEGORY_ERROR, 2),
+    FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", CATEGORY_ERROR, 2),
     /**
      * Remove on cache failed
      */
-    FAILED_REMOVE(OXCachingExceptionMessage.FAILED_REMOVE_MSG, CATEGORY_ERROR, 3),
+    FAILED_REMOVE("Remove on cache failed", CATEGORY_ERROR, 3),
     /**
      * Cache %s could not be initialized due to following error: %s
      */
-    FAILED_INIT(OXCachingExceptionMessage.FAILED_INIT_MSG, CATEGORY_ERROR, 4);
+    FAILED_INIT("Cache %s could not be initialized due to following error: %s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 4);
 
     /**
      * Message of the exception.
@@ -89,6 +90,11 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
      * Detail number of the exception.
      */
     final int detailNumber;
+    
+    /**
+     * Message displayed to the user
+     */
+    private final String displayMessage;
 
     /**
      * Default constructor.
@@ -98,9 +104,14 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
      * @param detailNumber detail number.
      */
     private OXCachingExceptionCode(final String message, final Category category, final int detailNumber) {
+        this(message, null, category, detailNumber);
+    }
+    
+    private OXCachingExceptionCode(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
+        this.displayMessage = (displayMessage == null) ? OXExceptionStrings.MESSAGE_RETRY : displayMessage;
     }
 
     @Override
@@ -156,5 +167,13 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }

@@ -95,6 +95,4 @@ public interface FolderFields extends FolderChildFields {
 
 	public static final String SUBSCR_SUBFLDS = "subscr_subflds";
 
-    public static final String META = "meta";
-
 }

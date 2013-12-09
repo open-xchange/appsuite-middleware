@@ -60,7 +60,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.dataretention.DataRetentionExceptionMessages;
+import com.openexchange.dataretention.DataRetentionExceptionCodes;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.dataretention.csv.CSVFile;
 import com.openexchange.exception.OXException;
@@ -197,15 +197,15 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             Thread.currentThread().interrupt();
         } catch (final CancellationException e) {
             REFERENCE.set(null);
-            throw DataRetentionExceptionMessages.ERROR.create(e, e.getMessage());
+            throw DataRetentionExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             REFERENCE.set(null);
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
-                throw DataRetentionExceptionMessages.IO.create(cause, cause.getMessage());
+                throw DataRetentionExceptionCodes.IO.create(cause, cause.getMessage());
             }
             if (cause instanceof RuntimeException) {
-                throw DataRetentionExceptionMessages.ERROR.create(cause, cause.getMessage());
+                throw DataRetentionExceptionCodes.ERROR.create(cause, cause.getMessage());
             }
             if (cause instanceof Error) {
                 throw (Error) cause;

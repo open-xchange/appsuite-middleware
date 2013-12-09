@@ -60,9 +60,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class TwitterMessagingExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
     // Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.
     public static final String INVALID_ACCOUNT_MSG = "Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.";
 

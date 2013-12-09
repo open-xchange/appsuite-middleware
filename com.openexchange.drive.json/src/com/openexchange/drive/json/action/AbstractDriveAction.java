@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
@@ -111,7 +112,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
         }
         int apiVersion = requestData.containsParameter("apiVersion") ? requestData.getParameter("apiVersion", Integer.class).intValue() : 0;
-        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID, extractHostData(requestData, session), apiVersion);
+        DefaultDriveSession driveSession = new DefaultDriveSession(
+            session, rootFolderID, extractHostData(requestData, session), apiVersion, extractClientVersion(requestData));
         /*
          * extract device name information if present
          */
@@ -153,6 +155,18 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * perform
          */
         return doPerform(requestData, driveSession);
+    }
+
+    private static DriveClientVersion extractClientVersion(AJAXRequestData requestData) throws OXException {
+        String version = requestData.containsParameter("version") ? requestData.getParameter("version") : null;
+        if (Strings.isEmpty(version)) {
+            return DriveClientVersion.VERSION_0;
+        }
+        try {
+            return new DriveClientVersion(version);
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "version", version);
+        }
     }
 
     /**

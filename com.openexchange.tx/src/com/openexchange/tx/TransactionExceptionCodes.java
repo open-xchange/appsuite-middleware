@@ -49,37 +49,36 @@
 
 package com.openexchange.tx;
 
-import static com.openexchange.tx.TransactionExceptionMessages.CANNOT_COMMIT_MSG;
-import static com.openexchange.tx.TransactionExceptionMessages.CANNOT_FINISH_MSG;
-import static com.openexchange.tx.TransactionExceptionMessages.CANNOT_ROLLBACK_MSG;
-import static com.openexchange.tx.TransactionExceptionMessages.NO_COMPLETE_ROLLBACK_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * The error code enumeration for transaction errors.
  */
-public enum TransactionExceptionCodes implements OXExceptionCode {
+public enum TransactionExceptionCodes implements DisplayableOXExceptionCode {
 
     /** This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool! */
-    NO_COMPLETE_ROLLBACK(NO_COMPLETE_ROLLBACK_MSG, Category.CATEGORY_ERROR, 1),
+    NO_COMPLETE_ROLLBACK(
+        "This transaction could not be fully undone. Some components are probably not consistent anymore. Run the recovery tool.",
+        OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1),
     /** Cannot commit transaction to write DB */
-    CANNOT_COMMIT(CANNOT_COMMIT_MSG, Category.CATEGORY_SERVICE_DOWN, 400),
+    CANNOT_COMMIT("Cannot commit transaction to write DB", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 400),
     /** Cannot rollback transaction in write DB */
-    CANNOT_ROLLBACK(CANNOT_ROLLBACK_MSG, Category.CATEGORY_SERVICE_DOWN, 401),
+    CANNOT_ROLLBACK("Cannot roll back transaction in write DB", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 401),
     /** Cannot finish transaction */
-    CANNOT_FINISH(CANNOT_FINISH_MSG, Category.CATEGORY_SERVICE_DOWN, 402);
+    CANNOT_FINISH("Cannot finish transaction", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 402);
 
     private final String message;
-
+    private final String displayMessage;
     private final Category category;
-
     private final int number;
 
-    private TransactionExceptionCodes(final String message, final Category category, final int number) {
+    private TransactionExceptionCodes(final String message, final String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = number;
     }
@@ -97,6 +96,11 @@ public enum TransactionExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

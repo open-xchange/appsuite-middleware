@@ -76,39 +76,39 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * No access to mail folder %1$s
      */
-    public final static String NO_ACCESS_MSG = "No access to mail folder %1$s";
+    public final static String NO_ACCESS_MSG = "You do not have the appropriate permissions to access the mail folder %1$s";
     /**
      * No lookup access to mail folder %1$s
      */
-    public final static String NO_LOOKUP_ACCESS_MSG = "No lookup access to mail folder %1$s";
+    public final static String NO_LOOKUP_ACCESS_MSG = "You do not have the appropriate permissions to lookup mail folder %1$s";
     /**
      * No read access on mail folder %1$s
      */
-    public final static String NO_READ_ACCESS_MSG = "No read access to mail folder %1$s";
+    public final static String NO_READ_ACCESS_MSG = "You do not have the appropriate permissions to read mail folder %1$s";
     /**
      * No delete access on mail folder %1$s
      */
-    public final static String NO_DELETE_ACCESS_MSG = "No delete access to mail folder %1$s";
+    public final static String NO_DELETE_ACCESS_MSG = "You do not have the appropriate permissions to delete mail folder %1$s";
     /**
      * No insert access on mail folder %1$s
      */
-    public final static String NO_INSERT_ACCESS_MSG = "No insert access to mail folder %1$s";
+    public final static String NO_INSERT_ACCESS_MSG = "You do not have the appropriate permissions to insert to mail folder %1$s";
     /**
      * No administer access on mail folder %1$s
      */
-    public final static String NO_ADMINISTER_ACCESS_MSG = "No administer access to mail folder %1$s";
+    public final static String NO_ADMINISTER_ACCESS_MSG = "You do not have the appropriate permissions to administer mail folder %1$s";
     /**
      * No write access to POP3 folder %1$s
      */
-    public final static String NO_WRITE_ACCESS_MSG = "No write access to POP3 folder %1$s";
+    public final static String NO_WRITE_ACCESS_MSG = "You do not have the appropriate permissions to write to POP3 folder %1$s";
     /**
      * No keep-seen access on mail folder %1$s
      */
-    public final static String NO_KEEP_SEEN_ACCESS_MSG = "No keep-seen access to mail folder %1$s";
+    public final static String NO_KEEP_SEEN_ACCESS_MSG = "You do not have the appropriate permissions to keep seen messages in mail folder %1$s";
     /**
      * Folder %1$s does not allow subfolders.
      */
-    public final static String FOLDER_DOES_NOT_HOLD_FOLDERS_MSG = "Folder %1$s does not allow subfolders.";
+    public final static String FOLDER_DOES_NOT_HOLD_FOLDERS_MSG = "You cannot create subfolders in folder %1$s.";
     /**
      * POP3 does not support mail folder creation
      */
@@ -169,11 +169,11 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * Unknown search field: %1$s
      */
-    public final static String UNKNOWN_SEARCH_FIELD_MSG = "Unknown search field: %1$s";
+    public final static String UNKNOWN_SEARCH_FIELD_MSG = "The suppied search field \"%1$s\" is unknown.";
     /**
      * Mail folder %1$s must not be moved to subsequent folder %2$s
      */
-    public final static String NO_MOVE_TO_SUBFLD_MSG = "Mail folder %1$s must not be moved to subsequent folder %2$s";
+    public final static String NO_MOVE_TO_SUBFLD_MSG = "Moving mail folder %1$s to subsequent folder %2$s is not allowed.";
     /**
      * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
      * In that case, please try to empty your deleted items first, or delete smaller messages first.
@@ -182,11 +182,11 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * Missing %1$s folder in mail move operation
      */
-    public final static String MISSING_SOURCE_TARGET_FOLDER_ON_MOVE_MSG = "Missing %1$s folder in mail move operation";
+    public final static String MISSING_SOURCE_TARGET_FOLDER_ON_MOVE_MSG = "Missing %1$s folder in mail move operation. Please provide one and try again.";
     /**
      * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
      */
-    public final static String NO_EQUAL_MOVE_MSG = "Message move aborted for user %1$s. Source and destination folder are equal: %2$s";
+    public final static String NO_EQUAL_MOVE_MSG = "Message move aborted for user %1$s. Source and destination folders are the same: %2$s";
     /**
      * Folder read-only check failed
      */
@@ -202,7 +202,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * Not allowed to open folder %1$s due to missing read access
      */
-    public final static String NO_FOLDER_OPEN_MSG = "Not allowed to open folder %1$s due to missing read access";
+    public final static String NO_FOLDER_OPEN_MSG = "You do not have the appropriate permissions to open folder %1$s due to missing read access";
     /**
      * The raw content's input stream of message %1$s in folder %2$s cannot be read
      */
@@ -214,114 +214,89 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * Versit object %1$s could not be saved
      */
-    public final static String FAILED_VERSIT_SAVE_MSG = "Versit object could not be saved";
+    public final static String FAILED_VERSIT_SAVE_MSG = "Versit object (i.e. vCard or vCalendar) could not be saved";
     /**
      * POP3 server does not support capability "THREAD=REFERENCES"
      */
-    public final static String THREAD_SORT_NOT_SUPPORTED_MSG = "POP3 server does not support capability \"THREAD=REFERENCES\"";
-    /**
-     * A protocol exception occurred during execution of an POP3 request: %1$s
-     */
-    public final static String PROTOCOL_ERROR_MSG = "A protocol exception occurred during execution of a POP3 request: %1$s";
+    public final static String THREAD_SORT_NOT_SUPPORTED_MSG = "Thread sorting is not supported by the server.";
     /**
      * POP3 does not support to move folders.
      */
-    public final static String MOVE_DENIED_MSG = "POP3 does not support to move folders.";
+    public final static String MOVE_DENIED_MSG = "Moving folders is not supported by the server.";
     /**
      * Sort field %1$s is not supported via POP3 SORT command
      */
-    public final static String UNSUPPORTED_SORT_FIELD_MSG = "Sort field %1$s is not supported via POP3 SORT command";
+    public final static String UNSUPPORTED_SORT_FIELD_MSG = "The sort field you supplied is unsupported.";
     /**
      * Missing personal namespace
      */
-    public final static String MISSING_PERSONAL_NAMESPACE_MSG = "Missing personal namespace";
-    /**
-     * Parsing thread-sort string failed: %1$s.
-     */
-    public final static String THREAD_SORT_PARSING_ERROR_MSG = "Parsing thread-sort string failed: %1$s.";
+    public final static String MISSING_PERSONAL_NAMESPACE_MSG = "Missing personal namespace. Please provide one and try again.";
     /**
      * POP3 does not support to create folders.
      */
-    public final static String CREATE_DENIED_MSG = "POP3 does not support to create folders.";
+    public final static String CREATE_DENIED_MSG = "The creation of folders is not supported by the server.";
     /**
      * POP3 does not support to delete folders.
      */
-    public final static String DELETE_DENIED_MSG = "POP3 does not support to delete folders.";
+    public final static String DELETE_DENIED_MSG = "The deletion of folders is not supported by the server.";
     /**
      * POP3 does not support to update folders.
      */
-    public final static String UPDATE_DENIED_MSG = "POP3 does not support to update folders.";
-    /**
-     * A SQL error occurred: %1$s.
-     */
-    public final static String SQL_ERROR_MSG = "A SQL error occurred: %1$s.";
+    public final static String UPDATE_DENIED_MSG = "Updating folders is not supported by the server.";
     /**
      * POP3 does not support to move messages.
      */
-    public final static String MOVE_MSGS_DENIED_MSG = "POP3 does not support to move messages.";
+    public final static String MOVE_MSGS_DENIED_MSG = "Moving messages is not supported by the server.";
     /**
      * POP3 does not support to copy messages.
      */
-    public final static String COPY_MSGS_DENIED_MSG = "POP3 does not support to copy messages.";
+    public final static String COPY_MSGS_DENIED_MSG = "Copying messages is not supported by the server.";
     /**
      * POP3 does not support to append messages.
      */
-    public final static String APPEND_MSGS_DENIED_MSG = "POP3 does not support to append messages.";
+    public final static String APPEND_MSGS_DENIED_MSG = "Appending to messages is not supported by the server.";
     /**
      * POP3 does not support draft messages.
      */
-    public final static String DRAFTS_NOT_SUPPORTED_MSG = "POP3 does not support draft messages.";
+    public final static String DRAFTS_NOT_SUPPORTED_MSG = "Draft messages are not supported by the server.";
     /**
      * Missing POP3 storage name for user %1$s in context %2$s.
      */
-    public final static String MISSING_POP3_STORAGE_NAME_MSG = "Missing POP3 storage name for user %1$s in context %2$s.";
+    public final static String MISSING_POP3_STORAGE_NAME_MSG = "The POP3 storage name is missing for user %1$s. Please provide one and try again.";
     /**
      * Missing POP3 storage for user %1$s in context %2$s.
      */
-    public final static String MISSING_POP3_STORAGE_MSG = "Missing POP3 storage for user %1$s in context %2$s.";
+    public final static String MISSING_POP3_STORAGE_MSG = "The POP3 storage is missing for user %1$s. Please provide one and try again";
     /**
      * POP3 default folder %1$s must not be moved.
      */
-    public final static String NO_DEFAULT_FOLDER_MOVE_MSG = "POP3 default folder %1$s must not be moved.";
+    public final static String NO_DEFAULT_FOLDER_MOVE_MSG = "You are not allowed to move the POP3 default folder %1$s.";
     /**
      * POP3 default folder %1$s must not be renamed.
      */
-    public final static String NO_DEFAULT_FOLDER_RENAME_MSG = "POP3 default folder %1$s must not be renamed.";
-    /**
-     * Inconsistency detected in UIDL map.
-     */
-    public final static String UIDL_INCONSISTENCY_MSG = "Inconsistency detected in UIDL map.";
+    public final static String NO_DEFAULT_FOLDER_RENAME_MSG = "You are not allowed to rename the POP3 default folder %1$s.";
     /**
      * Missing POP3 storage path for user %1$s in context %2$s.
      */
-    public final static String MISSING_PATH_MSG = "Missing POP3 storage path for user %1$s in context %2$s.";
+    public final static String MISSING_PATH_MSG = "The POP3 storage path is missing for user %1$s. Please provide one and try again.";
     /**
      * Illegal move operation.
      */
-    public final static String MOVE_ILLEGAL_MSG = "Illegal move operation.";
+    public final static String MOVE_ILLEGAL_MSG = "The move operation you want to execute is not allowed.";
     /**
      * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s).<br>
      * Error message from server: %5$s
      */
-    public final static String LOGIN_DELAY_MSG = "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s";
+    public final static String LOGIN_DELAY_MSG = "Login delay denies connecting to server %1$s with login %2$s. Error message from server: %5$s";
     /**
      * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
      * Error message from server: %6$s
      */
-    public final static String LOGIN_DELAY2_MSG = "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds. Error message from server: %6$s";
-    /**
-     * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
-     */
-    public final static String MISSING_REQUIRED_CAPABILITY_MSG = "Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).";
+    public final static String LOGIN_DELAY2_MSG = "Login delay denies connecting to server %1$s with login %2$s. Try again in %5$s seconds. Error message from server: %6$s";
     /**
      * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
      */
-    public final static String ILLEGAL_PATH_MSG = "POP3 storage path \"%1$s\" cannot be created for user %2$s in context %3$s.";
-    /**
-     * Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s
-     * (user=%4$s, context=%5$s).
-     */
-    public final static String EXPUNGE_MODE_ONLY_MSG = "Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, context=%5$s).";
+    public final static String ILLEGAL_PATH_MSG = "The POP3 storage path is invalid. POP3 storage path \"%1$s\" cannot be created for user %2$s";
     /**
      * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
      */

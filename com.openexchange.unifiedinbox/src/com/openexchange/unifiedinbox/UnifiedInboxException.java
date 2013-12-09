@@ -50,8 +50,8 @@
 package com.openexchange.unifiedinbox;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -68,52 +68,52 @@ public final class UnifiedInboxException extends OXException {
      */
     private static final long serialVersionUID = -8226676160145457046L;
 
-    public static enum Code implements OXExceptionCode {
+    public static enum Code implements DisplayableOXExceptionCode {
 
         /**
          * Unified Mail does not support to create folders.
          */
-        CREATE_DENIED(UnifiedInboxExceptionMessage.CREATE_DENIED_MSG, Category.CATEGORY_ERROR, 2001),
+        CREATE_DENIED("Unified Mail does not support to create folders.", UnifiedInboxExceptionMessage.CREATE_DENIED_MSG, Category.CATEGORY_ERROR, 2001),
         /**
          * Unified Mail does not support to delete folders.
          */
-        DELETE_DENIED(UnifiedInboxExceptionMessage.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 2002),
+        DELETE_DENIED("Unified Mail does not support to delete folders.", UnifiedInboxExceptionMessage.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 2002),
         /**
          * Unified Mail does not support to update folders.
          */
-        UPDATE_DENIED(UnifiedInboxExceptionMessage.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 2003),
+        UPDATE_DENIED("Unified Mail does not support to update folders.", UnifiedInboxExceptionMessage.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 2003),
         /**
          * Unified Mail does not support to move messages.
          */
-        MOVE_MSGS_DENIED(UnifiedInboxExceptionMessage.MOVE_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2004),
+        MOVE_MSGS_DENIED("Unified Mail does not support to move messages.", UnifiedInboxExceptionMessage.MOVE_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2004),
         /**
          * Unified Mail does not support to copy messages.
          */
-        COPY_MSGS_DENIED(UnifiedInboxExceptionMessage.COPY_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2005),
+        COPY_MSGS_DENIED("Unified Mail does not support to copy messages.", UnifiedInboxExceptionMessage.COPY_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2005),
         /**
          * Append messages failed.
          */
-        APPEND_MSGS_DENIED(UnifiedInboxExceptionMessage.APPEND_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2006),
+        APPEND_MSGS_DENIED("Append messages failed.", UnifiedInboxExceptionMessage.APPEND_MSGS_DENIED_MSG, Category.CATEGORY_ERROR, 2006),
         /**
          * Unified Mail does not support draft messages.
          */
-        DRAFTS_NOT_SUPPORTED(UnifiedInboxExceptionMessage.DRAFTS_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 2007),
+        DRAFTS_NOT_SUPPORTED("Unified Mail does not support draft messages.", UnifiedInboxExceptionMessage.DRAFTS_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 2007),
         /**
          * Unified Mail does not support to move folders.
          */
-        MOVE_DENIED(UnifiedInboxExceptionMessage.MOVE_DENIED_MSG, Category.CATEGORY_ERROR, 2008),
+        MOVE_DENIED("Unified Mail does not support to move folders.", UnifiedInboxExceptionMessage.MOVE_DENIED_MSG, Category.CATEGORY_ERROR, 2008),
         /**
          * Unified Mail does not support mail folder creation
          */
-        FOLDER_CREATION_FAILED(UnifiedInboxExceptionMessage.FOLDER_CREATION_FAILED_MSG, Category.CATEGORY_ERROR, 2009),
+        FOLDER_CREATION_FAILED("Unified Mail does not support mail folder creation", UnifiedInboxExceptionMessage.FOLDER_CREATION_FAILED_MSG, Category.CATEGORY_ERROR, 2009),
         /**
          * Unified Mail does not support to clear INBOX folder.
          */
-        CLEAR_NOT_SUPPORTED(UnifiedInboxExceptionMessage.CLEAR_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 2010),
+        CLEAR_NOT_SUPPORTED("Unified Mail does not support to clear INBOX folder.", UnifiedInboxExceptionMessage.CLEAR_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 2010),
         /**
          * No connection available to access mailbox
          */
-        NOT_CONNECTED(UnifiedInboxExceptionMessage.NOT_CONNECTED_MSG, Category.CATEGORY_ERROR, 2011),
+        NOT_CONNECTED("No connection available to access mailbox", UnifiedInboxExceptionMessage.NOT_CONNECTED_MSG, Category.CATEGORY_ERROR, 2011),
         /**
          * Folder %1$s does not hold messages and is therefore not selectable.
          */
@@ -125,19 +125,19 @@ public final class UnifiedInboxException extends OXException {
         /**
          * Unknown default folder fullname: %1$s.
          */
-        UNKNOWN_DEFAULT_FOLDER_INDEX(UnifiedInboxExceptionMessage.UNKNOWN_DEFAULT_FOLDER_INDEX_MSG, Category.CATEGORY_ERROR, 2012),
+        UNKNOWN_DEFAULT_FOLDER_INDEX("Unknown default folder fullname: %1$s.", UnifiedInboxExceptionMessage.UNKNOWN_DEFAULT_FOLDER_INDEX_MSG, Category.CATEGORY_ERROR, 2012),
         /**
          * Move operation aborted. Source and destination folder are equal.
          */
-        NO_EQUAL_MOVE(UnifiedInboxExceptionMessage.NO_EQUAL_MOVE_MSG, Category.CATEGORY_ERROR, 2013),
+        NO_EQUAL_MOVE("Move operation aborted. Source and destination folder are equal.", UnifiedInboxExceptionMessage.NO_EQUAL_MOVE_MSG, Category.CATEGORY_ERROR, 2013),
         /**
          * Request aborted due to timeout of %1$s %2$s.
          */
-        TIMEOUT(UnifiedInboxExceptionMessage.TIMEOUT_MSG, Category.CATEGORY_ERROR, 2014),
+        TIMEOUT("Request aborted due to timeout of %1$s %2$s.", UnifiedInboxExceptionMessage.TIMEOUT_MSG, Category.CATEGORY_ERROR, 2014),
         /**
          * Invalid destination folder. Don't know where to append the mails.
          */
-        INVALID_DESTINATION_FOLDER(UnifiedInboxExceptionMessage.INVALID_DESTINATION_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 2015),
+        INVALID_DESTINATION_FOLDER("Invalid destination folder. Don't know where to append the mails.", UnifiedInboxExceptionMessage.INVALID_DESTINATION_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 2015),
         ;
 
         private final String message;
@@ -145,13 +145,16 @@ public final class UnifiedInboxException extends OXException {
         private final int detailNumber;
 
         private final Category category;
+        
+        private final String displayMessage;
 
         private final String prefix;
 
-        private Code(final String message, final Category category, final int detailNumber) {
+        private Code(final String message, final String displayMessage, final Category category, final int detailNumber) {
             this.message = message;
             this.detailNumber = detailNumber;
             this.category = category;
+            this.displayMessage = displayMessage;
             prefix = UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.getName();
         }
 
@@ -160,6 +163,7 @@ public final class UnifiedInboxException extends OXException {
             detailNumber = code.getNumber();
             category = code.getCategory();
             prefix = code.getPrefix();
+            displayMessage = code.getDisplayMessage();
         }
 
         private Code(final MimeMailExceptionCode code) {
@@ -167,6 +171,7 @@ public final class UnifiedInboxException extends OXException {
             detailNumber = code.getNumber();
             category = code.getCategory();
             prefix = code.getPrefix();
+            displayMessage = code.getDisplayMessage();
         }
 
         @Override
@@ -222,6 +227,14 @@ public final class UnifiedInboxException extends OXException {
          */
         public OXException create(final Throwable cause, final Object... args) {
             return OXExceptionFactory.getInstance().create(this, cause, args);
+        }
+
+        /* (non-Javadoc)
+         * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+         */
+        @Override
+        public String getDisplayMessage() {
+            return displayMessage;
         }
     }
 
