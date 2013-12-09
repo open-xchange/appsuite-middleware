@@ -741,6 +741,7 @@ if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
 fi
 
 # SoftwareChange_Request-1564
+VALUE=""
 [ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
 TOVALUE=$(ox_read_property com.openexchange.hazelcast.group.name /opt/open-xchange/etc/hazelcast.properties)
 if [ -n "$VALUE" -a -z "$TOVALUE" ]; then

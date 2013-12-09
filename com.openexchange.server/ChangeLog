@@ -1,7 +1,11 @@
+* 2013-12-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30145: Have to clear variable in post installation script before using it.
+
 * 2013-12-09 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29729: Skip filestorage deletion if bucket no longer exists 
-  
+
 * 2013-12-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 29954: Enable support for EAS favorite folder if property "com.openexchange.usm.eas.allow_folder_selection" is set to "true"
