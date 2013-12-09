@@ -2,6 +2,10 @@
 
  - Fix for bug 29729: Skip filestorage deletion if bucket no longer exists 
   
+* 2013-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29954: Enable support for EAS favorite folder if property "com.openexchange.usm.eas.allow_folder_selection" is set to "true"
+
 * 2013-12-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 30190: Fixed parsing of CLI call
