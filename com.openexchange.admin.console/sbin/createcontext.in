@@ -143,6 +143,9 @@ case "${BNAME}" in
     "changedatabase")
     ACTION="util.database.ChangeDatabase"
     ;;
+    "getschemaname")
+    ACTION="context.GetSchemaName"
+    ;;
     "getadminid")
     ACTION="context.GetAdminId"
     ;;
