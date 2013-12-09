@@ -108,7 +108,7 @@ final class POTokenStream {
             initNextToken();
             return element;
         }
-        throw I18NErrorMessages.UNEXPECTED_TOKEN_CONSUME.create(
+        throw I18NExceptionCode.UNEXPECTED_TOKEN_CONSUME.create(
             nextToken.name().toLowerCase(),
             filename,
             Integer.valueOf(line),
@@ -139,7 +139,7 @@ final class POTokenStream {
             while ((c = read()) != -1 && c != '\n') {
                 baos.write(c);
             }
-            throw I18NErrorMessages.UNEXPECTED_TOKEN.create(
+            throw I18NExceptionCode.UNEXPECTED_TOKEN.create(
                 toString(baos.toByteArray()),
                 filename,
                 Integer.valueOf(line - 1),
@@ -155,7 +155,7 @@ final class POTokenStream {
             }
             return b;
         } catch (final IOException e) {
-            throw I18NErrorMessages.IO_EXCEPTION.create(e, filename);
+            throw I18NExceptionCode.IO_EXCEPTION.create(e, filename);
         }
     }
 
@@ -276,7 +276,7 @@ final class POTokenStream {
                 element(Integer.valueOf(number));
             }
         } catch (final NumberFormatException x) {
-            throw I18NErrorMessages.EXPECTED_NUMBER.create(number, filename, Integer.valueOf(line));
+            throw I18NExceptionCode.EXPECTED_NUMBER.create(number, filename, Integer.valueOf(line));
         }
     }
 
@@ -293,7 +293,7 @@ final class POTokenStream {
         for (final char c : characters) {
             final byte readC = read();
             if (readC != c) {
-                throw I18NErrorMessages.MALFORMED_TOKEN.create("" + (char) readC, "" + c, filename, Integer.valueOf(line));
+                throw I18NExceptionCode.MALFORMED_TOKEN.create("" + (char) readC, "" + c, filename, Integer.valueOf(line));
             }
         }
     }

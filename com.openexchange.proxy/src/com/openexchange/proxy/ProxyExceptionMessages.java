@@ -49,6 +49,7 @@
 
 package com.openexchange.proxy;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocalizableStrings;
 
 
@@ -59,29 +60,13 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class ProxyExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // Duplicate proxy registration: %1$s
-    public static final String DUPLICATE_REGISTRATION_MSG = "Duplicate proxy registration: %1$s";
-
-    // Malformed URL: %1$s
-    public static final String MALFORMED_URL_MSG = "Malformed URL: %1$s";
-
-    // HTTP request to VoipNow server %1$s failed. Status line: %2$s
-    public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to VoipNow server %1$s failed. Status line: %2$s";
-
-    // Malformed URI: %1$s
-    public static final String MALFORMED_URI_MSG = "Malformed URI: %1$s";
-
-    // Invalid session identifier: %1$s
-    public static final String INVALID_SESSION_ID_MSG = "Invalid session identifier: %1$s";
-
     /**
      * Initializes a new {@link ProxyExceptionMessages}.
      */
     private ProxyExceptionMessages() {
         super();
     }
+    
+    public final static String PROXY_ERROR_MSG = "Could not load data via proxy.";
 
 }

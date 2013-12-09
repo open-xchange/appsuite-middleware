@@ -50,43 +50,47 @@
 package com.openexchange.passwordchange.servlet;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
-public enum PasswordChangeServletExceptionCode implements OXExceptionCode {
+public enum PasswordChangeServletExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(PasswordChangeServletExceptionMessage.JSON_ERROR_MSG, CATEGORY_ERROR),
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, PasswordChangeServletExceptionMessage.PW_CHANGE_ERROR_MSG),
     /**
      * Invalid locale string: %1$s
      */
-    INVALID_LOCALE_STR(PasswordChangeServletExceptionMessage.INVALID_LOCALE_STR_MSG, CATEGORY_ERROR),
+    INVALID_LOCALE_STR("Invalid locale string: %1$s", CATEGORY_ERROR, PasswordChangeServletExceptionMessage.PW_CHANGE_ERROR_MSG),
     /**
      * Unsupported action %1$s via %2$s request
      */
-    UNSUPPORTED_ACTION(PasswordChangeServletExceptionMessage.UNSUPPORTED_ACTION_MSG, CATEGORY_ERROR),
+    UNSUPPORTED_ACTION("Unsupported action %1$s via %2$s request", CATEGORY_ERROR, PasswordChangeServletExceptionMessage.PW_CHANGE_ERROR_MSG),
     /**
      * Missing parameter %1$s
      */
-    MISSING_PARAM(PasswordChangeServletExceptionMessage.MISSING_PARAM_MSG, CATEGORY_ERROR),
+    MISSING_PARAM("Missing parameter %1$s", CATEGORY_ERROR, PasswordChangeServletExceptionMessage.PW_CHANGE_ERROR_MSG),
     /**
      * Password changed successfully. Please logout and login back again.
      */
-    PW_CHANGE_SUCCEEDED(PasswordChangeServletExceptionMessage.PW_CHANGE_SUCCEEDED_MSG, CATEGORY_WARNING),
+    PW_CHANGE_SUCCEEDED("Password changed successfully. Please logout and login back again.", CATEGORY_WARNING,
+        PasswordChangeServletExceptionMessage.PW_CHANGE_SUCCEEDED_MSG),
 
     ;
 
     private final String message;
     private final int detailNumber;
     private final Category category;
+    private final String displayMessage;
 
-    private PasswordChangeServletExceptionCode(final String message, final Category category) {
+    private PasswordChangeServletExceptionCode(final String message, final Category category, String displayMessage) {
         this.message = message;
         this.detailNumber = ordinal() + 1;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -107,6 +111,11 @@ public enum PasswordChangeServletExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

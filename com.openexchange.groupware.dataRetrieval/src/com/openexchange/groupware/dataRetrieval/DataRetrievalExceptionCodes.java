@@ -50,23 +50,24 @@
 package com.openexchange.groupware.dataRetrieval;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link DataRetrievalExceptionCodes} - Enumeration of all {@link OXException}s.
  *
  * @author francisco.laguna@open-xchange.com
  */
-public enum DataRetrievalExceptionCodes implements OXExceptionCode {
+public enum DataRetrievalExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(DataRetrievalExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
-    UNKNOWN_DATA_PROVIDER(DataRetrievalExceptionMessages.UNKNOWN_DATA_PROVIDER_MSG, Category.CATEGORY_ERROR, 2),
-    MISSING_PARAMETER(DataRetrievalExceptionMessages.MISSING_PARAMETER_MSG, Category.CATEGORY_ERROR, 3);
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
+    UNKNOWN_DATA_PROVIDER("Could not find data provider for id: %1$s", Category.CATEGORY_ERROR, 2, null),
+    MISSING_PARAMETER("Missing parameter: %1$s", Category.CATEGORY_ERROR, 3, null);
     ;
 
     private final Category category;
@@ -74,11 +75,14 @@ public enum DataRetrievalExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private final String displayMessage;
 
-    private DataRetrievalExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private DataRetrievalExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -99,6 +103,11 @@ public enum DataRetrievalExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

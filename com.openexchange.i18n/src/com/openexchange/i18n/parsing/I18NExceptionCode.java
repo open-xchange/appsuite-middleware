@@ -50,20 +50,26 @@
 package com.openexchange.i18n.parsing;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public enum I18NErrorMessages implements OXExceptionCode {
+public enum I18NExceptionCode implements DisplayableOXExceptionCode {
 
-    UNEXPECTED_TOKEN(101, I18NErrorStrings.UNEXPECTED_TOKEN, I18NErrorStrings.CHECK_FILE, CATEGORY_CONFIGURATION),
-    UNEXPECTED_TOKEN_CONSUME(102, I18NErrorStrings.UNEXPECTED_TOKEN, I18NErrorStrings.CHECK_FILE, CATEGORY_CONFIGURATION),
-    EXPECTED_NUMBER(103, I18NErrorStrings.EXPECTED_NUMBER, I18NErrorStrings.CHECK_FILE, CATEGORY_CONFIGURATION),
-    MALFORMED_TOKEN(104, I18NErrorStrings.MALFORMED_TOKEN, I18NErrorStrings.CHECK_FILE, CATEGORY_CONFIGURATION),
-    IO_EXCEPTION(105, I18NErrorStrings.IO_EXCEPTION, I18NErrorStrings.FILE_ACCESS, CATEGORY_CONFIGURATION);
+    UNEXPECTED_TOKEN(101, "Unexpected token %s in .po file %s:%s. Expected one of %s", "Please check that the file is correctly formatted.",
+        CATEGORY_CONFIGURATION),
+    UNEXPECTED_TOKEN_CONSUME(102, "Unexpected token %s in .po file %s:%s. Expected one of %s", "Please check that the file is correctly"
+        + " formatted.", CATEGORY_CONFIGURATION),
+    EXPECTED_NUMBER(103, "Got %s, but expected a number in .po file %s:%s.", "Please check that the file is correctly formatted.",
+        CATEGORY_CONFIGURATION),
+    MALFORMED_TOKEN(104, "Malformed or unsupported token. Got %s but expected %s in .po file %s:%s.", "Please check that the file is"
+        + " correctly formatted.", CATEGORY_CONFIGURATION),
+    IO_EXCEPTION(105, "An I/O error occurred reading .po file %s.", "Please make sure the file is readable by the groupware.",
+        CATEGORY_CONFIGURATION);
 
     private Category category;
 
@@ -73,7 +79,7 @@ public enum I18NErrorMessages implements OXExceptionCode {
 
     private int errorCode;
 
-    private I18NErrorMessages(final int errorCode, final String message, final String help, final Category category) {
+    private I18NExceptionCode(final int errorCode, final String message, final String help, final Category category) {
         this.category = category;
         this.help = help;
         this.message = message;
@@ -93,6 +99,11 @@ public enum I18NErrorMessages implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return OXExceptionStrings.MESSAGE;
     }
 
     @Override
