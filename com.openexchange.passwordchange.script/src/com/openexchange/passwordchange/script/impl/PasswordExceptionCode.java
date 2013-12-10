@@ -51,54 +51,53 @@
 package com.openexchange.passwordchange.script.impl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link PasswordExceptionCode}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum PasswordExceptionCode implements OXExceptionCode {
+public enum PasswordExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Cannot change password for any reason.
      */
-    PASSWORD_FAILED(PasswordExceptionMessage.PASSWORD_FAILED_MSG, CATEGORY_PERMISSION_DENIED, 1),
+    PASSWORD_FAILED("Cannot change password < %s >, see log files for details.", OXExceptionStrings.MESSAGE, CATEGORY_PERMISSION_DENIED, 1),
     /**
      * Cannot change password: %1$s
      */
-    PASSWORD_FAILED_WITH_MSG(PasswordExceptionMessage.PASSWORD_FAILED_WITH_MSG_MSG, CATEGORY_PERMISSION_DENIED, 1),
+    PASSWORD_FAILED_WITH_MSG("Cannot change password: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_PERMISSION_DENIED, 1),
     /**
      * New password too short.
      */
-    PASSWORD_SHORT(PasswordExceptionMessage.PASSWORD_SHORT_MSG, CATEGORY_USER_INPUT, 2),
+    PASSWORD_SHORT("New password is too short.", PasswordExceptionMessage.PASSWORD_SHORT_MSG, CATEGORY_USER_INPUT, 2),
     /**
      * New password too weak.
      */
-    PASSWORD_WEAK(PasswordExceptionMessage.PASSWORD_WEAK_MSG, CATEGORY_USER_INPUT, 3),
+    PASSWORD_WEAK("New password is too weak.", PasswordExceptionMessage.PASSWORD_WEAK_MSG, CATEGORY_USER_INPUT, 3),
     /**
      * User not found.
      */
-    PASSWORD_NOUSER(PasswordExceptionMessage.PASSWORD_NOUSER_MSG, CATEGORY_CONFIGURATION, 4),
+    PASSWORD_NOUSER("Cannot find user.", OXExceptionStrings.MESSAGE, CATEGORY_CONFIGURATION, 4),
     /**
      * User not found.
      */
-    LDAP_ERROR(PasswordExceptionMessage.LDAP_ERROR_MSG, CATEGORY_CONFIGURATION, 5),
-    /**
-     * A database connection cannot be obtained.
-     */
-    NO_CONNECTION(PasswordExceptionMessage.NO_CONNECTION_MSG, CATEGORY_SERVICE_DOWN, 6),
+    LDAP_ERROR("LDAP error.", OXExceptionStrings.MESSAGE, CATEGORY_CONFIGURATION, 5),
 
-    /**
-     * No permission to modify resources in context %1$s
-     */
-    PERMISSION(PasswordExceptionMessage.PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 7);
+    ;
 
     /**
      * Message of the exception.
      */
     private final String message;
+
+    /**
+     * (Display-) Message of the exception.
+     */
+    private final String displayMessage;
 
     /**
      * Category of the exception.
@@ -117,8 +116,9 @@ public enum PasswordExceptionCode implements OXExceptionCode {
      * @param category category.
      * @param detailNumber detail number.
      */
-    private PasswordExceptionCode(final String message, final Category category, final int detailNumber) {
+    private PasswordExceptionCode(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.detailNumber = detailNumber;
     }
@@ -141,6 +141,11 @@ public enum PasswordExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -177,4 +182,5 @@ public enum PasswordExceptionCode implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }
