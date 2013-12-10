@@ -50,7 +50,6 @@
 package com.openexchange.folderstorage.outlook.sql;
 
 import java.sql.PreparedStatement;
-import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
@@ -89,7 +88,7 @@ public final class Utility {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Utility.class);
             if (log.isDebugEnabled()) {
                 final String sql = getSQLString(stmt);
-                log.debug("{}{}Failed SQL:\n\t{}", sql.length(, ) + 16, sql);
+                log.debug("Failed SQL:\n\t{}",  sql);
             }
         }
     }
