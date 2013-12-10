@@ -126,7 +126,7 @@ public final class IMAPSort {
                         seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+                            LOG.debug("IMAP sort took {}msec", (System.currentTimeMillis() - start));
                         }
                     }
                     if ((seqNums == null) || (seqNums.length == 0)) {
@@ -213,7 +213,7 @@ public final class IMAPSort {
                         seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+                            LOG.debug("IMAP sort took {}msec", (System.currentTimeMillis() - start));
                         }
                     }
                     if ((seqNums == null) || (seqNums.length == 0)) {
@@ -225,8 +225,7 @@ public final class IMAPSort {
                     msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, false, true, body).doCommand();
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(seqNums.length).append(" messages took ").append(
-                            (System.currentTimeMillis() - start)).append("msec").toString());
+                        LOG.debug("IMAP fetch for {} messages took {}msec", seqNums.length, (System.currentTimeMillis() - start));
                     }
                     if ((msgs == null) || (msgs.length == 0)) {
                         return EMPTY_MSGS;

@@ -65,8 +65,6 @@ final class ThreadSortParser {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadSortParser.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private final List<ThreadSortNode> threads;
 
     /**
@@ -87,25 +85,18 @@ final class ThreadSortParser {
     }
 
     private void parse(final String threadList, final List<ThreadSortNode> recthreads) throws OXException {
-        final boolean debug = DEBUG;
-        if (debug) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Start parse: ").append(threadList).toString());
-        }
+        LOG.debug("Start parse: {}", threadList);
         final int length = threadList.length();
         if (threadList.charAt(0) == '{') {
             // Now in a thread the thread starts normally with a number.
             final MessageInfo message = getMessageID(threadList);
-            if (debug) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Found message: ").append(message).toString());
-            }
+                LOG.debug("Found message: {}", message);
             final ThreadSortNode actual = new ThreadSortNode(message, -1L);
             recthreads.add(actual);
             // Now thread ends or answers are there.
             final int messageIDLength = message.getSlen();
             if ((length > messageIDLength) && (threadList.charAt(messageIDLength) == ' ')) {
-                if (debug) {
                     LOG.debug("Parsing child threads.");
-                }
                 final List<ThreadSortNode> childThreads = new ArrayList<ThreadSortNode>();
                 parse(threadList.substring(messageIDLength + 1), childThreads);
                 actual.addChildren(childThreads);
@@ -115,27 +106,19 @@ final class ThreadSortParser {
                     "Found unexpected character: " + threadList.charAt(messageIDLength));
             }
         } else if (threadList.charAt(0) == '(') {
-            if (debug) {
                 LOG.debug("Parsing list.");
-            }
             // Parse list of threads.
             int pos = 0;
             do {
-                if (debug) {
-                    LOG.debug(new com.openexchange.java.StringAllocator("Position: ").append(pos).toString());
-                }
+                LOG.debug("Position: {}", pos);
                 final int closingBracket = findMatchingBracket(threadList.substring(pos));
                 if (closingBracket == -1) {
                     throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Closing parenthesis not found.");
                 }
-                if (debug) {
-                    LOG.debug(new com.openexchange.java.StringAllocator("Closing bracket: ").append((pos + closingBracket)).toString());
-                }
+                    LOG.debug("Closing bracket: {}{}", pos, closingBracket);
                 final String subList = threadList.substring(pos + 1, pos + closingBracket);
                 if (subList.charAt(0) == '(') {
-                    if (debug) {
                         LOG.debug("Parsing childs of thread with no parent.");
-                    }
                     final ThreadSortNode emptyParent = new ThreadSortNode(MessageInfo.DUMMY, -1L);
                     recthreads.add(emptyParent);
                     final List<ThreadSortNode> childThreads = new ArrayList<ThreadSortNode>();
@@ -148,9 +131,7 @@ final class ThreadSortParser {
                 }
                 pos += closingBracket + 1;
             } while (pos < length);
-            if (debug) {
-                LOG.debug(new com.openexchange.java.StringAllocator("List: ").append(recthreads).toString());
-            }
+                LOG.debug("List: {}", recthreads);
         } else {
             throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Found unexpected character: " + threadList.charAt(0));
         }

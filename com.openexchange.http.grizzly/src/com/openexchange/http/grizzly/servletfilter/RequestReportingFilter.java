@@ -64,7 +64,6 @@ import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link RequestReportingFilter} - Add incoming requests to the RequestWatcherService so we can track and interrupt long running requests.
@@ -116,9 +115,7 @@ public class RequestReportingFilter implements Filter {
                 final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
                 // Request watcher is enabled but service is missing, bundle not started etc ..
                 if (requestWatcher == null) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(new StringAllocator(RequestWatcherService.class.getSimpleName()).append(" is not available. Unable to watch this request.").toString());
-                    }
+                    LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
                     chain.doFilter(httpServletRequest, httpServletResponse);
                 } else {
                     final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
@@ -127,10 +124,7 @@ public class RequestReportingFilter implements Filter {
                         chain.doFilter(request, response);
 
                         // Debug duration
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(new StringAllocator("Request took ").append(requestRegistryEntry.getAge()).append("ms ").append(" for URL: ").append(
-                                httpServletRequest.getRequestURL()).toString());
-                        }
+                        LOG.debug("Request took {}ms  for URL: {}", requestRegistryEntry.getAge(), httpServletRequest.getRequestURL());
                     } finally {
                         // Remove request from watcher after processing finished
                         requestWatcher.unregisterRequest(requestRegistryEntry);

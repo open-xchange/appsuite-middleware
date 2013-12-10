@@ -166,7 +166,7 @@ final class PreRead<T> {
                     // Nothing to do. Continue with normal work.
                     // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                     Thread.currentThread().interrupt();
-                    LOG.trace(e.getMessage(), e);
+                    LOG.trace("", e);
                 }
             }
             return !elements.isEmpty();

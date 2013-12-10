@@ -392,8 +392,7 @@ public class IMAPDefaultFolderChecker {
             }
         } // End of for loop
         if (DEBUG) {
-            LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
-                System.currentTimeMillis() - start).append("msec").toString());
+            LOG.debug("Default folders check for account {} took {}msec", accountId, System.currentTimeMillis() - start);
         }
         /*
          * Check for modifications

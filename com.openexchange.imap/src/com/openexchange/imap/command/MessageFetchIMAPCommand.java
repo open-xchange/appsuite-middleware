@@ -488,15 +488,13 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
              * Discard corrupt message
              */
             final OXException imapExc = MimeMailException.handleMessagingException(e);
-            LOG.error(new com.openexchange.java.StringAllocator(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
-                imapExc.getMessage()).toString(), imapExc);
+            LOG.error("Message #{} discarded: {}", msg.getMessageNumber(), imapExc.getMessage(), imapExc);
             error = true;
         } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
-            LOG.error(new com.openexchange.java.StringAllocator(128).append("Message #").append(msg.getMessageNumber()).append(" discarded: ").append(
-                e.getMessage()).toString(), e);
+            LOG.error("Message #{} discarded: {}", msg.getMessageNumber(), e.getMessage(), e);
             error = true;
         }
         if (!error) {

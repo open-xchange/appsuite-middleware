@@ -152,8 +152,7 @@ public final class ListLsubCache {
     public static void dropFor(final Session session) {
         MAP.remove(keyFor(session));
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive LIST/LSUB cache for user ").append(session.getUserId()).append(
-                " in context ").append(session.getContextId()).toString());
+            LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", session.getUserId(), session.getContextId());
         }
     }
 

@@ -347,7 +347,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 folderStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error(new StringBuilder("Error while closing IMAP folder storage: ").append(e.getMessage()).toString(), e);
+                LOG.error("Error while closing IMAP folder storage: {}", e.getMessage()).toString(), e));
             } finally {
                 folderStorage = null;
             }
@@ -356,7 +356,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 messageStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error(new StringBuilder("Error while closing IMAP message storage: ").append(e.getMessage()).toString(), e);
+                LOG.error("Error while closing IMAP message storage: {}", e.getMessage()).toString(), e));
             } finally {
                 messageStorage = null;
 
@@ -580,9 +580,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             return true;
         } catch (final OXException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString(), e);
-            }
+            LOG.debug("Ping to IMAP server \"{}\" failed", config.getServer(), e);
             return false;
         }
     }
@@ -680,12 +678,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (!isEmpty(ip)) {
                     clientIp = ip;
                 } else if (DEBUG) {
-                    LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
-                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n").toString());
+                    LOG.debug("\n\n\tMissing client IP in session \"{}\" of user {} in context {}.\n", session.getSessionID(), session.getUserId(), session.getContextId());
                 }
             } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
-                LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
-                    Services.getService(ConfigurationService.class).getProperty("com.openexchange.server.backendRoute")).append("\"\n").toString());
+                LOG.debug("\n\n\tPropagating client IP address disabled on Open-Xchange server \"{}\"\n", Services.getService(ConfigurationService.class).getProperty("com.openexchange.server.backendRoute"));
             }
             /*
              * Get connected store

@@ -125,7 +125,7 @@ public class WebdavIfAction extends AbstractAction {
 		} catch (final IfHeaderParseException e) {
 			//Ignore
 			if (LOG.isTraceEnabled()) { // Added to suppress PMD warning
-				LOG.trace(e.getMessage(), e);
+				LOG.trace("", e);
 			}
 		}
 

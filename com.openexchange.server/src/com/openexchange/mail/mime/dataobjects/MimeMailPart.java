@@ -1137,7 +1137,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         try {
             closeable.close();
         } catch (final IOException e) {
-            LOG.trace(e.getMessage(), e);
+            LOG.trace("", e);
         }
     }
 }

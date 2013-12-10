@@ -393,9 +393,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     /*
                      * Folder not open
                      */
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("IMAP folder's mode could not be checked, because folder is closed. Going to open folder.", e);
-                    }
+                    LOG.debug("IMAP folder's mode could not be checked, because folder is closed. Going to open folder.", e);
                 }
                 /*
                  * Folder is closed here

@@ -593,7 +593,7 @@ public class OXContainerConverter {
                         } catch (final MalformedURLException e) {
                             // Not a valid URL
                             if (LOG.isTraceEnabled()) {
-                                LOG.trace(e.getMessage(), e);
+                                LOG.trace("", e);
                             }
                         }
                     }

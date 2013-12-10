@@ -90,10 +90,6 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpecialUseDefaultFolderChecker.class);
-
-    static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link SpecialUseDefaultFolderChecker}.
      *
@@ -213,8 +209,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
             }
         } // End of for loop
         if (DEBUG) {
-            LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
-                System.currentTimeMillis() - start).append("msec").toString());
+            LOG.debug("Default folders check for account {} took {}msec", accountId, System.currentTimeMillis() - start);
         }
         /*
          * Check for modifications
@@ -380,10 +375,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                         if (isOverQuotaException(e)) {
                             throw e;
                         }
-                        LOG.warn(
-                            new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullName).append(
-                                "\" failed.").toString(),
-                            e);
+                        LOG.warn("Creation of non-existing default IMAP folder \"{}\" failed.", fullName, e);
                         ListLsubCache.clearCache(accountId, session);
                         modified.set(true);
                     }

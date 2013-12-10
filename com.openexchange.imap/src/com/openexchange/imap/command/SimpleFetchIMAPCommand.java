@@ -109,8 +109,6 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SimpleFetchIMAPCommand.class);
 
-    private static final boolean WARN = LOG.isWarnEnabled();
-
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
 
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
@@ -298,9 +296,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 if (null == itemHandler) {
                     itemHandler = getItemHandlerByItem(item);
                     if (null == itemHandler) {
-                        if (WARN) {
-                            LOG.warn("Unknown FETCH item: " + item.getClass().getName());
-                        }
+                        LOG.warn("Unknown FETCH item: " + item.getClass().getName());
                     } else {
                         lastHandlers.add(itemHandler);
                         itemHandler.handleItem(item, mail, LOG);
@@ -320,22 +316,16 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             /*
              * Discard corrupt message
              */
-            if (WARN) {
+            {
                 final OXException imapExc = MimeMailException.handleMessagingException(e);
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(imapExc.getMessage()).toString(),
-                    imapExc);
+                LOG.warn("Message #{} discarded: {}", mail.getSeqnum(), imapExc.getMessage(), imapExc);
             }
             error = true;
         } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
-            if (WARN) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(e.getMessage()).toString(),
-                    e);
-            }
+            LOG.warn("Message #{} discarded: {}", mail.getSeqnum(), e.getMessage(), e);
             error = true;
         }
         if (!error) {

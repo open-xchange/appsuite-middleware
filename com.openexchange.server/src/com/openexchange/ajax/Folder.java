@@ -839,7 +839,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                  * No non-tree-visible public calendar folders due to user configuration
                                  */
                                 if (LOG.isTraceEnabled()) {
-                                    LOG.trace(e.getMessage(), e);
+                                    LOG.trace("", e);
                                 }
                             } else {
                                 throw e;
@@ -870,7 +870,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                  * No non-tree-visible public contact folders due to user configuration
                                  */
                                 if (LOG.isTraceEnabled()) {
-                                    LOG.trace(e.getMessage(), e);
+                                    LOG.trace("", e);
                                 }
                             } else {
                                 throw e;
@@ -901,7 +901,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                  * No non-tree-visible public task folders due to user configuration
                                  */
                                 if (LOG.isTraceEnabled()) {
-                                    LOG.trace(e.getMessage(), e);
+                                    LOG.trace("", e);
                                 }
                             } else {
                                 throw e;

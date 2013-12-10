@@ -232,7 +232,7 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
         int pos = resp.indexOf(COPYUID);
         if (pos < 0) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append("Missing COPYUID response code: ").append(resp).toString());
+                LOG.warn("Missing COPYUID response code: {}", resp);
             }
             return true;
         }
@@ -269,7 +269,7 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
             }
             copyuidResp.fillResponse(uids, retval);
         } else {
-            LOG.error(new com.openexchange.java.StringAllocator(128).append("Invalid COPYUID response: ").append(resp).toString());
+            LOG.error("Invalid COPYUID response: {}", resp);
         }
         proceed = false;
         return true;

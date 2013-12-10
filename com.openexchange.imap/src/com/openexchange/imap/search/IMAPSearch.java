@@ -269,7 +269,7 @@ public final class IMAPSearch {
          * SEARCH CHARSET UTF-8 <one or more search criteria>
          */
         final int[] seqNums = search(term, imapFolder);
-        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP search took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+        LOG.debug("IMAP search took {}msec", (System.currentTimeMillis() - start));
         return seqNums;
     }
 

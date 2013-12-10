@@ -112,8 +112,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageFetchIMAPCommand.class);
 
-    private static final boolean WARN = LOG.isWarnEnabled();
-
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
@@ -307,7 +305,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         try {
             return handleMessage(imapFolder.getMessage(seqNum));
         } catch (final Exception e) {
-            LOG.warn(new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(), e);
+            LOG.warn("Message #{} discarded: {}", seqNum, e.getMessage(), e);
             return null;
         }
     }
@@ -316,7 +314,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         try {
             return handleMessage(imapFolder.getMessageByUID(uid));
         } catch (final Exception e) {
-            LOG.warn(new com.openexchange.java.StringAllocator(128).append("Message uid=").append(uid).append(" discarded: ").append(e.getMessage()).toString(), e);
+            LOG.warn("Message uid={} discarded: {}", uid, e.getMessage(), e);
             return null;
         }
     }
@@ -332,12 +330,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
             return mail;
         } catch (final Exception e) {
-            if (WARN) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator(128).append("Message #").append(message.getMessageNumber()).append(" discarded: ").append(
-                        e.getMessage()).toString(),
-                    e);
-            }
+            LOG.warn("Message #{} discarded: {}", message.getMessageNumber(), e.getMessage(), e);
             return null;
         }
     }
@@ -376,11 +369,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             /*
              * Discard corrupt message
              */
-            if (WARN) {
+            {
                 final OXException imapExc = MimeMailException.handleMessagingException(e);
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(imapExc.getMessage()).toString(),
-                    imapExc);
+                LOG.warn("Message #{} discarded: {}", seqNum, imapExc.getMessage(), imapExc);
             }
             error = true;
             mail = null;
@@ -388,11 +379,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             /*
              * Discard corrupt message
              */
-            if (WARN) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator(128).append("Message #").append(seqNum).append(" discarded: ").append(e.getMessage()).toString(),
-                    e);
-            }
+            LOG.warn("Message #{} discarded: {}", seqNum, e.getMessage(), e);
             error = true;
             mail = null;
         }
@@ -431,9 +418,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             if (null == itemHandler) {
                 itemHandler = getItemHandlerByItem(item);
                 if (null == itemHandler) {
-                    if (WARN) {
-                        LOG.warn("Unknown FETCH item: " + item.getClass().getName());
-                    }
+                    LOG.warn("Unknown FETCH item: " + item.getClass().getName());
                 } else {
                     if (null != lastHandlers) {
                         lastHandlers.add(itemHandler);

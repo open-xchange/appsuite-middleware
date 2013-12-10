@@ -259,7 +259,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 } catch (final OXException e) {
                     if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
                         // Ignore
-                        LOG.trace(e.getMessage(), e);
+                        LOG.trace("", e);
                     } else {
                         throw e;
                     }
@@ -271,7 +271,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 } catch (final OXException e) {
                     if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
                         // Ignore
-                        LOG.trace(e.getMessage(), e);
+                        LOG.trace("", e);
                     } else {
                         throw e;
                     }

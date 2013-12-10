@@ -248,8 +248,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                 MailFolderUtility.prepareFullname(accountId, fullName.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : fullName),
                 session);
             if (INFO_ENABLED) {
-                LOG.info(new StringBuilder(64).append("\n\tNotified new mails in folder \"").append(fullName).append("\" in account ").append(
-                    accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+                LOG.info("\n\tNotified new mails in folder \"{}\" in account {} for user {} in context {}", fullName, accountId, session.getUserId(), session.getContextId());
             }
         } catch (final OXException e) {
             org.slf4j.LoggerFactory.getLogger(IMAPNotifierMessageRecentListener.class).warn("Couldn't notify about possible recent message.", e);
