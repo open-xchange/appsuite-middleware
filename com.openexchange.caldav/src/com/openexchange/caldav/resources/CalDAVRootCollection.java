@@ -135,11 +135,11 @@ public class CalDAVRootCollection extends CommonCollection {
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 if (name.equals(folder.getID())) {
-                    LOG.debug(this.getUrl() + ": found child collection by name '" + name + "'");
+                    LOG.debug("{}: found child collection by name '{}'", this.getUrl(), name);
                     return createCollection(folder);
                 }
             }
-            LOG.debug(this.getUrl() + ": child collection '" + name + "' not found, creating placeholder collection");
+            LOG.debug("{}: child collection '{}' not found, creating placeholder collection", this.getUrl(), name);
             return new UndecidedFolderCollection(factory, constructPathForChildResource(name));
 
         } catch (OXException e) {
@@ -185,13 +185,13 @@ public class CalDAVRootCollection extends CommonCollection {
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 children.add(createCollection(folder, ++calendarOrder));
-                LOG.debug(getUrl() + ": adding folder collection for folder '" + folder.getName() + "' as child resource.");
+                LOG.debug("{}: adding folder collection for folder '{}' as child resource.", getUrl(), folder.getName());
             }
         } catch (OXException e) {
             throw protocolException(e);
         }
 
-        LOG.debug(getUrl() + ": got " + children.size() + " child resources.");
+        LOG.debug("{}: got {} child resources.", getUrl(), children.size());
         return children;
     }
 
@@ -296,7 +296,7 @@ public class CalDAVRootCollection extends CommonCollection {
                 UserizedFolder[] response = pathResponse.getResponse();
                 for (UserizedFolder parentFolder : response) {
                     if (trashFolderId.equals(parentFolder.getID())) {
-                        LOG.debug("Detected folder below trash: " + folder);
+                        LOG.debug("Detected folder below trash: {}", folder);
                         return true;
                     }
                 }

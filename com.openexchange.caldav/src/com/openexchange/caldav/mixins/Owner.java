@@ -83,7 +83,7 @@ public class Owner extends SingleXMLPropertyMixin {
         try {
             owner = collection.getOwner();
         } catch (OXException e) {
-            LOG.warn("error determining owner from folder collection '" + collection.getFolder() + "'", e);
+            LOG.warn("error determining owner from folder collection '{}'", collection.getFolder(), e);
         }
         return null != owner ? "<D:href>/principals/users/" + owner.getLoginInfo() + "</D:href>" : null;
     }

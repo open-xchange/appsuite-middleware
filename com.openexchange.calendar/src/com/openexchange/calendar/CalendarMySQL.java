@@ -884,7 +884,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             }
                         }
                     } catch (final OXException x) {
-                        LOG.error("Can not calculate invalid recurrence pattern for appointment "+oid+":"+c.getContextId(),x);
+                        LOG.error("Can not calculate invalid recurrence pattern for appointment {}:{}", oid, c.getContextId(),x);
                     }
                 } else {
                     fillActiveDates(start, s.getTime(), e.getTime(), activeDates, COLLECTION.exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
@@ -1936,8 +1936,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 pi.setNull(6, 0);
                             } else {
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Missing mandatory email address in participant "
-                                            + participant.getClass().getSimpleName(), new Throwable());
+                                    LOG.debug("Missing mandatory email address in participant {}", participant.getClass().getSimpleName(), new Throwable());
                                 }
                                 throw OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD.create();
                             }
@@ -2246,7 +2245,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                 }
             } else {
-                LOG.warn("Unknown type detected for Participant :" + type);
+                LOG.warn("Unknown type detected for Participant :{}", type);
             }
             if (participant != null && participants != null) {
                 participants.add(participant);
@@ -2310,7 +2309,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                     }
                 } else {
-                    LOG.warn("Unknown type detected for Participant :" + type);
+                    LOG.warn("Unknown type detected for Participant :{}", type);
                 }
                 if (participant != null) {
                     participants.add(participant);
@@ -4128,7 +4127,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (rs.next()) {
                 amount = rs.getInt(1);
             } else {
-                LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
+                LOG.error("Object Not Found: Unable to handle attachment action", new Throwable());
                 throw OXException.notFound("");
             }
             amount += numberOfAttachments;
@@ -4664,7 +4663,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     mdao = FACTORY_REF.get().createAppointmentSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
                 } catch (final OXException e) {
                     if (e.getCode() == OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber()) {
-                        LOG.debug("Unable to access Exception-Master (User-ID:" + uid + "/Folder-ID:" + inFolder + "/Exception-ID:" + cdao.getObjectID() + "/Master-ID" + edao.getRecurrenceID() + ")", e);
+                        LOG.debug("Unable to access Exception-Master (User-ID:{}/Folder-ID:{}/Exception-ID:{}/Master-ID{})", uid, inFolder, cdao.getObjectID(), edao.getRecurrenceID(), e);
                         takeCareOfMaster = false;
                     } else {
                         throw e;

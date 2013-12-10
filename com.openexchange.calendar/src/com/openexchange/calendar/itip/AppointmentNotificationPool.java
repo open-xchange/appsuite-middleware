@@ -127,7 +127,7 @@ public class AppointmentNotificationPool implements
 				tick(item.getContextId(), item.getAppointmentId(), false);
 			}
 		} catch (Throwable t) {
-			LOG.error(t.getMessage(), t);
+			LOG.error("", t);
 		} finally {
 			lock.unlock();
 		}
@@ -234,7 +234,7 @@ public class AppointmentNotificationPool implements
 				drop(contextId, objectID);
 			}
 		} catch (Throwable t) {
-			LOG.error(t.getMessage(), t);
+			LOG.error("", t);
 			drop(contextId, objectID);
 		}
 	}

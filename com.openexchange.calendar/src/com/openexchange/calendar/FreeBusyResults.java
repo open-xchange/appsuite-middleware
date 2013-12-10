@@ -228,7 +228,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                             try {
                                 rrs = recColl.calculateRecurring(cdao, range_start, range_end, 0);
                             } catch (final OXException x) {
-                                LOG.error("Can not load appointment '"+cdao.getTitle()+"' with id "+cdao.getObjectID()+":"+cdao.getContextID()+" due to invalid recurrence pattern", x);
+                                LOG.error("Can not load appointment '{}' with id {}:{} due to invalid recurrence pattern", cdao.getTitle(), cdao.getObjectID(), cdao.getContextID(), x);
                                 recColl.recoverForInvalidPattern(cdao);
                                 seq = -1;
                                 rsNext();
@@ -252,7 +252,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final Exception e) {
-            LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString() , e);
+            LOG.error("FreeBusyResults calculation problem with oid {} / {}", oid, cdao == null ? "" : cdao.toString() , e);
             throw SearchIteratorExceptionCodes.CALCULATION_ERROR.create(e, oid).setPrefix("APP");
         }
         if (ft != 0 && cdao != null) {

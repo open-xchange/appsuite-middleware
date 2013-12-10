@@ -199,7 +199,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             }
             checkForExplicitRemoves(originalAppointment, appointmentToSave);
             if (false == containsChanges(originalAppointment, appointmentToSave)) {
-                LOG.debug("No changes detected in " + appointmentToSave + ", skipping update.");
+                LOG.debug("No changes detected in {}, skipping update.", appointmentToSave);
             } else {
                 getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified, checkPermissions);
                 if (null != appointmentToSave.getLastModified()) {
@@ -214,7 +214,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                  * check if already deleted
                  */
                 if (containsDeleteException(originalAppointment, exceptionToSave.getRecurrenceDatePosition())) {
-                    LOG.debug("Delete exception " + exceptionToSave + " already exists, skipping update.");
+                    LOG.debug("Delete exception {} already exists, skipping update.", exceptionToSave);
                     continue;
                 }
                 Appointment originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
@@ -254,7 +254,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                  * update exception
                  */
                 if (null != originalException && false == containsChanges(originalException, exceptionToSave)) {
-                    LOG.debug("No changes detected in " + exceptionToSave + ", skipping update.");
+                    LOG.debug("No changes detected in {}, skipping update.", exceptionToSave);
                 } else {
                     getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
                     if (null != exceptionToSave.getLastModified()) {
@@ -267,7 +267,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             for (CalendarDataObject deleteExceptionToSave : deleteExceptionsToSave) {
                 if (containsDeleteException(originalAppointment, deleteExceptionToSave.getRecurrenceDatePosition())) {
-                    LOG.debug("Delete exception " + deleteExceptionToSave + " already exists, skipping update.");
+                    LOG.debug("Delete exception {} already exists, skipping update.", deleteExceptionToSave);
                     continue;
                 }
                 Appointment originalException = getMatchingException(originalExceptions, deleteExceptionToSave.getRecurrenceDatePosition());
@@ -644,9 +644,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     CalendarDataObject existingAppointment = getAppointmentInterface().getObjectById(objectID);
                     if (isUpdate(appointmentToSave, existingAppointment) &&
                         PrivateType.getInstance().equals(parent.getFolder().getType())) {
-                        LOG.debug("Considering appointment with UID '" + appointmentToSave.getUid() + "', sequence " +
-                            appointmentToSave.getSequence() + " as update for appointment with object ID " + objectID + ", sequence " +
-                            existingAppointment.getSequence() + ".");
+                        LOG.debug("Considering appointment with UID '{}', sequence {} as update for appointment with object ID {}, sequence {}.", appointmentToSave.getUid(), appointmentToSave.getSequence(), objectID, existingAppointment.getSequence());
                         this.object = existingAppointment;
                         appointmentToSave.setObjectID(objectID);
                         appointmentToSave.removeParentFolderID();

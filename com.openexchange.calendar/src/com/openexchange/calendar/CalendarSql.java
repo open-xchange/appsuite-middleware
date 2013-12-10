@@ -526,7 +526,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
                 // Silently ignore updates on Appointments with an outdated Sequence. OLOX2-Requirement.
                 cdao.setLastModified(edao.getLastModified());
-                LOG.info("Ignored update on Appointment due to outdated sequence: " + edao.getContextID() + "-" + edao.getObjectID() + " (cid-objectId)");
+                LOG.info("Ignored update on Appointment due to outdated sequence: {}-{} (cid-objectId)", edao.getContextID(), edao.getObjectID());
                 return null;
             }
 
@@ -1289,11 +1289,11 @@ public class CalendarSql implements AppointmentSQLInterface {
             CalendarSql.cimp = cimp;
             return cimp;
         } catch(final ClassNotFoundException cnfe) {
-            LOG.error(cnfe.getMessage(), cnfe);
+            LOG.error("", cnfe);
         } catch (final IllegalAccessException iae) {
-            LOG.error(iae.getMessage(), iae);
+            LOG.error("", iae);
         } catch (final InstantiationException ie) {
-            LOG.error(ie.getMessage(), ie);
+            LOG.error("", ie);
         }
         return null;
     }
@@ -1307,18 +1307,18 @@ public class CalendarSql implements AppointmentSQLInterface {
                     classname = default_class;
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Using "+classname+" in CalendarSql");
+                    LOG.debug("Using {} in CalendarSql", classname);
                 }
                 cimp = (CalendarSqlImp) Class.forName(classname).newInstance();
             }
         } catch(final ConfigurationException ce) {
-            LOG.error(ce.getMessage(), ce);
+            LOG.error("", ce);
         } catch(final ClassNotFoundException cnfe) {
-            LOG.error(cnfe.getMessage(), cnfe);
+            LOG.error("", cnfe);
         } catch (final IllegalAccessException iae) {
-            LOG.error(iae.getMessage(), iae);
+            LOG.error("", iae);
         } catch (final InstantiationException ie) {
-            LOG.error(ie.getMessage(), ie);
+            LOG.error("", ie);
         } catch (final OXException e) {
             LOG.error("", e);
         }

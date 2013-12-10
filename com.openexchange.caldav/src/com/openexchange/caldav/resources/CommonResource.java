@@ -113,7 +113,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     }
 
     protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error(this.getUrl() + ": " + t.getMessage(), t);
+        LOG.error("{}: {}", this.getUrl(), t.getMessage(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 
@@ -128,7 +128,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
              * handle by trimming truncated fields
              */
             if (this.trimTruncatedAttributes(e)) {
-                LOG.warn(this.getUrl() + ": " + e.getMessage() + " - trimming fields and trying again.");
+                LOG.warn("{}: {} - trimming fields and trying again.", this.getUrl(), e.getMessage());
                 retry = true;
             }
         } else if ("APP-0093".equals(e.getErrorCode())) {
