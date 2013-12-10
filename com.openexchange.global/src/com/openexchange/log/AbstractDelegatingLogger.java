@@ -426,17 +426,25 @@ public abstract class AbstractDelegatingLogger extends Logger {
     protected abstract void internalLogFormatted(String msg, LogRecord record);
 
     protected String formatMessage(LogRecord record) {
-        String format = record.getMessage();
-        ResourceBundle catalog = record.getResourceBundle();
+        return formatMessage(record.getMessage(), record.getParameters(), record.getResourceBundleName());
+    }
+
+    protected String formatMessage(String msg, Object[] params, String rbname) {
+        return formatMessage(msg, params, loadResourceBundle(rbname));
+    }
+
+    protected String formatMessage(String msg, Object[] params, ResourceBundle rb) {
+        String format = msg;
+        ResourceBundle catalog = rb;
         if (catalog != null) {
             try {
-                format = catalog.getString(record.getMessage());
+                format = catalog.getString(msg);
             } catch (MissingResourceException ex) {
-                format = record.getMessage();
+                format = msg;
             }
         }
         try {
-            Object parameters[] = record.getParameters();
+            Object parameters[] = params;
             if (parameters == null || parameters.length == 0) {
                 return format;
             }
