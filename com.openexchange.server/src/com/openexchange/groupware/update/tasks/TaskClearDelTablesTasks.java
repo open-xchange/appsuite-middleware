@@ -99,7 +99,7 @@ public final class TaskClearDelTablesTasks extends UpdateTaskAdapter {
             connection.setAutoCommit(false);
             LOG.info("Clearing obsolete fields in 'del_task'...");
             int cleared = clearDeletedTasks(connection);
-            LOG.info("Cleared " + cleared + " rows in 'del_task'.");
+            LOG.info("Cleared {} rows in 'del_task'.", cleared);
             connection.commit();
         } catch (SQLException e) {
             rollback(connection);

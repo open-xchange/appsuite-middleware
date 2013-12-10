@@ -128,7 +128,7 @@ public class TaskReminderFolderZero implements UpdateTask {
                  update.add(remind);
              }
         }
-        LOG.info("Fixing " + update.size() + " reminder and removing " + remove.size() + " not fixable reminder.");
+        LOG.info("Fixing {} reminder and removing {} not fixable reminder.", update.size(), remove.size());
         final Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false);
@@ -222,9 +222,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             DBUtils.closeSQLStuff(null, stmt);
         }
         if (retval != update.size()) {
-            LOG.error(String.valueOf(update.size())
-                + " reminder should be changed, but only " + retval
-                + " have been changed.");
+            LOG.error("{} reminder should be changed, but only {} have been changed.", String.valueOf(update.size()), retval);
         }
         return retval;
     }
@@ -251,9 +249,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             DBUtils.closeSQLStuff(null, stmt);
         }
         if (retval != remove.size()) {
-            LOG.error(String.valueOf(remove.size())
-                + " reminder should be removed, but only " + retval
-                + " have been removed.");
+            LOG.error("{} reminder should be removed, but only {} have been removed.", String.valueOf(remove.size()), retval);
         }
         return retval;
 

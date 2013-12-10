@@ -447,7 +447,7 @@ public final class IDGenerator {
                 }
             } catch (final SQLException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: " + stmt);
+                    LOG.debug("SQL Problem: {}", stmt);
                 }
                 throw e;
             } finally {
@@ -477,7 +477,7 @@ public final class IDGenerator {
                 }
             } catch (final SQLException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: " + stmt);
+                    LOG.debug("SQL Problem: {}", stmt);
                 }
                 throw e;
             } finally {
@@ -578,7 +578,7 @@ public final class IDGenerator {
                 }
             } catch (final SQLException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: " + stmt);
+                    LOG.debug("SQL Problem: {}", stmt);
                 }
                 throw e;
             } finally {
@@ -607,7 +607,7 @@ public final class IDGenerator {
                 }
             } catch (final SQLException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: " + stmt);
+                    LOG.debug("SQL Problem: {}", stmt);
                 }
                 throw e;
             } finally {

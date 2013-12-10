@@ -87,7 +87,7 @@ public class AdditionalFolderFieldList {
     }
 
     private void warnAboutCollision(final AdditionalFolderField field) {
-        LOG.warn("Collision in folder fields. Field '" + field.getColumnName() + "' : " + field.getColumnID() + " has already been taken. Ignoring second service.");
+        LOG.warn("Collision in folder fields. Field '{}' : {} has already been taken. Ignoring second service.", field.getColumnName(), field.getColumnID());
     }
 
     /**

@@ -83,7 +83,7 @@ public final class TransportPropertiesInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (started.get()) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         TransportProperties.getInstance().loadProperties();
@@ -93,7 +93,7 @@ public final class TransportPropertiesInit implements Initialization {
     @Override
     public void stop() {
         if (!started.get()) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+            LOG.error("{} cannot be stopped since it has not been started before", this.getClass().getName());
             return;
         }
         TransportProperties.getInstance().resetProperties();

@@ -91,9 +91,7 @@ public class TaskAttachmentListener implements AttachmentListener {
             throw e;
         }
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Increased number of attachments for task "
-                + event.getAttachedId() + " in context " + ctx.getContextId()
-                + " to " + task.getNumberOfAttachments());
+            LOG.trace("Increased number of attachments for task {} in context {} to {}", event.getAttachedId(), ctx.getContextId(), task.getNumberOfAttachments());
         }
         return lastModified.getTime();
     }
@@ -124,9 +122,7 @@ public class TaskAttachmentListener implements AttachmentListener {
             throw e;
         }
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Decreased number of attachments for task "
-                + event.getAttachedId() + " in context " + ctx.getContextId()
-                + " to " + task.getNumberOfAttachments());
+            LOG.trace("Decreased number of attachments for task {} in context {} to {}", event.getAttachedId(), ctx.getContextId(), task.getNumberOfAttachments());
         }
         return lastModified.getTime();
     }

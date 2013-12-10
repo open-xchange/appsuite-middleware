@@ -159,7 +159,7 @@ public class Search {
             throw e;
         }
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Search tasks, all: " + all + ", own: " + own + ", shared: " + shared);
+            LOG.trace("Search tasks, all: {}, own: {}, shared: {}", all, own, shared);
         }
     }
 

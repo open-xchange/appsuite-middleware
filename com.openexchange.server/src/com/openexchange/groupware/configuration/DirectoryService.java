@@ -179,7 +179,7 @@ public final class DirectoryService {
                     try {
                         propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("ldap.properties");
                     } catch (final NullPointerException e) {
-                        LOG.error("Config file ldap.properties is not set in " + "ComfireConfig.");
+                        LOG.error("Config file ldap.properties is not set in ComfireConfig.");
                     }
                     tmp = new Properties();
                     FileInputStream fis = null;
@@ -283,8 +283,7 @@ public final class DirectoryService {
                uri = confValues[3];
             } else {
                if (null == confValues[1]) {
-                   LOG.error("Missing HOST and URI in directory service "
-                       + "configuration.");
+                   LOG.error("Missing HOST and URI in directory service configuration.");
                } else {
                   uri = "ldap://" + confValues[1];
                   if (null != confValues[2]) {
@@ -302,12 +301,10 @@ public final class DirectoryService {
                bindPW = confValues[5];
             }
          } catch (final IOException e) {
-            LOG.error("Error while reading writable directory service "
-                + "configuration.", e);
+            LOG.error("Error while reading writable directory service configuration.", e);
          }
       } else {
-         LOG.error("Cannot read directory service configuration file \""
-            + ldapConfFile.getAbsolutePath() + "\"");
+         LOG.error("Cannot read directory service configuration file \"{}\"", ldapConfFile.getAbsolutePath());
       }
    }
 
@@ -327,8 +324,7 @@ public final class DirectoryService {
                writableURI = confValues[3];
             } else {
                if (null == confValues[1]) {
-                  LOG.error("Missing HOST and URI in directory service "
-                      + "configuration.");
+                  LOG.error("Missing HOST and URI in directory service configuration.");
                } else {
                   writableURI = "ldap://" + confValues[1];
                   if (null != confValues[2]) {
@@ -337,8 +333,7 @@ public final class DirectoryService {
                }
             }
          } catch (final IOException e) {
-            LOG.error("Error while reading writable directory service "
-                + "configuration.", e);
+            LOG.error("Error while reading writable directory service configuration.", e);
          }
       } else {
          loadLdapConf();

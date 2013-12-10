@@ -99,7 +99,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                         mac.clearUserEntries(session);
                         // AttachmentTokenRegistry.getInstance().dropFor(session);
                     } catch (final OXException e) {
-                        LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
+                        LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
                     }
                 }
             }
@@ -119,7 +119,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                 mac.clearUserEntries(session);
                 // AttachmentTokenRegistry.getInstance().dropFor(session);
             } catch (final OXException e) {
-                LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
+                LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
             }
         }
     }

@@ -97,7 +97,7 @@ public final class InfostoreExtendFilenameTitleAndFilesizeTask extends UpdateTas
     @Override
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(InfostoreExtendFilenameTitleAndFilesizeTask.class);
-        log.info("Performing update task " + InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName());
+        log.info("Performing update task {}", InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName());
         Column[] colums = {
             new Column("title", "varchar(767)"),
             new Column("filename", "varchar(767)"),
@@ -118,7 +118,7 @@ public final class InfostoreExtendFilenameTitleAndFilesizeTask extends UpdateTas
             autocommit(connnection);
             Database.backNoTimeout(params.getContextId(), true, connnection);
         }
-        log.info(InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName() + " successfully performed.");
+        log.info("{} successfully performed.", InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName());
     }
 
 }

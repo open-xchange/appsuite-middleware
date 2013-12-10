@@ -82,7 +82,7 @@ public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer
         }
         final Object registrationName = reference.getProperty("name");
         if (null == registrationName) {
-            LOG.error("Missing registration name in spam handler service: " + addedService.getClass().getName());
+            LOG.error("Missing registration name in spam handler service: {}", addedService.getClass().getName());
             return addedService;
         }
         /*

@@ -1421,7 +1421,7 @@ public final class MimeMessageConverter {
             if (filler == null) {
                 if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
                     if (DEBUG) {
-                        LOG.debug("Ignoring mail field " + field);
+                        LOG.debug("Ignoring mail field {}", field);
                     }
                     fillers[i] = null;
                 } else {
@@ -1819,7 +1819,7 @@ public final class MimeMessageConverter {
                     };
                 } else if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
                     if (DEBUG) {
-                        LOG.debug("Ignoring mail field " + field);
+                        LOG.debug("Ignoring mail field {}", field);
                     }
                     fillers[i] = null;
                 } else {
@@ -2944,7 +2944,7 @@ public final class MimeMessageConverter {
                 priority = Integer.parseInt(tmp[0]);
             } catch (final NumberFormatException nfe) {
                 if (DEBUG) {
-                    LOG.debug("Assuming priority NORMAL due to strange X-Priority header: " + priorityStr);
+                    LOG.debug("Assuming priority NORMAL due to strange X-Priority header: {}", priorityStr);
                 }
                 priority = MailMessage.PRIORITY_NORMAL;
             }
@@ -2969,7 +2969,7 @@ public final class MimeMessageConverter {
                 priority = MailMessage.PRIORITY_HIGHEST;
             } else {
                 if (DEBUG) {
-                    LOG.debug("Assuming priority NORMAL due to strange Importance header: " + importance);
+                    LOG.debug("Assuming priority NORMAL due to strange Importance header: {}", importance);
                 }
                 priority = MailMessage.PRIORITY_NORMAL;
             }

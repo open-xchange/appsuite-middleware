@@ -83,7 +83,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
         }
         final Object protocol = reference.getProperty("protocol");
         if (null == protocol) {
-            LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+            LOG.error("Missing protocol in mail provider service: {}", addedService.getClass().getName());
             context.ungetService(reference);
             return null;
         }

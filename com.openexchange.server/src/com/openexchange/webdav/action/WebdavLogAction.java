@@ -120,12 +120,12 @@ public class WebdavLogAction extends AbstractAction {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString(),x);
 			} else if(LOG.isErrorEnabled() && x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
-				LOG.error("The request: "+b.toString()+" caused an internal server error: "+x.getMessage(),x);
+				LOG.error("The request: {} caused an internal server error: {}", b, x.getMessage(),x);
 			}
 			throw x;
 		} catch (final RuntimeException x) {
 			if (LOG.isErrorEnabled()) {
-				LOG.error("RuntimeException In WebDAV for request: "+b.toString(),x);
+				LOG.error("RuntimeException In WebDAV for request: {}", b,x);
 			}
 			throw x;
 		}

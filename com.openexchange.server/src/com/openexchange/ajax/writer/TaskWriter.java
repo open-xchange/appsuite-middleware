@@ -133,7 +133,7 @@ public class TaskWriter extends CalendarWriter {
             writeValue(task.getAlarm(), tz, json);
             break;
         default:
-            LOG.warn("Column " + column + " is unknown for tasks.");
+            LOG.warn("Column {} is unknown for tasks.", column);
         }
     }
 

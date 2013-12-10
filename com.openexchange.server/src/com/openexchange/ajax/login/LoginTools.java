@@ -270,7 +270,7 @@ public final class LoginTools {
         if (conf.isInsecure()) {
             String oldIP = session.getLocalIp();
             if (null != newIP && !newIP.equals(oldIP)) {
-                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + ", old ip: " + oldIP + ", new ip: " + newIP);
+                LOG.info("Updating sessions IP address. authID: {}, sessionID: {}, old ip: {}, new ip: {}", session.getAuthId(), session.getSessionID(), oldIP, newIP);
                 session.setLocalIp(newIP);
             }
         }

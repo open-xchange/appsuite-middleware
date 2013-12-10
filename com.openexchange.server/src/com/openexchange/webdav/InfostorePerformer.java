@@ -337,7 +337,7 @@ public final class InfostorePerformer implements SessionHolder {
             session.set(sess);
             BehaviourLookup.getInstance().setRequest(webdavRequest);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
+                LOG.debug("Executing {}", action);
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {

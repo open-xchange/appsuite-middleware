@@ -484,7 +484,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                 folderStorage.restore(realTreeId, folderId, storageParameters);
                             } else {
                                 deleteFolder(treeId, folderId, storageParameters, isDatabaseFolder(folderId), memoryTable);
-                                LOG.warn("Deleted absent folder '" + folderId + "' from virtual folder tree as there is no real counterpart", new Throwable());
+                                LOG.warn("Deleted absent folder '{}' from virtual folder tree as there is no real counterpart", folderId, new Throwable());
                             }
                         } else if (isDatabaseFolder(folderId)) {
                             final String parentId = memoryTree.getParentOf(folderId);
@@ -502,9 +502,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                         }
                     } catch (final OXException oxe) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, oxe);
+                            LOG.warn("Checking consistency failed for folder {} in tree {}", folderId, treeId, oxe);
                         } else {
-                            LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ":\n" + oxe.getMessage());
+                            LOG.warn("Checking consistency failed for folder {} in tree {}:\n{}", folderId, treeId, oxe.getMessage());
                         }
                     }
                 }
@@ -517,18 +517,18 @@ public final class OutlookFolderStorage implements FolderStorage {
                     folderStorage.rollback(storageParameters);
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.warn("Checking consistency failed in tree " + treeId, e);
+                    LOG.warn("Checking consistency failed in tree {}", treeId, e);
                 } else {
-                    LOG.warn("Checking consistency failed in tree " + treeId + ":\n" + e.getMessage());
+                    LOG.warn("Checking consistency failed in tree {}:\n{}", treeId, e.getMessage());
                 }
             } catch (final RuntimeException e) {
                 for (final FolderStorage folderStorage : storages) {
                     folderStorage.rollback(storageParameters);
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.warn("Checking consistency failed for in tree " + treeId, e);
+                    LOG.warn("Checking consistency failed for in tree {}", treeId, e);
                 } else {
-                    LOG.warn("Checking consistency failed for in tree " + treeId + ":\n" + e.getMessage());
+                    LOG.warn("Checking consistency failed for in tree {}:\n{}", treeId, e.getMessage());
                 }
             }
         }

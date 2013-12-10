@@ -484,7 +484,7 @@ public final class vcard extends PermissionServlet {
                         }
                     } catch (final OXException exc) {
                         if (exc.isNotFound()) {
-                            LOG.debug("object was already deleted on server: " + object_id, exc);
+                            LOG.debug("object was already deleted on server: {}", object_id, exc);
                         } else {
                             throw exc;
                         }
@@ -508,7 +508,7 @@ public final class vcard extends PermissionServlet {
                         			timestamp);
                         } catch (final OXException exc) {
                             if (exc.isNotFound()) {
-                                LOG.debug("object was already deleted on server: " + object_id, exc);
+                                LOG.debug("object was already deleted on server: {}", object_id, exc);
                             } else {
                                 throw exc;
                             }

@@ -79,7 +79,7 @@ public abstract class AbstractConfigWrapper {
 			try {
 				return Integer.parseInt(tmp);
 			} catch (final NumberFormatException ex) {
-				LOG.warn("property no parsable: " + name + ':' + value);
+				LOG.warn("property no parsable: {}{}{}", name, ':', value);
 			}
 		}
 		return value;
@@ -103,7 +103,7 @@ public abstract class AbstractConfigWrapper {
 				try {
 					ports[a] = Integer.parseInt(s[a]);
 				} catch (final NumberFormatException ex) {
-					LOG.warn("port in port range no parsable: " + s[a]);
+					LOG.warn("port in port range no parsable: {}", s[a]);
 				}
 			}
 

@@ -101,7 +101,7 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
             try {
                 tmp = ServerConfig.getInt(ServerConfig.Property.MAX_UPLOAD_SIZE);
             } catch (final Exception e) {
-                LOG.warn(e.getMessage() + " Using no upload restrictions as fallback.", e);
+                LOG.warn("{} Using no upload restrictions as fallback.", e.getMessage(), e);
                 tmp = 0;
             }
             this.uploadQuota = tmp;

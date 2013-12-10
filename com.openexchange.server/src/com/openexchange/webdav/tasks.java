@@ -148,7 +148,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                 break;
             default:
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: " + method);
+                    LOG.debug("invalid method: {}", method);
                 }
             }
         } else {

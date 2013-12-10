@@ -140,12 +140,12 @@ public final class DuplicateCleaner {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
-                    LOG.warn("Deleting folder "+folderId+" failed for tree " + treeId, e);
+                    LOG.warn("Deleting folder {} failed for tree {}", folderId, treeId, e);
                 } catch (final Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
-                    LOG.warn("Deleting folder "+folderId+" failed for tree " + treeId, e);
+                    LOG.warn("Deleting folder {} failed for tree {}", folderId, treeId, e);
                 }
             }
         }

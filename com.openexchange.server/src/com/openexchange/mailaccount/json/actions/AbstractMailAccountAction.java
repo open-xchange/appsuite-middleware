@@ -337,7 +337,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
         if (null == mailProvider) {
             if (DEBUG) {
-                LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
+                LOG.debug("Validating mail account failed. No mail provider found for URL: {}", mailServerURL);
             }
             return null;
         }

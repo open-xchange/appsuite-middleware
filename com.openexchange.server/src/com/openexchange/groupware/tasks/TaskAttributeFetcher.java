@@ -497,7 +497,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("No getter for field: " + attributeName);
+                LOG.info("No getter for field: {}", attributeName);
             }
             return null;
         }

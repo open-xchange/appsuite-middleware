@@ -377,7 +377,7 @@ public final class ical extends PermissionServlet {
     // content_type = req.getContentType();
     //
     // if (LOG.isDebugEnabled()) {
-    // LOG.debug("read ical content_type: " + content_type);
+    // LOG.debug("read ical content_type: {}", content_type);
     // }
     //
     // calendarfolder_id = getCalendarFolderID(req);
@@ -582,7 +582,7 @@ public final class ical extends PermissionServlet {
     //
     // LOG.debug("STATUS: OK");
     // } else {
-    // LOG.warn("invalid versit object: " + vo.name);
+    // LOG.warn("invalid versit object: {}", vo.name);
     // }
     // } catch (final OXObjectNotFoundException exc) {
     // LOG.debug("object was already delete", exc);
@@ -894,7 +894,7 @@ public final class ical extends PermissionServlet {
      * principal.getId()); ps.setLong(2, context.getContextId()); rs = ps.executeQuery(); while (rs.next()) { final String client_id =
      * rs.getString(2); final int target_id = rs.getInt(3); final int module = rs.getInt(4); switch (module) { case Types.APPOINTMENT:
      * mapping.addAppointment(client_id, target_id); break; case Types.TASK: mapping.addTask(client_id, target_id); break; default:
-     * LOG.warn("Unknown iCal object mapping module " + module); } } } catch (final SQLException e) { throw new
+     * LOG.warn("Unknown iCal object mapping module {}", module); } } } catch (final SQLException e) { throw new
      * OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(rs, ps);
      * DBPool.closeReaderSilent(context, readCon); } return mapping; }
      */

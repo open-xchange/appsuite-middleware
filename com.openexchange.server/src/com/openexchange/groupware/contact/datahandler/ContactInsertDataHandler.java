@@ -142,7 +142,7 @@ public final class ContactInsertDataHandler implements DataHandler {
                     /*
                      * No appropriate definition for current part of the VCard stream
                      */
-                    LOG.error("Could not recognize format of the following VCard data:\n" + Arrays.toString(chunk.getContent()));
+                    LOG.error("Could not recognize format of the following VCard data:\n{}", Arrays.toString(chunk.getContent()));
                 } else {
                     final VersitDefinition.Reader versitReader = def.getReader(
                         new UnsynchronizedByteArrayInputStream(chunk.getContent()),

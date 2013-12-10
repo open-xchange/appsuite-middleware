@@ -122,11 +122,11 @@ public final class ServerConfig {
     public void initialize(final ConfigurationService confService) {
         final Properties newProps = confService.getFile(FILENAME);
         if (null == newProps) {
-            LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
+            LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
         } else {
             this.props.clear();
             this.props.putAll(newProps);
-            LOG.info("Read configuration file " + FILENAME + ".");
+            LOG.info("Read configuration file {}.", FILENAME);
         }
         reinit();
     }

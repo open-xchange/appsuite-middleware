@@ -105,13 +105,13 @@ public class AddAppointmentParticipantsIndexTask implements UpdateTask {
             try {
                 String indexName = existsIndex(con, table, columns);
                 if (null == indexName) {
-                    LOG.info("Creating new index named member with columns (cid,member_uid,object_id) on table " + table + ".");
+                    LOG.info("Creating new index named member with columns (cid,member_uid,object_id) on table {}.", table);
                     createIndex(con, table, "member", columns, true);
                 } else {
-                    LOG.info("New unique index named " + indexName + " with columns (cid,member_uid,object_id) already exists on table " + table + ".");
+                    LOG.info("New unique index named {} with columns (cid,member_uid,object_id) already exists on table {}.", indexName, table);
                 }
             } catch (SQLException e) {
-                LOG.error("Problem correcting indexes on table " + table + ".", e);
+                LOG.error("Problem correcting indexes on table {}.", table, e);
             }
         }
     }

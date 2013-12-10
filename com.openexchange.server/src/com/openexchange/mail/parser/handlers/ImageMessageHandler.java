@@ -306,7 +306,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {
-            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: {}", (null == content ? "null" : content.getClass().getSimpleName()));
             return true;
         }
         final ImageMessageHandler handler = new ImageMessageHandler(cid);

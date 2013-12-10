@@ -118,14 +118,14 @@ public class StringHelper {
             final I18nService tool = I18nServices.getInstance().getService(locale);
             if (tool == null) {
                 if (DEBUG) {
-                    LOG.debug("No service for " + locale + "  found. Using default for bundle ");
+                    LOG.debug("No service for {}  found. Using default for bundle ", locale);
                 }
                 return key;
             }
             return tool.getLocalized(key);
         } catch (final MissingResourceException x) {
             if (DEBUG) {
-                LOG.debug("MissingResource for " + locale + ". Using default for bundle ", x);
+                LOG.debug("MissingResource for {}. Using default for bundle ", locale, x);
             }
             return key;
         }

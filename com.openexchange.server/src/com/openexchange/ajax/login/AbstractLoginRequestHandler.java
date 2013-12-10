@@ -170,7 +170,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 } catch (final ExecutionException e) {
                     // Cannot occur
                     final Throwable cause = e.getCause();
-                    LOG.warn("Modules could not be added to login JSON response: " + cause.getMessage(), cause);
+                    LOG.warn("Modules could not be added to login JSON response: {}", cause.getMessage(), cause);
                 }
             }
 
@@ -271,11 +271,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     SettingStorage.getInstance(session).readValues(setting);
                     return convert2JS(setting);
                 } catch (final OXException e) {
-                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                    LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
                 } catch (final JSONException e) {
-                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                    LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
                 } catch (final Exception e) {
-                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                    LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
                 }
                 return null;
             }

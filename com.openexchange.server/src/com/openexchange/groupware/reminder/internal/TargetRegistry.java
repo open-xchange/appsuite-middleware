@@ -89,7 +89,7 @@ public class TargetRegistry {
         if (null == previous) {
             return;
         }
-        LOG.error("Duplicate registration of a reminder target service for module " + module + " with implementation " + targetService.getClass().getName() + ".");
+        LOG.error("Duplicate registration of a reminder target service for module {} with implementation {}.", module, targetService.getClass().getName());
     }
 
     public void removeService(final int module) {

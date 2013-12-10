@@ -83,7 +83,7 @@ public final class EnlargeCalendarUid extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnlargeCalendarUid.class);
-        log.info("Performing update task " + EnlargeCalendarUid.class.getSimpleName());
+        log.info("Performing update task {}", EnlargeCalendarUid.class.getSimpleName());
         final Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {
             con.setAutoCommit(false);
@@ -101,7 +101,7 @@ public final class EnlargeCalendarUid extends UpdateTaskAdapter {
             autocommit(con);
             Database.backNoTimeout(params.getContextId(), true, con);
         }
-        log.info(EnlargeCalendarUid.class.getSimpleName() + " successfully performed.");
+        log.info("{} successfully performed.", EnlargeCalendarUid.class.getSimpleName());
     }
 
 }

@@ -986,7 +986,7 @@ public class OXContainerConverter {
                     } else if (value instanceof String) {
                         cats.addAll(Arrays.asList(value.toString().split(" *, *")));
                     } else {
-                        LOG.error("Unexpected class: " + value.getClass().getName());
+                        LOG.error("Unexpected class: {}", value.getClass().getName());
                     }
                 }
             }
@@ -1038,7 +1038,7 @@ public class OXContainerConverter {
         				int targetHeight = Integer.parseInt(matcher.group(4));
         				return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
     				} catch (NumberFormatException e) {
-    					LOG.warn("unable to parse clipping rectangle from " + text, e);
+    					LOG.warn("unable to parse clipping rectangle from {}", text, e);
     				}
     			}
     		}

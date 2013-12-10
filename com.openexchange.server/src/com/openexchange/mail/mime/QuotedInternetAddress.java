@@ -989,7 +989,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         try {
             this.address = toACE(address);
         } catch (final AddressException e) {
-            LOG.error("ACE string could not be parsed from IDN string: " + address, e);
+            LOG.error("ACE string could not be parsed from IDN string: {}", address, e);
             this.address = address;
         }
     }

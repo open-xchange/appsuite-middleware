@@ -178,7 +178,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         try {
             return getAttachmentLong(folder, parseUnsignedLong(mailId), sequenceId);
         } catch (final NumberFormatException e) {
-            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }
     }
@@ -212,7 +212,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         try {
             return getImageAttachmentLong(folder, parseUnsignedLong(mailId), contentId);
         } catch (final NumberFormatException e) {
-            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }
     }
@@ -280,7 +280,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         try {
             return getMessageLong(folder, parseUnsignedLong(mailId), markSeen);
         } catch (final NumberFormatException e) {
-            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }
     }

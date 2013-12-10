@@ -156,7 +156,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         final String prop = configService.getProperty(propertyName);
         if (prop == null) {
             final String defaultValue = property.getDefaultValue();
-            LOG.warn("Missing configuration property \"" + propertyName + "\". Using fall-back value: " + defaultValue);
+            LOG.warn("Missing configuration property \"{}\". Using fall-back value: {}", propertyName, defaultValue);
             params.put(propertyName, defaultValue);
         } else {
             params.put(propertyName, prop);

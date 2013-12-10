@@ -283,9 +283,9 @@ public class freebusy extends HttpServlet {
         } catch (final ServiceException e) {
             LOG.error("Calendar service not found.", e);
         } catch (final OXException e) {
-            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
+            LOG.error("Problem getting free busy information for '{}'.", mailAddress, e);
         } catch (final RuntimeException e) {
-            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
+            LOG.error("Problem getting free busy information for '{}'.", mailAddress, e);
         }
         printWriter.println("END:VFREEBUSY");
         printWriter.println("END:VCALENDAR");
@@ -330,7 +330,7 @@ public class freebusy extends HttpServlet {
         } catch (final ServiceException e) {
             LOG.error("", e);
         } catch (final OXException e) {
-            LOG.debug("User '" + mailAddress + "' not found.");
+            LOG.debug("User '{}' not found.", mailAddress);
         }
 
         Resource resource = null;
@@ -343,7 +343,7 @@ public class freebusy extends HttpServlet {
         } catch (final ServiceException e) {
             LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error("Resource '" + mailAddress + "' not found.");
+            LOG.error("Resource '{}' not found.", mailAddress);
         }
 
         Participant retval = null;

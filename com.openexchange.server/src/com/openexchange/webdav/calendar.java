@@ -160,7 +160,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 break;
             case DataParser.DELETE:
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
+                    LOG.debug("delete appointment: {} in folder: {}", appointmentobject.getObjectID(), inFolder);
                 }
 
                 pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(),
@@ -172,7 +172,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 break;
             default:
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: " + method);
+                    LOG.debug("invalid method: {}", method);
                 }
             }
         } else {
@@ -311,7 +311,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     break;
                 case DataParser.DELETE:
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
+                        LOG.debug("delete appointment: {} in folder: {}", appointmentobject.getObjectID(), inFolder);
                     }
 
                     if (lastModified == null) {

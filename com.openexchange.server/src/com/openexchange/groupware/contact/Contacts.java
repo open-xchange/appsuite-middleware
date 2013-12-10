@@ -452,7 +452,7 @@ public final class Contacts {
             writecon.setAutoCommit(false);
             id = IDGenerator.getId(context, Types.CONTACT, writecon);
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Got ID from Generator -> " + id);
+                LOG.trace("Got ID from Generator -> {}", id);
             }
             writecon.commit();
         } catch (final SQLException e) {
@@ -1081,7 +1081,7 @@ public final class Contacts {
 
             final java.util.Date server_date = original.getLastModified();
             if (DEBUG) {
-                LOG.debug("Compare Dates for Contact Update\nClient-Date=" + lastModified.getTime() + "\nServer-Date=" + server_date.getTime());
+                LOG.debug("Compare Dates for Contact Update\nClient-Date={}\nServer-Date={}", lastModified.getTime(), server_date.getTime());
             }
             if ((lastModified != null) && (lastModified.getTime() > -1) && (lastModified.getTime() < server_date.getTime())) {
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
@@ -1233,7 +1233,7 @@ public final class Contacts {
             writecon.setAutoCommit(false);
 
             if (DEBUG) {
-                LOG.debug("INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + contact.getObjectID() + " -> " + getStatementString(ps));
+                LOG.debug("INFO: YOU WANT TO UPDATE THIS: cid={} oid={} -> {}", ctx.getContextId(), contact.getObjectID(), getStatementString(ps));
             }
             ps.execute();
 
@@ -2129,7 +2129,7 @@ public final class Contacts {
             }
             return false;
         } catch (final SQLException e) {
-            LOG.error("UNABLE TO performContactReadCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
+            LOG.error("UNABLE TO performContactReadCheckByID cid={} oid={}", ctx.getContextId(), objectId, e);
             return false;
         } finally {
             closeSQLStuff(rs, stmt);
@@ -2188,7 +2188,7 @@ public final class Contacts {
             }
             return false;
         } catch (final SQLException e) {
-            LOG.error("UNABLE TO performContactReadCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
+            LOG.error("UNABLE TO performContactReadCheckByID cid={} oid={}", ctx.getContextId(), objectId, e);
             return false;
         } finally {
             closeSQLStuff(rs, stmt);
@@ -2223,7 +2223,7 @@ public final class Contacts {
             }
             return true;
         } catch (final OXException e) {
-            LOG.error("UNABLE TO PERFORM performContactReadCheck cid=" + ctx.getContextId() + " fid=" + folderId, e);
+            LOG.error("UNABLE TO PERFORM performContactReadCheck cid={} fid={}", ctx.getContextId(), folderId, e);
             return false;
         }
     }
@@ -2296,7 +2296,7 @@ public final class Contacts {
             }
             return false;
         } catch (final SQLException e) {
-            LOG.error("UNABLE TO performContactWriteCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
+            LOG.error("UNABLE TO performContactWriteCheckByID cid={} oid={}", ctx.getContextId(), objectId, e);
             return false;
         } finally {
             closeSQLStuff(rs, stmt);
@@ -2329,7 +2329,7 @@ public final class Contacts {
             }
             return true;
         } catch (final OXException e) {
-            LOG.error("UNABLE TO PERFORM performContactWriteCheck cid=" + ctx.getContextId() + " fid=" + folderId, e);
+            LOG.error("UNABLE TO PERFORM performContactWriteCheck cid={} fid={}", ctx.getContextId(), folderId, e);
             return false;
         }
     }
@@ -2375,7 +2375,7 @@ public final class Contacts {
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
             return (rs.next());
         } catch (final SQLException se) {
-            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
+            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: {} Fid: {} Cause:{}", cx.getContextId(), fid, se);
             return false;
         } finally {
             closeResources(rs, st, readCon, true, cx);
@@ -2391,7 +2391,7 @@ public final class Contacts {
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
             return (rs.next());
         } catch (final SQLException se) {
-            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
+            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: {} Fid: {} Cause:{}", cx.getContextId(), fid, se);
             return false;
         } finally {
             closeSQLStuff(rs, st);
@@ -2608,7 +2608,7 @@ public final class Contacts {
                         final int admin_folder = xx.getObjectID();
                         cs.iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
                     } catch (final Exception oxee) {
-                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid, oxee);
+                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!.This contact will be deleted.Context {} Folder {} User{} Contact{}", contextId, fid, uid, oid, oxee);
 
                         folder_error = false;
                     }
@@ -2742,7 +2742,7 @@ public final class Contacts {
             final Timestamp timestamp = rs.getTimestamp(pos);
             return rs.wasNull() ? null : timestamp;
         } catch (final SQLException e) {
-            LOG.warn("TIMESTAMP field could not be read: " + e.getMessage());
+            LOG.warn("TIMESTAMP field could not be read: {}", e.getMessage());
             return null;
         }
     }

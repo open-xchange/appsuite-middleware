@@ -99,13 +99,13 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
             connection.setAutoCommit(false);
             LOG.info("Clearing obsolete fields in 'del_dlist'...");
             int cleared = clearDeletedDistributionLists(connection);
-            LOG.info("Cleared " + cleared + " rows in 'del_dlist'.");
+            LOG.info("Cleared {} rows in 'del_dlist'.", cleared);
             LOG.info("Clearing obsolete fields in 'del_contacts_image'...");
             cleared = clearDeletedContactImages(connection);
-            LOG.info("Cleared " + cleared + " rows in 'del_contacts_image'.");
+            LOG.info("Cleared {} rows in 'del_contacts_image'.", cleared);
             LOG.info("Clearing obsolete fields in 'del_contacts'...");
             cleared = clearDeletedContacts(connection);
-            LOG.info("Cleared " + cleared + " rows in 'del_contacts'.");
+            LOG.info("Cleared {} rows in 'del_contacts'.", cleared);
             connection.commit();
         } catch (SQLException e) {
             rollback(connection);

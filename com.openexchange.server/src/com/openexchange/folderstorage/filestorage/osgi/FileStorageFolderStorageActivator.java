@@ -93,7 +93,7 @@ public final class FileStorageFolderStorageActivator extends DeferredActivator {
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
+            LOG.info("Re-available service: {}", clazz.getName());
         }
         getServiceRegistry().addService(clazz, getService(clazz));
     }
@@ -101,7 +101,7 @@ public final class FileStorageFolderStorageActivator extends DeferredActivator {
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
+            LOG.warn("Absent service: {}", clazz.getName());
         }
         getServiceRegistry().removeService(clazz);
     }

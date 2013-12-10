@@ -390,7 +390,7 @@ public final class OXFolderAdminHelper {
         try {
             final int[] perms = getPermissionValue(cid, globalAddressBookId, OCLPermission.ALL_GROUPS_AND_USERS, readCon);
             if (null != perms) {
-                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user=" + userId + ", context=" + cid);
+                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user={}, context={}", userId, cid);
                 return (perms[0] == OCLPermission.NO_PERMISSIONS);
             }
         } catch (final SQLException e) {
@@ -462,7 +462,7 @@ public final class OXFolderAdminHelper {
                 /*
                  * Global permission enabled for global address book folder
                  */
-                LOG.warn("Cannot update individual permission on global address book folder since global permission is active. user=" + userId + ", context=" + cid);
+                LOG.warn("Cannot update individual permission on global address book folder since global permission is active. user={}, context={}", userId, cid);
                 // updateGABWritePermission(cid, enable, writeCon);
                 return;
             }
@@ -1532,7 +1532,7 @@ public final class OXFolderAdminHelper {
             final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
             final boolean globalPermEnabled = checkGlobalGABPermissionExistence(cid, writeCon);
             if (globalPermEnabled) {
-                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user=" + userId + ", context=" + cid);
+                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user={}, context={}", userId, cid);
             } else {
                 if (!checkPermissionExistence(cid, globalAddressBookId, userId, writeCon)) {
                     final OCLPermission p = new OCLPermission();

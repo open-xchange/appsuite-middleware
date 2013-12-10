@@ -870,7 +870,7 @@ public final class MimeMessageUtility {
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unsupported character-encoding in encoded-word: " + m.group(), e);
+                        LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     }
                     sb.append(handleUnsupportedEncoding(m));
                     lastMatch = m.end();
@@ -897,7 +897,7 @@ public final class MimeMessageUtility {
                     /*
                      * Invalid quoted-printable
                      */
-                    LOG.warn("Cannot decode quoted-printable: " + e.getMessage(), e);
+                    LOG.warn("Cannot decode quoted-printable: {}", e.getMessage(), e);
                     return asciiText;
                 }
             } else if ("B".equalsIgnoreCase(transferEncoding)) {
@@ -906,7 +906,7 @@ public final class MimeMessageUtility {
                 /*
                  * Unknown transfer-encoding; just return current match
                  */
-                LOG.warn("Unknown transfer-encoding: " + transferEncoding);
+                LOG.warn("Unknown transfer-encoding: {}", transferEncoding);
                 return asciiText;
             }
             detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
@@ -917,7 +917,7 @@ public final class MimeMessageUtility {
             /*
              * Even detected charset is unknown... giving up
              */
-            LOG.warn("Unknown character-encoding: " + detectedCharset);
+            LOG.warn("Unknown character-encoding: {}", detectedCharset);
             return asciiText;
         }
     }
@@ -1008,11 +1008,11 @@ public final class MimeMessageUtility {
                     }
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.warn("Unsupported character-encoding in encoded-word: " + m.group(), e);
+                    LOG.warn("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
-                    LOG.warn("String is not an encoded-word as per RFC 2047: " + m.group(), e);
+                    LOG.warn("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 }
@@ -1389,7 +1389,7 @@ public final class MimeMessageUtility {
             return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+            LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return phrase;
         }

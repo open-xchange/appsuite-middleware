@@ -180,7 +180,7 @@ public final class URIParser {
             /*
              * Cannot sanitize
              */
-            LOG.warn("Couldn't sanitize URI: " + input, e);
+            LOG.warn("Couldn't sanitize URI: {}", input, e);
             return null;
         }
     }
@@ -198,7 +198,7 @@ public final class URIParser {
                 if (URIDefaults.NULL.equals(defaults)) {
                     throw new URISyntaxException(input, "A valid port value is between 0 and 65535, but is: " + port);
                 }
-                LOG.warn("Invalid port: " + port);
+                LOG.warn("Invalid port: {}", port);
                 return defaults.getPort();
             }
             return iPort;
@@ -206,7 +206,7 @@ public final class URIParser {
             if (URIDefaults.NULL.equals(defaults)) {
                 throw new URISyntaxException(input, e.getMessage());
             }
-            LOG.warn("Couldn't parse port: " + e.getMessage(), e);
+            LOG.warn("Couldn't parse port: {}", e.getMessage(), e);
             return defaults.getPort();
         }
     }

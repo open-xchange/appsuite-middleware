@@ -77,7 +77,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
 
         SpecificServiceChooser<T> chooser = getChooser(module);
         if(chooser == null) {
-            LOG.warn("Can't register services for module "+module+" in tracker "+getClass().getName());
+            LOG.warn("Can't register services for module {} in tracker {}", module, getClass().getName());
         }
         if(contextId == null && folderId == null) {
             chooser.removeForEverything(tracked);
@@ -107,7 +107,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
         }
         SpecificServiceChooser<T> chooser = getChooser(module);
         if(chooser == null) {
-            LOG.error("Can't register services for module "+module+" in tracker "+getClass().getName());
+            LOG.error("Can't register services for module {} in tracker {}", module, getClass().getName());
             return;
         }
         try {
@@ -128,7 +128,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
             }
 
         } catch (ServicePriorityConflictException x) {
-            LOG.error("Could not register service "+tracked+" with contextId: "+contextId+" for folder: "+folderId+" with ranking: "+ranking+". A conflicting service has already been registered for the combination");
+            LOG.error("Could not register service {} with contextId: {} for folder: {} with ranking: {}. A conflicting service has already been registered for the combination", tracked, contextId, folderId, ranking);
         }
     }
 

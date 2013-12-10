@@ -124,8 +124,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
             stmt = con.createStatement();
             stmt.execute("ALTER TABLE " + table + " MODIFY " + title
                 + " VARCHAR(256)");
-            LOG.info("Altered table " + table + " changed " + title
-                + " to VARCHAR(256).");
+            LOG.info("Altered table {} changed {} to VARCHAR(256).", table, title);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }

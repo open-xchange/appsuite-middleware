@@ -154,7 +154,7 @@ public class Multiple extends SessionServlet {
                 dataArray = new JSONArray(reader);
             } catch (final JSONException e) {
                 final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-                LOG.warn(exc.getMessage() + Tools.logHeaderForError(req), exc);
+                LOG.warn("{}{}", exc.getMessage(), Tools.logHeaderForError(req), exc);
                 dataArray = new JSONArray();
             } finally {
                 Streams.close(reader);

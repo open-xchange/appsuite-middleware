@@ -115,7 +115,7 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
                 repairStmt.setInt(3, id);
                 repairStmt.addBatch();
 
-                LOG.info("Fixed appointment " + cid + "/" + id + " (cid/id) old count: " + count + " new count: " + realCount);
+                LOG.info("Fixed appointment {}/{} (cid/id) old count: {} new count: {}", cid, id, count, realCount);
             }
             repairStmt.executeBatch();
             con.commit();

@@ -903,7 +903,7 @@ public class RdbUserStorage extends UserStorage {
                         final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
                         for (int i : map.keys()) {
-                            LOG.error("User " + i + ": " + map.get(i).getAttributes().toString());
+                            LOG.error("User {}: {}", i, map.get(i).getAttributes());
                         }
                         throw e;
                     }
@@ -926,7 +926,7 @@ public class RdbUserStorage extends UserStorage {
                         final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
                         for (int i : map.keys()) {
-                            LOG.error("User " + i + ": " + map.get(i).getAttributes().toString());
+                            LOG.error("User {}: {}", i, map.get(i).getAttributes());
                         }
                         throw e;
                     }

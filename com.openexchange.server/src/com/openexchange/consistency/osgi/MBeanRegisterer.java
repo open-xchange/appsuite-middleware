@@ -83,7 +83,7 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer<Managemen
         final ManagementService managementService = context.getService(reference);
         try {
             name = MBeanNamer.getName();
-            LOG.info("Registering consistency MBean under name: " + name);
+            LOG.info("Registering consistency MBean under name: {}", name);
             managementService.registerMBean(name, new OsgiOXConsistency());
         } catch (final OXException e) {
             final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
@@ -106,7 +106,7 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer<Managemen
     @Override
     public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         final ManagementService managementService = service;
-        LOG.info("Unregistering consistency MBean with name " + name);
+        LOG.info("Unregistering consistency MBean with name {}", name);
         try {
             managementService.unregisterMBean(name);
         } catch (final OXException e) {

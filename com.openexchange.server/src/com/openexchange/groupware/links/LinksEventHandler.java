@@ -143,7 +143,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (OXException e) {
                     LOG.error("", e);
                 } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing numerical identifiers from event: " + e.getMessage() + ". Skipping.");
+                    LOG.debug("Error parsing numerical identifiers from event: {}. Skipping.", e.getMessage());
                 }
 
                 if (LOG.isDebugEnabled()) {
@@ -158,7 +158,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (OXException e) {
                     LOG.error("", e);
                 } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing numerical identifiers from event: " + e.getMessage() + ". Skipping.");
+                    LOG.debug("Error parsing numerical identifiers from event: {}. Skipping.", e.getMessage());
                 }
 
                 if (LOG.isDebugEnabled()) {
@@ -177,7 +177,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         try {
             ct = ContextStorage.getStorageContext(contextId);
         } catch (final OXException e) {
-            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + contextId + " oid=" + id + " fid=" + fid, e);
+            LOG.error("ERROR: Unable to Delete Links from Object! cid={} oid={} fid={}", contextId, id, fid, e);
             return;
         }
         // Check if any present
@@ -193,7 +193,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 return;
             }
         } catch (final Exception se) {
-            LOG.debug("DEBUG: Error occurred during look-up attempt. cid=" + contextId + " oid=" + id + " fid=" + fid, se);
+            LOG.debug("DEBUG: Error occurred during look-up attempt. cid={} oid={} fid={}", contextId, id, fid, se);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (null != con) {
@@ -217,7 +217,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
             stmt.setInt(pos++, contextId);
             stmt.executeUpdate();
         } catch (final Exception se) {
-            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + contextId + " oid=" + id + " fid=" + fid, se);
+            LOG.error("ERROR: Unable to Delete Links from Object! cid={} oid={} fid={}", contextId, id, fid, se);
         } finally {
             DBUtils.closeSQLStuff(stmt);
             if (null != con) {
@@ -243,8 +243,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         try {
             ct = ContextStorage.getStorageContext(so.getContextId());
         } catch (final OXException e) {
-            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
-                    + type + " fid=" + fid + ')', e);
+            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid={} uid={} type={} fid={}{}", so.getContextId(), id, type, fid, ')', e);
             return;
         }
 
@@ -272,8 +271,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 }
             }
         } catch (final Exception e) {
-            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
-                    + type + " fid=" + fid + ')', e);
+            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid={} uid={} type={} fid={}{}", so.getContextId(), id, type, fid, ')', e);
         } finally {
             DBUtils.closeResources(rs, smt, writecon, false, ct);
             rs = null;
@@ -310,8 +308,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (final SQLException see) {
                     LOG.error("Uable to rollback Link Update", see);
                 }
-                LOG.error("ERROR: Unable to Update Links for Object! cid=" + so.getContextId() + " oid=" + id + " fid="
-                        + fid, se);
+                LOG.error("ERROR: Unable to Update Links for Object! cid={} oid={} fid={}", so.getContextId(), id, fid, se);
             } finally {
                 try {
                     writecon.setAutoCommit(true);

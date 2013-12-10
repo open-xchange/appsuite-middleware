@@ -99,7 +99,7 @@ public final class AppointmentClearDelTablesTasks extends UpdateTaskAdapter {
             connection.setAutoCommit(false);
             LOG.info("Clearing obsolete fields in 'del_dates'...");
             int cleared = clearDeletedAppointments(connection);
-            LOG.info("Cleared " + cleared + " rows in 'del_dates'.");
+            LOG.info("Cleared {} rows in 'del_dates'.", cleared);
             connection.commit();
         } catch (SQLException e) {
             rollback(connection);

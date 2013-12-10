@@ -126,7 +126,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
         }
         if (checkPrimaryKey(contextId)) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("FolderAddPermColumnUpdateTask: Primary already set to " + Arrays.toString(EXPECTED_COLS));
+                LOG.info("FolderAddPermColumnUpdateTask: Primary already set to {}", Arrays.toString(EXPECTED_COLS));
             }
         } else {
 

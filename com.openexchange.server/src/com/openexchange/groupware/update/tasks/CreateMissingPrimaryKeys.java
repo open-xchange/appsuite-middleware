@@ -524,7 +524,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                 try {
                     task.call();
                 } catch (final SQLException e) {
-                    log.warn("ALTER TABLE failed with: >>" + e.getMessage() + "<<\nStatement: >>" + task.toString() + "<<");
+                    log.warn("ALTER TABLE failed with: >>{}<<\nStatement: >>{}<<", e.getMessage(), task);
                 }
             }
             con.commit();

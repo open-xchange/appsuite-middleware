@@ -549,7 +549,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         final StringBuilder builder = new StringBuilder(256).append(
                             "Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
                                 newObj.getObjectID()).append("). Cause:\n");
-                        LOG.error(builder.toString() + e.getMessage(), e);
+                        LOG.error("{}{}", builder, e.getMessage(), e);
                     }
                 }
             }
@@ -1102,7 +1102,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             }
                             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
                             if (DEBUG) {
-                                LOG.debug("Added file attachment to notification message: " + fileName);
+                                LOG.debug("Added file attachment to notification message: {}", fileName);
                             }
                             /*
                              * Append body part
@@ -1880,7 +1880,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             tz = getCalendarTools().getTimeZone(user.getTimeZone());
         } catch (final OXException e) {
             // Should not happen
-            LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
+            LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", session.getUserId(), session.getContextId());
             l = Locale.getDefault();
             tz = TimeZone.getDefault();
         }
@@ -1993,7 +1993,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             l = user.getLocale();
         } catch (final OXException e) {
             // Should not happen
-            LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
+            LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", session.getUserId(), session.getContextId());
             l = Locale.getDefault();
         }
 

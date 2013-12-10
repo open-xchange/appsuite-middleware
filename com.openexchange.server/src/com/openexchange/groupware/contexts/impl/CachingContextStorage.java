@@ -92,7 +92,7 @@ public class CachingContextStorage extends ContextStorage {
         Integer contextId = (Integer) cache.get(loginInfo);
         if (null == contextId) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Cache MISS. Login info: " + loginInfo);
+                LOG.trace("Cache MISS. Login info: {}", loginInfo);
             }
             contextId = I(persistantImpl.getContextId(loginInfo));
             if (NOT_FOUND != contextId.intValue()) {
@@ -103,7 +103,7 @@ public class CachingContextStorage extends ContextStorage {
                 }
             }
         } else if (LOG.isTraceEnabled()) {
-            LOG.trace("Cache HIT. Login info: " + loginInfo);
+            LOG.trace("Cache HIT. Login info: {}", loginInfo);
         }
         return contextId.intValue();
     }
@@ -211,7 +211,7 @@ public class CachingContextStorage extends ContextStorage {
             }
         } catch (final OXException e) {
             if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
-                LOG.warn("Switching to read only mode for context " + contextId + " because master database is down.", e);
+                LOG.warn("Switching to read only mode for context {} because master database is down.", contextId, e);
                 retval.setReadOnly(true);
             }
         }

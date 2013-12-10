@@ -79,7 +79,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
             final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
             folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (final OXException e) {
-			LOG.error("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
+			LOG.error("Couldn't remove folder locks from folder {} in context {}. Run the consistency tool.", folderObj.getObjectID(), session.getContextId());
 		}
     }
 

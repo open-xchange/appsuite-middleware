@@ -129,16 +129,16 @@ public class RedeemToken implements LoginRequestHandler {
             final Context context = ContextStorage.getInstance().getContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!context.isEnabled() || !user.isMailEnabled()) {
-                LOG.info("Either context " + context.getContextId() + " or user " + user.getId() + " not enabled");
+                LOG.info("Either context {} or user {} not enabled", context.getContextId(), user.getId());
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
         } catch (final java.lang.RuntimeException e) {
-            LOG.info("Unexpected error occurred during login: " + e.getMessage(), e);
+            LOG.info("Unexpected error occurred during login: {}", e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         } catch (final OXException e) {
-            LOG.info("Couldn't resolve context/user by identifier: " + session.getContextId() + '/' + session.getUserId(), e);
+            LOG.info("Couldn't resolve context/user by identifier: {}{}{}", session.getContextId(), '/', session.getUserId(), e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

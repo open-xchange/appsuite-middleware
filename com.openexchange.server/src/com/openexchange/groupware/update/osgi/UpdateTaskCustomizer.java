@@ -82,7 +82,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
         boolean error = false;
         for (final UpdateTask task : collection) {
             if (!registry.addUpdateTask(task)) {
-                LOG.error("Update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+                LOG.error("Update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
                 error = true;
                 break;
             }

@@ -83,7 +83,7 @@ public final class EnlargeResourceDescription extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnlargeResourceDescription.class);
-        log.info("Performing update task " + EnlargeResourceDescription.class.getSimpleName());
+        log.info("Performing update task {}", EnlargeResourceDescription.class.getSimpleName());
         final Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {
             con.setAutoCommit(false);
@@ -101,7 +101,7 @@ public final class EnlargeResourceDescription extends UpdateTaskAdapter {
             autocommit(con);
             Database.backNoTimeout(params.getContextId(), true, con);
         }
-        log.info(EnlargeResourceDescription.class.getSimpleName() + " successfully performed.");
+        log.info("{} successfully performed.", EnlargeResourceDescription.class.getSimpleName());
     }
 
 }

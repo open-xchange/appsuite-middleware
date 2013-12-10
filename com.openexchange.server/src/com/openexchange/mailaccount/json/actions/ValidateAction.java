@@ -245,7 +245,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {
             if (DEBUG) {
-                LOG.debug("Validating mail account failed. No transport provider found for URL: " + transportServerURL);
+                LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
             }
             return false;
         }

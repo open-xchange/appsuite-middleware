@@ -215,7 +215,7 @@ public final class MailPasswordUtil {
             // Decrypting failed; retry with CryptoService
             final CryptoService crypto = ServerServiceRegistry.getInstance().getService(CryptoService.class);
             if (null == crypto) {
-                LOG.warn("MailPasswordUtil.decrypt(): Missing " + CryptoService.class.getSimpleName());
+                LOG.warn("MailPasswordUtil.decrypt(): Missing {}", CryptoService.class.getSimpleName());
                 throw e;
             }
             try {

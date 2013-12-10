@@ -168,7 +168,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
                             return coverFile;
                         }
                     } else {
-                        LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
+                        LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: {}", body.getClass().getName());
                     }
                 }
             } else if (isSupported(managedFile.getContentType()) || isSupportedFileExt(managedFile.getFileName())) {

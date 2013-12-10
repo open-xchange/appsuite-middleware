@@ -119,7 +119,7 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
         try {
             return Integer.parseInt(property.toString());
         } catch (final NumberFormatException e) {
-            LOG.error("Service ranking cannot be parsed to an integer: " + property.toString(), e);
+            LOG.error("Service ranking cannot be parsed to an integer: {}", property, e);
             return 0;
         }
     }

@@ -123,12 +123,11 @@ public class CorrectIndexes implements UpdateTask {
             }
             final String index2Create = existsIndex(con, table, newcolumns1);
             if (null == index2Create) {
-                LOG.info("Creating new index (cid,timestampfield01) on table "
-                    + table + ".");
+                LOG.info("Creating new index (cid,timestampfield01) on table {}.", table);
                 createIndex(con, table, newcolumns1);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table + ".", e);
+            LOG.error("Problem correcting indexes on table {}.", table, e);
         }
         final String[] oldcolumns2 = new String[] { "timestampfield02" };
         final String[] newcolumns2 = new String[] { "cid", "timestampfield02" };
@@ -141,23 +140,21 @@ public class CorrectIndexes implements UpdateTask {
             }
             final String index2Create = existsIndex(con, table, newcolumns2);
             if (null == index2Create) {
-                LOG.info("Creating new index (cid,timestampfield02) on table "
-                    + table + ".");
+                LOG.info("Creating new index (cid,timestampfield02) on table {}.", table);
                 createIndex(con, table, newcolumns2);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table + ".", e);
+            LOG.error("Problem correcting indexes on table {}.", table, e);
         }
         final String[] newcolumns3 = new String[] { "cid", "intfield02" };
         try {
             final String index2Create = existsIndex(con, table, newcolumns3);
             if (null == index2Create) {
-                LOG.info("Creating new index (cid,intfield02) on table "
-                    + table + ".");
+                LOG.info("Creating new index (cid,intfield02) on table {}.", table);
                 createIndex(con, table, newcolumns3);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table + ".", e);
+            LOG.error("Problem correcting indexes on table {}.", table, e);
         }
     }
 
@@ -172,7 +169,7 @@ public class CorrectIndexes implements UpdateTask {
                 dropIndex(con, table, index2Drop);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table + ".", e);
+            LOG.error("Problem correcting indexes on table {}.", table, e);
         }
     }
 
@@ -214,7 +211,7 @@ public class CorrectIndexes implements UpdateTask {
                 dropIndex(con, table, index2Drop);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table + ".", e);
+            LOG.error("Problem correcting indexes on table {}.", table, e);
         }
     }
 }

@@ -85,7 +85,7 @@ public final class AppointmentExceptionRemoveDuplicateDatePosition implements Up
     @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException {
-        LOG.info("Performing update task to remove duplicate date recurrence position from appointment change exceptions on schema " + schema.getSchema());
+        LOG.info("Performing update task to remove duplicate date recurrence position from appointment change exceptions on schema {}", schema.getSchema());
         final Connection con = Database.get(contextId, true);
         Statement st = null;
         try {

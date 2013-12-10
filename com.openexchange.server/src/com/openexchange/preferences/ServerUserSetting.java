@@ -592,7 +592,7 @@ public class ServerUserSetting {
             byte[] uuidBinary = UUIDs.toByteArray(uuid);
             stmt.setBytes(pos, uuidBinary);
             if (DEBUG) {
-                LOG.debug("INSERTing user settings: " + DBUtils.getStatementString(stmt));
+                LOG.debug("INSERTing user settings: {}", DBUtils.getStatementString(stmt));
             }
             stmt.execute();
         } catch (final SQLException e) {

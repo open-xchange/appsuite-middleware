@@ -398,7 +398,7 @@ public final class MailAccountRequest {
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
         if (null == mailProvider) {
             if (DEBUG) {
-                LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
+                LOG.debug("Validating mail account failed. No mail provider found for URL: {}", mailServerURL);
             }
             return null;
         }
@@ -456,7 +456,7 @@ public final class MailAccountRequest {
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {
             if (DEBUG) {
-                LOG.debug("Validating mail account failed. No transport provider found for URL: " + transportServerURL);
+                LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
             }
             return false;
         }

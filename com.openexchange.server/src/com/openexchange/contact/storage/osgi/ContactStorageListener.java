@@ -78,13 +78,13 @@ public class ContactStorageListener implements SimpleRegistryListener<ContactSto
 
     @Override
     public void added(final ServiceReference<ContactStorage> ref, final ContactStorage service) {
-        LOG.info("adding contact storage: " + service);
+        LOG.info("adding contact storage: {}", service);
         this.registry.addStorage(service);
     }
 
     @Override
     public void removed(final ServiceReference<ContactStorage> ref, final ContactStorage service) {
-        LOG.info("removing contact storage: " + service);
+        LOG.info("removing contact storage: {}", service);
         this.registry.removeStorage(service);
     }
 

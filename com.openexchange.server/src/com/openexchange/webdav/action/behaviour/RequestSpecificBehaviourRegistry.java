@@ -103,14 +103,14 @@ public class RequestSpecificBehaviourRegistry {
 			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
 				sum += entry.getValue().size();
 			}
-			LOG.info("Using "+sum+" overrides for WebDAV");
+			LOG.info("Using {} overrides for WebDAV", sum);
 		}
 
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Overrides for WebDAV:");
 			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
 				for(final Behaviour behaviour : entry.getValue()) {
-					LOG.debug(behaviour+" provides override for "+entry.getKey());
+					LOG.debug("{} provides override for {}", behaviour, entry.getKey());
 				}
 			}
 		}

@@ -328,7 +328,7 @@ public final class EventQueue {
 //            infostore(eventObj, noDelay ? noDelayInfostoreEventList : infostoreEventList);
 //            break;
         default:
-            LOG.error("invalid module: " + module);
+            LOG.error("invalid module: {}", module);
         }
     }
 
@@ -395,7 +395,7 @@ public final class EventQueue {
             }
             break;
         default:
-            LOG.error("invalid action for appointment: " + action);
+            LOG.error("invalid action for appointment: {}", action);
         }
     }
 
@@ -435,7 +435,7 @@ public final class EventQueue {
             }
             break;
         default:
-            LOG.error("invalid action for contact: " + action);
+            LOG.error("invalid action for contact: {}", action);
         }
     }
 
@@ -502,7 +502,7 @@ public final class EventQueue {
             }
             break;
         default:
-            LOG.error("invalid action for task: " + action);
+            LOG.error("invalid action for task: {}", action);
         }
     }
 
@@ -542,7 +542,7 @@ public final class EventQueue {
             }
             break;
         default:
-            LOG.error("invalid action for folder: " + action);
+            LOG.error("invalid action for folder: {}", action);
         }
     }
 
@@ -582,7 +582,7 @@ public final class EventQueue {
 //            }
 //            break;
 //        default:
-//            LOG.error("invalid action for infostore: " + action);
+//            LOG.error("invalid action for infostore: {}", action);
 //        }
 //    }
 

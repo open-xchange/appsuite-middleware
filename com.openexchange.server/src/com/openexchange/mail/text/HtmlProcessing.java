@@ -877,7 +877,7 @@ public final class HtmlProcessing {
             imgReplacer.appendTail(sb);
             reval = sb.toString();
         } catch (final Exception e) {
-            LOG.warn("Unable to filter cid background images: " + e.getMessage());
+            LOG.warn("Unable to filter cid background images: {}", e.getMessage());
         }
         return reval;
     }
@@ -942,7 +942,7 @@ public final class HtmlProcessing {
             imgReplacer.appendTail(sb);
             reval = sb.toString();
         } catch (final Exception e) {
-            LOG.warn("Unable to filter cid Images: " + e.getMessage());
+            LOG.warn("Unable to filter cid Images: {}", e.getMessage());
         }
         return reval;
     }

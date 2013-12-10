@@ -1593,7 +1593,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
+                LOG.warn("Collected contacts could not be stripped by user's email aliases: {}", e.getMessage(), e);
 
             }
             if (!addrs.isEmpty()) {

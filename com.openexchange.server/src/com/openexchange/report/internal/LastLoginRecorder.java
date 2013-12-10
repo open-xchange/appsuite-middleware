@@ -98,7 +98,7 @@ public class LastLoginRecorder implements LoginHandlerService {
             int count = 0;
             for (String origKey : user.getAttributes().keySet()) {
                 if (origKey.startsWith("client:") && ++count > maxClientCount) {
-                    LOG.warn("Login of client " + client + " for login " + login + " (Context: " + context.getContextId() + ", User: " + user.getId() + ") will not be recorded in the database.");
+                    LOG.warn("Login of client {} for login {} (Context: {}, User: {}) will not be recorded in the database.", client, login, context.getContextId(), user.getId());
                 }
             }
         }

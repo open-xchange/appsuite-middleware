@@ -158,8 +158,8 @@ public class AppointmentRequest extends CalendarRequest {
 
         timeZone = getTimeZone(sTimeZone);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("use timezone string: " + sTimeZone);
-            LOG.debug("use user timezone: " + timeZone);
+            LOG.debug("use timezone string: {}", sTimeZone);
+            LOG.debug("use user timezone: {}", timeZone);
         }
     }
 
@@ -389,7 +389,7 @@ public class AppointmentRequest extends CalendarRequest {
                                 recuResults = recColl.calculateFirstRecurring(appointmentObj);
                                 written = true;
                             } catch (final OXException e) {
-                                LOG.error("Can not calculate recurrence " + appointmentObj.getObjectID() + ':' + ctx.getContextId(), e);
+                                LOG.error("Can not calculate recurrence {}{}{}", appointmentObj.getObjectID(), ':', ctx.getContextId(), e);
                             }
                             if (recuResults != null && recuResults.size() != 1) {
                                 LOG.warn("cannot load first recurring appointment from appointment object: " + +appointmentObj.getRecurrenceType() + " / " + appointmentObj.getObjectID() + "\n\n\n");
@@ -417,7 +417,7 @@ public class AppointmentRequest extends CalendarRequest {
                                     written = true;
                                 }
                             } catch (final OXException e) {
-                                LOG.error("Can not calculate recurrence " + appointmentObj.getObjectID() + ':' + ctx.getContextId(), e);
+                                LOG.error("Can not calculate recurrence {}{}{}", appointmentObj.getObjectID(), ':', ctx.getContextId(), e);
                             }
 
                             if (recuResults != null) {
@@ -597,7 +597,7 @@ public class AppointmentRequest extends CalendarRequest {
                         try {
                             recuResults = recColl.calculateFirstRecurring(appointment);
                         } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + ctx.getContextId(), e);
+                            LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), ctx.getContextId(), e);
                             appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
                         }
 
@@ -640,7 +640,7 @@ public class AppointmentRequest extends CalendarRequest {
                             try {
                                 recuResults = recColl.calculateFirstRecurring(appointment);
                             } catch (final OXException e) {
-                                LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + ctx.getContextId(), e);
+                                LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), ctx.getContextId(), e);
                                 appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
                             }
                             if (recuResults != null && recuResults.size() > 0) {
@@ -791,7 +791,7 @@ public class AppointmentRequest extends CalendarRequest {
                             recuResults = recColl.calculateFirstRecurring(appointment);
                             written = true;
                         } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ':' + ctx.getContextId(), e);
+                            LOG.error("Can not calculate recurrence {}{}{}", appointment.getObjectID(), ':', ctx.getContextId(), e);
                         }
                         if (recuResults != null && recuResults.size() == 1) {
                             appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
@@ -809,7 +809,7 @@ public class AppointmentRequest extends CalendarRequest {
                             recuResults = recColl.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
                             written = true;
                         } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ':' + ctx.getContextId(), e);
+                            LOG.error("Can not calculate recurrence {}{}{}", appointment.getObjectID(), ':', ctx.getContextId(), e);
                         }
                         if (recuResults != null) {
                             for (int a = 0; a < recuResults.size(); a++) {
@@ -1024,11 +1024,11 @@ public class AppointmentRequest extends CalendarRequest {
                     try {
                         recuResults = recColl.calculateFirstRecurring(appointment);
                     } catch (final OXException x) {
-                        LOG.error("Can not calculate recurrence for appointment " + appointment.getObjectID() + " in context " + ctx.getContextId(), x);
+                        LOG.error("Can not calculate recurrence for appointment {} in context {}", appointment.getObjectID(), ctx.getContextId(), x);
                         appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
                     }
                     if (recuResults != null && recuResults.size() != 1) {
-                        LOG.warn("Can not load first recurring appointment from appointment object " + appointment.getObjectID());
+                        LOG.warn("Can not load first recurring appointment from appointment object {}", appointment.getObjectID());
                         appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
                     } else if (recuResults != null) {
                         appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
@@ -1114,7 +1114,7 @@ public class AppointmentRequest extends CalendarRequest {
                         recuResults = recColl.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
                         processed = true;
                     } catch (final OXException x) {
-                        LOG.error("Can not calculate recurrence " + appointmentobject.getObjectID() + ":" + ctx.getContextId(), x);
+                        LOG.error("Can not calculate recurrence {}:{}", appointmentobject.getObjectID(), ctx.getContextId(), x);
                     }
                     if (recuResults != null && recuResults.size() > 0) {
                         final RecurringResultInterface result = recuResults.getRecurringResult(0);

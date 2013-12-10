@@ -95,7 +95,7 @@ public final class HostDataLoginHandlerRegisterer implements ServiceTrackerCusto
             lock.unlock();
         }
         if (!needsRegistration && registration != null) {
-            LOG.warn("Found multiple SysteNameService instances. Ignoring " + service.getClass().getName());
+            LOG.warn("Found multiple SysteNameService instances. Ignoring {}", service.getClass().getName());
             foundService = null;
             context.ungetService(reference);
         }

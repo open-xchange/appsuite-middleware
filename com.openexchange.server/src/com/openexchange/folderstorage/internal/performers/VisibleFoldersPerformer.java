@@ -184,7 +184,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             try {
                 allSubfolderIds = Arrays.asList(folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters));
             } catch (final UnsupportedOperationException e) {
-                LOG.warn("Operation is not supported for folder storage " + folderStorage.getClass().getSimpleName() + " (content-type=" + contentType.toString() + ")", e);
+                LOG.warn("Operation is not supported for folder storage {} (content-type={})", folderStorage.getClass().getSimpleName(), contentType, e);
                 return new UserizedFolder[0];
             }
             /*

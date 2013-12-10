@@ -247,7 +247,7 @@ public final class ConditionTreeMapManagement {
                 }
             }
             final long dur = System.currentTimeMillis() - st;
-            LOG.debug("ConditionTreeMapManagement.shrink() took " + dur + "msec.");
+            LOG.debug("ConditionTreeMapManagement.shrink() took {}msec.", dur);
         } else {
             final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
             for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {

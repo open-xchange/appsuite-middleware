@@ -150,7 +150,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
     }
 
     private void processContext(final int cid, final long creatingTime) throws OXException {
-        LOG.info("Performing 'NewInfostoreFolderTreeUpdateTask' on context " + cid);
+        LOG.info("Performing 'NewInfostoreFolderTreeUpdateTask' on context {}", cid);
         final Connection writeCon = Database.getNoTimeout(cid, true);
         try {
             final int admin = getContextAdmin(cid, writeCon);
@@ -182,11 +182,11 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
             writeCon.commit(); // COMMIT
         } catch (final SQLException e) {
             rollback(writeCon);
-            LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context " + cid);
+            LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context {}", cid);
             throw err(e);
         } catch (final OXException e) {
             rollback(writeCon);
-            LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context " + cid);
+            LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context {}", cid);
             throw e;
         } finally {
             autocommit(writeCon);

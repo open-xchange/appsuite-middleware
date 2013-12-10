@@ -144,7 +144,7 @@ public final class UpdateExecutor {
                 final String taskName = task.getClass().getSimpleName();
                 boolean success = false;
                 try {
-                    LOG.info("Starting update task " + taskName + " on schema " + state.getSchema() + ".");
+                    LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
                     if (task instanceof UpdateTaskV2) {
                         final ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
                         final PerformParameters params = new PerformParametersImpl(state, contextId, logger);
@@ -157,9 +157,9 @@ public final class UpdateExecutor {
                     LOG.error("", e);
                 }
                 if (success) {
-                    LOG.info("Update task " + taskName + " on schema " + state.getSchema() + " done.");
+                    LOG.info("Update task {} on schema {} done.", taskName, state.getSchema());
                 } else {
-                    LOG.info("Update task " + taskName + " on schema " + state.getSchema() + " failed.");
+                    LOG.info("Update task {} on schema {} failed.", taskName, state.getSchema());
                 }
                 addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
             }

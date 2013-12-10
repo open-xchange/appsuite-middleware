@@ -899,7 +899,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             if (LOG.isDebugEnabled() && file.repetitive()) {
                 try {
                     final File tmpFile = writeBrokenImage2Disk(file);
-                    LOG.error("Unable to transform image from " + file.getName() + ". Unparseable image file is written to disk at: " + tmpFile.getPath());
+                    LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", file.getName(), tmpFile.getPath());
                 } catch (final Exception x) {
                     LOG.error("Unable to transform image from {}", file.getName());
                 }
@@ -919,7 +919,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 LOG.warn("Error resetting input stream", e);
             }
         }
-        LOG.warn("Unable to transform image from " + file.getName());
+        LOG.warn("Unable to transform image from {}", file.getName());
         return file.repetitive() ? file : null;
     }
 

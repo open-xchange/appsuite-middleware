@@ -1143,7 +1143,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     }
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Locally loaded folder " + folderId + " from context " + contextId + " for user " + params.getUserId());
+                    LOG.debug("Locally loaded folder {} from context {} for user {}", folderId, contextId, params.getUserId());
                 }
                 return folder;
             }

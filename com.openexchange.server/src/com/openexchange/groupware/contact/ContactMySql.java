@@ -579,7 +579,7 @@ public class ContactMySql implements ContactSql {
             final Mapper m = Contacts.mapping[cols[a]];
             if (m == null) {
                 if (DEBUG) {
-                    LOG.debug("UNKNOWN FIELD -> " + cols[a]);
+                    LOG.debug("UNKNOWN FIELD -> {}", cols[a]);
                 }
             } else {
                 sb.append("co.").append(m.getDBFieldName()).append(',');

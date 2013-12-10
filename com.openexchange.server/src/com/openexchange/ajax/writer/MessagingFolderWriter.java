@@ -562,7 +562,7 @@ public final class MessagingFolderWriter {
             final MessagingFolderFieldWriter mffw = WRITERS_MAP.get(curField);
             if (mffw == null) {
                 if (!additionalFields.knows(curField) && LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown folder field: " + curField);
+                    LOG.warn("Unknown folder field: {}", curField);
                 }
 
                 final AdditionalFolderField folderField = additionalFields.get(curField);

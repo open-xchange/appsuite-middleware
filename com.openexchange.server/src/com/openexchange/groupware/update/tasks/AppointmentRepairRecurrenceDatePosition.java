@@ -111,10 +111,10 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             result = stmt.executeQuery();
             while (result.next()) {
                 final CalendarDataObject appointment = fillAppointment(result);
-                LOG.info("Repairing in context " + appointment.getContextID() + " appointment " + appointment.getObjectID() + ".");
+                LOG.info("Repairing in context {} appointment {}.", appointment.getContextID(), appointment.getObjectID());
                 try {
                     if (!appointment.containsRecurrencePosition()) {
-                        LOG.info("Unable to repair appointment " + appointment.getObjectID() + " in context " + appointment.getContextID() + ". Recurrence position is missing.");
+                        LOG.info("Unable to repair appointment {} in context {}. Recurrence position is missing.", appointment.getObjectID(), appointment.getContextID());
                         continue;
                     }
                     final long recurrence_date_position;
@@ -165,7 +165,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             stmt.setInt(3, id);
             final int changed = stmt.executeUpdate();
             if (1 != changed) {
-                LOG.error("Updated " + changed + " appointments instead of 1.");
+                LOG.error("Updated {} appointments instead of 1.", changed);
             }
         } catch (final SQLException e) {
             LOG.error("SQL psroblem while repairing recurrence date position.", e);

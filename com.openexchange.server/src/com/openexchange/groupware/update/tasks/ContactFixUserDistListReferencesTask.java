@@ -99,10 +99,10 @@ public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapte
             connection.setAutoCommit(false);
             LOG.info("Trying to auto-correct wrong contact references in 'prg_dlist'...");
             int corrected = correctWrongReferences(connection);
-            LOG.info("Auto-corrected " + corrected + " contact references.");
+            LOG.info("Auto-corrected {} contact references.", corrected);
             LOG.info("Deleting remaining wrong contact references in 'prg_dlist'...");
             int deleted = deleteWrongReferences(connection);
-            LOG.info("Deleted " + deleted + " contact references.");
+            LOG.info("Deleted {} contact references.", deleted);
             connection.commit();
         } catch (SQLException e) {
             rollback(connection);

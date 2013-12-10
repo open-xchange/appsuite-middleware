@@ -96,7 +96,7 @@ public class MsisdnUtility {
                         addresses.add(new QuotedInternetAddress(MsisdnCheck.cleanup(number)));
                     } catch (final Exception e) {
                         // Ignore invalid number
-                        LOG.debug("Ignoring invalid number: " + number, e);
+                        LOG.debug("Ignoring invalid number: {}", number, e);
                     }
                 }
             } catch (final Exception e) {

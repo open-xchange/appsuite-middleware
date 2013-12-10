@@ -125,7 +125,7 @@ public final class MailAccessEventHandler implements ElementEventHandler {
 
     @Override
     public void handleElementEvent(final ElementEvent event) {
-        LOG.error("Unknown event type: " + event.getElementEvent());
+        LOG.error("Unknown event type: {}", event.getElementEvent());
     }
 
     @Override

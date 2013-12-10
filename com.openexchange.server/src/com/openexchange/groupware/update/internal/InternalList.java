@@ -136,13 +136,13 @@ public final class InternalList {
         final DynamicList registry = DynamicList.getInstance();
         for (final UpdateTask task : OLD_TASKS) {
             if (!registry.addUpdateTask(task)) {
-                LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+                LOG.error("Internal update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
             }
         }
         TASKS = genTaskList();
         for (final UpdateTaskV2 task : TASKS) {
             if (!registry.addUpdateTask(task)) {
-                LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+                LOG.error("Internal update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
             }
         }
     }

@@ -323,7 +323,7 @@ public final class LoginPerformer {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("No session found for ID: " + sessionId);
+                LOG.debug("No session found for ID: {}", sessionId);
             }
             return null;
         }

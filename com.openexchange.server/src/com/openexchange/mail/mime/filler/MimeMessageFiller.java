@@ -368,7 +368,7 @@ public class MimeMessageFiller {
             final String localIp = session.getLocalIp();
             if (isLocalhost(localIp)) {
                 if (DEBUG) {
-                    LOG.debug("Session provides localhost as client IP address: " + localIp);
+                    LOG.debug("Session provides localhost as client IP address: {}", localIp);
                 }
                 // Prefer request's remote address if local IP seems to denote local host
                 String clientIp = LogProperties.getLogProperty(LogProperties.Name.AJP_REQUEST_IP);
@@ -1400,7 +1400,7 @@ public class MimeMessageFiller {
                         final byte[] bs = QuotedPrintableCodec.decodeQuotedPrintable(image.getData().getBytes());
                         dataSource = new MessageDataSource(bs, image.getContentType());
                     } catch (final DecoderException e) {
-                        LOG.warn("Couldn't decode " + image.getTransferEncoding() + " image data.", e);
+                        LOG.warn("Couldn't decode {} image data.", image.getTransferEncoding(), e);
                         continue NextImg;
                     }
                 }

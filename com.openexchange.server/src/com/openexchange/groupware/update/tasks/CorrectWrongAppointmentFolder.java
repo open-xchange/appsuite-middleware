@@ -114,13 +114,9 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
                 final int member = result.getInt(pos++);
                 final int folderId = getPrivateFolder(con, cid, member);
                 if (-1 == folderId) {
-                    LOG.info("Unable to correct folder of participant "
-                        + member + " for appointment " + appId + " in context "
-                        + cid + ".");
+                    LOG.info("Unable to correct folder of participant {} for appointment {} in context {}.", member, appId, cid);
                 } else {
-                    LOG.info("Setting folder to " + folderId + " of participant "
-                        + member + " for appointment " + appId + " in context "
-                        + cid + ".");
+                    LOG.info("Setting folder to {} of participant {} for appointment {} in context {}.", folderId, member, appId, cid);
                     correctFolder(con, cid, appId, member, folderId);
                 }
             }

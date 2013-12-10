@@ -92,12 +92,12 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Starting " + CalendarExtendDNColumnTask.class.getSimpleName());
+            LOG.info("Starting {}", CalendarExtendDNColumnTask.class.getSimpleName());
         }
         modifyColumnInTable("prg_date_rights", contextId);
         modifyColumnInTable("del_date_rights", contextId);
         if (LOG.isInfoEnabled()) {
-            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + " finished.");
+            LOG.info("{} finished.", CalendarExtendDNColumnTask.class.getSimpleName());
         }
     }
 
@@ -105,7 +105,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
 
     private void modifyColumnInTable(final String tableName, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
-            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Going to extend size of column `dn` in table `" + tableName + "`.");
+            LOG.info("{}: Going to extend size of column `dn` in table `{}`.", CalendarExtendDNColumnTask.class.getSimpleName(), tableName);
         }
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
@@ -121,7 +121,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
                         // A column whose VARCHAR size shall possibly be changed
                         final int size = rs.getInt("COLUMN_SIZE");
                         if (size >= DESIRED_SIZE) {
-                            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Column " + tableName + '.' + name + " with size " + size + " is already equal to/greater than " + DESIRED_SIZE);
+                            LOG.info("{}: Column {}{}{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTask.class.getSimpleName(), tableName, '.', name, size, DESIRED_SIZE);
                             return;
                         }
                     }
@@ -146,7 +146,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
             Database.backNoTimeout(contextId, true, con);
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Size of column `dn` in table `" + tableName + "` successfully extended.");
+            LOG.info("{}: Size of column `dn` in table `{}` successfully extended.", CalendarExtendDNColumnTask.class.getSimpleName(), tableName);
         }
     }
 

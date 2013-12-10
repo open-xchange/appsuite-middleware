@@ -87,7 +87,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 
 		try {
 			if(LOG.isDebugEnabled()) {
-				LOG.debug("try to load propfile: " + propfile);
+				LOG.debug("try to load propfile: {}", propfile);
 			}
 
 			prop = new Properties();
@@ -99,19 +99,19 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 			    Streams.close(fis);
 			}
 		} catch (final FileNotFoundException exc) {
-			LOG.error("Cannot find propfile: " + propfile, exc);
+			LOG.error("Cannot find propfile: {}", propfile, exc);
 		} catch (final IOException exc) {
-			LOG.error("Cannot read propfile: " + propfile, exc);
+			LOG.error("Cannot read propfile: {}", propfile, exc);
 		}
 
 		isReminderEnabled = parseProperty(prop, "com.openexchange.groupware.reminder.isReminderEnabled", isReminderEnabled);
 		if(LOG.isDebugEnabled()) {
-			LOG.debug("Reminder property: com.openexchange.groupware.reminder.isReminderEnabled=" + isReminderEnabled);
+			LOG.debug("Reminder property: com.openexchange.groupware.reminder.isReminderEnabled={}", isReminderEnabled);
 		}
 
 		reminderInterval = parseProperty(prop, "com.openexchange.groupware.reminder.reminderInterval", reminderInterval);
 		if(LOG.isDebugEnabled()) {
-			LOG.debug("Reminder property: com.openexchange.groupware.reminder.reminderInterval=" + reminderInterval);
+			LOG.debug("Reminder property: com.openexchange.groupware.reminder.reminderInterval={}", reminderInterval);
 		}
 
 		isInit = true;

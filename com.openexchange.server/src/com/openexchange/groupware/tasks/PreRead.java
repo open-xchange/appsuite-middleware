@@ -126,7 +126,7 @@ final class PreRead<T> {
             if (elements.size() >= MINIMUM_PREREAD) {
                 waitForMinimum.signal();
             }
-            LOG.trace("Offered. " + elements.size());
+            LOG.trace("Offered. {}", elements.size());
         } finally {
             lock.unlock();
         }
@@ -136,7 +136,7 @@ final class PreRead<T> {
         final List<T> retval;
         lock.lock();
         try {
-            LOG.debug("Taking. " + minimum);
+            LOG.debug("Taking. {}", minimum);
             if (minimum && elements.size() < MINIMUM_PREREAD
                 && !preReaderFinished) {
                 LOG.debug("Waiting for enough.");

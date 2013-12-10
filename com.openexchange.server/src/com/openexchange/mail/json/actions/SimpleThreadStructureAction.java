@@ -146,7 +146,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     result.setResponseProperty("cached", Boolean.TRUE);
                     if (DEBUG) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache look-up took " + dur + "msec");
+                        LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache look-up took {}msec", dur);
                     }
                 }
                 /*-
@@ -176,7 +176,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                             MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
                             if (DEBUG) {
                                 final long dur = System.currentTimeMillis() - st;
-                                LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache update took " + dur + "msec");
+                                LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache update took {}msec", dur);
                             }
                         } catch (final Exception e) {
                             // Something went wrong

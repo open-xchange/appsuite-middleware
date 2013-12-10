@@ -210,7 +210,7 @@ public class CachingUserStorage extends UserStorage {
             }
             if (null == tmp) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
+                    LOG.trace("Cache MISS. Context: {} User: {}", context.getContextId(), uid);
                 }
                 identifier = delegate.getUserId(uid, context);
                 try {
@@ -220,7 +220,7 @@ public class CachingUserStorage extends UserStorage {
                 }
             } else {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Cache HIT. Context: " + context.getContextId() + " User: " + uid);
+                    LOG.trace("Cache HIT. Context: {} User: {}", context.getContextId(), uid);
                 }
                 identifier = tmp.intValue();
             }

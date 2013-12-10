@@ -210,7 +210,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             try {
                 handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
             } catch (final OXException e) {
-                LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
+                LOG.error("Default mail account for user {} in context {} could not be created", user.getId(), contextId, e);
             }
         }
     }

@@ -117,7 +117,7 @@ public class InfostoreClearDelTablesTask extends UpdateTaskAdapter {
 
             stmt = con.prepareStatement(query);
             int cleared = stmt.executeUpdate();
-            LOG.info("Cleared " + cleared + " rows in 'del_infostore_document'.");
+            LOG.info("Cleared {} rows in 'del_infostore_document'.", cleared);
             con.commit();
         } catch (SQLException e) {
             rollback(con);

@@ -407,7 +407,7 @@ public final class MessageUtility {
              */
             final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
             if (DEBUG) {
-                LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
+                LOG.debug("Mapped \"GB2312\" charset to \"{}\".", detectedCharset);
             }
             if (isBig5(detectedCharset)) {
                 return readBig5Bytes(bytes);
@@ -436,7 +436,7 @@ public final class MessageUtility {
         final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
         final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
         if (DEBUG) {
-            LOG.debug("Mapped \"" + charset + "\" charset to \"" + detectedCharset + "\".");
+            LOG.debug("Mapped \"{}\" charset to \"{}\".", charset, detectedCharset);
         }
         return new String(bytes, detectedCharset);
     }
@@ -486,7 +486,7 @@ public final class MessageUtility {
              */
             final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
             if (DEBUG) {
-                LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
+                LOG.debug("Mapped \"GB2312\" charset to \"{}\".", detectedCharset);
             }
             if (isBig5(detectedCharset)) {
                 return readBig5Bytes(bytes);
@@ -524,7 +524,7 @@ public final class MessageUtility {
          */
         final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
         if (DEBUG) {
-            LOG.debug("Mapped \"GB18030\" charset to \"" + detectedCharset + "\".");
+            LOG.debug("Mapped \"GB18030\" charset to \"{}\".", detectedCharset);
         }
         if (isBig5(detectedCharset)) {
             return readBig5Bytes(bytes);
@@ -571,7 +571,7 @@ public final class MessageUtility {
             try {
                 return tmp.toString(charset);
             } catch (final UnsupportedCharsetException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + charset + '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", charset, '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
                 final byte[] bytes = tmp.toByteArray();
                 return new String(bytes, Charsets.forName(detectCharset(bytes)));

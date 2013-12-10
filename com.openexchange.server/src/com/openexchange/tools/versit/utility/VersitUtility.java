@@ -218,7 +218,7 @@ public final class VersitUtility {
                     retvalList.add(taskObj);
                 } else {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn("invalid versit object: " + vo.name);
+                        LOG.warn("invalid versit object: {}", vo.name);
                     }
                 }
             }

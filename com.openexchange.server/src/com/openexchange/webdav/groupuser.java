@@ -411,7 +411,7 @@ public final class groupuser extends PermissionServlet {
     public void doError(final HttpServletResponse resp, final int code, final String msg) {
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("status: " + code + " message: " + msg);
+                LOG.debug("status: {} message: {}", code, msg);
             }
 
             resp.setStatus(code);

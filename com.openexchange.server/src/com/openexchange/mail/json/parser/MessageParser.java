@@ -324,7 +324,7 @@ public final class MessageParser {
                     final String key = elem.keys().next();
                     dataArguments.put(key, elem.getString(key));
                 } else {
-                    LOG.warn("Corrupt data argument in JSON object: " + elem.toString());
+                    LOG.warn("Corrupt data argument in JSON object: {}", elem);
                 }
             }
             return dataArguments;
@@ -878,7 +878,7 @@ public final class MessageParser {
         try {
             managedFile = management.getByID(seqId.substring(FILE_PREFIX.length()));
         } catch (final OXException e) {
-            LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()), e);
+            LOG.error("No temp file found for ID: {}", seqId.substring(FILE_PREFIX.length()), e);
             return;
         }
         // Create wrapping upload file

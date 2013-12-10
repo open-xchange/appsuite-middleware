@@ -141,7 +141,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     result.setResponseProperty("cached", Boolean.TRUE);
                     if (DEBUG) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("\tAllAction.perform(): JSON cache look-up took " + dur + "msec");
+                        LOG.debug("\tAllAction.perform(): JSON cache look-up took {}msec", dur);
                     }
                 }
                 /*-
@@ -171,7 +171,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
                             if (DEBUG) {
                                 final long dur = System.currentTimeMillis() - st;
-                                LOG.debug("\tAllAction.perform(): JSON cache update took " + dur + "msec");
+                                LOG.debug("\tAllAction.perform(): JSON cache update took {}msec", dur);
                             }
                         } catch (final Exception e) {
                             // Something went wrong

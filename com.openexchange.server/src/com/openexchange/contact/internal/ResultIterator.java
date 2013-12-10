@@ -293,7 +293,7 @@ public class ResultIterator implements SearchIterator<Contact> {
 					EffectivePermission permission = Tools.getPermission(session.getContextId(), folderID, session.getUserId());
 					canReadAllObjects = permission.canReadAllObjects();
 				} catch (final OXException e) {
-					LOG.debug("Unable to determine effective permissions for folder '" + folderID + "'", e);
+					LOG.debug("Unable to determine effective permissions for folder '{}'", folderID, e);
 				}
 				canReadAllMap.put(folderID, Boolean.valueOf(canReadAllObjects));
 			}

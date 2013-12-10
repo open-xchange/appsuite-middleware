@@ -726,9 +726,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.executeUpdate();
             retval = true;
         } catch (final SQLException e) {
-            LOG.warn("Couldn't delete referenced entries with: " + sql, e);
+            LOG.warn("Couldn't delete referenced entries with: {}", sql, e);
         } catch (final Exception e) {
-            LOG.warn("Couldn't delete referenced entries with: " + sql, e);
+            LOG.warn("Couldn't delete referenced entries with: {}", sql, e);
         } finally {
             closeSQLStuff(stmt);
         }

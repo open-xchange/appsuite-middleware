@@ -329,7 +329,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     @Override
     public void recalculateUsage() throws OXException {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Recalculating usage for Context " + context.getContextId());
+            LOG.info("Recalculating usage for Context {}", context.getContextId());
         }
         final SortedSet<String> filenames = fileStorage.getFileList();
         long entireFileSize = 0;

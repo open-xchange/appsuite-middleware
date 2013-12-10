@@ -92,15 +92,15 @@ public class ImageTransformationUtility {
             val = val.substring(0, idx);
         }
         if ("pjpeg".equals(val)) {
-            LOG.debug("Assuming 'jpeg' for image format " + val);
+            LOG.debug("Assuming 'jpeg' for image format {}", val);
             return "jpeg";
         }
         if ("x-png".equals(val)) {
-            LOG.debug("Assuming 'png' for image format " + val);
+            LOG.debug("Assuming 'png' for image format {}", val);
             return "png";
         }
         if ("x-ms-bmp".equals(val)) {
-            LOG.debug("Assuming 'bmp' for image format " + val);
+            LOG.debug("Assuming 'bmp' for image format {}", val);
             return "bmp";
         }
         return val;

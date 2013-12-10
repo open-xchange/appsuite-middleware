@@ -185,7 +185,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
                 }
             }
             if (!file.delete() && LOG.isWarnEnabled()) {
-                LOG.warn("Temporary file could not be deleted: " + file.getPath());
+                LOG.warn("Temporary file could not be deleted: {}", file.getPath());
             }
         }
         management.removeFromFiles(id);

@@ -149,7 +149,7 @@ public class AttachmentRequest extends CommonRequest {
 
     public boolean action(final String action, final SimpleRequest req) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Attachments: " + action + ' ' + req);
+            LOG.debug("Attachments: {}{}{}", action, ' ', req);
         }
         try {
             if (AJAXServlet.ACTION_ATTACH.equals(action)) {

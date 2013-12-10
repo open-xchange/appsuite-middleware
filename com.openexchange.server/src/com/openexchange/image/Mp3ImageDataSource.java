@@ -185,7 +185,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
                                     mimeType = (String) getObjectValue(DataTypes.OBJ_MIME_TYPE, imageFrameBody);
                                 }
                             } else {
-                                LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
+                                LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: {}", body.getClass().getName());
                             }
                         }
                     }

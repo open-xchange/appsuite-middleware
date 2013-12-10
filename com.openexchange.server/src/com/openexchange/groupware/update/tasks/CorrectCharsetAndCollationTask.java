@@ -142,7 +142,7 @@ public class CorrectCharsetAndCollationTask implements UpdateTask {
     }
 
     private void correctTable(final Connection con, final String table) {
-        LOG.info("Correcting table " + table + ".");
+        LOG.info("Correcting table {}.", table);
         Statement stmt = null;
         try {
             stmt = con.createStatement();

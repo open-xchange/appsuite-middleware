@@ -376,7 +376,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             throws ServletException {
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("STATUS: " + msg + ": (" + code + ')');
+                LOG.debug("STATUS: {}: ({}{}", msg, code, ')');
             }
 
             resp.sendError(code, msg);
@@ -516,7 +516,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             final String client_id, final OutputStream os, final XMLOutputter xo, final Appointment[] conflicts)
             throws IOException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug(message + ':' + status);
+            LOG.debug("{}{}{}", message, ':', status);
         }
 
         final Element e_response = new Element("response", dav);

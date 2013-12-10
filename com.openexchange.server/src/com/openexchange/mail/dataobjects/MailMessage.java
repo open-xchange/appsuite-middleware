@@ -290,7 +290,7 @@ public abstract class MailMessage extends MailPart {
             return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (final NumberFormatException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid color label: " + cl, e);
+                LOG.debug("Invalid color label: {}", cl, e);
             }
             return defaultValue;
         }
@@ -1000,7 +1000,7 @@ public abstract class MailMessage extends MailPart {
                             setSentDate(parsedDate);
                         }
                     } catch (final java.text.ParseException e) {
-                        LOG.warn("Date string could not be parsed: " + sentDateStr, e);
+                        LOG.warn("Date string could not be parsed: {}", sentDateStr, e);
                     }
                 }
             }

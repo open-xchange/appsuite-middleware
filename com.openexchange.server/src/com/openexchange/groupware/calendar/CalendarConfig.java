@@ -175,7 +175,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
                     MAX_PRE_FETCH = mfs;
                 }
             } catch(final NumberFormatException nfe) {
-                LOG.error("Unable to parse config parameter MAX_PRE_FETCH: "+check_max_pre_fetch_size);
+                LOG.error("Unable to parse config parameter MAX_PRE_FETCH: {}", check_max_pre_fetch_size);
             }
         }
         String check_and_remove_past_reminders_string = CalendarConfig.getProperty("CHECK_AND_REMOVE_PAST_REMINDERS");
@@ -201,7 +201,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
         	try {
 				max_operations_in_recurrence_calculations = Integer.parseInt(max_operations_in_recurrence_calculations_string);
 			} catch (final NumberFormatException e) {
-				LOG.error("Unable to parse config parameter MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS: "+max_operations_in_recurrence_calculations_string);
+				LOG.error("Unable to parse config parameter MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS: {}", max_operations_in_recurrence_calculations_string);
 				max_operations_in_recurrence_calculations = 999 * 50;
 			}
         }

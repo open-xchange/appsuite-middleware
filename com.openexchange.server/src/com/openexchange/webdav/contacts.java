@@ -156,7 +156,7 @@ public final class contacts extends XmlServlet<ContactService> {
                 break;
             default:
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: " + method);
+                    LOG.debug("invalid method: {}", method);
                 }
             }
         } else {

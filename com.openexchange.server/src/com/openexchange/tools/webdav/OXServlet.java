@@ -270,7 +270,7 @@ public abstract class OXServlet extends WebDavServlet {
         }
         try {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Entering HTTP sub method. Session: " + getSession(req));
+                LOG.trace("Entering HTTP sub method. Session: {}", getSession(req));
             }
             super.service(req, resp);
         } catch (final ServletException e) {
@@ -379,7 +379,7 @@ public abstract class OXServlet extends WebDavServlet {
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Request to server denied for session: " + session.getSessionID() + ". in WebDAV XML interface. Client login IP changed from " + session.getLocalIp() + " to " + address + '.');
+                    LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, '.');
                 }
                 addUnauthorizedHeader(req, resp);
                 removeSession(session.getSessionID());

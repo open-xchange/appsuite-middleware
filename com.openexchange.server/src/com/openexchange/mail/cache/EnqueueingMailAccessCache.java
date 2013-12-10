@@ -414,7 +414,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                 }
             } catch (final RuntimeException e) {
                 // A runtime exception
-                LOG.warn("Purge-expired run failed: " + e.getMessage(), e);
+                LOG.warn("Purge-expired run failed: {}", e.getMessage(), e);
             }
         }
 

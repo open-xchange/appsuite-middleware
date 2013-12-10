@@ -96,7 +96,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public List<String> listMissingFilesInContext(final int contextId) throws MBeanException {
         try {
-            LOG.info("Listing missing files in context " + contextId);
+            LOG.info("Listing missing files in context {}", contextId);
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
@@ -118,7 +118,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public Map<Integer, List<String>> listMissingFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
-            LOG.info("Listing missing files in filestore " + filestoreId);
+            LOG.info("Listing missing files in filestore {}", filestoreId);
             return listMissing(getContextsForFilestore(filestoreId));
         } catch (final OXException e) {
             LOG.error("", e);
@@ -136,7 +136,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public Map<Integer, List<String>> listMissingFilesInDatabase(final int databaseId) throws MBeanException {
         try {
-            LOG.info("List missing files in database " + databaseId);
+            LOG.info("List missing files in database {}", databaseId);
             return listMissing(getContextsForDatabase(databaseId));
         } catch (final OXException e) {
             LOG.error("", e);
@@ -172,7 +172,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public List<String> listUnassignedFilesInContext(final int contextId) throws MBeanException {
         try {
-            LOG.info("List all unassigned files in context " + contextId);
+            LOG.info("List all unassigned files in context {}", contextId);
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
@@ -194,7 +194,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public Map<Integer, List<String>> listUnassignedFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
-            LOG.info("List all unassigned files in filestore " + filestoreId);
+            LOG.info("List all unassigned files in filestore {}", filestoreId);
             return listUnassigned(getContextsForFilestore(filestoreId));
         } catch (final OXException e) {
             LOG.error("", e);
@@ -212,7 +212,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public Map<Integer, List<String>> listUnassignedFilesInDatabase(final int databaseId) throws MBeanException {
         try {
-            LOG.info("List all unassigned files in database " + databaseId);
+            LOG.info("List all unassigned files in database {}", databaseId);
             return listUnassigned(getContextsForDatabase(databaseId));
         } catch (final OXException e) {
             LOG.error("", e);
@@ -253,7 +253,7 @@ public abstract class Consistency implements ConsistencyMBean {
         PreparedStatement stmt = null;
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Deleting context_server2dbpool mapping for context " + contextId);
+                LOG.debug("Deleting context_server2dbpool mapping for context {}", contextId);
             }
             // delete context from context_server2db_pool
             stmt = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
@@ -268,14 +268,14 @@ public abstract class Consistency implements ConsistencyMBean {
             }
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Deleting login2context entries for context " + contextId);
+                LOG.debug("Deleting login2context entries for context {}", contextId);
             }
             stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Deleting context entry for context " + contextId);
+                LOG.debug("Deleting context entry for context {}", contextId);
             }
             stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
@@ -337,14 +337,14 @@ public abstract class Consistency implements ConsistencyMBean {
                     ctxs.remove(ctx);
                 }
                 if( ctxs.size() > 0 ) {
-                    LOG.info("Schema " + schema + " is broken");
+                    LOG.info("Schema {} is broken", schema);
                     for(final Integer ctx : ctxs) {
                         if( repair ) {
-                            LOG.info("Deleting inconsistent entry for context " + ctx + " from configdb");
+                            LOG.info("Deleting inconsistent entry for context {} from configdb", ctx);
                             deleteContextFromConfigDB(confCon, ctx.intValue()); 
                             ret.add("Deleted inconsistent entry for context " + ctx + " from configdb");
                         } else {
-                            LOG.info("Context " + ctx + " does not exist anymore");
+                            LOG.info("Context {} does not exist anymore", ctx);
                             ret.add("Context " + ctx + " does not exist anymore");
                         }
                     }
@@ -526,27 +526,27 @@ public abstract class Consistency implements ConsistencyMBean {
 
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
-        LOG.info("Checking context " + ctx.getContextId() + ". Using solvers db: " + dbSolver.description() + " attachments: " + attachmentSolver.description() + " snippets: " + snippetSolver.description() + " files: " + fileSolver.description());
+        LOG.info("Checking context {}. Using solvers db: {} attachments: {} snippets: {} files: {}", ctx.getContextId(), dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description());
         stor.recreateStateFile();
 
         LOG.info("Listing all files in filestore");
         final SortedSet<String> filestoreset = stor.getFileList();
-        LOG.info("Found " + filestoreset.size() + " files in the filestore for this context");
+        LOG.info("Found {} files in the filestore for this context", filestoreset.size());
         LOG.info("Loading all attachments");
         final SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(ctx);
-        LOG.info("Found " + attachmentset.size() + " attachments");
+        LOG.info("Found {} attachments", attachmentset.size());
         final SortedSet<String> snippetset = getSnippetFileStoreLocationsperContext(ctx);
-        LOG.info("Found " + attachmentset.size() + " attachments");
+        LOG.info("Found {} attachments", attachmentset.size());
         SortedSet<String> dbfileset;
         try {
             LOG.info("Loading all infostore filestore locations");
             dbfileset = database.getDocumentFileStoreLocationsperContext(ctx);
-            LOG.info("Found " + dbfileset.size() + " infostore filepaths");
+            LOG.info("Found {} infostore filepaths", dbfileset.size());
             final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
 
-            LOG.info("Found " + joineddbfileset.size() + " filestore ids in total. There are " + filestoreset.size() + " files in the filespool. A difference of " + Math.abs(joineddbfileset.size() - filestoreset.size()));
+            LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
 
             // Build the difference set of the database set, so that the final
             // dbfileset contains all the members that aren't in the filestoreset

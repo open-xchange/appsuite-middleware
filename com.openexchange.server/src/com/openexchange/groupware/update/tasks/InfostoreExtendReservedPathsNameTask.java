@@ -95,7 +95,7 @@ public final class InfostoreExtendReservedPathsNameTask extends UpdateTaskAdapte
     @Override
     public void perform(PerformParameters params) throws OXException {
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(InfostoreExtendReservedPathsNameTask.class);
-        log.info("Performing update task " + InfostoreExtendReservedPathsNameTask.class.getSimpleName());
+        log.info("Performing update task {}", InfostoreExtendReservedPathsNameTask.class.getSimpleName());
         Connection connnection = Database.getNoTimeout(params.getContextId(), true);
         try {
             connnection.setAutoCommit(false);
@@ -111,7 +111,7 @@ public final class InfostoreExtendReservedPathsNameTask extends UpdateTaskAdapte
             autocommit(connnection);
             Database.backNoTimeout(params.getContextId(), true, connnection);
         }
-        log.info(InfostoreExtendReservedPathsNameTask.class.getSimpleName() + " successfully performed.");
+        log.info("{} successfully performed.", InfostoreExtendReservedPathsNameTask.class.getSimpleName());
     }
 
 }

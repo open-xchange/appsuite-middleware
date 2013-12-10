@@ -309,7 +309,7 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void verifySession(final HttpServletRequest req, final SessiondService sessiondService, final String sessionId, final ServerSession session) throws OXException {
         if (!sessionId.equals(session.getSessionID())) {
             if (INFO) {
-                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
+                LOG.info("Request's session identifier \"{}\" differs from the one indicated by SessionD service \"{}\".", sessionId, session.getSessionID());
             }
             throw SessionExceptionCodes.WRONG_SESSION.create();
         }
@@ -317,7 +317,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (!ctx.isEnabled()) {
             sessiondService.removeSession(sessionId);
             if (INFO) {
-                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+                LOG.info("The context {} associated with session is locked.", ctx.getContextId());
             }
             throw SessionExceptionCodes.CONTEXT_LOCKED.create();
         }
@@ -346,7 +346,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
                     if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
                         if (INFO) {
-                            LOG.info("User " + session.getUserId() + " in context " + session.getContextId() + " exceeded max. concurrent requests (" + maxConcurrentRequests + ").");
+                            LOG.info("User {} in context {} exceeded max. concurrent requests ({}).", session.getUserId(), session.getContextId(), maxConcurrentRequests);
                         }
                         throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                     }
@@ -639,7 +639,7 @@ public abstract class SessionServlet extends AJAXServlet {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (INFO && !"unset".equals(sessionId)) {
-                LOG.info("There is no session associated with session identifier: " + sessionId);
+                LOG.info("There is no session associated with session identifier: {}", sessionId);
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
@@ -657,7 +657,7 @@ public abstract class SessionServlet extends AJAXServlet {
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!user.isMailEnabled()) {
                 if (INFO) {
-                    LOG.info("User " + user.getId() + " in context " + context.getContextId() + " is not activated.");
+                    LOG.info("User {} in context {} is not activated.", user.getId(), context.getContextId());
                 }
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
@@ -667,7 +667,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
                 if (INFO) {
-                    LOG.info("The context associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
+                    LOG.info("The context associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
                 }
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
@@ -677,7 +677,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
                     if (INFO) {
-                        LOG.info("The user associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
+                        LOG.info("The user associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
                     }
                     throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                 }
@@ -704,7 +704,7 @@ public abstract class SessionServlet extends AJAXServlet {
             if (null == cookie) {
                 LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
                 if (INFO) {
-                    LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
+                    LOG.info("Restored public session cookie for \"{}\": {}", session.getLogin(), cookieName);
                 }
             }
 //            else {
@@ -713,7 +713,7 @@ public abstract class SessionServlet extends AJAXServlet {
 //                    removeOXCookies(req, resp, Collections.singletonList(cookieName));
 //                    LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
 //                    if (INFO) {
-//                        LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
+//                        LOG.info("Restored public session cookie for \"{}\": {}", session.getLogin(), cookieName);
 //                    }
 //                }
 //            }
@@ -746,7 +746,7 @@ public abstract class SessionServlet extends AJAXServlet {
         final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"));
         if (secret == null || !session.getSecret().equals(secret)) {
             if (logInfo && null != secret) {
-                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
+                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
             }
             final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             oxe.setProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name(), null == secret ? "null" : secret);

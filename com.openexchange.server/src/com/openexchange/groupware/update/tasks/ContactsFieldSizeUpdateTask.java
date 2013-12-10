@@ -236,11 +236,9 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                     final int size = rs.getInt("COLUMN_SIZE");
                     final Integer desiredSize = columnRefer.get(name);
                     if (desiredSize.intValue() == size) {
-                        LOG.info("FIELD " + sqltable + '.' + name + " WITH SIZE " + size + " IS CORRECT "
-                                + desiredSize);
+                        LOG.info("FIELD {}{}{} WITH SIZE {} IS CORRECT {}", sqltable, '.', name, size, desiredSize);
                     } else {
-                        LOG.warn("CHANGE FIELD " + sqltable + '.' + name + " WITH SIZE " + size + " TO NEW SIZE "
-                                + desiredSize);
+                        LOG.warn("CHANGE FIELD {}{}{} WITH SIZE {} TO NEW SIZE {}", sqltable, '.', name, size, desiredSize);
                         toChange.put(name, desiredSize);
                     }
                 }
@@ -278,7 +276,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
             alterCommand = alterBuilder.toString();
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("DROPPING SQL FIELDS: " + alterCommand);
+            LOG.info("DROPPING SQL FIELDS: {}", alterCommand);
         }
         executeAlterCommand(alterCommand, contextId);
     }
@@ -313,7 +311,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
             alterCommand = alterBuilder.toString();
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("CHANGING SQL FIELDS' SIZE: " + alterCommand);
+            LOG.info("CHANGING SQL FIELDS' SIZE: {}", alterCommand);
         }
         executeAlterCommand(alterCommand, contextId);
     }

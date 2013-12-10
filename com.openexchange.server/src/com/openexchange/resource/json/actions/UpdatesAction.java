@@ -101,7 +101,7 @@ public final class UpdatesAction extends AbstractResourceAction {
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
         } catch (final OXException exc) {
-            LOG.debug("Tried to find resources that were modified since "+lastModified, exc);
+            LOG.debug("Tried to find resources that were modified since {}", lastModified, exc);
         }
 
         final JSONArray modified = new JSONArray();

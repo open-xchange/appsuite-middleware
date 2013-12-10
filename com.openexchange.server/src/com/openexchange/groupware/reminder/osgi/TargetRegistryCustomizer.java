@@ -77,7 +77,7 @@ public class TargetRegistryCustomizer implements ServiceTrackerCustomizer<Target
         final TargetService targetService = context.getService(reference);
         final int module = parseModule(reference);
         if (-1 == module) {
-            LOG.error("Registration of service " + targetService.getClass().getName() + " is missing property defining the module.");
+            LOG.error("Registration of service {} is missing property defining the module.", targetService.getClass().getName());
             context.ungetService(reference);
             return null;
         }

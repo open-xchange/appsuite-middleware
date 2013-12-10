@@ -95,7 +95,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
             ForeignKeyOld fk = new ForeignKeyOld("infostore_document", "infostore_id", "infostore", "id");
 
             if( keys.contains(fk)) {
-                LOG.info("Foreign Key "+fk+" exists. Skipping Update Task.");
+                LOG.info("Foreign Key {} exists. Skipping Update Task.", fk);
                 return;
             }
 
@@ -120,13 +120,13 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
                     // Version 0 has no file.
                     Tools.removeFile(cid, fileStoreLocation);
                 } else if (0 != version) {
-                    LOG.warn("Found file version without location in filestore. cid:" + cid + ",id:" + id + ",version:" + version + ".");
+                    LOG.warn("Found file version without location in filestore. cid:{},id:{},version:{}.", cid, id, version);
                 }
                 counter++;
             }
-            LOG.info("Cleared "+counter+" orphaned documents");
+            LOG.info("Cleared {} orphaned documents", counter);
 
-            LOG.info("Adding foreign key: "+fk);
+            LOG.info("Adding foreign key: {}", fk);
 
             // Need one with CID as well, so FK system doesn't work.
             addKey.executeUpdate();

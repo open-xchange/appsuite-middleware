@@ -106,7 +106,7 @@ public final class MailCacheConfiguration implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been started. Aborting.");
+            LOG.warn("{} has already been started. Aborting.", MailCacheConfiguration.class.getSimpleName());
         }
         configure();
     }
@@ -114,7 +114,7 @@ public final class MailCacheConfiguration implements Initialization {
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been stopped. Aborting.");
+            LOG.warn("{} has already been stopped. Aborting.", MailCacheConfiguration.class.getSimpleName());
         }
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {

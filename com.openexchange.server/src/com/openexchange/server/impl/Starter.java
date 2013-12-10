@@ -253,7 +253,7 @@ public class Starter implements Initialization {
                 init.start();
                 started.push(init);
             } catch (Throwable t) {
-                LOG.error("initialization of " + init.getClass().getName() + " failed", t);
+                LOG.error("initialization of {} failed", init.getClass().getName(), t);
             }
         }
 
@@ -290,7 +290,7 @@ public class Starter implements Initialization {
                 init.start();
                 started.push(init);
             } catch (final OXException e) {
-                LOG.error("Initialization of " + init.getClass().getName() + " failed", e);
+                LOG.error("Initialization of {} failed", init.getClass().getName(), e);
             }
         }
         if (LOG.isInfoEnabled()) {
@@ -323,22 +323,22 @@ public class Starter implements Initialization {
             }
             final long totalMemory = Runtime.getRuntime().totalMemory() >> 10;
             if (LOG.isInfoEnabled()) {
-                LOG.info("VM Total Memory       : " + NumberFormat.getNumberInstance().format(totalMemory) + " KB");
+                LOG.info("VM Total Memory       : {} KB", NumberFormat.getNumberInstance().format(totalMemory));
             }
             final long freeMemory = Runtime.getRuntime().freeMemory() >> 10;
             if (LOG.isInfoEnabled()) {
-                LOG.info("VM Free Memory        : " + NumberFormat.getNumberInstance().format(freeMemory) + " KB");
+                LOG.info("VM Free Memory        : {} KB", NumberFormat.getNumberInstance().format(freeMemory));
             }
             final long usedMemory = totalMemory - freeMemory;
             if (LOG.isInfoEnabled()) {
-                LOG.info("VM Used Memory        : " + NumberFormat.getNumberInstance().format(usedMemory) + " KB");
+                LOG.info("VM Used Memory        : {} KB", NumberFormat.getNumberInstance().format(usedMemory));
             }
         } catch (final Exception gee) {
             LOG.error("", gee);
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("System version : " + Version.NAME + " Server [" + Version.getInstance().getVersionString() + "] initializing ...");
-            LOG.info("Server Footprint : " + OXException.getServerId());
+            LOG.info("System version : {} Server [{}] initializing ...", Version.NAME, Version.getInstance().getVersionString());
+            LOG.info("Server Footprint : {}", OXException.getServerId());
         }
     }
 

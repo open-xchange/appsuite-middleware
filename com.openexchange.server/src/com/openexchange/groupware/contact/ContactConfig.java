@@ -85,11 +85,11 @@ public class ContactConfig {
     public void initialize(ConfigurationService configuration) {
         final Properties props = configuration.getFile(FILENAME);
         if (null == props) {
-            LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
+            LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
         } else {
             this.props.clear();
             this.props.putAll(props);
-            LOG.info("Read configuration file " + FILENAME + ".");
+            LOG.info("Read configuration file {}.", FILENAME);
         }
         parse();
     }
@@ -130,7 +130,7 @@ public class ContactConfig {
 
     private void logNotInitialized() {
         if (props.isEmpty()) {
-            LOG.info("Configuration file " + FILENAME + " not read. Using defaults.");
+            LOG.info("Configuration file {} not read. Using defaults.", FILENAME);
         }
     }
 

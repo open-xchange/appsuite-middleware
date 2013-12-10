@@ -366,7 +366,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
              * Already committed
              */
             if (LOG.isWarnEnabled()) {
-                LOG.warn("Storage already committed:\n" + params.getCommittedTrace(), e);
+                LOG.warn("Storage already committed:\n{}", params.getCommittedTrace(), e);
             }
             return;
         }

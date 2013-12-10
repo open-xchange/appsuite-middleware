@@ -93,7 +93,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
         if (added) {
             UpdateTaskCollection.getInstance().dirtyVersion();
         } else {
-            LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is already registered.");
+            LOG.error("Update task \"{}\" is already registered.", updateTask.getClass().getName());
         }
         return added;
     }
@@ -106,7 +106,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
     public void removeUpdateTask(final UpdateTask updateTask) {
         final UpdateTask removed = taskList.remove(updateTask.getClass());
         if (null == removed) {
-            LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is unknown and could not be deregistered.");
+            LOG.error("Update task \"{}\" is unknown and could not be deregistered.", updateTask.getClass().getName());
         } else {
             UpdateTaskCollection.getInstance().dirtyVersion();
         }

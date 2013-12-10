@@ -88,7 +88,7 @@ public class ExceptionUtils {
         if (t instanceof ThreadDeath) {
             final Map<String, String> taskProperties = LogProperties.getPropertyMap();
             if (null == taskProperties) {
-                LOG.error(MARKER + "Thread death" + MARKER, t);
+                LOG.error("{}Thread death{}", MARKER, MARKER, t);
             } else {
                 final StringBuilder logBuilder = new StringBuilder(512);
                 final Map<String, String> sorted = new TreeMap<String, String>();

@@ -627,7 +627,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         final long lastModified = lock.lastModified();
         if (lastModified > 0 && lastModified + maxLifeTime < System.currentTimeMillis()) {
             unlock();
-            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed by a crashed/restarted application.");
+            LOG.error("Deleting a very old stale lock file here {}. Assuming it has not been removed by a crashed/restarted application.", lock.getAbsolutePath());
         }
         final long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
@@ -667,7 +667,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         final File lock = new File(storage, LOCK_FILENAME);
         if (!lock.delete()) {
             if (lock.exists()) {
-                LOG.error("Couldn't delete lock file: " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
+                LOG.error("Couldn't delete lock file: {}. This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.", lock.getAbsolutePath());
                 throw FileStorageCodes.UNLOCK.create();
             }
         }

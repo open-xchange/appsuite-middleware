@@ -399,7 +399,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         try {
             return ImageIO.read(inputStream);
         } catch (final RuntimeException e) {
-            LOG.debug("error reading image from stream for " + formatName, e);
+            LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
         } finally {
             Streams.close(inputStream);
@@ -422,13 +422,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
             try {
                 metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
             } catch (ImageProcessingException e) {
-                LOG.warn("error getting metadata for " + formatName, e);
+                LOG.warn("error getting metadata for {}", formatName, e);
             }
             return ImageIO.read(managedFile.getInputStream());
         } catch (OXException e) {
             throw new IOException("error accessing managed file", e);
         } catch (IllegalArgumentException e) {
-            LOG.debug("error reading image from stream for " + formatName, e);
+            LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
         } finally {
             if (managedFile != null) {

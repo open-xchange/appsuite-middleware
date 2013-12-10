@@ -277,7 +277,7 @@ public class AppointmentWriter extends CalendarWriter {
             }
             break;
         default:
-            LOG.warn("Column " + column + " is unknown for appointment.");
+            LOG.warn("Column {} is unknown for appointment.", column);
         }
     }
 

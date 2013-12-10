@@ -235,14 +235,14 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 } else {
                     final File tmp = File.createTempFile(prefix, suffix, directory);
                     if (!tmpFile.delete()) {
-                        LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath());
+                        LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
                     }
                     tmpFile = tmp;
                     tmpFile.deleteOnExit();
                 }
             } catch (final IOException e) {
                 if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
-                    LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
+                    LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
                 }
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             }
@@ -314,14 +314,14 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     final File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
                     copyFile(tmpFile, tmp);
                     if (!tmpFile.delete()) {
-                        LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath());
+                        LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
                     }
                     tmpFile = tmp;
                     tmpFile.deleteOnExit();
                 }
             } catch (final IOException e) {
                 if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
-                    LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
+                    LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
                 }
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             } finally {

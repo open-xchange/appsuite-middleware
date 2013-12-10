@@ -305,7 +305,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * Never stop the server even if a needed service is absent
          */
         if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
+            LOG.warn("Absent service: {}", clazz.getName());
         }
         if (CacheService.class.equals(clazz)) {
             final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
@@ -323,7 +323,7 @@ public final class ServerActivator extends HousekeepingActivator {
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
+            LOG.info("Re-available service: {}", clazz.getName());
         }
         ServerServiceRegistry.getInstance().addService(clazz, getService(clazz));
         if (CacheService.class.equals(clazz)) {
@@ -352,7 +352,7 @@ public final class ServerActivator extends HousekeepingActivator {
         try {
             return Integer.parseInt(toParse.trim());
         } catch (NumberFormatException e) {
-            LOG.error("Not an integer: " + toParse, e);
+            LOG.error("Not an integer: {}", toParse, e);
             return defaultValue;
         }
     }

@@ -583,7 +583,7 @@ public final class FolderWriter {
                 } else {
 
                     if (!additionalFields.knows(curField) && LOG.isWarnEnabled()) {
-                        LOG.warn("Unknown folder field: " + curField);
+                        LOG.warn("Unknown folder field: {}", curField);
                     }
 
                     final AdditionalFolderField folderField = additionalFields.get(curField);

@@ -958,7 +958,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                     dateObject.put("utc", parsedDate.getTime());
                 }
             } catch (final ParseException pex) {
-                LOG.warn("Date string could not be parsed: " + date);
+                LOG.warn("Date string could not be parsed: {}", date);
             }
         }
         dateObject.put("date", date);

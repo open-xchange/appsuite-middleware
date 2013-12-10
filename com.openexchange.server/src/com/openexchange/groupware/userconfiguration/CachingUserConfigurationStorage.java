@@ -308,7 +308,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             try {
                 cache.put(key, userConfig, false);
             } catch (RuntimeException e) {
-                LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
+                LOG.warn("Failed to add user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
             } finally {
                 cacheWriteLock.unlock();
             }
@@ -348,7 +348,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cache.remove(key);
             cache.remove(keyWithoutExtended);
         } catch (RuntimeException e) {
-            LOG.warn("Failed to remove user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
+            LOG.warn("Failed to remove user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
         } finally {
             cacheWriteLock.unlock();
         }

@@ -110,7 +110,7 @@ public class ImageGetAction implements AJAXActionService {
             }
             if (registrationName == null) {
                 if (DEBUG) {
-                    LOG.debug("Request URI cannot be resolved to an image location: " + serlvetRequestURI);
+                    LOG.debug("Request URI cannot be resolved to an image location: {}", serlvetRequestURI);
                 }
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Unknown image location.");
             }
@@ -128,7 +128,7 @@ public class ImageGetAction implements AJAXActionService {
         }
         if (dataSource == null) {
             if (DEBUG) {
-                LOG.debug("Data source cannot be found for: " + registrationName);
+                LOG.debug("Data source cannot be found for: {}", registrationName);
             }
             throw AjaxExceptionCodes.BAD_REQUEST.create("Invalid image location.");
         }
