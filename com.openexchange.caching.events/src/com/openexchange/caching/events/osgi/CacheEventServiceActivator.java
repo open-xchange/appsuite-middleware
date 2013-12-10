@@ -78,14 +78,14 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         CacheEventServiceLookup.set(this);
         registerService(CacheEventService.class, new CacheEventServiceImpl());
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         CacheEventServiceLookup.set(null);
         super.stopBundle();
     }
