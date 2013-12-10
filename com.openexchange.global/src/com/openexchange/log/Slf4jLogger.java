@@ -80,7 +80,7 @@ import org.slf4j.spi.LocationAwareLogger;
  */
 public class Slf4jLogger extends AbstractDelegatingLogger {
 
-    private static final String FQCN = AbstractDelegatingLogger.class.getName();
+    private static final String FQCN = Slf4jLogger.class.getName();
 
     private final org.slf4j.Logger logger;
     private final LocationAwareLogger locationAwareLogger;
