@@ -50,49 +50,50 @@
 package com.openexchange.ms;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link MsExceptionCodes} - Enumeration of all {@link OXException}s known in Messaging Service (MS) module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum MsExceptionCodes implements OXExceptionCode {
+public enum MsExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(MsExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MsExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 2),
     /**
      * No such queue or could not be created: %1$s
      */
-    QUEUE_NOT_FOUND(MsExceptionMessages.QUEUE_NOT_FOUND_MSG, CATEGORY_ERROR, 3),
+    QUEUE_NOT_FOUND("No such queue or could not be created: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 3),
     /**
      * No such topic or could not be created: %1$s
      */
-    TOPIC_NOT_FOUND(MsExceptionMessages.TOPIC_NOT_FOUND_MSG, CATEGORY_ERROR, 4),
+    TOPIC_NOT_FOUND("No such topic or could not be created: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 4),
     /**
      * Illegal state: %1$s
      */
-    ILLEGAL_STATE(MsExceptionMessages.ILLEGAL_STATE_MSG, CATEGORY_ERROR, 5),
+    ILLEGAL_STATE("Illegal state: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 5),
     /**
      * A filter expression has not been validated.
      */
-    INVALID_SELECTOR(MsExceptionMessages.INVALID_SELECTOR_MSG, CATEGORY_ERROR, 6),
+    INVALID_SELECTOR("A filter expression has not been validated.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 6),
     /**
      * Either no such queue or a topic or could not be created: %1$s
      */
-    DESTINATION_NOT_FOUND(MsExceptionMessages.DESTINATION_NOT_FOUND_MSG, CATEGORY_ERROR, 7),
+    DESTINATION_NOT_FOUND("Either no such queue or a topic or could not be created: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 7),
     /**
      * A security problem occurred: %1$s
      */
-    SECURITY_ERROR(MsExceptionMessages.SECURITY_ERROR_MSG, CATEGORY_PERMISSION_DENIED, 8),
+    SECURITY_ERROR("A security problem occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_PERMISSION_DENIED, 8),
 
     ;
 
@@ -104,9 +105,11 @@ public enum MsExceptionCodes implements OXExceptionCode {
     private final Category category;
     private final int detailNumber;
     private final String message;
+    private final String displayMessage;
 
-    private MsExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private MsExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.detailNumber = detailNumber;
         this.category = category;
     }
@@ -119,6 +122,11 @@ public enum MsExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -165,4 +173,5 @@ public enum MsExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }
