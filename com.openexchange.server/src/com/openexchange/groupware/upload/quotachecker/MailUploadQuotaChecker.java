@@ -90,7 +90,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
             try {
                 globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 globalQuota = 0;
             }
             if (globalQuota > 0) {
@@ -123,7 +123,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
             try {
                 globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 globalQuota = 0;
             }
             if (globalQuota > 0) {

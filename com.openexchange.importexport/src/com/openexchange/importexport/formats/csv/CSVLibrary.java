@@ -173,7 +173,7 @@ public final class CSVLibrary {
             }
             return bob.toString();
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         } catch (final IOException e) {
             if ("Bad file descriptor".equals(e.getMessage())) {

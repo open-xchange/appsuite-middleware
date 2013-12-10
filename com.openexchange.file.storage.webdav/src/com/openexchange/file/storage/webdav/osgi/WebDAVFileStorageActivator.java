@@ -85,7 +85,7 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
                 new WebDAVServiceRegisterer(context)));
             openTrackers();
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(WebDAVFileStorageActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(WebDAVFileStorageActivator.class).error("", e);
             throw e;
         }
     }
@@ -104,7 +104,7 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
              */
             WebDAVServices.setServices(null);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(WebDAVFileStorageActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(WebDAVFileStorageActivator.class).error("", e);
             throw e;
         }
     }

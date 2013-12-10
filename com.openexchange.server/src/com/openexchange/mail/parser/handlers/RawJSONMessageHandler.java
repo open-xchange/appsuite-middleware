@@ -590,7 +590,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 }
             } catch (final JSONException e) {
                 // Cannot occur
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

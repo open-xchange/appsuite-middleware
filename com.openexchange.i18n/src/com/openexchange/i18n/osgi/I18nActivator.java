@@ -145,7 +145,7 @@ public class I18nActivator extends HousekeepingActivator {
         final String value = config.getProperty("i18n.language.path");
         if (null == value) {
             final FileNotFoundException e = new FileNotFoundException("Configuration property 'i18n.language.path' is not defined.");
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
         final File dir = new File(value);

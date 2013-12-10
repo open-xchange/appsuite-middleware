@@ -102,7 +102,7 @@ public abstract class AbstractJMXHandler {
             try {
                 md = MessageDigest.getInstance("SHA-1");
             } catch (final NoSuchAlgorithmException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return raw;
             }
 
@@ -115,7 +115,7 @@ public abstract class AbstractJMXHandler {
                 /*
                  * Cannot occur
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             md.update(salt);
 

@@ -96,7 +96,7 @@ public class FileTemplate extends CompiledLineParserTemplate {
             }
             return collect.toString();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return e.toString();
         } finally {
             Streams.close(reader);

@@ -184,10 +184,10 @@ public final class CoyoteTask implements Task<Object> {
             ajpProcessor.process(client);
         } catch (final java.net.SocketException e) {
             // SocketExceptions are normal
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         } catch (final java.io.IOException e) {
             // IOExceptions are normal
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         } catch (final ThreadDeath fatal) {
             throw fatal;
         } catch (final VirtualMachineError fatal) {
@@ -197,7 +197,7 @@ public final class CoyoteTask implements Task<Object> {
              * Any other exception or error is odd.
              */
             ExceptionUtils.handleThrowable(e);
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             ajpProcessor.action(ActionCode.STOP, null);
             // ajpProcessor.recycle();

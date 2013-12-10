@@ -95,7 +95,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 /*
                  * Cannot occur since we are cloneable
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final InternalError error = new InternalError(e.getMessage());
                 error.initCause(e);
                 throw error;
@@ -353,7 +353,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
             }
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final InternalError error = new InternalError(e.getMessage());
             error.initCause(e);
             throw error;
@@ -749,7 +749,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 // TODO: Use account ID later on!!! Currently default mail account is passed.
                 spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(storage.getDefaultMailAccount(userId, cid)));
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return ((null != spamHandlerFound && spamHandlerFound.booleanValue()) && spamEnabled);

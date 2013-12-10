@@ -140,7 +140,7 @@ public final class DeleteAction extends AbstractFolderAction {
                     folderService.deleteFolder(treeId, folderId, timestamp, session);
                 } catch (final OXException e) {
                     e.setCategory(Category.CATEGORY_ERROR);
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                     errorOccurred = true;
                     foldersWithError.add(folderId);
                 }
@@ -164,7 +164,7 @@ public final class DeleteAction extends AbstractFolderAction {
                     folderService.deleteFolder(treeId, folderId, timestamp, session);
                 } catch (final OXException e) {
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                     e.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(e);
                     responseArray.put(folderId);

@@ -484,7 +484,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 data.close();
             } catch (final IOException e) {
-                org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class).error("", e);
             }
         }
     }

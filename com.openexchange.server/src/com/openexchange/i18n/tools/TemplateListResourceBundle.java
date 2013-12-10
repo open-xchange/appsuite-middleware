@@ -121,7 +121,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
                     parseTemplate(template);
                 }
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 Streams.close(is);
             }

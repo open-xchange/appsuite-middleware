@@ -126,7 +126,7 @@ public final class OutlookFolderDeleteListener implements DeleteListener {
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    LoggerFactory.getLogger(OutlookFolderDeleteListener.class).error(e.getMessage(), e);
+                    LoggerFactory.getLogger(OutlookFolderDeleteListener.class).error("", e);
                 }
             }
         }

@@ -193,7 +193,7 @@ public class OXContainerConverter {
         try {
             domain = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         atdomain = new StringBuilder().append('@').append(domain).toString();
     }
@@ -1198,7 +1198,7 @@ public class OXContainerConverter {
                 if (maxSize > 0 && bytes.length > maxSize) {
                     final ConverterException e = new ConverterException(
                         "Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                     bytes = null;
                 }
             } finally {
@@ -1764,7 +1764,7 @@ public class OXContainerConverter {
                 final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                 result = calColl.calculateFirstRecurring(app);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw new ConverterException(e);
             }
             if (result.size() == 1) {

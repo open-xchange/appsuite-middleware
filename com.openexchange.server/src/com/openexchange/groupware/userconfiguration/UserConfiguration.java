@@ -347,7 +347,7 @@ public class UserConfiguration implements Serializable, Cloneable {
              */
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new InternalError(e.getMessage());
         }
     }
@@ -869,12 +869,12 @@ public class UserConfiguration implements Serializable, Cloneable {
                 }
             } catch (final OXException x) {
                 if (UserExceptionCode.USER_NOT_FOUND.equals(x)) {
-                    LOG.debug(x.getMessage(), x);
+                    LOG.debug("", x);
                 } else {
-                    LOG.error(x.getMessage(), x);
+                    LOG.error("", x);
                 }
             } catch (final RuntimeException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
             }
         }
         return retval;

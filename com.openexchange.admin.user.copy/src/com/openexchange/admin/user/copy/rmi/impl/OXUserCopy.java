@@ -137,7 +137,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
         try {
             newUserId = service.copyUser(i(src.getId()), i(dest.getId()), i(user.getId()));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final StorageException storageException = new StorageException(e.getMessage());
             setStackTraceSafe(storageException, e);
             throw new StorageException(e.getMessage());
@@ -159,7 +159,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
     private final void contextcheck(final Context ctx, final String type) throws InvalidDataException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidDataException e = new InvalidDataException("Client sent invalid " + type + " context data object");
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

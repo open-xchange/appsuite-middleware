@@ -284,7 +284,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             try {
                 tasks.add(get.loadAndCheck());
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         return new ArrayIterator<Task>(tasks.toArray(new Task[tasks.size()]));

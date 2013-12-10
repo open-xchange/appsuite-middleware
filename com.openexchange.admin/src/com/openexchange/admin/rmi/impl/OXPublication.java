@@ -104,7 +104,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 }
             }
         } catch (OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (InvalidCredentialsException e) {
             throw new RemoteException(e.getMessage());
         } catch (StorageException e) {
@@ -139,7 +139,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 }
             }
         } catch (OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (InvalidCredentialsException e) {
             throw new RemoteException(e.getMessage());
         } catch (StorageException e) {

@@ -163,11 +163,11 @@ public class InfostorePublicationServlet extends HttpServlet {
             }
 
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             try {
                 resp.getWriter().print(x.toString());
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

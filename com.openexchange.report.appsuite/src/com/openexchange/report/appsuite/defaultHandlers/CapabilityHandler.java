@@ -97,7 +97,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             contextReport.set("macdetail-quota", "quota", quota);
 
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -144,7 +144,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
 
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

@@ -273,7 +273,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -292,7 +292,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -323,7 +323,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 con.setAutoCommit(true);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

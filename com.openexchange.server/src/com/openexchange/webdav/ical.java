@@ -242,13 +242,13 @@ public final class ical extends PermissionServlet {
                 }
                 patchers.forEachValue(PATCH_PROCEDURE);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 if (null != iter) {
                     try {
                         iter.close();
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -271,13 +271,13 @@ public final class ical extends PermissionServlet {
                     // }
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 if (null != itTask) {
                     try {
                         itTask.close();
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -287,7 +287,7 @@ public final class ical extends PermissionServlet {
             try {
                 emitter.writeSession(iSession, resp.getOutputStream());
             } catch (final ConversionError e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             if (null == principal) {
@@ -304,10 +304,10 @@ public final class ical extends PermissionServlet {
             // addEntries(context, principal, entriesApp, entriesTask);
             // deleteEntries(context, principal, mapping, entriesApp, entriesTask);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }

@@ -444,7 +444,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
             }, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.NUMBER_OF_VERSIONS_FAILED.create(
                 e,
                 I(document.getId()),

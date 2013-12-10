@@ -155,7 +155,7 @@ public final class Pools implements Runnable {
                     }
                     if (!destroyed) {
                         final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey());
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -187,7 +187,7 @@ public final class Pools implements Runnable {
                 }
                 if (!destroyed) {
                     final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey());
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             pools.clear();

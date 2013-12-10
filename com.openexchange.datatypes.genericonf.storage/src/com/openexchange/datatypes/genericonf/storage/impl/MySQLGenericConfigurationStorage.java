@@ -131,7 +131,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 }
             } catch (final SQLException e) {
             }
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw GenericConfigStorageErrorMessage.SQLException.create(x, x.getMessage());
         } finally {
             tx.close();

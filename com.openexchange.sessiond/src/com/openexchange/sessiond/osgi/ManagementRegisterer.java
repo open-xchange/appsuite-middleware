@@ -102,11 +102,11 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementS
                 objectName = getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN);
                 management.registerMBean(objectName, new SessiondMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -116,7 +116,7 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementS
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 objectName = null;
             }

@@ -228,15 +228,15 @@ public class QueryAction extends RTAction {
                 throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(exception, exception.getMessage());
             }
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } catch (InterruptedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } catch (Throwable e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } finally {

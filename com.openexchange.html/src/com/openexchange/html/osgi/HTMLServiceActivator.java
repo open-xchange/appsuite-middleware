@@ -122,7 +122,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             Config.LoggerProvider = LoggerProvider.DISABLED;
             HTMLFilterHandler.loadWhitelist();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -144,7 +144,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             restore();
             HTMLImageFilterHandler.PREFIX.set(null);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -182,7 +182,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             in = new FileInputStream(htmlEntityFile);
             htmlEntities.load(in);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return getDefaultHTMLEntityMaps();
         } finally {
             Streams.close(in);
@@ -406,7 +406,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         /*
          * Build up map
@@ -469,12 +469,12 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                 /*
                  * Cannot occur
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final IOException e) {
                 /*
                  * Cannot occur
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return properties;

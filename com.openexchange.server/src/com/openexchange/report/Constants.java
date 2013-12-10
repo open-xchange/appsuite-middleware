@@ -76,9 +76,9 @@ public final class Constants {
         try {
             retval = new ObjectName("com.openexchange.reporting", "name", "Reporting");
         } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval;
     }
@@ -88,9 +88,9 @@ public final class Constants {
         try {
             retval = new ObjectName("com.openexchange.reporting", "name", "Login Counter");
         } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval;
     }

@@ -108,7 +108,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
                 }
                 addingServiceInternal(service);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return addedService;
@@ -140,7 +140,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
                     }
                     removedServiceInternal(serviceClass.cast(service));
                 } catch (final Exception e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } finally {

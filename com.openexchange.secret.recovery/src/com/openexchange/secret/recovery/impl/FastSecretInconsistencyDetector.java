@@ -150,7 +150,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
                 LOG.debug(message, t);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

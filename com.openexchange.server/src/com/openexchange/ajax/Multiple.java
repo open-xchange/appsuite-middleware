@@ -564,7 +564,7 @@ public class Multiple extends SessionServlet {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return state;
     }
@@ -600,7 +600,7 @@ public class Multiple extends SessionServlet {
             try {
                 mi.close(true);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

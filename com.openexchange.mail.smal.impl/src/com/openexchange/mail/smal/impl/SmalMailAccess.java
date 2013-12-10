@@ -151,7 +151,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
                     return;
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         // Couldn't be put into cache

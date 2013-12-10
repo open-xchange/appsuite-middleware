@@ -119,9 +119,9 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
             executedSuccessfully = true;
 
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final AuthenticationException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final ServiceException e) {
             LOG.error(e.toString());
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());

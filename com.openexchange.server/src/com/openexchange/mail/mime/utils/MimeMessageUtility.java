@@ -571,7 +571,7 @@ public final class MimeMessageUtility {
         try {
             return new ContentType(hdr).getParameter(PARAM_NAME);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -1100,7 +1100,7 @@ public final class MimeMessageUtility {
             }
         } catch (final java.io.UnsupportedEncodingException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval.toString();
     }
@@ -1256,7 +1256,7 @@ public final class MimeMessageUtility {
             /*
              * Cannot occur since default charset is checked on global mail configuration initialization
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return addrs;
     }

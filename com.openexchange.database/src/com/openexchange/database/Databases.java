@@ -89,7 +89,7 @@ public final class Databases {
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -104,7 +104,7 @@ public final class Databases {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -166,7 +166,7 @@ public final class Databases {
                 con.rollback();
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -184,7 +184,7 @@ public final class Databases {
                 con.setAutoCommit(true);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

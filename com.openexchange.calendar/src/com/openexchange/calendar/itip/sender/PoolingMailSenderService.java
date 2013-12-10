@@ -106,7 +106,7 @@ public class PoolingMailSenderService implements MailSenderService {
 			//delegate.sendMail(mail, session);
 
 		} catch (OXException x) {
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		}
 	}
 

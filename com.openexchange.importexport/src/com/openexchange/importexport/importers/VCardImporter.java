@@ -247,13 +247,13 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                 list.add(importResult);
             }
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage());
         } catch (final ConverterException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage());
         } finally {
             if (oxContainerConverter != null) {

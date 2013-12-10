@@ -93,11 +93,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
                 getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true),
                 AJPv13Monitors.getListenerMonitor());
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -111,11 +111,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
             activator.removeService(ManagementService.class);
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

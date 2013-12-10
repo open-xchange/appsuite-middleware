@@ -72,7 +72,7 @@ public class Version {
     public String getBuildDate() {
         if (null == buildDate) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
         return buildDate;
@@ -83,7 +83,7 @@ public class Version {
             if (null == versionString) {
                 if (null == numbers) {
                     IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw e;
                 }
                 versionString = numbers.getVersion() + "-Rev" + numbers.getBuildNumber();
@@ -95,7 +95,7 @@ public class Version {
     public int getMajor() {
         if (null == numbers) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
         return numbers.getMajor();
@@ -104,7 +104,7 @@ public class Version {
     public int getMinor() {
         if (null == numbers) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
         return numbers.getMinor();
@@ -113,7 +113,7 @@ public class Version {
     public int getPatch() {
         if (null == numbers) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
         return numbers.getPatch();

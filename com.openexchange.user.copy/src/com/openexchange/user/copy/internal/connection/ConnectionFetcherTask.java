@@ -127,7 +127,7 @@ public class ConnectionFetcherTask implements CopyUserTaskService {
                     dstCon.commit();
                 }
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             service.backForUpdateTask(dstCtxId, dstCon);
             dstCon = null;

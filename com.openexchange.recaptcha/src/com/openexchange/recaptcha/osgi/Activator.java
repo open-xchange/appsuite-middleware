@@ -121,7 +121,7 @@ public class Activator extends HousekeepingActivator {
                 httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX, servlet = new ReCaptchaServlet(), null, null);
                 LOG.info("reCAPTCHA Servlet registered.");
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

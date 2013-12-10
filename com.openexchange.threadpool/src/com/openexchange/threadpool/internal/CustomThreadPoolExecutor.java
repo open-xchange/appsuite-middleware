@@ -1021,7 +1021,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             try {
                                 command.run();
                             } catch (final Exception e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                             // rejectCustom(command);
                             break;

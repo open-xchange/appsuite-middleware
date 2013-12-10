@@ -98,7 +98,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         try {
             oxRes = OXResourceStorageInterface.getInstance();
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         }
         this.context = context;
@@ -231,7 +231,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        try {
            basicauth.doAuthentication(auth,ctx);
        } catch( final InvalidDataException e) {
-           log.error(e.getMessage(), e);
+           log.error("", e);
            throw e;
        }
 
@@ -350,22 +350,22 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 throw new NoSuchResourceException("Resource with this id does not exist");
             }
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchResourceException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
         final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
@@ -416,7 +416,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         try {
             basicauth.doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -503,7 +503,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 }
             }
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -556,7 +556,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
             basicauth.doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 

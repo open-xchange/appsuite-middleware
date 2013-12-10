@@ -157,7 +157,7 @@ public class Activator extends HousekeepingActivator {
                     try {
                         service.registerMBean(logbackConfObjName, logbackConfMBean);
                     } catch (OXException e) {
-                        logger.error(e.getMessage(), e);
+                        logger.error("", e);
                     }
                 }
 
@@ -166,17 +166,17 @@ public class Activator extends HousekeepingActivator {
                     try {
                         service.unregisterMBean(logbackConfObjName);
                     } catch (OXException e) {
-                        logger.warn(e.getMessage(), e);
+                        logger.warn("", e);
                     }
                 }
             });
 
         } catch (MalformedObjectNameException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("", e);
         } catch (NullPointerException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("", e);
         } catch (NotCompliantMBeanException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("", e);
         }
     }
 }

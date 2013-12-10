@@ -116,7 +116,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
                     correctContextAdmin(con, contextId, permissions, contextAdminId);
                     dropAllOtherPermissions(con, contextId, isContained(permissions, contextAdminId), contextAdminId);
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     if (null == re) {
                         re = e;
                     }

@@ -157,7 +157,7 @@ public class FileMetadataWriter {
                     }
                     return JSONCoercion.coerceToJSON(value);
                 } catch (JSONException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     return null;
                 }
             default: // do nothing;

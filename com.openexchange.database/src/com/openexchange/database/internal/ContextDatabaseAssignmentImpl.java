@@ -199,7 +199,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             try {
                 myCache.remove(myCache.newCacheKey(contextId, Server.getServerId()));
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -209,7 +209,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         try {
             this.cache = service.getCache(CACHE_NAME);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -220,7 +220,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             try {
                 myCache.clear();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             this.cache = null;
         }

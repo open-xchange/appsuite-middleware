@@ -96,7 +96,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         if (null == con) {
             LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         try {

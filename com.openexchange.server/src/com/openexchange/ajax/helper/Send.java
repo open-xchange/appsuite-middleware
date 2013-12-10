@@ -88,7 +88,7 @@ public final class Send {
         try {
             ResponseWriter.write(response, sWriter);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             sendError(resp);
         }
         Tools.disableCaching(resp);
@@ -105,7 +105,7 @@ public final class Send {
         try {
             ResponseWriter.write(response, resp.getWriter());
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             sendError(resp);
         }
     }

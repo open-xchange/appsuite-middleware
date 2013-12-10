@@ -190,7 +190,7 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -205,7 +205,7 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

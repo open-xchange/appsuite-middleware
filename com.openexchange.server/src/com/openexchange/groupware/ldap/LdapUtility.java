@@ -245,7 +245,7 @@ public final class LdapUtility {
                             data);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     retval = tag;
                 }
             }

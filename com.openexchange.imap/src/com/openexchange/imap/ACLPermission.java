@@ -342,7 +342,7 @@ public final class ACLPermission extends MailPermission {
             clone.acl = null;
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new RuntimeException("CloneNotSupportedException even though it's cloenable", e);
         }
     }

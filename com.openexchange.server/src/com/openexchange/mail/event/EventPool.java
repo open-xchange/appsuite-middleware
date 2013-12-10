@@ -105,7 +105,7 @@ public final class EventPool implements Runnable {
                 instance = new EventPool();
                 instance.startup();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

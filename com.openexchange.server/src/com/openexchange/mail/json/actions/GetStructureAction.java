@@ -174,7 +174,7 @@ public final class GetStructureAction extends AbstractMailAction {
                     // ignore
                 }
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             throw e;
         } catch (final RuntimeException e) {

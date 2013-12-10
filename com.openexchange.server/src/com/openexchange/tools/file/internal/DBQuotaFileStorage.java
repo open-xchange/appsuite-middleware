@@ -206,7 +206,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             if (newUsage < 0) {
                 newUsage = 0;
                 final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(context.getContextId()));
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");

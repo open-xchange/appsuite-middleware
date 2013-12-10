@@ -152,7 +152,7 @@ public class GroupDispatcher implements ComponentHandle {
                         onDispose(memberId != null ? memberId : id);
                     }
                 } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         });

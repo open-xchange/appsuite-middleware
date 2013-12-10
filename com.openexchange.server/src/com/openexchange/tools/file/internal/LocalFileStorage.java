@@ -639,7 +639,7 @@ public class LocalFileStorage extends DefaultFileStorage {
                 // Try again to create the file.
                 ioe = e;
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
             }
             if (!created) {
@@ -649,7 +649,7 @@ public class LocalFileStorage extends DefaultFileStorage {
                     // Should not be interrupted.
                     // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                     Thread.currentThread().interrupt();
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } while (!created && System.currentTimeMillis() < failTime);

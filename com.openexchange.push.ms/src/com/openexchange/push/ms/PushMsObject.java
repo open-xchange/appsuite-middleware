@@ -156,7 +156,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
             InetAddress addr = InetAddress.getLocalHost();
             hostname = addr.getHostName();
         } catch (UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         this.hostname = hostname;
     }

@@ -109,10 +109,10 @@ public class Activator extends HousekeepingActivator {
             LOG.error("Error while creating one instance for RMI interface", e);
             throw e;
         } catch (final OXGenericException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -114,7 +114,7 @@ public class SchemaStoreImpl extends SchemaStore {
                     try {
                         cache.putSafe(key, retval);
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             } finally {
@@ -172,7 +172,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         lockSchemaDB(schema, contextId, background);
@@ -180,7 +180,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -320,7 +320,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         unlockSchemaDB(schema, contextId, background);
@@ -328,7 +328,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -534,7 +534,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -632,7 +632,7 @@ public class SchemaStoreImpl extends SchemaStore {
         try {
             cache = cacheService.getCache("OXDBPoolCache");
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -642,7 +642,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.clear();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             cache = null;
         }

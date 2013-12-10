@@ -182,13 +182,13 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
             if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
                 // Rethrow according to previous behavior
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
             }
             if (LoginExceptionCodes.REDIRECT.equals(e)) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             response.setException(e);
         } catch (final JSONException e) {

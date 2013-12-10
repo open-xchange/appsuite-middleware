@@ -99,13 +99,13 @@ public class ReadFileFormat {
         try {
             return ExtractorFactory.createExtractor(in).getText();
         } catch (final InvalidFormatException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         } catch (final OpenXML4JException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         } catch (final XmlException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         } catch (final RuntimeException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         } finally {
             Streams.close(in);
         }
@@ -158,7 +158,7 @@ public class ReadFileFormat {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return;
             }
         }

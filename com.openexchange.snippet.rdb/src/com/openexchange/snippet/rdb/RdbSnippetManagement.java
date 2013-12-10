@@ -174,7 +174,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property("com.openexchange.snippet.rdb.supportsAttachments", boolean.class);
                 supportsAttachments = property.isDefined() ? property.get().booleanValue() : false;
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 supportsAttachments = false;
             }
             this.supportsAttachments = supportsAttachments;

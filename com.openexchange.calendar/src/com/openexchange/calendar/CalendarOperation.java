@@ -558,7 +558,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else {
                 final String text = "Object " + oid + " in context " + cdao.getContextID();
                 final OXException e = OXException.notFound(text);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
         } finally {
@@ -1950,7 +1950,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         try {
             date = attachmentBase.getNewestCreationDate(ctx, Types.APPOINTMENT, cdao.getObjectID());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         if (null != date) {
             cdao.setLastModifiedOfNewestAttachment(date);

@@ -242,7 +242,7 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         } catch (final Exception e) {
             // Catch all exceptions to get them into the normal logging
             // mechanism.
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

@@ -328,7 +328,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             }
             return comparedTo;
         } catch (final MessagingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return 0;
         }
     }

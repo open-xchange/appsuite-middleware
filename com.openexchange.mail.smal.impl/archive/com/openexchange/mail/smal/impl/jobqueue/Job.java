@@ -273,7 +273,7 @@ public abstract class Job implements Task<Void>, Comparable<Job>, Serializable {
         try {
             perform();
         } catch (final Exception e) {
-            Log.loggerFor(Job.class).error(e.getMessage(), e);
+            Log.loggerFor(Job.class).error("", e);
         }
     }
 

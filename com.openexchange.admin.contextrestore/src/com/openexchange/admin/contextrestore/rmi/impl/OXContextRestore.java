@@ -727,7 +727,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         try {
             basicauth.doAuthentication(auth);
         } catch (final InvalidCredentialsException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
 
@@ -774,22 +774,22 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             }
             return instance.restorectx(ctx, result, getConfigDbName(optConfigDbName));
         } catch (final StorageException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new OXContextRestoreException(Code.IO_EXCEPTION, e);
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new OXContextRestoreException(Code.DATABASE_OPERATION_ERROR, e, e.getMessage());
         } catch (final OXContextRestoreException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new OXContextRestoreException(Code.UNEXPECTED_ERROR, e, e.getMessage());
         }
     }

@@ -91,9 +91,9 @@ public class PropertyHandler {
         try {
             loadProps(sysprops);
         } catch (final FileNotFoundException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (final IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         }
     }
 

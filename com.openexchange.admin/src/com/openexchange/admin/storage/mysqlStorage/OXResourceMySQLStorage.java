@@ -464,7 +464,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             dorollback(con);
             throw new StorageException(e);
         } catch (final CloneNotSupportedException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             dorollback(con);
             throw new StorageException(e);
         } finally {

@@ -126,7 +126,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             try {
                 initCacheFolderStorage();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 unregisterCacheFolderStorage();
             }
         }
@@ -141,7 +141,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             try {
                 disposeCacheFolderStorage();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 unregisterCacheFolderStorage();
             }
         }
@@ -173,7 +173,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 serviceTracker.open();
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -195,7 +195,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -238,7 +238,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                         try {
                             tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 }
@@ -270,7 +270,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                             tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                         }
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             };
@@ -366,7 +366,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                         tmp.removeFromGlobalCache(uniqueID, FolderStorage.REAL_TREE_ID, session.getContextId());
                         tmp.removeFromCache(uniqueID, FolderStorage.REAL_TREE_ID, false, session);
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             };

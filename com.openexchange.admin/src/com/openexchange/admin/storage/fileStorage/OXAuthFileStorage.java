@@ -88,7 +88,7 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
                 try {
                     return UnixCrypt.matches(master.getPassword(), authdata.getPassword());
                 } catch (UnsupportedEncodingException e) {
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                     return false;
                 }
         }else{

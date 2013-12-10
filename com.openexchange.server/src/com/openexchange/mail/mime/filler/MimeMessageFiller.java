@@ -298,7 +298,7 @@ public class MimeMessageFiller {
                     try {
                         mfm.removeByID(iter.next());
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -482,7 +482,7 @@ public class MimeMessageFiller {
                         /*
                          * Conflict during look-up
                          */
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                 }
             }

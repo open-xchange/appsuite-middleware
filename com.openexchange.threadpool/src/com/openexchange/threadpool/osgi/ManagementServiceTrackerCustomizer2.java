@@ -126,11 +126,11 @@ public final class ManagementServiceTrackerCustomizer2 implements ServiceTracker
                 objectName = getObjectName(SessionThreadCountMBeanImpl.class.getName(), SessionThreadCountMBean.SESSION_THREAD_COUNT_DOMAIN);
                 management.registerMBean(objectName, new SessionThreadCountMBeanImpl(counter, sessiondServiceTracker));
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -140,7 +140,7 @@ public final class ManagementServiceTrackerCustomizer2 implements ServiceTracker
             try {
                 management.unregisterMBean(objectName);
             } catch (final Exception e) {
-                org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer2.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer2.class).error("", e);
             } finally {
                 objectName = null;
             }

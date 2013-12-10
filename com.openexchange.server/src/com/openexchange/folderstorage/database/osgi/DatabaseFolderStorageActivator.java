@@ -122,7 +122,7 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
             folderStorageRegistration = context.registerService(FolderStorage.class, new DatabaseFolderStorage(), dictionary);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -139,7 +139,7 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

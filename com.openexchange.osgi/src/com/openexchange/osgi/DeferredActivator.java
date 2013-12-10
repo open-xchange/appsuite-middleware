@@ -437,10 +437,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             this.context = context;
             init();
         } catch (final org.osgi.framework.ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             // Do not re-throw!
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -483,7 +483,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             stopBundle();
             started.set(false);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             reset();

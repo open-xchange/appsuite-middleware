@@ -323,11 +323,11 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             managementService.registerMBean(objectName, new GABRestorerMBeanImpl());
             return objectName;
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NotCompliantMBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return null;
     }
@@ -343,7 +343,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             try {
                 managementService.unregisterMBean(objectName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -390,7 +390,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             }
             CacheFolderStorage.getInstance().removeFromGlobalCache(FolderStorage.GLOBAL_ADDRESS_BOOK_ID, FolderStorage.REAL_TREE_ID, contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             if (null != con) {
                 Database.back(contextId, true, con);
@@ -407,7 +407,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             ps.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
             ps.executeUpdate();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             DBUtils.closeSQLStuff(ps);
         }

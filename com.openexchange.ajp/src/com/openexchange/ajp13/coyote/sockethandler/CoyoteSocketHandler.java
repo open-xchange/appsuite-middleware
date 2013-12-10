@@ -130,7 +130,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
         try {
             tmp = new AJPv13TaskMonitor();
         } catch (final NotCompliantMBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         listenerMonitor = tmp;
         readTimeout = AJPv13Config.getAJPListenerReadTimeout();

@@ -271,7 +271,7 @@ public class CPServlet extends PermissionServlet {
                 configView = configViewFactory.getView(session.getUserId(), session.getContextId());
                 retval = configView.get("ui/product/name", String.class);
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (null == retval) {

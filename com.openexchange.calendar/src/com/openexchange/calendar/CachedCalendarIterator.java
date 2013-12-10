@@ -298,7 +298,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         try {
             dates = attachmentBase.getNewestCreationDates(ctx, Types.APPOINTMENT, arr);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         for (final CalendarDataObject cdao : list) {

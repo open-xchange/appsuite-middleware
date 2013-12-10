@@ -84,7 +84,7 @@ public final class IOUtils {
             try {
                 closeable.close();
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

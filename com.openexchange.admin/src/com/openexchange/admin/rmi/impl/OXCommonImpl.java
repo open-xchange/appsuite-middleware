@@ -85,7 +85,7 @@ public abstract class OXCommonImpl {
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }

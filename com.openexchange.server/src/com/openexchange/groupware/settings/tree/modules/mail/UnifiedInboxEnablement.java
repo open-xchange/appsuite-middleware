@@ -101,14 +101,14 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                     return Boolean.FALSE;
                 }
                 try {
                     return Boolean.valueOf(management.getUnifiedINBOXAccountID(settings.getUserId(), settings.getCid()) >= 0);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     return Boolean.FALSE;
                 }
             }
@@ -139,7 +139,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                         management.deleteUnifiedINBOX(userId, cid);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         };

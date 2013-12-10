@@ -127,7 +127,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
             try {
                 Tools.checkAndAddColumns(con, tableName, COLUMNS);
             } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 if (null == toThrow) {
                     toThrow = e;
                 }
@@ -144,7 +144,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
                 }
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             if (null == toThrow) {
                 toThrow = e;
             }
@@ -160,7 +160,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
                 }
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             if (null == toThrow) {
                 toThrow = e;
             }

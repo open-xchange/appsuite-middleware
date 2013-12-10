@@ -155,7 +155,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         try {
             writeResponse(response, resp, session);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -166,7 +166,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         try {
             writeResponse(response, resp, session);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

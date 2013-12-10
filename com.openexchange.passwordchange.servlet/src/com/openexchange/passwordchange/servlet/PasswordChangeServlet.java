@@ -211,7 +211,7 @@ public final class PasswordChangeServlet extends SessionServlet {
                 requestObject.getString(PARAM_OLD_PASSWORD)));
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         /*

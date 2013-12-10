@@ -179,7 +179,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
             LOG.info("Error delay: " + errordelay + "");
             LOG.info("pushmode: " + pushmode);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -209,7 +209,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
              */
             folder = null;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

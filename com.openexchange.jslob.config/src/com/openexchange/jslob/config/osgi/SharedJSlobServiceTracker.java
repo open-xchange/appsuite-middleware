@@ -94,7 +94,7 @@ public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<Share
                 eventAdmin.postEvent(event);
             }
         } catch (RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return service;
     }
@@ -116,7 +116,7 @@ public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<Share
                 eventAdmin.postEvent(event);
             }
         } catch (RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         context.ungetService(reference);
     }

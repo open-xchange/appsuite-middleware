@@ -181,7 +181,7 @@ public class UCSAuthentication implements AuthenticationService {
                         // unbind old context
                         ctx.close();
                     } catch (final NamingException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -280,7 +280,7 @@ public class UCSAuthentication implements AuthenticationService {
                 try {
                     ctx.close();
                 } catch (final NamingException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

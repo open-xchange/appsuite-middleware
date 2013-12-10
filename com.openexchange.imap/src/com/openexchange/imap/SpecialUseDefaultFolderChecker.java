@@ -261,9 +261,9 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                             f.setSubscribed(true);
                             modified.set(true);
                         } catch (final MethodNotSupportedException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         } catch (final MessagingException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 } else if (0 == subscribe) {
@@ -272,9 +272,9 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                             f.setSubscribed(false);
                             modified.set(true);
                         } catch (final MethodNotSupportedException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         } catch (final MessagingException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 }
@@ -444,9 +444,9 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                 try {
                     f.setSubscribed(true);
                 } catch (final MethodNotSupportedException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (final MessagingException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } finally {
                     modified.set(true);
                 }
@@ -456,9 +456,9 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                 try {
                     f.setSubscribed(false);
                 } catch (final MethodNotSupportedException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (final MessagingException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } finally {
                     modified.set(true);
                 }

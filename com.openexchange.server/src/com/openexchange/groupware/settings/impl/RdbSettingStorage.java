@@ -177,7 +177,7 @@ public class RdbSettingStorage extends SettingStorage {
                 value.writeValue(session, ctx, user, setting);
             } else {
                 final OXException e = SettingExceptionCodes.NO_WRITE.create(setting.getName());
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         } else {
             saveInternal(con, setting);

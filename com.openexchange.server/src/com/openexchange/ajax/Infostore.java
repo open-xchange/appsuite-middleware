@@ -222,7 +222,7 @@ public class Infostore extends PermissionServlet {
                  */
                 throw (IOException) e.getCause();
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
             LOG.error("Not possible, obviously: " + e.getMessage(), e);
         } finally {
@@ -260,7 +260,7 @@ public class Infostore extends PermissionServlet {
                  */
                 throw (IOException) e.getCause();
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
             LOG.error("Not possible, obviously: " + e.getMessage(), e);
         } catch (final Throwable t) {
@@ -643,7 +643,7 @@ public class Infostore extends PermissionServlet {
             os = null;
 
         } catch (final OXException x) {
-            LOG.debug(x.getMessage(), x);
+            LOG.debug("", x);
             handleOXException(res, x, STR_ERROR, true, session);
             return;
         } finally {
@@ -756,7 +756,7 @@ public class Infostore extends PermissionServlet {
                 sendErrorAsJSHTML(res, t.toString(), action);
                 LOG.error("Got non OXException", t);
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -104,7 +104,7 @@ public class PluginStarter {
                 LOG.debug("Loading util implementation: " + prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
             }
         } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final StorageException e) {
             LOG.error("Error while creating one instance for RMI interface", e);

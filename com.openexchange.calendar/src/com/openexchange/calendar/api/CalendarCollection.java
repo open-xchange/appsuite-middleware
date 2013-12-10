@@ -1009,7 +1009,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                     calc_timezone = calDataObject.getTimezone();
                 } else {
                     final OXException e = OXCalendarExceptionCodes.TIMEZONE_MISSING.create();
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
             }
             recurringStart = calDataObject.getRecurringStart();
@@ -1578,7 +1578,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         try {
             rresults = calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return new Date(maxEnd);
         }
         if (rresults == null) {

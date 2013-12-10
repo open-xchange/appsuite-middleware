@@ -199,7 +199,7 @@ public abstract class MailPart implements Serializable, Cloneable {
                 try {
                     setContentType(new ContentType(ct));
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -226,7 +226,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         b_contentType = false;
     }
@@ -264,7 +264,7 @@ public abstract class MailPart implements Serializable, Cloneable {
                 try {
                     setContentDisposition(new ContentDisposition(disp));
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -698,7 +698,7 @@ public abstract class MailPart implements Serializable, Cloneable {
             try {
                 msgref = new MailPath(xMsgref);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 msgref = null;
             }
         }
@@ -746,10 +746,10 @@ public abstract class MailPart implements Serializable, Cloneable {
             }
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new InternalError(e.getMessage());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new InternalError(e.getMessage());
         }
     }

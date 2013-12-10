@@ -139,10 +139,10 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         log.error(ex.getMessage(), ex);
                         throw new StorageException(ex);
                     } catch (NoSuchAlgorithmException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                         throw new StorageException(e);
                     } catch (UnsupportedEncodingException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                         throw new StorageException(e);
                     } finally {
                         try {
@@ -187,10 +187,10 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 //                        return false;
 //                    }
 //                } catch (NoSuchAlgorithmException e) {
-//                    log.error(e.getMessage(), e);
+//                    log.error("", e);
 //                    throw new StorageException(e);
 //                } catch (UnsupportedEncodingException e) {
-//                    log.error(e.getMessage(), e);
+//                    log.error("", e);
 //                    throw new StorageException(e);
 //                }
 //
@@ -242,10 +242,10 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 log.error(ex.getMessage(), ex);
                 throw new StorageException(ex);
             } catch (NoSuchAlgorithmException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
                 throw new StorageException(e);
             } catch (UnsupportedEncodingException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
                 throw new StorageException(e);
             } finally {
 

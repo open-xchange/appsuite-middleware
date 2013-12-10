@@ -527,7 +527,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         try {
             return mailServerUrl = URITools.generateURI(protocol, IDNA.toASCII(mailServer), mailPort).toString();
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             // Old implementation is not capable of handling IPv6 addresses.
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
             sb.append(mailProtocol);
@@ -620,7 +620,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         try {
             return transportServerUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             // Old implementation is not capable of handling IPv6 addresses.
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
             sb.append(transportProtocol);

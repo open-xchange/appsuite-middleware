@@ -115,7 +115,7 @@ public final class ServiceHolderInit implements Initialization {
                 /*
                  * Cannot occur due to the above check
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
             }
         }

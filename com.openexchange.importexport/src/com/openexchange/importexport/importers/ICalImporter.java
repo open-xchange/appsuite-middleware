@@ -318,7 +318,7 @@ public class ICalImporter extends AbstractImporter {
 					importResult.setDate(task.getLastModified());
 					importResult.setFolder(String.valueOf(taskFolderId));
 				} catch (final OXException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error("", e);
 					importResult.setException(e);
 				}
 

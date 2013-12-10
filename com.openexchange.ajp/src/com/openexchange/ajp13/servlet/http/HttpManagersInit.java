@@ -215,7 +215,7 @@ public final class HttpManagersInit implements Initialization {
                 final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(className) != -1;
                 if (!isEqual && LOG.isWarnEnabled()) {
                     final OXException e = OXServletException.Code.ALREADY_PRESENT.create(name, servletConstructorMap.get(name), className);
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
             } else {
                 servletConstructorMap.put(name, Class.forName(className).getConstructor(CLASS_ARR));

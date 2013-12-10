@@ -149,7 +149,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
             stmt.setInt(pos++, member);
             stmt.execute();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -174,7 +174,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
                 folderId = result.getInt(1);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(result, stmt);
         }

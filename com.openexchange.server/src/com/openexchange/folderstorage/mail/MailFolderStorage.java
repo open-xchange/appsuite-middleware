@@ -458,7 +458,7 @@ public final class MailFolderStorage implements FolderStorage {
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (fullname.startsWith(trashFullname)) {
                 // Special handling
@@ -508,7 +508,7 @@ public final class MailFolderStorage implements FolderStorage {
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (!hardDelete) {
                 // New folder in trash folder

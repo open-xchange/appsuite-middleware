@@ -104,7 +104,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
                 LOG.error("Couldn't remove locks from infoitem. Run the consistency tool.", e);
             } catch (NumberFormatException e) {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
 
             if (LOG.isDebugEnabled()) {

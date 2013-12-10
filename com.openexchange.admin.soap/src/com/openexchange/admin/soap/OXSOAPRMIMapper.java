@@ -155,10 +155,10 @@ public abstract class OXSOAPRMIMapper {
                 log.debug(sb.toString());
             }
         } catch (final MalformedURLException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         }
     }
@@ -211,22 +211,22 @@ public abstract class OXSOAPRMIMapper {
                 //clazz.cast(rmistub);
             }
         } catch (final SecurityException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final NoSuchFieldException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final IllegalAccessException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final MalformedURLException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final NotBoundException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } finally {
             LOCK.unlock();

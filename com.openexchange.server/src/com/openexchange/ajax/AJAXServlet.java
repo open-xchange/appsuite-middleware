@@ -517,7 +517,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             resp.setContentType("text/plain; charset=UTF-8");
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final ServletException se = new ServletException(e.getMessage());
             se.initCause(e);
             throw se;
@@ -1013,7 +1013,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             obj.put(STR_ERROR_PARAMS, Collections.emptyList());
 			w.write(substituteJS(obj.toString(), action));
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             close(w);
         }

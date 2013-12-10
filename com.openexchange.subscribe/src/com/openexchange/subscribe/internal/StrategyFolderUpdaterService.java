@@ -100,7 +100,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
                     strategy.update(bestMatch, element, session);
                 }
             } catch (final OXException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
             }
         }
 
@@ -123,7 +123,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
                 }
             } catch (final OXException x) {
                 if (null == errors) {
-                    LOG.error(x.getMessage(), x);
+                    LOG.error("", x);
                 } else {
                     errors.add(x);
                 }

@@ -107,7 +107,7 @@ public final class OXFolderDeleteListenerHelper {
         try {
             corruptPermissions = DetectCorruptPermissions.detectCorruptUserPermissions(cid, writeCon);
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
         /*
@@ -127,7 +127,7 @@ public final class OXFolderDeleteListenerHelper {
                     writeCon.commit();
                 }
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 if (performTransaction) {
                     writeCon.rollback();
                 }
@@ -159,7 +159,7 @@ public final class OXFolderDeleteListenerHelper {
         try {
             corruptPermissions = DetectCorruptPermissions.detectCorruptGroupPermissions(cid, writeCon);
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
         /*
@@ -179,7 +179,7 @@ public final class OXFolderDeleteListenerHelper {
                     writeCon.commit();
                 }
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 if (performTransaction) {
                     writeCon.rollback();
                 }

@@ -357,7 +357,7 @@ public final class CacheFolderStorage implements FolderStorage {
                                                             }
                                                         } catch (final Exception e) {
                                                             // Pre-Accessing external account folder failed.
-                                                            LOG.debug(e.getMessage(), e);
+                                                            LOG.debug("", e);
                                                         }
                                                     }
                                                 };
@@ -378,13 +378,13 @@ public final class CacheFolderStorage implements FolderStorage {
                                     log.debug(tmp.toString());
                                 }
                             } catch (final Exception e) {
-                                LOG.debug(e.getMessage(), e);
+                                LOG.debug("", e);
                             }
                         }
                     };
                     threadPool.submit(ThreadPools.trackableTask(task), behavior);
                 } catch (final Exception e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
             }
         } finally {
@@ -633,7 +633,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 final org.slf4j.Logger log =
                     org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
                 if (log.isDebugEnabled()) {
-                    log.debug(e.getMessage(), e);
+                    log.debug("", e);
                 }
                 try {
                     ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));

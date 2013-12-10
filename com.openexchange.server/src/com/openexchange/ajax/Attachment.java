@@ -206,7 +206,7 @@ public class Attachment extends PermissionServlet {
                      */
                     throw (IOException) e.getCause();
                 }
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -254,7 +254,7 @@ public class Attachment extends PermissionServlet {
                  */
                 throw (IOException) e.getCause();
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -346,7 +346,7 @@ public class Attachment extends PermissionServlet {
 
         } catch (final JSONException e) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -480,7 +480,7 @@ public class Attachment extends PermissionServlet {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             handle(res, t, ResponseFields.ERROR, session);
             return;
@@ -488,7 +488,7 @@ public class Attachment extends PermissionServlet {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException x) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             handle(res, AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()), ResponseFields.ERROR, session);
             return;
@@ -496,7 +496,7 @@ public class Attachment extends PermissionServlet {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException x) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             handle(res, AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage()), ResponseFields.ERROR, session);
             return;

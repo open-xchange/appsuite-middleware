@@ -83,7 +83,7 @@ public abstract class PermissionServlet extends SessionServlet {
             super.service(req, resp);
         } catch (final OXException e) {
             if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 handleSessiondException(e, req, resp);
                 /*
                  * Return JSON response

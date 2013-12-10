@@ -592,7 +592,7 @@ public final class MailAccountRequest {
                     }
                 }
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
 

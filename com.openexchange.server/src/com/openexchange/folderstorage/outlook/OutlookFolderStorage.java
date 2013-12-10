@@ -311,7 +311,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         try {
             tcm = new TimeoutConcurrentMap<Key, Future<List<SortableId>>>(10, true);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             tcm = null;
         }
         TCM = tcm;
@@ -370,7 +370,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             return b.booleanValue();
         } catch (final OXException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return false;
         }
     }
@@ -397,7 +397,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             return id;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -1627,7 +1627,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                     }
                                 }
                             } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                             if (fsAccounts.isEmpty()) {
                                 // Do nothing
@@ -2150,7 +2150,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                             unifiedMailIndex = accountSubfolderIDs.size() - 1;
                                         }
                                     } catch (final OXException e) {
-                                        LOG.error(e.getMessage(), e);
+                                        LOG.error("", e);
                                     }
                                 } else {
                                     accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
@@ -2186,12 +2186,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                             try {
                                 messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
                             } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                         }
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 if (messagingAccounts.isEmpty()) {
                     messagingSubfolderIDs = Collections.emptyList();
@@ -2437,7 +2437,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 } catch (final OXException e) {
                     if (MailExceptionCode.UNKNOWN_PROTOCOL.equals(e)) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage(), e);
+                            LOG.debug("", e);
                         }
                         parameters.addWarning(e);
                         /*
@@ -2446,7 +2446,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage(), e);
+                            LOG.debug("", e);
                         }
                         parameters.addWarning(e);
                         /*
@@ -2455,7 +2455,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage(), e);
+                            LOG.debug("", e);
                         }
                         parameters.addWarning(e);
                         /*
@@ -2464,7 +2464,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MimeMailExceptionCode.CONNECT_ERROR.equals(e) || MimeMailExceptionCode.UNKNOWN_HOST.equals(e)) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage(), e);
+                            LOG.debug("", e);
                         }
                         parameters.addWarning(e);
                         /*

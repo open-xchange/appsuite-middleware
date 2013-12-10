@@ -78,7 +78,7 @@ public class PushMsMBeanImpl extends StandardMBean implements PushMsMBean {
                 init.init();
             } catch (OXException e) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsMBeanImpl.class);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

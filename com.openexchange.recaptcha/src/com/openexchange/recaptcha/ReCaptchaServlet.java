@@ -90,7 +90,7 @@ public class ReCaptchaServlet extends DataServlet {
                 doGetPublicKey(response);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
 

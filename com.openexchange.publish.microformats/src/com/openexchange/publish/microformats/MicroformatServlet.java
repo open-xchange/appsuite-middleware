@@ -229,7 +229,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             writer.write(html);
             writer.flush();
         } catch (final OXException x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             final PrintWriter writer = resp.getWriter();
             writer.println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
             writer.flush();

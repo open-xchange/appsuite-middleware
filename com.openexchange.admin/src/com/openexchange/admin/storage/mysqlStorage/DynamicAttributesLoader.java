@@ -148,7 +148,7 @@ public class DynamicAttributesLoader implements Filter<Context, Context> {
                 try {
                     cache.pushConnectionForContextAfterReading(cid, con);
                 } catch (PoolException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

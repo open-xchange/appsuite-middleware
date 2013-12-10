@@ -97,7 +97,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         try {
             initCache();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -204,7 +204,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 }
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -253,7 +253,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 }
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -316,7 +316,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 stmt = null;
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -401,7 +401,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 cacheWriteLock.unlock();
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -443,7 +443,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -554,7 +554,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -630,7 +630,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         try {
             releaseCache();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

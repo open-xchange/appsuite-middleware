@@ -106,7 +106,7 @@ public class CTag extends SingleXMLPropertyMixin {
 					this.timestamp = this.collection.getLastModified().getTime();
 				}
 			} catch (OXException e) {
-		        LOG.error(e.getMessage(), e);
+		        LOG.error("", e);
 		        this.timestamp = 0;
 			}
 		}

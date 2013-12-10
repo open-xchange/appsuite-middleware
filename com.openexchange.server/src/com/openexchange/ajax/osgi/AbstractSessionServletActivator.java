@@ -109,7 +109,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
                         sb.append(alias);
                         sb.append("\".");
                         final IllegalStateException e = new IllegalStateException(sb.toString());
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                         property = "";
                     }
                     initParams.put(configKey, property);
@@ -123,7 +123,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
 
             registerServlet(alias, servlet, initParams, getService(HttpService.class));
         } catch (final IllegalStateException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

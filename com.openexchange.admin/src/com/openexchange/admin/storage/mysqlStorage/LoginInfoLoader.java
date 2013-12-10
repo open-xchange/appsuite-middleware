@@ -131,7 +131,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (final PoolException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

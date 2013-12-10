@@ -397,7 +397,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         try {
             return Tools.parseHeaderDate(headerValue).getTime();
         } catch (final ParseException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new IllegalArgumentException(e.getMessage());
         }
     }

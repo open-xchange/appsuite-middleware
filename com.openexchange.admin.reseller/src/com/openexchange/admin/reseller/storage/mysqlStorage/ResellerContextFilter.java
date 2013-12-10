@@ -139,7 +139,7 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (PoolException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return retval;

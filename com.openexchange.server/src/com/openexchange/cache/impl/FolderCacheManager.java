@@ -175,7 +175,7 @@ public final class FolderCacheManager {
                         try {
                             cacheService.freeCache(REGION_NAME);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 }
@@ -394,7 +394,7 @@ public final class FolderCacheManager {
                             final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
                             globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                         } catch (final OXException e) {
-                            LOG.warn(e.getMessage(), e);
+                            LOG.warn("", e);
                         }
                     }
                 }
@@ -555,7 +555,7 @@ public final class FolderCacheManager {
                             final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderObj.getObjectID()));
                             globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                         } catch (final OXException e) {
-                            LOG.warn(e.getMessage(), e);
+                            LOG.warn("", e);
                         }
                     }
                 } else if (tmp instanceof Condition) {
@@ -617,7 +617,7 @@ public final class FolderCacheManager {
                 final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
                 globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
     }
@@ -667,7 +667,7 @@ public final class FolderCacheManager {
                     globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                 }
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
     }
@@ -690,7 +690,7 @@ public final class FolderCacheManager {
                 final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                 globalCache.clear();
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
     }

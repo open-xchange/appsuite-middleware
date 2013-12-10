@@ -119,7 +119,7 @@ public class Sent implements PreferencesItemService {
                         try {
                             mail.close(true);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 }

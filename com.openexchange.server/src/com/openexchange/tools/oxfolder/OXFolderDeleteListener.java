@@ -171,14 +171,14 @@ public class OXFolderDeleteListener implements DeleteListener {
 		            FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
 		            FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, ctx);
 		        } catch (final OXException e) {
-		            LOG.error(e.getMessage(), e);
+		            LOG.error("", e);
 		        }
 		    }
 		} catch (final OXException e) {
-		    LOG.error(e.getMessage(), e);
+		    LOG.error("", e);
 		    throw e;
 		} catch (final SQLException e) {
-		    LOG.error(e.getMessage(), e);
+		    LOG.error("", e);
 		    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
 		}
 	}
@@ -297,15 +297,15 @@ public class OXFolderDeleteListener implements DeleteListener {
 		            try {
 		                FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
 		            } catch (final OXException e) {
-		                LOG.error(e.getMessage(), e);
+		                LOG.error("", e);
 		            }
 		        }
 		    }
 		} catch (final OXException e) {
-		    LOG.error(e.getMessage(), e);
+		    LOG.error("", e);
 		    throw e;
 		} catch (final SQLException e) {
-		    LOG.error(e.getMessage(), e);
+		    LOG.error("", e);
 		    throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
 		}
 	}

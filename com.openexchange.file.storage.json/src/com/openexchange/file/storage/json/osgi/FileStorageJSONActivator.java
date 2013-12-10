@@ -91,7 +91,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
             registerService(ResultConverter.class, new FileConverter());
         } catch (final Exception x) {
-            org.slf4j.LoggerFactory.getLogger(FileStorageJSONActivator.class).error(x.getMessage(), x);
+            org.slf4j.LoggerFactory.getLogger(FileStorageJSONActivator.class).error("", x);
             throw x;
         }
     }

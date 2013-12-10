@@ -222,7 +222,7 @@ public final class OXFolderUtility {
                             }
                         }
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 } else {
                     /*
@@ -857,7 +857,7 @@ public final class OXFolderUtility {
                     retval.add(members[j]);
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } else {
             retval.add(permission.getEntity());

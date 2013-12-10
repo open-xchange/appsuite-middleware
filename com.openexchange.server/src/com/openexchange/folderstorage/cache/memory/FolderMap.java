@@ -506,7 +506,7 @@ public final class FolderMap {
                     lock.unlock();
                 }
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
     }
@@ -555,7 +555,7 @@ public final class FolderMap {
                     lock.unlock();
                 }
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
     }

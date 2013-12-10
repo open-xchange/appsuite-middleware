@@ -87,7 +87,7 @@ public class UpdateProcess implements Runnable {
             }
             new UpdateExecutor(state, contextId, null).execute();
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
         }

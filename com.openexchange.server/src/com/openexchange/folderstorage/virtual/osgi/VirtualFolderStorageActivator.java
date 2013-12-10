@@ -132,7 +132,7 @@ public class VirtualFolderStorageActivator extends HousekeepingActivator {
             dictionary.put("tree", FolderStorage.ALL_TREE_ID);
             registerService(FolderStorage.class, VirtualFolderStorage.getInstance(), dictionary);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -146,7 +146,7 @@ public class VirtualFolderStorageActivator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

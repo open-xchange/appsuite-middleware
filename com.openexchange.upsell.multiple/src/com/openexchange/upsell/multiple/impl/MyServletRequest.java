@@ -155,7 +155,7 @@ public final class MyServletRequest  {
             this.admin = UserStorage.getInstance().getUser(this.ctx.getMailadmin(), ctx);
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
 
@@ -581,7 +581,7 @@ public final class MyServletRequest  {
                 stringBuilder.append(System.getProperty("line.separator"));
             }
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             Streams.close(input);
         }

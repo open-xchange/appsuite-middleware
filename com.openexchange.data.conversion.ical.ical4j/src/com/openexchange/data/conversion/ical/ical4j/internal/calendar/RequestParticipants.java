@@ -86,7 +86,7 @@ public class RequestParticipants<T extends CalendarComponent, U extends Calendar
                 parameters.add(Rsvp.TRUE);
                 component.getProperties().add(attendee);
             } catch (final URISyntaxException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

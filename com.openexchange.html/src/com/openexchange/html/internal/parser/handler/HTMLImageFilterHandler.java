@@ -234,7 +234,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
                     imageURLFound = true;
                 }
             } catch (final StackOverflowError e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 attributes.remove(BACKGROUND);
             }
         }
@@ -256,7 +256,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
                         imageURLFound = true;
                     }
                 } catch (final StackOverflowError e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     attributes.remove(BACKGROUND);
                 }
             }

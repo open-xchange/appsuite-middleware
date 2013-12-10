@@ -84,7 +84,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
         try {
             con = cache.getConnectionForConfigDB();
         } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e.getMessage());
         }
         try {
@@ -93,7 +93,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
             con.commit();
             return id;
         } catch (final SQLException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {

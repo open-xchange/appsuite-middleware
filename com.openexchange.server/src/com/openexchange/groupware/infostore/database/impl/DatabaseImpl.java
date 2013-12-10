@@ -223,7 +223,7 @@ public class DatabaseImpl extends DBService {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -258,7 +258,7 @@ public class DatabaseImpl extends DBService {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -587,7 +587,7 @@ public class DatabaseImpl extends DBService {
             } catch (final OXException e1) {
                 throw e1;
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (final OXException e) {
             try {
@@ -595,7 +595,7 @@ public class DatabaseImpl extends DBService {
             } catch (final OXException e1) {
                 throw e1;
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             close(stmt, null);
@@ -667,7 +667,7 @@ public class DatabaseImpl extends DBService {
                 _strReturnArray.add(result.getString(1));
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -885,7 +885,7 @@ public class DatabaseImpl extends DBService {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         } finally {
             releaseReadConnection(ctx, con);
@@ -916,7 +916,7 @@ public class DatabaseImpl extends DBService {
             }
 
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -942,7 +942,7 @@ public class DatabaseImpl extends DBService {
                 retval = true;
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -1101,7 +1101,7 @@ public class DatabaseImpl extends DBService {
             final String[] filesArray = files.toArray(new String[files.size()]);
             fileStorage.deleteFiles(filesArray);
         } catch (final SQLException x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, x.toString());
         } catch (final OXException x) {
             throw x;
@@ -1148,7 +1148,7 @@ public class DatabaseImpl extends DBService {
 //            try {
 //                ec.delete(documentMetadata);
 //            } catch (final OXException e) {
-//                LOG.error(e.getMessage(), e);
+//                LOG.error("", e);
 //            }
 //        }
     }

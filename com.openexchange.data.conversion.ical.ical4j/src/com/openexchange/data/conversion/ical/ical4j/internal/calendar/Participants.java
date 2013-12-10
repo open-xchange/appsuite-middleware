@@ -168,9 +168,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             parameters.add(Rsvp.TRUE);
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e); // Shouldn't happen
+            LOG.error("", e); // Shouldn't happen
         } catch (AddressException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -184,7 +184,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     address = resolveUserMail(index, userParticipant, ctx);
                 }
             } else {
@@ -212,9 +212,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e); // Shouldn't happen
+            LOG.error("", e); // Shouldn't happen
         } catch (AddressException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

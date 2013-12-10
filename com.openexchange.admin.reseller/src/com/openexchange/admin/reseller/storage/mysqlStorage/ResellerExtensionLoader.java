@@ -162,7 +162,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (PoolException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

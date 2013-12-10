@@ -291,7 +291,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     public void setCacheable(final boolean cacheable) {
         if (cacheable && LOG.isWarnEnabled()) {
             final UnsupportedOperationException e = new UnsupportedOperationException("POP3Access.setCacheable() not supported");
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         }
     }
 
@@ -410,7 +410,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             try {
                 pop3Store.close();
             } catch (final MessagingException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
             /*
              * Add warning if non-secure

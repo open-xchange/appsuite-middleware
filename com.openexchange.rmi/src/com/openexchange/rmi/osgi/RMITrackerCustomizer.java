@@ -87,13 +87,13 @@ public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Re
             try {
                 RMIRegistry.getRMIRegistry().bind(name, UnicastRemoteObject.exportObject(r, 0));
             } catch (final AccessException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } catch (final RemoteException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } catch (final AlreadyBoundException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             }
         }
         return r;
@@ -111,13 +111,13 @@ public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Re
             RMIRegistry.getRMIRegistry().unbind(name);
             UnicastRemoteObject.unexportObject(service, true);
         } catch (final AccessException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (final NotBoundException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (final OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         }
     }
 

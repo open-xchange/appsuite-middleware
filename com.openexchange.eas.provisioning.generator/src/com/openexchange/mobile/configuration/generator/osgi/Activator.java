@@ -149,9 +149,9 @@ public class Activator extends HousekeepingActivator {
         try {
             service.registerServlet(ALIAS, new MobileConfigServlet(), null, null);
         } catch (ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         LOG.info("MobileConfig servlet registered");
     }

@@ -784,7 +784,7 @@ public final class MailMessageParser {
                 }
             } catch (final MessagingException e) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
@@ -911,7 +911,7 @@ public final class MailMessageParser {
             // try {
             // filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
             // } catch (final Exception e) {
-            // LOG.error(e.getMessage(), e);
+            // LOG.error("", e);
             // }
         }
         return filename;

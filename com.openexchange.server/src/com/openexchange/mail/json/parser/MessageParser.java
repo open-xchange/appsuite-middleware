@@ -957,7 +957,7 @@ public final class MessageParser {
                 }
                 return parseAdressArray(jsonArr, length);
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 /*
                  * Reset
                  */

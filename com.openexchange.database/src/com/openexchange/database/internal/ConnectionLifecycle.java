@@ -184,7 +184,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                     retval = false;
                 }
             } catch (final Exception e) {
-                ConnectionPool.LOG.error(e.getMessage(), e);
+                ConnectionPool.LOG.error("", e);
             }
             // Write warning if using this connection was longer than 2 seconds.
             if (data.getTimeDiff() > 2000) {

@@ -223,7 +223,7 @@ public final class ContactDataSource implements DataSource {
             try {
                 versitWriter.close();
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

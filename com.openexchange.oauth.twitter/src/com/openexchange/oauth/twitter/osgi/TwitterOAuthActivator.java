@@ -117,7 +117,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
 
             getService(CapabilityService.class).declareCapability("twitter");
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error("", e);
             throw e;
         }
     }
@@ -131,7 +131,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
              */
             TwitterOAuthServiceRegistry.setServiceLookup(null);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error("", e);
             throw e;
         }
     }

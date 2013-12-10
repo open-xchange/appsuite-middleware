@@ -84,7 +84,7 @@ public final class FileWatcher {
                     notifyListeners(false);
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

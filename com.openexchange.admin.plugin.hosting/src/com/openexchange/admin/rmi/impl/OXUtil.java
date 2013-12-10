@@ -349,7 +349,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
         } catch (final EnforceableDataObjectException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new InvalidDataException(e);
         }
 

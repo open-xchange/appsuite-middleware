@@ -319,7 +319,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                             localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
                         }
                     } catch (final OXException e) {
-                        org.slf4j.LoggerFactory.getLogger(MailFolderImpl.class).error(e.getMessage(), e);
+                        org.slf4j.LoggerFactory.getLogger(MailFolderImpl.class).error("", e);
                         mailFolderType = MailFolderType.NONE;
                     }
                 }

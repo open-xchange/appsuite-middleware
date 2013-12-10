@@ -198,7 +198,7 @@ public final class CharsetDetector {
                 /*
                  * Neither a MimeBodyPart nor a MimeMessage
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return FALLBACK;
             }
             return detectCharset(rawIn);
@@ -260,7 +260,7 @@ public final class CharsetDetector {
         try {
             return detectCharsetFailOnError(in);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return FALLBACK;
         }
     }
@@ -287,7 +287,7 @@ public final class CharsetDetector {
                 detector.handleData(buffer, 0, read);
             }
         } catch (IOException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         } finally {
             Streams.close(in);
         }

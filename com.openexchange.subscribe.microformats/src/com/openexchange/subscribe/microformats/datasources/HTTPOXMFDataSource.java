@@ -74,10 +74,10 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
         try {
             return HTTPToolkit.grab(site);
         } catch (HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
         }
 

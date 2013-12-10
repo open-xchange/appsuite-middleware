@@ -123,11 +123,11 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
             try {
                 // new StartUpTest().test();
             } catch (final Exception e) {
-                org.slf4j.LoggerFactory.getLogger(FacebookMessagingActivator.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(FacebookMessagingActivator.class).error("", e);
             }
 
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(FacebookMessagingActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(FacebookMessagingActivator.class).error("", e);
             throw e;
         }
     }
@@ -142,7 +142,7 @@ public final class FacebookMessagingActivator extends HousekeepingActivator {
 
             Services.setServiceLookup(null);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(FacebookMessagingActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(FacebookMessagingActivator.class).error("", e);
             throw e;
         }
     }

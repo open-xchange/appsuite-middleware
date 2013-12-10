@@ -215,7 +215,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
 
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         } finally {
             if(stmt != null) {

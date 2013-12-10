@@ -110,7 +110,7 @@ public class DistributedFileServlet extends HttpServlet {
                 outStream.write(bytesRead);
             }
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
         } finally {
             Streams.close(inStream);
             Streams.close(outStream);
@@ -134,7 +134,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.getByID(id);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
         }
     }
 
@@ -150,7 +150,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.removeByID(id);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
         }
     }
 }

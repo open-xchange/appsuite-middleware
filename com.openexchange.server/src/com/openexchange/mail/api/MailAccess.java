@@ -709,7 +709,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         return;
                     }
                 } catch (final Exception e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             // Close mail connection

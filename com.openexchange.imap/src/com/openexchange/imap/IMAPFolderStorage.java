@@ -2481,7 +2481,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return imapFolder.getACL();
         } catch (final MessagingException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
             return null;
         }
@@ -2734,7 +2734,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         IMAPCommandsCollection.forceSetSubscribed(imapStore, moveFullname, false);
         if (!toMove.delete(true) && LOG.isWarnEnabled()) {
             final OXException e = IMAPException.create(IMAPException.Code.DELETE_FAILED, moveFullname);
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         }
         /*
          * Notify message storage
@@ -3015,7 +3015,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, f.getFullName());
         } catch (final MessagingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

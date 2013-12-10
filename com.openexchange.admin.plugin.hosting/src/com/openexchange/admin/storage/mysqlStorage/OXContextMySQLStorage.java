@@ -190,9 +190,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
             gwCtx = service.getContext(ctx.getId().intValue());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         // we need the right connection and scheme for this context
         final int poolId;
@@ -272,13 +272,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             conForConfigDB.commit();
             LOG.info("Context " + ctx.getId() + " deleted.");
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new StorageException(e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new StorageException(e);
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             rollback(conForConfigDB);
             throw new StorageException(e);
         } finally {
@@ -1035,7 +1035,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);
             } catch (OXContextException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw new StorageException(e.getMessage());
             }
             // Two separate try-catch blocks are necessary because rollback only works after starting a transaction.
@@ -1923,7 +1923,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
                 retval = db;
             } catch (final PoolException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (null == retval) {

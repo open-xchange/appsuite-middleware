@@ -112,9 +112,9 @@ public final class HashUtility {
             checksum.update(string.getBytes("UTF-8"));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         } catch (final UnsupportedEncodingException e) {
-            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         }
         return null;
     }
@@ -144,9 +144,9 @@ public final class HashUtility {
             checksum.update(string.getBytes("UTF-8"));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         } catch (final UnsupportedEncodingException e) {
-            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
         }
         return null;
     }

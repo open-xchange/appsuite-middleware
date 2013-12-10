@@ -190,7 +190,7 @@ public abstract class AJAXServlet extends HttpServlet {
             final AbstractAction action = createAction(session);
             response.setData(action.action(request));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         /*
@@ -254,7 +254,7 @@ public abstract class AJAXServlet extends HttpServlet {
             final AbstractAction action = createAction(session);
             response.setData(action.action(request));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         /*

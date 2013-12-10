@@ -95,7 +95,7 @@ public class PreparedStatementHolder {
             try {
                 stmt.close();
             } catch (SQLException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
             }
         }
     }

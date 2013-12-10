@@ -162,7 +162,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 try {
                     contact.setBirthday(DATE.parse(map.get(OXMF_PREFIX + "birthday")));
                 } catch (ParseException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -186,7 +186,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 try {
                     contact.setAnniversary(DATE.parse(map.get(OXMF_PREFIX + "anniversary")));
                 } catch (ParseException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -323,7 +323,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
             try {
                 loadImageFromURL(contact, new URL(map.get(OXMF_PREFIX + "image")));
             } catch (MalformedURLException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
                 // Discard image. This is all best effort, nothing more, maybe next time.
             }
         }
@@ -425,7 +425,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } catch (final java.net.SocketTimeoutException e) {

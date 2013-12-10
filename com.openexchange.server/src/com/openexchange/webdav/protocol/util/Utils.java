@@ -93,7 +93,7 @@ public class Utils {
             } catch (final ParseException e) {
             	// Ignore and try the others
             	if (LOG.isDebugEnabled()) {
-            		LOG.debug(e.getMessage(), e);
+            		LOG.debug("", e);
             	}
             }
         }

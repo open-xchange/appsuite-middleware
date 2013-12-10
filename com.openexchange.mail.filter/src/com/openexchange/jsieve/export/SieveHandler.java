@@ -1125,7 +1125,7 @@ public class SieveHandler {
             try {
                 return Integer.parseInt(matcher.group(1));
             } catch (final NumberFormatException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
                 return -1;
             }
         }

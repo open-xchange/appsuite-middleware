@@ -283,7 +283,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 try {
                     locale = userService.getUser(session.getUserId(), ctx).getLocale();
                 } catch (final OXException e) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                     return Locale.ENGLISH;
                 }
             }
@@ -379,7 +379,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, session.getUserId(), contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         if (fullName.startsWith(trashFullname)) {
             // Special handling
@@ -421,7 +421,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, session.getUserId(), contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         if (fullName.startsWith(trashFullname)) {
             // Special handling
@@ -533,7 +533,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             return maildIds;
         }
@@ -638,7 +638,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                     MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 // Prepare for next iteration
                 retval.addAll(Arrays.asList(destIds));
@@ -675,7 +675,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, session.getUserId(), contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         if (!hardDelete) {
             // New folder in trash folder
@@ -738,7 +738,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, session.getUserId(), contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         postEvent(accountId, fullName, true, true, false);
         if (!hd) {
@@ -1311,7 +1311,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return mail;
@@ -1421,7 +1421,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 try {
                                     in.close();
                                 } catch (final IOException e) {
-                                    LOG.error(e.getMessage(), e);
+                                    LOG.error("", e);
                                 }
                             }
                         }
@@ -1431,7 +1431,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     try {
                         zipOutput.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
                 /*
@@ -1684,7 +1684,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 return mails;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         /*
          * Live-Fetch from mail storage
@@ -1720,7 +1720,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return mails;
     }
@@ -1821,7 +1821,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         final List<MailMessage> l = new ArrayList<MailMessage>(mails.length);
         for (final MailMessage mm : mails) {
@@ -2224,7 +2224,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return SearchIteratorAdapter.createArrayIterator(mails);
     }
@@ -2842,7 +2842,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      */
                     retentionService.storeOnTransport(retentionData);
                 } catch (final OXException e) {
-                    l.error(e.getMessage(), e);
+                    l.error("", e);
                 }
             }
         };
@@ -2874,7 +2874,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 MailMessageCache.getInstance().removeFolderMessages(mailAccess.getAccountId(), sentFullname, session.getUserId(), contextId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } catch (final OXException e) {
             if (e.getMessage().indexOf("quota") != -1) {
@@ -2924,7 +2924,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } else {
             final MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
@@ -2950,7 +2950,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } finally {
                 otherAccess.close(false);
@@ -2987,7 +2987,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } else {
                 final MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
@@ -3013,7 +3013,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
                         }
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 } finally {
                     otherAccess.close(false);
@@ -3089,7 +3089,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } else {
             /*
@@ -3117,7 +3117,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } finally {
                 otherAccess.close(false);
@@ -3275,7 +3275,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     new Object[] { Integer.valueOf(newColorLabel) });
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -3344,7 +3344,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     MailMessageCache.getInstance().removeMessages(ids, accountId, fullName, session.getUserId(), contextId);
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } else {
             try {
@@ -3362,7 +3362,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         new Object[] { Integer.valueOf(flagVal ? flagBits : (flagBits * -1)) });
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -94,7 +94,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
         try {
             return parseMessage(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, owner, errors, warnings);
         } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return Collections.emptyList();
     }

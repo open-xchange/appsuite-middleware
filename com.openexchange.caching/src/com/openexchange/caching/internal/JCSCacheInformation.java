@@ -113,7 +113,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
         try {
             out = new ObjectOutputStream(counter);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return 0;
         }
         try {

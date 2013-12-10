@@ -155,7 +155,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
                 UnifiedInboxSynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -170,7 +170,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -100,7 +100,7 @@ public class AuditEventHandler implements EventHandler {
                 LOG.info("Using global Logging instance.");
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -130,7 +130,7 @@ public class AuditEventHandler implements EventHandler {
                 LOG.info(infoMsg);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -414,7 +414,7 @@ public class AuditEventHandler implements EventHandler {
                 retval = iter.next().getFolderName() + "/" + retval;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         return retval;

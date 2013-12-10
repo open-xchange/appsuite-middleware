@@ -121,7 +121,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 try {
                     return candidate.getContent();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     return null;
                 }
             }

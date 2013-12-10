@@ -154,7 +154,7 @@ public final class Delete {
             try {
                 throw GroupExceptionCodes.NO_GROUP_DELETE.create(GroupTools.getGroupZero(ctx).getDisplayName());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw GroupExceptionCodes.NO_GROUP_DELETE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
             }
         }

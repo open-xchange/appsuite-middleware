@@ -87,7 +87,7 @@ public class SyncToken extends SingleXMLPropertyMixin {
     		try {
 				this.lastModified = collection.getLastModified();
 			} catch (WebdavProtocolException e) {
-		        LOG.error(e.getMessage(), e);
+		        LOG.error("", e);
 			}
     	}
     	return Long.toString(null != lastModified ? lastModified.getTime() : 0);

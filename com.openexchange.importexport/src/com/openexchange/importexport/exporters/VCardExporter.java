@@ -302,7 +302,7 @@ public class VCardExporter implements Exporter {
                     try {
                         searchIterator.close();
                     } catch (final SearchIteratorException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             } else {
@@ -320,7 +320,7 @@ public class VCardExporter implements Exporter {
                     try {
                         searchIterator.close();
                     } catch (final SearchIteratorException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -382,7 +382,7 @@ public class VCardExporter implements Exporter {
             try {
                 versitWriter.close();
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

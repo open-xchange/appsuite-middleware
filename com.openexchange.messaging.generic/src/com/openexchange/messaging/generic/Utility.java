@@ -185,7 +185,7 @@ public final class Utility {
         try {
             return future.get();
         } catch (final InterruptedException e) {
-            org.slf4j.LoggerFactory.getLogger(Utility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(Utility.class).error("", e);
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } catch (final ExecutionException e) {

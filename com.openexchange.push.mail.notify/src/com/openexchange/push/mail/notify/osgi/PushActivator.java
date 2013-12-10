@@ -161,7 +161,7 @@ public final class PushActivator extends HousekeepingActivator {
             registerService(DeleteListener.class, new MailNotifyPushDeleteListener(), null);
             startUdpListener();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -183,7 +183,7 @@ public final class PushActivator extends HousekeepingActivator {
              */
             PushServiceRegistry.getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

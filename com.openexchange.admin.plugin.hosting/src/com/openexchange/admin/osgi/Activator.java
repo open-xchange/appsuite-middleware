@@ -89,7 +89,7 @@ public class Activator extends HousekeepingActivator {
             this.starter.start(context, configurationService);
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
         } catch (final OXGenericException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

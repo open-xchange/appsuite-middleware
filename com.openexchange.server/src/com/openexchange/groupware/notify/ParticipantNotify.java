@@ -229,7 +229,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             try {
                 fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
             }
         } else {
@@ -457,7 +457,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             serverSession = ServerSessionAdapter.valueOf(session);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         /*
@@ -781,7 +781,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             try {
                 folderName = access.getFolderName(folderId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 folderName = "";
             }
         }

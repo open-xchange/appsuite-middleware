@@ -185,7 +185,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 return;
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }  catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
@@ -194,7 +194,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 LOG.error(oxe.getMessage(), oxe);
                 response.setException(oxe);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 response.setException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
             }
         }

@@ -307,7 +307,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }

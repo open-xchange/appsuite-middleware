@@ -82,11 +82,11 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer<Mana
             objName = new ObjectName("com.openexchange.admin.monitor", "name", "CallMonitor");
             management.registerMBean(objName, new Monitor());
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return management;
     }
@@ -103,7 +103,7 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer<Mana
             try {
                 management.unregisterMBean(objName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             objName = null;
         }

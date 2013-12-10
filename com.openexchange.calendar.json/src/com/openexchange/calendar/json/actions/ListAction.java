@@ -266,7 +266,7 @@ public final class ListAction extends AppointmentAction {
         } catch (final SearchIteratorException e) {
             throw e;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             if (it != null) {

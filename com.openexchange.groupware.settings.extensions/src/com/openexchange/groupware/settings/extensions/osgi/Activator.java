@@ -127,7 +127,7 @@ public class Activator extends HousekeepingActivator {
                 }
             }
         } catch (final Throwable x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
         }
 
 
@@ -188,7 +188,7 @@ public class Activator extends HousekeepingActivator {
                             final String isProtected = property.get("protected");
                             return (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class).booleanValue());
                         } catch (final OXException x) {
-                            LOG.error(x.getMessage(), x);
+                            LOG.error("", x);
                             return false;
                         }
                     }

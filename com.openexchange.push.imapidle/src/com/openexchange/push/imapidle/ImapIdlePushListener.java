@@ -461,7 +461,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 try {
                     ImapIdlePushListenerRegistry.getInstance().removePushListener(contextId, userId);
                 } catch (final Exception e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

@@ -197,7 +197,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             }
                             return null;
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return null;
                         } finally {
                             closeSafe(mailAccess);
@@ -300,7 +300,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             final int unreadCount = unreadMessages.length;
                             return new int[] { count, unreadCount };
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return new int[] {0,0};
                         } finally {
                             closeSafe(mailAccess);
@@ -393,7 +393,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             final int count = messageStorage.searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, fields).length;
                             return Integer.valueOf(count);
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return Integer.valueOf(0);
                         } finally {
                             closeSafe(mailAccess);
@@ -473,7 +473,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             final int count = messageStorage.searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, term, fields).length;
                             return Integer.valueOf(count);
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return Integer.valueOf(0);
                         } finally {
                             closeSafe(mailAccess);
@@ -554,7 +554,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                                 messageStorage.getUnreadMessages(fn, MailSortField.RECEIVED_DATE, OrderDirection.ASC, fields, -1);
                             return Integer.valueOf(unreadMessages.length);
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return Integer.valueOf(0);
                         } finally {
                             closeSafe(mailAccess);
@@ -875,7 +875,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         return mailFolder;
                     } catch (final OXException e) {
-                        getLogger().debug(e.getMessage(), e);
+                        getLogger().debug("", e);
                         return null;
                     } finally {
                         if (null != mailAccess) {

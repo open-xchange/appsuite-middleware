@@ -262,7 +262,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 }
                             }
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return GetMessagesResult.EMPTY_RESULT;
                         } finally {
                             closeSafe(mailAccess);
@@ -1030,7 +1030,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             return messages;
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return Collections.emptyList();
                         } finally {
                             closeSafe(mailAccess);
@@ -1113,7 +1113,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 mailAccess.getMessageStorage().deleteMessages(folder, uids.toArray(new String[uids.size()]), hardDelete);
                             }
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return null;
                         } finally {
                             closeSafe(mailAccess);
@@ -1214,7 +1214,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 mailAccess.getMessageStorage().updateMessageFlags(folder, uids.toArray(new String[uids.size()]), flags, set);
                             }
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return null;
                         } finally {
                             closeSafe(mailAccess);
@@ -1290,7 +1290,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     colorLabel);
                             }
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return null;
                         } finally {
                             closeSafe(mailAccess);

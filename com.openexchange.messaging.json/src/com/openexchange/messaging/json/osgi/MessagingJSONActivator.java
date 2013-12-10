@@ -101,7 +101,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
         try {
             register();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -136,7 +136,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
 
             register();
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw x;
         }
     }
@@ -193,7 +193,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             }
             cleanUp();
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw x;
         }
     }

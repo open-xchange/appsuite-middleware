@@ -154,7 +154,7 @@ public final class MailSessionEventHandler implements EventHandler {
             try {
                 MailMessageCache.getInstance().removeUserMessages(userId, contextId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (DEBUG) {
                 LOG.debug(new com.openexchange.java.StringAllocator("All session-related caches cleared for removed session ").append(session.getSessionID()).toString());

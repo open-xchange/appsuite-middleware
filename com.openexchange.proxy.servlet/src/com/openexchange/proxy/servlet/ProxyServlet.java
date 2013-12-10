@@ -284,7 +284,7 @@ public class ProxyServlet extends SessionServlet {
             try {
                 Streams.close(httpMethod.getResponseBodyAsStream());
             } catch (final IOException e) {
-                LoggerFactory.getLogger(ProxyServlet.class).error(e.getMessage(), e);
+                LoggerFactory.getLogger(ProxyServlet.class).error("", e);
             } finally {
                 /*
                  * We are done with the connection and that it can now be reused

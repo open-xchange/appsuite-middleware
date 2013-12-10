@@ -240,10 +240,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                             if (null != other.getTrace()) {
                                 e.setStackTrace(other.getTrace());
                             }
-                            LOG.debug(e.getMessage(), e);
+                            LOG.debug("", e);
                             e = new PoolingException("Found thread using two objects. Second get.");
                             e.fillInStackTrace();
-                            LOG.debug(e.getMessage(), e);
+                            LOG.debug("", e);
                         }
                     }
                 }
@@ -477,7 +477,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 ReentrantLockPool.this.run();
                 thread.setName(origName);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     };
@@ -604,7 +604,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (testThreads && null != metaData.getTrace()) {
                 e.setStackTrace(metaData.getTrace());
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         try {
             ensureMinIdle();

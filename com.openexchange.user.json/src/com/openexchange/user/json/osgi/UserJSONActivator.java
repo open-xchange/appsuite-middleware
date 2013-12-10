@@ -118,7 +118,7 @@ public class UserJSONActivator extends AJAXModuleActivator {
             openTrackers();
         } catch (final Exception e) {
             final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserJSONActivator.class);
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

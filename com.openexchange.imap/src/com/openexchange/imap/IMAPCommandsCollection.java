@@ -1262,7 +1262,7 @@ public final class IMAPCommandsCollection {
                 }
             });
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -1363,9 +1363,9 @@ public final class IMAPCommandsCollection {
             field.setAccessible(true);
             field.set(folder, null);
         } catch (final NoSuchFieldException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         new ExtendedIMAPFolder(folder, folder.getSeparator()).triggerNotifyFolderListeners(FolderEvent.RENAMED);
     }
@@ -1810,7 +1810,7 @@ public final class IMAPCommandsCollection {
                                 try {
                                     sia.append(Integer.parseInt(num));
                                 } catch (final NumberFormatException e) {
-                                    LOG.error(e.getMessage(), e);
+                                    LOG.error("", e);
                                     throw wrapException(e, "Invalid Message Number: " + num);
                                 }
                             }
@@ -2169,7 +2169,7 @@ public final class IMAPCommandsCollection {
             });
             return val.booleanValue();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw IMAPException.create(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
         }
     }
@@ -2232,7 +2232,7 @@ public final class IMAPCommandsCollection {
                 }
             })).booleanValue();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw IMAPException.create(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
         }
     }

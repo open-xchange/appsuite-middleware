@@ -129,9 +129,9 @@ public class CrawlerUpdateTask implements Runnable {
                 }
 
             } catch (MalformedURLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

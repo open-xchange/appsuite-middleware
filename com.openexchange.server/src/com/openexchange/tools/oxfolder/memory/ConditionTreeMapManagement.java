@@ -319,10 +319,10 @@ public final class ConditionTreeMapManagement {
                 newMap.init();
                 return newMap;
             } catch (final OXException e) {
-                logger.warn(e.getMessage(), e);
+                logger.warn("", e);
                 return null;
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 return null;
             }
         }

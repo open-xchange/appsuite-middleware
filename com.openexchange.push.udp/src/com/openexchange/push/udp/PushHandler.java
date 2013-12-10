@@ -151,7 +151,7 @@ public class PushHandler implements EventHandler {
         try {
             PushOutputQueue.add(new PushObject(folderId, module, ctx.getContextId(), users, false, timestamp));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }

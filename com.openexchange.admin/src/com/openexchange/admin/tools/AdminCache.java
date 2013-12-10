@@ -497,7 +497,7 @@ public class AdminCache {
                         props.put(name, URLDecoder.decode(value, "UTF-8"));
                     } catch (final UnsupportedEncodingException e) {
                         // Should not happen for UTF-8.
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                     }
                 }
             }
@@ -619,7 +619,7 @@ public class AdminCache {
                 try {
                     bf.close();
                 } catch (IOException e) {
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                 }
             }
         }

@@ -189,7 +189,7 @@ public class Activator extends DeferredActivator {
             capabilityRegistration = context.registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
 
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -216,7 +216,7 @@ public class Activator extends DeferredActivator {
              */
             MailFilterServletServiceRegistry.getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             mstarted.set(false);

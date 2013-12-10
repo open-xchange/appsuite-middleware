@@ -1715,7 +1715,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iter.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -1842,7 +1842,7 @@ public final class OXFolderSQL {
                         deleteSingleEntityPermission(entity, fuid, permTable, wc, ctx);
                         updateSingleEntityPermission(mergedPerm, mailAdmin, fuid, permTable, wc, ctx);
                     } catch (final Exception e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         continue Next;
                     }
                 } else {
@@ -1854,7 +1854,7 @@ public final class OXFolderSQL {
                     try {
                         executeUpdate(stmt);
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         continue Next;
                     } finally {
                         stmt.close();
@@ -2072,7 +2072,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -2119,7 +2119,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*

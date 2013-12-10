@@ -141,7 +141,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
                 retval.add((CalendarDataObject) appointmentsInFolder.next());
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         return retval;

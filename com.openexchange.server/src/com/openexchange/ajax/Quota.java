@@ -98,7 +98,7 @@ public class Quota extends SessionServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         writeResponse(response, res, session);

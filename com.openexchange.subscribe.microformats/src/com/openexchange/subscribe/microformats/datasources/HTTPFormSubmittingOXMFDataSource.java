@@ -102,10 +102,10 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
         try {
             return HTTPToolkit.post(address, formValues);
         } catch (HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
         }
 

@@ -153,7 +153,7 @@ public final class OXFolderAdminHelper {
         try {
             admin = getContextAdminID(cid, readCon);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         if (admin != userId) {
@@ -197,7 +197,7 @@ public final class OXFolderAdminHelper {
         try {
             admin = getContextAdminID(cid, writeCon);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         for (final int id : CHANGEABLE_PUBLIC_FOLDERS) {
@@ -297,7 +297,7 @@ public final class OXFolderAdminHelper {
                         CalendarCache.getInstance().invalidateGroup(cid);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -568,7 +568,7 @@ public final class OXFolderAdminHelper {
                         }
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } catch (final SQLException e) {
@@ -726,7 +726,7 @@ public final class OXFolderAdminHelper {
                 OXFolderSQL.updateLastModified(globalAddressBookId, creatingTime, mailAdmin, writeCon, ctx);
             } catch (final OXException e) {
                 // Cannot occur
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } else {
             createGlobalAddressBook(cid, mailAdmin, writeCon, creatingTime);
@@ -1316,7 +1316,7 @@ public final class OXFolderAdminHelper {
                 }
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -1342,7 +1342,7 @@ public final class OXFolderAdminHelper {
             }
         } catch (final Exception e) {
             // Ignore
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         /*
          * Update last-modified time stamp

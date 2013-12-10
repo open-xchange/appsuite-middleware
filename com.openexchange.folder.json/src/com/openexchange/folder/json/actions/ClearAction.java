@@ -116,7 +116,7 @@ public final class ClearAction extends AbstractFolderAction {
                 folderService.clearFolder(treeId, folderId, session);
             } catch (final OXException e) {
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ClearAction.class);
-                log.error(e.getMessage(), e);
+                log.error("", e);
                 responseArray.put(folderId);
                 e.setCategory(com.openexchange.exception.Category.CATEGORY_WARNING);
                 warnings.add(e);

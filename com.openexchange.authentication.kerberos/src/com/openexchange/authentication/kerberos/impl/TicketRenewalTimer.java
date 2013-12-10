@@ -129,7 +129,7 @@ class TicketRenewalTimer implements Runnable {
             schedule(subject);
             principal.dispose();
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

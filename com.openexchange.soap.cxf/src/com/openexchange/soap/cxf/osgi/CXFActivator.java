@@ -225,7 +225,7 @@ public class CXFActivator extends HousekeepingActivator {
                 track(HttpService.class, trackerCustomizer);
                 openTrackers();
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }

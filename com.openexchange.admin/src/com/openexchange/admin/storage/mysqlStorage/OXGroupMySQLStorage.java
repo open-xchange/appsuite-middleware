@@ -475,7 +475,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                                 cache.remove(key);
                             }
                         } catch (final OXException e) {
-                            log.error(e.getMessage(), e);
+                            log.error("", e);
                         } finally {
                             AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                         }

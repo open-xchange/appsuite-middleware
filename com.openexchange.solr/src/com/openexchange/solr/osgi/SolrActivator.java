@@ -157,9 +157,9 @@ public class SolrActivator extends HousekeepingActivator {
                             scheduler.scheduleJob(jobDetail, trigger);
                         }
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     } catch (SchedulerException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -204,7 +204,7 @@ public class SolrActivator extends HousekeepingActivator {
                     try {
                         service.registerMBean(solrMBeanName, solrMBean);
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -213,14 +213,14 @@ public class SolrActivator extends HousekeepingActivator {
                     try {
                         service.unregisterMBean(solrMBeanName);
                     } catch (OXException e) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             });
         } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (NotCompliantMBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

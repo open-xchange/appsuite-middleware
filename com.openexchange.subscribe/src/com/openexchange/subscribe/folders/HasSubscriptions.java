@@ -135,7 +135,7 @@ public class HasSubscriptions implements AdditionalFolderField {
              }
              return retval;
          } catch (final OXException e) {
-             LOG.error(e.getMessage(), e);
+             LOG.error("", e);
          }
          return allFalse(folder.size());
      }

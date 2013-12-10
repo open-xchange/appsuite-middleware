@@ -94,7 +94,7 @@ public final class Task2Links {
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             folders = FolderStorage.getInstance().selectFolder(ctx, taskId, StorageType.ACTIVE);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         for (final Folder folder : folders) {
@@ -115,7 +115,7 @@ public final class Task2Links {
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             folder = FolderStorage.getInstance().selectFolderById(ctx, taskId, folderId, StorageType.ACTIVE);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         return null == folder ? false : mayRead(ctx, user, permissionBits, task, folder);
@@ -126,7 +126,7 @@ public final class Task2Links {
         try {
             folder2 = Tools.getFolder(ctx, folder.getIdentifier());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         try {

@@ -218,7 +218,7 @@ public final class WebDAVFileStorageService implements AccountAware {
         try {
             return compositeAccountManager.getAccountManagerFor(SERVICE_ID);
         } catch (final OXException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return getAccountManager0();
         }
     }

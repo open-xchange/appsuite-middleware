@@ -291,7 +291,7 @@ public final class Delete {
                     }
                 } catch (final Exception e) {
                     // Ignore
-                    org.slf4j.LoggerFactory.getLogger(Delete.class).error(e.getMessage(), e);
+                    org.slf4j.LoggerFactory.getLogger(Delete.class).error("", e);
                 }
             }
         }

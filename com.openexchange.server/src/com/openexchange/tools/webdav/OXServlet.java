@@ -278,7 +278,7 @@ public abstract class OXServlet extends WebDavServlet {
         } catch (final IOException e) {
             throw e;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final ServletException se = new ServletException(e.getMessage(), e);
             throw se;
         }
@@ -325,7 +325,7 @@ public abstract class OXServlet extends WebDavServlet {
             try {
                 session = findSessionByCookie(req, resp);
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 return false;
             }
@@ -341,7 +341,7 @@ public abstract class OXServlet extends WebDavServlet {
                     loginRequest = customizer.modifyLogin(loginRequest);
                 }
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addUnauthorizedHeader(req, resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return false;
@@ -364,7 +364,7 @@ public abstract class OXServlet extends WebDavServlet {
                     addUnauthorizedHeader(req, resp);
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 }
                 return false;

@@ -103,7 +103,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
                 }
             }
         } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         } finally {
             continueHandling();
         }

@@ -101,7 +101,7 @@ public class MSNServiceImpl implements MSNService {
             contacts = parseIntoContacts(wrap_access_token, response);
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         return contacts;
@@ -127,11 +127,11 @@ public class MSNServiceImpl implements MSNService {
             wholeResponse = new JSONObject(response);
 
         } catch (final HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return wholeResponse;
     }
@@ -229,7 +229,7 @@ public class MSNServiceImpl implements MSNService {
             	contacts.add(c);
             }
         } catch (JSONException x) {
-        	LOG.error(x.getMessage(), x);
+        	LOG.error("", x);
         }
 
         return contacts;
@@ -264,13 +264,13 @@ public class MSNServiceImpl implements MSNService {
             final String response = URLDecoder.decode(postMethod.getResponseBodyAsString(), "UTF-8");
             return new JSONObject(response).getString("access_token");
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
 		}
         return accessToken;
     }
@@ -283,7 +283,7 @@ public class MSNServiceImpl implements MSNService {
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return displayName;
     }

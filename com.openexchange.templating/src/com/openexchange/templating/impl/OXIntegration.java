@@ -204,10 +204,10 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             return builder.toString();
 
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw TemplateErrorMessage.IOException.create(e);
         } finally {
             Streams.close(reader);

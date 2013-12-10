@@ -170,7 +170,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
         final Lock l = synchronizer.acquire();
         try {
             /*
-             * try { byteBuffer.flush(); } catch (IOException e) { LOG.error(e.getMessage(), e); }
+             * try { byteBuffer.flush(); } catch (IOException e) { LOG.error("", e); }
              */
             final byte[] retval = new byte[count];
             System.arraycopy(buf, 0, retval, 0, count);
@@ -297,7 +297,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             }
         } catch (final SocketException e) {
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } else {
                 LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage()).toString(), e);
             }
@@ -307,10 +307,10 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             ioexc.initCause(e);
             throw ioexc;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final IOException ioexc = new IOException(e.getMessage());
             ioexc.initCause(e);
             throw ioexc;
@@ -341,7 +341,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             }
         } catch (final SocketException e) {
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } else {
                 LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage()).toString(), e);
             }
@@ -351,10 +351,10 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             ioexc.initCause(e);
             throw ioexc;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final IOException ioexc = new IOException(e.getMessage());
             ioexc.initCause(e);
             throw ioexc;

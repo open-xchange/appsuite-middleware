@@ -100,7 +100,7 @@ public abstract class OXContextStorageInterface {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXContextStorageInterface.class);
                     } catch (final ClassNotFoundException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                         throw new StorageException(e);
                     }
                 } else {
@@ -115,22 +115,22 @@ public abstract class OXContextStorageInterface {
             cons = implementingClass.getConstructor(new Class[] {});
             return cons.newInstance(new Object[] {});
         } catch (final SecurityException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final NoSuchMethodException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final InstantiationException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         }
     }

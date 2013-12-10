@@ -135,7 +135,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             };
 
         } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return super.initOAuth(callbackUrl, session);
     }
@@ -202,7 +202,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             }
             return token;
         } catch (UnsupportedEncodingException x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
         } catch (IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (JSONException e) {

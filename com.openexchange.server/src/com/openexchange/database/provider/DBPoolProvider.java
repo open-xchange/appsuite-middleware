@@ -64,7 +64,7 @@ public class DBPoolProvider implements DBProvider {
         try {
             return DBPool.pickup(ctx);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

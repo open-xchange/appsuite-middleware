@@ -141,7 +141,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                     ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
                     updateLink(id, Types.INFOSTORE, folderId, session);
                 } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (NumberFormatException e) {
                     LOG.debug("Error parsing numerical identifiers from event: " + e.getMessage() + ". Skipping.");
                 }
@@ -156,7 +156,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                     ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
                     deleteLink(id, Types.INFOSTORE, folderId, session);
                 } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (NumberFormatException e) {
                     LOG.debug("Error parsing numerical identifiers from event: " + e.getMessage() + ". Skipping.");
                 }

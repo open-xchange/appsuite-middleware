@@ -109,13 +109,13 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,O
                 final ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl");
                 managementService.registerMBean(objectName, new CrawlerUpdateMBeanImpl(configurationService, activator));
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return obj;
@@ -136,11 +136,11 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,O
                 try {
                     managementService.unregisterMBean(new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl"));
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (final MalformedObjectNameException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 managementService = null;
             }

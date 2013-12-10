@@ -450,7 +450,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
                     try {
                         userPermissionBits = tmp = userId > 0 ? UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx) : null;
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -475,7 +475,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
                     try {
                         userConfiguration = tmp = userId > 0 ? UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx) : null;
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }

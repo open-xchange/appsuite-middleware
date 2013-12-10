@@ -1133,7 +1133,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
             }
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         /*-
          *
@@ -1431,7 +1431,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 /*
                  * Cannot occur
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return jsonObject;

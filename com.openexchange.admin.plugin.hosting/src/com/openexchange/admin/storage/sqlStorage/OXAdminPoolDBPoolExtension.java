@@ -84,7 +84,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         try {
             getService().back(poolId, con);
         } catch (PoolException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -102,7 +102,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         try {
             getService().backNoTimeoout(poolId, con);
         } catch (PoolException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

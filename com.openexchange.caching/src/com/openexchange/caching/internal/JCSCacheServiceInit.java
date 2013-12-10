@@ -201,7 +201,7 @@ public final class JCSCacheServiceInit {
             try {
                 in.close();
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return props;
@@ -380,7 +380,7 @@ public final class JCSCacheServiceInit {
             configureByPropertyFile(false, true);
         } catch (final OXException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

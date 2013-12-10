@@ -191,7 +191,7 @@ public final class HtmlServiceImpl implements HtmlService {
             }
 
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return content;
     }
@@ -277,7 +277,7 @@ public final class HtmlServiceImpl implements HtmlService {
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
@@ -335,7 +335,7 @@ public final class HtmlServiceImpl implements HtmlService {
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
@@ -372,7 +372,7 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Append as-is
              */
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             builder.append(url);
         }
     }

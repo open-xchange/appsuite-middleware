@@ -145,7 +145,7 @@ public final class StorageUtility {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

@@ -158,18 +158,18 @@ public class FilestoreDataMover implements Callable<Void> {
         try {
             copy();
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             // Because the client side only knows of the exceptions defined in the core we have
             // to throw the trace as string
             throw new StorageException(e.toString());
         } catch (final IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InterruptedException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final ProgrammErrorException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
         return null;

@@ -120,7 +120,7 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
             }
         } catch (final Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CallbackRegistry.class);
-            logger.error(e.getMessage(), e);
+            logger.error("", e);
         }
     }
 

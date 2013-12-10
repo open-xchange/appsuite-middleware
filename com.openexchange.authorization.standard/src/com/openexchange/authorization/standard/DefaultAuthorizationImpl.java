@@ -94,7 +94,7 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
         try {
             if (!ctx.isEnabled()) {
                 final OXException e = ContextExceptionCodes.CONTEXT_DISABLED.create(Integer.valueOf(ctx.getContextId()), ctx.getName());
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 throw AuthorizationExceptionCodes.USER_DISABLED.create(e);
             }
         } catch (final UndeclaredThrowableException e) {

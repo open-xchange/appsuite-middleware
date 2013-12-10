@@ -112,7 +112,7 @@ public final class FolderDeleteListenerRegistry {
         try {
             return (map.containsKey(Class.forName(clazz).asSubclass(FolderDeleteListenerService.class)));
         } catch (final ClassNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
     }

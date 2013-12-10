@@ -505,7 +505,7 @@ public final class MailProperties implements IMailProperties {
                     /*
                      * Cannot occur
                      */
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 logBuilder.append("\tPartModifier Implementation: Unknown class \"").append(partModifierStr).append(fallbackPrefix).append(
                     DummyPartModifier.class.getName()).append('\n');

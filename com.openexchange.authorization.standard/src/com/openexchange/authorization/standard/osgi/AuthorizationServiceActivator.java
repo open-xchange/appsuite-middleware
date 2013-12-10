@@ -96,7 +96,7 @@ public class AuthorizationServiceActivator extends HousekeepingActivator {
                 registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -110,7 +110,7 @@ public class AuthorizationServiceActivator extends HousekeepingActivator {
              */
             // getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

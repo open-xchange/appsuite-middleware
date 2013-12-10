@@ -159,7 +159,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
                 retval = result.getString(1);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -181,7 +181,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
                 LOG.error("Strangely updated " + updated + " appointments instead of 1.");
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(null, stmt);
         }

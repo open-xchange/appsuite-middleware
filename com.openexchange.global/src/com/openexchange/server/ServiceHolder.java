@@ -107,7 +107,7 @@ public abstract class ServiceHolder<S> {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -330,7 +330,7 @@ public abstract class ServiceHolder<S> {
                         }
                     } catch (final InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     } finally {
                         waiting.set(false);
                     }

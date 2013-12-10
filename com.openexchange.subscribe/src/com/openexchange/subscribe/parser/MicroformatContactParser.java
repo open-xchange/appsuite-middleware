@@ -120,9 +120,9 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
             storeContacts(new TargetFolderSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
 
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
     }
@@ -137,9 +137,9 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
             xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes()) ) );
             contacts = handler.getObjects();
         } catch (final SAXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

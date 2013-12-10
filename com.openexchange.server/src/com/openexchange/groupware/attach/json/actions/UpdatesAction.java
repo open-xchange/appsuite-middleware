@@ -203,7 +203,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (iter != null) {
                 try {
@@ -216,7 +216,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
                 try {
                     iter2.close();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

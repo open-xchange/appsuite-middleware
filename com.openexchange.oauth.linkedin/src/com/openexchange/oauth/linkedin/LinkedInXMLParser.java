@@ -100,7 +100,7 @@ public class LinkedInXMLParser {
                 OXContainerConverter.loadImageFromURL(contact, imageUrl);
             }
         } catch (final ConverterException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         // get the current job and company
@@ -230,7 +230,7 @@ public class LinkedInXMLParser {
                     OXContainerConverter.loadImageFromURL(contact, imageUrl);
                 }
             } catch (final ConverterException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             // get the current job and company

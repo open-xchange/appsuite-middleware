@@ -171,7 +171,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         try {
             return HTTPToolkit.grabStream(dataLink, false);
         } catch (final IOException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         return null;
     }
@@ -203,7 +203,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
                 try {
                     file.close();
                 } catch (final IOException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
             }
         }

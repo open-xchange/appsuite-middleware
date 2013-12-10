@@ -705,7 +705,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             try {
                 retval.add(oxfolderAccess.getFolderObject(iter.next().intValue()));
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 continue;
             }
         }

@@ -121,7 +121,7 @@ public final class MailCacheConfiguration implements Initialization {
             try {
                 cacheService.freeCache(MailMessageCache.REGION_NAME);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -264,7 +264,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -284,7 +284,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 secretService = null;
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

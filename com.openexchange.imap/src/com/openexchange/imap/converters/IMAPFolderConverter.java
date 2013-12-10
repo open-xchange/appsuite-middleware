@@ -697,13 +697,7 @@ public final class IMAPFolderConverter {
             }
         } catch (final MessagingException e) {
             if (!ownRights.contains(Rights.Right.ADMINISTER)) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(
-                        new com.openexchange.java.StringAllocator(256).append("ACLs could not be requested for folder ").append(imapFolder.getFullName()).append(
-                            ". A newer ACL extension (RFC 4314) seems to be supported by IMAP server ").append(imapConfig.getServer()).append(
-                            ", which denies GETACL command if no ADMINISTER right is granted.").toString(),
-                        e);
-                }
+                LOG.warn("ACLs could not be requested for folder {}. A newer ACL extension (RFC 4314) seems to be supported by IMAP server {}, which denies GETACL command if no ADMINISTER right is granted.", imapFolder.getFullName(), imapConfig.getServer(), e);
                 addOwnACL(mailFolder);
                 return;
             }
@@ -865,7 +859,7 @@ public final class IMAPFolderConverter {
                     handleCommandFailedException(((com.sun.mail.iap.CommandFailedException) nextException), folder.getFullName());
                     return null;
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 /*
                  * Write empty string as rights. Nevertheless user may see folder!

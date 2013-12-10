@@ -1075,13 +1075,13 @@ public final class QuotedInternetAddress extends InternetAddress {
                     try {
                         encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
                     } catch (final UnsupportedEncodingException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 } else if (!isAscii(personal)) {
                     try {
                         encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
                     } catch (final UnsupportedEncodingException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
                 return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();

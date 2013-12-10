@@ -96,7 +96,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         try {
             oxresell = OXResellerStorageInterface.getInstance();
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -181,16 +181,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error("Invalid data sent by client!", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -251,19 +251,19 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.create(adm);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final EnforceableDataObjectException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new InvalidDataException(e.getMessage());
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -318,16 +318,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error("Invalid data sent by client!", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -357,10 +357,10 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
             return ret.toArray(new Restriction[ret.size()]);
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -410,19 +410,19 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.getData(admins);
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -458,13 +458,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.getRestrictionsFromContext(ctx);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -484,16 +484,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
             oxresell.initDatabaseRestrictions();
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -523,13 +523,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 return oxresell.list(search_pattern, pid);
             }
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -551,16 +551,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.removeDatabaseRestrictions();
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -581,16 +581,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.updateModuleAccessRestrictions();
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -665,16 +665,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.updateRestrictions();
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }

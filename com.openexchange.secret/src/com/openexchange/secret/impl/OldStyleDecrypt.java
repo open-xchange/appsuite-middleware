@@ -130,7 +130,7 @@ public final class OldStyleDecrypt {
             encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(Strings.toAsciiBytes(encryptedPassword));
         } catch (final RuntimeException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
 

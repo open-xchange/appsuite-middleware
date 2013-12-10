@@ -254,7 +254,7 @@ public final class FolderStorageActivator implements BundleActivator {
 				LOG.info(sb.toString());
 			}
 		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 			throw e;
 		}
 	}
@@ -309,7 +309,7 @@ public final class FolderStorageActivator implements BundleActivator {
 				LOG.info(sb.toString());
 			}
 		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 			throw e;
 		}
 	}

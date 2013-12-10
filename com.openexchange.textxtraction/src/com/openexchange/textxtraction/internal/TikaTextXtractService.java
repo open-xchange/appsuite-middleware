@@ -121,9 +121,9 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             TikaConfig config = new TikaConfig(configMatch.document());
             tika = new Tika(config);
         } catch (TikaException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

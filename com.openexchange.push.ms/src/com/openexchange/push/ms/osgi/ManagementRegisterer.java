@@ -105,11 +105,11 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
                 objectName = getObjectName(PushMsMBeanImpl.class.getName(), PushMsMBean.PUSH_MS_DOMAIN);
                 management.registerMBean(objectName, new PushMsMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             }
         }
     }
@@ -120,7 +120,7 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } finally {
                 objectName = null;
             }

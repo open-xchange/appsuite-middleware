@@ -136,7 +136,7 @@ public class MyActivator extends HousekeepingActivator {
             if (new EmptyCecker().isEmpty(alias)) {
                 registry.clearRegistry();
                 final IllegalStateException e = new IllegalStateException("Missing property in \"com.openexchange.upsell.multiple.servlet\" configuration or missing file \"upsell.properties\".");
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return;
             }
         }

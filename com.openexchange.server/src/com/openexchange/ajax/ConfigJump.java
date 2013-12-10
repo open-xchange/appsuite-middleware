@@ -145,7 +145,7 @@ public class ConfigJump extends SessionServlet {
             });
             response.setData(url);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
