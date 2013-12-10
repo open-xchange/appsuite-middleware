@@ -134,13 +134,13 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
 
         } catch (ConversionError e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (FailingHttpStatusCodeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (MalformedURLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         output = new CalendarDataObject[events.size()];

@@ -148,7 +148,7 @@ public class UUEncodedMultiPart {
                 final int skip = examineBeginToken(m.group(1));
                 uuencodeParts.add(new UUEncodedPart(m.start(1) + skip, m.start(5), m.group().substring(skip), cleanAtom(m.group(3))));
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 break;
             }
         }

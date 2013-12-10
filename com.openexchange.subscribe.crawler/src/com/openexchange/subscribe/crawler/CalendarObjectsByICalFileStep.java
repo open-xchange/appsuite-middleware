@@ -100,9 +100,9 @@ public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObje
                 }
 
             } catch (ConversionError e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (FailingHttpStatusCodeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         output = new CalendarDataObject[events.size()];

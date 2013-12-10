@@ -103,11 +103,11 @@ class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService
                 objectName = getObjectName(DeferredActivatorMBeanImpl.class.getName(), DeferredActivatorMBean.OSGI_DOMAIN);
                 management.registerMBean(objectName, new DeferredActivatorMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             }
         }
     }
@@ -118,7 +118,7 @@ class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } finally {
                 objectName = null;
             }

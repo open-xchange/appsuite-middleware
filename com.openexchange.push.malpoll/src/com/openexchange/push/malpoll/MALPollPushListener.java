@@ -312,7 +312,7 @@ public final class MALPollPushListener implements PushListener {
             } catch (final OXException e) {
                 if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                     /*
                      * Nothing to synchronize

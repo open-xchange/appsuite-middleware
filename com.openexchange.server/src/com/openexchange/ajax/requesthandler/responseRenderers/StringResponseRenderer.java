@@ -100,9 +100,9 @@ public class StringResponseRenderer implements ResponseRenderer {
             final Object resultObject = result.getResultObject();
             resp.getWriter().write(resultObject == null ? "" : resultObject.toString());
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

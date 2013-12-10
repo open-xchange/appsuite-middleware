@@ -257,7 +257,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
                 }
                 dataSource = mds;
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
         }

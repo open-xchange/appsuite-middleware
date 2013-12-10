@@ -88,7 +88,7 @@ public class Resource extends DataServlet {
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 				writeResponse(response, httpServletResponse, session);
 				return;

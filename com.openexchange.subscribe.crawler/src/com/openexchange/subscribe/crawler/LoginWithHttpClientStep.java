@@ -148,7 +148,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
             executedSuccessfully = true;
 
         } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(LoginWithHttpClientStep.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(LoginWithHttpClientStep.class).error("", e);
         }
     }
 

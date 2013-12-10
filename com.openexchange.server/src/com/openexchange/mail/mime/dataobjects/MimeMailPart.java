@@ -274,12 +274,12 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 }
                 tmp = getContentType().startsWith(MULTIPART);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final MessageRemovedException e) {
                 // Message has been removed in the meantime
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
             } catch (final MessagingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             isMulti = tmp;
         }

@@ -106,7 +106,7 @@ public class RMIRegistry {
             }
             return registry;
         } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw RMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
         } finally {
             lock.unlock();

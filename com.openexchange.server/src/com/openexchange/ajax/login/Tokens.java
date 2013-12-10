@@ -153,7 +153,7 @@ public final class Tokens implements LoginRequestHandler {
         try {
             ResponseWriter.write(response, resp.getWriter(), locale);
         } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

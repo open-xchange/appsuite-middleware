@@ -106,10 +106,10 @@ public class HTTPServletRegistration extends ServiceTracker<HttpService, HttpSer
             service.registerServlet(alias, servlet, null, null);
             return service;
         } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             context.ungetService(reference);
         } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             context.ungetService(reference);
         }
         return null;

@@ -113,7 +113,7 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
             }
             return removeOldNonces(currentTimeMsec, databaseService);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final String logMessage = e.getPlainLogMessage();
             final Object[] args = e.getLogArgs();
             throw new IOException(String.format(Locale.US, null == logMessage ? "I/O error." : logMessage, null == args ? new Object[0] : args), e);

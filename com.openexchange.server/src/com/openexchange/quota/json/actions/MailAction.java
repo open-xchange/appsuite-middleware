@@ -96,10 +96,10 @@ public final class MailAction extends AbstractQuotaAction {
             } catch (final OXException e) {
                 if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
             }

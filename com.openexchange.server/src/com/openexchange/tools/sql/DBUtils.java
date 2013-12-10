@@ -108,7 +108,7 @@ public final class DBUtils {
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -123,7 +123,7 @@ public final class DBUtils {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -174,7 +174,7 @@ public final class DBUtils {
                 rs.close();
             } catch (final SQLException e) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -186,7 +186,7 @@ public final class DBUtils {
                 stmt.close();
             } catch (final SQLException e) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -244,7 +244,7 @@ public final class DBUtils {
                 con.rollback();
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -262,7 +262,7 @@ public final class DBUtils {
                 con.setAutoCommit(true);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

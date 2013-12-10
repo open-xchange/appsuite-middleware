@@ -231,7 +231,7 @@ public final class SystemInfostoreFolder {
             }
             return b.booleanValue();
         } catch (final OXException e) {
-            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).warn(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).warn("", e);
             return false;
         }
     }
@@ -251,7 +251,7 @@ public final class SystemInfostoreFolder {
             }
             return id;
         } catch (final OXException e) {
-            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).error("", e);
             return -1;
         }
     }

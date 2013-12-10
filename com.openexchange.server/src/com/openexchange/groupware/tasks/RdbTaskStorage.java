@@ -497,7 +497,7 @@ public class RdbTaskStorage extends TaskStorage {
             try {
                 tmp2 = DBUtils.getColumnSize(con, SQL.TASK_TABLES.get(type), mapper.getDBColumnName());
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 tmp2 = -1;
             }
             final int length = -1 == tmp2 ? 0 : tmp2;

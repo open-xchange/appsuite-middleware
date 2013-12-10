@@ -311,10 +311,10 @@ public final class AjpMessage {
             try {
                 return QuotedPrintable.decodeString(sb.toString(), DEFAULT_ENCODING == null ? "UTF-8" : DEFAULT_ENCODING);
             } catch (final IOException e) {
-                log.warn(e.getMessage(), e);
+                log.warn("", e);
                 return sb.toString();
             } catch (final MessagingException e) {
-                log.warn(e.getMessage(), e);
+                log.warn("", e);
                 return sb.toString();
             }
         }

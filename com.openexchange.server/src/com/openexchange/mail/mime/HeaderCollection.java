@@ -1029,7 +1029,7 @@ public class HeaderCollection implements Serializable {
             log2.info(Boolean.toString(hc.equals(hc2)));
 
         } catch (final Exception e) {
-            log2.error(e.getMessage(), e);
+            log2.error("", e);
         }
     }
 }

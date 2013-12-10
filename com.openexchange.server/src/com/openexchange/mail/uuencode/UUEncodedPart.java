@@ -143,7 +143,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
             final InputStream inStreamPart = MimeUtility.decode(bStream, "uuencode");
             return (inStreamPart);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error("", e);
             return (null);
         }
     }
@@ -196,7 +196,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
                 Streams.close(br);
             }
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error("", e);
         }
         return (encodedPart);
     }

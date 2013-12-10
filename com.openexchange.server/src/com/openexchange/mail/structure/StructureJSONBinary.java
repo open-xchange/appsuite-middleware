@@ -128,7 +128,7 @@ public final class StructureJSONBinary implements JSONBinary {
             base64Out.close();
             return bout.toString("US-ASCII");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return "";
         }
     }
@@ -142,7 +142,7 @@ public final class StructureJSONBinary implements JSONBinary {
         try {
             return tfh.getStream();
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return Streams.EMPTY_INPUT_STREAM;
         }
     }

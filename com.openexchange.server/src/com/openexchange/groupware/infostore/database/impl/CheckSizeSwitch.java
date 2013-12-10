@@ -126,7 +126,7 @@ public class CheckSizeSwitch {
             SIZES.put(field, size);
             return size;
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return 0;
         } catch (final OXException e) {
             LOG.error(e.getMessage(),  e);

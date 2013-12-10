@@ -1467,7 +1467,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         if (null == con) {

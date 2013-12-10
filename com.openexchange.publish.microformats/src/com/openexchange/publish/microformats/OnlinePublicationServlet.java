@@ -143,7 +143,7 @@ public class OnlinePublicationServlet extends HttpServlet {
                 return true;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
         resp.getWriter().println("Cannot find the publication site.");

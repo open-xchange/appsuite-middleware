@@ -412,7 +412,7 @@ public final class NewAction extends AbstractMailAction {
                                 session.getUserId(),
                                 session.getContext().getContextId());
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     } catch (final OXException e) {
                         if (e.getMessage().indexOf("quota") != -1) {

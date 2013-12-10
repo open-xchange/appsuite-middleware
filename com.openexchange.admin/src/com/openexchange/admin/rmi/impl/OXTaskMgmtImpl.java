@@ -98,16 +98,16 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 TaskManager.getInstance().deleteJob(id, ctx.getId());
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final TaskManagerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -123,16 +123,16 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 TaskManager.getInstance().flush(ctx.getId());
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final TaskManagerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -148,13 +148,13 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 return TaskManager.getInstance().getJobList(ctx.getId());
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -170,19 +170,19 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 return getTaskResults(id, ctx.getId());
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InterruptedException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (TaskManagerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new InvalidDataException(e.getMessage());
         }
     }

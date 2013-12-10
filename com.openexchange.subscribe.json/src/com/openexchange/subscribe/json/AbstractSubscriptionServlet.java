@@ -75,7 +75,7 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
     }
 
     protected void writeOXException(final OXException x, final HttpServletResponse resp, final Session session) {
-        getLog().error(x.getMessage(), x);
+        getLog().error("", x);
         final Response response = new Response();
         response.setException(x);
         writeResponseSafely(response, resp, session);
@@ -96,7 +96,7 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
         try {
             writeResponse(response, resp, session);
         } catch (final IOException e) {
-            getLog().error(e.getMessage(), e);
+            getLog().error("", e);
         }
     }
 

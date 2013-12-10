@@ -225,11 +225,11 @@ public final class CacheActivator extends HousekeepingActivator {
                 this.objectName = objectName;
                 management.registerMBean(objectName, new JCSCacheInformation());
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -240,7 +240,7 @@ public final class CacheActivator extends HousekeepingActivator {
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 this.objectName = null;
             }

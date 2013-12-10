@@ -216,6 +216,7 @@ public class XMLModifierCLT {
         final DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();
+            db.setEntityResolver(new ClassloaderEntityResolver());
         } catch (ParserConfigurationException e) {
             System.err.println("Can not configure XML parser: " + e.getMessage());
             e.printStackTrace();

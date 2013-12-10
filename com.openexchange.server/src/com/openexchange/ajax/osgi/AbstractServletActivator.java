@@ -78,9 +78,9 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
             httpService.registerServlet(alias, servlet, params, null);
             servlets.add(alias);
         } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

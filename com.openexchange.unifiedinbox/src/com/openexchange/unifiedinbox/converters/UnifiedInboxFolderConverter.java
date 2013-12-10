@@ -292,7 +292,7 @@ public final class UnifiedInboxFolderConverter {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return new int[0][];
         } finally {
             if (null != mailAccess) {

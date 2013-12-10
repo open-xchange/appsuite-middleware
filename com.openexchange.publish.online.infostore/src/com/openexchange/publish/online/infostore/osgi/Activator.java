@@ -93,7 +93,7 @@ public class Activator extends HousekeepingActivator {
                     fileAccessFactory,
                     infostorePublisher), null, null);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

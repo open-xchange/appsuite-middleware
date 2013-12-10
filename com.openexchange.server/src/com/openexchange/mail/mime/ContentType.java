@@ -501,7 +501,7 @@ public class ContentType extends ParameterizedHeader {
                 }
                 // Content-Type could not be parsed the simple way
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ContentType.class);
-                logger.debug(e.getMessage(), e);
+                logger.debug("", e);
             }
         }
         // Try with regex-based parsing

@@ -99,7 +99,7 @@ public class CachingContextStorage extends ContextStorage {
                 try {
                     cache.put(loginInfo, contextId, false);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } else if (LOG.isTraceEnabled()) {
@@ -152,7 +152,7 @@ public class CachingContextStorage extends ContextStorage {
             try {
                 cacheService.freeCache(REGION_NAME);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         persistantImpl.shutDown();

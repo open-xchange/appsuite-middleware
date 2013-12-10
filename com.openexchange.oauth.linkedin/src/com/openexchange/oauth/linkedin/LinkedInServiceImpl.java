@@ -129,7 +129,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             }
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
 
@@ -191,7 +191,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             final JSONArray ids = json.getJSONArray("values");
             result = extractIds(ids);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return result;
     }
@@ -203,7 +203,7 @@ public class LinkedInServiceImpl implements LinkedInService {
                 result.add(connections.getJSONObject(i).getString("id"));
             }
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return result;
     }
@@ -219,7 +219,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return displayName;
     }

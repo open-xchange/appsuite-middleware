@@ -81,7 +81,7 @@ public final class MailProviderProxyGenerator {
                 new Class<?>[] { MailProvider.class },
                 new MailProviderInvocationHandler(mailProviderServiceReference, context));
         } catch (final ClassCastException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

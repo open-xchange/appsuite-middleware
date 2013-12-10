@@ -270,7 +270,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return true;
             }
         } catch (HazelcastException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         /*
          * none found
@@ -307,11 +307,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             return new ArrayList<Session>(sessions().values());
         } catch (final HazelcastException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         } catch (OXException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         return Collections.emptyList();
@@ -323,7 +323,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             return sessions().size();
         } catch (OXException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         return 0;
@@ -345,13 +345,13 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(randomToken);
         } catch (final HazelcastException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
             throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(e, randomToken);
         } catch (final OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
                 throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(e, randomToken);
             }
@@ -372,13 +372,13 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(altId);
         } catch (final HazelcastException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
             throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId);
         } catch (final OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
                 throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId);
             }
@@ -408,7 +408,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -426,7 +426,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -444,7 +444,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -462,7 +462,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
             if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -478,7 +478,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 }
             } catch (final HazelcastException e) {
                 if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
                 throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }

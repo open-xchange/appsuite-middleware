@@ -140,7 +140,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
             getService(CapabilityService.class).declareCapability("oauth");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -160,7 +160,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             AbstractOAuthAJAXActionService.PREFIX.set(null);
             ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class).error("", e);
             throw e;
         }
     }

@@ -131,7 +131,7 @@ public final class SmalProvider extends AllMailProvider {
         try {
             return SmalMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailPermission(session, accountId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return new DefaultMailPermission();
         }
     }

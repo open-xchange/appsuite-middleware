@@ -526,7 +526,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 try {
                     tmpPass = new String(tmpPass.getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
                 } catch (final UnsupportedCharsetException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -574,7 +574,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     try {
                         imapStore.close();
                     } catch (final MessagingException e) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             }
@@ -609,7 +609,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 try {
                     tmpPass = new String(tmpPass.getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
                 } catch (final UnsupportedCharsetException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             final boolean certainPassword = false; //("10.20.30.205".equals(config.getServer()) && 17 == session.getUserId());
@@ -624,7 +624,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 login = new String(config.getLogin().getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
             } catch (final UnsupportedCharsetException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 login = config.getLogin();
             }
             String user = login;

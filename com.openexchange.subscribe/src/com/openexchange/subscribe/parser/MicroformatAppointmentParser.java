@@ -81,9 +81,9 @@ public class MicroformatAppointmentParser {
             xmlReader.parse( new InputSource( new ByteArrayInputStream(text.getBytes()) ) );
             appointments = handler.getObjects();
         } catch (SAXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

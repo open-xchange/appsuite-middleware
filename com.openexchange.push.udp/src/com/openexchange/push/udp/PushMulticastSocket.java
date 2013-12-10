@@ -119,10 +119,10 @@ public class PushMulticastSocket implements Runnable {
                 }
             } catch (final SocketException e) {
                 if (running) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -139,7 +139,7 @@ public class PushMulticastSocket implements Runnable {
             } catch (final InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final ExecutionException e) {
                 final Throwable cause = e.getCause();
                 LOG.error(cause.getMessage(), cause);

@@ -89,7 +89,7 @@ public final class version extends HttpServlet {
             pw.println(Version.getInstance().getVersionString());
             pw.flush();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 }

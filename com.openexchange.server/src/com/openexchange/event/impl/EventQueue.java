@@ -710,7 +710,7 @@ public final class EventQueue {
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             // Just in case another Thread also stopped the queue, we have to
             // wake that one up as well

@@ -81,7 +81,7 @@ public class Activator extends HousekeepingActivator {
             registerService(MessagingService.class, new RSSMessagingService(), null);
             HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw x;
         }
     }

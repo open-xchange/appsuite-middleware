@@ -111,7 +111,7 @@ public final class SpamSettingsServlet extends PermissionServlet {
             LOG.error("Missing or wrong field action in JSON request", e);
             response.setException(e);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
         }
 

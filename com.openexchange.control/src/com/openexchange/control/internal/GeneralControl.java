@@ -222,14 +222,14 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                         completed = Bundle.RESOLVED == systemBundle.getState();
                     }
                 }
             }
         } catch (final BundleException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return completed;
     }

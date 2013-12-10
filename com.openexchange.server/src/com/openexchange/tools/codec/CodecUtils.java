@@ -151,12 +151,12 @@ public class CodecUtils {
                 result = decode(encoded, ENCODINGS[i], charset);
             } catch (final IOException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
                 result = encoded;
             } catch (final MessagingException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
                 result = encoded;
             }

@@ -103,14 +103,14 @@ public abstract class Consistency implements ConsistencyMBean {
             checkOneContext(ctx, recorder, recorder, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -121,14 +121,14 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("Listing missing files in filestore " + filestoreId);
             return listMissing(getContextsForFilestore(filestoreId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -139,14 +139,14 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("List missing files in database " + databaseId);
             return listMissing(getContextsForDatabase(databaseId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -157,14 +157,14 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("List all missing files");
             return listMissing(getAllContexts());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -179,14 +179,14 @@ public abstract class Consistency implements ConsistencyMBean {
             checkOneContext(ctx, doNothing, doNothing, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -197,14 +197,14 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("List all unassigned files in filestore " + filestoreId);
             return listUnassigned(getContextsForFilestore(filestoreId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -215,14 +215,14 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("List all unassigned files in database " + databaseId);
             return listUnassigned(getContextsForDatabase(databaseId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -233,14 +233,14 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("List all unassigned files");
             return listUnassigned(getAllContexts());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -264,7 +264,7 @@ public abstract class Consistency implements ConsistencyMBean {
             try {
                 com.openexchange.databaseold.Database.reset(contextId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             if (LOG.isDebugEnabled()) {
@@ -361,11 +361,11 @@ public abstract class Consistency implements ConsistencyMBean {
             stmt = null;
             return ret;
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } finally {
@@ -410,14 +410,14 @@ public abstract class Consistency implements ConsistencyMBean {
             repairMe.add(getContext(contextId));
             repair(repairMe, resolverPolicy);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -427,14 +427,14 @@ public abstract class Consistency implements ConsistencyMBean {
         try {
             repair(getContextsForFilestore(filestoreId), resolverPolicy);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -444,14 +444,14 @@ public abstract class Consistency implements ConsistencyMBean {
         try {
             repair(getContextsForDatabase(databaseId), resolverPolicy);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -461,14 +461,14 @@ public abstract class Consistency implements ConsistencyMBean {
         try {
             repair(getAllContexts(), resolverPolicy);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -496,7 +496,7 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private void erroroutput(final Exception e) {
-        LOG.error(e.getMessage(), e);
+        LOG.error("", e);
     }
 
     private void outputSet(final SortedSet<String> set) {

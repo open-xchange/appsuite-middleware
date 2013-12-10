@@ -98,11 +98,11 @@ public final class Management {
                 managementService.registerMBean(objName, pool);
             }
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -119,11 +119,11 @@ public final class Management {
                 managementService.registerMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"), overview);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -138,11 +138,11 @@ public final class Management {
                 managementService.unregisterMBean(objName);
             }
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -153,11 +153,11 @@ public final class Management {
         try {
             managementService.unregisterMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"));
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

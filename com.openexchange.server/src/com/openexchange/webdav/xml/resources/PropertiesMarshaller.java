@@ -196,7 +196,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 				LOG.error(e.toString());
 				propertyElement.setText(property.getValue());
 			} catch (final IOException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 			}
 		} else {
 			if(property.isDate()) {

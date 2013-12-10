@@ -120,7 +120,7 @@ public final class SpamHandlerRegistry {
             handler = getSpamHandler0(mailAccount, new URLMailProviderGetter(mailAccount));
         } catch (final OXException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         return handler == null ? false : !SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName());

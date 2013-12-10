@@ -108,7 +108,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
                     date = EmitterTools.toDateTime(EmitterTools.calculateExactTime(cloned, changeException));
                 }
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
                 date = EmitterTools.toDate(changeException);
             }
         } else {

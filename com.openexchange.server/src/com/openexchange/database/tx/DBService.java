@@ -207,7 +207,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             try {
                 undo.undo();
             } catch (final OXException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
                 failed.add(undo);
             }
         }

@@ -197,7 +197,7 @@ public final class EmitterTools {
                 retval = new java.util.Date(rrs.getRecurringResultByPosition(recurrencePosition).getStart());
             }
         } catch (final OXException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         }
         return retval;
     }

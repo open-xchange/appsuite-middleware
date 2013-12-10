@@ -157,7 +157,7 @@ public class ReplicationMonitor {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                     if (10 == tries) {
                         // Do a fall back to the master.
                         clientTransaction = -1;
@@ -223,7 +223,7 @@ public class ReplicationMonitor {
                         try {
                             assign.setTransaction(readTransaction(con, assign.getContextId()));
                         } catch (OXException e) {
-                            LOG.warn(e.getMessage(), e);
+                            LOG.warn("", e);
                         }
                     }
                     // Warn if a master connection was only used for reading.
@@ -240,7 +240,7 @@ public class ReplicationMonitor {
         try {
             pool = pools.getPool(poolId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         if (noTimeout) {

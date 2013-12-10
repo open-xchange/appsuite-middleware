@@ -246,7 +246,7 @@ public final class Insert {
                 } catch (final Exception e) {
                     // Ignore
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                 }
             }
         }

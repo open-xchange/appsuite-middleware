@@ -418,7 +418,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                 /*
                  * Now log actual UploadServletException...
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 /*
                  * ... and write bytes
                  */

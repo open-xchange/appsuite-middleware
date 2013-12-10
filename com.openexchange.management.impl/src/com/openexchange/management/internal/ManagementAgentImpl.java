@@ -309,15 +309,15 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
             }
             running.set(true);
         } catch (final MalformedURLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -351,7 +351,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 unregisterMBean(objectNames.pop());
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         removeConnectorServer(jmxURL);
         /*
@@ -369,7 +369,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         try {
             return InetAddress.getByName(host).getHostName();
         } catch (final UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

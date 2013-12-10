@@ -164,7 +164,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
                     try {
                         docInputSream.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                     docInputSream = null;
                 }

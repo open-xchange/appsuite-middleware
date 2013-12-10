@@ -154,7 +154,7 @@ final class CallbackInputStream extends InputStream implements FileRemovedListen
         try {
             close0();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

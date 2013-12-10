@@ -293,7 +293,7 @@ public final class RFC2231Tools {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval.toString();
     }

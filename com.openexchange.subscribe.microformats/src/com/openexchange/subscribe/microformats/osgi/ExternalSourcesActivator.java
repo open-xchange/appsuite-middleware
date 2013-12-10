@@ -129,7 +129,7 @@ public class ExternalSourcesActivator extends HousekeepingActivator {
                         try {
                             service.refresh();
                         } catch (final OXException x) {
-                            LOG.error(x.getMessage(), x);
+                            LOG.error("", x);
                         }
                     }
                 }

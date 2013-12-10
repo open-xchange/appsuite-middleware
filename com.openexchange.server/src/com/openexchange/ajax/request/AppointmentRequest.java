@@ -676,7 +676,7 @@ public class AppointmentRequest extends CalendarRequest {
         } catch (final SearchIteratorException e) {
             throw e;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             if (it != null) {

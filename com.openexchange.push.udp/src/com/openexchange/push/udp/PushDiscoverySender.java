@@ -95,7 +95,7 @@ public class PushDiscoverySender implements Runnable {
             final DatagramPacket datagramPacket = new DatagramPacket(packetBytes, packetBytes.length, multicastAddress, multicastPort);
             multicastSocket.send(datagramPacket);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

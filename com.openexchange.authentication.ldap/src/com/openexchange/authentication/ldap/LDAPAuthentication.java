@@ -291,7 +291,7 @@ public class LDAPAuthentication implements AuthenticationService {
             LOG.error("Login failed for dn " + dn + ":",e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (NamingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } finally {
             try {
@@ -299,7 +299,7 @@ public class LDAPAuthentication implements AuthenticationService {
                     context.close();
                 }
             } catch (NamingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -106,7 +106,7 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
             if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                 throw e;
             }
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
             fileHolder.close();
             fileHolder = new ThresholdFileHolder();
             fileHolder.write(new byte[0]);

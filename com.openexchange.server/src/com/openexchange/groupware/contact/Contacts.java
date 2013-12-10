@@ -865,7 +865,7 @@ public final class Contacts {
                     try {
                         stmt.close();
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -2265,7 +2265,7 @@ public final class Contacts {
             LOG.error(e1.getMessage(), e1);
             return false;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
     }
@@ -2683,7 +2683,7 @@ public final class Contacts {
                     try {
                         tmp = DBUtils.getColumnSize(con, table, fields[i]);
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         tmp = 0;
                     }
                     final int maxSize = tmp;

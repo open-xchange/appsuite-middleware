@@ -121,7 +121,7 @@ public final class ClientPrincipalImpl implements ClientPrincipal {
                 try {
                     credential.dispose();
                 } catch (GSSException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -130,7 +130,7 @@ public final class ClientPrincipalImpl implements ClientPrincipal {
                 try {
                     credential.dispose();
                 } catch (GSSException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

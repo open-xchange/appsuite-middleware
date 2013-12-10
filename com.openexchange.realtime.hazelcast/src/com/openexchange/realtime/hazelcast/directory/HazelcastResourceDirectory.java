@@ -562,7 +562,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                         LOG.debug("Removed: " + removed.entrySet().toString());
                     }
                 } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

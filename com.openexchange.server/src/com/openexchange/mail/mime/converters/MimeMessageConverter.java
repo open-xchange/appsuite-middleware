@@ -1273,7 +1273,7 @@ public final class MimeMessageConverter {
                     /*
                      * Cannot occur
                      */
-                    LOG1.error(e.getMessage(), e);
+                    LOG1.error("", e);
                 }
                 mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
             }
@@ -2053,7 +2053,7 @@ public final class MimeMessageConverter {
                         msg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                     } catch (final Exception e) {
                         // Ignore...
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                 }
             }
@@ -2297,7 +2297,7 @@ public final class MimeMessageConverter {
                         part.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                     } catch (final Exception e) {
                         // Ignore...
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                 } else {
                     mailPart.setMsgref(null);

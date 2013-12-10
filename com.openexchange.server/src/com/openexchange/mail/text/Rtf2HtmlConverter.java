@@ -399,10 +399,10 @@ public final class Rtf2HtmlConverter {
         try {
             rtfeditorkit.read(new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes(s)), document, 0);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
     }
@@ -415,7 +415,7 @@ public final class Rtf2HtmlConverter {
             hsm.closeTags(sb);
             return sb.toString();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return "";
     }
@@ -443,7 +443,7 @@ public final class Rtf2HtmlConverter {
                 sb.append(s);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
     }

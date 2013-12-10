@@ -387,7 +387,7 @@ public final class Collections {
             final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
             return in.readObject();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         } catch (final ClassNotFoundException cnfe) {
             LOG.error(cnfe.getMessage(), cnfe);

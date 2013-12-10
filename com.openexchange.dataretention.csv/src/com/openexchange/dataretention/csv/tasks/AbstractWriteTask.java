@@ -221,13 +221,13 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             // Write CSV line to file
             writeCSVLine(getCSVLine());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

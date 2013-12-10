@@ -109,7 +109,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
             final String invalidRegex = pattern.replaceAll("[a-zA-Z]+", "0+");
             return new RegexDateValidator(Pattern.compile(invalidRegex));
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return DEFAULT_VALIDATOR;
         }
     }

@@ -78,7 +78,7 @@ public final class UpdateTaskMBeanInit implements Initialization {
         try {
             managementService.registerMBean(Constants.OBJECT_NAME, new UpdateTaskMBean());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -87,7 +87,7 @@ public final class UpdateTaskMBeanInit implements Initialization {
         try {
             managementService.unregisterMBean(Constants.OBJECT_NAME);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

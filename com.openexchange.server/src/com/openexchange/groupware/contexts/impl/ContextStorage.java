@@ -96,7 +96,7 @@ public abstract class ContextStorage {
                         impl = tmp;
                     } catch (final OXException e) {
                         // Cannot occur
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             }

@@ -175,7 +175,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
             try {
                 return new ByteArrayInputStream(body.getString("ical").getBytes("UTF-8"));
             } catch (final UnsupportedEncodingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return null;
             } catch (final JSONException x) {
     			throw AjaxExceptionCodes.JSON_ERROR.create(x);

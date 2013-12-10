@@ -121,7 +121,7 @@ public final class Tools {
     	try {
 			return DBUtils.getColumnSize(connection, table.toString(), columnLabel);
         } catch (final SQLException x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             return 0;
         }
     }

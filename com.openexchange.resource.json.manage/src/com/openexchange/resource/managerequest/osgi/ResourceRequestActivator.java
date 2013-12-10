@@ -86,7 +86,7 @@ public final class ResourceRequestActivator extends AJAXModuleActivator {
         try {
             registerRequestHandler();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

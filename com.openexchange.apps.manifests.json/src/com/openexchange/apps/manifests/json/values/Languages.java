@@ -121,7 +121,7 @@ public class Languages implements ComputedServerConfigValueService {
 			}
 		} catch (JSONException x) {
 			// Doesn't happen
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		}
 	}
 

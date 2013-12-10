@@ -267,7 +267,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
                 }
                 doUpdate(RealtimeConfig.getInstance(), configService);
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

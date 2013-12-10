@@ -95,7 +95,7 @@ public class LangDetectActivator extends HousekeepingActivator {
                             }
                             languageDetectionService.loadLanguageCodes(service.getFileByName("language-codes.properties"));
                         } catch (final OXException e) {
-                            logger.error(e.getMessage(), e);
+                            logger.error("", e);
                             return null;
                         }
                         /*
@@ -109,7 +109,7 @@ public class LangDetectActivator extends HousekeepingActivator {
                             }
                             languageDetectionService.setLanguageModelsDir(service.getDirectory(languageModelsDir));
                         } catch (final OXException e) {
-                            logger.error(e.getMessage(), e);
+                            logger.error("", e);
                             return null;
                         }
                         registerService(LanguageDetectionService.class, languageDetectionService, null);

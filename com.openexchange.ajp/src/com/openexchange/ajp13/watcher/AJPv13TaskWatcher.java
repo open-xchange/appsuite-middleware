@@ -222,7 +222,7 @@ public class AJPv13TaskWatcher {
                             try {
                                 AJPv13Server.restartAJPServer();
                             } catch (final AJPv13Exception e) {
-                                log.error(e.getMessage(), e);
+                                log.error("", e);
                             }
                         }
                     }
@@ -243,7 +243,7 @@ public class AJPv13TaskWatcher {
                     }
                 }
             } catch (final Exception e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             }
         }
     } // End of class TimerTaskRunnable

@@ -97,9 +97,9 @@ private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Ta
             tasks.addAll(tempTasks);
 
         } catch (ConversionError e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (FailingHttpStatusCodeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         output = new Task[tasks.size()];

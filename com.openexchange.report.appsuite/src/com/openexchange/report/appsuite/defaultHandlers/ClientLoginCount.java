@@ -92,7 +92,7 @@ public class ClientLoginCount implements ReportSystemHandler {
            startDate = cal.getTime();
            runReport(report, "clientlogincount", startDate, endDate);
        } catch (OXException x) {
-           LOG.error(x.getMessage(), x);
+           LOG.error("", x);
        }
         
     }

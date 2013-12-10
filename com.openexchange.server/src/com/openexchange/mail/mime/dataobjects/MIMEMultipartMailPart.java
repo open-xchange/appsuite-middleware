@@ -871,7 +871,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    LoggerFactory.getLogger(MIMEMultipartMailPart.DataSourceDataAccess.class).error(e.getMessage(), e);
+                    LoggerFactory.getLogger(MIMEMultipartMailPart.DataSourceDataAccess.class).error("", e);
                 }
             }
         }

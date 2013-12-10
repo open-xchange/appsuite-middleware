@@ -136,7 +136,7 @@ public class FileDeliveryServlet extends HttpServlet {
                 PARAM_MAP.remove(token);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } finally {
             if(state != null && provider != null) {

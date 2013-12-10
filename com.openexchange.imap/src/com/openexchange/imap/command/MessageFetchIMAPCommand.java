@@ -419,7 +419,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             final MessagingException e = new MessagingException(new com.openexchange.java.StringAllocator(32).append("Expected ").append(length)
                     .append(" FETCH responses but got ").append(index).append(" from IMAP folder \"").append(imapFolder.getFullName())
                     .append("\" on server \"").append(server).append("\".").toString());
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         }
         return retval;
     }
@@ -731,7 +731,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 msg.setContentType(new ContentType(sb.toString()));
             } catch (final OXException e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(e.getMessage(), e);
+                    logger.warn("", e);
                 }
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
             }

@@ -281,7 +281,7 @@ public class Enriched2HtmlConverter {
             }
             return sb.toString();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return enrichedText;
         }
     }

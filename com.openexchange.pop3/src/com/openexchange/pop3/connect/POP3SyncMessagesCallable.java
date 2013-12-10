@@ -191,7 +191,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         try {
             return Long.valueOf(lastAccessedStr);
         } catch (final NumberFormatException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return null;
         }
     }

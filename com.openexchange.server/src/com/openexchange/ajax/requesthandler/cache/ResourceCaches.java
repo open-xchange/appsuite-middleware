@@ -130,10 +130,10 @@ public class ResourceCaches {
             return sb.append(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(md5Bytes))).toString();
         } catch (final UnsupportedEncodingException e) {
             // Shouldn't happen
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NoSuchAlgorithmException e) {
             // Shouldn't happen
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return sb.toString();
     }

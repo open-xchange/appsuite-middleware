@@ -110,7 +110,7 @@ public final class GlobalActivator implements BundleActivator {
 
             logger.info("Global bundle successfully started");
         } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("", e);
             throw e;
         }
     }
@@ -213,7 +213,7 @@ public final class GlobalActivator implements BundleActivator {
             shutdownStringParsers();
             logger.debug("Global bundle successfully stopped");
         } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("", e);
             throw e;
         }
     }

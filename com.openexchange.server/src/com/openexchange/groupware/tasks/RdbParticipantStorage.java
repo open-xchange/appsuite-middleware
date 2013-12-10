@@ -418,7 +418,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     tmp = 0;
                 }
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 tmp = 0;
             }
             final int maxSize = tmp;
@@ -520,7 +520,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tmp = 0;
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             tmp = 0;
         }
         final int maxSize = tmp;

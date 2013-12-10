@@ -241,7 +241,7 @@ final class IMAPSessionStorage {
                     try {
                         MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, userId, contextId);
                     } catch (final Exception e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
                 /*

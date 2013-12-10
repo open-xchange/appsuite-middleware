@@ -1134,7 +1134,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             try {
                 setSubfolderIds((ArrayList<Integer>) other.getSubfolderIds());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (other.containsType() && (overwrite || !containsType())) {

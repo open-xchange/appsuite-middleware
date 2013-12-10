@@ -209,13 +209,13 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     }
 
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
 

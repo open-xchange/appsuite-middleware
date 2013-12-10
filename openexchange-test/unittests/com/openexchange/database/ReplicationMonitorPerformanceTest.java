@@ -135,7 +135,7 @@ public class ReplicationMonitorPerformanceTest {
                 + "PRIMARY KEY (`id`)"
                 + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             DBUtils.closeSQLStuff(stmt);
             db.releaseWriteConnection(context, writeCon);

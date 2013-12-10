@@ -247,10 +247,10 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 keepConnection = true;
                 return iter;
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
             } finally {
                 if (con != null && !keepConnection) {
@@ -340,7 +340,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 objectIDs.add(results.getInt(1));
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
         } finally {
             DBUtils.closeSQLStuff(results, statement);
@@ -365,10 +365,10 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             keepConnection = true;
             return iter;
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } finally {
             if (connection != null && !keepConnection) {

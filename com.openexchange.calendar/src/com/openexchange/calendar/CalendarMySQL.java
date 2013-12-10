@@ -2091,7 +2091,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         }
                                         if (reminder == null) {
                                             final OXException e = OXCalendarExceptionCodes.NEXT_REMINDER_FAILED.create(Autoboxing.I(cdao.getContext().getContextId()), Autoboxing.I(cdao.getObjectID()));
-                                            LOG.warn(e.getMessage(), e);
+                                            LOG.warn("", e);
                                         }
                                     }
                                 }
@@ -2968,7 +2968,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 try {
                     it.close();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             for (final ReminderObject reminder : toUpdate) {
@@ -3958,7 +3958,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 mo.executeUpdate();
             } else if (changes == 0) {
                 final OXException e = OXException.notFound("Object: " + oid + ", Context: " + so.getContextId() + ", User: " + uid);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } else {
                 LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of setUserConfirmation was ",
@@ -4054,7 +4054,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 writeCon.rollback();
                 final OXException e = OXCalendarExceptionCodes.COULD_NOT_FIND_PARTICIPANT.create();
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
         } catch (final SQLException sqle) {

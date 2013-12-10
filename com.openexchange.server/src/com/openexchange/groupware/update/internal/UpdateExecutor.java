@@ -154,7 +154,7 @@ public final class UpdateExecutor {
                     }
                     success = true;
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 if (success) {
                     LOG.info("Update task " + taskName + " on schema " + state.getSchema() + " done.");

@@ -173,7 +173,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 }
                 dataSource = new FileDataSource(uploadFile, getContentType().toString());
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
         }
@@ -227,7 +227,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                     try {
                         fis.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }

@@ -83,7 +83,7 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
             try {
                 previewCache.clearFor(contextId);
             } catch (final Exception e) {
-                LoggerFactory.getLogger(ResourceCacheMBeanImpl.class).error(e.getMessage(), e);
+                LoggerFactory.getLogger(ResourceCacheMBeanImpl.class).error("", e);
                 throw new MBeanException(new Exception(e.getMessage()));
             }
         }

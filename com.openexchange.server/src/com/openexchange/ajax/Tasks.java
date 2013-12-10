@@ -84,7 +84,7 @@ public class Tasks extends DataServlet {
             try {
                  jsonObj = convertParameter2JSONObject(httpServletRequest);
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                 writeResponse(response, httpServletResponse, session);
                 return;
@@ -95,9 +95,9 @@ public class Tasks extends DataServlet {
             response.setData(responseObj);
         } catch (final OXException e) {
             if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             response.setException(e);
          } catch (final JSONException e) {
@@ -123,7 +123,7 @@ public class Tasks extends DataServlet {
                 try {
                     jsonObj = convertParameter2JSONObject(httpServletRequest);
                 } catch (final JSONException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                     writeResponse(response, httpServletResponse, session);
                     return;
@@ -155,9 +155,9 @@ public class Tasks extends DataServlet {
             response.setException(oje);
         } catch (final OXException e) {
             if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             response.setException(e);
         }

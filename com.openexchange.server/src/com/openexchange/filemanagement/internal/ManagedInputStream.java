@@ -168,7 +168,7 @@ public final class ManagedInputStream extends InputStream {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

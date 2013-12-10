@@ -148,7 +148,7 @@ public class ICal4JParser implements ICalParser {
         try {
             return parseAppointments(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (final UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return Collections.emptyList();
     }
@@ -198,7 +198,7 @@ public class ICal4JParser implements ICalParser {
         try {
             return parseFreeBusy(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return Collections.emptyList();
 	}
@@ -226,7 +226,7 @@ public class ICal4JParser implements ICalParser {
                 }
             }
         } catch (UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             // IGNORE
         } catch (ConversionError e) {
         	errors.add(e);
@@ -280,7 +280,7 @@ public class ICal4JParser implements ICalParser {
         try {
             return parseTasks(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (final UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return new LinkedList<Task>();
     }
@@ -479,12 +479,12 @@ public class ICal4JParser implements ICalParser {
             return builder.build(chunkedReader);
         } catch (final IOException e) {
             if (null == exceptions) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } else {
                 exceptions.add(e);
             }
         } catch (final ParserException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e, e.getMessage());
         }
         return null;

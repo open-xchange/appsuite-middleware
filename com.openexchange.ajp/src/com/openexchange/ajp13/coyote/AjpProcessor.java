@@ -966,7 +966,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     /*
                      * Now log actual UploadServletException...
                      */
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     /*
                      * ... and write bytes
                      */

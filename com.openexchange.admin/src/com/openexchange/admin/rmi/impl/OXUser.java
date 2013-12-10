@@ -132,7 +132,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             oxu = OXUserStorageInterface.getInstance();
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -166,22 +166,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             oxu.changeCapabilities(ctx, user, capsToAdd, capsToRemove, auth);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
         final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
@@ -190,7 +190,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 Cache jcs = cacheService.getCache("CapabilitiesUser");
                 jcs.removeFromGroup(user.getId(), ctx.getId().toString());
             } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
@@ -362,7 +362,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 jcs.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.valueOf(0), userid));
                 jcs.invalidateGroup(ctx.getId().toString());
             } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
@@ -412,22 +412,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             oxu.changeModuleAccess(ctx, user_id, moduleAccess);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -500,22 +500,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             oxu.changeModuleAccess(ctx, user_id, access);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -680,7 +680,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error(e2.getMessage(), e2);
             throw e2;
         } catch (final EnforceableDataObjectException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new InvalidDataException(e.getMessage());
         }
 
@@ -817,7 +817,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 cacheKey = cacheService.newCacheKey(ctx.getId().intValue(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
                 folderCache.remove(cacheKey);
             } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
@@ -859,7 +859,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         if (users.length == 0) {
             final InvalidDataException e = new InvalidDataException("User array is empty");
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -992,7 +992,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
                 }
             } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
@@ -1047,7 +1047,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new InvalidDataException();
             }
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -1130,10 +1130,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw(e);
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw(e);
         }
 
@@ -1195,22 +1195,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             return oxu.getModuleAccess(ctx, user_id);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -1245,22 +1245,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, user_id));
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -1531,7 +1531,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth);
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -1557,7 +1557,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             tool.changeAccessCombination(permissionBits, addBits, removeBits);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -1588,16 +1588,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new InvalidDataException("Neither id nor name is set in supplied user object");
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }

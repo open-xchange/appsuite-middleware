@@ -268,7 +268,7 @@ public final class ServerConfig {
             }
             return (V) value;
         } catch (final ClassCastException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
             return null;
         }
     }

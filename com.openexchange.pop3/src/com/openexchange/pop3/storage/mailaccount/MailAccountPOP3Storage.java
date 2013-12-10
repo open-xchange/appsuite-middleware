@@ -682,7 +682,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     pop3Store.close();
                 }
             } catch (final MessagingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

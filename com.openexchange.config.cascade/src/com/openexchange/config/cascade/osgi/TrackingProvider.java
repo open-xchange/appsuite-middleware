@@ -85,7 +85,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         try {
             return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");
         } catch (final InvalidSyntaxException e) {
-            LoggerFactory.getLogger(TrackingProvider.class).error(e.getMessage(), e);
+            LoggerFactory.getLogger(TrackingProvider.class).error("", e);
         }
         return null;
     }

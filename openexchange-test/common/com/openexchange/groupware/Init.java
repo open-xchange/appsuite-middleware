@@ -265,7 +265,7 @@ public final class Init {
                     AJPv13Server.startAJPServer();
                     HttpManagersInit.getInstance().start();
                 } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
 

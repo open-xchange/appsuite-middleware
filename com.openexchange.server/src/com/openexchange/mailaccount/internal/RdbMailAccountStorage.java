@@ -602,7 +602,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 try {
                     enableForeignKeyChecks(con);
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -2047,7 +2047,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             try {
                 addr = InetAddress.getByName(IDNA.toASCII(server));
             } catch (final UnknownHostException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
                 addr = null;
             }
             final int port = mailAccount.getMailPort();
@@ -2086,7 +2086,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         try {
             return addr.equals(InetAddress.getByName(IDNA.toASCII(mailServer)));
         } catch (final UnknownHostException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             /*
              * Check by server string
              */
@@ -2123,7 +2123,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             try {
                 addr = InetAddress.getByName(IDNA.toASCII(server));
             } catch (final UnknownHostException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
                 addr = null;
             }
             final int port = mailAccount.getTransportPort();
@@ -2162,7 +2162,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         try {
             return addr.equals(InetAddress.getByName(IDNA.toASCII(transportServer)));
         } catch (final UnknownHostException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             /*
              * Check by server string
              */

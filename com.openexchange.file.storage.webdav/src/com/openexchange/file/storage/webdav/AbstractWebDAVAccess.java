@@ -107,7 +107,7 @@ public abstract class AbstractWebDAVAccess {
             try {
                 Streams.close(httpMethod.getResponseBodyAsStream());
             } catch (final IOException e) {
-                LoggerFactory.getLogger(AbstractWebDAVAccess.class).error(e.getMessage(), e);
+                LoggerFactory.getLogger(AbstractWebDAVAccess.class).error("", e);
             } finally {
                 /*
                  * We are done with the connection and that it can now be reused

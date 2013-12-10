@@ -541,13 +541,13 @@ public final class HtmlProcessing {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(string)));
         } catch (final ParserConfigurationException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final SAXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return null;
     }
@@ -601,10 +601,10 @@ public final class HtmlProcessing {
             serializer.transform(new DOMSource(node), new StreamResult(sw));
             return sw.toString();
         } catch (final TransformerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return fallback;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return fallback;
         }
     }
@@ -1008,7 +1008,7 @@ public final class HtmlProcessing {
         try {
             return URLEncoder.encode(text, charset);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return text;
         }
     }
@@ -1023,9 +1023,9 @@ public final class HtmlProcessing {
             writer.write(content);
             writer.flush();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             Streams.close(writer);
         }

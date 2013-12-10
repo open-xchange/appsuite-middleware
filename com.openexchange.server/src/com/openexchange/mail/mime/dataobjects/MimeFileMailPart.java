@@ -115,7 +115,7 @@ public abstract class MimeFileMailPart extends MailPart {
             }
             this.dataSource = fileDataSource;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
         }
     }
@@ -157,7 +157,7 @@ public abstract class MimeFileMailPart extends MailPart {
                 }
                 dataSource = new FileDataSource(file, getContentType().toString());
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
         }

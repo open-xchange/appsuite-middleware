@@ -187,7 +187,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
                 }
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

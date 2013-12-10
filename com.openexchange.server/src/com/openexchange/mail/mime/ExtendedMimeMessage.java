@@ -150,13 +150,13 @@ public final class ExtendedMimeMessage extends MimeMessage {
                 hasAttachment =
                     Boolean.valueOf(ct.startsWith(MULTI) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || deepAttachmentCheck(ct.getSubType())));
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             } catch (final MessagingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             }
         }
@@ -250,7 +250,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
                 }
             } catch (final MessagingException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
                 priority = MailMessage.PRIORITY_NORMAL;
             }
@@ -303,7 +303,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
                 size = Integer.valueOf(super.getSize());
             } catch (final MessagingException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
                 size = Integer.valueOf(-1);
             }
@@ -326,7 +326,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
                 contentType = new ContentType(getHeader(MessageHeaders.HDR_CONTENT_TYPE, null));
             } catch (final MessagingException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
                 contentType = new ContentType();
                 contentType.setPrimaryType("text");
@@ -334,7 +334,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
                 contentType.setCharsetParameter("us-ascii");
             } catch (final OXException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
                 contentType = new ContentType();
                 contentType.setPrimaryType("text");

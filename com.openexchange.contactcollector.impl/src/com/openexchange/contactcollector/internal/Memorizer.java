@@ -207,11 +207,11 @@ public class Memorizer implements Runnable {
             contact = transformInternetAddress(address);
         } catch (final ParseException e) {
             // Decoding failed; ignore contact
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return -1;
         } catch (final UnsupportedEncodingException e) {
             // Decoding failed; ignore contact
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return -1;
         }
         /*
@@ -304,7 +304,7 @@ public class Memorizer implements Runnable {
                 retval = folder.intValue();
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval;
     }
@@ -316,7 +316,7 @@ public class Memorizer implements Runnable {
             enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
             enabledRight = ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return enabledRight && enabled != null && enabled.booleanValue();
     }

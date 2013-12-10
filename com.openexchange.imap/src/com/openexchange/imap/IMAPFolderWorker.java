@@ -223,7 +223,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         try {
             closeIMAPFolder();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
     }
@@ -244,7 +244,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         try {
             closeIMAPFolder();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -541,9 +541,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 uidTable.clear();
             }
         } catch (final IllegalArgumentException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

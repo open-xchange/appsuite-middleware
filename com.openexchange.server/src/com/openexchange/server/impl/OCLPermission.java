@@ -645,7 +645,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         try {
             return ((OCLPermission) super.clone());
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

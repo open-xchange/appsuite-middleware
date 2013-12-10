@@ -178,7 +178,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
           }
           //windows: iexplore http://www.example.com
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             Streams.close(output);
         }

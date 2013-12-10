@@ -272,7 +272,7 @@ public final class UpdateTaskToolkit {
                 try {
                     removeContexts(contextId);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

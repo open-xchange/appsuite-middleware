@@ -263,7 +263,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                     CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

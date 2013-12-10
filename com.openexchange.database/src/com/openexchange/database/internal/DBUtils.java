@@ -73,7 +73,7 @@ final class DBUtils {
             try {
                 result.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -83,7 +83,7 @@ final class DBUtils {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -102,7 +102,7 @@ final class DBUtils {
                 con.rollback();
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -115,7 +115,7 @@ final class DBUtils {
                 con.rollback(savePoint);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -128,7 +128,7 @@ final class DBUtils {
                 con.setAutoCommit(true);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 }

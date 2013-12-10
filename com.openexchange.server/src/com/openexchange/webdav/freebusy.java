@@ -219,7 +219,7 @@ public class freebusy extends HttpServlet {
             final ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             context = service.getContext(contextId);
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         } catch (final OXException e) {
             LOG.error("Can not load context.", e);
@@ -328,7 +328,7 @@ public class freebusy extends HttpServlet {
             final UserService service = serviceRegistry.getService(UserService.class, true);
             user = service.searchUser(mailAddress, ctx);
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
             LOG.debug("User '" + mailAddress + "' not found.");
         }
@@ -341,7 +341,7 @@ public class freebusy extends HttpServlet {
                 resource = resources[0];
             }
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
             LOG.error("Resource '" + mailAddress + "' not found.");
         }

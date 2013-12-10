@@ -173,9 +173,9 @@ public class Partitioner {
                 addToMap(dayMap, appointment);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

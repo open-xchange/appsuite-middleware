@@ -313,7 +313,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 try {
                     reg.notifyAbsence();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -332,7 +332,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 try {
                     reg.notifyAvailability();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

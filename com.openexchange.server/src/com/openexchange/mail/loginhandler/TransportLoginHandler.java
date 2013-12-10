@@ -180,7 +180,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
             try {
                 searchIterator.close();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

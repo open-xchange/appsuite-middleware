@@ -153,7 +153,7 @@ public final class POP3Activator extends HousekeepingActivator {
              */
             registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)), null);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -176,7 +176,7 @@ public final class POP3Activator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

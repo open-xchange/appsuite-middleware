@@ -610,7 +610,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                         maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
                         oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         oxe.addTruncatedId(id);
                     }
 
@@ -1087,7 +1087,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxc) {
             throw oxc;
         } catch(final RuntimeException e) {
-            LOG.error(e.getMessage(), e); // Unfortunately the nested exception looses its stack trace.
+            LOG.error("", e); // Unfortunately the nested exception looses its stack trace.
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, I(33));
         } finally {
             if (close_connection) {
@@ -1320,7 +1320,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch (final InstantiationException ie) {
             LOG.error(ie.getMessage(), ie);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

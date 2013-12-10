@@ -448,7 +448,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                             try {
                                 mailMessage.setSentDate(mdf.parse(hdr.getValue()));
                             } catch (final ParseException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                         }
                     }
@@ -789,7 +789,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 msg.addHeader("Content-Type", contentType);
             } catch (final OXException e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(e.getMessage(), e);
+                    logger.warn("", e);
                 }
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);

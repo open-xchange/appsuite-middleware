@@ -114,7 +114,7 @@ public class GetArisingReminder {
                         STORAGE.deleteReminder(ctx, reminder);
                         continue;
                     }
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                     continue;
                 } catch (final SQLException e) {
                     final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());

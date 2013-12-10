@@ -80,8 +80,6 @@ public final class Entity2ACLAutoDetector {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Entity2ACLAutoDetector.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static ConcurrentMap<String, Future<Entity2ACL>> map;
 
     /**
@@ -187,10 +185,7 @@ public final class Entity2ACLAutoDetector {
          */
         final IMAPServer imapServer = mapInfo2IMAPServer(greeting, imapConfig);
         final Entity2ACL entity2Acl = imapServer.getImpl();
-        if (DEBUG) {
-            LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\tIMAP server [").append(imapConfig.getServer()).append(
-                "] greeting successfully mapped to: ").append(imapServer.getName()).toString());
-        }
+        LOG.debug("\n\tIMAP server [{}] greeting successfully mapped to: {}", imapConfig.getServer(), imapServer.getName());
         return entity2Acl;
     }
 
@@ -210,14 +205,7 @@ public final class Entity2ACLAutoDetector {
             /*
              * Return fallback implementation
              */
-            if (LOG.isWarnEnabled()) {
-                final com.openexchange.java.StringAllocator warnBuilder =
-                    new com.openexchange.java.StringAllocator(512).append("No IMAP server found ").append("that corresponds to greeting:\n\"").append(
-                        info.replaceAll("\r?\n", "")).append("\" on ").append(imapConfig.getServer()).append(
-                        ".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"").append(
-                        IMAPServer.CYRUS.getName()).append("\" is used as fallback.");
-                LOG.warn(warnBuilder.toString());
-            }
+            LOG.warn("No IMAP server found that corresponds to greeting:\n\"{}\" on {}.\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"{}\" is used as fallback.", info.replaceAll("\r?\n", ""), imapConfig.getServer(), IMAPServer.CYRUS.getName());
             return IMAPServer.CYRUS;
         }
         /*

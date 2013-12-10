@@ -80,7 +80,7 @@ public abstract class OXToolStorageInterface {
             cache = AdminDaemon.getCache();
             prop = cache.getProperties();
         } catch (OXGenericException e) {
-            log.warn(e.getMessage(), e);
+            log.warn("", e);
         }
     }
 

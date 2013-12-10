@@ -152,7 +152,7 @@ public class HashCalculator {
             }
             return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return "";
     }

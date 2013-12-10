@@ -163,7 +163,7 @@ public class IndexingActivator extends HousekeepingActivator {
                     try {
                         service.registerMBean(monitoringMBeanName, monitoringMBean);
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -172,12 +172,12 @@ public class IndexingActivator extends HousekeepingActivator {
                     try {
                         service.unregisterMBean(monitoringMBeanName);
                     } catch (OXException e) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             });
         } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 }

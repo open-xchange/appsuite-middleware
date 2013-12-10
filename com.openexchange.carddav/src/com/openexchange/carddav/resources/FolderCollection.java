@@ -133,7 +133,7 @@ public class FolderCollection extends CardDAVCollection {
                     try {
                         ownerName = factory.resolveUser(entity).getDisplayName();
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         ownerName = new Integer(entity).toString();
                     }
                     break;

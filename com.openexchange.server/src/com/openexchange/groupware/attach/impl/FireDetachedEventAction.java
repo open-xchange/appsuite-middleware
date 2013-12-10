@@ -68,7 +68,7 @@ public class FireDetachedEventAction extends AttachmentEventAction {
             try {
                 fireDetached(processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
             } catch (final Exception e1) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw AttachmentExceptionCodes.UNDONE_FAILED.create(e1);
             }
             throw e;

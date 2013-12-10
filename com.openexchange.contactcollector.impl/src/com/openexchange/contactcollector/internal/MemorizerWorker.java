@@ -388,11 +388,11 @@ public final class MemorizerWorker {
             contact = transformInternetAddress(address, session);
         } catch (final ParseException e) {
             // Decoding failed; ignore contact
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return -1;
         } catch (final UnsupportedEncodingException e) {
             // Decoding failed; ignore contact
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return -1;
         }
         /*
@@ -460,7 +460,7 @@ public final class MemorizerWorker {
             enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
             enabledRight = ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return enabledRight && enabled != null && enabled.booleanValue();
     }
@@ -470,7 +470,7 @@ public final class MemorizerWorker {
             final Integer folder = ServerUserSetting.getInstance().getContactCollectionFolder(session.getContextId(), session.getUserId());
             return null == folder ? 0 : folder.intValue();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return 0;
         }
     }

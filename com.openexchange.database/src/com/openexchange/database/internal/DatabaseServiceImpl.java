@@ -94,7 +94,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         if (null == con) {
             LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         try {
@@ -111,7 +111,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         if (null == con) {
             LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         try {
@@ -291,7 +291,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
             LOG.error(e2.getMessage(), e2);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -300,7 +300,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             pools.getPool(poolId).backWithoutTimeout(con);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

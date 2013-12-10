@@ -84,7 +84,7 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
             registration = context.registerService(Remote.class, userCopy, null);
             LOG.info("RMI Interface for usercopy bundle bound to RMI registry");
         } catch (final StorageException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return service;
     }
@@ -104,7 +104,7 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
             }
             context.ungetService(reference);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 }

@@ -278,7 +278,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                 }
                 throw MailExceptionCode.NO_CONTENT.create();
             } catch (final MailConfigException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             }
         }

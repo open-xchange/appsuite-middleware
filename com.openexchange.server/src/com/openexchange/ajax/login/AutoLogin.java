@@ -224,7 +224,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
 
         } catch (final OXException e) {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } else {
                 e.log(LOG);
             }

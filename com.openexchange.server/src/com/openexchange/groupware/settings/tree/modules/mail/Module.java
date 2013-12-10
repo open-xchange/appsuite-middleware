@@ -111,7 +111,7 @@ public class Module implements PreferencesItemService {
                     setting.setSingleValue(Boolean.TRUE);
                 } catch (final OXException e) {
                     setting.setSingleValue(Boolean.FALSE);
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } finally {
                     if (null != mail) {
                         mail.close(true);

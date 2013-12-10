@@ -334,7 +334,7 @@ public final class IMAPCapabilityAndGreetingCache {
                     try {
                         s.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }

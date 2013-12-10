@@ -81,7 +81,7 @@ public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
                 try {
 					calendarSql = feature.wrap(calendarSql, session);
 				} catch (OXException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error("", e);
 				}
             }
         }

@@ -267,7 +267,7 @@ public class ServletResponseWrapper implements ServletResponse {
                     writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
                 }
             } catch (final UnsupportedEncodingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } else if (outputSelection == OUTPUT_STREAM && servletOutputStream != null) {
             servletOutputStream.resetBuffer();
@@ -399,7 +399,7 @@ public class ServletResponseWrapper implements ServletResponse {
                     writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(servletOutputStream, getCharacterEncoding())), true);
                 }
             } catch (final UnsupportedEncodingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -410,10 +410,10 @@ public class MobileConfigServlet extends HttpServlet {
         try {
             return new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream), Charset.forName("UTF-8")));
         } catch (final IllegalCharsetNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

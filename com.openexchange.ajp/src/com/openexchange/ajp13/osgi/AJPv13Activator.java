@@ -163,7 +163,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             final HttpServiceImpl http = new HttpServiceImpl();
             registerService(HttpService.class, http);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(AJPv13Activator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(AJPv13Activator.class).error("", e);
             throw e;
         }
     }
@@ -187,7 +187,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
              */
             Services.setServiceLookup(null);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(AJPv13Activator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(AJPv13Activator.class).error("", e);
             throw e;
         }
     }

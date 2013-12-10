@@ -308,7 +308,7 @@ public class LdapContactCache {
                     refreshContacts();
                 }
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

@@ -163,13 +163,13 @@ public final class AllAction extends AbstractAttachmentAction {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (iter != null) {
                 try {
                     iter.close();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

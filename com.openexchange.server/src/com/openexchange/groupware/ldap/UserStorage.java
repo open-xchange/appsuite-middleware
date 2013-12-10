@@ -392,7 +392,7 @@ public abstract class UserStorage {
                         instance = tmp;
                     } catch (final OXException e) {
                         // Cannot occur
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             }
@@ -413,7 +413,7 @@ public abstract class UserStorage {
         try {
             return getInstance().getUser(uid, context);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -429,7 +429,7 @@ public abstract class UserStorage {
         try {
             return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

@@ -153,7 +153,7 @@ public abstract class UserConfigurationStorage {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

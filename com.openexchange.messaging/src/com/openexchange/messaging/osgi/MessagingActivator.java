@@ -91,7 +91,7 @@ public final class MessagingActivator extends HousekeepingActivator {
              */
             registerService(MessagingServiceRegistry.class, registry, null);
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -112,7 +112,7 @@ public final class MessagingActivator extends HousekeepingActivator {
                 registry = null;
             }
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }

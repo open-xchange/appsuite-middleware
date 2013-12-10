@@ -83,7 +83,7 @@ public class Reminder extends DataServlet {
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 	            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 	            writeResponse(response, httpServletResponse, session);
 	            return;
@@ -94,7 +94,7 @@ public class Reminder extends DataServlet {
 			response.setTimestamp(reminderRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 			response.setException(e);
 		} catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
@@ -118,7 +118,7 @@ public class Reminder extends DataServlet {
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 	            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 	            writeResponse(response, httpServletResponse, session);
 	            return;

@@ -538,7 +538,7 @@ public class TemplateServiceImpl implements TemplateService {
                     tagMap.put(filename, categories);
                 }
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 Streams.close(inStream);
             }

@@ -386,7 +386,7 @@ public final class MALPollDBUtility {
                 }
                 return toUUID(rs.getBytes(1));
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return null;
             } finally {
                 MALPollDBUtility.closeSQLStuff(rs);
@@ -504,7 +504,7 @@ public final class MALPollDBUtility {
         try {
             con.rollback();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -520,7 +520,7 @@ public final class MALPollDBUtility {
         try {
             con.setAutoCommit(true);
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -534,7 +534,7 @@ public final class MALPollDBUtility {
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -549,7 +549,7 @@ public final class MALPollDBUtility {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

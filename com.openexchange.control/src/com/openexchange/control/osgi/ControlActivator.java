@@ -99,7 +99,7 @@ public final class ControlActivator extends HousekeepingActivator {
             Runtime.getRuntime().addShutdownHook(shutdownHookThread);
             this.shutdownHookThread = shutdownHookThread;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -130,7 +130,7 @@ public final class ControlActivator extends HousekeepingActivator {
             // Do bundle clean-up
             cleanUp();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

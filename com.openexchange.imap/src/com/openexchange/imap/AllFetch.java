@@ -175,7 +175,7 @@ public final class AllFetch {
                     m.setContentType(new ContentType(sb.toString()));
                 } catch (final OXException e) {
                     if (logger.isWarnEnabled()) {
-                        logger.warn(e.getMessage(), e);
+                        logger.warn("", e);
                     }
                     m.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 }
@@ -358,7 +358,7 @@ public final class AllFetch {
                                     try {
                                         lowCostItem.getItemHandler().handleItem(item, m, LOG);
                                     } catch (final OXException e) {
-                                        LOG.error(e.getMessage(), e);
+                                        LOG.error("", e);
                                     }
                                 }
                                 l.add(m);
@@ -433,15 +433,15 @@ public final class AllFetch {
                 }
             }
         } catch (final SecurityException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IllegalArgumentException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NoSuchFieldException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -456,15 +456,15 @@ public final class AllFetch {
         try {
             return IMAPTracer.enableTrace(protocol, sbout);
         } catch (final SecurityException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IllegalArgumentException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NoSuchFieldException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return null;
     }

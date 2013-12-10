@@ -99,7 +99,7 @@ public class CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abs
                 events.add(oxEvent);
 
             } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

@@ -399,7 +399,7 @@ public final class IMAPSort {
                             try {
                                 list.add(Long.parseLong(num));
                             } catch (final NumberFormatException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                                 throw new ProtocolException("Invalid UID: " + num, e);
                             }
                         }

@@ -85,12 +85,12 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
 			folderProperties.commit();
 		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
+			LOG.error("", e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} finally {
 			try {
 				folderProperties.finish();
 			} catch (final OXException e) {
-			    LOG.error(e.getMessage(), e);
+			    LOG.error("", e);
 			}
 		}
 	}
@@ -110,15 +110,15 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
                 infoProperties.removeAll(id, session.getContext());
                 infoProperties.commit();
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (NumberFormatException e) {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } finally {
                 try {
                     infoProperties.finish();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
 

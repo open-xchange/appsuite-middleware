@@ -933,7 +933,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             try {
                 ClientAdminThread.cache.reinitAccessCombinations();
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             }
              *
              */
@@ -965,7 +965,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             }
                         }
                     } catch (final OXException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                     } finally {
                         AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                     }
@@ -1015,7 +1015,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rollback(con);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             rollback(con);
             throw e;
         } catch (final OXException e) {
@@ -1023,7 +1023,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rollback(con);
             throw new StorageException(e);
         } catch (final URISyntaxException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             rollback(con);
             throw new StorageException(e.toString());
         } finally {
@@ -1578,7 +1578,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("InvocationTarget Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } finally {
             closePreparedStatement(ps);
@@ -1765,7 +1765,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             // rollback operations on ox db connection
             try {
                 if (null != write_ox_con) {
@@ -1817,7 +1817,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Pool Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } finally {
             try {
@@ -1882,7 +1882,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Pool Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } finally {
             try {
@@ -2159,7 +2159,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXException e) {
             log.error("GUI setting Error", e);
@@ -2297,7 +2297,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 try {
                     ClientAdminThread.cache.reinitAccessCombinations();
                 } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                 }
                  *
                  */
@@ -2319,7 +2319,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache = cacheService.getCache("UserSettingMail");
                             cache.remove(key);
                         } catch (final OXException e) {
-                            log.error(e.getMessage(), e);
+                            log.error("", e);
                         } finally {
                             AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                         }
@@ -2410,7 +2410,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         throw new StorageException(sql.toString(), sql);
                     }
                 } catch (final RuntimeException e) {
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                     DBUtils.rollback(con);
                     throw e;
                 } finally {
@@ -2458,7 +2458,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             try {
                 ClientAdminThread.cache.reinitAccessCombinations();
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             }
              *
              */
@@ -2482,7 +2482,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.remove(key);
                         }
                     } catch (final OXException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                     } finally {
                         AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                     }
@@ -2494,7 +2494,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rollback(con);
             throw new StorageException(e.toString());
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             rollback(con);
             throw e;
         } finally {

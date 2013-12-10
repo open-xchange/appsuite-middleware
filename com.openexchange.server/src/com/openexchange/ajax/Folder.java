@@ -358,7 +358,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
@@ -791,7 +791,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         } catch (final OXException e) {
                             // Internal users folder not visible to current user
                             if (e.isGeneric(Generic.NO_PERMISSION)) {
-                                LOG.debug(e.getMessage(), e);
+                                LOG.debug("", e);
                             } else {
                                 throw e;
                             }
@@ -1010,7 +1010,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 mailInterface.close(true);
                                 mailInterface = null;
                             } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                         }
                     }
@@ -1042,7 +1042,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
@@ -1237,7 +1237,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 mailInterface.close(true);
                                 mailInterface = null;
                             } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                         }
                     }
@@ -1304,7 +1304,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
@@ -1677,7 +1677,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
              */
             lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
@@ -1777,7 +1777,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 mailInterface.close(true);
                             }
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 } else {
@@ -1806,7 +1806,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
@@ -1891,7 +1891,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         try {
                             mailInterface.close(true);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 } else {
@@ -1942,7 +1942,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
@@ -2024,7 +2024,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         try {
                             mailInterface.close(true);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 } else {
@@ -2051,7 +2051,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
@@ -2172,7 +2172,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
@@ -2297,7 +2297,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
@@ -2469,11 +2469,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     arrays[index] = null;
                     if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug(e.getMessage(), e);
+                            logger.debug("", e);
                         }
                         return null;
                     }
-                    logger.error(e.getMessage(), e);
+                    logger.error("", e);
                     throw e;
                 }
                 final MailFolder rootFolder = mailAccess.getRootFolder();
@@ -2496,7 +2496,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 arrays[index] = ja;
                 return null;
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 arrays[index] = null;
                 throw e;
             } finally {
@@ -2546,11 +2546,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 serviceId = service.getId();
             } catch (final OXException e) {
                 arrays[index] = null;
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 throw e;
             } catch (final Exception e) {
                 arrays[index] = null;
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
             try {
@@ -2566,7 +2566,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 arrays[index] = ja;
                 return null;
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 arrays[index] = null;
                 throw e;
             } finally {

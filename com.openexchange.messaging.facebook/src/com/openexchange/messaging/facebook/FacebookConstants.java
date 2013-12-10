@@ -126,10 +126,10 @@ public final class FacebookConstants {
             cmf.setAccessible(true);
         } catch (final SecurityException e) {
             // Cannot occur
-            org.slf4j.LoggerFactory.getLogger(FacebookConstants.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(FacebookConstants.class).error("", e);
         } catch (final NoSuchFieldException e) {
             // Cannot occur
-            org.slf4j.LoggerFactory.getLogger(FacebookConstants.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(FacebookConstants.class).error("", e);
         }
         HTTP_CLIENT_FIELD = hcf;
         CONNECTION_MANAGER_FIELD = cmf;

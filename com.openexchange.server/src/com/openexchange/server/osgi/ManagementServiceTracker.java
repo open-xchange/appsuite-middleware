@@ -92,11 +92,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             gadObjectName = OXFolderProperties.registerRestorerMBean(managementService);
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
         } catch (final MalformedObjectNameException e) {
-            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } catch (final NullPointerException e) {
-            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         }
         new ReportingInit(managementService).start();
         new UpdateTaskMBeanInit(managementService).start();
@@ -116,11 +116,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
                 OXFolderProperties.unregisterRestorerMBean(gadObjectName, managementService);
             }
         } catch (final MalformedObjectNameException e) {
-            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } catch (final NullPointerException e) {
-            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } finally {
             this.gadObjectName = null;
         }

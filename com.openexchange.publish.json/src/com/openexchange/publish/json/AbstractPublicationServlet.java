@@ -104,7 +104,7 @@ public abstract class AbstractPublicationServlet extends PermissionServlet {
         try {
             writeResponse(response, resp, session);
         } catch (final IOException e) {
-            getLog().error(e.getMessage(), e);
+            getLog().error("", e);
         }
     }
 

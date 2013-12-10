@@ -606,7 +606,7 @@ public final class DownloadUtility {
                 tmp.append(Helper.encodeFilename(fileName, "UTF-8", internetExplorer));
             }
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return fileName;
         }
         if ((null != baseCT) && (null == getFileExtension(fileName))) {

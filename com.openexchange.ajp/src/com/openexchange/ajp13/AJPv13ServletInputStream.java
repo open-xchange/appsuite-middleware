@@ -325,7 +325,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
             ajpRequestHandler.processPackage();
             return (data != null);
         } catch (final AJPv13Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new IOException(e.getMessage());
         }
     }

@@ -111,7 +111,7 @@ public final class SessionMailCache {
             }
         } catch (final Exception e) {
             // SWALLOW
-           LoggerFactory.getLogger(SessionMailCache.class).warn(e.getMessage(), e);
+           LoggerFactory.getLogger(SessionMailCache.class).warn("", e);
         }
     }
 

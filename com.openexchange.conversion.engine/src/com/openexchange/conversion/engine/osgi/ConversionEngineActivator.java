@@ -99,7 +99,7 @@ public final class ConversionEngineActivator extends HousekeepingActivator {
                 LOG.info("Conversion engine successfully started");
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -116,7 +116,7 @@ public final class ConversionEngineActivator extends HousekeepingActivator {
                 LOG.info("Conversion engine successfully stopped");
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

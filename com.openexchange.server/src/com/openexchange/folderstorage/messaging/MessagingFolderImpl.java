@@ -228,7 +228,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
                     messagingFolderType = MessagingFolderType.NONE;
                 }
             } catch (final OXException e) {
-                org.slf4j.LoggerFactory.getLogger(MessagingFolderImpl.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(MessagingFolderImpl.class).error("", e);
                 messagingFolderType = MessagingFolderType.NONE;
             }
         } else {

@@ -116,7 +116,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             oxGroup = OXGroupStorageInterface.getInstance();
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
         this.context = context;
@@ -141,7 +141,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -177,7 +177,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 throw new InvalidDataException("Member already exists in group");
             }
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -194,7 +194,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     cache.remove(cacheService.newCacheKey(contextId, user.getId()));
 	            }
 	        } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } finally {
 	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
 	        }
@@ -285,7 +285,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         }
                     }
     	        } catch (final OXException e) {
-    	            log.error(e.getMessage(), e);
+    	            log.error("", e);
     	        } finally {
     	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
     	        }
@@ -297,22 +297,22 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e1) {
             log.error(e1.getMessage(), e1);
             throw e1;
         } catch (final NoSuchUserException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchGroupException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -397,7 +397,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.error(e2.getMessage(), e2);
             throw e2;
         } catch (final NoSuchUserException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
@@ -474,7 +474,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id));
                     }
     	        } catch (final OXException e) {
-    	            log.error(e.getMessage(), e);
+    	            log.error("", e);
     	        } finally {
     	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
     	        }
@@ -495,7 +495,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id));
                     }
     	        } catch (final OXException e) {
-    	            log.error(e.getMessage(), e);
+    	            log.error("", e);
     	        } finally {
     	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
     	        }
@@ -563,22 +563,22 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 throw new NoSuchGroupException("No such group");
             }
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final NoSuchGroupException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -645,7 +645,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         }
                     }
     	        } catch (final OXException e) {
-    	            log.error(e.getMessage(), e);
+    	            log.error("", e);
     	        } finally {
     	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
     	        }
@@ -653,7 +653,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             // END OF JCS
 
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -675,7 +675,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -776,7 +776,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 }
             }
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -853,7 +853,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -894,7 +894,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -932,7 +932,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -975,7 +975,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -1017,7 +1017,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
 	            }
 	        } catch (final OXException e) {
-	            log.error(e.getMessage(), e);
+	            log.error("", e);
 	        } finally {
 	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
 	        }

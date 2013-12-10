@@ -424,7 +424,7 @@ public class AttachmentRequest extends CommonRequest {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -478,7 +478,7 @@ public class AttachmentRequest extends CommonRequest {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (iter != null) {
                 try {
@@ -491,7 +491,7 @@ public class AttachmentRequest extends CommonRequest {
                 try {
                     iter2.close();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -527,13 +527,13 @@ public class AttachmentRequest extends CommonRequest {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (iter != null) {
                 try {
                     iter.close();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -559,7 +559,7 @@ public class AttachmentRequest extends CommonRequest {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 
@@ -605,21 +605,21 @@ public class AttachmentRequest extends CommonRequest {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             handle(t, session);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             if (iter != null) {
                 try {
                     iter.close();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

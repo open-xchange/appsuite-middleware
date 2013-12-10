@@ -174,7 +174,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
                 array.put(fileContent.get(i));
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             Streams.close(r);
         }

@@ -135,7 +135,7 @@ public class RenameGroupTask extends UpdateTaskAdapter {
                 LOG.warn("Was not able to update display name of standard group.");
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -153,7 +153,7 @@ public class RenameGroupTask extends UpdateTaskAdapter {
                 language = result.getString(1);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(result, stmt);
         }

@@ -63,8 +63,6 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractIMAPStoreContainer.class);
 
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
-
     protected final String name;
 
     /**

@@ -100,7 +100,7 @@ public class FacebookServiceImpl implements FacebookService {
         try {
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         if (null != account) {
             // get the users own profile (for his id) with the given access token
@@ -114,7 +114,7 @@ public class FacebookServiceImpl implements FacebookService {
                 final JSONObject object = new JSONObject(ownProfileResponse.getBody());
                 myuid = object.getString("id");
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             // get the users connections
@@ -167,7 +167,7 @@ public class FacebookServiceImpl implements FacebookService {
                     try {
                         OXContainerConverter.loadImageFromURL(contact, (String) connection.get("pic_big"));
                     } catch (final ConverterException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -215,7 +215,7 @@ public class FacebookServiceImpl implements FacebookService {
         	} catch (final JSONException x) {
         		// Give up
         	}
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         return contacts;
@@ -228,7 +228,7 @@ public class FacebookServiceImpl implements FacebookService {
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return displayName;
     }

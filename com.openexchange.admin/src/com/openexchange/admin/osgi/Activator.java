@@ -114,10 +114,10 @@ public class Activator extends HousekeepingActivator {
             AdminDaemon.initCache(configurationService);
             daemon.initAccessCombinationsInCache();
         } catch (final OXGenericException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final ClassNotFoundException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
         track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();

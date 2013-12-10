@@ -107,11 +107,11 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementS
                         management.registerMBean(objectName, new HazelcastMBeanImpl());
                         this.objectName = objectName;
                     } catch (final MalformedObjectNameException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     } catch (final NotCompliantMBeanException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -124,7 +124,7 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementS
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 this.objectName = null;
             }

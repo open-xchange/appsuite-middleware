@@ -314,7 +314,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

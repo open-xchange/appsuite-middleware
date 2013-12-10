@@ -176,7 +176,7 @@ public abstract class AbstractAgent {
             try {
                 md = MessageDigest.getInstance("SHA-1");
             } catch (final NoSuchAlgorithmException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return raw;
             }
 
@@ -525,7 +525,7 @@ public abstract class AbstractAgent {
                 /*
                  * Squelch the exception
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 if (!portFound) {
                     freePort = 0;

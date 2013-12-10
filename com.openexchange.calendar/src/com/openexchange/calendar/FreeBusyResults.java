@@ -415,7 +415,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                         }
                     }
                 } catch (SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } finally {
                     DBUtils.closeSQLStuff(result, sharedFolderQuery);
                 }
@@ -544,13 +544,13 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 list.add(pfio);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             if(shared_folder_info != null) {
                 try {
                     shared_folder_info.close();
                 } catch (final SQLException e) {
-                	LOG.error(e.getMessage(), e);
+                	LOG.error("", e);
                 }
             }
         }

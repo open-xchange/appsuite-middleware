@@ -158,7 +158,7 @@ public class Activator extends HousekeepingActivator {
             try {
                 cacheService.freeCache(LDAPHostnameCache.REGION_NAME);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

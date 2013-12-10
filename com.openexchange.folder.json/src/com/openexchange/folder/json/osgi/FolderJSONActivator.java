@@ -129,7 +129,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
             registerService(PreferencesItemService.class, new Tree());
             registerService(LoginHandlerService.class, new FolderConsistencyLoginHandler());
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -147,7 +147,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              */
             restore();
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(FolderJSONActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(FolderJSONActivator.class).error("", e);
             throw e;
         }
     }

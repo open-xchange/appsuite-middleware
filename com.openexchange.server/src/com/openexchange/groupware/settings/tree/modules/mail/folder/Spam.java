@@ -119,7 +119,7 @@ public class Spam implements PreferencesItemService {
                         try {
                             mail.close(true);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 }

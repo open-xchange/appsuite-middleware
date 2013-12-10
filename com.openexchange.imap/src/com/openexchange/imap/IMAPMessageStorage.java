@@ -1073,7 +1073,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         try {
             return new ContentType(hdr).getParameter(PARAM_NAME);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

@@ -169,17 +169,17 @@ public class ServletActivator extends HousekeepingActivator {
         try {
             httpService.registerServlet("/publications", microformatServlet, null, null);
         } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         try {
             httpService.registerServlet("/publications/contactPictures", new ContactPictureServlet(), null, null);
             httpService.registerServlet("/publications/files", new InfostoreFileServlet(), null, null);
         } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

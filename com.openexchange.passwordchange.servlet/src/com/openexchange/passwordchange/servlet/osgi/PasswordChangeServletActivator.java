@@ -100,9 +100,9 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
             try {
                 registerServlet();
             } catch (final ServletException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NamespaceException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -138,7 +138,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
              */
             registerServlet();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
 
@@ -156,7 +156,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
 

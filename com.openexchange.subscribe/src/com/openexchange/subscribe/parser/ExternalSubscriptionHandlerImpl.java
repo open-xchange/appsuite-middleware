@@ -76,9 +76,9 @@ public class ExternalSubscriptionHandlerImpl extends ContactHandler {
 //            List<ContactObject> contacts = Arrays.asList(contactsForUser);
 //            storeContacts(new XingSubscriptionSession(subscription), subscription.getTargetFolder(), contacts);
 //        } catch (OXException e) {
-//            LOG.error(e.getMessage(), e);
+//            LOG.error("", e);
 //        } catch (OXException e) {
-//            LOG.error(e.getMessage(), e);
+//            LOG.error("", e);
 //        }
 //    }
 //

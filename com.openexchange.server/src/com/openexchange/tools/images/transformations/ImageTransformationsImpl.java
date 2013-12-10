@@ -373,17 +373,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
         try {
             parameters.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         try {
             parameters.setProgressiveMode(ImageWriteParam.MODE_DEFAULT);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         try {
             parameters.setCompressionQuality(0.8f);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
     }
 

@@ -187,13 +187,13 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
                 management.registerMBean(objectName, new ResourceCacheMBeanImpl());
             } catch (final MalformedObjectNameException e) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheActivator.class);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheActivator.class);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final OXException e) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheActivator.class);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -205,7 +205,7 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheActivator.class);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 this.objectName = null;
             }

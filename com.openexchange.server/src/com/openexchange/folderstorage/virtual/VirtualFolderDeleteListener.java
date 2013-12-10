@@ -126,7 +126,7 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    LoggerFactory.getLogger(VirtualFolderDeleteListener.class).error(e.getMessage(), e);
+                    LoggerFactory.getLogger(VirtualFolderDeleteListener.class).error("", e);
                 }
             }
         }

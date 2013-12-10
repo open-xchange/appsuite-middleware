@@ -178,7 +178,7 @@ public class IsPublished implements AdditionalFolderField {
             }
             return retval;
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return allFalse(folder.size());
     }

@@ -502,7 +502,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
                 CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
             }
         } catch (final OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         }
     }
 

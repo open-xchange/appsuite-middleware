@@ -178,7 +178,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 try {
                     password = new String(password.getBytes(authenc), CHARENC_ISO8859);
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw LoginExceptionCodes.COMMUNICATION.create(e);
                 }
             }

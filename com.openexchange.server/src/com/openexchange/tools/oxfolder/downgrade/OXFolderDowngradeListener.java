@@ -119,7 +119,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 }
             } catch (final Exception e) {
                 LOG.warn("Could not remove all calendar-related folder data caused by loss of calendar module access.");
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         if (!newUserConfiguration.hasTask()) {
@@ -133,7 +133,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 }
             } catch (final Exception e) {
                 LOG.warn("Could not remove all task-related folder data caused by loss of task module access.");
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         if (!newUserConfiguration.hasInfostore()) {
@@ -147,7 +147,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 }
             } catch (final Exception e) {
                 LOG.warn("Could not remove all infostore-related folder data caused by loss of infostore module access.");
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         if (!newUserConfiguration.hasFullSharedFolderAccess()) {
@@ -161,7 +161,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 }
             } catch (final Exception e) {
                 LOG.warn("Could not remove all shared folder data caused by loss of full shared folder access.");
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         /*
@@ -175,7 +175,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 CalendarCache.getInstance().invalidateGroup(event.getContext().getContextId());
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -482,7 +482,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             try {
                 FolderCacheManager.getInstance().removeFolderObjects(folderIDs, ctx);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);

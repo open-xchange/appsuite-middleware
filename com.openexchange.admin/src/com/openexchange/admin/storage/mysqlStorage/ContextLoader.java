@@ -153,7 +153,7 @@ public class ContextLoader implements Filter<Integer, Context> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (final PoolException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (cids.size() != retval.size()) {

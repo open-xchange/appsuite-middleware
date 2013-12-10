@@ -163,7 +163,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
         }
         // this is done so the logfile is not cluttered with irrelevant data as per bug 16591
         catch (SSLProtocolException e){
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
         finally {

@@ -172,7 +172,7 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
                     try {
                         tmp = InetAddress.getLocalHost().getHostName();
                     } catch (final UnknownHostException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                     hostName = tmp;
                 }

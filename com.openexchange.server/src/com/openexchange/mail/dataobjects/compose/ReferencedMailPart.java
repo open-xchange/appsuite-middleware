@@ -315,7 +315,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 }
                 throw MailExceptionCode.NO_CONTENT.create();
             } catch (final MailConfigException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             }
         }
@@ -363,7 +363,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 try {
                     fis.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

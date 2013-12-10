@@ -140,7 +140,7 @@ public final class AJAXFile extends PermissionServlet {
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final ServletException se = new ServletException(e.getMessage(), e);
                 se.initCause(e);
                 throw se;
@@ -243,7 +243,7 @@ public final class AJAXFile extends PermissionServlet {
                 Streams.close(contentInputStream);
             }
         } catch (final UploadException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
             Tools.disableCaching(resp);
             JSONObject responseObj = null;
@@ -259,7 +259,7 @@ public final class AJAXFile extends PermissionServlet {
 					e.getAction() == null ? STR_NULL : e.getAction()),
 					e.getMessage(), e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             Tools.disableCaching(resp);

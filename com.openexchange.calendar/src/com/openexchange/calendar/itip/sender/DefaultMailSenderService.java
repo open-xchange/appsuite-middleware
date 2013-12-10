@@ -194,7 +194,7 @@ public class DefaultMailSenderService implements MailSenderService {
             try {
                 fromAddr = getUserSettingMail(session.getUserId(), serverSession.getContext()).getSendAddr();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 fromAddr = UserStorage.getStorageUser(session.getUserId(), serverSession.getContext()).getMail();
             }
         } else {
@@ -331,9 +331,9 @@ public class DefaultMailSenderService implements MailSenderService {
 				multipart.addBodyPart(bodyPart);
 			}
 		} catch (IOException x) {
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		} catch (MessagingException x) {
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		}
 	}
 

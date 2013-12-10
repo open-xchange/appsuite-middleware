@@ -121,7 +121,7 @@ public class LoginCounterImpl implements LoginCounterService {
             }
             return Collections.singletonList(new Object[] { new Date(Long.parseLong(rs.getString(1))), client });
         } catch (final Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("", e);
             throw new OXException(-1, e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
@@ -146,7 +146,7 @@ public class LoginCounterImpl implements LoginCounterService {
         try {
             schemaMap = Tools.getAllSchemata(logger);
         } catch (SQLException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new OXException(wrapMe);
         }
@@ -199,7 +199,7 @@ public class LoginCounterImpl implements LoginCounterService {
                     }
                 }
             } catch (final SQLException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 throw new OXException(e);
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);

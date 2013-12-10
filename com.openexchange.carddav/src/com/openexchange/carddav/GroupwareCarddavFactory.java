@@ -225,7 +225,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		try {
 			this.userService.setUserAttribute(getOverrideNextSyncTokenAttributeName(), value, this.getUser().getId(), this.getContext());
 		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 		}
 	}
 
@@ -240,7 +240,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		try {
 			return this.userService.getUserAttribute(getOverrideNextSyncTokenAttributeName(), this.getUser().getId(), this.getContext());
 		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 		}
 		return null;
 	}
@@ -613,7 +613,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				try {
 					ignoreFolders = factory.getConfigValue(FOLDER_BLACKLIST_PROPERTY, null);
 				} catch (OXException e) {
-			        LOG.error(e.getMessage(), e);
+			        LOG.error("", e);
 				}
 				if (null == ignoreFolders || 0 >= ignoreFolders.length()) {
 					this.folderBlacklist = new HashSet<String>(0);
@@ -738,7 +738,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 							Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
 					return true;
 				} catch (OXException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error("", e);
 				}
             }
 			return false;
@@ -749,7 +749,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				try {
 					iterator.close();
 				} catch (final OXException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error("", e);
 				}
 			}
 		}

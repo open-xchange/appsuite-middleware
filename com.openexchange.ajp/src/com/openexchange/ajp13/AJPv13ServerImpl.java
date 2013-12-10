@@ -247,7 +247,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                     /*
                      * An unexpected socket error
                      */
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     stopServer();
                 } else {
                     /*
@@ -287,10 +287,10 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 latch.await();
                 task.run();
             } catch (final InterruptedException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 Thread.currentThread().interrupt();
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             }
         }
     }

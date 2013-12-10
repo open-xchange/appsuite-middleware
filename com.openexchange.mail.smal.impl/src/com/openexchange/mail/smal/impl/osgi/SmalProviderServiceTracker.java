@@ -100,7 +100,7 @@ public final class SmalProviderServiceTracker implements ServiceTrackerCustomize
                 return null;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             context.ungetService(reference);
             return null;
         }

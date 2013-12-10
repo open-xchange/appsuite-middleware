@@ -71,7 +71,7 @@ public class Tools {
             try {
                 readcon = dbService.getReadOnly();
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 throw e;
             }
             /*
@@ -86,7 +86,7 @@ public class Tools {
                     schemaMap.put(rs.getString(2), Integer.valueOf(rs.getInt(1)));
                 }
             } catch (final SQLException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 throw e;
             } finally {
                 DBUtils.closeSQLStuff(rs, statement);

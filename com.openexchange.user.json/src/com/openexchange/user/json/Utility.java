@@ -118,7 +118,7 @@ public final class Utility {
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
             final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utility.class);
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return TimeZone.getTimeZone(ID);
     }

@@ -232,7 +232,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                             try {
                                 mfm.removeByID(fileId);
                             } catch (final OXException e) {
-                                LOG.warn(e.getMessage(), e);
+                                LOG.warn("", e);
                             }
                         }
                     } else if (ComposedPartType.DATA.equals(composedMailPart.getType())) {
@@ -241,7 +241,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                             try {
                                 mfm.removeByID(fileId);
                             } catch (final OXException e) {
-                                LOG.warn(e.getMessage(), e);
+                                LOG.warn("", e);
                             }
                         }
                     } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
@@ -254,7 +254,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

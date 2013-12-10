@@ -363,7 +363,7 @@ public abstract class SessionServlet extends AJAXServlet {
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final OXException e) {
             if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 handleSessiondException(e, req, resp);
                 /*
                  * Return JSON response

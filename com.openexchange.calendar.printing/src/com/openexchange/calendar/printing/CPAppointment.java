@@ -171,7 +171,7 @@ public class CPAppointment {
                     final UserService userService = CPServiceRegistry.getInstance().getService(UserService.class, true);
                     retval.add(userService.getUser(participant.getIdentifier(), context).getDisplayName());
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 break;
             case Participant.GROUP:
@@ -179,7 +179,7 @@ public class CPAppointment {
                     final GroupService service = CPServiceRegistry.getInstance().getService(GroupService.class, true);
                     retval.add(service.getGroup(context, participant.getIdentifier()).getDisplayName());
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 break;
             case Participant.EXTERNAL_USER:

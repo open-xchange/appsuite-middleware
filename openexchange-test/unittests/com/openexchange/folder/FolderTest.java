@@ -165,7 +165,7 @@ public class FolderTest extends TestCase {
                     // session.getContext(), null, null,
                     // System.currentTimeMillis());
                 } catch (final Exception e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

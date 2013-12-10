@@ -261,7 +261,7 @@ public class DatabaseFolder extends AbstractFolder {
                 return count < 0 ? super.getTotal() : count;
             } catch (final OXException e) {
                 // Ignore
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         return super.getTotal();

@@ -338,7 +338,7 @@ public class OXContextMySQLStorageCommon {
             try {
                 com.openexchange.databaseold.Database.reset(contextId);
             } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             }
 
             if (!cs2dbBroken) {

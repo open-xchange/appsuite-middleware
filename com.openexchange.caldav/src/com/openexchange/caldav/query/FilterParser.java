@@ -108,7 +108,7 @@ public class FilterParser {
                 Date startDate = format.parse(startAttr.getValue());
                 return startDate.getTime();
             } catch (ParseException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw WebdavProtocolException.generalError(new WebdavPath(), HttpServletResponse.SC_BAD_REQUEST);
             }
         }

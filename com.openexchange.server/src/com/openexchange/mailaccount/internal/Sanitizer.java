@@ -93,7 +93,7 @@ final class Sanitizer {
                 storageService.invalidateMailAccount(accountId, user, contextId);
             } catch (final OXException e) {
                 // Swallow
-                org.slf4j.LoggerFactory.getLogger(Sanitizer.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(Sanitizer.class).error("", e);
             }
             return true;
         }

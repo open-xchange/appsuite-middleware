@@ -559,7 +559,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 rs.close();
             } catch (final SQLException e) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 error = SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage()).setPrefix("FLD");
             }
@@ -573,7 +573,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 stmt.close();
             } catch (final SQLException e) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 if (error == null) {
                     error = SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage()).setPrefix("FLD");
@@ -661,7 +661,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 cache.putIfAbsent(fo, ctx, resideInCache ? getEternalAttributes() : null);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         /*
@@ -695,7 +695,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         try {
             closeResources();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         /*
          * Close other stuff
@@ -795,7 +795,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 closeResources();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             /*
              * Close other stuff

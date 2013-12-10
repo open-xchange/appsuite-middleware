@@ -53,6 +53,7 @@ import static com.openexchange.configuration.clt.ConvertJUL2LogbackCLT.determine
 import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
 import static com.openexchange.configuration.clt.XMLModifierCLT.parseInput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Properties;
@@ -121,16 +122,27 @@ public class ExtractLog4JModificationsCLT {
             return 1;
         }
         try {
-            Document original = db.parse(ExtractLog4JModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml"));
+            InputStream resourceAsStream = ExtractLog4JModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml");
+            Document original = db.parse(resourceAsStream);
             Document document = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
             // Find differences
             Set<Logger> origLogger = parseLogger(original);
             Set<Logger> configuredLogger = parseLogger(document);
             Set<Logger> added = new HashSet<Logger>(configuredLogger);
+            Set<Logger> changed = new HashSet<Logger>(configuredLogger);
             added.removeAll(origLogger);
+            changed.retainAll(origLogger);
             Properties properties = new Properties();
             for (Logger logger : added) {
                 properties.put(logger.getName() + ".level", logger.getLevel());
+            }
+            loop: for (Logger change : changed) {
+                for (Logger orig : origLogger) {
+                    if (orig.equals(change) && !change.getLevel().equals(orig.getLevel())) {
+                        properties.put(change.getName() + ".level", change.getLevel());
+                        continue loop;
+                    }
+                }
             }
             // Write output
             final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
@@ -162,7 +174,7 @@ public class ExtractLog4JModificationsCLT {
         for (int i = 0; i < list.getLength(); i++) {
             Node nameAttribute = list.item(i);
             final String name = nameAttribute.getNodeValue();
-            Node valueAttribute = (Node) path.compile("//level/@value").evaluate(nameAttribute, XPathConstants.NODE);
+            Node valueAttribute = (Node) path.compile("../level/@value").evaluate(nameAttribute, XPathConstants.NODE);
             final String value = valueAttribute.getNodeValue();
             retval.add(new Logger(name, value));
         }

@@ -91,9 +91,9 @@ public class PushRegistryListenerThread extends Thread {
                     LOG.warn("received empty udp package: " + datagramSocket);
                 }
             } catch (final SocketException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

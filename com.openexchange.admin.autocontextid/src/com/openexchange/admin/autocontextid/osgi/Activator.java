@@ -81,10 +81,10 @@ public class Activator extends HousekeepingActivator {
             registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
 
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final OXGenericException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

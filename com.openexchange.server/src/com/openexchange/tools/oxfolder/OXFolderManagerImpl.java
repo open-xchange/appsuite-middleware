@@ -1651,7 +1651,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             try {
                 FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         /*
@@ -1944,11 +1944,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         FolderCacheManager.getInstance().removeFolderObject(fuids[i], ctx);
                     } catch (final OXException e) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -2027,7 +2027,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             try {
                 tmp2 = DBUtils.getColumnSize(readCon, tableName, fields[i]);
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 tmp2 = -1;
             } finally {
                 if (closeReadCon) {

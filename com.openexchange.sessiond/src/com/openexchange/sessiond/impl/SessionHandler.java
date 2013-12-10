@@ -219,7 +219,7 @@ public final class SessionHandler {
                 };
                 retval2 = getFrom(c, new Session[0]);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (INFO) {
@@ -281,7 +281,7 @@ public final class SessionHandler {
                 };
                 submitAndIgnoreRejection(c);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (INFO) {
@@ -316,7 +316,7 @@ public final class SessionHandler {
                     };
                     hasForContext = getFrom(c, Boolean.FALSE).booleanValue();
                 } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -354,7 +354,7 @@ public final class SessionHandler {
                         retval[i] = sessionToSessionControl(sessions[i]);
                     }
                 } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -393,7 +393,7 @@ public final class SessionHandler {
                         retval = sessionToSessionControl(storedSession);
                     }
                 } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -420,7 +420,7 @@ public final class SessionHandler {
                     };
                     retval = getFrom(c, null);
                 } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -591,7 +591,7 @@ public final class SessionHandler {
                             throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
                         }
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -633,7 +633,7 @@ public final class SessionHandler {
                                 }
                             }
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 }
@@ -654,7 +654,7 @@ public final class SessionHandler {
             try {
                 storageService.checkAuthId(login, authId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         */
@@ -864,7 +864,7 @@ public final class SessionHandler {
                         return s;
                     }
                 } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             return null;
@@ -1001,7 +1001,7 @@ public final class SessionHandler {
                         return sessionToSessionControl(session);
                     }
                 } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -1035,7 +1035,7 @@ public final class SessionHandler {
                     return sessionToSessionControl(session);
                 }
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return null;
@@ -1276,14 +1276,14 @@ public final class SessionHandler {
                                     try {
                                         sessionStorageService.removeSession(session.getSessionID());
                                     } catch (final OXException e) {
-                                        LOG.error(e.getMessage(), e);
+                                        LOG.error("", e);
                                     } catch (final RuntimeException e) {
-                                        LOG.error(e.getMessage(), e);
+                                        LOG.error("", e);
                                     }
                                 }
                             }
                         } catch (final RuntimeException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                         return null;
                     }

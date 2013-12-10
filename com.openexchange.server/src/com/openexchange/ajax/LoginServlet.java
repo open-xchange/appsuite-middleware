@@ -445,7 +445,7 @@ public class LoginServlet extends AJAXServlet {
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                     }
                 } catch (final OXException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                     response.setException(e);
                 }
                 Tools.disableCaching(resp);
@@ -685,7 +685,7 @@ public class LoginServlet extends AJAXServlet {
                 doAuthHeaderLogin(req, resp);
 
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 resp.addHeader("WWW-Authenticate", "NEGOTIATE");
                 resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
@@ -745,7 +745,7 @@ public class LoginServlet extends AJAXServlet {
     }
 
     public static void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
-        LOG.debug(e.getMessage(), e);
+        LOG.debug("", e);
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Response response = new Response();

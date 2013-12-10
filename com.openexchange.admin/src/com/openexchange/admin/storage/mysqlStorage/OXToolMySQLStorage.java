@@ -1562,7 +1562,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (doUpdate) {
                 if (ctx == null) {
                     final StorageException e = new StorageException("context must not be null when schema update should be done");
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                     throw e;
                 }
                 updater.startUpdate(ctx.getId().intValue());
@@ -1689,7 +1689,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForConfigDB();
         } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         }
         PreparedStatement stmt = null;

@@ -876,7 +876,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
             }
             registerServices();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

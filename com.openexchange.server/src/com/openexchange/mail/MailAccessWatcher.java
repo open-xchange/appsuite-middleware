@@ -264,7 +264,7 @@ public final class MailAccessWatcher {
                     } while ((expired = queue.poll(filter)) != null);
                 }
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             }
         }
     } // End of WatcherTask class

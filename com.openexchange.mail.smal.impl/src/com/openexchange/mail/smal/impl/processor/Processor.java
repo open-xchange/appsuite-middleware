@@ -208,7 +208,7 @@ public class Processor {
                     submitJob(mailAccess);
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
                 MailUtility.releaseAccess(facade, indexAccess);

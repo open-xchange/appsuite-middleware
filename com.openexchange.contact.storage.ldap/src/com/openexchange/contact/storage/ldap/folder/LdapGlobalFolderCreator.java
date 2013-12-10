@@ -152,14 +152,14 @@ public class LdapGlobalFolderCreator {
                 try {
                     executeQuery.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             if (null != ps) {
                 try {
                     ps.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

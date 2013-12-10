@@ -109,7 +109,7 @@ public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker 
             builder.append(')');
             return context.createFilter(builder.toString());
         } catch (InvalidSyntaxException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

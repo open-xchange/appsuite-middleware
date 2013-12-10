@@ -299,7 +299,7 @@ public final class SMTPCapabilityCache {
                     try {
                         s.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }

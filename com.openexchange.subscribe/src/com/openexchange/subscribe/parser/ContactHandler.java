@@ -88,7 +88,7 @@ public class ContactHandler {
                 try {
                     existingContact = existingContacts.next();
                 } catch (final SearchIteratorException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 if (existingContact == null) {
                     continue;
@@ -111,7 +111,7 @@ public class ContactHandler {
             try {
                 contactService.createContact(session, String.valueOf(folderId), updatedContact);
             } catch (final OXException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
             }
         }
     }

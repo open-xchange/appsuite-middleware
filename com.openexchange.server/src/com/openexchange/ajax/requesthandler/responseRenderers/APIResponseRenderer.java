@@ -239,14 +239,14 @@ public class APIResponseRenderer implements ResponseRenderer {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
             }
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             try {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
             } catch (final IOException ioe) {
                 LOG.error(ioe.getMessage(), ioe);
             }
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

@@ -535,7 +535,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addFrom(QuotedInternetAddress.parse(fromStr, true));
             } catch (final AddressException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addFrom(new PlainTextAddress(fromStr));
             }
         }
@@ -602,7 +602,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addTo(QuotedInternetAddress.parse(toStr, true));
             } catch (final AddressException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addTo(new PlainTextAddress(toStr));
             }
         }
@@ -669,7 +669,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addCc(QuotedInternetAddress.parse(ccStr, true));
             } catch (final AddressException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addCc(new PlainTextAddress(ccStr));
             }
         }
@@ -736,7 +736,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addBcc(QuotedInternetAddress.parse(bccStr, true));
             } catch (final AddressException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addBcc(new PlainTextAddress(bccStr));
             }
         }
@@ -1242,7 +1242,7 @@ public abstract class MailMessage extends MailPart {
                 try {
                     setDispositionNotification(new QuotedInternetAddress(dispNotTo, false));
                 } catch (final AddressException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                     setDispositionNotification(new PlainTextAddress(dispNotTo));
                 }
             }

@@ -94,7 +94,7 @@ public final class CMISActivator extends HousekeepingActivator {
             rememberTracker(new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, new CMISServiceRegisterer(context)));
             openTrackers();
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(CMISActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(CMISActivator.class).error("", e);
             throw e;
         }
     }
@@ -113,7 +113,7 @@ public final class CMISActivator extends HousekeepingActivator {
             // Clear service registry
             CMISServices.setServices(null);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(CMISActivator.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(CMISActivator.class).error("", e);
             throw e;
         }
     }

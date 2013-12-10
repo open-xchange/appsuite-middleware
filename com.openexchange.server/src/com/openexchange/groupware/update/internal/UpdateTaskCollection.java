@@ -126,7 +126,7 @@ class UpdateTaskCollection {
                     break;
                 default:
                     OXException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecuteV2.getClass().getName());
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     blocking.add(toExecuteV2);
                 }
             } else {

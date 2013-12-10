@@ -76,11 +76,11 @@ public class FireAttachedEventAction extends AttachmentEventAction {
         try {
             fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             try {
                 fireDetached(processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
             } catch (final Exception e1) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw AttachmentExceptionCodes.UNDONE_FAILED.create(e1);
             }
             if (e instanceof OXException) {

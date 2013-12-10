@@ -218,7 +218,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             final java.net.URL url = new java.net.URL(sibling);
             return url.getProtocol()+"://"+url.getHost()+relative;
         } catch (final MalformedURLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return relative;
         }
     }
@@ -248,10 +248,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             final Reader r = HTTPToolkit.grab(sourceURL);
             return parser.parse(r);
         } catch (final HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
         }
     }

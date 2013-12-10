@@ -111,7 +111,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
             openConnection();
             removeReservation();
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
         } finally {
             releaseConnection();
         }

@@ -665,7 +665,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 clone.value = null;
                 return clone;
             } catch (final CloneNotSupportedException e) {
-                LOG1.error(e.getMessage(), e);
+                LOG1.error("", e);
                 throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
             }
 
@@ -798,7 +798,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 /*
                  * Cannot occur
                  */
-                LOG1.error(e.getMessage(), e);
+                LOG1.error("", e);
             }
         }
 
@@ -871,7 +871,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 /*
                  * Cannot occur
                  */
-                LOG1.error(e.getMessage(), e);
+                LOG1.error("", e);
                 return null;
             }
         }

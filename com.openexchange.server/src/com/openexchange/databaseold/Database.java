@@ -165,7 +165,7 @@ public final class Database {
                 getDatabaseService().backReadOnly(con);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -183,7 +183,7 @@ public final class Database {
                 getDatabaseService().backReadOnly(ctx, con);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -191,7 +191,7 @@ public final class Database {
         try {
             getDatabaseService().backWritableAfterReading(ctx, con);
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -209,7 +209,7 @@ public final class Database {
                 getDatabaseService().backReadOnly(contextId, con);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -217,7 +217,7 @@ public final class Database {
         try {
             getDatabaseService().backWritableAfterReading(contextId, con);
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -236,7 +236,7 @@ public final class Database {
                 getDatabaseService().backForUpdateTaskAfterReading(contextId, con);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -249,7 +249,7 @@ public final class Database {
         try {
             getDatabaseService().back(poolId, con);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -273,7 +273,7 @@ public final class Database {
         try {
             getDatabaseService().backNoTimeoout(poolId, con);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

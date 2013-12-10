@@ -101,7 +101,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                 return null;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             context.ungetService(reference);
             return null;
         }
@@ -123,7 +123,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                     LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(provider.getProtocol().toString()).append(
                         "' successfully unregistered").toString());
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } finally {
                 /*

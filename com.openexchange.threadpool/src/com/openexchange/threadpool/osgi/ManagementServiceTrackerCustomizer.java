@@ -122,11 +122,11 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
                 objectName = getObjectName(ThreadPoolInformation.class.getName(), ThreadPoolInformationMBean.THREAD_POOL_DOMAIN);
                 management.registerMBean(objectName, new ThreadPoolInformation(threadPoolService));
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -136,7 +136,7 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
             try {
                 management.unregisterMBean(objectName);
             } catch (final Exception e) {
-                org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer.class).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(ManagementServiceTrackerCustomizer.class).error("", e);
             } finally {
                 objectName = null;
             }

@@ -438,7 +438,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
             }
             messageDispatcher.send(errorPresence);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

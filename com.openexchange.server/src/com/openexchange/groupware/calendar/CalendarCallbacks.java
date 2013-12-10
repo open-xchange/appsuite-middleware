@@ -129,7 +129,7 @@ public class CalendarCallbacks implements CalendarListener {
             try {
                 listener.createdChangeExceptionInRecurringAppointment(master, changeException,inFolder, serverSession);
             } catch (final OXException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
                 exceptionIDs.add(x.getExceptionId());
             }
         }

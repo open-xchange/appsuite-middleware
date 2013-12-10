@@ -230,7 +230,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
                 try {
                     return iterator.hasNext();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     return false;
                 }
             }
@@ -240,7 +240,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
                 try {
                     return iterator.next();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 return null;
             }

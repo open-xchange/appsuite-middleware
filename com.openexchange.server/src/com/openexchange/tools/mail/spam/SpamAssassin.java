@@ -159,13 +159,13 @@ public class SpamAssassin {
             }
             return false;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final MessagingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return false;
     }
@@ -196,9 +196,9 @@ public class SpamAssassin {
         try {
             new TrainMessageThread(getRawMessageInputStream(msg), isSpam).start();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final MessagingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

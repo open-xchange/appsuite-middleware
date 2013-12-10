@@ -52,7 +52,6 @@ package com.openexchange.imap.acl;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link ACLExtensionAutoDetector} - Auto-detects IMAP server's ACL extension.
@@ -62,8 +61,6 @@ import com.openexchange.java.StringAllocator;
 final class ACLExtensionAutoDetector {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ACLExtensionAutoDetector.class);
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Prevent instantiation
@@ -100,11 +97,7 @@ final class ACLExtensionAutoDetector {
          * Examine CAPABILITY response
          */
         if (!capabilities.containsKey("ACL")) {
-            if (DEBUG) {
-                LOG.debug(new StringAllocator(256).append("\n\tIMAP server [").append(
-                    new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
-                    "] CAPABILITY response indicates no support of ACL extension.").toString());
-            }
+            LOG.debug("\n\tIMAP server [{0}] CAPABILITY response indicates no support of ACL extension.", new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()));
             return NoACLExtension.getInstance();
         }
         /*
@@ -120,22 +113,11 @@ final class ACLExtensionAutoDetector {
                 for (int i = 0; !containsRFC4314Character && i < RFC4314_CARACTERS_UPPER.length; i++) {
                     containsRFC4314Character = (upperName.indexOf(RFC4314_CARACTERS_UPPER[i], fromIndex) >= 0);
                 }
-                if (DEBUG) {
-                    LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\tIMAP server [").append(
-                        new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
-                        "] CAPABILITY response indicates support of ACL extension\n\tand specifies \"").append(upperName).append(
-                        "\" capability.").append("\n\tACL extension according to ").append(containsRFC4314Character ? "RFC 4314" : "RFC 2086").append(
-                        " is going to be used.\n").toString());
-                }
+                LOG.debug("\n\tIMAP server [{0}] CAPABILITY response indicates support of ACL extension\n\tand specifies \"{}\" capability.\n\tACL extension according to {} is going to be used.\n", new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()).toString(), upperName, (containsRFC4314Character ? "RFC 4314" : "RFC 2086"));
                 return containsRFC4314Character ? new RFC4314ACLExtension() : new RFC2086ACLExtension();
             }
         }
-        if (DEBUG) {
-            LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\tIMAP server [").append(
-                new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort())).append(
-                "] CAPABILITY response indicates support of ACL extension\n\tbut does not specify \"RIGHTS=\" capability.").append(
-                "\n\tACL extension according to RFC 2086 is going to be used.\n").toString());
-        }
+        LOG.debug("\n\tIMAP server [{}] CAPABILITY response indicates support of ACL extension\n\tbut does not specify \"RIGHTS=\" capability.\n\tACL extension according to RFC 2086 is going to be used.\n", new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()));
         return new RFC2086ACLExtension();
     }
 

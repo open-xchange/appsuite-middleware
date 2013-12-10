@@ -471,7 +471,7 @@ public final class LoginPerformer {
         } catch (final OXException e) {
             e.log(LOG);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

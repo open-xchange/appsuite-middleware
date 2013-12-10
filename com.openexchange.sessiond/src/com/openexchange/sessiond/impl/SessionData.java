@@ -688,7 +688,7 @@ final class SessionData {
         final SessionImpl session = sessionControl.getSession();
         if (!randomToken.equals(session.getRandomToken())) {
             final OXException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             SessionHandler.clearSession(sessionId);
             return null;
         }
@@ -776,7 +776,7 @@ final class SessionData {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             wlock.unlock();
         }
@@ -812,7 +812,7 @@ final class SessionData {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             wlongTermLock.unlock();
             wlock.unlock();

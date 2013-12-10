@@ -134,7 +134,7 @@ public class PushUDPActivator extends HousekeepingActivator {
             rememberTracker(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerCustomizer(context)));
             openTrackers();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -155,7 +155,7 @@ public class PushUDPActivator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

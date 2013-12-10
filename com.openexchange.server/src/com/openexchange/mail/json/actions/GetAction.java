@@ -284,7 +284,7 @@ public final class GetAction extends AbstractMailAction {
                     if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                         throw e;
                     }
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                     fileHolder = new ThresholdFileHolder();
                     fileHolder.write(new byte[0]);
                 }
@@ -473,7 +473,7 @@ public final class GetAction extends AbstractMailAction {
                     throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
                 }
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             throw e;
         } catch (final MessagingException e) {

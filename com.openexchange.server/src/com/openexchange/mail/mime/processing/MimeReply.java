@@ -671,7 +671,7 @@ public final class MimeReply {
                                 ltz.timeZone)));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                     replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst("");
                 }
@@ -686,7 +686,7 @@ public final class MimeReply {
                                 ltz.timeZone)));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                     replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst("");
                 }

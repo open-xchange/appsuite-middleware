@@ -84,12 +84,12 @@ public class DatabaseDataMover implements Callable<Void> {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.moveDatabaseContext(ctx, db, reason_id);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             // Because the client side only knows of the exceptions defined in the core we have
             // to throw the trace as string
             throw new StorageException(e.toString());
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
         return null;

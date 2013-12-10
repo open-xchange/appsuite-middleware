@@ -290,7 +290,7 @@ public final class ImageUtility {
             return URLEncoder.encode(text, UTF_8);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
             return text;
         }
     }
@@ -309,7 +309,7 @@ public final class ImageUtility {
             checksum.update(string.getBytes(Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
         }
         return null;
     }
@@ -339,9 +339,9 @@ public final class ImageUtility {
             checksum.update(string.getBytes(UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
         } catch (final UnsupportedEncodingException e) {
-            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
         }
         return null;
     }

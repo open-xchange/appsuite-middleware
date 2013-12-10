@@ -122,7 +122,7 @@ public final class IndexAccessAdapter {
             try {
                 facade.releaseIndexAccess(indexAccess);
             } catch (OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
     }
