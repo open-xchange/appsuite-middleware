@@ -134,8 +134,6 @@ public final class IMAPFolderConverter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderConverter.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final Rights RIGHTS_EMPTY = new Rights();
 
     /**
@@ -245,7 +243,7 @@ public final class IMAPFolderConverter {
                     return convertRootFolder((DefaultFolder) imapFolder, session, imapAccess.getIMAPConfig());
                 }
                 final IMAPConfig imapConfig = imapAccess.getIMAPConfig();
-                final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                final long st = System.currentTimeMillis();
                 // Convert non-root folder
                 final IMAPMailFolder mailFolder = new IMAPMailFolder();
                 mailFolder.setRootFolder(false);
@@ -520,11 +518,7 @@ public final class IMAPFolderConverter {
                 } else {
                     mailFolder.setSupportsUserFlags(false);
                 }
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug(new com.openexchange.java.StringAllocator("IMAP folder \"").append(imapFullName).append("\" converted in ").append(dur).append(
-                        "msec.").toString());
-                }
+                LOG.debug("IMAP folder \"{}\" converted in {}msec.", imapFullName, System.currentTimeMillis() - st);
                 return mailFolder;
             }
         } catch (final MessagingException e) {
@@ -716,7 +710,6 @@ public final class IMAPFolderConverter {
             throw MimeMailException.handleMessagingException(e);
         }
         final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringAllocator(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator());
-        final com.openexchange.java.StringAllocator debugBuilder = DEBUG ? new com.openexchange.java.StringAllocator(128) : null;
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();
@@ -727,19 +720,7 @@ public final class IMAPFolderConverter {
                     userPermAdded = true;
                     final Rights aclRights = acl.getRights();
                     if (!ownRights.equals(aclRights)) {
-                        if (DEBUG) {
-                            final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(64);
-                            tmp.append("Detected different rights for MYRIGHTS (");
-                            tmp.append(ownRights);
-                            tmp.append(") and GETACL (");
-                            tmp.append(aclRights);
-                            tmp.append(") for user ");
-                            tmp.append(session.getUserId());
-                            tmp.append(" in context ");
-                            tmp.append(session.getContextId());
-                            tmp.append(". Preferring GETACL rights as user's own-rights.");
-                            LOG.debug(tmp.toString());
-                        }
+                        LOG.debug("Detected different rights for MYRIGHTS ({}) and GETACL ({}) for user {} in context {}. Preferring GETACL rights as user''s own-rights.", ownRights, aclRights, session.getUserId(), session.getContextId());
                         final MailPermission ownPermission = mailFolder.getOwnPermission();
                         if (ownPermission instanceof ACLPermission) {
                             ((ACLPermission) ownPermission).parseRights(aclRights, imapConfig);
@@ -758,10 +739,7 @@ public final class IMAPFolderConverter {
                 if (!isUnknownEntityError(e)) {
                     throw e;
                 }
-                if (DEBUG) {
-                    debugBuilder.reinitTo(0);
-                    LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acl.getName()).append("\" to a system user").toString());
-                }
+                LOG.debug("Cannot map ACL entity named \"{}\" to a system user", acl.getName());
             }
         }
         /*
