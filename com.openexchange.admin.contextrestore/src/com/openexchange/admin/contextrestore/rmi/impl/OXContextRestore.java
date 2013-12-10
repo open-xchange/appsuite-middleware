@@ -305,7 +305,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 final String databasename = dbmatcher.group(1);
                                 if (getConfigDbName(optConfigDbName).equals(databasename) || (null != schema && schema.equals(databasename))) {
                                     furthersearch = true;
-                                    LOG.info("Database: " + databasename);
+                                    LOG.info("Database: {}", databasename);
                                     if (null != bufferedWriter) {
                                         bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;\n");
                                         bufferedWriter.flush();
@@ -331,7 +331,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             } else if (furthersearch && tablematcher.matches()) {
                                 // Table found
                                 tableName = tablematcher.group(1);
-                                LOG.info("Table: " + tableName);
+                                LOG.info("Table: {}", tableName);
                                 cidpos = -1;
                                 oldstate = 0;
                                 state = 3;
@@ -374,7 +374,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         continue;
                     } else if (4 == state && c == '(') {
                         cidpos = cidsearch(in);
-                        LOG.info("Cid pos: " + cidpos);
+                        LOG.info("Cid pos: {}", cidpos);
                         state = 0;
                         continue;
                     } else if (5 == state && c == 'I') {
@@ -384,7 +384,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         oldstate = 5;
                         state = 1;
                     } else if (6 == state && c == '(') {
-                        LOG.info("Insert found and cid=" + cidpos);
+                        LOG.info("Insert found and cid={}", cidpos);
                         // Now we search for matching cids and write them to the tmp file
                         if (searchcontext && null != bufferedWriter) {
                             final String value[] =
@@ -657,7 +657,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 // Now searching for cid text...
                 if (cidmatcher.matches()) {
                     final List<String> searchingForeignKey = searchingForeignKey(in);
-                    LOG.info("Foreign Keys: " + searchingForeignKey);
+                    LOG.info("Foreign Keys: {}", searchingForeignKey);
                     found = true;
                     break;
                 } else if (enginematcher.matches()) {
@@ -731,8 +731,8 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             throw e;
         }
 
-        LOG.info("Context: " + ctx);
-        LOG.info("Filenames: " + java.util.Arrays.toString(fileNames));
+        LOG.info("Context: {}", ctx);
+        LOG.info("Filenames: {}", java.util.Arrays.toString(fileNames));
 
         try {
             final HashMap<String, File> tempfilemap = new HashMap<String, File>();
@@ -769,7 +769,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     contextInterface.delete(ctx, auth);
                 } catch (final NoSuchContextException e) {
                     // As we check for the existence beforehand this exception should never occur. Nevertheless we will log this
-                    LOG.error("FATAL:" + e.getMessage(), e);
+                    LOG.error("FATAL:{}", e.getMessage(), e);
                 }
             }
             return instance.restorectx(ctx, result, getConfigDbName(optConfigDbName));

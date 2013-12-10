@@ -116,7 +116,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                         prepareStatement.execute();
                         prepareStatement.close();
                     } catch (SQLException e) {
-                        LOG.error("Executing the following SQL statement failed: " + line, e);
+                        LOG.error("Executing the following SQL statement failed: {}", line, e);
                         throw e;
                     }
                 }
@@ -140,7 +140,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                         prepareStatement2.execute();
                         prepareStatement2.close();
                     } catch (SQLException e) {
-                        LOG.error("Executing the following SQL statement failed: " + line, e);
+                        LOG.error("Executing the following SQL statement failed: {}", line, e);
                         throw e;
                     }
                 }
