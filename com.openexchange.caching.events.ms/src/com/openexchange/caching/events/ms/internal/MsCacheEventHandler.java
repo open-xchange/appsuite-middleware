@@ -123,7 +123,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("publish: " + cacheEvent + " [" + senderId + "]");
+            LOG.debug("publish: {} [{}]", cacheEvent, senderId);
         }
         try {
             getTopic().publish(CacheEventWrapper.wrap(cacheEvent));
@@ -146,7 +146,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
             Map<String, Serializable> cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("onMessage: " + message.getMessageObject() + " [" + message.getSenderId() + "]");
+                    LOG.debug("onMessage: {} [{}]", message.getMessageObject(), message.getSenderId());
                 }
                 cacheEvents.notify(this, CacheEventWrapper.unwrap(cacheEvent));
             } else {
