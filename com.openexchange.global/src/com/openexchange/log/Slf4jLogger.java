@@ -405,6 +405,15 @@ public class Slf4jLogger extends AbstractDelegatingLogger {
     }
 
     @Override
+    public void throwing(String sourceClass, String sourceMethod, Throwable thrown) {
+        if (locationAwareLogger == null) {
+            logger.trace(thrown.getMessage(), thrown);
+        } else {
+            locationAwareLogger.log(null, FQCN, LocationAwareLogger.TRACE_INT, thrown.getMessage(), null, thrown);
+        }
+    }
+
+    @Override
     public void logp(final Level level, final String sourceClass, final String sourceMethod, final String msg) {
         log(level, msg);
     }
