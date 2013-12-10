@@ -107,7 +107,7 @@ public final class HttpManagersInit implements Initialization {
             // Do nothing
         }
         if (!started.compareAndSet(false, true)) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         initServletMappings(false);
@@ -120,7 +120,7 @@ public final class HttpManagersInit implements Initialization {
     @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+            LOG.error("{} cannot be stopped since it has not been started before", this.getClass().getName());
             return;
         }
         HttpSessionManagement.reset();
@@ -208,7 +208,7 @@ public final class HttpManagersInit implements Initialization {
     private static void addServletClass(final String name, final String className, final Map<String, Constructor<?>> servletConstructorMap) {
         try {
             if (!checkServletPath(name)) {
-                LOG.error(new com.openexchange.java.StringAllocator("Invalid servlet path: ").append(name).toString());
+                LOG.error("Invalid servlet path: {}", name);
                 return;
             }
             if (servletConstructorMap.containsKey(name)) {
@@ -223,17 +223,17 @@ public final class HttpManagersInit implements Initialization {
         } catch (final SecurityException e) {
             if (LOG.isWarnEnabled()) {
                 final OXException se = OXServletException.Code.SECURITY_ERR.create(e, className);
-                LOG.warn(se.getMessage(), se);
+                LOG.warn("", se);
             }
         } catch (final ClassNotFoundException e) {
             if (LOG.isWarnEnabled()) {
                 final OXException se = OXServletException.Code.CLASS_NOT_FOUND.create(e, className);
-                LOG.warn(se.getMessage(), se);
+                LOG.warn("", se);
             }
         } catch (final NoSuchMethodException e) {
             if (LOG.isWarnEnabled()) {
                 final OXException se = OXServletException.Code.NO_DEFAULT_CONSTRUCTOR.create(e, className);
-                LOG.warn(se.getMessage(), se);
+                LOG.warn("", se);
             }
         }
     }

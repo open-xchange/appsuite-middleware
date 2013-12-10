@@ -213,9 +213,7 @@ public class AJPv13TaskWatcher {
                         final int numProcessing = countProcessing.get();
                         if (numProcessing > 0 && countExceeded.get() == numProcessing) {
                             final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-                            log.error(new com.openexchange.java.StringAllocator(128 + delimStr.length()).append(delimStr).append(
-                                "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
-                                delimStr).toString());
+                            log.error("{}{}{}AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED! Going to stop and re-initialize system{}", 128 + delimStr.length(, ), delimStr, delimStr);
                             /*
                              * Restart AJP Server
                              */

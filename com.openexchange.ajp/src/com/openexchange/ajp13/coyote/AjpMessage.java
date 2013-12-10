@@ -260,7 +260,7 @@ public final class AjpMessage {
      */
     public void appendBytes(final byte[] b, final int off, final int numBytes) {
         if (pos + numBytes + 3 > buf.length) {
-            log.error("ajpmessage.overflow: numBytes=" + numBytes + ", pos=" + pos, new ArrayIndexOutOfBoundsException());
+            log.error("ajpmessage.overflow: numBytes={}, pos={}", numBytes, pos, new ArrayIndexOutOfBoundsException());
             if (log.isDebugEnabled()) {
                 dump("Overflow/coBytes");
             }
@@ -361,7 +361,7 @@ public final class AjpMessage {
     public int getBytes(final byte[] dest) {
         final int length = getInt();
         if (pos + length > buf.length) {
-            log.error("ajpmessage.read: length=" + length);
+            log.error("ajpmessage.read: length={}", length);
             return 0;
         }
 
@@ -404,14 +404,14 @@ public final class AjpMessage {
         len = getInt();
         // Verify message signature
         if ((mark != 0x1234) && (mark != 0x4142)) {
-            log.error("ajpmessage.invalid: mark=" + mark);
+            log.error("ajpmessage.invalid: mark={}", mark);
             if (log.isDebugEnabled()) {
                 dump("In: ");
             }
             return -1;
         }
         if (log.isDebugEnabled()) {
-            log.debug("Received AJP message of length " + len + ". First payload byte is: " + buf[0]);
+            log.debug("Received AJP message of length {}. First payload byte is: {}", len, buf[0]);
         }
         return len;
     }

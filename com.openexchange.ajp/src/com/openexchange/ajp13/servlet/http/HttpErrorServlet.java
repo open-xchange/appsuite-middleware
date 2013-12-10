@@ -90,7 +90,7 @@ public class HttpErrorServlet extends HttpServlet {
             final PrintWriter writer = resp.getWriter();
             writer.write(new com.openexchange.java.StringAllocator().append("<html>").append(message).append("</html>").toString());
         } catch (final IOException exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
 
     }

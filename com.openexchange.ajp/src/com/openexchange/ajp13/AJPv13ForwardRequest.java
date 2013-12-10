@@ -470,7 +470,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                     } catch (final NumberFormatException e) {
                         version = 0;
                         if (DEBUG) {
-                            LOG.debug("Version set to 0. No number value in $Version cookie: " + versionStr);
+                            LOG.debug("Version set to 0. No number value in $Version cookie: {}", versionStr);
                         }
                     }
                 }
@@ -488,7 +488,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                     continue;
                 }
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!").toString());
+                    LOG.info("Special cookie {} not handled, yet!", name);
                 }
             }
             if (prevEnd != -1) {
@@ -674,7 +674,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                              * Different JVM route detected -> Discard
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id).toString());
+                                LOG.debug("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: {}", id);
                             }
                             current.setPath("/");
                             current.setMaxAge(0); // delete
@@ -690,7 +690,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()).toString());
+                                LOG.debug("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: {}", current.getValue());
                             }
                             current.setPath("/");
                             current.setMaxAge(0); // delete
@@ -711,7 +711,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                              * But this host defines a JVM route
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()).toString());
+                                LOG.debug("\n\tMissing JVM route in JESSIONID cookie{}", current.getValue());
                             }
                             current.setPath("/");
                             current.setMaxAge(0); // delete
@@ -727,7 +727,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                              * Invalid cookie
                              */
                             if (DEBUG) {
-                                LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()).toString());
+                                LOG.debug("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: {}", current.getValue());
                             }
                             current.setPath("/");
                             current.setMaxAge(0); // delete

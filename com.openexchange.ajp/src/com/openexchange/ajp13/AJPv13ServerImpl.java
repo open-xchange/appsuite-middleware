@@ -260,7 +260,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                     keepOnRunning = false;
                 }
             } catch (final IOException ex) {
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
                 keepOnRunning = false;
             }
         }

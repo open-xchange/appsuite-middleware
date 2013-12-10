@@ -128,7 +128,7 @@ public final class AJPv13Config implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         init();
@@ -137,7 +137,7 @@ public final class AJPv13Config implements Initialization {
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
+            LOG.error("{} cannot be stopped since it has no been started before", this.getClass().getName());
             return;
         }
         reset();
@@ -190,7 +190,7 @@ public final class AJPv13Config implements Initialization {
             final File servletConfigsFile = configService.getDirectory(servletConfigs);
             final boolean nonExisting = (null == servletConfigsFile) || !servletConfigsFile.exists() || !servletConfigsFile.isDirectory();
             if (LOG.isTraceEnabled() && nonExisting) {
-                LOG.trace(servletConfigsFile + " does not exist or is not a directory");
+                LOG.trace("{} does not exist or is not a directory", servletConfigsFile);
             }
 
             this.logForwardRequest = configService.getBoolProperty("AJP_LOG_FORWARD_REQUEST", false);
@@ -223,7 +223,7 @@ public final class AJPv13Config implements Initialization {
                     List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
                     if (!erroneousIPs.isEmpty()) {
                         if (LOG.isWarnEnabled()) {
-                            LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: " + erroneousIPs);
+                            LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
                         }
                     } else {
                         this.knownProxies = proxyCandidates;

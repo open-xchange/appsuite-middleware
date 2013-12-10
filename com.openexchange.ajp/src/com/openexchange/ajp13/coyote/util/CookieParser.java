@@ -106,7 +106,7 @@ public final class CookieParser {
                     } catch (final NumberFormatException e) {
                         version = 0;
                         if (DEBUG) {
-                            LOG.debug("Version set to 0. No number value in $Version cookie: " + versionStr);
+                            LOG.debug("Version set to 0. No number value in $Version cookie: {}", versionStr);
                         }
                     }
                 }
@@ -124,7 +124,7 @@ public final class CookieParser {
                     continue;
                 }
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new com.openexchange.java.StringAllocator(32).append("Special cookie ").append(name).append(" not handled, yet!").toString());
+                    LOG.info("Special cookie {} not handled, yet!", name);
                 }
             }
             if (prevEnd != -1) {

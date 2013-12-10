@@ -84,7 +84,7 @@ public final class AJPv13RequestBody extends AbstractAJPv13Request {
                             Long.valueOf(ajpRequestHandler.getContentLength()),
                             ajpRequestHandler.getForwardRequest());
                         ajpExc.fillInStackTrace();
-                        LOG.warn(ajpExc.getMessage(), ajpExc);
+                        LOG.warn("", ajpExc);
                     }
                     /*
                      * Set data to null to indicate that no more data is available from web server
