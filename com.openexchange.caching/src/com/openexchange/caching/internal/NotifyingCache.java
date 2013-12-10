@@ -317,7 +317,7 @@ public class NotifyingCache implements Cache, CacheListener {
     public void onEvent(Object sender, CacheEvent cacheEvent) {
         if (sender != this && null != cacheEvent) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("onEvent: " + cacheEvent);
+                LOG.debug("onEvent: {}", cacheEvent);
             }
             try {
                 switch (cacheEvent.getOperation()) {
@@ -334,10 +334,10 @@ public class NotifyingCache implements Cache, CacheListener {
                     locallyPostInvalidateEvent(cacheEvent);
                     break;
                 default:
-                    LOG.warn("Unknown cache event operation: " + cacheEvent.getOperation());
+                    LOG.warn("Unknown cache event operation: {}", cacheEvent.getOperation());
                 }
             } catch (OXException e) {
-                LOG.error("Error handling cache event: " + cacheEvent, e);
+                LOG.error("Error handling cache event: {}", cacheEvent, e);
             }
         }
     }
@@ -358,7 +358,7 @@ public class NotifyingCache implements Cache, CacheListener {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("fireInvalidateGroup: " + event);
+                LOG.debug("fireInvalidateGroup: {}", event);
             }
             eventService.notify(this, event);
         }
@@ -372,7 +372,7 @@ public class NotifyingCache implements Cache, CacheListener {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("fireInvalidate: " + event);
+                LOG.debug("fireInvalidate: {}", event);
             }
             eventService.notify(this, event);
         }

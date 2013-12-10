@@ -123,7 +123,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
             }
             out.flush();
         } catch (final Exception e) {
-            LOG.info("Problem getting byte count. Likely cause is a non serializable object." + e.getMessage());
+            LOG.info("Problem getting byte count. Likely cause is a non serializable object.{}", e.getMessage());
         } finally {
             Streams.close(out);
         }
