@@ -91,7 +91,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             doNullCheck(user);
         } catch (final InvalidDataException e2) {
             final InvalidDataException invalidDataException = new InvalidDataException(THE_GIVEN_SOURCE_USER_OBJECT_IS_NULL);
-            LOG.error(invalidDataException.getMessage(), invalidDataException);
+            LOG.error("", invalidDataException);
             throw invalidDataException;
         }
 
@@ -115,20 +115,20 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
 
             if (!tool.existsUser(src, userid.intValue())) {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + userid + " in context " + src.getId());
-                LOG.error(noSuchUserException.getMessage(), noSuchUserException);
+                LOG.error("", noSuchUserException);
                 throw noSuchUserException;
             }
             if (tool.existsUserName(dest, user.getName())) {
                 final UserExistsException userExistsExeption = new UserExistsException("User " + user.getName() + " already exists in context " + dest.getId());
-                LOG.error(userExistsExeption.getMessage(), userExistsExeption);
+                LOG.error("", userExistsExeption);
                 throw userExistsExeption;
             }
 
         } catch (final InvalidDataException e1) {
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             throw e1;
         } catch (final StorageException e1) {
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             throw e1;
         }
 
@@ -143,7 +143,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             throw new StorageException(e.getMessage());
         }
 
-        LOG.info("User " + user.getId() + " successfully copied to Context " + dest.getId() + " from Context " + src.getId());
+        LOG.info("User {} successfully copied to Context {} from Context {}", user.getId(), dest.getId(), src.getId());
 
         return new User(newUserId);
     }
