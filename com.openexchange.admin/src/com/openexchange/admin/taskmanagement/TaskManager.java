@@ -87,7 +87,7 @@ public class TaskManager {
         @Override
         protected void done() {
             TaskManager.this.runningjobs--;
-            log.debug("Removing job number " + this.id);
+            log.debug("Removing job number {}", this.id);
             finishedJobs.add(this.id);
         }
     }
@@ -100,7 +100,7 @@ public class TaskManager {
         this.prop = this.cache.getProperties();
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
         if (log.isInfoEnabled()) {
-            log.info("AdminJobExecutor: running " + threadCount + " jobs parallel");
+            log.info("AdminJobExecutor: running {} jobs parallel", threadCount);
         }
         this.executor = Executors.newFixedThreadPool(threadCount);
     }
@@ -113,7 +113,7 @@ public class TaskManager {
         final Extended<?> job = new Extended(jobcall, typeofjob, furtherinformation, ++this.lastID, cid);
         this.jobs.put(this.lastID, job);
         if (log.isDebugEnabled()) {
-        log.debug("Adding job number " + this.lastID);
+        log.debug("Adding job number {}", this.lastID);
         }
         runningjobs++;
         this.executor.execute(job);

@@ -332,7 +332,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             try {
                 cache.pushConnectionForContext(contextId, con);
             } catch (PoolException e) {
-                log.error("Error pushing connection to pool for context " + contextId + "!", e);
+                log.error("Error pushing connection to pool for context {}!", contextId, e);
             }
         }
     }
@@ -973,7 +973,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // End of JCS
 
-            log.info("User " + userId + " changed!");
+            log.info("User {} changed!", userId);
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             rollback(con);
@@ -1717,7 +1717,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final int retval = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
 
             write_ox_con.commit();
-            log.info("User " + retval + " created!");
+            log.info("User {} created!", retval);
             return retval;
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -2393,7 +2393,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     DBUtils.startTransaction(con);
                     delete(ctx, users, con);
                     for (final User user : users) {
-                        log.info("User " + user.getId() + " deleted!");
+                        log.info("User {} deleted!", user.getId());
                     }
                     con.commit();
                 } catch (final StorageException st) {

@@ -158,7 +158,7 @@ public abstract class OXCommonImpl {
         }
         if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
             final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
-            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
+            log.error("", databaseUpdateException);
             throw databaseUpdateException;
         }
     }

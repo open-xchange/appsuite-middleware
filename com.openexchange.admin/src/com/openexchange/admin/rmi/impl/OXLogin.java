@@ -84,7 +84,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         super();
         this.context = context;
         if (log.isInfoEnabled()) {
-            log.info("Class loaded: " + this.getClass().getName());
+            log.info("Class loaded: {}", this.getClass().getName());
         }
     }
 
@@ -131,7 +131,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
                             if (log.isDebugEnabled()) {
-                                log.debug("Calling getData for plugin: " + bundlename);
+                                log.debug("Calling getData for plugin: {}", bundlename);
                             }
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }

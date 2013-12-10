@@ -110,7 +110,7 @@ public class PropertyHandler {
         if ( this.allPropValues.containsKey( key ) ) {
             retString = this.allPropValues.get( key ).toString();
         } else {
-            log.error("Property '" + key + "' not found in file " + this.configdirname +"! Using fallback :" + fallBack );
+            log.error("Property '{}' not found in file {}! Using fallback :{}", key, this.configdirname, fallBack );
         }
 
         return retString;
@@ -150,7 +150,7 @@ public class PropertyHandler {
                 }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                     }
                 } else {
                     final Properties properties = service.getFile("Group.properties");
@@ -190,7 +190,7 @@ public class PropertyHandler {
                 }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                     }
                 } else {
                     final Properties properties = service.getFile("Group.properties");
@@ -206,7 +206,7 @@ public class PropertyHandler {
             retBool = Boolean.parseBoolean( this.groupPropValues.get( key ).toString() );
         } else {
             if(log.isDebugEnabled()){
-                log.debug("Property '" + key + "' not found in file 'Group.properties'! Using fallback :" + fallBack );
+                log.debug("Property '{}' not found in file 'Group.properties'! Using fallback :{}", key, fallBack );
             }
         }
 
@@ -230,7 +230,7 @@ public class PropertyHandler {
                 }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                     }
                 } else {
                     final Properties properties = service.getFile("AdminUser.properties");
@@ -271,7 +271,7 @@ public class PropertyHandler {
                 }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                     }
                 } else {
                     final Properties properties = service.getFile("AdminUser.properties");
@@ -313,7 +313,7 @@ public class PropertyHandler {
                 }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                     }
                 } else {
                     final Properties properties = service.getFile("Resource.properties");
@@ -354,7 +354,7 @@ public class PropertyHandler {
                 }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                     }
                 } else {
                     final Properties properties = service.getFile("RMI.properties");
@@ -471,7 +471,7 @@ public class PropertyHandler {
                 }
                 if (null == service) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Service '" + ConfigurationService.class.getName() + "' is missing.");
+                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                     }
                 } else {
                     final Properties properties = service.getFile("Resource.properties");
@@ -487,7 +487,7 @@ public class PropertyHandler {
             retval = this.resPropValues.get( key ).toString();
         } else {
             if(log.isDebugEnabled()){
-                log.debug("Property '" + key + "' not found in file 'Resource.properties'! Using fallback :" + fallback );
+                log.debug("Property '{}' not found in file 'Resource.properties'! Using fallback :{}", key, fallback );
             }
         }
         return retval;

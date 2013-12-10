@@ -105,7 +105,7 @@ public abstract class OXGroupStorageInterface {
                     }
                 } else {
                     final StorageException storageException = new StorageException("Property for group_storage not defined");
-                    log.error(storageException.getMessage(), storageException);
+                    log.error("", storageException);
                     throw storageException;
                 }
             }

@@ -126,9 +126,9 @@ public class Activator extends HousekeepingActivator {
 
         if (log.isInfoEnabled()) {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
-            log.info("Version: " + headers.get("Bundle-Version"));
-            log.info("Name: " + headers.get("Bundle-SymbolicName"));
-            log.info("Build: " + Version.getInstance().getVersionString());
+            log.info("Version: {}", headers.get("Bundle-Version"));
+            log.info("Name: {}", headers.get("Bundle-SymbolicName"));
+            log.info("Build: {}", Version.getInstance().getVersionString());
         }
         log.info("Admindaemon successfully started.");
 
@@ -137,12 +137,12 @@ public class Activator extends HousekeepingActivator {
             @Override
             public void serviceChanged(final ServiceEvent ev) {
                 if (log.isInfoEnabled()) {
-                    log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
+                    log.info("Service: {}, {}", ev.getServiceReference().getBundle().getSymbolicName(), ev.getType());
                 }
                 switch (ev.getType()) {
                     case ServiceEvent.REGISTERED:
                         if(log.isInfoEnabled()){
-                            log.info(ev.getServiceReference().getBundle().getSymbolicName() + " registered service");
+                            log.info("{} registered service", ev.getServiceReference().getBundle().getSymbolicName());
                         }
                         break;
                     default:

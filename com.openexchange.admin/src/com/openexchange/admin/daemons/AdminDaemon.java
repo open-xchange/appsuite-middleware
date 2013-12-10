@@ -365,7 +365,7 @@ public class AdminDaemon {
                         if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
                             final Object obj = context.getService(servicereference);
                             if (null == obj) {
-                                LOG.error("Missing service " + serviceName + " in bundle " + bundleSymbolicName);
+                                LOG.error("Missing service {} in bundle {}", serviceName, bundleSymbolicName);
                             }
                             try {
                                 return clazz.cast(obj);

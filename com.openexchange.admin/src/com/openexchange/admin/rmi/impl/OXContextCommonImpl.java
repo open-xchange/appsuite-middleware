@@ -123,14 +123,14 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             doNullCheck(ctx,admin_user);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + admin_user);
+            log.debug("{} - {}", ctx, admin_user);
         }
 
         try {
@@ -206,7 +206,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                         if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
                             final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
                             if (log.isDebugEnabled()) {
-                                log.debug("Calling " + method + " for plugin: " + bundlename);
+                                log.debug("Calling {} for plugin: {}", method, bundlename);
                             }
                             try {
                                 final Class[] classes = new Class[args.length];
@@ -225,19 +225,19 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                                     args[0] = ret;
                                 }
                             } catch (final SecurityException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             } catch (final NoSuchMethodException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             } catch (final IllegalArgumentException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             } catch (final IllegalAccessException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             } catch (final InvocationTargetException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             }
                         }

@@ -103,7 +103,7 @@ public abstract class OXResourceStorageInterface {
                     }
                 } else {
                     final StorageException storageException = new StorageException("Property for resource_storage not defined");
-                    log.error(storageException.getMessage(), storageException);
+                    log.error("", storageException);
                     throw storageException;
                 }
             }

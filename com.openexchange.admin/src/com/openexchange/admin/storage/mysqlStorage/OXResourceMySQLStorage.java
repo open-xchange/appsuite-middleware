@@ -188,7 +188,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             if (null == resourceName) {
                 log.info("Resource changed!");
             } else {
-                log.info("Resource " + resourceName + " changed!");
+                log.info("Resource {} changed!", resourceName);
             }
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -274,7 +274,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_insert.executeUpdate();
 
             con.commit();
-            log.info("Resource " + resID + " created!");
+            log.info("Resource {} created!", resID);
             return resID;
         }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);

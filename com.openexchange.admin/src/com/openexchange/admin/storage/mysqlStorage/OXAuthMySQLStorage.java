@@ -119,7 +119,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         if (!rs.next()) {
                             // auth failed , admin user not found in context
                             if (log.isDebugEnabled()) {
-                                log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getId() + "\"!");
+                                log.debug("Admin user \"{}\" not found in context \"{}\"!", authdata.getLogin(), ctx.getId());
                             }
                             return false;
                         } else {
@@ -133,10 +133,10 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                             return false;
                         }
                     } catch (final SQLException sql) {
-                        log.error(sql.getMessage(), sql);
+                        log.error("", sql);
                         throw new StorageException(sql.toString());
                     } catch (final PoolException ex) {
-                        log.error(ex.getMessage(), ex);
+                        log.error("", ex);
                         throw new StorageException(ex);
                     } catch (NoSuchAlgorithmException e) {
                         log.error("", e);
@@ -179,7 +179,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 //                            return true;
 //                        } else {
 //                            if (log.isDebugEnabled()) {
-//                                log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+//                                log.debug("Password for admin user \"{}\" did not match!", authdata.getLogin());
 //                            }
 //                            return false;
 //                        }
@@ -219,7 +219,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 if (!rs.next()) {
                     // auth failed , user not found in context
                     if (log.isDebugEnabled()) {
-                        log.debug("User \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getId() + "\"!");
+                        log.debug("User \"{}\" not found in context \"{}\"!", authdata.getLogin(), ctx.getId());
                     }
                     return false;
                 } else {
@@ -230,16 +230,16 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         return true;
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Password for ser \"" + authdata.getLogin() + "\" did not match!");
+                            log.debug("Password for ser \"{}\" did not match!", authdata.getLogin());
                         }
                         return false;
                     }
                 }
             } catch (final SQLException sql) {
-                log.error(sql.getMessage(), sql);
+                log.error("", sql);
                 throw new StorageException(sql.toString());
             } catch (final PoolException ex) {
-                log.error(ex.getMessage(), ex);
+                log.error("", ex);
                 throw new StorageException(ex);
             } catch (NoSuchAlgorithmException e) {
                 log.error("", e);

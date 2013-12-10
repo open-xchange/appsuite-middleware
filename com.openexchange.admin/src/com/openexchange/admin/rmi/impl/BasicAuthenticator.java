@@ -128,7 +128,7 @@ public class BasicAuthenticator extends OXCommonImpl {
                             if (null != property && property.toString().equalsIgnoreCase("BasicAuthenticator")) {
                                 final BasicAuthenticatorPluginInterface authplug = (BasicAuthenticatorPluginInterface) this.context.getService(servicereference);
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Calling doAuthentication for plugin: " + bundlename);
+                                    LOG.debug("Calling doAuthentication for plugin: {}", bundlename);
                                 }
                                 authplug.doAuthentication(authdata);
                                 // leave
@@ -146,7 +146,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             }
             if(!fileAuth.authenticate(authdata)){
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
-                LOG.error("Master authentication for user: " + authdata.getLogin(), invalidCredentialsException);
+                LOG.error("Master authentication for user: {}", authdata.getLogin(), invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -180,8 +180,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
-                LOG.error("Requested context " + ctx.getId()
-                        + " does not exist!", invalidCredentialsException);
+                LOG.error("Requested context {} does not exist!", ctx.getId(), invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -191,7 +190,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             if (!sqlAuth.authenticate(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
-                LOG.error("Admin authentication for user " + authdata.getLogin(),invalidCredentialsException);
+                LOG.error("Admin authentication for user {}", authdata.getLogin(),invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -212,8 +211,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                     "Authentication failed for user " + authdata.getLogin());
-            LOG.error("Requested context " + ctx.getId()
-                    + " does not exist!", invalidCredentialsException);
+            LOG.error("Requested context {} does not exist!", ctx.getId(), invalidCredentialsException);
             throw invalidCredentialsException;
         }
 

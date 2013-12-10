@@ -123,7 +123,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
         if (log.isInfoEnabled()) {
-            log.info("Class loaded: " + this.getClass().getName());
+            log.info("Class loaded: {}", this.getClass().getName());
         }
         basicauth = new BasicAuthenticator();
     }
@@ -152,8 +152,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + grp + " - " + Arrays.toString(members)
-                + " - " + auth);
+            log.debug("{} - {} - {} - {}", ctx, grp, Arrays.toString(members), auth);
         }
 
         checkContextAndSchema(ctx);
@@ -215,12 +214,12 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e1) {
-            log.error(e1.getMessage(), e1);
+            log.error("", e1);
             throw e1;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + grp + " - " + auth);
+            log.debug("{} - {} - {}", ctx, grp, auth);
         }
 
         try {
@@ -294,7 +293,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         } catch (final EnforceableDataObjectException e2) {
             final InvalidDataException invalidDataException = new InvalidDataException(e2.getMessage());
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         } catch (final StorageException e) {
             log.error("", e);
@@ -306,7 +305,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.error("", e);
             throw e;
         } catch (final InvalidDataException e1) {
-            log.error(e1.getMessage(), e1);
+            log.error("", e1);
             throw e1;
         } catch (final NoSuchUserException e) {
             log.error("", e);
@@ -328,11 +327,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                             final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling change for plugin: " + bundlename);
+                                    log.debug("Calling change for plugin: {}", bundlename);
                                 }
                                 oxgroup.change(ctx, grp, auth);
                             } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: " + bundlename, e);
+                                log.error("Error while calling change for plugin: {}", bundlename, e);
                                 throw new StorageException(e);
                             }
                         }
@@ -358,12 +357,12 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e2) {
-            log.error(e2.getMessage(), e2);
+            log.error("", e2);
             throw e2;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + grp + " - " + auth);
+            log.debug("{} - {} - {}", ctx, grp, auth);
         }
 
         checkContextAndSchema(ctx);
@@ -394,7 +393,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 }
             }
         } catch (final InvalidDataException e2) {
-            log.error(e2.getMessage(), e2);
+            log.error("", e2);
             throw e2;
         } catch (final NoSuchUserException e) {
             log.error("", e);
@@ -424,8 +423,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                                     .getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling create for plugin: "
-                                            + bundlename);
+                                    log.debug("Calling create for plugin: {}", bundlename);
                                 }
                                 oxgroup.create(ctx, grp, auth);
                                 interfacelist.add(oxgroup);
@@ -555,7 +553,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
 
             if (log.isDebugEnabled()) {
-                log.debug(ctx + " - " + Arrays.toString(grp) + " - " + auth);
+                log.debug("{} - {} - {}", ctx, Arrays.toString(grp), auth);
             }
             checkContextAndSchema(ctx);
 
@@ -605,8 +603,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                                     .getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling delete for plugin: "
-                                            + bundlename);
+                                    log.debug("Calling delete for plugin: {}", bundlename);
                                 }
                                 oxgroup.delete(ctx, grp, auth);
                                 interfacelist.add(oxgroup);
@@ -714,8 +711,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                             final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context
                                     .getService(servicereference);
                             if (log.isDebugEnabled()) {
-                                log.debug("Calling getData for plugin: "
-                                        + bundlename);
+                                log.debug("Calling getData for plugin: {}", bundlename);
                             }
                             retgrp = oxgroupplugin.get(ctx, retgrp, auth);
                         }
@@ -743,7 +739,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             if (log.isDebugEnabled()) {
-                log.debug(ctx + " - " + Arrays.toString(groups) + " - " + auth);
+                log.debug("{} - {} - {}", ctx, Arrays.toString(groups), auth);
             }
             checkContextAndSchema(ctx);
 
@@ -802,8 +798,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                             final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context
                                     .getService(servicereference);
                             if (log.isDebugEnabled()) {
-                                log.debug("Calling get for plugin: "
-                                        + bundlename);
+                                log.debug("Calling get for plugin: {}", bundlename);
                             }
                             for (Group group : retval) {
                                 group = oxgroupplugin.get(ctx, group, auth);
@@ -824,7 +819,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         auth = auth == null ? new Credentials("","") : auth;
         basicauth.doAuthentication(auth, ctx);
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + auth);
+            log.debug("{} - {}", ctx, auth);
         }
         checkContextAndSchema(ctx);
 
@@ -899,7 +894,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + pattern + " - " + auth);
+            log.debug("{} - {} - {}", ctx, pattern, auth);
         }
 
         checkContextAndSchema(ctx);
@@ -937,7 +932,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + usr + " - " + auth);
+            log.debug("{} - {} - {}", ctx, usr, auth);
         }
 
         checkContextAndSchema(ctx);

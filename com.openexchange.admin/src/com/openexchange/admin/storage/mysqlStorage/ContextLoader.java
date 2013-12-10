@@ -164,7 +164,7 @@ public class ContextLoader implements Filter<Integer, Context> {
             if (failOnMissing) {
                 throw new StorageException("Can not load the following contexts: " + missing.toString());
             }
-            LOG.warn("Can not load the following contexts: " + missing.toString());
+            LOG.warn("Can not load the following contexts: {}", missing);
         }
         return retval;
     }

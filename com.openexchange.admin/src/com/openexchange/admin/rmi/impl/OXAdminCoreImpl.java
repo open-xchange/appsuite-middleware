@@ -83,9 +83,9 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
             return true;
         }
         if (!fragments.isEmpty()) {
-            log.info("System contains the following fragments which will not be started: " + fragments);
+            log.info("System contains the following fragments which will not be started: {}", fragments);
         }
-        log.error("The following bundles aren't started: " + notStarted);
+        log.error("The following bundles aren't started: {}", notStarted);
         return false;
     }
 }

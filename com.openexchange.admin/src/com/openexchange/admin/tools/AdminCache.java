@@ -560,7 +560,7 @@ public class AdminCache {
             } else if (pwmech.equalsIgnoreCase(PasswordMechObject.BCRYPT_MECH)) {
                 passwordMech = PasswordMechObject.BCRYPT_MECH;
             } else {
-                log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
+                log.warn("WARNING: unknown password mechanism {} using SHA", pwmech);
                 passwordMech = PasswordMechObject.SHA_MECH;
             }
             user.setPasswordMech(passwordMech);
@@ -573,7 +573,7 @@ public class AdminCache {
         } else if (PasswordMechObject.BCRYPT_MECH.equals(passwordMech)) {
             passwd = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         } else {
-            log.error("unsupported password mechanism: " + passwordMech);
+            log.error("unsupported password mechanism: {}", passwordMech);
             throw new StorageException("unsupported password mechanism: " + passwordMech);
         }
         return passwd;
@@ -586,10 +586,10 @@ public class AdminCache {
         final String context_auth_disabled = this.prop.getProp("CONTEXT_AUTHENTICATION_DISABLED", "false"); // fallback is auth
 
         masterAuthenticationDisabled = Boolean.parseBoolean(master_auth_disabled);
-        log.debug("MasterAuthentication mechanism disabled: " + masterAuthenticationDisabled);
+        log.debug("MasterAuthentication mechanism disabled: {}", masterAuthenticationDisabled);
 
         contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
-        log.debug("ContextAuthentication mechanism disabled: " + contextAuthenticationDisabled);
+        log.debug("ContextAuthentication mechanism disabled: {}", contextAuthenticationDisabled);
     }
 
     private void readMasterCredentials(final ConfigurationService service) throws OXGenericException {

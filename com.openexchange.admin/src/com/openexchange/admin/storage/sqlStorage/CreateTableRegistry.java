@@ -83,13 +83,13 @@ public class CreateTableRegistry {
 
     public void addCreateTable(CreateTableService service) {
         if (!createTables.add(service)) {
-            LOG.warn("CreateTableService " + service.getClass().getName() + " found twice.");
+            LOG.warn("CreateTableService {} found twice.", service.getClass().getName());
         }
     }
 
     public void removeCreateTable(CreateTableService service) {
         if (!createTables.remove(service)) {
-            LOG.warn("Unkown CreateTableService " + service.getClass().getName() + " removed.");
+            LOG.warn("Unkown CreateTableService {} removed.", service.getClass().getName());
         }
     }
 
