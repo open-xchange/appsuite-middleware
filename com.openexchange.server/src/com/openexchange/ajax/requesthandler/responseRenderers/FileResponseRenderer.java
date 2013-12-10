@@ -116,7 +116,6 @@ import com.openexchange.tools.session.ServerSession;
 public class FileResponseRenderer implements ResponseRenderer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /** The default in-memory threshold of 1MB. */
     private static final int DEFAULT_IN_MEMORY_THRESHOLD = 1024 * 1024; // 1MB
@@ -848,9 +847,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 throw ioe;
             }
             if (null == transformed) {
-                if (DEBUG) {
                     LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
-                }
                 return handleFailure(file, stream, markSupported);
             }
             // Return immediately if not cacheable
@@ -899,15 +896,15 @@ public class FileResponseRenderer implements ResponseRenderer {
             // Return
             return new FileHolder(new ByteArrayInputStreamClosure(bytes), size, contentType, fileName);
         } catch (final RuntimeException e) {
-            if (DEBUG && file.repetitive()) {
+            if (LOG.isDebugEnabled() && file.repetitive()) {
                 try {
                     final File tmpFile = writeBrokenImage2Disk(file);
                     LOG.error("Unable to transform image from " + file.getName() + ". Unparseable image file is written to disk at: " + tmpFile.getPath());
                 } catch (final Exception x) {
-                    LOG.error("Unable to transform image from " + file.getName());
+                    LOG.error("Unable to transform image from {}", file.getName());
                 }
             } else {
-                LOG.error("Unable to transform image from " + file.getName());
+                LOG.error("Unable to transform image from {}", file.getName());
             }
             return file.repetitive() ? file : null;
         }
