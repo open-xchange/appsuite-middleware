@@ -118,7 +118,7 @@ public class GetArisingReminder {
                     continue;
                 } catch (final SQLException e) {
                     final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                    LOG.debug(re.getMessage(), re);
+                    LOG.debug("", re);
                     continue;
                 }
                 if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE && (!appointment.containsUntil() || appointment.getUntil().after(now))) {

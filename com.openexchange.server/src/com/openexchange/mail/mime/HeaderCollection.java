@@ -441,7 +441,7 @@ public class HeaderCollection implements Serializable {
             if (DEBUG) {
                 final IllegalArgumentException tmp =
                     new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
-                LOG.debug(tmp.getMessage(), tmp);
+                LOG.debug("", tmp);
             }
             // Do nothing...
             return;

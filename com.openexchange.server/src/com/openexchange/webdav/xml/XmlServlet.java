@@ -350,7 +350,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
             } else if (exc.isGeneric(Generic.CONFLICT)) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(exc.getMessage(), exc);
+                    LOG.error("", exc);
                 }
                 doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
             } else if (OXExceptionConstants.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {

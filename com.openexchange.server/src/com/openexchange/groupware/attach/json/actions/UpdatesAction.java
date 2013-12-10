@@ -209,7 +209,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
                 try {
                     iter.close();
                 } catch (final OXException e1) {
-                    LOG.error(e1.getMessage(), e1);
+                    LOG.error("", e1);
                 }
             }
             if (iter2 != null) {

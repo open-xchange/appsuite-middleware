@@ -407,7 +407,7 @@ public class DispatcherServlet extends SessionServlet {
             }
             // Handle other OXExceptions
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
-                LOG.error(new StringAllocator("Unexpected error: '").append(e.getMessage()).append('\'').toString(), e);
+                LOG.error("Unexpected error: '{}{}", e.getMessage(), '\'', e);
             } else if (e.isLoggable(LogLevel.ERROR)) {
                 // Ignore special "folder not found" error
                 if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {

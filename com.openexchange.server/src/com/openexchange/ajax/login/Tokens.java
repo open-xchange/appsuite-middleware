@@ -143,7 +143,7 @@ public final class Tokens implements LoginRequestHandler {
             response.setData(json);
         } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         Tools.disableCaching(resp);

@@ -193,8 +193,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
             if (DEBUG) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("List.doList() took ").append(duration).append("msec for parent folder: ").append(
-                    parentId).toString());
+                LOG.debug("List.doList() took {}msec for parent folder: {}", duration, parentId);
             }
             return ret;
         } catch (final OXException e) {
@@ -348,9 +347,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         try {
                                             subfolder = tmp.getFolder(treeId, id, newParameters);
                                         } catch (final OXException e) {
-                                            log.warn(
-                                                new com.openexchange.java.StringAllocator(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                                    "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
+                                            log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}{}", id, treeId, tmp.getClass().getSimpleName(), '"',
                                                 e);
                                             addWarning(e);
                                             continue NextIndex;
@@ -611,9 +608,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 try {
                                     subfolder = tmp.getFolder(treeId, id, newParameters);
                                 } catch (final OXException e) {
-                                    log.warn(
-                                        new com.openexchange.java.StringAllocator(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                            "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
+                                    log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}{}", id, treeId, tmp.getClass().getSimpleName(), '"',
                                         e);
                                     addWarning(e);
                                     continue NextIndex;

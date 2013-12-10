@@ -159,8 +159,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
             }
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive attachment tokens for user ").append(userId).append(" in context ").append(
-                contextId).toString());
+            LOG.debug("Cleaned user-sensitive attachment tokens for user {} in context {}", userId, contextId);
         }
     }
 

@@ -315,7 +315,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     public void setParameter(final String name, final String value) {
         if ((null == name) || containsSpecial(name)) {
             final OXException me = MailExceptionCode.INVALID_PARAMETER.create(name);
-            LOG.error(me.getMessage(), me);
+            LOG.error("", me);
             return;
         }
         parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
@@ -330,7 +330,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     public void addParameter(final String name, final String value) {
         if ((null == name) || containsSpecial(name)) {
             final OXException me = MailExceptionCode.INVALID_PARAMETER.create(name);
-            LOG.error(me.getMessage(), me);
+            LOG.error("", me);
             return;
         }
         final String key = name.toLowerCase(Locale.ENGLISH);

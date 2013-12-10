@@ -121,12 +121,12 @@ public class UUEncodedBodyPart {
                 /*
                  * there are no more tokens in this tokenizer's string
                  */
-                LOG.error(nsee.getMessage(), nsee);
+                LOG.error("", nsee);
             } catch (final NumberFormatException nfe) {
                 /*
                  * possibleFileSize was non-numeric
                  */
-                LOG.error(nfe.getMessage(), nfe);
+                LOG.error("", nfe);
             }
         }
         return false;

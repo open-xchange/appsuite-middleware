@@ -445,10 +445,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private InputStream getRawInputStream(final Exception e) throws MessagingException, OXException {
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(
-                    new com.openexchange.java.StringAllocator(256).append("Part's input stream could not be obtained: ").append(
-                        e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
-                        ". Trying to read from part's raw input stream instead").toString(),
+                LOG.debug("Part's input stream could not be obtained: {}. Trying to read from part's raw input stream instead", e.getMessage() == null ? "<no error message given>" : e.getMessage(),
                     e);
             }
             final Part part = this.part;
@@ -521,13 +518,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             this.multipart = multipart;
             return multipart.getCount();
         } catch (final IOException e1) {
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             /*
              * Throw original mail exception
              */
             throw e;
         } catch (final MessagingException e1) {
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             /*
              * Throw original mail exception
              */
@@ -1065,9 +1062,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     } catch (final ClassCastException e) {
                         // Cast to javax.mail.Multipart failed
-                        LOG.debug(new com.openexchange.java.StringAllocator(256).append(
-                            "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
-                            e.getMessage()).toString());
+                        LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but {}", e.getMessage());
                         throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
                     }
                 }

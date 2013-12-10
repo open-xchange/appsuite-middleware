@@ -243,7 +243,7 @@ public class APIResponseRenderer implements ResponseRenderer {
             try {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
             } catch (final IOException ioe) {
-                LOG.error(ioe.getMessage(), ioe);
+                LOG.error("", ioe);
             }
         } catch (final IOException e) {
             LOG.error("", e);

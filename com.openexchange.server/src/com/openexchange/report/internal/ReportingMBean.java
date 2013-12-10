@@ -411,7 +411,7 @@ public class ReportingMBean implements DynamicMBean {
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             final Exception wrapMe = new Exception(t.getMessage());
             throw new MBeanException(wrapMe);
         }

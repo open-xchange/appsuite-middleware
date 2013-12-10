@@ -1237,9 +1237,7 @@ public final class MimeMessageUtility {
                     throw e;
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(
-                        new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed, ").append(
-                            "using plain addresses' string representation instead.").toString(),
+                    LOG.debug("Internet addresses could not be properly parsed, using plain addresses' string representation instead.",
                         e);
                 }
                 addrs = PlainTextAddress.getAddresses(splitAddrs(al).toArray(new String[0]));
@@ -2068,9 +2066,7 @@ public final class MimeMessageUtility {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "ISO-8859-1";
             if (WARN) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(
-                        charset).append("\". Using fallback charset \"").append(fallback).append("\" instead.").toString(),
+                LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback,
                     e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);

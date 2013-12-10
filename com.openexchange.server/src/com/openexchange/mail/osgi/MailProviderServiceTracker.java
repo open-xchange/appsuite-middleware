@@ -89,11 +89,9 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
              * TODO: Clarify if proxy object is reasonable or if service itself should be registered
              */
             if (MailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
-                LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                    "' successfully registered").toString());
+                LOG.info("Mail provider for protocol '{}' successfully registered", protocol);
             } else {
-                LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                    "' could not be added.").append(" Another provider which supports the protocol has already been registered.").toString());
+                LOG.warn("Mail provider for protocol '{}' could not be added. Another provider which supports the protocol has already been registered.", protocol);
                 context.ungetService(reference);
                 return null;
             }
@@ -117,8 +115,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
                 try {
                     final MailProvider provider = service;
                     MailProviderRegistry.unregisterMailProvider(provider);
-                    LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
-                        "' successfully unregistered").toString());
+                    LOG.info("Mail provider for protocol '{}' successfully unregistered", provider.getProtocol());
                 } catch (final OXException e) {
                     LOG.error("", e);
                 }

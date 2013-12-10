@@ -247,8 +247,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                     } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
                         final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
                         if (f.exists() && !f.delete()) {
-                            LOG.warn(new com.openexchange.java.StringAllocator().append("Temporary store file '").append(f.getName()).append(
-                                "' could not be deleted.").toString());
+                            LOG.warn("Temporary store file '{}' could not be deleted.", f.getName());
                         }
                     }
                 }

@@ -143,8 +143,7 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
                     }
                 }
             } catch (final SQLException e) {
-                LOG.error(
-                    new StringBuilder("Problem adding index ").append(name).append(" on table ").append(table).append('.').toString(),
+                LOG.error("Problem adding index {} on table {}{}", name, table, '.',
                     e);
             }
         }

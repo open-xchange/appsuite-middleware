@@ -1042,7 +1042,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             try {
                 encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
             } catch (final UnsupportedEncodingException ex) {
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
             }
         }
 
@@ -1067,7 +1067,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                     try {
                         encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
                     } catch (final UnsupportedEncodingException ex) {
-                        LOG.error(ex.getMessage(), ex);
+                        LOG.error("", ex);
                     }
                 }
 

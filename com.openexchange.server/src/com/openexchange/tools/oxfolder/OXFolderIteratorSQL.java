@@ -624,7 +624,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -751,7 +751,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -854,7 +854,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -960,7 +960,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -1054,7 +1054,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -1144,7 +1144,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -1274,7 +1274,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -1381,7 +1381,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -1452,7 +1452,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -1592,7 +1592,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -1972,7 +1972,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -2065,7 +2065,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -2149,7 +2149,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -2213,7 +2213,7 @@ public final class OXFolderIteratorSQL {
 
             if (DEBUG) {
                 final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
             }
 
             rs = executeQuery(stmt);
@@ -2344,8 +2344,7 @@ public final class OXFolderIteratorSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }

@@ -367,7 +367,7 @@ public class MailAttachment extends AJAXServlet {
             callbackError(resp, outSelected, e);
         } catch (final Exception e) {
             final OXException exc = getWrappingOXException(e);
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
             callbackError(resp, outSelected, exc);
         }
     }
@@ -414,16 +414,16 @@ public class MailAttachment extends AJAXServlet {
             writer.flush();
         } catch (final UnsupportedEncodingException uee) {
             uee.initCause(e);
-            LOG.error(uee.getMessage(), uee);
+            LOG.error("", uee);
         } catch (final IOException ioe) {
             ioe.initCause(e);
-            LOG.error(ioe.getMessage(), ioe);
+            LOG.error("", ioe);
         } catch (final IllegalStateException ise) {
             ise.initCause(e);
-            LOG.error(ise.getMessage(), ise);
+            LOG.error("", ise);
         } catch (final JSONException je) {
             je.initCause(e);
-            LOG.error(je.getMessage(), je);
+            LOG.error("", je);
         }
     }
 

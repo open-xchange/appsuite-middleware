@@ -314,9 +314,7 @@ public final class TextFinder {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "ISO-8859-1";
             if (LOG.isWarnEnabled()) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                        "\". Using fallback charset \"").append(fallback).append("\" instead.").toString(),
+                LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback,
                     e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);

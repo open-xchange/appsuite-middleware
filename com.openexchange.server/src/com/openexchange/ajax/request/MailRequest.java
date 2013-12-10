@@ -367,8 +367,7 @@ public final class MailRequest {
             final long start = System.currentTimeMillis();
             collectObj.performOperations(session, writer, mailInterface);
             final long dur = System.currentTimeMillis() - start;
-            LOG.debug(new com.openexchange.java.StringAllocator(128).append("Multiple '").append(getOpName(collectObj.getOperation())).append(
-                "' mail request successfully performed: ").append(dur).append("msec").toString());
+            LOG.debug("Multiple '{}' mail request successfully performed: {}msec", getOpName(collectObj.getOperation()), dur);
         } else {
             collectObj.performOperations(session, writer, mailInterface);
         }

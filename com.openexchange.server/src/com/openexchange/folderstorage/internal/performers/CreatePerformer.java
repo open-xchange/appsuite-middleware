@@ -284,7 +284,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              */
             if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("Create.doCreate() took ").append(duration).append("msec for folder: ").append(newId).toString());
+                LOG.debug("Create.doCreate() took {}msec for folder: {}", duration, newId);
             }
             return newId;
         } catch (final OXException e) {

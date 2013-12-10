@@ -639,7 +639,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));
                 } catch (final Exception e1) {
                     if (log.isDebugEnabled()) {
-                        log.debug(e1.getMessage(), e1);
+                        log.debug("", e1);
                     }
                     ids = Collections.singletonList(id);
                 }

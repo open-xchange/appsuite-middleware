@@ -299,7 +299,7 @@ public final class MessageUtility {
             try {
                 return readStream(streamProvider, charset);
             } catch (final IOException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
                 return STR_EMPTY;
             }
         }

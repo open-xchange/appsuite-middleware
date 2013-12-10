@@ -1606,9 +1606,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 try {
                     next.onFolderDelete(folderID, ctx);
                 } catch (final OXException e) {
-                    LOG.error(
-                        new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
-                            "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()).toString(),
+                    LOG.error("Folder delete listener \"{}\" failed for folder {} int context {}", next.getClass().getName(), folderID, ctx.getContextId(),
                         e);
                     throw e;
                 }

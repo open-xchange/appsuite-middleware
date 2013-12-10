@@ -172,7 +172,7 @@ public final class ReminderRequest {
                 reminderSql.deleteReminder(reminder);
             }
         } catch (final OXException oxe) {
-            LOG.debug(oxe.getMessage(), oxe);
+            LOG.debug("", oxe);
             if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                 jsonArray.put(id);
                 return jsonArray;

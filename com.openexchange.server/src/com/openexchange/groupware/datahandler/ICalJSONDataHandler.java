@@ -241,7 +241,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                                 true);
                         if (recuResults.size() == 0) {
                             if (LOG.isWarnEnabled()) {
-                                LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition).toString());
+                                LOG.warn("No occurrence at position {}", recurrencePosition);
                             }
                             OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
                         }

@@ -536,7 +536,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 final Throwable t =
                     new Throwable(
                         new com.openexchange.java.StringAllocator("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
-                LOG.warn(t.getMessage(), t);
+                LOG.warn("", t);
             }
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType);
             jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), filename);

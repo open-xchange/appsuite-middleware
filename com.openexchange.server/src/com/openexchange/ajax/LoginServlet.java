@@ -309,7 +309,7 @@ public class LoginServlet extends AJAXServlet {
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 if (sessiondService == null) {
                     final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                    LOG.error(se.getMessage(), se);
+                    LOG.error("", se);
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -478,7 +478,7 @@ public class LoginServlet extends AJAXServlet {
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 if (sessiondService == null) {
                     final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                    LOG.error(se.getMessage(), se);
+                    LOG.error("", se);
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }

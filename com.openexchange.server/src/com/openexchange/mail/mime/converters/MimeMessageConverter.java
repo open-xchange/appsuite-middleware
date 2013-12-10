@@ -1990,24 +1990,15 @@ public final class MimeMessageConverter {
                                     throw e;
                                 }
                                 // A messaging error occurred
-                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
-                                    "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
-                                    e.getMessage()).append(
-                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(), e);
+                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage(), e);
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final ClassCastException e) {
                                 // Cast to javax.mail.Multipart failed
-                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
-                                    "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
-                                    content.getClass().getName()).append(
-                                    ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but {}.\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", content.getClass().getName());
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final MessagingException e) {
                                 // A messaging error occurred
-                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
-                                    "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
-                                    e.getMessage()).append(
-                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage());
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             }
                         }
@@ -2326,17 +2317,14 @@ public final class MimeMessageConverter {
                         } else if (part instanceof MimeMessage) {
                             size = estimateSize(((MimeMessage) part).getRawInputStream(), tansferEnc);
                         } else {
-                            LOG.warn(
-                                new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                            LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(),
                                 e);
                         }
                     } catch (final IOException e1) {
-                        LOG.warn(
-                            new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                        LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(),
                             e1);
                     } catch (final MessagingException e1) {
-                        LOG.warn(
-                            new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                        LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(),
                             e1);
                     }
                 }
@@ -2867,9 +2855,7 @@ public final class MimeMessageConverter {
             return addressList.toArray(new InternetAddress[addressList.size()]);
         } catch (final AddressException e) {
             if (DEBUG) {
-                LOG.debug(
-                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
-                        "\". Using plain addresses' string representation instead.").toString(),
+                LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(),
                     e);
             }
             return getAddressesOnParseError(addressArray);
@@ -2887,9 +2873,7 @@ public final class MimeMessageConverter {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
             if (DEBUG) {
-                LOG.debug(
-                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
-                        "\". Using plain addresses' string representation instead.").toString(),
+                LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(),
                     e);
             }
             return new InternetAddress[] { new PlainTextAddress(addresses) };

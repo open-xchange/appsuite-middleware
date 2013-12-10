@@ -232,7 +232,7 @@ public class ContactMySql implements ContactSql {
         injectors.clear();
         if (DEBUG) {
             final String sql = ps.toString();
-            LOG.debug(new StringBuilder().append("\nContactSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+            LOG.debug("\nContactSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
         }
 
         return ps;
@@ -974,7 +974,7 @@ public class ContactMySql implements ContactSql {
     public void iFtrashDistributionList(final boolean delete, final int id, final int cid, final Statement smt) throws SQLException {
         if (delete) {
             if (DEBUG) {
-                LOG.debug(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ").append(cid).toString());
+                LOG.debug("DELETE from prg_dlist where intfield01 = {} AND cid = {}", id, cid);
             }
             smt.execute(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ").append(cid).toString());
         } else {

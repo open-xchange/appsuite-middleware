@@ -425,10 +425,10 @@ public final class ConfigTree {
             }
         } catch (final InstantiationException e) {
             final OXException se = SettingExceptionCodes.INIT.create(e);
-            LOG.error(se.getMessage(), se);
+            LOG.error("", se);
         } catch (final IllegalAccessException e) {
             final OXException se = SettingExceptionCodes.INIT.create(e);
-            LOG.error(se.getMessage(), se);
+            LOG.error("", se);
         }
         tree = null;
     }

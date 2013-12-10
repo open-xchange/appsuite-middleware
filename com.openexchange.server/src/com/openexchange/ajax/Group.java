@@ -104,7 +104,7 @@ public class Group extends DataServlet {
             response.setException(e);
 		} catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
 		}
 
@@ -160,7 +160,7 @@ public class Group extends DataServlet {
             response.setException(e);
 		} catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
 		}
 

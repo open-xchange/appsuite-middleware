@@ -132,18 +132,18 @@ public class SyncServlet extends PermissionServlet {
 			try {
 				ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
 			} catch (final JSONException e1) {
-				LOG.error(e1.getMessage(), e1);
+				LOG.error("", e1);
 			}
 		} catch (final Exception e) {
 			final OXException wrapper = getWrappingOXException(e);
-			LOG.error(wrapper.getMessage(), wrapper);
+			LOG.error("", wrapper);
 			final Writer writer = resp.getWriter();
 			final Response response = new Response();
 			response.setException(wrapper);
 			try {
 				ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
 			} catch (final JSONException e1) {
-				LOG.error(e1.getMessage(), e1);
+				LOG.error("", e1);
 			}
 		}
 	}
@@ -220,7 +220,7 @@ public class SyncServlet extends PermissionServlet {
 							 * to be deleted
 							 */
 							if (LOG.isWarnEnabled()) {
-								LOG.warn(exc.getMessage(), exc);
+								LOG.warn("", exc);
 							}
 							continue NextId;
 						}
@@ -262,7 +262,7 @@ public class SyncServlet extends PermissionServlet {
 			}
 		} catch (final Exception e) {
 			final OXException wrapper = getWrappingOXException(e);
-			LOG.error(wrapper.getMessage(), wrapper);
+			LOG.error("", wrapper);
 			response.setException(wrapper);
 		}
 		/*
@@ -281,7 +281,7 @@ public class SyncServlet extends PermissionServlet {
 	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e, final Session session)
 			throws IOException {
 		final OXException wrapper = getWrappingOXException(e);
-		LOG.error(wrapper.getMessage(), wrapper);
+		LOG.error("", wrapper);
 		writeErrorResponse(resp, wrapper, session);
 	}
 
@@ -292,7 +292,7 @@ public class SyncServlet extends PermissionServlet {
 		try {
 			ResponseWriter.write(response, writer, localeFrom(session));
 		} catch (final JSONException e1) {
-			LOG.error(e1.getMessage(), e1);
+			LOG.error("", e1);
 		}
 	}
 

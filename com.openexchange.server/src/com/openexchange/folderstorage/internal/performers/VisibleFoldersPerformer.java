@@ -278,9 +278,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     try {
                                         subfolder = tmp.getFolder(treeId, id, newParameters);
                                     } catch (final OXException e) {
-                                        log.warn(
-                                            new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                                "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
+                                        log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}{}", id, treeId, tmp.getClass().getSimpleName(), '"',
                                             e);
                                         addWarning(e);
                                         continue NextIndex;
@@ -369,8 +367,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             }
             if (DEBUG) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("VisibleSubfoldersPerformer.doVisibleSubfolders() took ").append(duration).append(
-                    "msec").toString());
+                LOG.debug("VisibleSubfoldersPerformer.doVisibleSubfolders() took {}msec", duration);
             }
             return ret;
         } catch (final OXException e) {

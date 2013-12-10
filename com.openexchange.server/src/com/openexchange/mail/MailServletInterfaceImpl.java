@@ -2890,8 +2890,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
         if (DEBUG_ENABLED) {
-            LOG.debug(new com.openexchange.java.StringAllocator(128).append("Mail copy (").append(retval.toString()).append(
-                ") appended in ").append(System.currentTimeMillis() - start).append("msec").toString());
+            LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);
         }
         return retval;
     }

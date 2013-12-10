@@ -157,7 +157,7 @@ public final class MailSessionEventHandler implements EventHandler {
                 LOG.error("", e);
             }
             if (DEBUG) {
-                LOG.debug(new com.openexchange.java.StringAllocator("All session-related caches cleared for removed session ").append(session.getSessionID()).toString());
+                LOG.debug("All session-related caches cleared for removed session {}", session.getSessionID());
             }
             /*
              * Pooled events: Last session removed?
@@ -168,8 +168,7 @@ public final class MailSessionEventHandler implements EventHandler {
                 if (null != eventPool) {
                     eventPool.removeByUser(userId, contextId);
                     if (DEBUG) {
-                        LOG.debug(new com.openexchange.java.StringAllocator("Removed all pooled mail events for user ").append(userId).append(" in context ").append(
-                            contextId).toString());
+                        LOG.debug("Removed all pooled mail events for user {} in context {}", userId, contextId);
                     }
                 }
             }

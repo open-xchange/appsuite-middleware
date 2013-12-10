@@ -127,7 +127,7 @@ public final class EventQueue {
                     }
                 }
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
         }
 
@@ -263,7 +263,7 @@ public final class EventQueue {
             throw new OXException().setLogMessage("Event system is being shut down and therefore does not accept new events.");
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("add EventObject: ").append(eventObj).toString());
+            LOG.debug("add EventObject: {}", eventObj);
         }
 
         if (!isEnabled) {
@@ -345,7 +345,7 @@ public final class EventQueue {
                 try {
                     next.appointmentCreated(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -354,7 +354,7 @@ public final class EventQueue {
                 try {
                     next.appointmentModified(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -363,7 +363,7 @@ public final class EventQueue {
                 try {
                     next.appointmentDeleted(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -372,7 +372,7 @@ public final class EventQueue {
                 try {
                     next.appointmentAccepted(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -381,7 +381,7 @@ public final class EventQueue {
                 try {
                     next.appointmentDeclined(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -390,7 +390,7 @@ public final class EventQueue {
                 try {
                     next.appointmentTentativelyAccepted(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -412,7 +412,7 @@ public final class EventQueue {
                 try {
                     next.contactCreated(contact, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -421,7 +421,7 @@ public final class EventQueue {
                 try {
                     next.contactModified(contact, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -430,7 +430,7 @@ public final class EventQueue {
                 try {
                     next.contactDeleted(contact, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -452,7 +452,7 @@ public final class EventQueue {
                 try {
                     next.taskCreated(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -461,7 +461,7 @@ public final class EventQueue {
                 try {
                     next.taskModified(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -470,7 +470,7 @@ public final class EventQueue {
                 try {
                     next.taskDeleted(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -479,7 +479,7 @@ public final class EventQueue {
                 try {
                     next.taskAccepted(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -488,7 +488,7 @@ public final class EventQueue {
                 try {
                     next.taskDeclined(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -497,7 +497,7 @@ public final class EventQueue {
                 try {
                     next.taskTentativelyAccepted(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -519,7 +519,7 @@ public final class EventQueue {
                 try {
                     next.folderCreated(folderObject, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -528,7 +528,7 @@ public final class EventQueue {
                 try {
                     next.folderModified(folderObject, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -537,7 +537,7 @@ public final class EventQueue {
                 try {
                     next.folderDeleted(folderObject, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -559,7 +559,7 @@ public final class EventQueue {
 //                try {
 //                    next.infoitemCreated(documentMetadata, session);
 //                } catch (final Throwable t) {
-//                    LOG.error(t.getMessage(), t);
+//                    LOG.error("", t);
 //                }
 //            }
 //            break;
@@ -568,7 +568,7 @@ public final class EventQueue {
 //                try {
 //                    next.infoitemModified(documentMetadata, session);
 //                } catch (final Throwable t) {
-//                    LOG.error(t.getMessage(), t);
+//                    LOG.error("", t);
 //                }
 //            }
 //            break;
@@ -577,7 +577,7 @@ public final class EventQueue {
 //                try {
 //                    next.infoitemDeleted(documentMetadata, session);
 //                } catch (final Throwable t) {
-//                    LOG.error(t.getMessage(), t);
+//                    LOG.error("", t);
 //                }
 //            }
 //            break;

@@ -148,7 +148,7 @@ public class DefaultBodyParser implements BodyParser {
      */
     protected void hookHandleIOException(final IOException ioe) throws OXException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug(ioe.getMessage(), ioe);
+            LOG.debug("", ioe);
         }
     }
 

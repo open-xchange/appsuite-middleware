@@ -121,10 +121,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(
-                            new StringBuilder().append(enable ? "Enabling" : "Disabling").append(" of Unified Mail for user ").append(
-                                settings.getUserId()).append(" in context ").append(settings.getCid()).append(" aborted: ").append(
-                                e.getMessage()).toString(), e);
+                        LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", settings.getUserId(), settings.getCid(), e.getMessage(), e);
                     }
                     return;
                 }

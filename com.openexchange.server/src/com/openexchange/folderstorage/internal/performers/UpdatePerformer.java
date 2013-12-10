@@ -381,8 +381,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
             if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("UpdatePerformer.doUpdate() took ").append(duration).append("msec for folder: ").append(
-                    folderId).toString());
+                LOG.debug("UpdatePerformer.doUpdate() took {}msec for folder: {}", duration, folderId);
             }
         } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {

@@ -258,8 +258,7 @@ public class ResourceRequest {
             searchpattern = jData.getString(SearchFields.PATTERN);
         } else {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator(64).append("Missing field \"").append(SearchFields.PATTERN).append(
-                        "\" in JSON data. Searching for all as fallback").toString());
+                LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
             }
             return actionAll();
         }

@@ -95,7 +95,7 @@ public class Quota extends SessionServlet {
                 throw (IOException) cause;
             }
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         } catch (final OXException e) {
             LOG.error("", e);

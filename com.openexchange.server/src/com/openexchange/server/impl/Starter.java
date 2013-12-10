@@ -334,7 +334,7 @@ public class Starter implements Initialization {
                 LOG.info("VM Used Memory        : " + NumberFormat.getNumberInstance().format(usedMemory) + " KB");
             }
         } catch (final Exception gee) {
-            LOG.error(gee.getMessage(), gee);
+            LOG.error("", gee);
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("System version : " + Version.NAME + " Server [" + Version.getInstance().getVersionString() + "] initializing ...");

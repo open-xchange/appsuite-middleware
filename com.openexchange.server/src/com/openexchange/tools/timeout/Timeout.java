@@ -169,7 +169,7 @@ public final class Timeout implements Runnable {
             }
             if (enabled && target.isAlive()) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder("Timeout.run(): Stopping thread ").append(target.getName()).toString());
+                    LOG.info("Timeout.run(): Stopping thread {}", target.getName());
                 }
                 target.interrupt();
             }

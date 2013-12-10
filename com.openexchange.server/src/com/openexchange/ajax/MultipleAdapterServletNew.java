@@ -191,7 +191,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 final OXException oxe = (OXException) cause;
-                LOG.error(oxe.getMessage(), oxe);
+                LOG.error("", oxe);
                 response.setException(oxe);
             } else {
                 LOG.error("", e);
@@ -214,7 +214,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             }
         } catch (final JSONException e) {
             final OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             sendError(resp);
         }
     }

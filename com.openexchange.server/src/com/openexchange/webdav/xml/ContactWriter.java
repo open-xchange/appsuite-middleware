@@ -145,7 +145,7 @@ public class ContactWriter extends CommonWriter {
                 writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
             }
         } catch (final Exception ex) {
-            LOG.error(ex.getMessage(), ex);
+            LOG.error("", ex);
             writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
         }
     }
@@ -379,15 +379,13 @@ public class ContactWriter extends CommonWriter {
                  * A child element with the same name already exists
                  */
                 if (children.size() > 1) {
-                    LOG.warn(new StringBuilder(128).append("Conflicting email address detected!").append(" Multiple elements named \"").append(
-                        name).append("\" already exist.").toString());
+                    LOG.warn("Conflicting email address detected! Multiple elements named \"{}\" already exist.", name);
                     return;
                 }
                 final Element elem = children.get(0);
                 final Text text = (Text) elem.getContent().get(0);
                 if (!new QuotedInternetAddress(text.getText()).equals(ia)) {
-                    LOG.warn(new StringBuilder(128).append("Conflicting email address detected!").append(" An element named \"").append(
-                        name).append("\" already exists.").toString());
+                    LOG.warn("Conflicting email address detected! An element named \"{}\" already exists.", name);
                     return;
                 }
                 /*

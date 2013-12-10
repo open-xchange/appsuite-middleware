@@ -102,7 +102,7 @@ public class Tasks extends DataServlet {
             response.setException(e);
          } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         writeResponse(response, httpServletResponse, session);
@@ -151,7 +151,7 @@ public class Tasks extends DataServlet {
             }
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         } catch (final OXException e) {
             if (e.getCategory() == Category.CATEGORY_USER_INPUT) {

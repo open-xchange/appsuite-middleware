@@ -184,8 +184,7 @@ public abstract class MimeFileMailPart extends MailPart {
                 try {
                     charset = detectCharset(new FileInputStream(file));
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn(new com.openexchange.java.StringAllocator("Uploaded file contains textual content but").append(
-                            " does not specify a charset. Assumed charset is: ").append(charset).toString());
+                        LOG.warn("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
                     }
                 } catch (final FileNotFoundException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

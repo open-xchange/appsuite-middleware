@@ -85,7 +85,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         if (doAction) {
             final long size = attachment.getSize();
             if (size <= 0 && LOG.isDebugEnabled()) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Missing size: ").append(size).toString(), new Throwable());
+                LOG.debug("Missing size: {}", size, new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 final String fileName = attachment.getFileName();

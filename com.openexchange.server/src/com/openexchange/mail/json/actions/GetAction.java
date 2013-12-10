@@ -462,10 +462,7 @@ public final class GetAction extends AbstractMailAction {
             return data;
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Requested mail could not be found. ").append(
-                        "Most likely this is caused by concurrent access of multiple clients ").append(
-                        "while one performed a delete on affected mail.").toString(),
+                LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
                     e);
                 final Object[] args = e.getDisplayArgs();
                 final String uid = null == args || 0 == args.length ? null : (null == args[0] ? null : args[0].toString());

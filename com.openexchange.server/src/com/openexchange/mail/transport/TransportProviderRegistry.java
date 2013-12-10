@@ -107,9 +107,7 @@ public final class TransportProviderRegistry {
         final String protocol;
         if (transportServerURL == null) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append("Missing transport server URL. Transport server URL not set in account ").append(
-                    accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                    ". Using fallback protocol ").append(TransportProperties.getInstance().getDefaultTransportProvider()).toString());
+                LOG.warn("Missing transport server URL. Transport server URL not set in account {} for user {} in context {}. Using fallback protocol {}", accountId, session.getUserId(), session.getContextId(), TransportProperties.getInstance().getDefaultTransportProvider());
             }
             protocol = TransportProperties.getInstance().getDefaultTransportProvider();
         } else {
@@ -194,7 +192,7 @@ public final class TransportProviderRegistry {
         } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return false;
         }
     }
@@ -251,7 +249,7 @@ public final class TransportProviderRegistry {
         } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return removed;
         }
     }

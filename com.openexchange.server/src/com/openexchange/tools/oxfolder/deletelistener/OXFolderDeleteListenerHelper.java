@@ -115,7 +115,7 @@ public final class OXFolderDeleteListenerHelper {
          */
         if (null != corruptPermissions && corruptPermissions.length > 0) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(" corrupt user permissions detected").toString());
+                LOG.info("{} corrupt user permissions detected", corruptPermissions.length);
             }
             final boolean performTransaction = writeCon.getAutoCommit();
             if (performTransaction) {
@@ -133,7 +133,7 @@ public final class OXFolderDeleteListenerHelper {
                 }
                 throw e;
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
                 if (performTransaction) {
                     writeCon.rollback();
                 }
@@ -145,7 +145,7 @@ public final class OXFolderDeleteListenerHelper {
             }
         } else {
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(64).append("No corrupt user permissions detected").toString());
+                LOG.info("No corrupt user permissions detected");
             }
         }
     }
@@ -167,7 +167,7 @@ public final class OXFolderDeleteListenerHelper {
          */
         if (null != corruptPermissions && corruptPermissions.length > 0) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(" corrupt group permissions detected on host ").toString());
+                LOG.info("{} corrupt group permissions detected on host ", corruptPermissions.length);
             }
             final boolean performTransaction = writeCon.getAutoCommit();
             if (performTransaction) {
@@ -185,7 +185,7 @@ public final class OXFolderDeleteListenerHelper {
                 }
                 throw e;
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
                 if (performTransaction) {
                     writeCon.rollback();
                 }
@@ -197,7 +197,7 @@ public final class OXFolderDeleteListenerHelper {
             }
         } else {
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(64).append("No corrupt group permissions detected on host ").toString());
+                LOG.info("No corrupt group permissions detected on host ");
             }
         }
     }

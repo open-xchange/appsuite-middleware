@@ -89,10 +89,9 @@ public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer
          * TODO: Clarify if proxy object is reasonable or if service itself should be registered
          */
         if (SpamHandlerRegistry.registerSpamHandler(registrationName.toString(), addedService)) {
-            LOG.info(new StringBuilder(64).append("Spam handler registered for name '").append(registrationName.toString()).toString());
+            LOG.info("Spam handler registered for name '{}", registrationName);
         } else {
-            LOG.warn(new StringBuilder(64).append("Spam handler could not be registered for name '").append(registrationName.toString()).append(
-                ". Another spam handler has already been registered for the same name.").toString());
+            LOG.warn("Spam handler could not be registered for name '{}. Another spam handler has already been registered for the same name.", registrationName);
         }
         return addedService;
     }

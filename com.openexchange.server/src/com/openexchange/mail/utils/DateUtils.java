@@ -92,7 +92,7 @@ public final class DateUtils {
                 }
             } catch (final ParseException e1) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace(e1.getMessage(), e1);
+                    LOG.trace("", e1);
                 }
             }
             throw new IllegalArgumentException(e.getMessage());

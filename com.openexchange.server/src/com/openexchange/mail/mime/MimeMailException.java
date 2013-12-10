@@ -511,7 +511,7 @@ public class MimeMailException extends OXException {
             return MimeMailExceptionCode.MESSAGING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
         } catch (final Throwable t) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(t.getMessage(), t);
+                LOG.warn("", t);
             }
             /*
              * This routine should not fail since it's purpose is wrap a corresponding mail error around specified messaging error

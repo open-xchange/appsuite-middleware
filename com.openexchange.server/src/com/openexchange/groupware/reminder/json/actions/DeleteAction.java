@@ -113,7 +113,7 @@ public final class DeleteAction extends AbstractReminderAction {
                     reminderSql.deleteReminder(reminder);
                 }
             } catch (final OXException oxe) {
-                LOG.debug(oxe.getMessage(), oxe);
+                LOG.debug("", oxe);
                 if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                     response.put(id);
                     return new AJAXRequestResult(response, "json");
@@ -142,7 +142,7 @@ public final class DeleteAction extends AbstractReminderAction {
                         reminderSql.deleteReminder(reminder);
                     }
                 } catch (final OXException oxe) {
-                    LOG.debug(oxe.getMessage(), oxe);
+                    LOG.debug("", oxe);
                     if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                         response.put(id);
                         return new AJAXRequestResult(response, "json");

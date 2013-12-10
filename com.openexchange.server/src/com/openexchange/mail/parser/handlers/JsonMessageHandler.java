@@ -1059,7 +1059,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 final Throwable t =
                     new Throwable(
                         new com.openexchange.java.StringAllocator("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
-                LOG.warn(t.getMessage(), t);
+                LOG.warn("", t);
             }
             jsonObject.put(CONTENT_TYPE, contentType);
             jsonObject.put(ATTACHMENT_FILE_NAME, filename);

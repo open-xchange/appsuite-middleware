@@ -219,7 +219,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             final OXException tske = TaskExceptionCode
                 .PARTICIPANT_DELETE_WRONG.create(Integer.valueOf(users.length),
                 Integer.valueOf(deleted));
-            LOG.error(tske.getMessage(), tske);
+            LOG.error("", tske);
         }
     }
 
@@ -352,7 +352,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             final OXException exc = TaskExceptionCode
                 .PARTICIPANT_DELETE_WRONG.create(Integer.valueOf(addresses.length),
                 Integer.valueOf(deleted));
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
     }
 

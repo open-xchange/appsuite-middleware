@@ -119,7 +119,7 @@ public final class UpdateExecutor {
                 try {
                     unlockSchema(blocking);
                 } catch (final OXException e1) {
-                    LOG.error(e1.getMessage(), e1);
+                    LOG.error("", e1);
                 }
             }
             throw e;

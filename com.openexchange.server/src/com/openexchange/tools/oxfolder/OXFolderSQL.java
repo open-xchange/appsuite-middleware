@@ -1752,8 +1752,7 @@ public final class OXFolderSQL {
          */
         eventAdmin.sendEvent(event);
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(64).append("Notified ").append("content-related").append(
-                "-wise changed folder \"").append(fuid).append(" in context ").append(contextId).toString());
+            LOG.debug("Notified content-related-wise changed folder \"{} in context {}", fuid, contextId);
         }
     }
 
@@ -2325,8 +2324,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }
@@ -2338,8 +2336,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }
@@ -2351,8 +2348,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }

@@ -111,8 +111,7 @@ public class MailAccountProperties implements IMailProperties {
         final char defaultSep = defaultSepStr.trim().charAt(0);
         if (defaultSep <= 32) {
             final char fallback = MailProperties.getInstance().getDefaultSeparator();
-            LOG.error(new com.openexchange.java.StringAllocator(64).append("\tDefault Separator: Invalid separator (decimal ascii value=").append((int) defaultSep).append(
-                "). Setting to fallback: ").append(fallback).append('\n').toString());
+            LOG.error("\tDefault Separator: Invalid separator (decimal ascii value={}). Setting to fallback: {}{}", (int) defaultSep, fallback, '\n');
             return fallback;
         }
         return defaultSep;

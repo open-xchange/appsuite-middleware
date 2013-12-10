@@ -127,7 +127,7 @@ public final class TransportMailAction extends AbstractMailAction {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn("{}. Using default account's transport.", e.getMessage());
                 // Send with default account's transport provider
                 accountId = MailAccount.DEFAULT_ID;
             }

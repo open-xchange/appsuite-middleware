@@ -158,7 +158,7 @@ public final class AJAXFile extends PermissionServlet {
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
                 final ServletException se = new ServletException(e1.getMessage(), e1);
                 se.initCause(e1);
                 throw se;
@@ -252,7 +252,7 @@ public final class AJAXFile extends PermissionServlet {
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
 			throw new UploadServletException(resp, substituteJS(
 					responseObj == null ? STR_NULL : responseObj.toString(),
@@ -268,7 +268,7 @@ public final class AJAXFile extends PermissionServlet {
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
                 final ServletException se = new ServletException(e1.getMessage(), e1);
                 se.initCause(e1);
                 throw se;
@@ -382,7 +382,7 @@ public final class AJAXFile extends PermissionServlet {
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
 			throw new UploadServletException(resp, substituteJS(
 					responseObj == null ? STR_NULL : responseObj.toString(),
@@ -396,7 +396,7 @@ public final class AJAXFile extends PermissionServlet {
                 response.setException(oje);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
 			throw new UploadServletException(resp, substituteJS(
 					responseObj == null ? STR_NULL : responseObj.toString(),

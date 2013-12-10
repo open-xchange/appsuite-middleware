@@ -126,7 +126,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (null == sessiondService) {
                 final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                LOG.error(se.getMessage(), se);
+                LOG.error("", se);
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
@@ -242,7 +242,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         // The magic spell to disable caching

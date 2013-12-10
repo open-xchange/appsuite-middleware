@@ -773,7 +773,7 @@ public final class MailMessageParser {
                 }
             } catch (final IOException tnefExc) {
                 if (WARN_ENABLED) {
-                    LOG.warn(tnefExc.getMessage(), tnefExc);
+                    LOG.warn("", tnefExc);
                 }
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));

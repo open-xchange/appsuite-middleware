@@ -1261,7 +1261,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 try {
                     uploadListener.action(uploadEvent);
                 } catch (final OXException e) {
-                    LOG.error(new com.openexchange.java.StringAllocator(64).append("Failed upload listener: ").append(uploadListener.getClass()).toString(), e);
+                    LOG.error("Failed upload listener: {}", uploadListener.getClass(), e);
                 }
             }
         } finally {
@@ -1305,7 +1305,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     protected static void close(final Writer w) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(new com.openexchange.java.StringAllocator("Called close() with writer").append(w.toString()).toString());
+            LOG.trace("Called close() with writer{}", w);
         }
         /*-
          *

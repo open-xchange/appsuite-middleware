@@ -681,7 +681,7 @@ public class MimeMessageFiller {
                     /*
                      * Cannot occur since default mime charset is supported by JVM
                      */
-                    LOG.error(e1.getMessage(), e1);
+                    LOG.error("", e1);
                 }
             }
         }

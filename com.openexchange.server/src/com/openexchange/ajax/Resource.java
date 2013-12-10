@@ -103,7 +103,7 @@ public class Resource extends DataServlet {
 			response.setException(e);
 		} catch (final JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error(oje.getMessage(), oje);
+			LOG.error("", oje);
 			response.setException(oje);
 		}
 
@@ -128,7 +128,7 @@ public class Resource extends DataServlet {
 					final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
 					response.setException(exc);
 					writeResponse(response, httpServletResponse, session);
-					LOG.error(exc.getMessage(), exc);
+					LOG.error("", exc);
 					return;
 				}
 				JSONObject jsonObj = null;
@@ -172,7 +172,7 @@ public class Resource extends DataServlet {
 			response.setException(e);
 		} catch (final JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error(oje.getMessage(), oje);
+			LOG.error("", oje);
 			response.setException(oje);
 		}
 

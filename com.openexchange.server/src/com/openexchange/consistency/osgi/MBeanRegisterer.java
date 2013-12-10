@@ -87,13 +87,13 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer<Managemen
             managementService.registerMBean(name, new OsgiOXConsistency());
         } catch (final OXException e) {
             final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } catch (final MalformedObjectNameException e) {
             final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } catch (final NullPointerException e) {
             final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         }
         return managementService;
     }
@@ -111,7 +111,7 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer<Managemen
             managementService.unregisterMBean(name);
         } catch (final OXException e) {
             final OXException e1 = ConsistencyExceptionCodes.UNREGISTRATION_FAILED.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         }
         name = null;
         context.ungetService(reference);

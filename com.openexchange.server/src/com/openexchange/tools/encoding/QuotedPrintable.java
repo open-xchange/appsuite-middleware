@@ -94,7 +94,7 @@ public final class QuotedPrintable {
                 }
             }
         } catch (final Exception exc) {
-            LOG.error(new StringBuilder("encode error: ").append(exc).toString(), exc);
+            LOG.error("encode error: {}", exc, exc);
         }
 
         return sb.toString();
@@ -125,7 +125,7 @@ public final class QuotedPrintable {
                 }
             }
         } catch (final Exception exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
 
         return sb.toString();

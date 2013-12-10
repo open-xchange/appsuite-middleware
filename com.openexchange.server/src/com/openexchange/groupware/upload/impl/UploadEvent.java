@@ -360,10 +360,10 @@ public class UploadEvent {
                 if (null != tmpFile && tmpFile.exists()) {
                     try {
                         if (!tmpFile.delete()) {
-                            LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()).toString());
+                            LOG.error("Temporary upload file could not be deleted: {}", tmpFile.getName());
                         }
                     } catch (final Exception e) {
-                        LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()).toString(), e);
+                        LOG.error("Temporary upload file could not be deleted: {}", tmpFile.getName(), e);
                     }
                 }
             }

@@ -149,7 +149,7 @@ public class SpamAssassin {
              */
             final String result = cmdExec.getOutputString();
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(result).toString());
+                LOG.info("{}{}", STR_SPAMASSASSIN, result);
             }
             if (result != null && exitCode == 1) {
                 /*
@@ -250,14 +250,14 @@ public class SpamAssassin {
                  */
                 final String res = cmdExec.getOutputString();
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(isSpam ? STR_SPAM : STR_HAM).append(res).toString());
+                    LOG.info("{}{}{}", STR_SPAMASSASSIN, isSpam ? STR_SPAM : STR_HAM, res);
                 }
             } catch (final IOException e) {
-                LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
+                LOG.error("{}{}", ERR_PREFIX, e.getMessage(), e);
             } catch (final InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
-                LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
+                LOG.error("{}{}", ERR_PREFIX, e.getMessage(), e);
             }
         }
 

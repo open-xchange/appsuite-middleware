@@ -557,7 +557,7 @@ public final class Select {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
                     final String sql = getSQLString(stmt);
-                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    LOG.debug("Failed SQL:\n\t{}", sql);
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -600,7 +600,7 @@ public final class Select {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
                     final String sql = getSQLString(stmt);
-                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    LOG.debug("Failed SQL:\n\t{}", sql);
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -628,7 +628,7 @@ public final class Select {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
                     final String sql = getSQLString(stmt);
-                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    LOG.debug("Failed SQL:\n\t{}", sql);
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -664,7 +664,7 @@ public final class Select {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
                     final String sql = getSQLString(stmt);
-                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    LOG.debug("Failed SQL:\n\t{}", sql);
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -783,7 +783,7 @@ public final class Select {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
                     final String sql = getSQLString(stmt);
-                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    LOG.debug("Failed SQL:\n\t{}", sql);
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -832,7 +832,7 @@ public final class Select {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
                     final String sql = getSQLString(stmt);
-                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    LOG.debug("Failed SQL:\n\t{}", sql);
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -884,7 +884,7 @@ public final class Select {
                 final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Select.class);
                 if (LOG.isDebugEnabled()) {
                     final String sql = getSQLString(stmt);
-                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    LOG.debug("Failed SQL:\n\t{}", sql);
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());

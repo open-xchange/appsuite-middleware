@@ -218,10 +218,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                         modifiedFolderID,
                                         storageParameters));
                                 } catch (final OXException ee) {
-                                    LOG.error(
-                                        new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
-                                            "\" could not be fetched from storage \"").append(folderStorage.getClass().getName()).append(
-                                            "\":\n").append(ee.getMessage()).toString(),
+                                    LOG.error("Updated folder \"{}\" could not be fetched from storage \"{}\":\n{}", modifiedFolderID, folderStorage.getClass().getName(), ee.getMessage(),
                                         ee);
                                 }
                             }
@@ -249,10 +246,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                                 modifiedFolderID,
                                                 storageParameters));
                                         } catch (final OXException ee) {
-                                            LOG.error(
-                                                new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
-                                                    "\" could not be fetched from storage \"").append(storage.getClass().getName()).append(
-                                                    "\":\n").append(ee.getMessage()).toString(),
+                                            LOG.error("Updated folder \"{}\" could not be fetched from storage \"{}\":\n{}", modifiedFolderID, storage.getClass().getName(), ee.getMessage(),
                                                 ee);
                                         }
                                     }
@@ -449,7 +443,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
             }
             if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Updates.doUpdates() took ").append(duration).append("msec.").toString());
+                LOG.debug("Updates.doUpdates() took {}msec.", duration);
             }
             /*
              * Return result

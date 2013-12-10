@@ -362,7 +362,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1046,7 +1046,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1308,7 +1308,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1681,7 +1681,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1810,7 +1810,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1946,7 +1946,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2055,7 +2055,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2176,7 +2176,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2250,7 +2250,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                              * Folder could not be found and therefore need not to be deleted
                              */
                             if (LOG.isWarnEnabled()) {
-                                LOG.warn(exc.getMessage(), exc);
+                                LOG.warn("", exc);
                             }
                             continue NextId;
                         }
@@ -2303,7 +2303,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             }
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*

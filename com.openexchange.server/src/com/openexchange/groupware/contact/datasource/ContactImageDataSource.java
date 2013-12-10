@@ -202,9 +202,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         properties.put(DataProperties.PROPERTY_ID, Integer.toString(objectId));
         if (imageBytes == null) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder("Requested a non-existing image in contact: object-id=").append(objectId).append(" folder=").append(
-                    folder).append(" context=").append(session.getContextId()).append(" session-user=").append(session.getUserId()).append(
-                    "\nReturning an empty image as fallback.").toString());
+                LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}\nReturning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
             }
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));

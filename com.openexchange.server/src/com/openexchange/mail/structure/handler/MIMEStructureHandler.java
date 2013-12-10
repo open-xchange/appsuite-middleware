@@ -403,7 +403,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final Exception e) {
             final Throwable t =
                 new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
-            LOG.warn(t.getMessage(), t);
+            LOG.warn("", t);
         }
         /*
          * Dummy headers
@@ -1000,9 +1000,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             return addressList.toArray(new InternetAddress[addressList.size()]);
         } catch (final AddressException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(
-                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
-                        "\". Using plain addresses' string representation instead.").toString(),
+                LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(),
                     e);
             }
             return getAddressesOnParseError(addressStrings);
@@ -1021,8 +1019,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead.").toString(), e);
+                LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
         }
@@ -1070,8 +1067,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead.").toString(), e);
+                LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             }
             return MessageUtility.readStream(isp.getInputStream(), fallback);
         }

@@ -139,7 +139,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
         } catch (final InterruptedException e1) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         }
     }
 

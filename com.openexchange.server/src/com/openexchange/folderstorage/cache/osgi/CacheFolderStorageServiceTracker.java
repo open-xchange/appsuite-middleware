@@ -80,8 +80,7 @@ public final class CacheFolderStorageServiceTracker implements ServiceTrackerCus
         {
             final Object obj = reference.getProperty("tree");
             if (null == obj) {
-                LOG.error(new com.openexchange.java.StringAllocator(32).append("Missing tree identifier property \"tree\" for ").append(
-                    addedService.getClass().getName()).toString());
+                LOG.error("Missing tree identifier property \"tree\" for {}", addedService.getClass().getName());
                 // Nothing to track, return null
                 context.ungetService(reference);
                 return null;
@@ -111,8 +110,7 @@ public final class CacheFolderStorageServiceTracker implements ServiceTrackerCus
                 {
                     final Object obj = reference.getProperty("tree");
                     if (null == obj) {
-                        LOG.error(new com.openexchange.java.StringAllocator(32).append("Missing tree identifier property \"tree\" for ").append(
-                            service.getClass().getName()).toString());
+                        LOG.error("Missing tree identifier property \"tree\" for {}", service.getClass().getName());
                         return;
                     }
                     treeId = obj.toString();

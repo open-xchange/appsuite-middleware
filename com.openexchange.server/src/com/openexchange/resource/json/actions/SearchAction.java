@@ -110,8 +110,7 @@ public final class SearchAction extends AbstractResourceAction {
             searchpattern = jData.getString(SearchFields.PATTERN);
         } else {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("Missing field \"").append(SearchFields.PATTERN).append(
-                        "\" in JSON data. Searching for all as fallback").toString());
+                LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
             }
             return new AllAction(services).perform(req);
         }

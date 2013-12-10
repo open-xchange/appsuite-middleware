@@ -426,8 +426,7 @@ public final class MailAccountRequest {
                 try {
                     mailConfig.setPort(Integer.parseInt(sPort));
                 } catch (final NumberFormatException e) {
-                    LOG.warn(new com.openexchange.java.StringAllocator().append("Cannot parse port out of string: \"").append(sPort).append(
-                        "\". Using fallback 143 instead.").toString(), e);
+                    LOG.warn("Cannot parse port out of string: \"{}\". Using fallback 143 instead.", sPort, e);
                     mailConfig.setPort(143);
                 }
                 mailConfig.setServer(server.substring(0, pos));
@@ -490,8 +489,7 @@ public final class MailAccountRequest {
             try {
                 transportConfig.setPort(Integer.parseInt(sPort));
             } catch (final NumberFormatException e) {
-                LOG.warn(new com.openexchange.java.StringAllocator().append("Cannot parse port out of string: \"").append(sPort).append(
-                    "\". Using fallback 25 instead.").toString(), e);
+                LOG.warn("Cannot parse port out of string: \"{}\". Using fallback 25 instead.", sPort, e);
                 transportConfig.setPort(25);
             }
             transportConfig.setServer(server.substring(0, pos));

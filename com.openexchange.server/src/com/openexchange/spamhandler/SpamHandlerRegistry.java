@@ -248,8 +248,7 @@ public final class SpamHandlerRegistry {
     public static SpamHandler getSpamHandler(final String registrationName) {
         if (null == registrationName) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("Given registration name is null. Using fallback spam handler '").append(
-                    SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
+                LOG.warn("Given registration name is null. Using fallback spam handler '{}'", SpamHandler.SPAM_HANDLER_FALLBACK);
             }
             return NoSpamHandler.getInstance();
         } else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || unknownSpamHandlers.containsKey(registrationName)) {
@@ -258,8 +257,7 @@ public final class SpamHandlerRegistry {
         final SpamHandler spamHandler = spamHandlers.get(registrationName);
         if (null == spamHandler) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("No spam handler found for registration name '").append(registrationName).append(
-                    "'. Using fallback '").append(SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
+                LOG.warn("No spam handler found for registration name '{}'. Using fallback '{}'", registrationName, SpamHandler.SPAM_HANDLER_FALLBACK);
             }
             unknownSpamHandlers.put(registrationName, PRESENT);
             return NoSpamHandler.getInstance();
@@ -289,7 +287,7 @@ public final class SpamHandlerRegistry {
             unknownSpamHandlers.remove(registrationName);
             return true;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return false;
         }
     }

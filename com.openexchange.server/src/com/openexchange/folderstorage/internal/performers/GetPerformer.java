@@ -150,7 +150,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
                 getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
             if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("Get.doGet() took ").append(duration).append("msec for folder: ").append(folderId).toString());
+                LOG.debug("Get.doGet() took {}msec for folder: {}", duration, folderId);
             }
 
             /*

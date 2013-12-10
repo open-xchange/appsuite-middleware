@@ -111,7 +111,7 @@ public final class MailFolderType implements FolderType {
             } catch (final NumberFormatException e) {
                 final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
                 err.initCause(e);
-                LOG.error(err.getMessage(), err);
+                LOG.error("", err);
                 return false;
             }
         }
@@ -142,7 +142,7 @@ public final class MailFolderType implements FolderType {
             } catch (final NumberFormatException e) {
                 final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
                 err.initCause(e);
-                LOG.error(err.getMessage(), err);
+                LOG.error("", err);
                 return false;
             }
         }

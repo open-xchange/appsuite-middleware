@@ -253,7 +253,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
          * Log
          */
         if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder("Global Address Book permission resolved for context ").append(contextId).toString());
+            LOG.info("Global Address Book permission resolved for context {}", contextId);
         }
     }
 

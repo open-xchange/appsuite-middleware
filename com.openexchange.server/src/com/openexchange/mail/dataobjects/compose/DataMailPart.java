@@ -325,9 +325,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info(new com.openexchange.java.StringAllocator("Data mail part exeeds ").append(
-                Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue()).append(
-                "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()).toString());
+            LOG.info("Data mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
         }
     }
 

@@ -244,8 +244,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
         }
         if (DEBUG_ENABLED) {
             final long duration = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder().append("Path.doPath() took ").append(duration).append(
-                "msec for parent folder: ").append(folderId).toString());
+            LOG.debug("Path.doPath() took {}msec for parent folder: {}", duration, folderId);
         }
         return ret;
     }

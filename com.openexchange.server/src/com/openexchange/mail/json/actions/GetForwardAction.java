@@ -172,8 +172,7 @@ public final class GetForwardAction extends AbstractMailAction {
                     usmNoSave.setDisplayHtmlInlineContent(true);
                     usmNoSave.setAllowHTMLImages(false);
                 } else {
-                    LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(
-                        view).append(". Using user's mail settings as fallback.").toString());
+                    LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", Mail.PARAMETER_VIEW, view);
                 }
             }
             final MailServletInterface mailInterface = getMailInterface(req);

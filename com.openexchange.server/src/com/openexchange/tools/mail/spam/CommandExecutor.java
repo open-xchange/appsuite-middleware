@@ -178,7 +178,7 @@ public final class CommandExecutor {
                     buf.append(line).append('\n');
                 }
             } catch (final IOException ioe) {
-                LOG.error(ioe.getMessage(), ioe);
+                LOG.error("", ioe);
             } finally {
                 Streams.close(br);
                 Streams.close(isr);

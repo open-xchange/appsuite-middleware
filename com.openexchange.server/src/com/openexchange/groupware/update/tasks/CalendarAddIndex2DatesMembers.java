@@ -133,8 +133,7 @@ public final class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
                     }
                 }
             } catch (final SQLException e) {
-                log.error(
-                    new StringBuilder("Problem adding index ").append(name).append(" on table ").append(table).append('.').toString(),
+                log.error("Problem adding index {} on table {}{}", name, table, '.',
                     e);
             }
         }

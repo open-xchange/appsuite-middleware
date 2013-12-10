@@ -89,7 +89,7 @@ public final class Utility {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Utility.class);
             if (log.isDebugEnabled()) {
                 final String sql = getSQLString(stmt);
-                log.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                log.debug("{}{}Failed SQL:\n\t{}", sql.length(, ) + 16, sql);
             }
         }
     }

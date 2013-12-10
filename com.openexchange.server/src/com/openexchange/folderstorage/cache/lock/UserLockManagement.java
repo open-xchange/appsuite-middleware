@@ -102,8 +102,7 @@ public final class UserLockManagement {
         if (null != userMap) {
             userMap.remove(Integer.valueOf(session.getUserId()));
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for user ").append(session.getUserId()).append(
-                    " in context ").append(session.getContextId()).toString());
+                LOG.debug("Cleaned folder locks for user {} in context {}", session.getUserId(), session.getContextId());
             }
         }
     }
@@ -116,7 +115,7 @@ public final class UserLockManagement {
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for context ").append(contextId).toString());
+            LOG.debug("Cleaned folder locks for context {}", contextId);
         }
     }
 

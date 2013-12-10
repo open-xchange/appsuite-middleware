@@ -319,16 +319,13 @@ public class AppointmentWriter extends CalendarWriter {
                         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                         recuResults = recColl.calculateFirstRecurring(ao);
                     } catch (final OXException x) {
-                        LOG.error(new StringBuilder("Can not calculate recurrence ").append(ao.getObjectID()).append(
-                                ':').append(sessionObj.getContextId()).toString(), x);
+                        LOG.error("Can not calculate recurrence {}:{}", ao.getObjectID(), sessionObj.getContextId(), x);
                     }
                     if (recuResults != null && recuResults.size() == 1) {
                         ao.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                         ao.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
                     } else {
-                        LOG.warn(new StringBuilder("Cannot load first recurring appointment from appointment object: ")
-                                .append(ao.getRecurrenceType()).append(" / ").append(+ao.getObjectID())
-                                .append("\n\n\n").toString());
+                        LOG.warn("Cannot load first recurring appointment from appointment object: {} / {}\n\n\n", ao.getRecurrenceType(), ao.getObjectID());
                     }
                 }
                 addElement(CalendarFields.START_DATE, ao.getStartDate(), e_prop);

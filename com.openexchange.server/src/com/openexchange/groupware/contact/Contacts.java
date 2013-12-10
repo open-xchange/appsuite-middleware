@@ -265,9 +265,7 @@ public final class Contacts {
                     sHd = scaledWidth;
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
-                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
-                        ratio).toString());
+                    LOG.debug("IMAGE SCALE Picture Heigh {} Width {} -> Scale down to Heigh {} Width {} Ratio {}", origHeigh, origWidth, sHd, sWd, ratio);
                 }
             } else if (origWidth > origHeigh) {
                 final float w1 = origWidth;
@@ -285,9 +283,7 @@ public final class Contacts {
                 sHd = Math.round(heighFloat);
 
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
-                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
-                        ratio).toString());
+                    LOG.debug("IMAGE SCALE Picture Heigh {} Width {} -> Scale down to Heigh {} Width {} Ratio {}", origHeigh, origWidth, sHd, sWd, ratio);
                 }
 
             } else if (origWidth < origHeigh) {
@@ -306,9 +302,7 @@ public final class Contacts {
                 sWd = Math.round(widthFloat);
                 sHd = Math.round(heighFloat);
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
-                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
-                        ratio).toString());
+                    LOG.debug("IMAGE SCALE Picture Heigh {} Width {} -> Scale down to Heigh {} Width {} Ratio {}", origHeigh, origWidth, sHd, sWd, ratio);
                 }
             }
 
@@ -505,8 +499,7 @@ public final class Contacts {
             contact.setLastModified(ddd);
 
             if (DEBUG) {
-                LOG.debug(new StringBuilder(64).append("DEBUG: YOU WANT TO INSERT THIS: cid=").append(contextId).append(" oid=").append(
-                    contact.getObjectID()).append(" -> ").append(getStatementString(ps)).toString());
+                LOG.debug("DEBUG: YOU WANT TO INSERT THIS: cid={} oid={} -> {}", contextId, contact.getObjectID(), getStatementString(ps));
             }
 
             ps.execute();
@@ -672,10 +665,7 @@ public final class Contacts {
             }
 
             final java.util.Date server_date = original.getLastModified();
-            if (DEBUG) {
-                LOG.debug(new StringBuilder(
-                    "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()).toString());
-            }
+            LOG.debug("Compare Dates for Contact Update\nClient-Date={}\nServer-Date={}", client_date.getTime(), server_date.getTime());
             if ((client_date != null) && (client_date.getTime() > -1) && (client_date.getTime() < server_date.getTime())) {
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
             }
@@ -850,11 +840,6 @@ public final class Contacts {
             co.setLastModified(ddd);
 
             writecon.setAutoCommit(false);
-
-            if (DEBUG) {
-                LOG.debug(new StringBuilder(
-                    "DEBUG: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + getStatementString(ps)).toString());
-            }
 
             if (co.getParentFolderID() != fid) {
                 // Fake a deletion on MOVE operation for MS Outlook prior to performing actual UPDATE
@@ -1628,7 +1613,7 @@ public final class Contacts {
                 ps.setInt(8, cid);
 
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder("WRITE DLIST ").append(getStatementString(ps)).toString());
+                    LOG.debug("WRITE DLIST {}", getStatementString(ps));
                 }
 
                 ps.execute();
@@ -1771,7 +1756,7 @@ public final class Contacts {
                         ps.setString(8, dleo.getEmailaddress());
                         ps.setInt(12, cid);
                         if (DEBUG) {
-                            LOG.debug(new StringBuilder("UPDATE DLIST ").append(getStatementString(ps)).toString());
+                            LOG.debug("UPDATE DLIST {}", getStatementString(ps));
                         }
                         ps.execute();
                     }
@@ -1794,7 +1779,7 @@ public final class Contacts {
             ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
             ps.setInt(1, id);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)).toString());
+                LOG.debug("DELETE FROM DLIST {}", getStatementString(ps));
             }
             ps.execute();
         } catch (final SQLException e) {
@@ -1817,7 +1802,7 @@ public final class Contacts {
                     }
                     ps.setInt(4, cid);
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)).toString());
+                        LOG.debug("DELETE FROM DLIST {}", getStatementString(ps));
                     }
                     ps.execute();
                 }
@@ -1906,7 +1891,7 @@ public final class Contacts {
                 byte[] uuidBinary = UUIDs.toByteArray(uuid);
                 ps.setBytes(6, uuidBinary);
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder("INSERT LINKAGE ").append(getStatementString(ps)).toString());
+                    LOG.debug("INSERT LINKAGE {}", getStatementString(ps));
                 }
                 ps.addBatch();
             }
@@ -1984,7 +1969,7 @@ public final class Contacts {
                     ps.setInt(2, leo.getLinkID());
                     ps.setInt(3, cid);
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(getStatementString(ps)).toString());
+                        LOG.debug("DELETE LINKAGE ENTRY{}", getStatementString(ps));
                     }
                     ps.execute();
                 }
@@ -2071,7 +2056,7 @@ public final class Contacts {
             ps.setInt(4, cid);
             ps.setLong(5, lastModified);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)).toString());
+                LOG.debug("INSERT IMAGE {}", getStatementString(ps));
             }
             ps.execute();
         } catch (final SQLException e) {
@@ -2097,7 +2082,7 @@ public final class Contacts {
             ps.setInt(6, contact_id);
             ps.setInt(7, cid);
             if (DEBUG) {
-                LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)).toString());
+                LOG.debug("UPDATE IMAGE {}", getStatementString(ps));
             }
             ps.execute();
         } catch (final SQLException e) {
@@ -2262,7 +2247,7 @@ public final class Contacts {
             return true;
         } catch (final SQLException e) {
             final OXException e1 = ContactExceptionCodes.SQL_PROBLEM.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             return false;
         } catch (final OXException e) {
             LOG.error("", e);

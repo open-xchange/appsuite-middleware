@@ -105,7 +105,7 @@ public abstract class CommonRequest {
 		    x.log(LOG);
 		    res.setException(x);
 		} else {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             res.setException(new OXException(t));
 		}
 		try {

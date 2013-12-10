@@ -110,7 +110,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
         super();
         if (!checkRequest(servletRequest)) {
             if (INFO) {
-                LOG.info(new StringAllocator("Request with IP '").append(servletRequest.getRemoteAddr()).append("' to path '").append(servletRequest.getServletPath()).append("' has been rate limited.").append(LINE_SEP).toString());
+                LOG.info("Request with IP '{}' to path '{}' has been rate limited.{}", servletRequest.getRemoteAddr(), servletRequest.getServletPath(), LINE_SEP);
             }
             throw new RateLimitedException("429 Too Many Requests");
         }

@@ -661,7 +661,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     mailConfig.getLogin(),
                     Integer.valueOf(session.getContextId()),
                     e.getMessage());
-            LOG.error(mailExc.getMessage(), mailExc);
+            LOG.error("", mailExc);
             closeInternal();
             throw mailExc;
         }

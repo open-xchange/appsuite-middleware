@@ -150,15 +150,13 @@ public final class NotificationPool {
                 map.put(pooledNotification, pooledNotification);
                 queue.offer(pooledNotification);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder().append("New pooled notification added for receiver ").append(
-                        pooledNotification.getParticipant().email).toString());
+                    LOG.debug("New pooled notification added for receiver {}", pooledNotification.getParticipant().email);
                 }
             } else {
                 prev.merge(pooledNotification);
                 prev.touch();
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder().append("Pooled notification merged for receiver ").append(
-                        pooledNotification.getParticipant().email).toString());
+                    LOG.debug("Pooled notification merged for receiver {}", pooledNotification.getParticipant().email);
                 }
             }
         } finally {

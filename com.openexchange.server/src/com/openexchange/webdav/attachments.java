@@ -237,14 +237,14 @@ public final class attachments extends OXServlet {
             xo.output(output_doc, resp.getOutputStream());
         } catch (final TransactionException exc) {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
             exc.printStarterTrace();
             rollbackTransaction();
         } catch (final OXException exc) {
             if (exc.getCategory() == Category.CATEGORY_PERMISSION_DENIED) {
-                LOG.debug(exc.getMessage(), exc);
+                LOG.debug("", exc);
             } else {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             }
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
             rollbackTransaction();
