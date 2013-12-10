@@ -60,7 +60,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import org.slf4j.Logger;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.Services;
@@ -213,7 +212,7 @@ public class AJPv13TaskWatcher {
                         final int numProcessing = countProcessing.get();
                         if (numProcessing > 0 && countExceeded.get() == numProcessing) {
                             final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-                            log.error("{}{}{}AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED! Going to stop and re-initialize system{}", 128 + delimStr.length(, ), delimStr, delimStr);
+                            log.error("{}AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED! Going to stop and re-initialize system{}", delimStr, delimStr);
                             /*
                              * Restart AJP Server
                              */
