@@ -226,7 +226,7 @@ public class AppsLoadServlet extends HttpServlet {
             final Matcher m = moduleRE.matcher(module);
             if (!m.matches()) {
                 final String escapedName = escapeName(module);
-                LOG.debug("Invalid module name: '" + escapedName + "'");
+                LOG.debug("Invalid module name: '{}'", escapedName);
                 ew.error(("console.error('Invalid module name: \\'" + escapedName + "\\'');\n").getBytes("UTF-8"));
                 continue;
             }

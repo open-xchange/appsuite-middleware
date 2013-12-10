@@ -95,7 +95,7 @@ public class FileCache {
             timestamp = current;
 
             // Read the entire file into a byte array
-            LOG.debug("Reading '" + path + "'");
+            LOG.debug("Reading '{}'", path);
             final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
             InputStream in = null;
             try {
@@ -108,7 +108,7 @@ public class FileCache {
                 baos.flush(); // no-op
                 data = filter == null ? baos.toByteArray() : filter.filter(baos);
             } catch (final IOException e) {
-                LOG.debug("Could not read from '" + path + "'");
+                LOG.debug("Could not read from '{}'", path);
                 data = null;
             } finally {
                 Streams.close(in);
